@@ -81,12 +81,13 @@ noncomputable def normalize : Homotopy (𝟙 K) 0 :=
     rw [Cochain.ofHom_zero, add_zero, h.toContractionZero.normalize.δ_homotopy]
     simp⟩
 
-lemma normalize_hom (i j : ℤ) :
+private lemma normalize_hom (i j : ℤ) :
     h.normalize.hom i j =
       if hij : i + (-1) = j then h.toContractionZero.normalize.homotopy.v i j hij else 0 :=
   (rfl)
 
 /-- The components of the normalized null-homotopy compose to zero. -/
+@[simp]
 lemma normalize_hom_comp_hom (i j k : ℤ) :
     h.normalize.hom i j ≫ h.normalize.hom j k = 0 := by
   rw [normalize_hom, normalize_hom]
