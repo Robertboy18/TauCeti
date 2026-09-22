@@ -9,7 +9,8 @@ public import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
 public import Mathlib.LinearAlgebra.Matrix.BilinearForm
 public import Mathlib.LinearAlgebra.SymplecticGroup
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.LinearAlgebra.Matrix.Nondegenerate
+import TauCeti.LinearAlgebra.BilinearForm.LinearIndependent
+import TauCeti.LinearAlgebra.BilinearForm.Orthogonal
 
 /-!
 # Symplectic bases of nondegenerate alternating forms
@@ -37,10 +38,6 @@ hyperbolic pair `e, f` hold over any commutative ring and are stated at that lev
 
 ## Main declarations
 
-* `LinearMap.BilinForm.linearIndependent_of_det_ne_zero`: a family whose Gram matrix has nonzero
-  determinant is linearly independent.
-* `LinearMap.BilinForm.mem_orthogonal_span_pair_iff`: membership in the orthogonal complement of
-  the span of two vectors.
 * `LinearMap.BilinForm.IsAlt.restrict_nondegenerate_orthogonal_span_pair`: a nondegenerate
   alternating form stays nondegenerate on the orthogonal complement of a hyperbolic pair.
 * `LinearMap.BilinForm.IsAlt.exists_basis_apply_eq_J_of_basis_orthogonal_span_pair`: adjoining a
@@ -70,16 +67,6 @@ section CommSemiring
 
 variable {R M : Type*} [CommSemiring R] [AddCommMonoid M] [Module R M]
 
-/-- A vector is orthogonal to the span of two vectors exactly when it is orthogonal to both. -/
-theorem mem_orthogonal_span_pair_iff (B : BilinForm R M) {x y z : M} :
-    z ∈ B.orthogonal (span R {x, y}) ↔ B x z = 0 ∧ B y z = 0 := by
-  constructor
-  · intro hz
-    exact ⟨hz x (subset_span (by simp)), hz y (subset_span (by simp))⟩
-  · rintro ⟨hx, hy⟩ n hn
-    obtain ⟨a, b, rfl⟩ := mem_span_pair.1 hn
-    simp [hx, hy]
-
 /-- In a space spanned by a family of subspaces paired trivially by `B` except along an
 involution `σ`, a nonzero vector of `W i` pairs nontrivially with some vector of `W (σ i)`. -/
 theorem exists_mem_apply_ne_zero_of_iSup_eq_top {B : BilinForm R M} (hnd : B.Nondegenerate)
@@ -100,19 +87,6 @@ end CommSemiring
 section CommRing
 
 variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
-
-/-- A family whose Gram matrix with respect to a bilinear form has nonzero determinant is
-linearly independent. -/
-theorem linearIndependent_of_det_ne_zero [NoZeroDivisors R] {ι : Type*} [Fintype ι]
-    [DecidableEq ι] (B : BilinForm R M) {c : ι → M}
-    (h : (Matrix.of fun x y => B (c x) (c y)).det ≠ 0) : LinearIndependent R c := by
-  rw [Fintype.linearIndependent_iff]
-  intro g hg
-  refine congrFun (Matrix.eq_zero_of_mulVec_eq_zero h (v := g) ?_)
-  funext y
-  calc Matrix.mulVec (Matrix.of fun x y => B (c x) (c y)) g y = B (c y) (∑ x, g x • c x) := by
-        simp [Matrix.mulVec, dotProduct, mul_comm]
-    _ = 0 := by rw [hg, map_zero]
 
 variable {B : BilinForm R M} (hB : B.IsAlt) {e f : M} (hfe : B f e = 1)
 include hB hfe
