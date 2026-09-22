@@ -192,13 +192,12 @@ private theorem continuous_fixingSubgroupMulEquiv : Continuous (fixingSubgroupMu
 topological groups: conjugation by the identification `separableClosureRingEquiv K L σ` of separable
 closures is an isomorphism `G_L ≃ₜ* σ.fieldRange.fixingSubgroup` for the Krull topologies, for any
 extension `L/K` embedded in `Kˢ`. For a finite `L/K` this subgroup is open, and the isomorphism is
-`galoisSubgroupEquiv K L σ`.
-
-Continuity of the inverse comes for free: `G_L` is compact and the subgroup is Hausdorff. -/
+`galoisSubgroupEquiv K L σ`. -/
 def absoluteGaloisGroupEquivFixingSubgroup :
     AbsoluteGaloisGroup L ≃ₜ* ↥σ.fieldRange.fixingSubgroup where
   __ := fixingSubgroupMulEquiv K L σ
   continuous_toFun := continuous_fixingSubgroupMulEquiv K L σ
+  -- Continuity of the inverse comes for free: `G_L` is compact and the subgroup is Hausdorff.
   continuous_invFun :=
     (Continuous.homeoOfEquivCompactToT2 (f := (fixingSubgroupMulEquiv K L σ).toEquiv)
       (continuous_fixingSubgroupMulEquiv K L σ)).symm.continuous
