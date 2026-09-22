@@ -52,6 +52,11 @@ same order. The reverse convention is common in the literature and in databases 
 `TauCeti.PermutationTriple.equivOppositeConvention` translates between the two, and
 `Equiv.Perm.cycleType_inv` says that the translation preserves cycle types.
 
+`TauCeti.PermutationTriple.ofTwo` and `TauCeti.PermutationTriple.equivPair` are `@[expose]`d:
+they carry the `Fintype` and `DecidableEq` instances on triples, and kernel computations in
+importing modules — deciding connectedness, counting isomorphism classes in small degree — must
+reduce through them.
+
 ## References
 
 * S. K. Lando, A. K. Zvonkin, *Graphs on Surfaces and Their Applications*, Encyclopaedia of
@@ -101,9 +106,7 @@ def component (t : PermutationTriple n) : Fin 3 → Perm (Fin n) :=
 
 @[simp] theorem component_two (t : PermutationTriple n) : t.component 2 = t.σinf := (rfl)
 
-/-- The triple with prescribed first two components, the third being forced. The body is
-exposed so that the triples of a fixed small degree can be enumerated by kernel computation,
-through `TauCeti.PermutationTriple.equivPair`. -/
+/-- The triple with prescribed first two components, the third being forced. -/
 @[expose] def ofTwo (σ0 σ1 : Perm (Fin n)) : PermutationTriple n where
   σ0 := σ0
   σ1 := σ1
@@ -150,9 +153,7 @@ theorem ext_of_two {t t' : PermutationTriple n} (h0 : t.σ0 = t'.σ0) (h1 : t.σ
   simp only [mk.injEq]
   exact ⟨h0, h1, hinf⟩
 
-/-- A permutation triple is the same thing as a pair of permutations. This is the equivalence
-that carries the `Fintype` and `DecidableEq` instances; its body is exposed so that those
-instances compute in the kernel. -/
+/-- A permutation triple is the same thing as a pair of permutations. -/
 @[expose] def equivPair (n : ℕ) : PermutationTriple n ≃ Perm (Fin n) × Perm (Fin n) where
   toFun t := (t.σ0, t.σ1)
   invFun p := ofTwo p.1 p.2
