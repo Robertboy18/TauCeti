@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Combinatorics.PermutationTriple.CycleData
+public import TauCeti.Combinatorics.PermutationTriple.Decidable
 public import TauCeti.Algebra.Group.Subgroup.Map
 public import TauCeti.GroupTheory.Perm.PermCongr
 
@@ -60,8 +61,6 @@ instance : MulAction (Perm (Fin n)) (ConnectedTriple n) where
   one_smul t := Subtype.ext (one_smul _ t.1)
   mul_smul τ υ t := Subtype.ext (mul_smul τ υ t.1)
 
-noncomputable instance : Fintype (ConnectedTriple n) := Fintype.ofFinite _
-
 instance : DecidableEq (ConnectedTriple n) := inferInstance
 
 @[simp]
@@ -71,8 +70,11 @@ theorem coe_smul (τ : Perm (Fin n)) (t : ConnectedTriple n) :
 
 end ConnectedTriple
 
-/-- Isomorphism classes of connected permutation triples of degree `n`. -/
-def ConnectedIsoClass (n : ℕ) : Type :=
+/-- Isomorphism classes of connected permutation triples of degree `n`.
+
+The body is exposed so that the classes of a fixed small degree can be enumerated by kernel
+computation, through the `Fintype` instance below. -/
+@[expose] def ConnectedIsoClass (n : ℕ) : Type :=
   MulAction.orbitRel.Quotient (Perm (Fin n)) (ConnectedTriple n)
 
 namespace ConnectedIsoClass
@@ -80,7 +82,7 @@ namespace ConnectedIsoClass
 variable {n : ℕ}
 
 /-- The isomorphism class of a connected triple. -/
-def mk (t : ConnectedTriple n) : ConnectedIsoClass n :=
+@[expose] def mk (t : ConnectedTriple n) : ConnectedIsoClass n :=
   Quotient.mk'' t
 
 /-- Two connected triples determine the same isomorphism class exactly when they are related by
@@ -99,11 +101,13 @@ theorem mk_eq_mk_iff_exists_smul {t t' : ConnectedTriple n} :
 theorem mk_surjective : Function.Surjective (mk : ConnectedTriple n → ConnectedIsoClass n) :=
   Quotient.mk''_surjective
 
-noncomputable instance : Fintype (ConnectedIsoClass n) := by
-  classical
-  exact Fintype.ofSurjective mk mk_surjective
+/-- Equality of isomorphism classes is decidable: on representatives, search the finitely many
+relabelings. -/
+instance : DecidableEq (ConnectedIsoClass n) := fun c c' =>
+  Quotient.recOnSubsingleton₂ c c' fun t t' =>
+    decidable_of_iff (∃ τ : Perm (Fin n), τ • t' = t) mk_eq_mk_iff_exists_smul.symm
 
-noncomputable instance : DecidableEq (ConnectedIsoClass n) := Classical.decEq _
+instance : Fintype (ConnectedIsoClass n) := Fintype.ofSurjective mk mk_surjective
 
 end ConnectedIsoClass
 
