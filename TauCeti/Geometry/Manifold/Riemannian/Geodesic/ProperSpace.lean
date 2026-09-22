@@ -31,7 +31,7 @@ Mathlib's `complete_of_proper`.
 
 In the namespace `TauCeti.Manifold`:
 
-* `image_closedBall_riemannianExp_subset`: `exp_p` maps the closed tangent ball of radius `r` into
+* `image_riemannianExp_closedBall_subset`: `exp_p` maps the closed tangent ball of radius `r` into
   the closed ball of radius `r` about `p`.
 * `closedBall_eq_image_riemannianExp`: with minimizing initial velocities, the closed ball of
   radius `r` about `p` is the image of the closed tangent ball of radius `r`.
@@ -77,7 +77,7 @@ the minimizing geodesics. -/
 
 /-- The exponential map sends the closed tangent ball of radius `r` into the closed ball of
 radius `r` about the base point. -/
-theorem image_closedBall_riemannianExp_subset (p : M) (r : ℝ) :
+theorem image_riemannianExp_closedBall_subset (p : M) (r : ℝ) :
     riemannianExp I M p '' closedBall 0 r ⊆ closedBall p r := by
   rintro _ ⟨v, hv, rfl⟩
   rw [mem_closedBall, dist_comm]
@@ -106,7 +106,7 @@ theorem closedBall_eq_image_riemannianExp
       riemannianExp I M p v = q ∧ ‖v‖ ≤ dist p q) :
     closedBall p r = riemannianExp I M p '' closedBall 0 r :=
   (closedBall_subset_image_riemannianExp hmin).antisymm
-    (image_closedBall_riemannianExp_subset p r)
+    (image_riemannianExp_closedBall_subset p r)
 
 /-! ### Properness -/
 
