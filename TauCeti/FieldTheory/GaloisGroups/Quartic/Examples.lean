@@ -6,13 +6,13 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.FieldTheory.GaloisGroups.Quartic.Basic
-import TauCeti.FieldTheory.GaloisGroups.Reduction
 public import TauCeti.RingTheory.Polynomial.FactorDegrees
 import Mathlib.NumberTheory.Cyclotomic.Gal
 import Mathlib.RingTheory.Polynomial.Eisenstein.Criterion
 import Mathlib.Tactic.NormNum.IsSquare
 import TauCeti.Algebra.Polynomial.SpecificDegree
-import TauCeti.RingTheory.Polynomial.Cyclotomic.SqrtFive
+import TauCeti.FieldTheory.GaloisGroups.Reduction
+import TauCeti.RingTheory.Polynomial.Cyclotomic.Basic
 import TauCeti.RingTheory.Polynomial.Monic.Irreducible
 
 /-!
