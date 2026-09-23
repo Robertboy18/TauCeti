@@ -174,27 +174,19 @@ def kerNormTransfer (T : LayerRestriction small big) (F : Formation G) :
       (Representation.IsIntertwiningMap.symm (T.isIntertwiningMap_repIso_range F))).comp
     (Representation.relTransferKerNorm (big.rep F).ρ T.galHom.range)
 
-/-- The relative transfer of norm kernels is the relative transfer on the ambient module. -/
-@[simp]
-theorem kerNormTransfer_apply_coe (T : LayerRestriction small big) (F : Formation G)
-    (x : LinearMap.ker (big.rep F).ρ.norm) :
-    (((T.kerNormTransfer F x : LinearMap.ker (small.rep F).ρ.norm) : F.level small.top) :
-        F.toRep.V) =
-      ((Representation.relTransfer (big.rep F).ρ T.galHom.range
-        ((x : F.level big.top) : (big.rep F).V) : F.level big.top) : F.toRep.V) := by
-  rw [kerNormTransfer, LinearMap.comp_apply, TauCeti.TateCohomology.mapKerNorm_apply_coe,
-    Representation.coe_relTransferKerNorm]
-  exact T.repIso_inv_apply_coe F _
-
+-- `dsimp% only` on the left-hand side: see the implementation notes of `Formation/Basic.lean`.
 /-- The norm-kernel transfer is the relative transfer of the image subgroup, read back through
 the identification of coefficient modules. -/
 @[simp]
 theorem kerNormTransfer_apply (T : LayerRestriction small big) (F : Formation G)
     (x : LinearMap.ker (big.rep F).ρ.norm) :
-    ((T.kerNormTransfer F x : LinearMap.ker (small.rep F).ρ.norm) : F.level small.top) =
-      (T.repIso F).inv.hom
-        (Representation.relTransfer (big.rep F).ρ T.galHom.range ((x : F.level big.top))) :=
-  Subtype.ext (by rw [kerNormTransfer_apply_coe, repIso_inv_apply_coe])
+    (dsimp% only (T.kerNormTransfer F x : F.level small.top)) =
+      (T.repIso F).inv.hom (Representation.relTransfer (big.rep F).ρ T.galHom.range x) := by
+  rw [kerNormTransfer, LinearMap.comp_apply, TauCeti.TateCohomology.mapKerNorm_apply_coe,
+    Representation.coe_relTransferKerNorm]
+  -- The linear part of `IsIntertwiningMap.symm (T.isIntertwiningMap_repIso_range F)` is
+  -- `(T.repIso F).inv.hom` by definition of `Representation.equivOfIso`.
+  rfl
 
 /-- **In degree minus one, layer Tate restriction is the relative transfer** on representatives. -/
 theorem tateRes_neg_one_HNegOneπ (T : LayerRestriction small big) (F : Formation G)
@@ -236,17 +228,11 @@ theorem kerNormTransfer_trans_sub_mem (T : LayerRestriction a b) (T' : LayerRest
   have htower := Representation.relTransfer_relTransfer_sub_relTransfer_mem
     (ρ := (c.rep F).ρ) (H := T'.galHom.range) hKH ((y : F.level c.top))
   rw [← hw] at htower
-  -- The two ways of reading the image of the smallest Galois group inside the largest agree.
-  have hsub : ((T.trans T').galHom.range.subtype).comp
-      (Subgroup.subgroupOfEquivOfLe hKH).toMonoidHom =
-        (T'.galHom.range.subtype).comp
-          (((T.trans T').galHom.range).subgroupOf T'.galHom.range).subtype := by
-    ext x
-    simp
-  rw [MonoidHom.comp_assoc, ← hsub,
+  -- Read the augmentation submodule in `htrans` over the image of the smallest Galois group
+  -- directly, rather than through the image of the middle one.
+  rw [MonoidHom.comp_assoc, ← Subgroup.subtype_comp_subgroupOfEquivOfLe hKH,
     Representation.coinvariantsKer_comp_comp_of_surjective
-      ((T.trans T').galHom.range.subtype)
-      (Subgroup.subgroupOfEquivOfLe hKH).toMonoidHom
+      ((T.trans T').galHom.range.subtype) _
       (Subgroup.subgroupOfEquivOfLe hKH).surjective] at htrans
   -- Reading an element of the middle layer back to the smallest one directly agrees with going
   -- across to the largest and back along the composite.
