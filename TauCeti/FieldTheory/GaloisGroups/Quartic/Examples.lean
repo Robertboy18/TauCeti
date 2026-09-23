@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.FieldTheory.GaloisGroups.Quartic.Basic
-public import TauCeti.FieldTheory.GaloisGroups.Reduction
+import TauCeti.FieldTheory.GaloisGroups.Reduction
 public import TauCeti.RingTheory.Polynomial.FactorDegrees
 import Mathlib.NumberTheory.Cyclotomic.Gal
 import Mathlib.RingTheory.Polynomial.Eisenstein.Criterion
