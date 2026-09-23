@@ -51,7 +51,13 @@ of the integral closure of `R` in `A` is the contraction of a prime of the integ
 in `B`. -/
 theorem Ideal.exists_isPrime_comap_mapIntegralClosure_eq (P : Ideal (integralClosure R A))
     [P.IsPrime] {f : A →ₐ[R] B} (hf : Function.Injective f) :
-    ∃ Q : Ideal (integralClosure R B), Q.IsPrime ∧ Q.comap f.mapIntegralClosure = P :=
-  P.exists_comap_eq_of_isIntegral f.mapIntegralClosure <| by
-    rw [(RingHom.injective_iff_ker_eq_bot _).mp (AlgHom.mapIntegralClosure_injective hf)]
+    ∃ Q : Ideal (integralClosure R B), Q.IsPrime ∧ Q.comap f.mapIntegralClosure = P := by
+  refine P.exists_comap_eq_of_isIntegral
+    (f.mapIntegralClosure : integralClosure R A →+* integralClosure R B) ?_ ?_
+  · apply RingHom.IsIntegral.tower_top (algebraMap R (integralClosure R A))
+    rw [AlgHom.comp_algebraMap]
+    exact algebraMap_isIntegral_iff.mpr inferInstance
+  · rw [(RingHom.injective_iff_ker_eq_bot
+      (f.mapIntegralClosure : integralClosure R A →+* integralClosure R B)).mp
+        (AlgHom.mapIntegralClosure_injective hf)]
     exact bot_le

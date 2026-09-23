@@ -222,7 +222,7 @@ noncomputable def ofAlgHom (φ : E.extensionField →ₐ[K] F.extensionField)
         IsLocalization.AtPrime.to_map_mem_maximal_iff F.localRing F.prime]
       exact hx }
 
-@[simp] lemma ofAlgHom_field (φ : E.extensionField →ₐ[K] F.extensionField)
+@[simp] lemma field_ofAlgHom (φ : E.extensionField →ₐ[K] F.extensionField)
     (hφ : F.prime.comap (φ.restrictScalars R).mapIntegralClosure = E.prime) :
     (ofAlgHom φ hφ).field = φ := (rfl)
 
