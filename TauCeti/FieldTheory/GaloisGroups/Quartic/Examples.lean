@@ -218,7 +218,8 @@ theorem natCard_gal_X_pow_four_add_eight_mul_X_add_twelve :
 /-- `X ^ 4 + 1` is the eighth cyclotomic polynomial, hence irreducible over `ℚ`. -/
 theorem irreducible_X_pow_four_add_one : Irreducible (X ^ 4 + 1 : ℚ[X]) := by
   have hcyc : cyclotomic 8 ℚ = X ^ 4 + 1 := by
-    rw [show (8 : ℕ) = 2 ^ (2 + 1) by norm_num, cyclotomic_prime_pow_eq_geom_sum Nat.prime_two]
+    have h8 : (8 : ℕ) = 2 ^ (2 + 1) := by norm_num
+    rw [h8, cyclotomic_prime_pow_eq_geom_sum Nat.prime_two]
     simp [Finset.sum_range_succ, add_comm]
   rw [← hcyc]
   exact cyclotomic.irreducible_rat (by norm_num)
@@ -323,6 +324,7 @@ private theorem map_X_pow_four_sub_two :
 /-- `X ^ 4 - 2` is irreducible over `ℚ`, by the Eisenstein criterion at the prime `2`. -/
 theorem irreducible_X_pow_four_sub_two : Irreducible (X ^ 4 - 2 : ℚ[X]) := by
   have hint : Irreducible (X ^ 4 - 2 : ℤ[X]) := by
+    have hdeg : (X ^ 4 - 2 : ℤ[X]).natDegree = 4 := by compute_degree!
     have h2 : (Ideal.span {(2 : ℤ)}).IsPrime :=
       (Ideal.span_singleton_prime two_ne_zero).mpr Int.prime_two
     refine irreducible_of_eisenstein_criterion h2 ?_ ?_ ?_ ?_
@@ -330,13 +332,11 @@ theorem irreducible_X_pow_four_sub_two : Irreducible (X ^ 4 - 2 : ℚ[X]) := by
     · rw [monic_X_pow_four_sub_two_int.leadingCoeff, Ideal.mem_span_singleton]
       decide
     · intro n hn
-      rw [degree_eq_natDegree monic_X_pow_four_sub_two_int.ne_zero,
-        show (X ^ 4 - 2 : ℤ[X]).natDegree = 4 by compute_degree!] at hn
+      rw [degree_eq_natDegree monic_X_pow_four_sub_two_int.ne_zero, hdeg] at hn
       have hn4 : n < 4 := by exact_mod_cast hn
       rw [Ideal.mem_span_singleton]
       interval_cases n <;> simp [coeff_X_pow, coeff_ofNat_zero, coeff_ofNat_succ]
-    · rw [degree_eq_natDegree monic_X_pow_four_sub_two_int.ne_zero,
-        show (X ^ 4 - 2 : ℤ[X]).natDegree = 4 by compute_degree!]
+    · rw [degree_eq_natDegree monic_X_pow_four_sub_two_int.ne_zero, hdeg]
       norm_num
     · rw [Ideal.span_singleton_pow, Ideal.mem_span_singleton]
       simp only [coeff_sub, coeff_X_pow, coeff_ofNat_zero]

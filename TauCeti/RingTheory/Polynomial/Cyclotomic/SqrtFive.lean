@@ -40,6 +40,7 @@ public section
 namespace Polynomial
 
 /-- The fifth cyclotomic polynomial is `X ^ 4 + X ^ 3 + X ^ 2 + X + 1`. -/
+@[simp]
 theorem cyclotomic_five (R : Type*) [Ring R] : cyclotomic 5 R = X ^ 4 + X ^ 3 + X ^ 2 + X + 1 := by
   have : Fact (Nat.Prime 5) := ⟨Nat.prime_five⟩
   rw [cyclotomic_prime]
@@ -79,4 +80,3 @@ theorem not_irreducible_cyclotomic_five_of_sq_eq_five (h5 : ∃ x : E, x ^ 2 = 5
     simpa [hdeg] using natDegree_eq_zero_of_isUnit h
 
 end Polynomial
-
