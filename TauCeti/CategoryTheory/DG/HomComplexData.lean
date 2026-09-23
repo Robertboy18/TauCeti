@@ -513,6 +513,7 @@ theorem enrichedComp_dgCategoryData [DGCategory R C] (X Y Z : C) :
 
 /-- Rebuilding a differential graded category from its explicit Hom-complex data recovers the
 category. -/
+@[simp]
 theorem toDGCategory_dgCategoryData [inst : DGCategory R C] :
     (dgCategoryData R C).toDGCategory = inst := by
   have hid : ∀ X, (dgCategoryData R C).enrichedId X = eId (CochainComplex (ModuleCat.{v} R) ℤ) X :=
@@ -528,6 +529,7 @@ theorem toDGCategory_dgCategoryData [inst : DGCategory R C] :
 
 /-- Extracting the explicit Hom-complex data of the category built from explicit data recovers the
 data. -/
+@[simp]
 theorem dgCategoryData_toDGCategory (D : DGCategoryData R C) :
     letI := D.toDGCategory
     dgCategoryData R C = D := by
