@@ -211,6 +211,44 @@ theorem continuous_factorSetToGroupExtensionEquiv [ContinuousMul E] (hinl : Cont
   exact (hinl.comp FactorSet.Extension.continuous_left).mul
     (hσc.comp FactorSet.Extension.continuous_right)
 
+/-- **The inverse of the comparison map is continuous** when the projection and the section are
+continuous and the kernel is embedded: it sends `y` to
+`⟨inl⁻¹ (y * (σ (rightHom y))⁻¹), rightHom y⟩`, and the first coordinate is continuous because its
+image under the embedding `inl` is. Together with
+`TauCeti.GroupExtension.continuous_factorSetToGroupExtensionEquiv` this makes the comparison a
+homeomorphism with no compactness assumption. -/
+theorem continuous_factorSetToGroupExtensionEquiv_symm [ContinuousMul E] [ContinuousInv E]
+    (hinl : Topology.IsEmbedding ⇑S.inl) (hrh : Continuous S.rightHom) {σ : S.Section}
+    (hσc : Continuous ⇑σ) (hσ : σ 1 = 1) (hact : InducesAction S) :
+    Continuous ⇑(factorSetToGroupExtensionEquiv σ hσ hact).symm := by
+  have hright : ∀ y : E, ((factorSetToGroupExtensionEquiv σ hσ hact).symm y).right =
+      S.rightHom y := fun y => by
+    have h := GroupExtension.Equiv.rightHom_map (factorSetToGroupExtensionEquiv σ hσ hact).symm y
+    rwa [FactorSet.groupExtension_rightHom, FactorSet.rightHom_apply] at h
+  have hleft : ∀ y : E, S.inl ((factorSetToGroupExtensionEquiv σ hσ hact).symm y).left =
+      y * (σ (S.rightHom y))⁻¹ := fun y => by
+    have hy : factorSetToGroupExtensionEquiv σ hσ hact
+        ((factorSetToGroupExtensionEquiv σ hσ hact).symm y) = y := by
+      simpa using (factorSetToGroupExtensionEquiv σ hσ hact).toMulEquiv.apply_symm_apply y
+    rw [factorSetToGroupExtensionEquiv_apply, hright] at hy
+    exact eq_mul_inv_of_mul_eq hy
+  refine FactorSet.Extension.isInducing_leftRight.continuous_iff.2 ?_
+  refine Continuous.prodMk ?_ (hrh.congr fun y => (hright y).symm)
+  refine hinl.continuous_iff.2 ?_
+  exact (continuous_id.mul (hσc.comp hrh).inv).congr fun y => (hleft y).symm
+
+omit [MulDistribMulAction G M] in
+/-- **The difference of two continuous sections is continuous** when the kernel carries the
+subspace topology of its image: the image of the difference under the inclusion is
+`σ g * (σ' g)⁻¹`. -/
+theorem continuous_sectionDiff [ContinuousMul E] [ContinuousInv E]
+    (hinl : Topology.IsEmbedding ⇑S.inl) {σ σ' : S.Section} (hσc : Continuous ⇑σ)
+    (hσ'c : Continuous ⇑σ') : Continuous (sectionDiff σ σ') := by
+  refine hinl.continuous_iff.2 ?_
+  have h : ⇑S.inl ∘ sectionDiff σ σ' = fun g => σ g * (σ' g)⁻¹ := funext (inl_sectionDiff σ σ')
+  rw [h]
+  exact hσc.mul hσ'c.inv
+
 /-- **A Hausdorff extension with compact kernel over a compact base is the twisted product built
 from the factor set of a continuous normalized section**: the comparison map of
 `TauCeti.GroupExtension.factorSetToGroupExtensionEquiv` is a multiplicative equivalence and a

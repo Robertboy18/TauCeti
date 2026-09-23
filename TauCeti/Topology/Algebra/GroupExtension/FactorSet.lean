@@ -199,6 +199,10 @@ theorem continuous_inl : Continuous (inl α) := by
 theorem continuous_rightHom : Continuous (rightHom α) :=
   Extension.continuous_right.congr fun x => (rightHom_apply α x).symm
 
+/-- The trivial factor set is continuous, being constant. -/
+theorem continuous_trivial : Continuous ⇑(trivial G M) :=
+  continuous_const.congr fun p => (trivial_apply G M p).symm
+
 /-- The canonical section `g ↦ ⟨1, g⟩` of the projection is continuous: the extension built from a
 continuous factor set comes with a continuous normalized section, and
 `TauCeti.GroupExtension.factorSet_canonicalSection` reads the factor set back off it. -/
@@ -240,6 +244,33 @@ theorem isQuotientMap_rightHom : Topology.IsQuotientMap (rightHom α) :=
   (isOpenMap_rightHom α).isQuotientMap (continuous_rightHom α) (rightHom_surjective α)
 
 end Maps
+
+/-! ### Continuity of the rescaling equivalence -/
+
+section Rescale
+
+variable {α β : FactorSet G M} {x : G → M}
+  (hx : ∀ g h : G, α (g, h) * x (g * h) = β (g, h) * (g • x h * x g)) (hxc : Continuous x)
+
+include hxc
+
+/-- **Rescaling the canonical section by a continuous function is continuous**: under
+`TauCeti.FactorSet.Extension.homeomorphProd` the rescaling is `(a, g) ↦ (a * x g, g)`. -/
+theorem continuous_rescaleEquiv [ContinuousMul M] : Continuous ⇑(rescaleEquiv α β x hx) := by
+  refine Extension.isInducing_leftRight.continuous_iff.2 ?_
+  simp only [Function.comp_def, rescaleEquiv_apply]
+  exact (Extension.continuous_left.mul (hxc.comp Extension.continuous_right)).prodMk
+    Extension.continuous_right
+
+/-- The inverse of the rescaling equivalence is continuous as well: it is the rescaling by `x⁻¹`. -/
+theorem continuous_rescaleEquiv_symm [ContinuousMul M] [ContinuousInv M] :
+    Continuous ⇑(rescaleEquiv α β x hx).symm := by
+  refine Extension.isInducing_leftRight.continuous_iff.2 ?_
+  simp only [Function.comp_def, rescaleEquiv_symm_apply]
+  exact (Extension.continuous_left.mul (hxc.comp Extension.continuous_right).inv).prodMk
+    Extension.continuous_right
+
+end Rescale
 
 /-! ### Continuity as membership of the explicit complex of continuous cochains -/
 
