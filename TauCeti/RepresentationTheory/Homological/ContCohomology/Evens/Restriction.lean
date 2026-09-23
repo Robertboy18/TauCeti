@@ -10,7 +10,7 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Clas
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Conjugation
 
 /-!
-# The restriction of the index-two Evens norm
+# The restriction of the index-two graph class, on the explicit model
 
 Let `U` be an open subgroup of index two in a topological group `G` and let
 `α : U →* Multiplicative (ZMod 2)` be a continuous homomorphism, that is a class in `H¹(U, 𝔽₂)`.
@@ -24,9 +24,16 @@ where `s · α` is the conjugation action of the nontrivial coset, in the choice
 `TauCeti.ContCohomology.evensConj1`. This is the first of the four identities characterizing the
 index-two norm, in the form Kozlowski's index-two expansion uses.
 
-The identity holds already at the level of cochains. On `U × U` the graph cochain is
-`α γ * α (s⁻¹ η s)`, which is the `(1,1)` cup-product cochain of `α` with its conjugate for the
-multiplication pairing of `𝔽₂`; passing to classes gives the identity in the explicit `H²(U, 𝔽₂)`.
+This file proves the identity on the explicit inhomogeneous model: both sides are classes in the
+explicit `H²(U, 𝔽₂)` of `TauCeti.RepresentationTheory.Homological.ContCohomology.LowDegree`, the
+left-hand side being the class of the graph cocycle that `TauCeti.ContCohomology.graphClass` is
+built from, and the right-hand side the explicit `(1,1)` cup product of
+`TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Product`. The identity holds already
+at the level of cochains. On `U × U` the graph cochain is `α γ * α (s⁻¹ η s)`, which is the
+`(1,1)` cup-product cochain of `α` with its conjugate for the multiplication pairing of `𝔽₂`;
+passing to classes gives the identity in the explicit `H²(U, 𝔽₂)`. The statement for the canonical
+`graphClass` against a canonical cup product is not made here, since that cup product does not yet
+exist; when it does, this explicit computation is the input to it.
 
 ## Main definitions
 
@@ -35,8 +42,8 @@ multiplication pairing of `𝔽₂`; passing to classes gives the identity in th
 
 ## Main results
 
-* `TauCeti.ContCohomology.evensNorm_res`: the restriction of the graph class is the cup product of
-  `α` with its conjugate.
+* `TauCeti.ContCohomology.explicitRes2_evensGraphCocycle`: the restriction of the class of the
+  graph cocycle is the cup product of `α` with its conjugate, on the explicit model.
 
 ## References
 
@@ -91,12 +98,18 @@ theorem coe_evensHomCocycleAmbient (U : OpenSubgroup G)
       fun h => (trivialF2Equiv G).symm (Multiplicative.toAdd (α h)) :=
   (rfl)
 
-/-- **Identity 1 of the index-two Evens norm: `res_U N^{Ev}(α) = α ⌣ (s · α)`.** The restriction to
-`U` of the class of the two-point graph cocycle, formed with any `s ∉ U`, is the `(1,1)` cup
-product, for the multiplication pairing of `𝔽₂`, of the class of `α` with its conjugate
-`TauCeti.ContCohomology.evensConj1`. The right-hand side does not mention `s`. -/
-theorem evensNorm_res (U : OpenSubgroup G) (hU : U.toSubgroup.index = 2) {s : G} (hs : s ∉ U)
-    (α : U.toSubgroup →* Multiplicative (ZMod 2)) (hα : Continuous α) :
+/-- **The explicit-model form of identity 1 of the index-two Evens norm,
+`res_U N^{Ev}(α) = α ⌣ (s · α)`.** The restriction to `U` of the class of the two-point graph
+cocycle, formed with any `s ∉ U`, is the `(1,1)` cup product, for the multiplication pairing of
+`𝔽₂`, of the class of `α` with its conjugate `TauCeti.ContCohomology.evensConj1`. The right-hand
+side does not mention `s`.
+
+Both sides are classes in the explicit `H²(U, 𝔽₂)`. The left-hand side is the class that
+`TauCeti.ContCohomology.graphClass_eq_cochainClass` identifies with the canonical
+`TauCeti.ContCohomology.graphClass` for every `s ∉ U`, so the statement is about the choice-free
+class, presented on a representative. -/
+theorem explicitRes2_evensGraphCocycle (U : OpenSubgroup G) (hU : U.toSubgroup.index = 2)
+    {s : G} (hs : s ∉ U) (α : U.toSubgroup →* Multiplicative (ZMod 2)) (hα : Continuous α) :
     explicitRes2 G (trivialF2 G).V U.toSubgroup
         (evensGraphCocycle U s α hU hs hα : H2 G (trivialF2 G).V) =
       explicitCup11 U.toSubgroup (trivialF2 G).V (trivialF2 G).V (trivialF2 G).V
