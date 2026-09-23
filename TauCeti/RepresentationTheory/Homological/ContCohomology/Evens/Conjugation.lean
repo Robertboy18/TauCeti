@@ -37,8 +37,6 @@ on the elements of `U`.
 
 * `TauCeti.ContCohomology.cochainsCor1_indexTwoTransversal_apply_coe`: on `γ ∈ U`, the
   corestriction cochain over the transversal `{1, s}` is `f γ + s • f (s⁻¹ γ s)`.
-* `TauCeti.ContCohomology.explicitRes1_explicitCor1_eq_add_evensConj1`:
-  `res ∘ cor = id + evensConj1` on `H¹(U, M)`, the defining formula `evensConj1_apply` rearranged.
 * `TauCeti.ContCohomology.evensConj1_eq_explicitConj1`: `evensConj1` is conjugation by every element
   outside `U`.
 
@@ -69,19 +67,19 @@ trivial coset and `s • f (s⁻¹ γ s)` at the coset of `s`. -/
 theorem cochainsCor1_indexTwoTransversal_apply_coe (hU : U.index = 2) {s : G} (hs : s ∉ U)
     (f : U → M) (γ : U) :
     letI : U.FiniteIndex := ⟨by omega⟩
-    cochainsCor1 G M U (indexTwoTransversal U s) (indexTwoTransversal_mk hU hs) f γ =
+    cochainsCor1 G M U (U.indexTwoTransversal s) (Subgroup.indexTwoTransversal_mk hU hs) f γ =
       f γ + s • f ⟨s⁻¹ * γ * s, (Subgroup.normal_of_index_eq_two hU).conj_mem' γ γ.2 s⟩ := by
   have : U.FiniteIndex := ⟨by omega⟩
-  have h1 : (⟨lWord U (indexTwoTransversal U s) (QuotientGroup.mk 1) γ,
-      lWord_mem U _ (indexTwoTransversal_mk hU hs) _ _⟩ : U) = γ :=
+  have h1 : (⟨lWord U (U.indexTwoTransversal s) (QuotientGroup.mk 1) γ,
+      lWord_mem U _ (Subgroup.indexTwoTransversal_mk hU hs) _ _⟩ : U) = γ :=
     Subtype.ext (lWord_indexTwoTransversal_mk_one_of_mem s γ.2)
-  have h2 : (⟨lWord U (indexTwoTransversal U s) (QuotientGroup.mk s) γ,
-      lWord_mem U _ (indexTwoTransversal_mk hU hs) _ _⟩ : U) =
+  have h2 : (⟨lWord U (U.indexTwoTransversal s) (QuotientGroup.mk s) γ,
+      lWord_mem U _ (Subgroup.indexTwoTransversal_mk hU hs) _ _⟩ : U) =
       ⟨s⁻¹ * γ * s, (Subgroup.normal_of_index_eq_two hU).conj_mem' γ γ.2 s⟩ :=
     Subtype.ext (lWord_indexTwoTransversal_mk_of_mem hU hs γ.2)
   rw [cochainsCor1_apply, sum_quotient_eq_add_of_index_two hU hs, h1, h2,
-    indexTwoTransversal_mk_one, one_smul,
-    indexTwoTransversal_of_ne s (mk_ne_mk_one_of_notMem hs)]
+    Subgroup.indexTwoTransversal_mk_one, one_smul,
+    Subgroup.indexTwoTransversal_of_ne s (mk_ne_mk_one_of_notMem hs)]
 
 end Cochain
 
@@ -109,14 +107,6 @@ theorem evensConj1_apply (hU : U.index = 2) (hUo : IsOpen (U : Set G)) (x : H1 U
     evensConj1 G M U hU hUo x = explicitRes1 G M U (explicitCor1 G M U hUo x) - x :=
   (rfl)
 
-/-- **`res ∘ cor = 1 + conj` at index two**, the defining property of `evensConj1` in the form
-later computations apply it. -/
-theorem explicitRes1_explicitCor1_eq_add_evensConj1 (hU : U.index = 2)
-    (hUo : IsOpen (U : Set G)) (x : H1 U M) :
-    letI : U.FiniteIndex := ⟨by omega⟩
-    explicitRes1 G M U (explicitCor1 G M U hUo x) = x + evensConj1 G M U hU hUo x := by
-  rw [evensConj1_apply, add_sub_cancel]
-
 /-- **The choice-free conjugation is conjugation by every element outside `U`.** For `s ∉ U`,
 `evensConj1` is the conjugation map `TauCeti.ContCohomology.explicitConj1 U s` of the normal
 subgroup `U`. -/
@@ -131,8 +121,8 @@ theorem evensConj1_eq_explicitConj1 (hU : U.index = 2) (hUo : IsOpen (U : Set G)
   induction x using QuotientAddGroup.induction_on with
   | H c =>
     -- Compute the corestriction on the transversal `{1, s}`, where it has two terms.
-    rw [evensConj1_apply, explicitCor1_eq_transversal G M U (indexTwoTransversal U s)
-      (indexTwoTransversal_mk hU hs) hUo]
+    rw [evensConj1_apply, explicitCor1_eq_transversal G M U (U.indexTwoTransversal s)
+      (Subgroup.indexTwoTransversal_mk hU hs) hUo]
     simp only [explicitCor1Transversal_mk, explicitRes1_mk, explicitConj1_apply_eq_smul, smul_mk]
     rw [sub_eq_iff_eq_add, ← QuotientAddGroup.mk_add]
     apply congrArg (fun z : Z1 U M => (z : H1 U M))

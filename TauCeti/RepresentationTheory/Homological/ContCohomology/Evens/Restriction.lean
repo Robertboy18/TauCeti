@@ -23,15 +23,6 @@ res_U [graph_s(α)] = [α] ⌣ evensConj1([α]).
 Here `TauCeti.ContCohomology.evensConj1` is defined on explicit `H¹` as `res ∘ cor - id`, and
 equals conjugation by every element outside `U`.
 
-The proof compares cochains: on `U × U` the graph cochain is `α γ * α (s⁻¹ η s)`, which is the
-cup-product cochain of `α` with its conjugate. Passing to classes gives the identity in explicit
-`H²(U, 𝔽₂)`.
-
-This calculation is a step toward a restriction identity for the canonical graph class.
-Transporting it to canonical cohomology requires compatibility of restriction, cup products,
-and conjugation with the explicit model. The general Evens norm also needs its comparison with
-the graph class.
-
 ## Main definitions
 
 * `TauCeti.ContCohomology.evensHomCocycleAmbient`: a continuous homomorphism on `U`, as a
