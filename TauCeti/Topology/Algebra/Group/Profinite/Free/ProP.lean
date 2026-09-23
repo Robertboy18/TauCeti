@@ -16,8 +16,9 @@ uniquely to a continuous homomorphism. Extensionality for homomorphisms out of t
 group only requires a Hausdorff group target, which may live in any universe.
 
 The canonical comparison with the free pro-`C` group for the class of finite `p`-groups is used
-to derive the universal property and functoriality. The file also records that a surjection of
-generating types induces a surjection of free pro-`p` groups.
+to derive the universal property and functoriality, and to see that the generators generate the
+free pro-`p` group topologically. The file also records that a surjection of generating types
+induces a surjection of free pro-`p` groups.
 
 ## Main definitions
 
@@ -30,6 +31,8 @@ generating types induces a surjection of free pro-`p` groups.
 ## Main results
 
 * `TauCeti.isProP_freeProP`: a free pro-`p` group is pro-`p`.
+* `TauCeti.freeProP.topologicalClosure_closure_range_of_eq_top`: the generators generate the
+  free pro-`p` group topologically.
 * `TauCeti.freeProP.hom_ext`: homomorphisms agreeing on the generators are equal.
 * `TauCeti.freeProP.existsUnique_lift`: the universal property.
 * `TauCeti.freeProP.lift_surjective`: a topologically generating map lifts to a surjection.
@@ -153,6 +156,18 @@ end freeProC
 namespace freeProP
 
 variable {p : ℕ} {X Y Z : Type u}
+
+/-- The canonical generators of a free pro-`p` group generate it topologically. -/
+theorem topologicalClosure_closure_range_of_eq_top (p : ℕ) (X : Type u) :
+    (Subgroup.closure (Set.range (of : X → freeProP p X))).topologicalClosure = ⊤ := by
+  have h := topologicalClosure_closure_image_eq_top
+    (freeProC.topologicalClosure_closure_range_of_eq_top (finiteGroupClassP.{u} p) X)
+    (f := (freeProC.equivFreeProP p X).toMulEquiv.toMonoidHom)
+    (freeProC.equivFreeProP p X).continuous (freeProC.equivFreeProP p X).surjective.denseRange
+  have hof : ((freeProC.equivFreeProP p X).toMulEquiv.toMonoidHom :
+      freeProC (finiteGroupClassP.{u} p) X → freeProP p X) ∘ freeProC.of = of :=
+    funext fun x ↦ freeProC.equivFreeProP_of p x
+  rwa [← Set.range_comp, hof] at h
 
 section HomExt
 

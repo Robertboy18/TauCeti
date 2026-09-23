@@ -17,8 +17,9 @@ import TauCeti.Topology.Algebra.Group.Profinite.ProP.ContinuousDual
 /-!
 # The generator rank of a free pro-`p` group on a finite type
 
-The canonical generators of `freeProP p X` generate it topologically, so for finite `X` the free
-pro-`p` group is topologically finitely generated. In the Frattini quotient
+The canonical generators of `freeProP p X` generate it topologically
+(`freeProP.topologicalClosure_closure_range_of_eq_top`), so for finite `X` the free pro-`p` group
+is topologically finitely generated. In the Frattini quotient
 `freeProP p X ⧸ proPFrattini p (freeProP p X)`, an `𝔽_p`-vector space, the classes of the
 generators are linearly independent: any assignment of exponents modulo `p` to the generators is
 realised by a continuous character of the free pro-`p` group, through its universal property. For
@@ -39,8 +40,6 @@ rather than by a discrete type.
 
 ## Main results
 
-* `TauCeti.freeProP.topologicalClosure_closure_range_of_eq_top`: the generators generate the
-  free pro-`p` group topologically.
 * `TauCeti.isTopologicallyFinitelyGenerated_freeProP`: for finite `X`, the free pro-`p` group on
   `X` is topologically finitely generated.
 * `TauCeti.freeProP.linearIndependent_frattiniQuotient_of`: for every `X`, the classes of the
@@ -62,26 +61,6 @@ namespace TauCeti
 open scoped Cardinal
 
 universe u
-
-namespace freeProP
-
-variable (p : ℕ) (X : Type u)
-
-/-- The canonical generators of a free pro-`p` group generate it topologically. -/
-theorem topologicalClosure_closure_range_of_eq_top :
-    (Subgroup.closure (Set.range (of : X → freeProP p X))).topologicalClosure = ⊤ := by
-  have hfree : (Subgroup.closure
-      (Set.range (freeProfiniteGroup.of : X → freeProfiniteGroup X))).topologicalClosure = ⊤ := by
-    rw [← SetLike.coe_set_eq, Subgroup.topologicalClosure_coe, Subgroup.coe_top,
-      ← dense_iff_closure_eq]
-    exact freeProfiniteGroup.dense_closure_range_of X
-  have h := topologicalClosure_closure_image_eq_top hfree
-    (f := (fromFreeProfiniteGroup p X).toMonoidHom) (fromFreeProfiniteGroup p X).continuous
-    fromFreeProfiniteGroup_surjective.denseRange
-  rw [← Set.range_comp] at h
-  simpa [Function.comp_def] using h
-
-end freeProP
 
 variable (p : ℕ) {X : Type u}
 
