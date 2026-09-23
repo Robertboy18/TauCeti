@@ -56,6 +56,14 @@ enrichment fixes the universe of the ground ring, so the differential graded str
 composition and identity cochains of `TauCeti/Algebra/Homology/DG/Module/Right/Composition.lean`
 are stated in that generality as well.
 
+The simp normal form of the enriched operations is the data layer: the simp lemmas
+`TauCeti.DGCategoryData.dgHomComplex_toDGCategory`, `dgDifferential_toDGCategory`,
+`dgId_toDGCategory` and `dgComp_toDGCategory` rewrite `dgHomComplex`, `dgDifferential`, `dgId`
+and `dgComp` to the fields of `homComplexData`, which `homComplexData_hom`, `homComplexData_comp`
+and `homComplexData_id` evaluate.  The bridge lemmas `dgHomComplex_eq`, `dgDifferential_eq`,
+`dgId_eq` and `dgComp_eq` state the resulting identifications in one step for `rw`; they are not
+simp lemmas, because the generic lemmas already rewrite their left-hand sides.
+
 ## References
 
 * B. Keller, *Deriving DG categories*, Sections 1 and 2.
