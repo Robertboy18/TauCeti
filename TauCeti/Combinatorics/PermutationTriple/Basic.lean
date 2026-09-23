@@ -52,11 +52,6 @@ same order. The reverse convention is common in the literature and in databases 
 `TauCeti.PermutationTriple.equivOppositeConvention` translates between the two, and
 `Equiv.Perm.cycleType_inv` says that the translation preserves cycle types.
 
-`TauCeti.PermutationTriple.ofTwo` and `TauCeti.PermutationTriple.equivPair` are `@[expose]`d:
-they carry the `Fintype` and `DecidableEq` instances on triples, and kernel computations in
-importing modules — deciding connectedness, counting isomorphism classes in small degree — must
-reduce through them.
-
 ## References
 
 * S. K. Lando, A. K. Zvonkin, *Graphs on Surfaces and Their Applications*, Encyclopaedia of
@@ -107,6 +102,8 @@ def component (t : PermutationTriple n) : Fin 3 → Perm (Fin n) :=
 @[simp] theorem component_two (t : PermutationTriple n) : t.component 2 = t.σinf := (rfl)
 
 /-- The triple with prescribed first two components, the third being forced. -/
+-- Exposed: the `Fintype` and `DecidableEq` instances on triples go through `ofTwo` and
+-- `equivPair`, and kernel computations in importing modules must reduce through them.
 @[expose] def ofTwo (σ0 σ1 : Perm (Fin n)) : PermutationTriple n where
   σ0 := σ0
   σ1 := σ1

@@ -8,6 +8,7 @@ module
 public import Mathlib.Data.Finset.Card
 public import Mathlib.Data.Fintype.Card
 public import Mathlib.Dynamics.FixedPoints.Basic
+import Mathlib.Order.Monotone.Basic
 
 /-!
 # Iterates of inflationary maps on the finsets of a finite type
@@ -40,27 +41,19 @@ variable {α : Type*} [Fintype α]
 of finsets, and such a chain can grow strictly at most `Fintype.card α` times. -/
 theorem _root_.Finset.isFixedPt_iterate_card {f : Finset α → Finset α} (hf : ∀ s, s ⊆ f s)
     (s : Finset α) : Function.IsFixedPt f (f^[Fintype.card α] s) := by
-  set N := Fintype.card α
-  by_contra h
-  -- No iterate below `N` is a fixed point either, since a fixed point stays fixed forever.
-  have hne : ∀ k ≤ N, f^[k] s ≠ f^[k + 1] s := by
-    intro k hk heq
-    apply h
-    have hfix : f^[N - k] (f^[k] s) = f^[k] s :=
-      Function.iterate_fixed (by rw [← Function.iterate_succ_apply' f k s, heq]) _
-    rw [← Function.iterate_add_apply, Nat.sub_add_cancel hk] at hfix
-    rw [Function.IsFixedPt, hfix, ← Function.iterate_succ_apply' f k s, heq]
-  -- So the iterates grow strictly at every step up to `N`, which the size of `α` forbids.
-  have hcard : ∀ k ≤ N + 1, k ≤ (f^[k] s).card := by
-    intro k
-    induction k with
-    | zero => exact fun _ => Nat.zero_le _
-    | succ k ih =>
-      intro hk
-      have hlt := Finset.card_lt_card (Finset.ssubset_iff_subset_ne.mpr
-        ⟨by rw [Function.iterate_succ_apply']; exact hf _, hne k (by omega)⟩)
-      have := ih (by omega)
-      omega
-  exact absurd (hcard (N + 1) le_rfl) (by have := Finset.card_le_univ (f^[N + 1] s); omega)
+  have hsub : ∀ k, f^[k] s ⊆ f^[k + 1] s := fun k => by
+    rw [Function.iterate_succ_apply']; exact hf _
+  -- The sizes of the iterates form a monotone sequence bounded by `Fintype.card α`, and once two
+  -- consecutive iterates have the same size they coincide, so the sequence is constant from there.
+  have hmono : Monotone fun k => (f^[k] s).card :=
+    monotone_nat_of_le_succ fun k => Finset.card_le_card (hsub k)
+  have hstab : ∀ k, (f^[k] s).card = (f^[k + 1] s).card →
+      (f^[k + 1] s).card = (f^[k + 2] s).card := fun k hk => by
+    have heq : f^[k] s = f^[k + 1] s := Finset.eq_of_subset_of_card_le (hsub k) hk.ge
+    rw [Function.iterate_succ_apply' f (k + 1), ← heq, ← Function.iterate_succ_apply' f k s, ← heq]
+  have hcard := Nat.stabilises_of_monotone hmono (fun k => Finset.card_le_univ (f^[k] s)) hstab
+    (Nat.le_succ (Fintype.card α))
+  exact (Finset.eq_of_subset_of_card_le (hf _)
+    (by rw [← Function.iterate_succ_apply' f (Fintype.card α) s]; exact hcard.le)).symm
 
 end TauCeti

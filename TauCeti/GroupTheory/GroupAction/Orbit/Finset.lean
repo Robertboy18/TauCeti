@@ -59,8 +59,6 @@ with all translates `g • y` of its elements by generators `g ∈ S`. -/
 @[expose] def orbitStep (S : Finset G) (s : Finset α) : Finset α :=
   s ∪ S • s
 
-theorem orbitStep_def (S : Finset G) (s : Finset α) : orbitStep S s = s ∪ S • s := (rfl)
-
 @[simp]
 theorem mem_orbitStep {S : Finset G} {s : Finset α} {y : α} :
     y ∈ orbitStep S s ↔ y ∈ s ∨ ∃ g ∈ S, ∃ x ∈ s, g • x = y := by
@@ -81,9 +79,6 @@ closure under the generators starting from `{x}`. That many rounds always suffic
 `Finset.coe_orbitFinset`. -/
 @[expose] def orbitFinset (S : Finset G) (x : α) : Finset α :=
   (orbitStep S)^[Fintype.card α] {x}
-
-theorem orbitFinset_def (S : Finset G) (x : α) :
-    orbitFinset S x = (orbitStep S)^[Fintype.card α] {x} := (rfl)
 
 /-- The computed orbit is closed under one more round of closure. -/
 theorem orbitStep_orbitFinset (S : Finset G) (x : α) :
@@ -154,8 +149,6 @@ variable (S : Finset G) [Fintype G] [DecidableEq G]
 generated subgroup acting by left multiplication, computed by `Finset.orbitFinset`. -/
 @[expose] def closureFinset : Finset G :=
   orbitFinset S (1 : G)
-
-theorem closureFinset_def : closureFinset S = orbitFinset S (1 : G) := (rfl)
 
 @[simp]
 theorem mem_closureFinset {g : G} : g ∈ closureFinset S ↔ g ∈ Subgroup.closure (S : Set G) := by

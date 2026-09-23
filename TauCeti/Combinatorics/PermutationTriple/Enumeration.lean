@@ -15,8 +15,7 @@ form a computable finset, and so do their isomorphism classes, each class listed
 connected triples it contains — the relabeling orbit, not a chosen representative. This file
 records both finsets and identifies their members and cardinalities with the corresponding types,
 and then establishes the number of isomorphism classes of connected triples — equivalently, of
-connected dessins d'enfants with a given number of edges — in degrees one to three by kernel
-computation:
+connected dessins d'enfants with a given number of edges — in degrees one to three:
 
 ```text
 degree               1   2   3
@@ -39,6 +38,8 @@ orderings (monodromy `S₃`), and the genus-one cover with a three-cycle at ever
 
 * `TauCeti.mem_connectedTriples`, `TauCeti.mem_isoClasses`: the members of the two finsets are
   exactly the connected triples, and exactly the relabeling orbits of connected triples.
+* `TauCeti.existsUnique_mem_isoClasses`: every connected triple lies in exactly one member of
+  `TauCeti.isoClasses n`, so the listed orbits partition the connected triples.
 * `TauCeti.card_connectedTriples`, `TauCeti.card_isoClasses`: the two finsets have the
   cardinalities of `TauCeti.ConnectedTriple n` and `TauCeti.ConnectedIsoClass n`.
 * `TauCeti.ConnectedIsoClass.card_one`, `TauCeti.ConnectedIsoClass.card_two`,
@@ -63,6 +64,8 @@ theorem mem_connectedTriples {t : PermutationTriple n} :
     t ∈ connectedTriples n ↔ t.IsConnected := by
   simp [connectedTriples]
 
+/-- The finset of connected triples of degree `n` has the cardinality of the type
+`TauCeti.ConnectedTriple n`. -/
 theorem card_connectedTriples : (connectedTriples n).card = Fintype.card (ConnectedTriple n) :=
   (Fintype.card_subtype _).symm
 
@@ -80,6 +83,18 @@ theorem mem_isoClasses {s : Finset (ConnectedTriple n)} :
   simp only [isoClasses, Finset.mem_image, Finset.mem_univ, true_and,
     ConnectedIsoClass.mk_surjective.exists, ConnectedIsoClass.orbitFinset_mk]
 
+/-- Every connected triple lies in exactly one of the listed relabeling orbits: the members of
+`TauCeti.isoClasses n` partition the connected triples of degree `n`. -/
+theorem existsUnique_mem_isoClasses (t : ConnectedTriple n) :
+    ∃! s, s ∈ isoClasses n ∧ t ∈ s := by
+  refine ⟨(ConnectedIsoClass.mk t).orbitFinset,
+    ⟨Finset.mem_image_of_mem _ (Finset.mem_univ _), ConnectedIsoClass.mem_orbitFinset.2 rfl⟩,
+    fun s ⟨hs, ht⟩ => ?_⟩
+  obtain ⟨c, -, rfl⟩ := Finset.mem_image.1 hs
+  rw [ConnectedIsoClass.mem_orbitFinset.1 ht]
+
+/-- The finset of isomorphism classes of degree `n` has the cardinality of the type
+`TauCeti.ConnectedIsoClass n`. -/
 theorem card_isoClasses : (isoClasses n).card = Fintype.card (ConnectedIsoClass n) := by
   rw [isoClasses, Finset.card_image_of_injective _ ConnectedIsoClass.orbitFinset_injective,
     Finset.card_univ]

@@ -32,13 +32,6 @@ quotient.
   finset of a class consists of the connected triples of that class, and is the class's orbit
   `MulAction.orbitRel.Quotient.orbit`.
 * `TauCeti.ConnectedIsoClass.orbitFinset_injective`: distinct classes have distinct finsets.
-
-## Implementation notes
-
-`TauCeti.ConnectedIsoClass`, `TauCeti.ConnectedIsoClass.mk` and
-`TauCeti.ConnectedIsoClass.orbitFinset` are `@[expose]`d so that kernel computations in
-importing modules, such as the class counts of
-`TauCeti.Combinatorics.PermutationTriple.Enumeration`, can reduce through them.
 -/
 
 open Equiv MulAction
@@ -136,18 +129,15 @@ theorem mem_orbitFinset {t : ConnectedTriple n} {c : ConnectedIsoClass n} :
 theorem coe_orbitFinset (c : ConnectedIsoClass n) :
     (c.orbitFinset : Set (ConnectedTriple n)) = MulAction.orbitRel.Quotient.orbit c := by
   obtain ⟨t, rfl⟩ := mk_surjective c
-  change (((Finset.univ : Finset (Perm (Fin n))).image (· • t) : Finset (ConnectedTriple n)) :
-    Set (ConnectedTriple n)) = orbit (Perm (Fin n)) t
+  rw [orbitFinset_mk, mk, MulAction.orbitRel.Quotient.orbit_mk]
   ext u
   simp [MulAction.mem_orbit_iff]
 
+/-- Distinct isomorphism classes have distinct finsets of connected triples. -/
 theorem orbitFinset_injective :
-    Function.Injective (orbitFinset : ConnectedIsoClass n → Finset (ConnectedTriple n)) := by
-  intro c c' h
-  obtain ⟨t, rfl⟩ := mk_surjective c
-  have ht : t ∈ (mk t).orbitFinset := mem_orbitFinset.2 rfl
-  rw [h, mem_orbitFinset] at ht
-  exact ht
+    Function.Injective (orbitFinset : ConnectedIsoClass n → Finset (ConnectedTriple n)) :=
+  fun c c' h => MulAction.orbitRel.Quotient.orbit_injective (by rw [← coe_orbitFinset, h,
+    coe_orbitFinset])
 
 end ConnectedIsoClass
 

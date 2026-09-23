@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Combinatorics.PermutationTriple.Basic
-public import TauCeti.GroupTheory.GroupAction.OrbitFinset
+public import TauCeti.GroupTheory.GroupAction.Orbit.Finset
 
 /-!
 # Deciding connectedness of a permutation triple
@@ -52,8 +52,6 @@ generating set of `TauCeti.PermutationTriple.monodromyGroup`, by `Finset.coe_pai
 @[expose] def generators : Finset (Perm (Fin n)) :=
   {t.σ0, t.σ1}
 
-theorem generators_def : t.generators = {t.σ0, t.σ1} := (rfl)
-
 @[simp]
 theorem coe_generators : (t.generators : Set (Perm (Fin n))) = {t.σ0, t.σ1} :=
   Finset.coe_pair
@@ -68,9 +66,6 @@ theorem closure_generators_eq_monodromyGroup :
 generating permutations, computed by `Finset.orbitFinset`. -/
 @[expose] def monodromyOrbitFinset (i : Fin n) : Finset (Fin n) :=
   t.generators.orbitFinset i
-
-theorem monodromyOrbitFinset_def (i : Fin n) :
-    t.monodromyOrbitFinset i = t.generators.orbitFinset i := (rfl)
 
 /-- The computed monodromy orbit of a sheet is its orbit under the monodromy group. -/
 @[simp]
@@ -102,8 +97,6 @@ instance : Decidable t.IsConnected :=
 left multiplication by the two generating permutations, computed by `Finset.closureFinset`. -/
 @[expose] def monodromyFinset : Finset (Perm (Fin n)) :=
   t.generators.closureFinset
-
-theorem monodromyFinset_def : t.monodromyFinset = t.generators.closureFinset := (rfl)
 
 @[simp]
 theorem mem_monodromyFinset {g : Perm (Fin n)} : g ∈ t.monodromyFinset ↔ g ∈ t.monodromyGroup := by
