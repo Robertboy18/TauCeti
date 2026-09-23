@@ -53,10 +53,8 @@ that convention.
 * B. Keller, *Deriving DG categories*, Section 1.
 * B. Keller, *Introduction to A-infinity algebras and modules*, Section 3.1, for the sign
   conventions and the comparison sign between the two factor orders.
-* `TauCeti/Algebra/Homology/LinearHomComplex/Composition.lean` and
-  `TauCeti/Algebra/Homology/LinearHomComplex/Enrichment.lean`: the chain-map, associativity and
-  unit proofs for the enriched composition below adapt the proof plan of the `R`-linear Hom
-  complex enrichment in those files.
+* `TauCeti/Algebra/Homology/LinearHomComplex/Composition.lean`.
+* `TauCeti/Algebra/Homology/LinearHomComplex/Enrichment.lean`.
 -/
 
 public section
@@ -102,7 +100,7 @@ namespace DGCategoryData
 
 variable {R : Type v} [CommRing R] {C : Type u} (D : DGCategoryData R C)
 
-/-- The identity is a cycle: the Leibniz rule for `id ∘ id` reads `d id = d id + d id`. -/
+/-- The identity is a cycle. -/
 @[simp]
 theorem d_id (X : C) : ((D.hom X X).d 0 1).hom (D.id X) = 0 := by
   have key := D.d_comp (zero_add 0) (D.id X) (D.id X)
@@ -294,12 +292,14 @@ theorem dgHomComplex_toDGCategory (X Y : C) :
   (rfl)
 
 /-- The enriched identity of the constructed category is the given one. -/
+@[simp]
 theorem eId_toDGCategory (X : C) :
     letI := D.toDGCategory
     eId (CochainComplex (ModuleCat.{v} R) ℤ) X = D.enrichedId X :=
   (rfl)
 
 /-- The enriched composition of the constructed category is the given one. -/
+@[simp]
 theorem eComp_toDGCategory (X Y Z : C) :
     letI := D.toDGCategory
     eComp (CochainComplex (ModuleCat.{v} R) ℤ) X Y Z = D.enrichedComp X Y Z :=
@@ -484,6 +484,7 @@ variable {R : Type v} [CommRing R] {C : Type u}
 
 /-- The enriched identity of a differential graded category is the enriched identity of its
 explicit data. -/
+@[simp]
 theorem enrichedId_dgCategoryData [DGCategory R C] (X : C) :
     (dgCategoryData R C).enrichedId X = eId (CochainComplex (ModuleCat.{v} R) ℤ) X := by
   apply from_single_hom_ext
@@ -498,6 +499,7 @@ theorem enrichedId_dgCategoryData [DGCategory R C] (X : C) :
 
 /-- The enriched composition of a differential graded category is the enriched composition of its
 explicit data. -/
+@[simp]
 theorem enrichedComp_dgCategoryData [DGCategory R C] (X Y Z : C) :
     (dgCategoryData R C).enrichedComp X Y Z = eComp (CochainComplex (ModuleCat.{v} R) ℤ) X Y Z := by
   ext n : 1
