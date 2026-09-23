@@ -44,7 +44,7 @@ variable [∀ i, Group (G i)]
 /-- The diagonal homomorphism into a restricted product induced by a family of homomorphisms
 whose values are eventually in the reference subgroups. The eventual-integrality evidence `h` is
 an argument, not a consequence of the construction. -/
-def rationalDiagonal {Γ : Type w} [Group Γ] (φ : ∀ i, Γ →* G i)
+def rationalDiagonal {Γ : Type w} [MulOneClass Γ] (φ : ∀ i, Γ →* G i)
     (U : ∀ i, Subgroup (G i))
     (h : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U i) :
     Γ →* Πʳ i, [G i, (U i : Set (G i))] where
@@ -58,7 +58,7 @@ def rationalDiagonal {Γ : Type w} [Group Γ] (φ : ∀ i, Γ →* G i)
 
 /-- The `i`-th coordinate of the diagonal at `γ` is `φ i γ`. -/
 @[simp]
-theorem rationalDiagonal_apply {Γ : Type w} [Group Γ] (φ : ∀ i, Γ →* G i)
+theorem rationalDiagonal_apply {Γ : Type w} [MulOneClass Γ] (φ : ∀ i, Γ →* G i)
     (U : ∀ i, Subgroup (G i))
     (h : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U i) (γ : Γ) (i : ι) :
     rationalDiagonal φ U h γ i = φ i γ := by
@@ -82,40 +82,41 @@ theorem injective_rationalDiagonal_iff {Γ : Type w} [Group Γ] (φ : ∀ i, Γ 
   rw [← MonoidHom.ker_eq_bot_iff, ker_rationalDiagonal]
 
 /-- The diagonal is injective as soon as one coordinate map is. -/
-theorem injective_rationalDiagonal {Γ : Type w} [Group Γ] (φ : ∀ i, Γ →* G i)
+theorem injective_rationalDiagonal {Γ : Type w} [MulOneClass Γ] (φ : ∀ i, Γ →* G i)
     (U : ∀ i, Subgroup (G i))
     (h : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U i)
     (hsep : ∃ i, Function.Injective (φ i)) :
     Function.Injective (rationalDiagonal φ U h) := by
   obtain ⟨i, hi⟩ := hsep
-  rw [injective_rationalDiagonal_iff]
-  exact le_bot_iff.mp ((iInf_le _ i).trans ((MonoidHom.ker_eq_bot_iff _).mpr hi).le)
+  intro a b hab
+  exact hi (by simpa using congrArg (fun x ↦ x i) hab)
 
 /-- A componentwise map applied after the diagonal is the diagonal of the composed coordinate
-maps. -/
-theorem restrictedProductMap_comp_rationalDiagonal {Γ : Type w} [Group Γ]
+maps, whose eventual integrality follows from that of the original coordinates. -/
+theorem restrictedProductMap_comp_rationalDiagonal {Γ : Type w} [MulOneClass Γ]
     {H : ι → Type z} [∀ i, Group (H i)]
     (φ : ∀ i, Γ →* G i) (ψ : ∀ i, G i →* H i)
     (U : ∀ i, Subgroup (G i)) (V : ∀ i, Subgroup (H i))
     (hU : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U i)
-    (hV : ∀ γ : Γ, ∀ᶠ i in cofinite, ψ i (φ i γ) ∈ V i)
     (hψ : ∀ᶠ i in cofinite, Set.MapsTo (ψ i) (U i) (V i)) :
     (restrictedProductMap U V ψ hψ).comp (rationalDiagonal φ U hU) =
-      rationalDiagonal (fun i ↦ (ψ i).comp (φ i)) V hV := by
+      rationalDiagonal (fun i ↦ (ψ i).comp (φ i)) V
+        (fun γ ↦ by filter_upwards [hU γ, hψ] with i hi hψi using hψi hi) := by
   ext γ i
   simp
 
 /-- A change of factors applied after the diagonal is the diagonal of the transported coordinate
-maps. The change of reference family is the case in which every `ψ i` is the identity. -/
-theorem restrictedProductCongrRight_comp_rationalDiagonal {Γ : Type w} [Group Γ]
+maps, whose eventual integrality follows from that of the original coordinates. The change of
+reference family is the case in which every `ψ i` is the identity. -/
+theorem restrictedProductCongrRight_comp_rationalDiagonal {Γ : Type w} [MulOneClass Γ]
     {H : ι → Type z} [∀ i, Group (H i)]
     (φ : ∀ i, Γ →* G i) (ψ : ∀ i, G i ≃* H i)
     (U : ∀ i, Subgroup (G i)) (V : ∀ i, Subgroup (H i))
     (hU : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U i)
-    (hV : ∀ γ : Γ, ∀ᶠ i in cofinite, ψ i (φ i γ) ∈ V i)
     (hψ : ∀ᶠ i in cofinite, Set.BijOn (ψ i) (U i) (V i)) :
     (restrictedProductCongrRight U V ψ hψ).toMonoidHom.comp (rationalDiagonal φ U hU) =
-      rationalDiagonal (fun i ↦ (ψ i).toMonoidHom.comp (φ i)) V hV := by
+      rationalDiagonal (fun i ↦ (ψ i).toMonoidHom.comp (φ i)) V
+        (fun γ ↦ by filter_upwards [hU γ, hψ] with i hi hψi using hψi.mapsTo hi) := by
   ext γ i
   simp
 
@@ -123,7 +124,7 @@ theorem restrictedProductCongrRight_comp_rationalDiagonal {Γ : Type w} [Group �
 set of indices at which every `γ` is integral. Pointwise eventual integrality alone builds the
 map but is not enough for continuity, because the restricted-product topology is finer than the
 topology induced from the full product. -/
-theorem continuous_rationalDiagonal {Γ : Type w} [Group Γ] [TopologicalSpace Γ]
+theorem continuous_rationalDiagonal {Γ : Type w} [MulOneClass Γ] [TopologicalSpace Γ]
     [∀ i, TopologicalSpace (G i)]
     (φ : ∀ i, Γ →* G i) (U : ∀ i, Subgroup (G i))
     (h : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U i)
