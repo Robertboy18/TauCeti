@@ -96,9 +96,8 @@ functionals of an extending basis lie in the dual semigroup and determine a toru
 theorem complexTorus_smul_default_injective :
     Function.Injective fun T : ComplexTorus N ↦
       T • (default : AffineSemigroupComplexPoint (dualSemigroup hi σ)) := by
-  have : Finite (ToricRay σ ⊕ ι) := Module.Finite.finite_basis b
   intro T T' h
-  refine (complexTorusCoordinatesOfBasis b).injective (funext fun c ↦ ?_)
+  refine b.complexTorusCoordinates.injective (funext fun c ↦ ?_)
   have h' := congrArg (coneChartEquiv hi hσ hb) h
   rcases c with ρ | j
   · have hρ := congrArg (fun z : (ToricRay σ → ℂ) × (ι → ℂˣ) ↦ z.1 ρ) h'
@@ -114,11 +113,10 @@ theorem mem_orbit_complexTorus_default_iff
     x ∈ MulAction.orbit (ComplexTorus N)
         (default : AffineSemigroupComplexPoint (dualSemigroup hi σ)) ↔
       ∀ ρ, (coneChartEquiv hi hσ hb x).1 ρ ≠ 0 := by
-  have : Finite (ToricRay σ ⊕ ι) := Module.Finite.finite_basis b
   refine ⟨?_, fun h ↦ ?_⟩
   · rintro ⟨T, rfl⟩ ρ
     simp
-  · refine ⟨(complexTorusCoordinatesOfBasis b).symm
+  · refine ⟨b.complexTorusCoordinates.symm
       (Sum.elim (fun ρ ↦ Units.mk0 _ (h ρ)) (coneChartEquiv hi hσ hb x).2),
       (coneChartEquiv hi hσ hb).injective ?_⟩
     exact Prod.ext (funext fun ρ ↦ by simp) (funext fun j ↦ Units.ext (by simp))

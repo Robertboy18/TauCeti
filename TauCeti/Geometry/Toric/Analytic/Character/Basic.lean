@@ -36,7 +36,7 @@ torus points.  Given an identification of the character lattice with a free abel
 * `TauCeti.Toric.exists_characterEvaluation_ne`: integral characters separate torus points.
 * `TauCeti.Toric.complexTorusCoordinates`: coordinates supplied by a free presentation of the
   character lattice.
-* `TauCeti.Toric.complexTorusCoordinatesOfBasis`: coordinates supplied by an integral basis of the
+* `Module.Basis.complexTorusCoordinates`: coordinates supplied by an integral basis of the
   lattice, through its dual basis.
 
 ## References
@@ -163,22 +163,33 @@ theorem complexTorusCoordinates_apply {σ : Type*} (e : IntegralCharacter N ≃+
     complexTorusCoordinates e x i = x (e.symm (Finsupp.single i 1)) :=
   by simp [complexTorusCoordinates, AddChar.toMonoidHomMulEquiv]
 
+end TauCeti.Toric
+
+namespace Module.Basis
+
+open TauCeti.Toric
+
+variable {N κ : Type*} [AddCommGroup N] [Module.Free ℤ N] [Module.Finite ℤ N]
+
 /-- The coordinates on the coordinate-free complex torus supplied by an integral basis of `N`: a
 torus point corresponds to its values on the dual basis characters, the coordinate functionals of
 the basis. -/
-noncomputable def complexTorusCoordinatesOfBasis {κ : Type*} [Finite κ]
-    (b : Module.Basis κ ℤ N) : ComplexTorus N ≃* (κ → ℂˣ) :=
-  open scoped Classical in
-  complexTorusCoordinates ((addMonoidHomLequivInt ℤ).trans b.dualBasis.repr).toAddEquiv
+noncomputable def complexTorusCoordinates (b : Basis κ ℤ N) :
+    ComplexTorus N ≃* (κ → ℂˣ) := by
+  classical
+  letI : Finite κ := Module.Finite.finite_basis b
+  exact TauCeti.Toric.complexTorusCoordinates
+    ((addMonoidHomLequivInt ℤ).trans b.dualBasis.repr).toAddEquiv
 
 /-- The coordinate of a torus point indexed by a basis vector is its value on the coordinate
 functional of that vector. -/
 @[simp]
-theorem complexTorusCoordinatesOfBasis_apply {κ : Type*} [Finite κ] (b : Module.Basis κ ℤ N)
+theorem complexTorusCoordinates_apply (b : Basis κ ℤ N)
     (x : ComplexTorus N) (c : κ) :
-    complexTorusCoordinatesOfBasis b x c = x (b.coord c).toAddMonoidHom := by
+    b.complexTorusCoordinates x c = x (b.coord c).toAddMonoidHom := by
   classical
-  rw [complexTorusCoordinatesOfBasis, complexTorusCoordinates_apply]
+  have : Finite κ := Module.Finite.finite_basis b
+  rw [complexTorusCoordinates, TauCeti.Toric.complexTorusCoordinates_apply]
   congr 1
   refine (LinearEquiv.symm_apply_eq ((addMonoidHomLequivInt ℤ).trans b.dualBasis.repr)).2 ?_
   ext j
@@ -187,9 +198,9 @@ theorem complexTorusCoordinatesOfBasis_apply {κ : Type*} [Finite κ] (b : Modul
 /-- The torus point with prescribed basis coordinates takes the prescribed value on each coordinate
 functional. -/
 @[simp]
-theorem complexTorusCoordinatesOfBasis_symm_apply {κ : Type*} [Finite κ] (b : Module.Basis κ ℤ N)
+theorem complexTorusCoordinates_symm_apply (b : Basis κ ℤ N)
     (z : κ → ℂˣ) (c : κ) :
-    (complexTorusCoordinatesOfBasis b).symm z (b.coord c).toAddMonoidHom = z c := by
-  rw [← complexTorusCoordinatesOfBasis_apply, MulEquiv.apply_symm_apply]
+    b.complexTorusCoordinates.symm z (b.coord c).toAddMonoidHom = z c := by
+  rw [← complexTorusCoordinates_apply, MulEquiv.apply_symm_apply]
 
-end TauCeti.Toric
+end Module.Basis
