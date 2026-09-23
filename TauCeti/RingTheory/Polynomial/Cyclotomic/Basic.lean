@@ -12,6 +12,15 @@ public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
 
 `Polynomial.cyclotomic_five` gives the fifth cyclotomic polynomial as the finite geometric
 sum `X⁴ + X³ + X² + X + 1` over any ring.
+
+Mathlib defines `Φ₅` abstractly, as a product over primitive roots of unity, and only unfolds it
+to a sum through `Polynomial.cyclotomic_prime`. Recording the expanded form once, as a `simp`
+lemma over an arbitrary ring, lets explicit factorisation and Galois-group computations work with
+the concrete coefficients directly. It is used for the factorisation of `Φ₅` over a field
+containing `√5` in `TauCeti.RingTheory.Polynomial.Cyclotomic.SqrtFive`, and to identify
+`X⁴ + X³ + X² + X + 1` with `Φ₅` in the worked quartic examples in
+`TauCeti.FieldTheory.GaloisGroups.Quartic.Examples`, where its Galois group over `ℚ` is
+computed as `(ℤ/5)ˣ`.
 -/
 
 public section

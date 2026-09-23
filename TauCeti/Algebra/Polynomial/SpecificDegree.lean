@@ -209,15 +209,17 @@ theorem Splits.exists_isRoot_ne {g : F[X]} (hsplit : g.Splits) (hsep : g.Separab
 
 section CommRing
 
-variable {R : Type*} [CommRing R] [Nontrivial R]
+variable {R : Type*} [CommRing R]
 
 /-- **Division of a depressed quartic by a monic quadratic.** The monic quadratic `X² + aX + b`
 divides the depressed quartic `X⁴ + pX² + qX + r` exactly when the linear remainder of the
 division vanishes, that is when `q = a³ - 2ab + ap` and `r = a²b - b² + bp`. The quotient is
-`X² - aX + (a² - b + p)`. -/
+`X² - aX + (a² - b + p)`. Over the zero ring both sides hold trivially. -/
 theorem X_sq_add_C_mul_X_add_C_dvd_X_pow_four_add_iff (a b p q r : R) :
     X ^ 2 + C a * X + C b ∣ X ^ 4 + C p * X ^ 2 + C q * X + C r ↔
       q = a ^ 3 - 2 * a * b + a * p ∧ r = a ^ 2 * b - b ^ 2 + b * p := by
+  rcases subsingleton_or_nontrivial R with _ | _
+  · exact iff_of_true ⟨1, Subsingleton.elim _ _⟩ ⟨Subsingleton.elim _ _, Subsingleton.elim _ _⟩
   have hdiv : (X ^ 4 + C p * X ^ 2 + C q * X + C r : R[X]) =
       (X ^ 2 + C a * X + C b) * (X ^ 2 - C a * X + C (a ^ 2 - b + p)) +
         (C (q - a ^ 3 + 2 * a * b - a * p) * X + C (r - a ^ 2 * b + b ^ 2 - b * p)) := by

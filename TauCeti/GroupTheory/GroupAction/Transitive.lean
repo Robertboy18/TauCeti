@@ -33,7 +33,7 @@ assumed.
   `TauCeti.quotientStabilizerEquiv_smul`: its equivariance.
 * `TauCeti.natCard_dvd_natCard_of_isPretransitive`: the number of points of a nonempty set acted
   on transitively divides the order of the group.
-* `TauCeti.stabilizer_eq_bot_of_natCard_eq`, `TauCeti.eq_one_of_smul_eq_self_of_natCard_eq`: a
+* `TauCeti.stabilizer_eq_bot_of_natCard_eq`, `TauCeti.eq_one_of_natCard_eq_of_smul_eq_self`: a
   transitive action of a group with as many elements as the finite set acted on is regular, so
   only the identity fixes a point.
 * `TauCeti.isPretransitive_prod_left`: a product with a subsingleton stays pretransitive.
@@ -118,7 +118,7 @@ theorem stabilizer_eq_bot_of_natCard_eq [Finite X] (h : Nat.card G = Nat.card X)
 variable {G} in
 /-- In a transitive action of a group with as many elements as the finite set acted on, an
 element fixing a point is the identity. -/
-theorem eq_one_of_smul_eq_self_of_natCard_eq [Finite X] (h : Nat.card G = Nat.card X) {g : G}
+theorem eq_one_of_natCard_eq_of_smul_eq_self [Finite X] (h : Nat.card G = Nat.card X) {g : G}
     {x : X} (hgx : g • x = x) : g = 1 :=
   Subgroup.mem_bot.mp (stabilizer_eq_bot_of_natCard_eq h x ▸ mem_stabilizer_iff.mpr hgx)
 

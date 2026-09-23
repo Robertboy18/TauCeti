@@ -404,7 +404,7 @@ private theorem exists_transitiveGroupLabel_four_of_natCard_eq_four (G : Subgrou
       intro g hg hg1 x hx
       have hfix : (⟨g, hg⟩ : G) • x = x := hx
       exact hg1 (congrArg Subtype.val
-        (eq_one_of_smul_eq_self_of_natCard_eq (by simpa using hG) hfix))
+        (eq_one_of_natCard_eq_of_smul_eq_self (by simpa using hG) hfix))
     -- A fixed-point-free involution of four points is a double transposition.
     have hklein : ∀ σ : Perm (Fin 4), σ ^ 2 = 1 → (∀ x, σ x ≠ x) →
         sign σ = 1 ∧ σ.cycleType = {2, 2} := by

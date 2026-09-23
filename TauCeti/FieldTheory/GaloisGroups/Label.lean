@@ -180,7 +180,7 @@ theorem HasGaloisLabel.eq_one_of_smul_eq_self (h : HasGaloisLabel f j)
     [Fact ((f.map (algebraMap F E)).Splits)] {σ : f.Gal} {x : f.rootSet E} (hx : σ • x = x) :
     σ = 1 := by
   have := Gal.galAction_isPretransitive f E h.irreducible
-  refine eq_one_of_smul_eq_self_of_natCard_eq ?_ hx
+  refine eq_one_of_natCard_eq_of_smul_eq_self ?_ hx
   rw [h.natCard_gal, hreg, Nat.card_eq_fintype_card,
     card_rootSet_eq_natDegree h.separable Fact.out, h.natDegree_eq]
 
