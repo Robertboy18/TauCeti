@@ -36,6 +36,8 @@ differential graded one, and its homotopy category is the `H⁰` category
   differential graded right modules as explicit Hom-complex data.
 * `TauCeti.DGRightModuleCat.instDGCategory`: the differential graded category of differential
   graded right modules.
+* `TauCeti.DGRightModuleCat.dgHomLinearEquivCochains`: the explicit identification of homogeneous
+  morphisms with right-module cochains.
 * `TauCeti.DGRightModuleCat.homLinearEquivDGCycles`: morphisms of differential graded right
   modules are the closed degree-zero morphisms of the differential graded category.
 
@@ -56,13 +58,13 @@ enrichment fixes the universe of the ground ring, so the differential graded str
 composition and identity cochains of `TauCeti/Algebra/Homology/DG/Module/Right/Composition.lean`
 are stated in that generality as well.
 
-The simp normal form of the enriched operations is the data layer: the simp lemmas
-`TauCeti.DGCategoryData.dgHomComplex_toDGCategory`, `dgDifferential_toDGCategory`,
-`dgId_toDGCategory` and `dgComp_toDGCategory` rewrite `dgHomComplex`, `dgDifferential`, `dgId`
-and `dgComp` to the fields of `homComplexData`, which `homComplexData_hom`, `homComplexData_comp`
-and `homComplexData_id` evaluate.  The bridge lemmas `dgHomComplex_eq`, `dgDifferential_eq`,
-`dgId_eq` and `dgComp_eq` state the resulting identifications in one step for `rw`; they are not
-simp lemmas, because the generic lemmas already rewrite their left-hand sides.
+The Hom-complex construction is accessed through `homComplexData_hom` and `dgHomComplex_eq`.
+The linear equivalence `dgHomLinearEquivCochains` transports homogeneous morphisms across this
+equality. The operation lemmas express the differential, identity and composition after that
+transport, so their statements do not depend on unfolding the body of `homComplexData`.
+The generic `DGCategoryData` simp lemmas reduce enriched operations to the data layer;
+`homComplexData_comp` and `homComplexData_id` evaluate the transported data. The `dg*_eq`
+bridge lemmas give the resulting formulas directly for `rw`.
 
 ## References
 
@@ -88,9 +90,7 @@ namespace DGRightModuleCat
 /-- The explicit Hom-complex data of the differential graded category of right modules over `h`:
 the Hom complex from `M` to `N` is `TauCeti.dgRightModuleHomComplex`, composition of homogeneous
 cochains is composition of the underlying maps, in Keller's order, and the identity is the
-identity cochain.  The body is exposed so that the homogeneous morphisms of the resulting
-differential graded category remain definitionally the homogeneous cochains. -/
-@[expose]
+identity cochain. -/
 noncomputable def homComplexData : DGCategoryData R (DGRightModuleCat.{u, u, u} h) :=
   DGCategoryData.ofKeller
     (fun M N => dgRightModuleHomComplex M.isDGRightModule N.isDGRightModule)
@@ -120,22 +120,6 @@ theorem homComplexData_hom :
       dgRightModuleHomComplex M.isDGRightModule N.isDGRightModule :=
   (rfl)
 
-/-- Composition in the explicit Hom-complex data is composition of cochains in reversed order,
-with the Koszul sign converting Keller's factor order into Mathlib's. -/
-@[simp]
-theorem homComplexData_comp {p q n : ℤ} (hpq : p + q = n)
-    (f : dgRightModuleCochains (R := R) (A := A) (ℳ := M.grading) (ℳN := N.grading) p)
-    (g : dgRightModuleCochains (R := R) (A := A) (ℳ := N.grading) (ℳN := P.grading) q) :
-    (homComplexData (h := h)).comp p q n hpq f g =
-      (p * q).negOnePow • dgRightModuleCochains.comp g f (by omega) :=
-  (rfl)
-
-/-- The identity of the explicit data is the identity cochain. -/
-@[simp]
-theorem homComplexData_id :
-    (homComplexData (h := h)).id M = dgRightModuleCochains.id (R := R) (A := A) (ℳ := M.grading) :=
-  (rfl)
-
 /-! ### The differential graded category -/
 
 /-- The differential graded category of differential graded right modules over `h`. -/
@@ -148,40 +132,87 @@ theorem dgHomComplex_eq :
     dgHomComplex R M N = dgRightModuleHomComplex M.isDGRightModule N.isDGRightModule :=
   (rfl)
 
-/-- The differential of the differential graded category of right modules is the graded
-commutator with the module differentials. -/
-theorem dgDifferential_eq (n : ℤ) (f : DGHom R n M N) :
-    dgDifferential R n f =
-      dgRightModuleCochains.differential (hM := M.isDGRightModule) (hN := N.isDGRightModule) n f :=
-  dgRightModuleHomComplex_d_apply M.isDGRightModule N.isDGRightModule n f
+/-- Homogeneous morphisms of the differential graded category, identified with right-module
+cochains through the equality of their Hom complexes. -/
+noncomputable def dgHomLinearEquivCochains (n : ℤ) :
+    DGHom R n M N ≃ₗ[R]
+      dgRightModuleCochains (R := R) (A := A) (ℳ := M.grading) (ℳN := N.grading) n :=
+  (eqToIso (congrArg (fun K : CochainComplex (ModuleCat R) ℤ => K.X n)
+    (dgHomComplex_eq M N))).toLinearEquiv
 
-/-- The identity of the differential graded category of right modules is the identity cochain. -/
-theorem dgId_eq : dgId R M = dgRightModuleCochains.id (R := R) (A := A) (ℳ := M.grading) :=
-  DGCategoryData.dgId_toDGCategory (homComplexData (h := h)) M
+/-- Transported composition in the explicit Hom-complex data is composition of cochains in
+reversed order, with the Koszul sign converting Keller's factor order into Mathlib's. -/
+@[simp]
+theorem homComplexData_comp {p q n : ℤ} (hpq : p + q = n)
+    (f : DGHom R p M N) (g : DGHom R q N P) :
+    dgHomLinearEquivCochains M P n ((homComplexData (h := h)).comp p q n hpq f g) =
+      (p * q).negOnePow • dgRightModuleCochains.comp
+        (dgHomLinearEquivCochains N P q g) (dgHomLinearEquivCochains M N p f) (by omega) :=
+  (rfl)
+
+/-- The transported identity of the explicit data is the identity cochain. -/
+@[simp]
+theorem homComplexData_id :
+    dgHomLinearEquivCochains M M 0 ((homComplexData (h := h)).id M) =
+      dgRightModuleCochains.id (R := R) (A := A) (ℳ := M.grading) :=
+  (rfl)
+
+/-- The differential of the differential graded category of right modules is the graded
+commutator with the module differentials, after transport to cochains. -/
+theorem dgDifferential_eq (n : ℤ) (f : DGHom R n M N) :
+    dgHomLinearEquivCochains M N (n + 1) (dgDifferential R n f) =
+      dgRightModuleCochains.differential (hM := M.isDGRightModule) (hN := N.isDGRightModule) n
+        (dgHomLinearEquivCochains M N n f) :=
+  dgRightModuleHomComplex_d_apply M.isDGRightModule N.isDGRightModule n
+    (dgHomLinearEquivCochains M N n f)
+
+/-- The identity of the differential graded category of right modules transports to the identity
+cochain. -/
+theorem dgId_eq :
+    dgHomLinearEquivCochains M M 0 (dgId R M) =
+      dgRightModuleCochains.id (R := R) (A := A) (ℳ := M.grading) :=
+  (congrArg (dgHomLinearEquivCochains M M 0)
+    (DGCategoryData.dgId_toDGCategory (homComplexData (h := h)) M)).trans (homComplexData_id M)
 
 /-- Composition in the differential graded category of right modules is composition of cochains,
 carrying the Koszul sign which converts Mathlib's enriched factor order into composition of the
-underlying maps. -/
+underlying maps, after transport to cochains. -/
 theorem dgComp_eq {p q n : ℤ} (f : DGHom R p M N) (g : DGHom R q N P) (hpq : p + q = n) :
-    dgComp R f g hpq = (p * q).negOnePow • dgRightModuleCochains.comp g f (by omega) :=
-  DGCategoryData.dgComp_toDGCategory (homComplexData (h := h)) f g hpq
+    dgHomLinearEquivCochains M P n (dgComp R f g hpq) =
+      (p * q).negOnePow • dgRightModuleCochains.comp
+        (dgHomLinearEquivCochains N P q g) (dgHomLinearEquivCochains M N p f) (by omega) :=
+  (congrArg (dgHomLinearEquivCochains M P n)
+    (DGCategoryData.dgComp_toDGCategory (homComplexData (h := h)) f g hpq)).trans
+      (homComplexData_comp M N P hpq f g)
 
 /-! ### Closed degree-zero morphisms -/
 
-/-- The closed degree-zero morphisms of the differential graded category of right modules are the
-zero-cocycles of the Hom complex. -/
+/-- The closed degree-zero morphisms are the preimage of the zero-cocycles of the Hom complex
+under the explicit identification with cochains. -/
 theorem dgCycles_eq :
-    dgCycles R M N = LinearMap.ker
-      (dgRightModuleCochains.differential (hM := M.isDGRightModule) (hN := N.isDGRightModule) 0) :=
-  Submodule.ext fun f => by
-    simp only [mem_dgCycles, dgDifferential_eq]
-    exact (LinearMap.mem_ker (f := dgRightModuleCochains.differential (hM := M.isDGRightModule)
-      (hN := N.isDGRightModule) 0)).symm
+    dgCycles R M N = Submodule.comap (dgHomLinearEquivCochains M N 0).toLinearMap
+      (LinearMap.ker (dgRightModuleCochains.differential
+        (hM := M.isDGRightModule) (hN := N.isDGRightModule) 0)) := by
+  ext f
+  rw [mem_dgCycles, Submodule.mem_comap, LinearMap.mem_ker]
+  change dgDifferential R 0 f = 0 ↔
+    dgRightModuleCochains.differential (hM := M.isDGRightModule) (hN := N.isDGRightModule) 0
+      (dgHomLinearEquivCochains M N 0 f) = 0
+  rw [← dgDifferential_eq]
+  constructor
+  · intro hf
+    rw [hf, map_zero]
+  · intro hf
+    apply (dgHomLinearEquivCochains M N (0 + 1)).injective
+    simpa only [map_zero] using hf
 
 /-- **Morphisms of differential graded right modules are the closed degree-zero morphisms** of the
 differential graded category of right modules. -/
 noncomputable def homLinearEquivDGCycles : (M ⟶ N) ≃ₗ[R] dgCycles R M N :=
-  (dgRightModuleHomLinearEquivZeroCocycles M.isDGRightModule N.isDGRightModule).trans
+  ((dgRightModuleHomLinearEquivZeroCocycles M.isDGRightModule N.isDGRightModule).trans
+    ((dgHomLinearEquivCochains M N 0).ofSubmodule' (LinearMap.ker
+      (dgRightModuleCochains.differential (hM := M.isDGRightModule)
+        (hN := N.isDGRightModule) 0))).symm).trans
     (LinearEquiv.ofEq _ _ (dgCycles_eq M N).symm)
 
 variable {M N P}
@@ -190,23 +221,25 @@ variable {M N P}
 has the same underlying map. -/
 @[simp]
 theorem coe_homLinearEquivDGCycles_apply (f : M ⟶ N) (x : M) :
-    (((homLinearEquivDGCycles M N f : DGHom R 0 M N) :
-      dgRightModuleCochains (R := R) (A := A) (ℳ := M.grading) (ℳN := N.grading) 0).1 x) = f x :=
-  dgRightModuleHomLinearEquivZeroCocycles_apply M.isDGRightModule N.isDGRightModule f x
+    (dgHomLinearEquivCochains M N 0 (homLinearEquivDGCycles M N f)).1 x = f x := by
+  simp only [homLinearEquivDGCycles, LinearEquiv.trans_apply, LinearEquiv.coe_ofEq_apply,
+    LinearEquiv.ofSubmodule'_symm_apply, LinearEquiv.apply_symm_apply]
+  exact dgRightModuleHomLinearEquivZeroCocycles_apply M.isDGRightModule N.isDGRightModule f x
 
 /-- The morphism of differential graded right modules attached to a closed degree-zero morphism
 has the same underlying map. -/
 @[simp]
 theorem homLinearEquivDGCycles_symm_apply (f : dgCycles R M N) (x : M) :
     (homLinearEquivDGCycles M N).symm f x =
-      ((f : DGHom R 0 M N) :
-        dgRightModuleCochains (R := R) (A := A) (ℳ := M.grading) (ℳN := N.grading) 0).1 x :=
-  dgRightModuleHomLinearEquivZeroCocycles_symm_apply M.isDGRightModule N.isDGRightModule _ x
+      (dgHomLinearEquivCochains M N 0 f).1 x := by
+  simpa only [LinearEquiv.apply_symm_apply] using
+    (coe_homLinearEquivDGCycles_apply ((homLinearEquivDGCycles M N).symm f) x).symm
 
 /-- The identity morphism corresponds to the identity of the differential graded category. -/
 @[simp]
 theorem homLinearEquivDGCycles_id :
     (homLinearEquivDGCycles M M (𝟙 M) : DGHom R 0 M M) = dgId R M := by
+  apply (dgHomLinearEquivCochains M M 0).injective
   rw [dgId_eq]
   refine Subtype.ext (LinearMap.ext fun x => ?_)
   rw [coe_homLinearEquivDGCycles_apply, id_apply, dgRightModuleCochains.id_apply]
@@ -218,13 +251,11 @@ theorem homLinearEquivDGCycles_comp (f : M ⟶ N) (g : N ⟶ P) :
     homLinearEquivDGCycles M P (f ≫ g) =
       dgCyclesComp R M N P (homLinearEquivDGCycles M N f) (homLinearEquivDGCycles N P g) := by
   apply Subtype.ext
+  apply (dgHomLinearEquivCochains M P 0).injective
   rw [coe_dgCyclesComp, dgCompZero_def, dgComp_eq, mul_zero, Int.negOnePow_zero, one_smul]
   refine Subtype.ext (LinearMap.ext fun x => ?_)
-  rw [coe_homLinearEquivDGCycles_apply, comp_apply]
-  -- The two composed cochains are typed as degree-zero morphisms of the differential graded
-  -- category, so the evaluation lemma for cochain composition is applied as a term.
-  refine ((dgRightModuleCochains.comp_apply _ _ _ x).trans ?_).symm
-  rw [coe_homLinearEquivDGCycles_apply, coe_homLinearEquivDGCycles_apply]
+  rw [coe_homLinearEquivDGCycles_apply, comp_apply, dgRightModuleCochains.comp_apply,
+    coe_homLinearEquivDGCycles_apply, coe_homLinearEquivDGCycles_apply]
 
 end DGRightModuleCat
 
