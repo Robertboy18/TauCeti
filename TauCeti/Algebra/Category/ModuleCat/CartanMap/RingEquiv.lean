@@ -125,37 +125,67 @@ instance : e.finiteProjectiveModulesEquivalence.functor.Additive := by
 @[simp]
 theorem finiteModulesEquivalence_functor_obj_obj (M : FGModuleCat.{u} S) :
     (e.finiteModulesEquivalence.functor.obj M).obj =
-      (ModuleCat.restrictScalars e.toRingHom).obj M.obj :=
-  (rfl)
+      (ModuleCat.restrictScalars e.toRingHom).obj M.obj := by
+  simp only [finiteModulesEquivalence, Equivalence.congrFullSubcategory_functor_eq_lift,
+    lift_obj_obj, Functor.comp_obj, ι_obj,
+    ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor]
 
 @[simp]
 theorem finiteModulesEquivalence_functor_map_hom {M N : FGModuleCat.{u} S} (f : M ⟶ N) :
     (e.finiteModulesEquivalence.functor.map f).hom =
       eqToHom (e.finiteModulesEquivalence_functor_obj_obj M) ≫
         (ModuleCat.restrictScalars e.toRingHom).map f.hom ≫
-        eqToHom (e.finiteModulesEquivalence_functor_obj_obj N).symm :=
-  (rfl)
+        eqToHom (e.finiteModulesEquivalence_functor_obj_obj N).symm := by
+  have h : e.finiteModulesEquivalence.functor ⋙ (ModuleCat.isFG R).ι =
+      (ModuleCat.isFG S).ι ⋙ ModuleCat.restrictScalars e.toRingHom := by
+    simp only [finiteModulesEquivalence, Equivalence.congrFullSubcategory_functor_eq_lift,
+      ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor]
+    apply CategoryTheory.Functor.ext
+    case h_obj =>
+      intro X
+      simp only [Functor.comp_obj, ι_obj_lift_obj]
+    case h_map =>
+      intro X Y g
+      simp only [Functor.comp_map, ι_obj_lift_map, eqToHom_refl,
+        Category.id_comp, Category.comp_id]
+  simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
 
 @[simp]
 theorem finiteModulesEquivalence_inverse_obj_obj (M : FGModuleCat.{u} R) :
     (e.finiteModulesEquivalence.inverse.obj M).obj =
-      (ModuleCat.restrictScalars e.symm.toRingHom).obj M.obj :=
-  (rfl)
+      (ModuleCat.restrictScalars e.symm.toRingHom).obj M.obj := by
+  simp only [finiteModulesEquivalence, Equivalence.congrFullSubcategory_inverse_eq_lift,
+    lift_obj_obj, Functor.comp_obj, ι_obj,
+    ModuleCat.restrictScalarsEquivalenceOfRingEquiv_inverse, toRingHom_eq_coe]
 
 @[simp]
 theorem finiteModulesEquivalence_inverse_map_hom {M N : FGModuleCat.{u} R} (f : M ⟶ N) :
     (e.finiteModulesEquivalence.inverse.map f).hom =
       eqToHom (e.finiteModulesEquivalence_inverse_obj_obj M) ≫
         (ModuleCat.restrictScalars e.symm.toRingHom).map f.hom ≫
-        eqToHom (e.finiteModulesEquivalence_inverse_obj_obj N).symm :=
-  (rfl)
+        eqToHom (e.finiteModulesEquivalence_inverse_obj_obj N).symm := by
+  have h : e.finiteModulesEquivalence.inverse ⋙ (ModuleCat.isFG S).ι =
+      (ModuleCat.isFG R).ι ⋙ ModuleCat.restrictScalars e.symm.toRingHom := by
+    simp only [finiteModulesEquivalence, Equivalence.congrFullSubcategory_inverse_eq_lift,
+      ModuleCat.restrictScalarsEquivalenceOfRingEquiv_inverse, toRingHom_eq_coe]
+    apply CategoryTheory.Functor.ext
+    case h_obj =>
+      intro X
+      simp only [Functor.comp_obj, ι_obj_lift_obj]
+    case h_map =>
+      intro X Y g
+      simp only [Functor.comp_map, ι_obj_lift_map, eqToHom_refl,
+        Category.id_comp, Category.comp_id]
+  simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
 
 @[simp]
 theorem finiteProjectiveModulesEquivalence_functor_obj_obj
     (M : (finiteProjectiveModules S).FullSubcategory) :
     (e.finiteProjectiveModulesEquivalence.functor.obj M).obj =
-      (ModuleCat.restrictScalars e.toRingHom).obj M.obj :=
-  (rfl)
+      (ModuleCat.restrictScalars e.toRingHom).obj M.obj := by
+  simp only [finiteProjectiveModulesEquivalence,
+    Equivalence.congrFullSubcategory_functor_eq_lift, lift_obj_obj, Functor.comp_obj, ι_obj,
+    ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor]
 
 @[simp]
 theorem finiteProjectiveModulesEquivalence_functor_map_hom
@@ -163,15 +193,30 @@ theorem finiteProjectiveModulesEquivalence_functor_map_hom
     (e.finiteProjectiveModulesEquivalence.functor.map f).hom =
       eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj M) ≫
         (ModuleCat.restrictScalars e.toRingHom).map f.hom ≫
-        eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj N).symm :=
-  (rfl)
+        eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj N).symm := by
+  have h : e.finiteProjectiveModulesEquivalence.functor ⋙ (finiteProjectiveModules R).ι =
+      (finiteProjectiveModules S).ι ⋙ ModuleCat.restrictScalars e.toRingHom := by
+    simp only [finiteProjectiveModulesEquivalence,
+      Equivalence.congrFullSubcategory_functor_eq_lift,
+      ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor]
+    apply CategoryTheory.Functor.ext
+    case h_obj =>
+      intro X
+      simp only [Functor.comp_obj, ι_obj_lift_obj]
+    case h_map =>
+      intro X Y g
+      simp only [Functor.comp_map, ι_obj_lift_map, eqToHom_refl,
+        Category.id_comp, Category.comp_id]
+  simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
 
 @[simp]
 theorem finiteProjectiveModulesEquivalence_inverse_obj_obj
     (M : (finiteProjectiveModules R).FullSubcategory) :
     (e.finiteProjectiveModulesEquivalence.inverse.obj M).obj =
-      (ModuleCat.restrictScalars e.symm.toRingHom).obj M.obj :=
-  (rfl)
+      (ModuleCat.restrictScalars e.symm.toRingHom).obj M.obj := by
+  simp only [finiteProjectiveModulesEquivalence,
+    Equivalence.congrFullSubcategory_inverse_eq_lift, lift_obj_obj, Functor.comp_obj, ι_obj,
+    ModuleCat.restrictScalarsEquivalenceOfRingEquiv_inverse, toRingHom_eq_coe]
 
 @[simp]
 theorem finiteProjectiveModulesEquivalence_inverse_map_hom
@@ -179,8 +224,21 @@ theorem finiteProjectiveModulesEquivalence_inverse_map_hom
     (e.finiteProjectiveModulesEquivalence.inverse.map f).hom =
       eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj M) ≫
         (ModuleCat.restrictScalars e.symm.toRingHom).map f.hom ≫
-        eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj N).symm :=
-  (rfl)
+        eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj N).symm := by
+  have h : e.finiteProjectiveModulesEquivalence.inverse ⋙ (finiteProjectiveModules S).ι =
+      (finiteProjectiveModules R).ι ⋙ ModuleCat.restrictScalars e.symm.toRingHom := by
+    simp only [finiteProjectiveModulesEquivalence,
+      Equivalence.congrFullSubcategory_inverse_eq_lift,
+      ModuleCat.restrictScalarsEquivalenceOfRingEquiv_inverse, toRingHom_eq_coe]
+    apply CategoryTheory.Functor.ext
+    case h_obj =>
+      intro X
+      simp only [Functor.comp_obj, ι_obj_lift_obj]
+    case h_map =>
+      intro X Y g
+      simp only [Functor.comp_map, ι_obj_lift_map, eqToHom_refl,
+        Category.id_comp, Category.comp_id]
+  simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
 
 /-- The equivalence of finitely generated module categories induced by a ring isomorphism is
 conflation-exact. -/
@@ -263,45 +321,68 @@ theorem finiteProjectiveModulesK0Equiv_symm_of
 /-! ### Functoriality in the ring isomorphism
 
 Restriction of scalars along the identity, along the inverse and along a composite of ring
-isomorphisms produces the same module as the identity, the inverse and the composite of the
-restrictions, so the induced isomorphisms of Grothendieck groups are functorial. -/
+isomorphisms identifies with the identity, the inverse and the composite of the restrictions.
+The identity and composition isomorphisms in `ModuleCat` lift to the full subcategories.
+Isomorphic objects have the same class in exact `K₀`, so these comparisons give functoriality
+without requiring equality of the underlying restricted module structures. -/
 
+/-- Restriction along the identity ring isomorphism induces the identity on `G₀(mod R)`. -/
 @[simp]
 theorem finiteModulesK0Equiv_refl :
     (RingEquiv.refl R).finiteModulesK0Equiv = AddEquiv.refl _ :=
   AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
     simp only [AddEquiv.coe_toAddMonoidHom, finiteModulesK0Equiv_of, AddEquiv.refl_apply]
-    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+    apply ExactK0.of_congr
+    apply ObjectProperty.isoMk
+    simpa only [finiteModulesEquivalence_functor_obj_obj, toRingHom_refl, Functor.id_obj] using
+      (ModuleCat.restrictScalarsId R).app M.obj
 
+/-- Restriction along the inverse ring isomorphism induces the inverse isomorphism on `G₀`. -/
 @[simp]
 theorem finiteModulesK0Equiv_symm : e.finiteModulesK0Equiv.symm = e.symm.finiteModulesK0Equiv :=
   AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
     simp only [AddEquiv.coe_toAddMonoidHom, finiteModulesK0Equiv_symm_of, finiteModulesK0Equiv_of]
-    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+    apply congrArg ExactK0.of
+    apply FullSubcategory.ext
+    rw [finiteModulesEquivalence_inverse_obj_obj, finiteModulesEquivalence_functor_obj_obj]
 
+/-- Restriction along a composite of ring isomorphisms induces the reverse composite on `G₀`. -/
 @[simp]
 theorem finiteModulesK0Equiv_trans {T : Type u} [Ring T] (e' : S ≃+* T) :
     e'.finiteModulesK0Equiv.trans e.finiteModulesK0Equiv = (e.trans e').finiteModulesK0Equiv :=
   AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
     simp only [AddEquiv.coe_toAddMonoidHom, AddEquiv.trans_apply, finiteModulesK0Equiv_of]
-    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+    apply ExactK0.of_congr
+    apply ObjectProperty.isoMk
+    simpa only [finiteModulesEquivalence_functor_obj_obj, toRingHom_trans, Functor.comp_obj] using
+      (ModuleCat.restrictScalarsComp e.toRingHom e'.toRingHom).symm.app M.obj
 
+/-- Restriction along the identity ring isomorphism induces the identity on `K₀(proj R)`. -/
 @[simp]
 theorem finiteProjectiveModulesK0Equiv_refl :
     (RingEquiv.refl R).finiteProjectiveModulesK0Equiv = AddEquiv.refl _ :=
   AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
     simp only [AddEquiv.coe_toAddMonoidHom, finiteProjectiveModulesK0Equiv_of,
       AddEquiv.refl_apply]
-    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+    apply ExactK0.of_congr
+    apply ObjectProperty.isoMk
+    simpa only [finiteProjectiveModulesEquivalence_functor_obj_obj, toRingHom_refl,
+      Functor.id_obj] using
+      (ModuleCat.restrictScalarsId R).app M.obj
 
+/-- Restriction along the inverse ring isomorphism induces the inverse isomorphism on `K₀`. -/
 @[simp]
 theorem finiteProjectiveModulesK0Equiv_symm :
     e.finiteProjectiveModulesK0Equiv.symm = e.symm.finiteProjectiveModulesK0Equiv :=
   AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
     simp only [AddEquiv.coe_toAddMonoidHom, finiteProjectiveModulesK0Equiv_symm_of,
       finiteProjectiveModulesK0Equiv_of]
-    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+    apply congrArg ExactK0.of
+    apply FullSubcategory.ext
+    rw [finiteProjectiveModulesEquivalence_inverse_obj_obj,
+      finiteProjectiveModulesEquivalence_functor_obj_obj]
 
+/-- Restriction along a composite of ring isomorphisms induces the reverse composite on `K₀`. -/
 @[simp]
 theorem finiteProjectiveModulesK0Equiv_trans {T : Type u} [Ring T] (e' : S ≃+* T) :
     e'.finiteProjectiveModulesK0Equiv.trans e.finiteProjectiveModulesK0Equiv =
@@ -309,7 +390,11 @@ theorem finiteProjectiveModulesK0Equiv_trans {T : Type u} [Ring T] (e' : S ≃+*
   AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
     simp only [AddEquiv.coe_toAddMonoidHom, AddEquiv.trans_apply,
       finiteProjectiveModulesK0Equiv_of]
-    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+    apply ExactK0.of_congr
+    apply ObjectProperty.isoMk
+    simpa only [finiteProjectiveModulesEquivalence_functor_obj_obj, toRingHom_trans,
+      Functor.comp_obj] using
+      (ModuleCat.restrictScalarsComp e.toRingHom e'.toRingHom).symm.app M.obj
 
 /-! ### Compatibility with the Cartan map -/
 
