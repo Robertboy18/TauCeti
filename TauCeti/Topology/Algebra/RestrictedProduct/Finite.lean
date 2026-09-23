@@ -63,6 +63,7 @@ theorem restrictedProductOfFinite_symm_apply (x : ∀ i, G i) (i : ι) :
 
 /-- Over a finite index type, the everywhere-integral subgroup is carried onto the product of the
 reference subgroups. -/
+@[simp]
 theorem map_restrictedProductOfFinite_integralSubgroup :
     (integralSubgroup U).map (restrictedProductOfFinite U) = Subgroup.pi Set.univ U := by
   rw [Subgroup.map_equiv_eq_comap_symm]
