@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Topology.Algebra.RestrictedProduct.CongrRight
+public import TauCeti.Topology.Algebra.RestrictedProduct.Congr.Right
 public import TauCeti.GroupTheory.DoubleCoset.Map
 
 /-!
@@ -18,15 +18,20 @@ directions, its continuity, its coherence laws, and its naturality with respect 
 maps.  It is the case of `restrictedProductCongrRight` in which every coordinate equivalence is
 the identity.
 
-The isomorphism identifies the ambient restricted products only.  It does not carry the
-everywhere-integral subgroup of one family to that of the other, because the coordinate
-condition changes at the finitely many indices where the families differ:
-`exists_map_integralSubgroup_ne` exhibits a family of copies of `Multiplicative ℤ` where the two
-subgroups differ.  For this reason the induced bijection of double-coset spaces,
-`doubleCosetCongr`, is stated along the transported subgroups rather than along the integral
-subgroup of the new family.
+The isomorphism identifies the ambient restricted products only.  It need not carry the
+everywhere-integral subgroup of one family onto that of the other, because the coordinate
+condition can change at the finitely many indices where the families differ:
+`exists_map_integralSubgroup_ne` is a counterexample to the general preservation claim, using a
+family of copies of `Multiplicative ℤ` where the two subgroups differ.  For this reason the
+induced bijection of double-coset spaces, `doubleCosetCongr`, is stated along the transported
+subgroups rather than along the integral subgroup of the new family.
 
 ## References
+
+This file follows §1.2a "Change of reference family" of Layer 1 and §"Change of family and
+double cosets" of `TauCetiRoadmap/RestrictedProducts/README.md`, which specify the equivalence,
+its laws, `doubleCosetCongr`, and the witness `exists_map_integralSubgroup_ne` together with its
+`Multiplicative ℤ` example.
 
 * N. Bourbaki, *General Topology*.
 * A. Weil, *Basic Number Theory*.
