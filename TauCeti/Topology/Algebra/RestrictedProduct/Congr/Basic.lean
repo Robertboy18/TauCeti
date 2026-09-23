@@ -28,11 +28,6 @@ subgroups rather than along the integral subgroup of the new family.
 
 ## References
 
-This file follows §1.2a "Change of reference family" of Layer 1 and §"Change of family and
-double cosets" of `TauCetiRoadmap/RestrictedProducts/README.md`, which specify the equivalence,
-its laws, `doubleCosetCongr`, and the witness `exists_map_integralSubgroup_ne` together with its
-`Multiplicative ℤ` example.
-
 * N. Bourbaki, *General Topology*.
 * A. Weil, *Basic Number Theory*.
 -/
