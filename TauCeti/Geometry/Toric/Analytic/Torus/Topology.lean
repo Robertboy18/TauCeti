@@ -24,9 +24,9 @@ The torus is a Hausdorff topological group for every `N`, and every additive hom
 such groups induces a continuous homomorphism of tori.  When `N` is a finitely generated free
 `ℤ`-module, the torus is also second countable and locally compact.
 
-For a chosen presentation, continuity of character evaluations follows from the formula
-`complexTorus_apply_eq_prod_zpow`: each character is a Laurent monomial in finitely many
-coordinates.
+Character evaluations are continuous by the topology of pointwise convergence.  For a chosen
+presentation, the Laurent-monomial formula expresses each evaluation of the inverse coordinate
+map as a finite product of powers, proving `continuous_complexTorusCoordinates_symm`.
 
 ## Main declarations
 
@@ -164,6 +164,7 @@ theorem complexTorusAmbient_apply (x : ComplexTorus N) (i : ι) :
   simp [complexTorusAmbient]
 
 /-- The ambient coordinates of a torus point are nonzero. -/
+@[simp↓]
 theorem complexTorusAmbient_ne_zero (x : ComplexTorus N) (i : ι) :
     complexTorusAmbient e x i ≠ 0 :=
   Units.ne_zero _

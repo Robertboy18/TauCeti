@@ -13,9 +13,10 @@ public import TauCeti.Geometry.Toric.Analytic.Torus.Topology
 /-!
 # The complex manifold structure of the coordinate-free complex torus
 
-A free presentation `e : (N →+ ℤ) ≃+ (ι →₀ ℤ)` of the character lattice embeds the complex torus
-`ComplexTorus N` openly into `ℂ^ι`, as the locus where every coordinate is nonzero.  Mathlib's
-singleton-chart construction therefore makes the torus a complex manifold modelled on `ℂ^ι`.
+A free presentation `e : (N →+ ℤ) ≃+ (ι →₀ ℤ)` of the character lattice, with `ι` finite, embeds
+the complex torus `ComplexTorus N` openly into `ℂ^ι`, as the locus where every coordinate is
+nonzero.  Mathlib's singleton-chart construction therefore makes the torus a complex manifold
+modelled on `ℂ^ι`.
 
 Although the chart names coordinates, the complex structure does not depend on the presentation:
 in the coordinates of two presentations, every torus map induced by a lattice map, and in
