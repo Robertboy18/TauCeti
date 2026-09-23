@@ -39,6 +39,9 @@ the Laplacian.
   the radial variable outermost.
 * `TauCeti.integral_norm_rpow_neg_finrank_mul_fderiv_apply_self`: the radial fundamental theorem
   of calculus.
+* `TauCeti.continuousOn_integral_toSphere_smul`: the sphere integrals `r ↦ ∫ u ∈ S, f (r • u)`
+  depend continuously on the radius `r ∈ [0, R]` when `f` is continuous on the closed ball of
+  radius `R`.
 -/
 
 public section
@@ -113,6 +116,27 @@ theorem integral_eq_integral_Ioi_integral_toSphere (f : E → F) (hf : Integrabl
   rw [heq, integral_prod_symm _ hint]
   exact integral_volumeIoiPow (Module.finrank ℝ E - 1)
     fun r ↦ ∫ u : sphere (0 : E) 1, f (r • (u : E)) ∂μ.toSphere
+
+omit [Nontrivial E] in
+/-- The integral of `f` over the sphere of radius `r` about the origin, parametrized by the unit
+sphere, depends continuously on `r ∈ [0, R]` when `f` is continuous on the closed ball of radius
+`R`. -/
+theorem continuousOn_integral_toSphere_smul {f : E → F} {R : ℝ}
+    (hf : ContinuousOn f (closedBall (0 : E) R)) :
+    ContinuousOn (fun r : ℝ ↦ ∫ u : sphere (0 : E) 1, f (r • (u : E)) ∂μ.toSphere) (Icc 0 R) := by
+  obtain ⟨C, hC⟩ := (isCompact_closedBall (0 : E) R).exists_bound_of_continuousOn hf
+  have hmem : ∀ r ∈ Icc (0 : ℝ) R, ∀ u : sphere (0 : E) 1,
+      r • (u : E) ∈ closedBall (0 : E) R := by
+    intro r hr u
+    rw [mem_closedBall_zero_iff, norm_smul, norm_eq_of_mem_sphere u, mul_one,
+      Real.norm_of_nonneg hr.1]
+    exact hr.2
+  refine continuousOn_of_dominated (bound := fun _ ↦ C) (fun r hr ↦ ?_) (fun r hr ↦ ?_)
+    (integrable_const C) (ae_of_all _ fun u ↦ ?_)
+  · exact (hf.comp_continuous (continuous_const.smul continuous_subtype_val)
+      (hmem r hr)).aestronglyMeasurable
+  · exact ae_of_all _ fun u ↦ hC _ (hmem r hr u)
+  · exact hf.comp (continuous_id.smul continuous_const).continuousOn fun r hr ↦ hmem r hr u
 
 /-- **Radial fundamental theorem of calculus.** For a `C¹` function `f` with compact support on a
 nontrivial finite-dimensional real normed space of dimension `d`,

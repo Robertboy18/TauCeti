@@ -19,8 +19,8 @@ if `f : ℝ → F` is continuous on `Ioo a b` and
 
 `∫ x, deriv ψ x • f x = 0`
 
-for every smooth compactly supported `ψ : ℝ → ℝ` with `tsupport ψ ⊆ Ioo a b`, then `f` is constant
-on `Ioo a b`. This is the one-variable **du Bois-Reymond lemma**, the derivative form of the
+for every smooth `ψ : ℝ → ℝ` with `tsupport ψ ⊆ Ioo a b`, then `f` is constant on
+`Ioo a b`. This is the one-variable **du Bois-Reymond lemma**, the derivative form of the
 fundamental lemma of the calculus of variations, whose zeroth-order form is Mathlib's
 `IsOpen.ae_eq_zero_of_integral_contDiff_smul_eq_zero`.
 
@@ -116,8 +116,7 @@ the derivative of every test function on the interval vanishes,
 `∫ x, deriv ψ x • f x = 0`, is constant on the interval. -/
 theorem exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero {a b : ℝ} {f : ℝ → F}
     (hf : ContinuousOn f (Ioo a b))
-    (h : ∀ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ → HasCompactSupport ψ → tsupport ψ ⊆ Ioo a b →
-      ∫ x, deriv ψ x • f x = 0) :
+    (h : ∀ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ → tsupport ψ ⊆ Ioo a b → ∫ x, deriv ψ x • f x = 0) :
     ∃ c : F, EqOn f (fun _ ↦ c) (Ioo a b) := by
   rcases le_or_gt b a with hba | hab
   · exact ⟨0, fun x hx ↦ absurd hx (by simp [Ioo_eq_empty (not_lt.mpr hba)])⟩
@@ -159,8 +158,8 @@ theorem exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero {a b : ℝ} {f : �
       simp only [hφ_def]
       rw [integral_sub hgi (hρi.const_mul _), MeasureTheory.integral_const_mul, hρint, mul_one,
         sub_self]
-    obtain ⟨ψ, hψ, hψc, hψs, hψd⟩ := exists_contDiff_deriv_eq_of_integral_eq_zero hφ hφs hφint
-    have h0 := h ψ hψ hψc hψs
+    obtain ⟨ψ, hψ, -, hψs, hψd⟩ := exists_contDiff_deriv_eq_of_integral_eq_zero hφ hφs hφint
+    have h0 := h ψ hψ hψs
     rw [hψd] at h0
     simp only [hφ_def, sub_smul, mul_smul] at h0
     have hρf : Integrable fun x ↦ (∫ y, g y) • ρ x • f x :=
