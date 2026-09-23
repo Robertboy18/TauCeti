@@ -7,7 +7,6 @@ module
 
 public import Mathlib.Data.ZMod.Basic
 public import Mathlib.GroupTheory.Abelianization.Defs
-public import Mathlib.GroupTheory.PresentedGroup
 public import Mathlib.GroupTheory.SemidirectProduct
 public import TauCeti.GroupTheory.Presentation.GroupPresentation
 
@@ -31,12 +30,6 @@ records the hypotheses on the source presentation, and
 presented group with the kernel of the parity homomorphism. The kernel is the commutator subgroup
 as soon as all generators agree in the abelianization,
 `TauCeti.IsSchreierIndexTwoSource.commutator_eq_ker_parityHom`.
-
-The injectivity half of the identification is proved by the standard device of assembling the
-semidirect product `H ⋊ C₂`, where `H` is the rewritten presented group and `C₂` acts through the
-automorphism of `H` inverting every Schreier generator, which is conjugation by `a`; the source
-presentation maps into it, and the composite with the rewritten group's map to `G` is the inclusion
-of `H`.
 
 The generator index type of the rewritten presentation is left free, as an equivalence `e` between
 the source generators other than `a` and a type `β`, so that a transcription indexed by `Fin n` is
@@ -100,10 +93,8 @@ theorem lengthParity_of (x : α) : lengthParity α (FreeGroup.of x) = ofAdd 1 :=
 /-- The inverse of a generator has odd length parity. -/
 theorem lengthParity_mk_singleton_false (x : α) :
     lengthParity α (FreeGroup.mk [(x, false)]) = ofAdd 1 := by
-  change lengthParity α (FreeGroup.mk (FreeGroup.invRev [(x, true)])) = _
-  rw [← FreeGroup.inv_mk, map_inv]
-  change (lengthParity α (FreeGroup.of x))⁻¹ = _
-  rw [lengthParity_of]
+  simp only [MonoidHom.apply_freeGroup_mk, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, Bool.cond_false, mul_one, lengthParity_of]
   decide
 
 /-- **The length parity of a word is the parity of its length.** -/
@@ -113,8 +104,9 @@ theorem lengthParity_mk (L : PresentationWord α) :
   | nil => simp [← FreeGroup.one_eq_mk]
   | cons p L ih =>
     obtain ⟨x, b⟩ := p
-    change lengthParity α (FreeGroup.mk ([(x, b)] ++ L)) = _
-    rw [← FreeGroup.mul_mk, map_mul, ih, List.length_cons, Nat.cast_succ, ofAdd_add, mul_comm]
+    conv_lhs => rw [← List.singleton_append]
+    rw [← FreeGroup.mul_mk (L₁ := [(x, b)]) (L₂ := L), map_mul, ih, List.length_cons,
+      Nat.cast_succ, ofAdd_add, mul_comm]
     congr 1
     cases b
     · exact lengthParity_mk_singleton_false x
@@ -242,16 +234,9 @@ theorem schreierInvHom_of (y : β) :
     schreierInvHom a e W (PresentedGroup.of y) = (PresentedGroup.of y)⁻¹ :=
   PresentedGroup.toGroup.of _
 
-/-- Inverting every generator sends the class of a word to the class of the word with every sign
-flipped. -/
-theorem schreierInvHom_mk_mk (L : PresentationWord β) :
-    schreierInvHom a e W (PresentedGroup.mk _ (FreeGroup.mk L)) =
-      PresentedGroup.mk _ (FreeGroup.mk (L.map fun p => (p.1, !p.2))) :=
-  PresentedGroup.lift_inv_of_mk _ L
-
 /-- Inverting every generator is an involution. -/
 @[simp]
-theorem schreierInvHom_schreierInvHom (g : PresentedGroup (schreierRelators a e W)) :
+theorem schreierInvHom_apply_apply (g : PresentedGroup (schreierRelators a e W)) :
     schreierInvHom a e W (schreierInvHom a e W g) = g := by
   have h : (schreierInvHom a e W).comp (schreierInvHom a e W) = MonoidHom.id _ := by
     ext y
@@ -335,13 +320,10 @@ theorem inv_of (x : α) : (PresentedGroup.of x : PresentedGroup R)⁻¹ = Presen
 theorem mk_mk_cons (x : α) (s : Bool) (L : PresentationWord α) :
     PresentedGroup.mk R (FreeGroup.mk ((x, s) :: L)) =
       PresentedGroup.of x * PresentedGroup.mk R (FreeGroup.mk L) := by
-  change PresentedGroup.mk R (FreeGroup.mk ([(x, s)] ++ L)) = _
-  rw [← FreeGroup.mul_mk, map_mul]
+  simp only [PresentedGroup.mk_mk, List.map_cons, List.prod_cons]
   congr 1
   cases s
-  · change PresentedGroup.mk R (FreeGroup.mk (FreeGroup.invRev [(x, true)])) = _
-    rw [← FreeGroup.inv_mk, map_inv]
-    exact h.inv_of x
+  · exact h.inv_of x
   · rfl
 
 /-! ### The parity homomorphism -/
@@ -532,14 +514,21 @@ private theorem lift_semidirectLetter_mk (L : PresentationWord α) :
         exact inv_eq_of_mul_eq_one_right (semidirectLetter_mul_self a e (W := W) x)
       · rw [FreeGroup.lift_mk]
         simp
-    change FreeGroup.lift (semidirectLetter a e (W := W)) (FreeGroup.mk ([(x, s)] ++ L)) = _
-    rw [← FreeGroup.mul_mk, map_mul, hletter, ih]
+    conv_lhs => rw [← List.singleton_append]
+    rw [← FreeGroup.mul_mk (L₁ := [(x, s)]) (L₂ := L), map_mul, hletter, ih]
     ext1
     · rw [SemidirectProduct.mul_left]
-      simp only [semidirectLetter, schreierConjAction_ofAdd_one, schreierInvAut_apply,
-        schreierInvHom_mk_mk, ← schreierWord_not, Bool.not_false]
+      simp only [semidirectLetter, schreierConjAction_ofAdd_one, schreierInvAut_apply]
       rw [schreierWord_cons_eq_append, ← FreeGroup.mul_mk, map_mul, mk_mk_schreierWord_singleton,
         Bool.not_false]
+      congr 1
+      calc
+        _ = FreeGroup.lift
+            (fun y => (PresentedGroup.of y : PresentedGroup (schreierRelators a e W))⁻¹)
+            (FreeGroup.mk (schreierWord a e false L)) := rfl
+        _ = _ := by
+          simpa only [← schreierWord_not, Bool.not_false] using
+            PresentedGroup.lift_inv_of_mk (schreierRelators a e W) (schreierWord a e false L)
     · simp only [semidirectLetter, SemidirectProduct.mul_right, List.length_cons, Nat.cast_succ,
         ofAdd_add]
       exact mul_comm _ _

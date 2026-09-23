@@ -59,18 +59,6 @@ an arbitrary `α`, and discharges the compilation theorem.
 
 public section
 
-namespace MonoidHom
-
-/-- A homomorphism out of a free group evaluates on the word `L` as the product of the images of
-its signed letters. This is `FreeGroup.lift_mk` for a homomorphism not presented as a lift. -/
-theorem apply_freeGroup_mk {α G : Type*} [Group G] (F : FreeGroup α →* G)
-    (L : List (α × Bool)) :
-    F (FreeGroup.mk L) =
-      (L.map fun p => cond p.2 (F (FreeGroup.of p.1)) (F (FreeGroup.of p.1))⁻¹).prod := by
-  rw [FreeGroup.lift_unique F (f := fun x => F (FreeGroup.of x)) fun _ => rfl, FreeGroup.lift_mk]
-
-end MonoidHom
-
 namespace TauCeti
 
 open scoped commutatorElement
