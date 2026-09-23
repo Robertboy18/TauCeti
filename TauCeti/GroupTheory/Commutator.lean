@@ -33,6 +33,8 @@ which quantifies over both subgroups. Neither reduces a comparison to generators
   subgroup presented by generators is tested on those generators.
 * `TauCeti.commutator_le_iff_map_mk'_eq_bot`: `⁅A, B⁆ ≤ N` for a normal `N` says that the images
   of `A` and `B` in `G ⧸ N` commute.
+* `TauCeti.commutatorElement_pow_right_mem_iff`: when `⁅a, y⁆` commutes with `y` modulo a normal
+  `N`, the commutator `⁅a, y ^ n⁆` lies in `N` exactly when `⁅a, y⁆ ^ n` does.
 * `TauCeti.commutatorElement_mul_mul_eq_mul_of_commute`: the commutator of two paired products
   splits into the product of their same-position commutators when the required cross terms commute.
 * `Subgroup.mem_of_adjacent_of_commutator`: a structure-constant-one family indexed by ordered
@@ -158,6 +160,19 @@ and `B` in the quotient `G ⧸ N` commute. -/
 theorem commutator_le_iff_map_mk'_eq_bot {A B : Subgroup G} [N.Normal] :
     ⁅A, B⁆ ≤ N ↔ ⁅A.map (QuotientGroup.mk' N), B.map (QuotientGroup.mk' N)⁆ = ⊥ := by
   rw [← map_commutator, map_eq_bot_iff, QuotientGroup.ker_mk']
+
+/-- If the commutator `⁅a, y⁆` commutes with `y` modulo a normal subgroup `N`, then modulo `N` the
+commutator `⁅a, y ^ n⁆` is the power `⁅a, y⁆ ^ n`: one lies in `N` exactly when the other does. This
+is `Commute.commutatorElement_pow_right` read in the quotient `G ⧸ N`. -/
+theorem commutatorElement_pow_right_mem_iff [N.Normal] {a y : G} (h : ⁅⁅a, y⁆, y⁆ ∈ N) (n : ℕ) :
+    ⁅a, y ^ n⁆ ∈ N ↔ ⁅a, y⁆ ^ n ∈ N := by
+  have hcomm : Commute (QuotientGroup.mk' N y) ⁅QuotientGroup.mk' N a, QuotientGroup.mk' N y⁆ := by
+    rw [← map_commutatorElement, ← commutatorElement_eq_one_iff_commute, ← map_commutatorElement,
+      QuotientGroup.mk'_apply, QuotientGroup.eq_one_iff, ← commutatorElement_inv]
+    exact N.inv_mem h
+  rw [← QuotientGroup.eq_one_iff (N := N), ← QuotientGroup.eq_one_iff (N := N),
+    ← QuotientGroup.mk'_apply, ← QuotientGroup.mk'_apply, map_commutatorElement, map_pow, map_pow,
+    map_commutatorElement, hcomm.commutatorElement_pow_right]
 
 end TauCeti
 
