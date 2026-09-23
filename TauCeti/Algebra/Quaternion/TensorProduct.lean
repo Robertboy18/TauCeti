@@ -7,8 +7,8 @@ module
 
 public import TauCeti.Algebra.Quaternion.CentralSimple
 public import TauCeti.Algebra.Quaternion.SquareSplit
-public import TauCeti.Algebra.CentralSimple.TensorProduct
 public import Mathlib.RingTheory.TensorProduct.Maps
+import TauCeti.Algebra.CentralSimple.TensorProduct
 import Mathlib.RingTheory.SimpleRing.Congr
 import Mathlib.RingTheory.SimpleRing.Matrix
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
@@ -152,7 +152,8 @@ def splitBasis : Basis (ℍ[R,a,b] ⊗[R] ℍ[R,a,c]) (a ^ 2) 0 c where
 
 /-- The two quaternion bases `linkedBasis` and `splitBasis` of `ℍ[R,a,b] ⊗[R] ℍ[R,a,c]` induce
 commuting algebra maps. -/
-theorem commute_linkedBasis_liftHom_splitBasis_liftHom (x : ℍ[R,a,b * c]) (y : ℍ[R,a ^ 2,c]) :
+private theorem commute_linkedBasis_liftHom_splitBasis_liftHom
+    (x : ℍ[R,a,b * c]) (y : ℍ[R,a ^ 2,c]) :
     Commute ((linkedBasis a b c).liftHom x) ((splitBasis a b c).liftHom y) := by
   refine Basis.commute_liftHom _ _ ?_ ?_ ?_ ?_ x y
   · exact (Commute.refl _).tmul (Commute.one_left _)
@@ -180,10 +181,11 @@ section Field
 
 variable {K : Type*} [Field K] [Invertible (2 : K)] (a b c : Kˣ)
 
-/-- Over a field with `2` invertible and unit parameters, `linkedTensorHom` is bijective: its
-source is a simple ring, so it is injective, and both sides have dimension `16`. -/
+/-- Over a field with `2` invertible and unit parameters, the common-slot map
+`ℍ[K,a,bc] ⊗[K] ℍ[K,a²,c] → ℍ[K,a,b] ⊗[K] ℍ[K,a,c]` is bijective. -/
 theorem linkedTensorHom_bijective :
     Function.Bijective (linkedTensorHom (a : K) (b : K) (c : K)) := by
+  -- The source is a simple ring, so the map is injective; both sides have dimension `16`.
   have : IsSimpleRing ℍ[K,(a : K),(b : K) * (c : K)] := instIsSimpleRing a (b * c)
   have : Algebra.IsCentral K ℍ[K,(a : K),(b : K) * (c : K)] := instIsCentral (a : K) (b * c)
   have : IsSimpleRing ℍ[K,(a : K) ^ 2,(c : K)] :=

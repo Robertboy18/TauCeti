@@ -6,12 +6,13 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.BrauerGroup.Group
-public import TauCeti.Algebra.Quaternion.TensorProduct
+public import TauCeti.Algebra.Quaternion.CentralSimple
 import TauCeti.Algebra.BrauerGroup.Splitting
 import TauCeti.Algebra.BrauerGroup.Division
+import TauCeti.Algebra.BrauerGroup.Quaternion
+import TauCeti.Algebra.Quaternion.TensorProduct
 import TauCeti.Algebra.Quaternion.Steinberg
 import TauCeti.Algebra.Quaternion.Binary
-import Mathlib.Basic.Real.Basic
 
 /-!
 # Brauer classes of quaternion symbols
@@ -266,12 +267,9 @@ theorem quaternionClass_eq_of_equivalent {a b c d : Kˣ}
 
 /-! ### Worked example -/
 
-/-- **Hamilton's quaternions have nontrivial Brauer class over `ℝ`**: the norm equation
-`-1 = x² + y²` has no real solution. -/
-example : quaternionClass (-1 : ℝˣ) (-1) ≠ 1 := fun h => by
-  obtain ⟨x, y, hxy⟩ := (quaternionClass_eq_one_iff_exists_eq_sq_sub_mul_sq _ _).1 h
-  simp only [Units.val_neg, Units.val_one, neg_mul, one_mul, sub_neg_eq_add] at hxy
-  nlinarith [sq_nonneg x, sq_nonneg y]
+/-- Hamilton's quaternions have nontrivial Brauer class over `ℝ`. -/
+example : quaternionClass (-1 : ℝˣ) (-1) ≠ 1 := by
+  simpa [quaternionClass_def] using Quaternion.mk_ne_one
 
 end BrauerGroup
 
