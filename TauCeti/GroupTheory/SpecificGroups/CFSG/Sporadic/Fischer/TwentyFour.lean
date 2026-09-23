@@ -110,7 +110,8 @@ Lemma 6.2(c) identifies the commutator subgroup and gives the generators `ab` th
 connected exponent-three graph makes all twelve source generators equal in the abelianization,
 `TauCeti.Sporadic.abelianizationOf_fi24AutomorphismGroup_of`, while sending each of them to the
 nontrivial element of `C₂` kills all the source relators. Hence that parity map has the commutator
-subgroup as its index-two kernel, `TauCeti.Sporadic.commutator_fi24AutomorphismGroup`. The rewrite
+subgroup as its index-two kernel,
+`TauCeti.Sporadic.commutator_fi24AutomorphismGroup_eq_ker_fi24ParityHom`. The rewrite
 was then checked
 definition by definition: `fi24SchreierFactors` toggles the transversal representative after every
 source letter, omits `a`, and records `(ax)⁻¹` and `ax` in alternating positions. Starting in the
@@ -141,8 +142,8 @@ the additional explicit-construction comparison does not apply to this row.
   source relators satisfy the hypotheses of index-two Reidemeister--Schreier rewriting.
 * `TauCeti.Sporadic.relatorSet_fi24PrimeRelators`: the row's relations are the
   Reidemeister--Schreier relators of the source words.
-* `TauCeti.Sporadic.commutator_fi24AutomorphismGroup`: the commutator subgroup of the source
-  presented group is the kernel of its parity homomorphism.
+* `TauCeti.Sporadic.commutator_fi24AutomorphismGroup_eq_ker_fi24ParityHom`: the commutator subgroup
+  of the source presented group is the kernel of its parity homomorphism.
 
 Every definition here has its body sealed, and each is pinned by a public characteristic equation
 named after it: the `_def` theorems below, the evaluation lemmas
@@ -772,7 +773,7 @@ theorem mem_fi24SourceWords {w : PresentationWord (Fin 12)} :
   Iff.rfl
 
 /-- The off-diagonal source relators are Coxeter relators of the source diagram. -/
-theorem mem_coxeterRelators_of_mem_fi24SourcePairRelators {r : Relator (Fin 12)}
+private theorem mem_coxeterRelators_of_mem_fi24SourcePairRelators {r : Relator (Fin 12)}
     (hr : r ∈ fi24SourcePairRelators) : r ∈ coxeterRelators fi24AutomorphismCoxeterMatrix := by
   rw [fi24SourcePairRelators_def] at hr
   obtain ⟨z, -, rfl⟩ := List.mem_map.mp hr
@@ -780,7 +781,7 @@ theorem mem_coxeterRelators_of_mem_fi24SourcePairRelators {r : Relator (Fin 12)}
   | _ i j => exact mem_coxeterRelators_iff.mpr ⟨i, j, rfl⟩
 
 /-- Every rewritten source relator is a source relator. -/
-theorem mem_fi24AutomorphismRelators_of_mem_append {r : Relator (Fin 12)}
+private theorem mem_fi24AutomorphismRelators_of_mem_append {r : Relator (Fin 12)}
     (hr : r ∈ fi24SourcePairRelators ++ fi24AutomorphismAdditionalRelators) :
     r ∈ fi24AutomorphismRelators := by
   rw [fi24AutomorphismRelators_def, List.mem_append]
@@ -834,7 +835,7 @@ theorem fi24ParityHom_of (i : Fin 12) :
 
 /-- **The commutator subgroup of the source presented group is the kernel of its parity
 homomorphism**, the source generators all agreeing in the abelianization. -/
-theorem commutator_fi24AutomorphismGroup :
+theorem commutator_fi24AutomorphismGroup_eq_ker_fi24ParityHom :
     commutator Fi24AutomorphismGroup = fi24ParityHom.ker :=
   isSchreierIndexTwoSource_fi24.commutator_eq_ker_parityHom 0
     abelianizationOf_fi24AutomorphismGroup_of
@@ -851,7 +852,7 @@ theorem fi24SchreierEquiv_apply (i : Fin 12) (h : i ≠ 0) :
 
 /-- The row's rewrite of a source word is the general Reidemeister--Schreier rewrite for the
 transversal `{1, a}`, read through the row's indexing of the Schreier generators. -/
-theorem toWord_foldr_fi24SchreierFactors (positive : Bool) (w : PresentationWord (Fin 12)) :
+private theorem toWord_foldr_fi24SchreierFactors (positive : Bool) (w : PresentationWord (Fin 12)) :
     ((fi24SchreierFactors positive w).foldr Relator.mul ((Relator.gen 0).pow 0)).toWord =
       schreierWord 0 fi24SchreierEquiv positive w := by
   induction w generalizing positive with

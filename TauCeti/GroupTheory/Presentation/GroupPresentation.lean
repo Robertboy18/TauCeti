@@ -51,6 +51,28 @@ from the target signatures in the human-owned roadmap's `CFSGStatement/Suggested
 
 public section
 
+namespace PresentedGroup
+
+/-- The image of a word in a presented group is the product of the images of its signed
+letters. -/
+theorem mk_mk {α : Type*} (S : Set (FreeGroup α)) (L : List (α × Bool)) :
+    mk S (FreeGroup.mk L) =
+      (L.map fun p => cond p.2 (of p.1) (of p.1)⁻¹).prod :=
+  (mk S).apply_freeGroup_mk L
+
+/-- Inverting every generator of a presented group sends the class of a word to the class of the
+word with every sign flipped. -/
+theorem lift_inv_of_mk {α : Type*} (S : Set (FreeGroup α)) (L : List (α × Bool)) :
+    FreeGroup.lift (fun x => (of x : PresentedGroup S)⁻¹) (FreeGroup.mk L) =
+      mk S (FreeGroup.mk (L.map fun p => (p.1, !p.2))) := by
+  rw [FreeGroup.lift_mk, mk_mk, List.map_map]
+  congr 1
+  refine List.map_congr_left fun p _ => ?_
+  obtain ⟨x, b⟩ := p
+  cases b <;> simp
+
+end PresentedGroup
+
 namespace TauCeti
 
 /-- A finite group presentation together with auditable source and transcription metadata.

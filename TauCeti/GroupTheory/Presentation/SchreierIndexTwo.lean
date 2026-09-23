@@ -63,8 +63,8 @@ a direct instance.
 
 ## Main results
 
-* `TauCeti.IsSchreierIndexTwoSource.range_toPresentedGroup`: the rewritten presented group maps
-  onto the kernel of the parity homomorphism.
+* `TauCeti.IsSchreierIndexTwoSource.range_toPresentedGroup_eq_ker_parityHom`: the rewritten
+  presented group maps onto the kernel of the parity homomorphism.
 * `TauCeti.IsSchreierIndexTwoSource.toPresentedGroup_injective`: that map is injective.
 * `TauCeti.IsSchreierIndexTwoSource.commutator_eq_ker_parityHom`: the kernel of the parity
   homomorphism is the commutator subgroup when all generators agree in the abelianization.
@@ -84,50 +84,6 @@ open Multiplicative
 
 variable {α β : Type*}
 
-/-! ## Evaluating homomorphisms on words -/
-
-/-- A homomorphism out of a free group evaluates on the word `L` as the product of the images of
-its signed letters. This is `FreeGroup.lift_mk` for a homomorphism not presented as a lift. -/
-theorem monoidHom_apply_freeGroup_mk {G : Type*} [Group G] (F : FreeGroup α →* G)
-    (L : PresentationWord α) :
-    F (FreeGroup.mk L) =
-      (L.map fun p => cond p.2 (F (FreeGroup.of p.1)) (F (FreeGroup.of p.1))⁻¹).prod := by
-  rw [FreeGroup.lift_unique F (f := fun x => F (FreeGroup.of x)) fun _ => rfl, FreeGroup.lift_mk]
-
-/-- The image of a word in a presented group is the product of the images of its signed
-letters. -/
-theorem presentedGroup_mk_mk (S : Set (FreeGroup α)) (L : PresentationWord α) :
-    PresentedGroup.mk S (FreeGroup.mk L) =
-      (L.map fun p => cond p.2 (PresentedGroup.of p.1) (PresentedGroup.of p.1)⁻¹).prod :=
-  monoidHom_apply_freeGroup_mk _ L
-
-/-- Every element of a free group is the class of a word. -/
-theorem exists_freeGroup_mk_eq (z : FreeGroup α) : ∃ L : PresentationWord α, FreeGroup.mk L = z :=
-  Quot.exists_rep z
-
-/-- The class of a single inverted letter is the inverse of the generator. -/
-theorem freeGroup_mk_singleton_false (x : α) :
-    FreeGroup.mk [(x, false)] = (FreeGroup.of x)⁻¹ := by
-  rw [FreeGroup.of, FreeGroup.inv_mk]
-  rfl
-
-/-- Splitting off the first letter of a word. -/
-theorem freeGroup_mk_cons (p : α × Bool) (L : PresentationWord α) :
-    FreeGroup.mk (p :: L) = FreeGroup.mk [p] * FreeGroup.mk L := by
-  rw [FreeGroup.mul_mk]
-  rfl
-
-/-- Inverting every generator of a presented group sends the class of a word to the class of the
-word with every sign flipped. -/
-theorem lift_inv_of_mk (S : Set (FreeGroup α)) (L : PresentationWord α) :
-    FreeGroup.lift (fun x => (PresentedGroup.of x : PresentedGroup S)⁻¹) (FreeGroup.mk L) =
-      PresentedGroup.mk S (FreeGroup.mk (L.map fun p => (p.1, !p.2))) := by
-  rw [FreeGroup.lift_mk, presentedGroup_mk_mk, List.map_map]
-  congr 1
-  refine List.map_congr_left fun p _ => ?_
-  obtain ⟨x, b⟩ := p
-  cases b <;> simp
-
 /-! ## The length parity -/
 
 /-- **The length parity of a word**: the homomorphism from the free group on `α` to `C₂` sending
@@ -144,7 +100,10 @@ theorem lengthParity_of (x : α) : lengthParity α (FreeGroup.of x) = ofAdd 1 :=
 /-- The inverse of a generator has odd length parity. -/
 theorem lengthParity_mk_singleton_false (x : α) :
     lengthParity α (FreeGroup.mk [(x, false)]) = ofAdd 1 := by
-  rw [freeGroup_mk_singleton_false, map_inv, lengthParity_of]
+  change lengthParity α (FreeGroup.mk (FreeGroup.invRev [(x, true)])) = _
+  rw [← FreeGroup.inv_mk, map_inv]
+  change (lengthParity α (FreeGroup.of x))⁻¹ = _
+  rw [lengthParity_of]
   decide
 
 /-- **The length parity of a word is the parity of its length.** -/
@@ -154,7 +113,8 @@ theorem lengthParity_mk (L : PresentationWord α) :
   | nil => simp [← FreeGroup.one_eq_mk]
   | cons p L ih =>
     obtain ⟨x, b⟩ := p
-    rw [freeGroup_mk_cons, map_mul, ih, List.length_cons, Nat.cast_succ, ofAdd_add, mul_comm]
+    change lengthParity α (FreeGroup.mk ([(x, b)] ++ L)) = _
+    rw [← FreeGroup.mul_mk, map_mul, ih, List.length_cons, Nat.cast_succ, ofAdd_add, mul_comm]
     congr 1
     cases b
     · exact lengthParity_mk_singleton_false x
@@ -262,7 +222,7 @@ theorem mk_mk_schreierWord_singleton (x : α) (s : Bool) :
   rw [schreierWord_cons, schreierWord_nil, List.append_nil]
   split_ifs with hx
   · rw [hx, schreierGenerator_self, inv_one, ← FreeGroup.one_eq_mk, map_one]
-  · rw [schreierGenerator_of_ne a e W hx, presentedGroup_mk_mk]
+  · rw [schreierGenerator_of_ne a e W hx, PresentedGroup.mk_mk]
     simp
 
 /-! ## Conjugation by the transversal element -/
@@ -274,7 +234,7 @@ def schreierInvHom :
     PresentedGroup (schreierRelators a e W) →* PresentedGroup (schreierRelators a e W) :=
   PresentedGroup.toGroup (f := fun y => (PresentedGroup.of y)⁻¹) (by
     rintro r ⟨positive, w, hw, rfl⟩
-    rw [lift_inv_of_mk, ← schreierWord_not]
+    rw [PresentedGroup.lift_inv_of_mk, ← schreierWord_not]
     exact PresentedGroup.one_of_mem (mk_schreierWord_mem_schreierRelators a e (!positive) hw))
 
 @[simp]
@@ -287,7 +247,7 @@ flipped. -/
 theorem schreierInvHom_mk_mk (L : PresentationWord β) :
     schreierInvHom a e W (PresentedGroup.mk _ (FreeGroup.mk L)) =
       PresentedGroup.mk _ (FreeGroup.mk (L.map fun p => (p.1, !p.2))) :=
-  lift_inv_of_mk _ L
+  PresentedGroup.lift_inv_of_mk _ L
 
 /-- Inverting every generator is an involution. -/
 @[simp]
@@ -339,7 +299,7 @@ theorem schreierConjAction_apply (g : Multiplicative (ZMod 2)) :
 /-- The nontrivial element of `C₂` acts by inverting every Schreier generator. -/
 theorem schreierConjAction_ofAdd_one :
     schreierConjAction a e W (ofAdd 1) = schreierInvAut a e W := by
-  rw [schreierConjAction_apply, toAdd_ofAdd, show (1 : ZMod 2).val = 1 by decide, pow_one]
+  simp [schreierConjAction_apply, ZMod.val_one_eq_one_mod]
 
 end Rewrite
 
@@ -375,10 +335,12 @@ theorem inv_of (x : α) : (PresentedGroup.of x : PresentedGroup R)⁻¹ = Presen
 theorem mk_mk_cons (x : α) (s : Bool) (L : PresentationWord α) :
     PresentedGroup.mk R (FreeGroup.mk ((x, s) :: L)) =
       PresentedGroup.of x * PresentedGroup.mk R (FreeGroup.mk L) := by
-  rw [freeGroup_mk_cons, map_mul]
+  change PresentedGroup.mk R (FreeGroup.mk ([(x, s)] ++ L)) = _
+  rw [← FreeGroup.mul_mk, map_mul]
   congr 1
   cases s
-  · rw [freeGroup_mk_singleton_false, map_inv]
+  · change PresentedGroup.mk R (FreeGroup.mk (FreeGroup.invRev [(x, true)])) = _
+    rw [← FreeGroup.inv_mk, map_inv]
     exact h.inv_of x
   · rfl
 
@@ -468,7 +430,8 @@ theorem lift_mk_schreierWord_of_mem {w : PresentationWord α} (hw : w ∈ W) (po
 /-- **The homomorphism from the rewritten presented group to the source presented group**, sending
 the Schreier generator indexed by `y` to `a x_y`, for `x_y` the source generator it names. It is
 injective, `TauCeti.IsSchreierIndexTwoSource.toPresentedGroup_injective`, with range the kernel of
-the parity homomorphism, `TauCeti.IsSchreierIndexTwoSource.range_toPresentedGroup`. -/
+the parity homomorphism,
+`TauCeti.IsSchreierIndexTwoSource.range_toPresentedGroup_eq_ker_parityHom`. -/
 def toPresentedGroup : PresentedGroup (schreierRelators a e W) →* PresentedGroup R :=
   PresentedGroup.toGroup
     (f := fun y => (PresentedGroup.of a : PresentedGroup R) * PresentedGroup.of (e.symm y).1) (by
@@ -516,7 +479,8 @@ theorem parityHom_toPresentedGroup (g : PresentedGroup (schreierRelators a e W))
   exact DFunLike.congr_fun hcomp g
 
 /-- **The rewritten presented group maps onto the kernel of the parity homomorphism.** -/
-theorem range_toPresentedGroup : (h.toPresentedGroup a e).range = h.parityHom.ker := by
+theorem range_toPresentedGroup_eq_ker_parityHom :
+    (h.toPresentedGroup a e).range = h.parityHom.ker := by
   ext g
   constructor
   · intro hg
@@ -524,7 +488,7 @@ theorem range_toPresentedGroup : (h.toPresentedGroup a e).range = h.parityHom.ke
     exact MonoidHom.mem_ker.mpr (h.parityHom_toPresentedGroup a e y)
   · intro hg
     obtain ⟨z, rfl⟩ := PresentedGroup.mk_surjective R g
-    obtain ⟨L, rfl⟩ := exists_freeGroup_mk_eq z
+    obtain ⟨L, rfl⟩ : ∃ L, FreeGroup.mk L = z := Quot.exists_rep z
     rw [h.mk_mk_mem_ker_parityHom_iff] at hg
     exact MonoidHom.mem_range.mpr ⟨_, h.toPresentedGroup_mk_mk_schreierWord a e hg⟩
 
@@ -568,7 +532,8 @@ private theorem lift_semidirectLetter_mk (L : PresentationWord α) :
         exact inv_eq_of_mul_eq_one_right (semidirectLetter_mul_self a e (W := W) x)
       · rw [FreeGroup.lift_mk]
         simp
-    rw [freeGroup_mk_cons, map_mul, hletter, ih]
+    change FreeGroup.lift (semidirectLetter a e (W := W)) (FreeGroup.mk ([(x, s)] ++ L)) = _
+    rw [← FreeGroup.mul_mk, map_mul, hletter, ih]
     ext1
     · rw [SemidirectProduct.mul_left]
       simp only [semidirectLetter, schreierConjAction_ofAdd_one, schreierInvAut_apply,
@@ -620,7 +585,7 @@ generator indexed by `y` going to `a x_y`. -/
 noncomputable def mulEquivKerParityHom :
     PresentedGroup (schreierRelators a e W) ≃* ↥h.parityHom.ker :=
   (MonoidHom.ofInjective (h.toPresentedGroup_injective a e)).trans
-    (MulEquiv.subgroupCongr (h.range_toPresentedGroup a e))
+    (MulEquiv.subgroupCongr (h.range_toPresentedGroup_eq_ker_parityHom a e))
 
 @[simp]
 theorem coe_mulEquivKerParityHom_apply (g : PresentedGroup (schreierRelators a e W)) :
@@ -637,7 +602,7 @@ theorem commutator_eq_ker_parityHom
     commutator (PresentedGroup R) = h.parityHom.ker := by
   refine le_antisymm (Abelianization.commutator_subset_ker _) fun g hg => ?_
   obtain ⟨z, rfl⟩ := PresentedGroup.mk_surjective R g
-  obtain ⟨L, rfl⟩ := exists_freeGroup_mk_eq z
+  obtain ⟨L, rfl⟩ : ∃ L, FreeGroup.mk L = z := Quot.exists_rep z
   rw [h.mk_mk_mem_ker_parityHom_iff] at hg
   rw [← Abelianization.ker_of, MonoidHom.mem_ker]
   have key : ∀ L : PresentationWord α,
