@@ -53,6 +53,10 @@ that convention.
 * B. Keller, *Deriving DG categories*, Section 1.
 * B. Keller, *Introduction to A-infinity algebras and modules*, Section 3.1, for the sign
   conventions and the comparison sign between the two factor orders.
+* `TauCeti/Algebra/Homology/LinearHomComplex/Composition.lean` and
+  `TauCeti/Algebra/Homology/LinearHomComplex/Enrichment.lean`: the chain-map, associativity and
+  unit proofs for the enriched composition below adapt the proof plan of the `R`-linear Hom
+  complex enrichment in those files.
 -/
 
 public section
@@ -92,11 +96,14 @@ structure DGCategoryData (R : Type v) [CommRing R] (C : Type u) where
   /-- The identity is a right unit. -/
   comp_id {X Y : C} {p : ℤ} (f : (hom X Y).X p) : comp p 0 p (add_zero p) f (id Y) = f
 
+attribute [simp] DGCategoryData.id_comp DGCategoryData.comp_id
+
 namespace DGCategoryData
 
 variable {R : Type v} [CommRing R] {C : Type u} (D : DGCategoryData R C)
 
 /-- The identity is a cycle: the Leibniz rule for `id ∘ id` reads `d id = d id + d id`. -/
+@[simp]
 theorem d_id (X : C) : ((D.hom X X).d 0 1).hom (D.id X) = 0 := by
   have key := D.d_comp (zero_add 0) (D.id X) (D.id X)
   simp only [D.id_comp, D.comp_id, Int.negOnePow_zero, one_smul] at key
@@ -156,7 +163,7 @@ noncomputable def enrichedId (X : C) : 𝟙_ (CochainComplex (ModuleCat.{v} R) �
   mkHomFromSingle (ModuleCat.ofHom (LinearMap.toSpanSingleton R _ (D.id X))) fun k hk => by
     obtain rfl : k = 0 + 1 := hk.symm
     ext
-    simp [D.d_id]
+    simp
 
 /-- The degree-zero component of the enriched identity. -/
 theorem enrichedId_f_zero (X : C) :
