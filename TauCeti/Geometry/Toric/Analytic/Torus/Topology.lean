@@ -12,18 +12,21 @@ public import TauCeti.Geometry.Toric.Analytic.Character.Basic
 /-!
 # The topology of the coordinate-free complex torus
 
-The complex torus `ComplexTorus N` of a lattice `N` is the group of `ℂˣ`-valued additive
-characters of the integral character lattice `N →+ ℤ`.  This file equips it with the topology of
-pointwise convergence: the coarsest topology for which the evaluation of every integral character
-is continuous.  Because the character lattice is finitely generated, this is the topology induced
-by the finitely many coordinate characters of any free presentation, so a presentation
-`e : (N →+ ℤ) ≃+ (ι →₀ ℤ)` identifies the torus with `(ℂˣ)^ι` as a topological group and embeds
-it openly into `ℂ^ι` as the locus where every coordinate is nonzero.  The torus is therefore a
-Hausdorff, second countable, locally compact topological group, and every lattice map induces a
-continuous homomorphism of tori.
+For an additive commutative group `N`, the complex torus `ComplexTorus N` is the group of
+`ℂˣ`-valued additive characters of `N →+ ℤ`.  This file equips it with the topology of pointwise
+convergence: the coarsest topology for which the evaluation of every integral character is
+continuous.  Any free presentation `e : (N →+ ℤ) ≃+ (ι →₀ ℤ)` identifies the torus with
+`(ℂˣ)^ι` as a topological group, for an arbitrary index type `ι`.  Its ambient coordinates in
+`ℂ^ι` are continuous and have range the locus where every coordinate is nonzero.  When `ι` is
+finite, these ambient coordinates form an open embedding.
 
-Every continuity statement about character functions reduces, through the Laurent-monomial formula
-`complexTorus_apply_eq_prod_zpow`, to the continuity of the coordinates of a presentation.
+The torus is a Hausdorff topological group for every `N`, and every additive homomorphism of
+such groups induces a continuous homomorphism of tori.  When `N` is a finitely generated free
+`ℤ`-module, the torus is also second countable and locally compact.
+
+For a chosen presentation, continuity of character evaluations follows from the formula
+`complexTorus_apply_eq_prod_zpow`: each character is a Laurent monomial in finitely many
+coordinates.
 
 ## Main declarations
 
@@ -32,9 +35,10 @@ Every continuity statement about character functions reduces, through the Lauren
   each character evaluation of it is.
 * `TauCeti.Toric.complexTorusCoordinatesContinuousMulEquiv`: a free presentation of the character
   lattice identifies the torus with `(ℂˣ)^ι` as a topological group.
-* `TauCeti.Toric.complexTorusAmbient` and `TauCeti.Toric.isOpenEmbedding_complexTorusAmbient`:
-  the ambient coordinates embed the torus openly into `ℂ^ι`, with range the locus where every
-  coordinate is nonzero.
+* `TauCeti.Toric.complexTorusAmbient` and `TauCeti.Toric.continuous_complexTorusAmbient`:
+  continuous ambient coordinates in `ℂ^ι`, with range the locus where every coordinate is nonzero.
+* `TauCeti.Toric.isOpenEmbedding_complexTorusAmbient`: for finite `ι`, the ambient coordinates
+  embed the torus openly into `ℂ^ι`.
 * `TauCeti.Toric.continuous_complexTorusMap`: lattice maps induce continuous torus maps.
 
 ## References
@@ -143,9 +147,15 @@ theorem coe_complexTorusCoordinatesContinuousMulEquiv_symm :
   (rfl)
 
 /-- The ambient coordinates of the torus supplied by a free presentation `e`: the coordinates of
-`e`, read as complex numbers.  They embed the torus openly into `ℂ^ι`. -/
+`e`, read as complex numbers.  For finite `ι`, they embed the torus openly into `ℂ^ι`. -/
 noncomputable def complexTorusAmbient (x : ComplexTorus N) : ι → ℂ :=
   fun i ↦ (complexTorusCoordinates e x i : ℂ)
+
+/-- The ambient coordinates are continuous for any index type. -/
+@[fun_prop]
+theorem continuous_complexTorusAmbient : Continuous (complexTorusAmbient e) :=
+  continuous_pi fun i ↦
+    Units.continuous_val.comp ((continuous_apply i).comp (continuous_complexTorusCoordinates e))
 
 /-- An ambient coordinate is the complex value of the corresponding coordinate character. -/
 @[simp]
@@ -178,7 +188,7 @@ theorem complexTorusAmbient_inv (x : ComplexTorus N) :
   ext i
   simp [complexTorusAmbient, AddChar.map_neg_eq_inv, Units.val_inv_eq_inv_val]
 
-/-- The ambient coordinates are an open embedding of the torus into `ℂ^ι`. -/
+/-- For finite `ι`, the ambient coordinates are an open embedding of the torus into `ℂ^ι`. -/
 theorem isOpenEmbedding_complexTorusAmbient [Finite ι] :
     IsOpenEmbedding (complexTorusAmbient e) :=
   (IsOpenEmbedding.piMap fun _ : ι ↦ Units.isOpenEmbedding_val).comp
