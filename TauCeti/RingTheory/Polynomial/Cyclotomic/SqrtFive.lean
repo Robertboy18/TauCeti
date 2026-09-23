@@ -22,6 +22,7 @@ irreducible, since `2` has order `4` modulo `5`.
 
 ## Main results
 
+* `Polynomial.cyclotomic_five`: `Φ_5 = X⁴ + X³ + X² + X + 1` over any ring.
 * `Polynomial.cyclotomic_five_eq_mul_of_sq_eq_five`: the explicit factorisation.
 * `Polynomial.not_irreducible_cyclotomic_five_of_sq_eq_five`: `Φ_5` is reducible over `E`.
 
@@ -38,6 +39,13 @@ public section
 
 namespace Polynomial
 
+/-- The fifth cyclotomic polynomial is `X ^ 4 + X ^ 3 + X ^ 2 + X + 1`. -/
+theorem cyclotomic_five (R : Type*) [Ring R] : cyclotomic 5 R = X ^ 4 + X ^ 3 + X ^ 2 + X + 1 := by
+  have : Fact (Nat.Prime 5) := ⟨Nat.prime_five⟩
+  rw [cyclotomic_prime]
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, pow_zero, pow_one, zero_add]
+  abel
+
 variable {E : Type*} [Field E] [NeZero (2 : E)]
 
 /-- **`Φ_5` factors over a field containing `√5`.** With `s ^ 2 = 5` the two factors are
@@ -52,8 +60,7 @@ theorem cyclotomic_five_eq_mul_of_sq_eq_five {s : E} (hs : s ^ 2 = 5) :
   have e2 : (s - 1) / 2 * ((-s - 1) / 2) = -1 := by field_simp; linear_combination (-1 : E) * hs
   have key : C ((s - 1) / 2) + C ((-s - 1) / 2) = (-1 : E[X]) := by rw [← C_add, e1, C_neg, C_1]
   have key2 : C ((s - 1) / 2) * C ((-s - 1) / 2) = (-1 : E[X]) := by rw [← C_mul, e2, C_neg, C_1]
-  rw [cyclotomic_prime]
-  simp only [Finset.sum_range_succ, Finset.sum_range_zero, pow_zero, pow_one, zero_add]
+  rw [cyclotomic_five]
   linear_combination (X ^ 3 + X) * key - X ^ 2 * key2
 
 /-- **`Φ_5` is reducible over a field containing `√5`.**
