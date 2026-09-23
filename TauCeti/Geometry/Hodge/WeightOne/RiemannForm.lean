@@ -23,11 +23,13 @@ that is, `H (x, y) = E_ℝ (J x) y + i E_ℝ x y` is a positive definite Hermiti
 complex structure `J`. This is the datum of a polarized abelian variety: `(ℤ^{2g}, J, E)` with
 `E` a Riemann form is a complex torus `ℂ^g / Λ` together with a polarization.
 
-This file shows that a Riemann form is exactly an integral form polarizing the effective weight-one
-Hodge structure `TauCeti.AlmostComplexStructure.latticeHodgeStructure` that `J` defines on `V`: the
-Hodge–Riemann relations for that structure, whose Weil operator is the transported `J`, reduce
-to the two relations above on the real points, which are the realification. The forward direction
-also proves that a Riemann form is nondegenerate, so nondegeneracy is not part of the definition.
+When `V` is flat over `ℤ`, this file shows that a Riemann form is exactly an integral form
+polarizing the effective weight-one Hodge structure
+`TauCeti.AlmostComplexStructure.latticeHodgeStructure` that `J` defines on `V`: the
+Hodge–Riemann relations for that structure, whose Weil operator is the
+transported `J`, reduce to the two relations above on the real points, which are the realification.
+A Riemann form is also nondegenerate when `V` is flat over `ℤ`, so nondegeneracy is not part of
+the definition.
 
 Sign convention: positivity is `0 < E_ℝ (J x) x`, as in Birkenhake–Lange, so that the Hermitian
 form `H` above is positive definite. It matches the pinned convention of
@@ -38,10 +40,12 @@ compatibility predicate `TauCeti.SymplecticForm.Compatible` uses the opposite si
 ## Main declarations
 
 * `TauCeti.AlmostComplexStructure.IsRiemannForm`: `E` is a Riemann form for `J`.
-* `TauCeti.AlmostComplexStructure.IsRiemannForm.nondegenerate`: a Riemann form is nondegenerate.
+* `TauCeti.AlmostComplexStructure.IsRiemannForm.nondegenerate`: a Riemann form is nondegenerate
+  when `V` is flat over `ℤ`.
 * `TauCeti.AlmostComplexStructure.IsRiemannForm.isPolarization` and
-  `TauCeti.AlmostComplexStructure.isRiemannForm_iff_isPolarization`: **a Riemann form polarizes the
-  weight-one Hodge structure of `J`**, and every form polarizing it is a Riemann form.
+  `TauCeti.AlmostComplexStructure.isRiemannForm_iff_isPolarization`: **when `V` is flat over `ℤ`,
+  a Riemann form polarizes the weight-one Hodge structure of `J`**, and every form polarizing it
+  is a Riemann form.
 * `TauCeti.AlmostComplexStructure.IsRiemannForm.polarization`: the polarized effective weight-one
   Hodge structure of a lattice with a complex structure and a Riemann form.
 
@@ -66,11 +70,12 @@ variable {ιℂ : V →ₗ[ℤ] Vℂ}
 on the realification of `V` when it is alternating, its real scalar extension is `J`-invariant, and
 `E_ℝ (J x) x` is positive for every nonzero real vector `x`.
 
-Nondegeneracy is not asked for: it follows (`IsRiemannForm.nondegenerate`). -/
+Nondegeneracy follows when `V` is flat over `ℤ` (`IsRiemannForm.nondegenerate`), so it is not part
+of this definition. -/
 structure IsRiemannForm (J : AlmostComplexStructure (Hodge.Realification V))
     (E : LinearMap.BilinForm ℤ V) : Prop where
   /-- The form is alternating. -/
-  eq_neg : ∀ x y, E y x = -E x y
+  isAlt : E.IsAlt
   /-- The first Riemann bilinear relation: the real scalar extension is `J`-invariant. -/
   invariant : ∀ x y, E.baseChange ℝ (J x) (J y) = E.baseChange ℝ x y
   /-- The second Riemann bilinear relation: `E_ℝ (J x) x` is positive on nonzero real vectors. -/
@@ -101,16 +106,17 @@ theorem nondegenerate [Module.Flat ℤ V] (h : IsRiemannForm J E) : E.Nondegener
     have hne : (1 : ℝ) ⊗ₜ[ℤ] x ≠ 0 := fun h0 ↦
       hx0 (Hodge.realificationMap_injective (by simpa using h0))
     exact (h.positive _ hne).ne' hpair
-  have hrefl : E.IsRefl := fun x y hxy ↦ by rw [h.eq_neg, hxy, neg_zero]
-  exact (LinearMap.IsRefl.nondegenerate_iff_separatingLeft hrefl).mpr hleft
+  exact (LinearMap.IsRefl.nondegenerate_iff_separatingLeft h.isAlt.isRefl).mpr hleft
 
-/-- **A Riemann form polarizes the weight-one Hodge structure of its complex structure.** For the
-effective weight-one structure `J.latticeHodgeStructure hℂ`, whose Weil operator is `J`, the
-Hodge–Riemann relations of `E` are exactly the two Riemann bilinear relations. -/
+/-- **A Riemann form on a flat integral module polarizes the weight-one Hodge structure of its
+complex structure.** For the effective weight-one structure `J.latticeHodgeStructure hℂ`, whose
+Weil operator is `J`, the Hodge–Riemann relations of `E` are exactly the two Riemann bilinear
+relations. -/
 theorem isPolarization [Module.Flat ℤ V] (h : IsRiemannForm J E) (hℂ : IsBaseChange ℂ ιℂ) :
     Hodge.IsPolarization hℂ (J.latticeHodgeStructure hℂ) E := by
   refine Hodge.isPolarization_of_weilOperator_invariant_on_realPoints_of_pos
-    (J.isEffective_latticeHodgeStructure hℂ) h.eq_neg h.nondegenerate ?_ ?_
+    (J.isEffective_latticeHodgeStructure hℂ) (fun x y ↦ (h.isAlt.neg_eq x y).symm)
+    h.nondegenerate ?_ ?_
   · intro x hx y hy
     obtain ⟨a, rfl⟩ := Hodge.exists_eq_realificationComplexEquiv_one_tmul hℂ hx
     obtain ⟨b, rfl⟩ := Hodge.exists_eq_realificationComplexEquiv_one_tmul hℂ hy
@@ -125,8 +131,8 @@ theorem isPolarization [Module.Flat ℤ V] (h : IsRiemannForm J E) (hℂ : IsBas
       Hodge.integralFormBaseChange_realificationComplexEquiv_one_tmul]
     exact Complex.zero_lt_real.mpr (h.positive a ha)
 
-/-- The polarized effective weight-one Hodge structure of a lattice with a complex structure and a
-Riemann form: the Riemann form, bundled with its Hodge–Riemann relations. -/
+/-- The polarized effective weight-one Hodge structure of a flat integral module with a complex
+structure and a Riemann form: the Riemann form, bundled with its Hodge–Riemann relations. -/
 def polarization [Module.Flat ℤ V] (h : IsRiemannForm J E) (hℂ : IsBaseChange ℂ ιℂ) :
     Hodge.Polarization hℂ (J.latticeHodgeStructure hℂ) where
   Qint := E
@@ -145,23 +151,25 @@ theorem polarization_Q [Module.Flat ℤ V] (h : IsRiemannForm J E) (hℂ : IsBas
   rw [Hodge.Polarization.Q_def, polarization_Qint]
 
 /-- The weight-one Hodge structure of a complex structure admitting a Riemann form is
-polarizable. -/
+polarizable when the integral module is flat. -/
 theorem isPolarizable [Module.Flat ℤ V] (h : IsRiemannForm J E) (hℂ : IsBaseChange ℂ ιℂ) :
     Hodge.IsPolarizable hℂ (J.latticeHodgeStructure hℂ) :=
   (h.polarization hℂ).isPolarizable
 
 end IsRiemannForm
 
-/-- **The Riemann forms for `J` are exactly the forms polarizing its weight-one Hodge
-structure.** In the converse direction, `J`-invariance of `E_ℝ` is the Weil operator being an
-isometry of the polarization, and positivity of `E_ℝ (J x) x` is positivity of the Hodge form on
-real vectors. -/
+/-- **When `V` is flat over `ℤ`, the Riemann forms for `J` are exactly the forms polarizing its
+weight-one Hodge structure.** In the converse direction, `J`-invariance of `E_ℝ` says that the Weil
+operator is an isometry of the polarization, and positivity of `E_ℝ (J x) x` is positivity of the
+Hodge form on real vectors. -/
 theorem isRiemannForm_iff_isPolarization [Module.Flat ℤ V]
     (J : AlmostComplexStructure (Hodge.Realification V)) (hℂ : IsBaseChange ℂ ιℂ)
     (E : LinearMap.BilinForm ℤ V) :
     J.IsRiemannForm E ↔ Hodge.IsPolarization hℂ (J.latticeHodgeStructure hℂ) E := by
-  refine ⟨fun h ↦ h.isPolarization hℂ, fun h ↦ ⟨h.eq_neg_of_odd odd_one, fun x y ↦ ?_,
-    fun x hx ↦ ?_⟩⟩
+  refine ⟨fun h ↦ h.isPolarization hℂ, fun h ↦
+    ⟨LinearMap.isAlt_iff_eq_neg_flip.mpr ?_, fun x y ↦ ?_, fun x hx ↦ ?_⟩⟩
+  · ext x y
+    exact h.eq_neg_of_odd odd_one y x
   · have hiso := h.isOrthogonal_weilOperator (Hodge.realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] x))
       (Hodge.realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] y))
     simp only [latticeHodgeStructure_weilOperator,
@@ -173,8 +181,7 @@ theorem isRiemannForm_iff_isPolarization [Module.Flat ℤ V]
       intro h0
       exact hx (Module.Flat.tensorProduct_mk_injective ℝ (Hodge.Realification V) ℂ
         (by simpa using h0))
-    have hpos := h.integralFormBaseChange_weilOperator_self_pos
-      (Hodge.realificationComplexEquiv_one_tmul_mem_realPoints hℂ x) hne
+    have hpos := h.integralFormBaseChange_weilOperator_self_pos (by simp) hne
     simp only [latticeHodgeStructure_weilOperator,
       latticeComplexification_realificationComplexEquiv_one_tmul,
       Hodge.integralFormBaseChange_realificationComplexEquiv_one_tmul] at hpos
