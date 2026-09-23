@@ -59,6 +59,8 @@ variable {n : ℕ}
 @[expose] def connectedTriples (n : ℕ) : Finset (PermutationTriple n) :=
   Finset.univ.filter PermutationTriple.IsConnected
 
+/-- The members of `TauCeti.connectedTriples n` are exactly the connected permutation triples of
+degree `n`. -/
 @[simp]
 theorem mem_connectedTriples {t : PermutationTriple n} :
     t ∈ connectedTriples n ↔ t.IsConnected := by
