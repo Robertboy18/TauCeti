@@ -10,12 +10,10 @@ public import TauCeti.Topology.Algebra.RestrictedProduct.Basic
 /-!
 # Restricted products of groups away from a set of indices
 
-This file names the restricted product of a family of topological groups relative to a family
-of reference subgroups, the same construction over the indices outside a set `S`, and the
-product of a restricted product with a distinguished factor carrying no integrality condition.
-These are the three shapes in which restricted products appear when a family of local groups is
-assembled into an adelic one: the finite adelic points, the finite adelic points away from a
-finite set of places, and the full adelic points with the archimedean factor set apart.
+This file names the restricted product of a family of groups relative to a family of reference
+subgroups over the indices outside a set `S`. This is the shape in which restricted products
+appear when the local groups at a finite set of places are set apart from the rest of an adelic
+group: the finite adelic points away from a finite set of places.
 
 It then constructs the restriction homomorphism from the restricted product to the restricted
 product away from `S`, which forgets the coordinates indexed by `S`. This is Mathlib's
@@ -40,26 +38,16 @@ namespace TauCeti
 open Filter
 open scoped RestrictedProduct
 
-universe u v w
+universe u v
 
 variable {ι : Type u} {G : ι → Type v}
 variable [∀ i, Group (G i)]
-
-/-- The restricted product of the family `G` relative to the reference subgroups `U`: the
-elements of `Π i, G i` whose coordinates lie in `U i` for all but finitely many `i`. -/
-abbrev RestrictedProductGroup (U : ∀ i, Subgroup (G i)) :=
-  Πʳ i, [G i, (U i : Set (G i))]
 
 /-- The restricted product of `G` relative to `U` over the indices **outside** `S`. This is
 `RestrictedProductGroup` at the index type `{i // i ∉ S}`; no finiteness of `S` is needed to form
 it. -/
 abbrev RestrictedProductGroupAway (S : Set ι) (U : ∀ i, Subgroup (G i)) :=
   RestrictedProductGroup fun i : {i // i ∉ S} ↦ U i.1
-
-/-- A restricted product together with a distinguished factor `H` carrying **no** integrality
-condition. -/
-abbrev RestrictedProductGroupWithFactor (H : Type w) (U : ∀ i, Subgroup (G i)) :=
-  H × RestrictedProductGroup U
 
 /-- Restriction of a restricted product to the indices outside `S`, forgetting the coordinates
 indexed by `S`. -/
