@@ -21,16 +21,20 @@ For a field `K` with `2` invertible, this file bundles the quaternion symbol wit
 symbol** in `BrauerGroup K`. The general centrality and simplicity results used here are in
 `TauCeti.Algebra.Quaternion.CentralSimple`.
 
-The symbol satisfies the classical relations (Lam III.2.11, Gille–Szamuely 1.5.2), each read off
-from an isomorphism of quaternion algebras through `TauCeti.BrauerGroup.mk_eq_mk_of_algEquiv`:
+The symbol satisfies the classical relations (Lam III.2.11, Gille–Szamuely 1.5.2):
 
 * it is symmetric, `[(a,b)] = [(b,a)]`, and invariant under multiplying either argument by a
-  square, so it factors through square classes;
+  square, so it factors through square classes; these follow from isomorphisms of quaternion
+  algebras through `TauCeti.BrauerGroup.mk_eq_mk_of_algEquiv`;
 * it is `2`-torsion, `[(a,b)]² = 1`, because quaternion conjugation identifies `ℍ[K,a,b]` with its
-  opposite algebra;
-* it vanishes on `(1,b)`, `(a,-a)`, `(a,b²)`, `(a²,b)` and on the Steinberg pair `(a,1-a)`;
-* it is **bilinear**, `[(a,bc)] = [(a,b)] · [(a,c)]`, from the common slot lemma
-  `TauCeti.QuaternionAlgebra.tensorAlgEquivTensorMatrix`;
+  opposite algebra, which `TauCeti.BrauerGroup.inv_mk_eq_mk_of_algEquiv_op` turns into
+  `[(a,b)]⁻¹ = [(a,b)]`;
+* it vanishes on `(1,b)`, `(a,-a)` and on the Steinberg pair `(a,1-a)`, whose quaternion algebras
+  are isomorphic to `M₂(K)`, and hence by square-class invariance on `(a,b²)` and `(a²,b)`;
+* it is **bilinear**, `[(a,bc)] = [(a,b)] · [(a,c)]`, from the common slot equivalence
+  `ℍ[K,a,b] ⊗[K] ℍ[K,a,c] ≃ₐ[K] ℍ[K,a,bc] ⊗[K] M₂(K)` of
+  `TauCeti.QuaternionAlgebra.tensorAlgEquivTensorMatrix`, read in the Brauer group through the
+  tensor product of central simple algebras;
 * it is invariant under isometry of the binary form `⟨a,b⟩`, from the binary quaternion lemma.
 
 Equality of two symbols is exactly an isomorphism of the underlying quaternion algebras, and a

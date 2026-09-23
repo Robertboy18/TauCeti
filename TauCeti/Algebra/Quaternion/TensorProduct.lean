@@ -33,7 +33,7 @@ it says that the quaternion symbol is multiplicative in each argument, which is 
 The construction is the classical one. Writing `i₁, j₁` and `i₂, j₂` for the generators of the
 two factors, the elements `i₁ ⊗ 1` and `j₁ ⊗ j₂` satisfy the relations of `ℍ[R,a,bc]`
 (`TauCeti.QuaternionAlgebra.linkedBasis`), the elements `i₁ ⊗ i₂` and `1 ⊗ j₂` satisfy those of
-`ℍ[R,a²,c]` (`TauCeti.QuaternionAlgebra.splitBasis`), and the two pairs commute. The universal
+`ℍ[R,a²,c]` (`TauCeti.QuaternionAlgebra.squareBasis`), and the two pairs commute. The universal
 property `QuaternionAlgebra.Basis.liftHom`, its compatibility with commuting generators
 (`QuaternionAlgebra.Basis.commute_liftHom` in `TauCeti/Algebra/Quaternion/Basis.lean`) and
 `Algebra.TensorProduct.lift` then produce an algebra map
@@ -91,7 +91,7 @@ def linkedBasis : Basis (ℍ[R,a,b] ⊗[R] ℍ[R,a,c]) a 0 (b * c) where
 
 /-- In `ℍ[R,a,b] ⊗[R] ℍ[R,a,c]` the elements `i ⊗ i`, `1 ⊗ j` and `i ⊗ k` satisfy the relations of
 `ℍ[R,a²,c]`: they form a quaternion basis of type `(a², c)`. -/
-def splitBasis : Basis (ℍ[R,a,b] ⊗[R] ℍ[R,a,c]) (a ^ 2) 0 c where
+def squareBasis : Basis (ℍ[R,a,b] ⊗[R] ℍ[R,a,c]) (a ^ 2) 0 c where
   i := (Basis.self R).i ⊗ₜ (Basis.self R).i
   j := 1 ⊗ₜ (Basis.self R).j
   k := (Basis.self R).i ⊗ₜ (Basis.self R).k
@@ -116,23 +116,23 @@ def splitBasis : Basis (ℍ[R,a,b] ⊗[R] ℍ[R,a,c]) (a ^ 2) 0 c where
 @[simp] theorem linkedBasis_k :
     (linkedBasis a b c).k = (Basis.self R).k ⊗ₜ (Basis.self R).j := (rfl)
 
-@[simp] theorem splitBasis_i :
-    (splitBasis a b c).i = (Basis.self R).i ⊗ₜ (Basis.self R).i := (rfl)
+@[simp] theorem squareBasis_i :
+    (squareBasis a b c).i = (Basis.self R).i ⊗ₜ (Basis.self R).i := (rfl)
 
-@[simp] theorem splitBasis_j : (splitBasis a b c).j = 1 ⊗ₜ (Basis.self R).j := (rfl)
+@[simp] theorem squareBasis_j : (squareBasis a b c).j = 1 ⊗ₜ (Basis.self R).j := (rfl)
 
-@[simp] theorem splitBasis_k :
-    (splitBasis a b c).k = (Basis.self R).i ⊗ₜ (Basis.self R).k := (rfl)
+@[simp] theorem squareBasis_k :
+    (squareBasis a b c).k = (Basis.self R).i ⊗ₜ (Basis.self R).k := (rfl)
 
-/-- The two quaternion bases `linkedBasis` and `splitBasis` of `ℍ[R,a,b] ⊗[R] ℍ[R,a,c]` induce
+/-- The two quaternion bases `linkedBasis` and `squareBasis` of `ℍ[R,a,b] ⊗[R] ℍ[R,a,c]` induce
 commuting algebra maps. -/
-private theorem commute_linkedBasis_liftHom_splitBasis_liftHom
+private theorem commute_linkedBasis_liftHom_squareBasis_liftHom
     (x : ℍ[R,a,b * c]) (y : ℍ[R,a ^ 2,c]) :
-    Commute ((linkedBasis a b c).liftHom x) ((splitBasis a b c).liftHom y) := by
+    Commute ((linkedBasis a b c).liftHom x) ((squareBasis a b c).liftHom y) := by
   refine Basis.commute_liftHom _ _ ?_ ?_ ?_ ?_ x y
   · exact (Commute.refl _).tmul (Commute.one_left _)
   · exact (Commute.one_right _).tmul (Commute.one_left _)
-  · simp only [Commute, SemiconjBy, linkedBasis_j, splitBasis_i,
+  · simp only [Commute, SemiconjBy, linkedBasis_j, squareBasis_i,
       Algebra.TensorProduct.tmul_mul_tmul, Basis.j_mul_i, Basis.i_mul_j, zero_smul, zero_sub,
       TensorProduct.neg_tmul, TensorProduct.tmul_neg, neg_neg]
   · exact (Commute.one_right _).tmul (Commute.refl _)
@@ -141,13 +141,13 @@ private theorem commute_linkedBasis_liftHom_splitBasis_liftHom
 sending the generators `i ⊗ 1, j ⊗ 1` of the first factor to `i ⊗ 1, j ⊗ j` and the generators
 `1 ⊗ i, 1 ⊗ j` of the second factor to `i ⊗ i, 1 ⊗ j`. -/
 def linkedTensorHom : ℍ[R,a,b * c] ⊗[R] ℍ[R,a ^ 2,c] →ₐ[R] ℍ[R,a,b] ⊗[R] ℍ[R,a,c] :=
-  Algebra.TensorProduct.lift (linkedBasis a b c).liftHom (splitBasis a b c).liftHom
-    (commute_linkedBasis_liftHom_splitBasis_liftHom a b c)
+  Algebra.TensorProduct.lift (linkedBasis a b c).liftHom (squareBasis a b c).liftHom
+    (commute_linkedBasis_liftHom_squareBasis_liftHom a b c)
 
 @[simp]
 theorem linkedTensorHom_tmul (x : ℍ[R,a,b * c]) (y : ℍ[R,a ^ 2,c]) :
     linkedTensorHom a b c (x ⊗ₜ y) =
-      (linkedBasis a b c).liftHom x * (splitBasis a b c).liftHom y := by
+      (linkedBasis a b c).liftHom x * (squareBasis a b c).liftHom y := by
   rw [linkedTensorHom, Algebra.TensorProduct.lift_tmul]
 
 end CommRing
@@ -202,7 +202,7 @@ theorem tensorAlgEquivTensorMatrix_symm_tmul (x : ℍ[K,(a : K),(b : K) * (c : K
     (M : Matrix (Fin 2) (Fin 2) K) :
     (tensorAlgEquivTensorMatrix a b c).symm (x ⊗ₜ M) =
       (linkedBasis (a : K) (b : K) (c : K)).liftHom x *
-        (splitBasis (a : K) (b : K) (c : K)).liftHom ((firstSquareEquivMatrix a c).symm M) := by
+        (squareBasis (a : K) (b : K) (c : K)).liftHom ((firstSquareEquivMatrix a c).symm M) := by
   simp only [tensorAlgEquivTensorMatrix, AlgEquiv.symm_trans_apply,
     Algebra.TensorProduct.congr_symm_apply, Algebra.TensorProduct.map_tmul, AlgEquiv.refl_symm,
     AlgEquiv.coe_toAlgHom, AlgEquiv.coe_refl, id_eq, AlgEquiv.symm_symm, linkedTensorAlgEquiv_apply,
