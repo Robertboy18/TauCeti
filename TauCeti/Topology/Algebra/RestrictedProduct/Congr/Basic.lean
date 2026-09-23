@@ -62,8 +62,10 @@ theorem restrictedProductCongr_apply (U U' : ∀ i, Subgroup (G i))
     restrictedProductCongr U U' h x i = x i :=
   restrictedProductCongrRight_apply U U' _ _ x i
 
-/-- The inverse of the change-of-family equivalence is the identity in every coordinate. -/
-@[simp]
+/-- The inverse of the change-of-family equivalence is the identity in every coordinate.
+
+Not a `simp` lemma: `simp` proves it from `restrictedProductCongr_symm` and
+`restrictedProductCongr_apply`. -/
 theorem restrictedProductCongr_symm_apply (U U' : ∀ i, Subgroup (G i))
     (h : ∀ᶠ i in cofinite, U i = U' i)
     (y : Πʳ i, [G i, (U' i : Set (G i))]) (i : ι) :
@@ -93,12 +95,13 @@ theorem restrictedProductCongr_refl (U : ∀ i, Subgroup (G i)) :
 
 /-- The inverse of the change-of-family equivalence is the change-of-family equivalence in the
 opposite direction. -/
+@[simp]
 theorem restrictedProductCongr_symm (U U' : ∀ i, Subgroup (G i))
     (h : ∀ᶠ i in cofinite, U i = U' i) :
     (restrictedProductCongr U U' h).symm =
       restrictedProductCongr U' U (h.mono fun _ hi ↦ hi.symm) := by
   ext x i
-  simp
+  simp [restrictedProductCongr_symm_apply]
 
 /-- Two successive changes of family compose to the change of family between the outer two
 families. -/
@@ -118,10 +121,11 @@ theorem restrictedProductCongr_naturality {H : ι → Type w} [∀ i, Group (H i
     (U U' : ∀ i, Subgroup (G i)) (V V' : ∀ i, Subgroup (H i))
     (φ : ∀ i, G i →* H i)
     (hφ : ∀ᶠ i in cofinite, Set.MapsTo (φ i) (U i) (V i))
-    (hφ' : ∀ᶠ i in cofinite, Set.MapsTo (φ i) (U' i) (V' i))
     (h : ∀ᶠ i in cofinite, U i = U' i) (h' : ∀ᶠ i in cofinite, V i = V' i) :
     (restrictedProductCongr V V' h').toMonoidHom.comp (restrictedProductMap U V φ hφ) =
-      (restrictedProductMap U' V' φ hφ').comp (restrictedProductCongr U U' h).toMonoidHom := by
+      (restrictedProductMap U' V' φ (by
+        filter_upwards [hφ, h, h'] with i hi hU hV
+        rwa [← hU, ← hV])).comp (restrictedProductCongr U U' h).toMonoidHom := by
   ext x i
   simp
 
