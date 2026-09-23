@@ -13,8 +13,9 @@ public import Mathlib.Topology.Algebra.RestrictedProduct.TopologicalSpace
 The topology of a restricted product `Πʳ i, [R i, A i]` is the final topology over its principal
 stages `Πʳ i, [R i, A i]_[𝓟 T]`, `T` cofinite, and is in general strictly finer than the topology
 induced from the full product `Π i, R i`. Continuity of a map *into* a restricted product therefore
-does not follow from continuity of its coordinates. This file records two criteria that do apply
-when the map is controlled by a single stage.
+does not follow from continuity of its coordinates. This file records two criteria that do apply:
+the first when the map is controlled by a single stage, the second by applying the first stagewise
+through the universal property of the restricted product.
 
 * `continuous_restrictedProduct_iff_of_forall_mem`: a map whose values all lie in one principal
   stage of the filter is continuous exactly when it is continuous into the full product.
