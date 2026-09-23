@@ -23,10 +23,11 @@ binary cofan on `E` and `F`; this file proves that one always exists.
 A common field is easy: embed both extension fields into a separable closure of `K` and take the
 Galois closure `N` of the compositum. The chosen places need more care. Lying over gives primes of
 the integral closure of `R` in `N` above each chosen place separately, but they need not agree,
-and one *cannot* in general keep both embeddings: when `E = F` is a split quadratic extension with
-its two places, the compositum must be the twisted one. Since `N / K` is Galois, its Galois group
-acts transitively on the primes above the closed point of `R`, so one embedding can be twisted by an
-automorphism until the two primes coincide. The common prime then restricts to both chosen places,
+and one *cannot* in general keep both embeddings. For example, if `E` and `F` have the same split
+quadratic extension field but different chosen places, one field embedding must be twisted.
+Since `N / K` is Galois, its Galois group acts transitively on the primes above the closed point
+of `R`, so one embedding can be twisted by an automorphism until the two primes coincide.
+The common prime then restricts to both chosen places,
 and `TauCeti.FiniteDVRExtension.Hom.ofAlgHom` upgrades the two field embeddings to maps of chosen
 extensions.
 
