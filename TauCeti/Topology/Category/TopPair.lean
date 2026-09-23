@@ -16,7 +16,7 @@ topological pairs `TopPair.ofSubsetMap g hB : (X, B) ⟶ (Y, B')`, where the pai
 on points and how it respects identities and composition.
 -/
 
-@[expose] public section
+public section
 
 open CategoryTheory
 

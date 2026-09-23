@@ -224,29 +224,39 @@ def interPairMap : interPair A B ⟶ interPair A' B' :=
 
 @[simp]
 lemma interPairMap_fst_apply (x : (interPair A B).fst) :
-    (Hom.fst (interPairMap g hA hB) x).1 = g x.1 := (rfl)
+    (Hom.fst (interPairMap g hA hB) x).1 = g x.1 :=
+  congrArg Subtype.val (ofSubsetMap_fst_apply
+    (TopCat.ofHom ⟨hA.restrict, g.hom.continuous.restrict hA⟩) (fun _ hx ↦ hB hx) x)
 
 @[simp]
 lemma interPairMap_snd_apply (x : (interPair A B).snd) :
-    (Hom.snd (interPairMap g hA hB) x).1.1 = g x.1.1 := (rfl)
+    (Hom.snd (interPairMap g hA hB) x).1.1 = g x.1.1 :=
+  congrArg Subtype.val (ofSubsetMap_snd_apply
+    (TopCat.ofHom ⟨hA.restrict, g.hom.continuous.restrict hA⟩) (fun _ hx ↦ hB hx) x)
 
 @[simp]
 lemma interPairMap_id (hA : Set.MapsTo (𝟙 X) A A) (hB : Set.MapsTo (𝟙 X) B B) :
     interPairMap (𝟙 X) hA hB = 𝟙 (interPair A B) := by
-  ext : 2 <;> rfl
+  ext : 2
+  · exact Subtype.ext (Subtype.ext (interPairMap_snd_apply _ _ _ _))
+  · exact Subtype.ext (interPairMap_fst_apply _ _ _ _)
 
 @[reassoc]
 lemma interPairMap_comp {Z : TopCat.{w}} (g' : Y ⟶ Z) {A'' B'' : Set Z}
     (hA' : Set.MapsTo g' A' A'') (hB' : Set.MapsTo g' B' B'')
     (hA'' : Set.MapsTo (g ≫ g') A A'') (hB'' : Set.MapsTo (g ≫ g') B B'') :
     interPairMap (g ≫ g') hA'' hB'' = interPairMap g hA hB ≫ interPairMap g' hA' hB' := by
-  ext : 2 <;> rfl
+  ext : 2
+  · exact Subtype.ext (Subtype.ext (by simp))
+  · exact Subtype.ext (by simp)
 
 /-- The excision maps are natural in the excision data. -/
 @[reassoc]
 lemma interPairMap_comp_excisionMap :
     interPairMap g hA hB ≫ excisionMap A' B' = excisionMap A B ≫ ofSubsetMap g hB := by
-  ext : 2 <;> rfl
+  ext : 2
+  · exact Subtype.ext (by simp)
+  · exact (interPairMap_fst_apply g hA hB _).trans (ofSubsetMap_fst_apply g hB _).symm
 
 end Subsets
 

@@ -109,19 +109,19 @@ def restrictMap : P.restrict S ⟶ P'.restrict S' :=
       apply Subtype.ext
       exact congr($(hw).app n x.1))
 
-@[simp]
 lemma restrictMap_left :
     (restrictMap f h).left =
       SSet.Subcomplex.lift ((S.preimage P.hom).ι ≫ f.left) (range_ι_comp_left_le f h) := (rfl)
 
-@[simp]
 lemma restrictMap_right :
     (restrictMap f h).right = SSet.Subcomplex.lift (S.ι ≫ f.right) (range_ι_comp_right_le f h) :=
   (rfl)
 
+@[simp]
 lemma restrictMap_left_app_coe {n : SimplexCategoryᵒᵖ} (x : (P.restrict S).left.obj n) :
     ((restrictMap f h).left.app n x).1 = f.left.app n x.1 := (rfl)
 
+@[simp]
 lemma restrictMap_right_app_coe {n : SimplexCategoryᵒᵖ} (x : (P.restrict S).right.obj n) :
     ((restrictMap f h).right.app n x).1 = f.right.app n x.1 := (rfl)
 
