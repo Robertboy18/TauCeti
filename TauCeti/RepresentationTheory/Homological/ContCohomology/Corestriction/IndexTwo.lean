@@ -45,6 +45,10 @@ produced by `cochainsCor1_apply`; the named corestriction formula is also availa
 
 ## References
 
+* The ProfiniteCohomology roadmap, `TauCetiRoadmap/ProfiniteCohomology/README.md`, Layer 13
+  (the explicit index-2 form), and `TauCetiRoadmap/ProfiniteCohomology/Suggested.lean`: the
+  blueprint for conjugation as `res ∘ cor - id` and its comparison with conjugation by any
+  element outside the subgroup.
 * L. Evens, *A generalization of the transfer map in the cohomology of groups*, Trans. Amer.
   Math. Soc. **108** (1963), 54–65.
 * A. Kozlowski, *The Evens–Kahn formula for the total Stiefel–Whitney class*, Proc. Amer. Math.

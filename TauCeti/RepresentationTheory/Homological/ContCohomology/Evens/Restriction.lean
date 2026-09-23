@@ -32,6 +32,9 @@ ambient group.
 
 ## References
 
+* The ProfiniteCohomology roadmap, `TauCetiRoadmap/ProfiniteCohomology/README.md`, Layer 13,
+  identity 1 of the explicit index-2 form, and `TauCetiRoadmap/ProfiniteCohomology/Suggested.lean`:
+  the blueprint for the restriction identity and the conjugate class defined by `res ∘ cor - id`.
 * L. Evens, *A generalization of the transfer map in the cohomology of groups*, Trans. Amer.
   Math. Soc. **108** (1963), 54–65.
 * A. Kozlowski, *The Evens–Kahn formula for the total Stiefel–Whitney class*, Proc. Amer. Math.
