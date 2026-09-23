@@ -196,14 +196,15 @@ theorem topologicalClosure_closure_eq_top_iff {s : Set G} :
   simp_rw [Subgroup.topologicalClosure_eq_top_iff_forall_map_mk', MonoidHom.map_closure]
 
 /-- **Surjectivity onto a profinite group is detected on the finite quotients.** A continuous
-homomorphism from a compact group into a profinite group whose composite with every quotient map
-onto a finite quotient `G ⧸ U` is surjective is itself surjective: its range is closed, because the
-source is compact, and dense, because it surjects onto every finite quotient. -/
+homomorphism from a compact group into a profinite group `G` whose composite with every quotient
+map onto a finite quotient `G ⧸ U` is surjective is itself surjective. -/
 theorem surjective_of_forall_surjective_mk'_comp {H : Type*} [Group H] [TopologicalSpace H]
     [CompactSpace H] {φ : H →* G} (hφ : Continuous φ)
     (h : ∀ U : OpenNormalSubgroup G,
       Function.Surjective ((QuotientGroup.mk' U.toSubgroup).comp φ)) :
     Function.Surjective φ := by
+  -- The range is closed, because the source is compact, and dense, because it surjects onto
+  -- every finite quotient.
   rw [← MonoidHom.range_eq_top]
   have hdense : φ.range.topologicalClosure = ⊤ :=
     (Subgroup.topologicalClosure_eq_top_iff_forall_map_mk' _).mpr fun U ↦ by

@@ -89,12 +89,13 @@ theorem bijective_of_surjective (hG : IsTopologicallyFinitelyGenerated G) (hf : 
 
 /-- **Continuous surjections in both directions are bijective.** If `G` is a topologically
 finitely generated profinite group and `φ : G →* H`, `ψ : H →* G` are continuous surjections,
-then `φ` is bijective: the endomorphism `ψ ∘ φ` of `G` is surjective, hence bijective by the Hopf
-property, so `φ` is injective. -/
+then `φ` is bijective. -/
 theorem bijective_of_surjective_of_surjective {H : Type*} [Group H] [TopologicalSpace H]
     (hG : IsTopologicallyFinitelyGenerated G) {φ : G →* H} {ψ : H →* G} (hφ : Continuous φ)
     (hφs : Function.Surjective φ) (hψ : Continuous ψ) (hψs : Function.Surjective ψ) :
     Function.Bijective φ := by
+  -- The endomorphism `ψ ∘ φ` of `G` is surjective, hence bijective by the Hopf property, so `φ`
+  -- is injective.
   have hinj := hG.injective_of_surjective (f := ψ.comp φ) (hψ.comp hφ) (hψs.comp hφs)
   rw [MonoidHom.coe_comp] at hinj
   exact ⟨hinj.of_comp, hφs⟩

@@ -116,8 +116,8 @@ theorem continuous_iff_forall_continuous_mk {X : Type*} [TopologicalSpace X] {f 
 `x N : H →* G ⧸ N` into the quotients of `G` by its open normal subgroups, compatible along the
 quotient maps `G ⧸ N → G ⧸ N'` for `N ≤ N'`, is induced by a unique homomorphism `H →* G`. This is
 the universal property of `G` as the inverse limit of its finite quotients, for abstract
-homomorphisms out of a group `H` that carries no topology. -/
-theorem existsUnique_monoidHom_mk'_comp_eq {H : Type*} [Group H]
+homomorphisms out of a monoid `H` that carries no topology. -/
+theorem existsUnique_monoidHom_mk'_comp_eq {H : Type*} [MulOneClass H]
     (x : ∀ N : OpenNormalSubgroup G, H →* G ⧸ N.toSubgroup)
     (hx : ∀ ⦃N N' : OpenNormalSubgroup G⦄ (hle : N ≤ N'),
       (QuotientGroup.mapOfLE hle).comp (x N) = x N') :

@@ -149,12 +149,13 @@ variable {G}
 
 /-- **The continuous finite quotients of the profinite completion are the finite quotients of the
 group.** A finite group `Q` occurs as a continuous finite quotient of the profinite completion of
-`G` exactly when it is a quotient of `G`: a continuous surjection out of the completion restricts
-along the dense canonical image to a surjection out of `G`, and a surjection out of `G` extends
-continuously to the completion by the universal property. -/
+`G` exactly when there is a surjective homomorphism `G →* Q`. -/
 theorem isFiniteContinuousQuotient_iff_exists_surjective {Q : Type u} [Group Q] [Finite Q] :
     IsFiniteContinuousQuotient (ProfiniteGrp.ProfiniteCompletion.completion (GrpCat.of G)) Q ↔
       ∃ f : G →* Q, Function.Surjective f := by
+  -- A continuous surjection out of the completion restricts along the dense canonical image to a
+  -- surjection out of `G`; a surjection out of `G` extends continuously to the completion by the
+  -- universal property.
   let : TopologicalSpace Q := ⊥
   have : DiscreteTopology Q := ⟨rfl⟩
   rw [isFiniteContinuousQuotient_iff_exists_continuous]

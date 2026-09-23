@@ -71,12 +71,13 @@ section Basic
 
 variable {G : Type u} [Group G] [TopologicalSpace G] {Q : Type v} [Group Q]
 
-/-- The defining property of a continuous finite quotient, as a rewrite lemma. The definition
-`TauCeti.IsFiniteContinuousQuotient` is not `@[expose]`d, so importing modules cannot unfold it
-definitionally and rewrite with this lemma instead. -/
+/-- A group `Q` is a continuous finite quotient of `G` exactly when it is finite and there is a
+surjective homomorphism `G →* Q` with open kernel. -/
 theorem isFiniteContinuousQuotient_iff :
     IsFiniteContinuousQuotient G Q ↔
       Finite Q ∧ ∃ f : G →* Q, Function.Surjective f ∧ IsOpen (f.ker : Set G) :=
+  -- The definition is not `@[expose]`d, so importing modules cannot unfold it and rewrite with
+  -- this lemma instead.
   Iff.rfl
 
 /-- The quotient of `G` by an open normal subgroup of finite index is a continuous finite quotient

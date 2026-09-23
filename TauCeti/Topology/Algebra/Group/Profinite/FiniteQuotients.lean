@@ -74,14 +74,15 @@ variable {H : Type v} [Group H] [TopologicalSpace H] [IsTopologicalGroup H] [Com
 /-- **Finite generation passes to a group with fewer continuous finite quotients.** If the
 topological group `G` is topologically finitely generated and every continuous finite quotient of
 the profinite group `H` occurs as a continuous finite quotient of `G`, then `H` is topologically
-finitely generated: each finite quotient of `H` is a finite quotient of `G`, so needs no more
-generators than `G` does, and a uniform bound on the ranks of the finite quotients is topological
-finite generation. -/
+finitely generated. -/
 theorem IsTopologicallyFinitelyGenerated.of_forall_isFiniteContinuousQuotient
     (hG : IsTopologicallyFinitelyGenerated G)
     (h : ∀ (Q : Type v) [Group Q] [Finite Q],
       IsFiniteContinuousQuotient H Q → IsFiniteContinuousQuotient G Q) :
     IsTopologicallyFinitelyGenerated H := by
+  -- Each finite quotient of `H` is a finite quotient of `G`, so needs no more generators than `G`
+  -- does, and a uniform bound on the ranks of the finite quotients is topological finite
+  -- generation.
   obtain ⟨s, hs⟩ := isTopologicallyFinitelyGenerated_iff.mp hG
   refine isTopologicallyFinitelyGenerated_iff_exists_rank_le.mpr ⟨s.card, fun U ↦ ?_⟩
   obtain ⟨_, f, hsurj, hopen⟩ :=
