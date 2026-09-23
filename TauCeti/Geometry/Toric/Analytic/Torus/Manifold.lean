@@ -47,9 +47,7 @@ open Function Set Topology
 
 namespace TauCeti.Toric
 
-variable {N N' ι ι' : Type*}
-  [AddCommGroup N] [Module.Free ℤ N] [Module.Finite ℤ N]
-  [AddCommGroup N'] [Module.Free ℤ N'] [Module.Finite ℤ N']
+variable {N N' ι ι' : Type*} [AddCommGroup N] [AddCommGroup N']
   [Fintype ι] (e : IntegralCharacter N ≃+ (ι →₀ ℤ)) (e' : IntegralCharacter N' ≃+ (ι' →₀ ℤ))
 
 /-- The complex charted-space structure on the torus induced by a free presentation of the

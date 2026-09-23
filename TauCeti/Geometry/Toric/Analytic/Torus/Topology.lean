@@ -9,7 +9,7 @@ public import Mathlib.Analysis.Normed.Ring.Units
 public import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
 public import Mathlib.Topology.Algebra.ContinuousMonoidHom
 public import Mathlib.Topology.Algebra.Group.Units
-public import TauCeti.Geometry.Toric.Analytic.Character
+public import TauCeti.Geometry.Toric.Analytic.Character.Basic
 
 /-!
 # The topology of the coordinate-free complex torus
@@ -51,9 +51,7 @@ namespace TauCeti.Toric
 
 open Topology
 
-variable {N N' ι : Type*}
-  [AddCommGroup N] [Module.Free ℤ N] [Module.Finite ℤ N]
-  [AddCommGroup N'] [Module.Free ℤ N'] [Module.Finite ℤ N']
+variable {N N' ι : Type*} [AddCommGroup N] [AddCommGroup N']
 
 /-- The topology of pointwise convergence on the complex torus: the coarsest topology for which
 evaluation of every integral character is continuous. -/
@@ -202,14 +200,14 @@ theorem range_complexTorusAmbient :
 
 /-- The complex torus is second countable: an integral basis of `N` embeds it openly into a
 finite-dimensional complex space. -/
-instance : SecondCountableTopology (ComplexTorus N) := by
+instance [Module.Free ℤ N] [Module.Finite ℤ N] : SecondCountableTopology (ComplexTorus N) := by
   classical
   exact (isOpenEmbedding_complexTorusAmbient
     (integralCharacterRepr (Module.Free.chooseBasis ℤ N))).isEmbedding.secondCountableTopology
 
 /-- The complex torus is locally compact: an integral basis of `N` embeds it openly into a
 finite-dimensional complex space. -/
-instance : LocallyCompactSpace (ComplexTorus N) := by
+instance [Module.Free ℤ N] [Module.Finite ℤ N] : LocallyCompactSpace (ComplexTorus N) := by
   classical
   exact (isOpenEmbedding_complexTorusAmbient
     (integralCharacterRepr (Module.Free.chooseBasis ℤ N))).locallyCompactSpace
