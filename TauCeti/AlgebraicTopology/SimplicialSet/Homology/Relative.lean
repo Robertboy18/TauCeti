@@ -18,9 +18,9 @@ of these short exact sequences, and deduces that the connecting morphism is natu
 forms a natural transformation `SSetPair.homologyδNatTrans`.
 
 It also records that the quotient maps from ambient to relative homology are natural in the pair:
-they commute with morphisms of simplicial-set pairs, and derives from the five lemma that a
-morphism of pairs which is a quasi-isomorphism on subcomplexes and on ambient simplicial sets is a
-quasi-isomorphism on relative chains (`SSetPair.quasiIso_chainComplexMap`).
+they commute with morphisms of simplicial-set pairs, and that a morphism of pairs which is a
+quasi-isomorphism on subcomplexes and on ambient simplicial sets is a quasi-isomorphism on relative
+chains (`SSetPair.quasiIso_chainComplexMap`), hence induces isomorphisms on relative homology.
 
 The source is Eilenberg--Steenrod, *Foundations of Algebraic Topology*, Chapters I--III.
 -/
@@ -91,8 +91,7 @@ lemma homologyδNatTrans_app (R : A) (n m : ℕ) (h : m + 1 = n) (P : SSetPair.{
   rw [homologyδNatTrans.eq_def]
 
 /-- A morphism of pairs of simplicial sets which is a quasi-isomorphism on the subcomplexes and
-on the ambient simplicial sets is a quasi-isomorphism on relative chains.  This is the five lemma
-applied to the long exact sequences of the two pairs. -/
+on the ambient simplicial sets is a quasi-isomorphism on relative chains. -/
 lemma quasiIso_chainComplexMap {P P' : SSetPair.{w}} (f : P ⟶ P') (R : A)
     [QuasiIso (SSet.chainComplexMap f.left R)] [QuasiIso (SSet.chainComplexMap f.right R)] :
     QuasiIso (SSetPair.chainComplexMap f R) := by

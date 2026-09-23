@@ -6,9 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.AlgebraicTopology.SimplicialSet.Homology.Excision
-public import TauCeti.AlgebraicTopology.SimplicialSet.Homology.Restrict
-public import TauCeti.AlgebraicTopology.Singular.Relative
-public import TauCeti.AlgebraicTopology.Singular.Subdivision.Small.Equiv
+public import TauCeti.AlgebraicTopology.Singular.Subdivision.Small.Relative
 
 /-!
 # Excision for relative singular homology
@@ -26,12 +24,22 @@ if the ambient space of `P'` has an open cover each of whose members lies in the
 or in the image of `f`, then `f` induces isomorphisms on relative singular homology
 (`TopPair.isIso_singularHomologyMap_of_open_cover`).
 
-The proof is Hatcher's.  By the small-chain theorem, restricting the singular pair of `P'` to the
-simplices subordinate to the cover does not change relative homology
-(`TopPair.isIso_homologyMap_restrictι_smallSingularSubcomplex`), and likewise for `P` and the
-pulled-back cover.  Between the restricted pairs, `f` induces a bijection on the simplices of the
-ambient spaces not lying in the subspaces, so it is an isomorphism on relative chains by the
-complementary-simplex criterion of simplicial excision.
+Two intermediate results are available on their own.  The relative small-chain theorem
+(`TopPair.isIso_homologyMap_restrictι_smallSingularSubcomplex`) identifies the relative homology
+of a topological pair with that of its singular pair restricted to the simplices subordinate to
+any open cover of the ambient space.  Under the hypotheses of
+`TopPair.isIso_singularHomologyMap_of_open_cover`, the map `f` puts the simplices subordinate to
+the pulled-back cover which do not lie in the subspace of `P` in bijection with the simplices
+subordinate to the cover which do not lie in the subspace of `P'`
+(`TopPair.relativeSimplex_restrictMap_bijective`); this is the form in which the hypotheses on `f`
+and the cover enter, and it feeds the complementary-simplex criterion of simplicial excision.
+
+A continuous map `g : X ⟶ Y` carrying `A` into `A'` and `B` into `B'` is a map of excision data:
+it induces maps of pairs `TopPair.interPairMap g hA hB : (A, A ∩ B) ⟶ (A', A' ∩ B')` and
+`TopPair.ofSubsetMap g hB : (X, B) ⟶ (Y, B')` forming a commutative square with the excision maps
+(`TopPair.interPairMap_comp_excisionMap`), so the excision isomorphisms are natural in the data.
+Compatibility with the connecting morphism of the pair is `TopPair.singularHomologyδ_naturality`
+applied to the excision map.
 
 ## References
 
@@ -51,73 +59,12 @@ namespace TopPair
 
 variable {A : Type u} [Category.{v} A] [HasCoproducts.{w} A] [Abelian A] (R : A)
 
-section RelativeSmall
-
-variable (P : TopPair.{w}) {ι : Type*} (U : ι → Set P.fst)
-
-/-- The singular simplices of the ambient space of a topological pair whose image lies in a member
-of the family `U`, as a subcomplex of the ambient simplicial set of the singular pair of `P`.  It is
-`TopCat.smallSingularSubcomplex` of the ambient space, typed so that the singular pair can be
-restricted to it. -/
-def smallSingularSubcomplex : (toSSetPair.obj P).right.Subcomplex :=
-  P.fst.smallSingularSubcomplex U
-
-@[simp]
-lemma mem_smallSingularSubcomplex_iff {n : SimplexCategoryᵒᵖ}
-    (σ : (toSSetPair.obj P).right.obj n) :
-    σ ∈ (P.smallSingularSubcomplex U).obj n ↔
-      ∃ i, Set.range (P.fst.toSSetObjEquiv n σ) ⊆ U i :=
-  TopCat.mem_smallSingularSubcomplex_iff P.fst U σ
-
-/-- The preimage of the small subcomplex of a pair in the singular simplicial set of its subspace
-is the small subcomplex of the subspace for the restricted family. -/
-lemma smallSingularSubcomplex_preimage_hom :
-    (P.smallSingularSubcomplex U).preimage (toSSetPair.obj P).hom =
-      P.snd.smallSingularSubcomplex (fun i ↦ P.map ⁻¹' U i) :=
-  TopCat.preimage_smallSingularSubcomplex U P.map
-
-variable (hU : ∀ i, IsOpen (U i)) (hcov : ⋃ i, U i = Set.univ)
-
-include hU hcov in
-/-- **The relative small-chain theorem.** Restricting the singular pair of a topological pair to
-the simplices subordinate to an open cover of the ambient space does not change relative
-homology. -/
-theorem isIso_homologyMap_restrictι_smallSingularSubcomplex (n : ℕ) :
-    IsIso (SSetPair.homologyMap
-      ((toSSetPair.obj P).restrictι (P.smallSingularSubcomplex U)) R n) := by
-  refine SSetPair.isIso_homologyMap_restrictι R ?_ ?_ n
-  · exact (congrArg (fun T : (toSSetPair.obj P).left.Subcomplex ↦
-        QuasiIso (SSet.chainComplexMap T.ι R))
-      (P.smallSingularSubcomplex_preimage_hom U)).mpr
-      (TauCeti.quasiIso_chainComplexMap_smallSingularSubcomplex_ι R (fun i ↦ P.map ⁻¹' U i)
-        (fun i ↦ (hU i).preimage P.map.hom.continuous)
-        (by rw [← Set.preimage_iUnion, hcov, Set.preimage_univ]))
-  · exact TauCeti.quasiIso_chainComplexMap_smallSingularSubcomplex_ι R U hU hcov
-
-end RelativeSmall
-
 section Excision
-
-/-- A simplex of the singular pair of `P` restricted to a subcomplex `S` comes from the subspace
-exactly when its image lies in the subspace. -/
-lemma mem_range_restrict_hom_app_iff (P : TopPair.{w}) (S : (toSSetPair.obj P).right.Subcomplex)
-    {n : SimplexCategoryᵒᵖ} (x : ((toSSetPair.obj P).restrict S).right.obj n) :
-    x ∈ Set.range (((toSSetPair.obj P).restrict S).hom.app n) ↔
-      Set.range (P.fst.toSSetObjEquiv n x.1) ⊆ Set.range P.map :=
-  (SSetPair.mem_range_restrict_hom_app_iff _ _ x).trans
-    (P.isEmbedding_map.isInducing.mem_range_toSSet_map_app_iff n x.1)
 
 variable {P P' : TopPair.{w}} (f : P ⟶ P') (hf : IsEmbedding (Hom.fst f))
   (hsnd : ∀ x, Hom.fst f x ∈ Set.range P'.map → x ∈ Set.range P.map)
   {ι : Type*} (U : ι → Set P'.fst) (hU : ∀ i, IsOpen (U i)) (hcov : ⋃ i, U i = Set.univ)
   (hUf : ∀ i, U i ⊆ Set.range P'.map ∨ U i ⊆ Set.range (Hom.fst f))
-
-/-- A map of pairs carries the simplices small for the pulled-back family into the simplices small
-for the family. -/
-lemma smallSingularSubcomplex_le_preimage :
-    P.smallSingularSubcomplex (fun i ↦ Hom.fst f ⁻¹' U i) ≤
-      (P'.smallSingularSubcomplex U).preimage (toSSetPair.map f).right :=
-  (TopCat.preimage_smallSingularSubcomplex U (Hom.fst f)).ge
 
 include hsnd in
 /-- If the subspace of `P` is the full preimage of the subspace of `P'`, then a map of pairs sends
@@ -126,8 +73,8 @@ small simplices not lying in the subspace of `P` to small simplices not lying in
 lemma mem_relativeSimplex_restrictMap_right_app (n : ℕ)
     (x : ((toSSetPair.obj P).restrict
         (P.smallSingularSubcomplex (fun i ↦ Hom.fst f ⁻¹' U i))).RelativeSimplex n) :
-    (SSetPair.restrictMap (toSSetPair.map f) (smallSingularSubcomplex_le_preimage f U)).right.app
-        _ x.1 ∈
+    (SSetPair.restrictMap (toSSetPair.map f)
+        (smallSingularSubcomplex_le_preimage f U)).right.app _ x.1 ∈
       ((toSSetPair.obj P').restrict (P'.smallSingularSubcomplex U)).RelativeSimplex n := by
   intro hx
   obtain ⟨a, ha⟩ := (SSetPair.mem_range_restrict_hom_app_iff _ _ _).mp hx
@@ -145,7 +92,7 @@ ambient spaces, whose subspace is the full preimage of the subspace of the targe
 cover of the target each of whose members lies in the subspace or in the image, the simplices small
 for the pulled-back cover not lying in the subspace correspond bijectively to the simplices small
 for the cover not lying in the subspace of the target. -/
-lemma bijective_relativeSimplex_restrictMap (n : ℕ) :
+lemma relativeSimplex_restrictMap_bijective (n : ℕ) :
     Function.Bijective (fun x : ((toSSetPair.obj P).restrict
         (P.smallSingularSubcomplex (fun i ↦ Hom.fst f ⁻¹' U i))).RelativeSimplex n ↦
       (⟨_, mem_relativeSimplex_restrictMap_right_app f hsnd U n x⟩ :
@@ -201,7 +148,7 @@ theorem isIso_singularHomologyMap_of_open_cover (n : ℕ) :
   have h₃ : IsIso (SSetPair.homologyMap (SSetPair.restrictMap (toSSetPair.map f)
       (smallSingularSubcomplex_le_preimage f U)) R n) :=
     SSetPair.isIso_homologyMap_of_relativeSimplex_equiv _ R
-      (fun m ↦ Equiv.ofBijective _ (bijective_relativeSimplex_restrictMap f hf hsnd U hUf m))
+      (fun m ↦ Equiv.ofBijective _ (relativeSimplex_restrictMap_bijective f hf hsnd U hUf m))
       (fun _ _ ↦ rfl) n
   have hsq := SSetPair.restrictMap_comp_restrictι (toSSetPair.map f)
     (smallSingularSubcomplex_le_preimage f U)
@@ -263,6 +210,41 @@ theorem isIso_singularHomologyMap_excisionMap_compl (Z : Set X) (h : closure Z �
   by_cases hx : x ∈ closure Z
   · exact Or.inr (h hx)
   · exact Or.inl hx
+
+variable {A B} {Y : TopCat.{w}} (g : X ⟶ Y) {A' B' : Set Y}
+  (hA : Set.MapsTo g A A') (hB : Set.MapsTo g B B')
+
+/-- A continuous map `g : X ⟶ Y` carrying `B` into `B'` induces a map of pairs
+`(X, B) ⟶ (Y, B')`. -/
+def ofSubsetMap : ofSubset B ⟶ ofSubset B' :=
+  TopPair.ofHom g (TopCat.ofHom ⟨hB.restrict, g.hom.continuous.restrict hB⟩)
+
+@[simp]
+lemma ofSubsetMap_fst_apply (x : (ofSubset B).fst) : Hom.fst (ofSubsetMap g hB) x = g x := (rfl)
+
+@[simp]
+lemma ofSubsetMap_snd_apply (x : (ofSubset B).snd) :
+    (Hom.snd (ofSubsetMap g hB) x).1 = g x.1 := (rfl)
+
+/-- A map of excision data: a continuous map `g : X ⟶ Y` carrying `A` into `A'` and `B` into `B'`
+induces a map of pairs `(A, A ∩ B) ⟶ (A', A' ∩ B')`. -/
+def interPairMap : interPair A B ⟶ interPair A' B' :=
+  ofSubsetMap (TopCat.ofHom ⟨hA.restrict, g.hom.continuous.restrict hA⟩)
+    (fun _ hx ↦ hB hx)
+
+@[simp]
+lemma interPairMap_fst_apply (x : (interPair A B).fst) :
+    (Hom.fst (interPairMap g hA hB) x).1 = g x.1 := (rfl)
+
+@[simp]
+lemma interPairMap_snd_apply (x : (interPair A B).snd) :
+    (Hom.snd (interPairMap g hA hB) x).1.1 = g x.1.1 := (rfl)
+
+/-- The excision maps are natural in the excision data. -/
+@[reassoc]
+lemma interPairMap_comp_excisionMap :
+    interPairMap g hA hB ≫ excisionMap A' B' = excisionMap A B ≫ ofSubsetMap g hB := by
+  ext : 2 <;> rfl
 
 end Subsets
 
