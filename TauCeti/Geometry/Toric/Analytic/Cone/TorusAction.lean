@@ -24,10 +24,6 @@ the distinguished point, at which every monomial takes the value `1`, is exactly
 all ray coordinates are nonzero; the torus acts freely on it, so it is a copy of the torus, and it
 is open and dense in the chart. This is the dense torus of the affine toric variety of `σ`.
 
-The finiteness and freeness of the lattice are consequences of the integral-lattice hypothesis,
-but they are taken as instances here because the carrier `ComplexTorus N` is stated in terms of
-them.
-
 ## Main declarations
 
 * `TauCeti.Toric.coneChartEquiv_smul_fst` and `TauCeti.Toric.coneChartEquiv_smul_snd`: in the
@@ -56,7 +52,7 @@ namespace TauCeti.Toric
 
 open AffineSemigroupComplexPoint
 
-variable {N V ι : Type*} [AddCommGroup N] [Module.Free ℤ N] [Module.Finite ℤ N]
+variable {N V ι : Type*} [AddCommGroup N]
   [AddCommGroup V] [Module ℝ V] {i : N →+ V} {σ : PointedCone ℝ V} {s : ℕ}
 
 variable (hi : IsIntegralLattice i) (hσ : IsToricCone i σ)
@@ -82,7 +78,6 @@ theorem coneChartEquiv_smul_snd (T : ComplexTorus N)
       T (b.coord (Sum.inr j)).toAddMonoidHom * (coneChartEquiv hi hσ hb x).2 j :=
   Units.ext (by simp)
 
-omit [Module.Free ℤ N] [Module.Finite ℤ N] in
 /-- The distinguished point has all chart coordinates equal to `1`. -/
 @[simp]
 theorem coneChartEquiv_default :
@@ -96,6 +91,7 @@ functionals of an extending basis lie in the dual semigroup and determine a toru
 theorem complexTorus_smul_default_injective :
     Function.Injective fun T : ComplexTorus N ↦
       T • (default : AffineSemigroupComplexPoint (dualSemigroup hi σ)) := by
+  let _ := hi.finite
   intro T T' h
   refine b.complexTorusCoordinates.injective (funext fun c ↦ ?_)
   have h' := congrArg (coneChartEquiv hi hσ hb) h
@@ -113,6 +109,7 @@ theorem mem_orbit_complexTorus_default_iff
     x ∈ MulAction.orbit (ComplexTorus N)
         (default : AffineSemigroupComplexPoint (dualSemigroup hi σ)) ↔
       ∀ ρ, (coneChartEquiv hi hσ hb x).1 ρ ≠ 0 := by
+  let _ := hi.finite
   refine ⟨?_, fun h ↦ ?_⟩
   · rintro ⟨T, rfl⟩ ρ
     simp
