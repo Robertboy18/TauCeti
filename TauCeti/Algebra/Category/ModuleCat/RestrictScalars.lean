@@ -63,10 +63,6 @@ theorem restrictScalarsSemilinearMap_apply (f : R →+* S) (M : ModuleCat.{v} S)
     f.restrictScalarsSemilinearMap M m = m :=
   (rfl)
 
-theorem restrictScalarsSemilinearMap_bijective (f : R →+* S) (M : ModuleCat.{v} S) :
-    Function.Bijective (f.restrictScalarsSemilinearMap M) :=
-  Function.bijective_id
-
 /-- **Finite generation along a surjective ring homomorphism.** Restricting scalars along a
 surjective ring homomorphism preserves and reflects finite generation: every scalar of `S` is the
 image of a scalar of `R`, so the two spans of a set agree. -/
@@ -75,7 +71,7 @@ theorem finite_restrictScalars_iff (f : R →+* S) (hf : Function.Surjective f)
     Module.Finite R ((ModuleCat.restrictScalars f).obj M) ↔ Module.Finite S M :=
   haveI : RingHomSurjective f := ⟨hf⟩
   LinearMap.finite_iff_of_bijective (f.restrictScalarsSemilinearMap M)
-    (f.restrictScalarsSemilinearMap_bijective M)
+    Function.bijective_id
 
 /-- Restricting scalars along a surjective ring homomorphism preserves and reflects the object
 property of being finitely generated. -/

@@ -45,8 +45,6 @@ The API is dot notation on the ring isomorphism: use `e.finiteModulesK0Equiv`,
 * `RingEquiv.isFG_inverseImage_restrictScalars` and
   `RingEquiv.finiteProjectiveModules_inverseImage_restrictScalars`: restriction of scalars along a
   ring isomorphism pulls the two object properties back to each other.
-* `RingEquiv.isConflationExact_restrictScalars`: restriction of scalars along a ring isomorphism
-  is conflation-exact for the canonical exact structures.
 * `RingEquiv.finiteModulesK0Equiv_refl`, `RingEquiv.finiteModulesK0Equiv_symm` and
   `RingEquiv.finiteModulesK0Equiv_trans`, with their `finiteProjectiveModulesK0Equiv`
   companions: the induced isomorphisms are functorial in the ring isomorphism.
@@ -89,13 +87,6 @@ theorem finiteProjectiveModules_inverseImage_restrictScalars :
   funext M
   rw [prop_inverseImage_iff, finiteProjectiveModules_iff, finiteProjectiveModules_iff,
     e.toRingHom.finite_restrictScalars_iff e.surjective, e.projective_restrictScalars_iff]
-
-/-- Restriction of scalars along a ring isomorphism is conflation-exact for the canonical exact
-structures of the two module categories. -/
-theorem isConflationExact_restrictScalars :
-    (ExactStructure.abelian (ModuleCat.{u} S)).IsConflationExact
-      (ExactStructure.abelian (ModuleCat.{u} R)) (ModuleCat.restrictScalars e.toRingHom) :=
-  ExactStructure.isConflationExact_abelian _
 
 /-! ### The equivalences of module subcategories
 
@@ -197,7 +188,7 @@ theorem isConflationExact_finiteModulesEquivalence_functor :
     (finiteModulesExactStructure S).IsConflationExact (finiteModulesExactStructure R)
       e.finiteModulesEquivalence.functor :=
   Equivalence.isConflationExact_finiteModules_congrFullSubcategory_functor _
-    e.isConflationExact_restrictScalars _
+    (ExactStructure.isConflationExact_abelian _) _
 
 /-- The inverse of the equivalence of finitely generated module categories induced by a ring
 isomorphism is conflation-exact. -/
@@ -205,7 +196,7 @@ theorem isConflationExact_finiteModulesEquivalence_inverse :
     (finiteModulesExactStructure R).IsConflationExact (finiteModulesExactStructure S)
       e.finiteModulesEquivalence.inverse :=
   Equivalence.isConflationExact_finiteModules_congrFullSubcategory_inverse _
-    e.symm.isConflationExact_restrictScalars _
+    (ExactStructure.isConflationExact_abelian _) _
 
 /-- The equivalence of finitely generated projective module categories induced by a ring
 isomorphism is conflation-exact. -/
@@ -213,7 +204,7 @@ theorem isConflationExact_finiteProjectiveModulesEquivalence_functor :
     (finiteProjectiveModulesExactStructure S).IsConflationExact
       (finiteProjectiveModulesExactStructure R) e.finiteProjectiveModulesEquivalence.functor :=
   Equivalence.isConflationExact_finiteProjectiveModules_congrFullSubcategory_functor _
-    e.isConflationExact_restrictScalars _
+    (ExactStructure.isConflationExact_abelian _) _
 
 /-- The inverse of the equivalence of finitely generated projective module categories induced by
 a ring isomorphism is conflation-exact. -/
@@ -221,7 +212,7 @@ theorem isConflationExact_finiteProjectiveModulesEquivalence_inverse :
     (finiteProjectiveModulesExactStructure R).IsConflationExact
       (finiteProjectiveModulesExactStructure S) e.finiteProjectiveModulesEquivalence.inverse :=
   Equivalence.isConflationExact_finiteProjectiveModules_congrFullSubcategory_inverse _
-    e.symm.isConflationExact_restrictScalars _
+    (ExactStructure.isConflationExact_abelian _) _
 
 /-! ### The induced isomorphisms of Grothendieck groups -/
 
