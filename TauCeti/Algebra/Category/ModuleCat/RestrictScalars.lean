@@ -23,16 +23,19 @@ finiteness properties defining `K₀(proj R)` and `G₀(mod R)` survive it.
 * Along a ring **isomorphism**, projectivity is preserved and reflected: the identity of the
   module is then a semilinear equivalence between the two module structures.
 
+The API is dot notation on the ring homomorphism, respectively the ring isomorphism: use
+`f.finite_restrictScalars_iff hf M` and `e.projective_restrictScalars_iff M`.
+
 ## Main definitions
 
-* `ModuleCat.restrictScalarsSemilinearMap`: the identity of a module, as a semilinear map from its
+* `RingHom.restrictScalarsSemilinearMap`: the identity of a module, as a semilinear map from its
   restriction of scalars.
 
 ## Main results
 
-* `ModuleCat.finite_restrictScalars_iff` and `ModuleCat.isFG_restrictScalars_iff`: finite
-  generation is invariant under restriction of scalars along a surjective ring homomorphism.
-* `ModuleCat.projective_restrictScalars_iff`: projectivity is invariant under restriction of
+* `RingHom.finite_restrictScalars_iff` and `RingHom.isFG_restrictScalars_iff`: finite generation
+  is invariant under restriction of scalars along a surjective ring homomorphism.
+* `RingEquiv.projective_restrictScalars_iff`: projectivity is invariant under restriction of
   scalars along a ring isomorphism.
 -/
 
@@ -42,26 +45,26 @@ open CategoryTheory
 
 universe v u₁ u₂
 
-namespace ModuleCat
-
 variable {R : Type u₁} {S : Type u₂} [Ring R] [Ring S]
+
+namespace RingHom
 
 /-- The identity map of an `S`-module `M`, as an `f`-semilinear map from `M` with scalars
 restricted along `f : R →+* S` to `M` itself. -/
 def restrictScalarsSemilinearMap (f : R →+* S) (M : ModuleCat.{v} S) :
-    (restrictScalars f).obj M →ₛₗ[f] M where
+    (ModuleCat.restrictScalars f).obj M →ₛₗ[f] M where
   toFun m := m
   map_add' _ _ := rfl
-  map_smul' r m := restrictScalars.smul_def f r m
+  map_smul' r m := ModuleCat.restrictScalars.smul_def f r m
 
 @[simp]
 theorem restrictScalarsSemilinearMap_apply (f : R →+* S) (M : ModuleCat.{v} S)
-    (m : (restrictScalars f).obj M) :
-    restrictScalarsSemilinearMap f M m = m :=
+    (m : (ModuleCat.restrictScalars f).obj M) :
+    f.restrictScalarsSemilinearMap M m = m :=
   (rfl)
 
 theorem restrictScalarsSemilinearMap_bijective (f : R →+* S) (M : ModuleCat.{v} S) :
-    Function.Bijective (restrictScalarsSemilinearMap f M) :=
+    Function.Bijective (f.restrictScalarsSemilinearMap M) :=
   Function.bijective_id
 
 /-- **Finite generation along a surjective ring homomorphism.** Restricting scalars along a
@@ -69,30 +72,35 @@ surjective ring homomorphism preserves and reflects finite generation: every sca
 image of a scalar of `R`, so the two spans of a set agree. -/
 theorem finite_restrictScalars_iff (f : R →+* S) (hf : Function.Surjective f)
     (M : ModuleCat.{v} S) :
-    Module.Finite R ((restrictScalars f).obj M) ↔ Module.Finite S M :=
+    Module.Finite R ((ModuleCat.restrictScalars f).obj M) ↔ Module.Finite S M :=
   haveI : RingHomSurjective f := ⟨hf⟩
-  LinearMap.finite_iff_of_bijective (restrictScalarsSemilinearMap f M)
-    (restrictScalarsSemilinearMap_bijective f M)
+  LinearMap.finite_iff_of_bijective (f.restrictScalarsSemilinearMap M)
+    (f.restrictScalarsSemilinearMap_bijective M)
 
 /-- Restricting scalars along a surjective ring homomorphism preserves and reflects the object
 property of being finitely generated. -/
 theorem isFG_restrictScalars_iff (f : R →+* S) (hf : Function.Surjective f)
     (M : ModuleCat.{v} S) :
-    isFG R ((restrictScalars f).obj M) ↔ isFG S M := by
-  rw [isFG_iff, isFG_iff, finite_restrictScalars_iff f hf]
+    ModuleCat.isFG R ((ModuleCat.restrictScalars f).obj M) ↔ ModuleCat.isFG S M := by
+  rw [ModuleCat.isFG_iff, ModuleCat.isFG_iff, f.finite_restrictScalars_iff hf]
+
+end RingHom
+
+namespace RingEquiv
 
 /-- **Projectivity along a ring isomorphism.** Restricting scalars along a ring isomorphism
 preserves and reflects projectivity: the identity is a semilinear equivalence between the two
 module structures, and projectivity transports along semilinear equivalences. -/
 theorem projective_restrictScalars_iff (e : R ≃+* S) (M : ModuleCat.{v} S) :
-    Module.Projective R ((restrictScalars e.toRingHom).obj M) ↔ Module.Projective S M := by
+    Module.Projective R ((ModuleCat.restrictScalars e.toRingHom).obj M) ↔
+      Module.Projective S M := by
   have : RingHomInvPair e.toRingHom e.symm.toRingHom := RingHomInvPair.of_ringEquiv e
   have : RingHomInvPair e.symm.toRingHom e.toRingHom := RingHomInvPair.of_ringEquiv_symm e
-  let φ : (restrictScalars e.toRingHom).obj M ≃ₛₗ[e.toRingHom] M :=
-    { restrictScalarsSemilinearMap e.toRingHom M with
-      invFun := id
+  let φ : (ModuleCat.restrictScalars e.toRingHom).obj M ≃ₛₗ[e.toRingHom] M :=
+    { e.toRingHom.restrictScalarsSemilinearMap M with
+      invFun := fun m ↦ m
       left_inv := fun _ ↦ rfl
       right_inv := fun _ ↦ rfl }
   exact ⟨fun _ ↦ Module.Projective.of_equiv φ, fun _ ↦ Module.Projective.of_equiv φ.symm⟩
 
-end ModuleCat
+end RingEquiv

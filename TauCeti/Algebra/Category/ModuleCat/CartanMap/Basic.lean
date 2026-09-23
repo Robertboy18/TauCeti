@@ -76,10 +76,10 @@ Krull--Schmidt hypotheses of a finite-dimensional algebra.
   generated projectives is the split one.
 * `TauCeti.finiteModulesExactK0Equiv`: the explicit comparison between the named finite-module
   exact structure and the structure induced directly from all modules.
-* `TauCeti.isConflationExact_finiteModules_congrFullSubcategory_functor` and
-  `TauCeti.isConflationExact_finiteProjectiveModules_congrFullSubcategory_functor`, with their
-  `_inverse` companions: an exact equivalence of module categories respecting the two object
-  properties restricts to exact equivalences of the two subcategories.
+* `CategoryTheory.Equivalence.isConflationExact_finiteModules_congrFullSubcategory_functor` and
+  its `finiteProjectiveModules` and `_inverse` companions: an exact equivalence of module
+  categories respecting the two object properties restricts to exact equivalences of the two
+  subcategories. These are dot notation on the equivalence.
 * `TauCeti.cartanMap_apply`: the Cartan map factors through the Grothendieck group of the modules
   admitting finite resolutions by finitely generated projectives, by the resolution theorem.
 * `TauCeti.moduleEulerClassOf_eq`: every finite projective resolution computes the module Euler
@@ -282,9 +282,16 @@ noncomputable def cartanMap :
 -- companion. They are recorded here, rather than at their point of use, because the bodies of
 -- `finiteModulesExactStructure` and `finiteProjectiveModulesExactStructure` are not exposed, so
 -- only this module can identify these structures with `ExactStructure.fullSubcategory`.
-section Equivalence
+end TauCeti
 
-variable {R} {S : Type u} [Ring S] (e : ModuleCat.{u} S ≌ ModuleCat.{u} R) [e.functor.Additive]
+namespace CategoryTheory.Equivalence
+
+open TauCeti
+
+universe u
+
+variable {R S : Type u} [Ring R] [Ring S] (e : ModuleCat.{u} S ≌ ModuleCat.{u} R)
+  [e.functor.Additive]
 
 /-- An exact equivalence of module categories pulling the finitely generated `R`-modules back to
 the finitely generated `S`-modules restricts to a conflation-exact functor between the finitely
@@ -330,7 +337,15 @@ theorem isConflationExact_finiteProjectiveModules_congrFullSubcategory_inverse
       (finiteProjectiveModulesExactStructure S) (e.congrFullSubcategory h).inverse :=
   ExactStructure.isConflationExact_congrFullSubcategory_inverse _ _ e hG h
 
-end Equivalence
+end CategoryTheory.Equivalence
+
+namespace TauCeti
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.ObjectProperty
+
+universe u
+
+variable (R : Type u) [Ring R]
 
 /-! ### The resolution theorem -/
 

@@ -29,28 +29,32 @@ For an algebra isomorphism `e : A ≃ₐ[k] B` the statements apply to `e.toRing
 `K₀(proj A)`, `G₀(mod A)` and the Cartan map are invariants of the isomorphism class of the
 algebra `A`.
 
+The API is dot notation on the ring isomorphism: use `e.finiteModulesK0Equiv`,
+`e.finiteProjectiveModulesK0Equiv` and `e.cartanMap_bijective_iff`.
+
 ## Main definitions
 
-* `TauCeti.finiteModulesEquivalenceOfRingEquiv` and
-  `TauCeti.finiteProjectiveModulesEquivalenceOfRingEquiv`: restriction of scalars along a ring
-  isomorphism, as equivalences between the finitely generated, respectively finitely generated
-  projective, modules over the two rings.
-* `TauCeti.finiteModulesK0EquivOfRingEquiv` and
-  `TauCeti.finiteProjectiveModulesK0EquivOfRingEquiv`: the induced isomorphisms
-  `G₀(mod S) ≃+ G₀(mod R)` and `K₀(proj S) ≃+ K₀(proj R)`.
+* `RingEquiv.finiteModulesEquivalence` and `RingEquiv.finiteProjectiveModulesEquivalence`:
+  restriction of scalars along a ring isomorphism, as equivalences between the finitely generated,
+  respectively finitely generated projective, modules over the two rings.
+* `RingEquiv.finiteModulesK0Equiv` and `RingEquiv.finiteProjectiveModulesK0Equiv`: the induced
+  isomorphisms `G₀(mod S) ≃+ G₀(mod R)` and `K₀(proj S) ≃+ K₀(proj R)`.
 
 ## Main results
 
-* `TauCeti.isFG_inverseImage_restrictScalars` and
-  `TauCeti.finiteProjectiveModules_inverseImage_restrictScalars`: restriction of scalars along a
+* `RingEquiv.isFG_inverseImage_restrictScalars` and
+  `RingEquiv.finiteProjectiveModules_inverseImage_restrictScalars`: restriction of scalars along a
   ring isomorphism pulls the two object properties back to each other.
-* `TauCeti.isConflationExact_restrictScalars_of_ringEquiv`: restriction of scalars along a ring
-  isomorphism is conflation-exact for the canonical exact structures.
-* `TauCeti.cartanMap_comp_finiteProjectiveModulesK0EquivOfRingEquiv` and
-  `TauCeti.cartanMap_finiteProjectiveModulesK0EquivOfRingEquiv`: the Cartan maps of `R` and `S`
-  commute with the two induced isomorphisms.
-* `TauCeti.cartanMap_bijective_iff`: the Cartan map of `R` is bijective if and only if the Cartan
-  map of `S` is.
+* `RingEquiv.isConflationExact_restrictScalars`: restriction of scalars along a ring isomorphism
+  is conflation-exact for the canonical exact structures.
+* `RingEquiv.finiteModulesK0Equiv_refl`, `RingEquiv.finiteModulesK0Equiv_symm` and
+  `RingEquiv.finiteModulesK0Equiv_trans`, with their `finiteProjectiveModulesK0Equiv`
+  companions: the induced isomorphisms are functorial in the ring isomorphism.
+* `RingEquiv.cartanMap_comp_finiteProjectiveModulesK0Equiv` and
+  `RingEquiv.cartanMap_finiteProjectiveModulesK0Equiv`: the Cartan maps of `R` and `S` commute
+  with the two induced isomorphisms.
+* `RingEquiv.cartanMap_bijective_iff`: the Cartan map of `R` is bijective if and only if the
+  Cartan map of `S` is.
 
 ## References
 
@@ -60,9 +64,9 @@ algebra `A`.
 
 public section
 
-namespace TauCeti
+namespace RingEquiv
 
-open CategoryTheory CategoryTheory.ObjectProperty
+open CategoryTheory CategoryTheory.ObjectProperty TauCeti
 
 universe u
 
@@ -75,7 +79,7 @@ back to the finitely generated `S`-modules. -/
 theorem isFG_inverseImage_restrictScalars :
     (ModuleCat.isFG.{u} R).inverseImage (ModuleCat.restrictScalars e.toRingHom) =
       ModuleCat.isFG.{u} S :=
-  funext fun M ↦ propext (ModuleCat.isFG_restrictScalars_iff e.toRingHom e.surjective M)
+  funext fun M ↦ propext (e.toRingHom.isFG_restrictScalars_iff e.surjective M)
 
 /-- Restriction of scalars along a ring isomorphism pulls the finitely generated projective
 `R`-modules back to the finitely generated projective `S`-modules. -/
@@ -84,12 +88,11 @@ theorem finiteProjectiveModules_inverseImage_restrictScalars :
       finiteProjectiveModules S := by
   funext M
   rw [prop_inverseImage_iff, finiteProjectiveModules_iff, finiteProjectiveModules_iff,
-    ModuleCat.finite_restrictScalars_iff e.toRingHom e.surjective,
-    ModuleCat.projective_restrictScalars_iff e]
+    e.toRingHom.finite_restrictScalars_iff e.surjective, e.projective_restrictScalars_iff]
 
 /-- Restriction of scalars along a ring isomorphism is conflation-exact for the canonical exact
 structures of the two module categories. -/
-theorem isConflationExact_restrictScalars_of_ringEquiv :
+theorem isConflationExact_restrictScalars :
     (ExactStructure.abelian (ModuleCat.{u} S)).IsConflationExact
       (ExactStructure.abelian (ModuleCat.{u} R)) (ModuleCat.restrictScalars e.toRingHom) :=
   ExactStructure.isConflationExact_abelian _
@@ -105,158 +108,204 @@ functor of `ModuleCat.restrictScalarsEquivalenceOfRingEquiv e`. -/
 /-- **Restriction of scalars on finitely generated modules.** A ring isomorphism `e : R ≃+* S`
 induces an equivalence from the finitely generated `S`-modules to the finitely generated
 `R`-modules, sending a module to the same module with scalars restricted along `e`. -/
-noncomputable def finiteModulesEquivalenceOfRingEquiv : FGModuleCat.{u} S ≌ FGModuleCat.{u} R :=
+noncomputable def finiteModulesEquivalence : FGModuleCat.{u} S ≌ FGModuleCat.{u} R :=
   (ModuleCat.restrictScalarsEquivalenceOfRingEquiv e).congrFullSubcategory
     (ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor e ▸
-      isFG_inverseImage_restrictScalars e)
+      e.isFG_inverseImage_restrictScalars)
 
 /-- **Restriction of scalars on finitely generated projective modules.** A ring isomorphism
 `e : R ≃+* S` induces an equivalence from the finitely generated projective `S`-modules to the
 finitely generated projective `R`-modules, sending a module to the same module with scalars
 restricted along `e`. -/
-noncomputable def finiteProjectiveModulesEquivalenceOfRingEquiv :
+noncomputable def finiteProjectiveModulesEquivalence :
     (finiteProjectiveModules S).FullSubcategory ≌ (finiteProjectiveModules R).FullSubcategory :=
   (ModuleCat.restrictScalarsEquivalenceOfRingEquiv e).congrFullSubcategory
     (ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor e ▸
-      finiteProjectiveModules_inverseImage_restrictScalars e)
+      e.finiteProjectiveModules_inverseImage_restrictScalars)
 
-instance : (finiteModulesEquivalenceOfRingEquiv e).functor.Additive := by
-  unfold finiteModulesEquivalenceOfRingEquiv
+instance : e.finiteModulesEquivalence.functor.Additive := by
+  unfold finiteModulesEquivalence
   infer_instance
 
-instance : (finiteProjectiveModulesEquivalenceOfRingEquiv e).functor.Additive := by
-  unfold finiteProjectiveModulesEquivalenceOfRingEquiv
+instance : e.finiteProjectiveModulesEquivalence.functor.Additive := by
+  unfold finiteProjectiveModulesEquivalence
   infer_instance
 
 @[simp]
-theorem finiteModulesEquivalenceOfRingEquiv_functor_obj_obj (M : FGModuleCat.{u} S) :
-    ((finiteModulesEquivalenceOfRingEquiv e).functor.obj M).obj =
+theorem finiteModulesEquivalence_functor_obj_obj (M : FGModuleCat.{u} S) :
+    (e.finiteModulesEquivalence.functor.obj M).obj =
       (ModuleCat.restrictScalars e.toRingHom).obj M.obj :=
   (rfl)
 
 @[simp]
-theorem finiteModulesEquivalenceOfRingEquiv_inverse_obj_obj (M : FGModuleCat.{u} R) :
-    ((finiteModulesEquivalenceOfRingEquiv e).inverse.obj M).obj =
+theorem finiteModulesEquivalence_inverse_obj_obj (M : FGModuleCat.{u} R) :
+    (e.finiteModulesEquivalence.inverse.obj M).obj =
       (ModuleCat.restrictScalars e.symm.toRingHom).obj M.obj :=
   (rfl)
 
 @[simp]
-theorem finiteProjectiveModulesEquivalenceOfRingEquiv_functor_obj_obj
+theorem finiteProjectiveModulesEquivalence_functor_obj_obj
     (M : (finiteProjectiveModules S).FullSubcategory) :
-    ((finiteProjectiveModulesEquivalenceOfRingEquiv e).functor.obj M).obj =
+    (e.finiteProjectiveModulesEquivalence.functor.obj M).obj =
       (ModuleCat.restrictScalars e.toRingHom).obj M.obj :=
   (rfl)
 
 @[simp]
-theorem finiteProjectiveModulesEquivalenceOfRingEquiv_inverse_obj_obj
+theorem finiteProjectiveModulesEquivalence_inverse_obj_obj
     (M : (finiteProjectiveModules R).FullSubcategory) :
-    ((finiteProjectiveModulesEquivalenceOfRingEquiv e).inverse.obj M).obj =
+    (e.finiteProjectiveModulesEquivalence.inverse.obj M).obj =
       (ModuleCat.restrictScalars e.symm.toRingHom).obj M.obj :=
   (rfl)
 
 /-- The equivalence of finitely generated module categories induced by a ring isomorphism is
 conflation-exact. -/
-theorem isConflationExact_finiteModulesEquivalenceOfRingEquiv_functor :
+theorem isConflationExact_finiteModulesEquivalence_functor :
     (finiteModulesExactStructure S).IsConflationExact (finiteModulesExactStructure R)
-      (finiteModulesEquivalenceOfRingEquiv e).functor :=
-  isConflationExact_finiteModules_congrFullSubcategory_functor _
-    (isConflationExact_restrictScalars_of_ringEquiv e) _
+      e.finiteModulesEquivalence.functor :=
+  Equivalence.isConflationExact_finiteModules_congrFullSubcategory_functor _
+    e.isConflationExact_restrictScalars _
 
 /-- The inverse of the equivalence of finitely generated module categories induced by a ring
 isomorphism is conflation-exact. -/
-theorem isConflationExact_finiteModulesEquivalenceOfRingEquiv_inverse :
+theorem isConflationExact_finiteModulesEquivalence_inverse :
     (finiteModulesExactStructure R).IsConflationExact (finiteModulesExactStructure S)
-      (finiteModulesEquivalenceOfRingEquiv e).inverse :=
-  isConflationExact_finiteModules_congrFullSubcategory_inverse _
-    (isConflationExact_restrictScalars_of_ringEquiv e.symm) _
+      e.finiteModulesEquivalence.inverse :=
+  Equivalence.isConflationExact_finiteModules_congrFullSubcategory_inverse _
+    e.symm.isConflationExact_restrictScalars _
 
 /-- The equivalence of finitely generated projective module categories induced by a ring
 isomorphism is conflation-exact. -/
-theorem isConflationExact_finiteProjectiveModulesEquivalenceOfRingEquiv_functor :
+theorem isConflationExact_finiteProjectiveModulesEquivalence_functor :
     (finiteProjectiveModulesExactStructure S).IsConflationExact
-      (finiteProjectiveModulesExactStructure R)
-      (finiteProjectiveModulesEquivalenceOfRingEquiv e).functor :=
-  isConflationExact_finiteProjectiveModules_congrFullSubcategory_functor _
-    (isConflationExact_restrictScalars_of_ringEquiv e) _
+      (finiteProjectiveModulesExactStructure R) e.finiteProjectiveModulesEquivalence.functor :=
+  Equivalence.isConflationExact_finiteProjectiveModules_congrFullSubcategory_functor _
+    e.isConflationExact_restrictScalars _
 
 /-- The inverse of the equivalence of finitely generated projective module categories induced by
 a ring isomorphism is conflation-exact. -/
-theorem isConflationExact_finiteProjectiveModulesEquivalenceOfRingEquiv_inverse :
+theorem isConflationExact_finiteProjectiveModulesEquivalence_inverse :
     (finiteProjectiveModulesExactStructure R).IsConflationExact
-      (finiteProjectiveModulesExactStructure S)
-      (finiteProjectiveModulesEquivalenceOfRingEquiv e).inverse :=
-  isConflationExact_finiteProjectiveModules_congrFullSubcategory_inverse _
-    (isConflationExact_restrictScalars_of_ringEquiv e.symm) _
+      (finiteProjectiveModulesExactStructure S) e.finiteProjectiveModulesEquivalence.inverse :=
+  Equivalence.isConflationExact_finiteProjectiveModules_congrFullSubcategory_inverse _
+    e.symm.isConflationExact_restrictScalars _
 
 /-! ### The induced isomorphisms of Grothendieck groups -/
 
 /-- **Invariance of `G₀(mod R)` under ring isomorphisms.** A ring isomorphism `e : R ≃+* S`
 induces `G₀(mod S) ≃+ G₀(mod R)`, sending the class of a finitely generated `S`-module to the
 class of the same module with scalars restricted along `e`. -/
-noncomputable def finiteModulesK0EquivOfRingEquiv :
+noncomputable def finiteModulesK0Equiv :
     ExactK0.{u} (finiteModulesExactStructure S) ≃+ ExactK0.{u} (finiteModulesExactStructure R) :=
-  ExactK0.mapEquiv (finiteModulesEquivalenceOfRingEquiv e)
-    (isConflationExact_finiteModulesEquivalenceOfRingEquiv_functor e)
-    (isConflationExact_finiteModulesEquivalenceOfRingEquiv_inverse e)
+  ExactK0.mapEquiv e.finiteModulesEquivalence e.isConflationExact_finiteModulesEquivalence_functor
+    e.isConflationExact_finiteModulesEquivalence_inverse
 
 /-- **Invariance of `K₀(proj R)` under ring isomorphisms.** A ring isomorphism `e : R ≃+* S`
 induces `K₀(proj S) ≃+ K₀(proj R)`, sending the class of a finitely generated projective
 `S`-module to the class of the same module with scalars restricted along `e`. -/
-noncomputable def finiteProjectiveModulesK0EquivOfRingEquiv :
+noncomputable def finiteProjectiveModulesK0Equiv :
     ExactK0.{u} (finiteProjectiveModulesExactStructure S) ≃+
       ExactK0.{u} (finiteProjectiveModulesExactStructure R) :=
-  ExactK0.mapEquiv (finiteProjectiveModulesEquivalenceOfRingEquiv e)
-    (isConflationExact_finiteProjectiveModulesEquivalenceOfRingEquiv_functor e)
-    (isConflationExact_finiteProjectiveModulesEquivalenceOfRingEquiv_inverse e)
+  ExactK0.mapEquiv e.finiteProjectiveModulesEquivalence
+    e.isConflationExact_finiteProjectiveModulesEquivalence_functor
+    e.isConflationExact_finiteProjectiveModulesEquivalence_inverse
 
 @[simp]
-theorem finiteModulesK0EquivOfRingEquiv_of (M : FGModuleCat.{u} S) :
-    finiteModulesK0EquivOfRingEquiv e (ExactK0.of M) =
-      ExactK0.of ((finiteModulesEquivalenceOfRingEquiv e).functor.obj M) :=
+theorem finiteModulesK0Equiv_of (M : FGModuleCat.{u} S) :
+    e.finiteModulesK0Equiv (ExactK0.of M) = ExactK0.of (e.finiteModulesEquivalence.functor.obj M) :=
   ExactK0.mapEquiv_of.{u, u} _ _ _ M
 
-@[simp]
-theorem finiteModulesK0EquivOfRingEquiv_symm_of (M : FGModuleCat.{u} R) :
-    (finiteModulesK0EquivOfRingEquiv e).symm (ExactK0.of M) =
-      ExactK0.of ((finiteModulesEquivalenceOfRingEquiv e).inverse.obj M) :=
+-- Not a `simp` lemma: `simp` normalises the left-hand side through `finiteModulesK0Equiv_symm`
+-- and `finiteModulesK0Equiv_of` instead.
+theorem finiteModulesK0Equiv_symm_of (M : FGModuleCat.{u} R) :
+    e.finiteModulesK0Equiv.symm (ExactK0.of M) =
+      ExactK0.of (e.finiteModulesEquivalence.inverse.obj M) :=
   ExactK0.mapEquiv_symm_of.{u, u} _ _ _ M
 
 @[simp]
-theorem finiteProjectiveModulesK0EquivOfRingEquiv_of
-    (M : (finiteProjectiveModules S).FullSubcategory) :
-    finiteProjectiveModulesK0EquivOfRingEquiv e (ExactK0.of.{u} M) =
-      ExactK0.of.{u} ((finiteProjectiveModulesEquivalenceOfRingEquiv e).functor.obj M) :=
+theorem finiteProjectiveModulesK0Equiv_of (M : (finiteProjectiveModules S).FullSubcategory) :
+    e.finiteProjectiveModulesK0Equiv (ExactK0.of.{u} M) =
+      ExactK0.of.{u} (e.finiteProjectiveModulesEquivalence.functor.obj M) :=
   ExactK0.mapEquiv_of.{u, u} _ _ _ M
 
-@[simp]
-theorem finiteProjectiveModulesK0EquivOfRingEquiv_symm_of
+-- Not a `simp` lemma: `simp` normalises the left-hand side through
+-- `finiteProjectiveModulesK0Equiv_symm` and `finiteProjectiveModulesK0Equiv_of` instead.
+theorem finiteProjectiveModulesK0Equiv_symm_of
     (M : (finiteProjectiveModules R).FullSubcategory) :
-    (finiteProjectiveModulesK0EquivOfRingEquiv e).symm (ExactK0.of.{u} M) =
-      ExactK0.of.{u} ((finiteProjectiveModulesEquivalenceOfRingEquiv e).inverse.obj M) :=
+    e.finiteProjectiveModulesK0Equiv.symm (ExactK0.of.{u} M) =
+      ExactK0.of.{u} (e.finiteProjectiveModulesEquivalence.inverse.obj M) :=
   ExactK0.mapEquiv_symm_of.{u, u} _ _ _ M
+
+/-! ### Functoriality in the ring isomorphism
+
+Restriction of scalars along the identity, along the inverse and along a composite of ring
+isomorphisms produces the same module as the identity, the inverse and the composite of the
+restrictions, so the induced isomorphisms of Grothendieck groups are functorial. -/
+
+@[simp]
+theorem finiteModulesK0Equiv_refl :
+    (RingEquiv.refl R).finiteModulesK0Equiv = AddEquiv.refl _ :=
+  AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
+    simp only [AddEquiv.coe_toAddMonoidHom, finiteModulesK0Equiv_of, AddEquiv.refl_apply]
+    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+
+@[simp]
+theorem finiteModulesK0Equiv_symm : e.finiteModulesK0Equiv.symm = e.symm.finiteModulesK0Equiv :=
+  AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
+    simp only [AddEquiv.coe_toAddMonoidHom, finiteModulesK0Equiv_symm_of, finiteModulesK0Equiv_of]
+    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+
+@[simp]
+theorem finiteModulesK0Equiv_trans {T : Type u} [Ring T] (e' : S ≃+* T) :
+    e'.finiteModulesK0Equiv.trans e.finiteModulesK0Equiv = (e.trans e').finiteModulesK0Equiv :=
+  AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
+    simp only [AddEquiv.coe_toAddMonoidHom, AddEquiv.trans_apply, finiteModulesK0Equiv_of]
+    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+
+@[simp]
+theorem finiteProjectiveModulesK0Equiv_refl :
+    (RingEquiv.refl R).finiteProjectiveModulesK0Equiv = AddEquiv.refl _ :=
+  AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
+    simp only [AddEquiv.coe_toAddMonoidHom, finiteProjectiveModulesK0Equiv_of,
+      AddEquiv.refl_apply]
+    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+
+@[simp]
+theorem finiteProjectiveModulesK0Equiv_symm :
+    e.finiteProjectiveModulesK0Equiv.symm = e.symm.finiteProjectiveModulesK0Equiv :=
+  AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
+    simp only [AddEquiv.coe_toAddMonoidHom, finiteProjectiveModulesK0Equiv_symm_of,
+      finiteProjectiveModulesK0Equiv_of]
+    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
+
+@[simp]
+theorem finiteProjectiveModulesK0Equiv_trans {T : Type u} [Ring T] (e' : S ≃+* T) :
+    e'.finiteProjectiveModulesK0Equiv.trans e.finiteProjectiveModulesK0Equiv =
+      (e.trans e').finiteProjectiveModulesK0Equiv :=
+  AddEquiv.toAddMonoidHom_injective <| ExactK0.hom_ext fun M ↦ by
+    simp only [AddEquiv.coe_toAddMonoidHom, AddEquiv.trans_apply,
+      finiteProjectiveModulesK0Equiv_of]
+    exact congrArg ExactK0.of (FullSubcategory.ext rfl)
 
 /-! ### Compatibility with the Cartan map -/
 
 /-- **Naturality of the Cartan map in the ring.** The Cartan maps of two isomorphic rings are
 intertwined by the induced isomorphisms of Grothendieck groups. -/
-theorem cartanMap_comp_finiteProjectiveModulesK0EquivOfRingEquiv :
-    (cartanMap R).comp (finiteProjectiveModulesK0EquivOfRingEquiv e).toAddMonoidHom =
-      (finiteModulesK0EquivOfRingEquiv e).toAddMonoidHom.comp (cartanMap S) := by
+theorem cartanMap_comp_finiteProjectiveModulesK0Equiv :
+    (cartanMap R).comp e.finiteProjectiveModulesK0Equiv.toAddMonoidHom =
+      e.finiteModulesK0Equiv.toAddMonoidHom.comp (cartanMap S) := by
   apply ExactK0.hom_ext
   rintro ⟨M, hM⟩
   simp only [AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom,
-    finiteProjectiveModulesK0EquivOfRingEquiv_of, cartanMap_of S hM,
-    finiteModulesK0EquivOfRingEquiv_of]
-  rw [cartanMap_of R
-    ((finiteProjectiveModulesEquivalenceOfRingEquiv e).functor.obj ⟨M, hM⟩).property]
-  exact congrArg ExactK0.of (ObjectProperty.FullSubcategory.ext (by simp))
+    finiteProjectiveModulesK0Equiv_of, cartanMap_of S hM, finiteModulesK0Equiv_of]
+  rw [cartanMap_of R (e.finiteProjectiveModulesEquivalence.functor.obj ⟨M, hM⟩).property]
+  exact congrArg ExactK0.of (FullSubcategory.ext (by simp))
 
 @[simp]
-theorem cartanMap_finiteProjectiveModulesK0EquivOfRingEquiv
+theorem cartanMap_finiteProjectiveModulesK0Equiv
     (x : ExactK0.{u} (finiteProjectiveModulesExactStructure S)) :
-    cartanMap R (finiteProjectiveModulesK0EquivOfRingEquiv e x) =
-      finiteModulesK0EquivOfRingEquiv e (cartanMap S x) :=
-  DFunLike.congr_fun (cartanMap_comp_finiteProjectiveModulesK0EquivOfRingEquiv e) x
+    cartanMap R (e.finiteProjectiveModulesK0Equiv x) =
+      e.finiteModulesK0Equiv (cartanMap S x) :=
+  DFunLike.congr_fun e.cartanMap_comp_finiteProjectiveModulesK0Equiv x
 
 include e in
 /-- **The resolution-theorem hypothesis is invariant under ring isomorphisms**: the Cartan map of
@@ -264,25 +313,23 @@ include e in
 theorem cartanMap_bijective_iff :
     Function.Bijective (cartanMap R) ↔ Function.Bijective (cartanMap S) := by
   have hR : ⇑(cartanMap R) =
-      ⇑(finiteModulesK0EquivOfRingEquiv e) ∘ ⇑(cartanMap S) ∘
-        ⇑(finiteProjectiveModulesK0EquivOfRingEquiv e).symm := by
+      ⇑e.finiteModulesK0Equiv ∘ ⇑(cartanMap S) ∘ ⇑e.finiteProjectiveModulesK0Equiv.symm := by
     ext x
-    simp only [Function.comp_apply, ← cartanMap_finiteProjectiveModulesK0EquivOfRingEquiv,
+    simp only [Function.comp_apply, ← cartanMap_finiteProjectiveModulesK0Equiv,
       AddEquiv.apply_symm_apply]
   have hS : ⇑(cartanMap S) =
-      ⇑(finiteModulesK0EquivOfRingEquiv e).symm ∘ ⇑(cartanMap R) ∘
-        ⇑(finiteProjectiveModulesK0EquivOfRingEquiv e) := by
+      ⇑e.finiteModulesK0Equiv.symm ∘ ⇑(cartanMap R) ∘ ⇑e.finiteProjectiveModulesK0Equiv := by
     ext x
-    simp only [Function.comp_apply, cartanMap_finiteProjectiveModulesK0EquivOfRingEquiv,
+    simp only [Function.comp_apply, cartanMap_finiteProjectiveModulesK0Equiv,
       AddEquiv.symm_apply_apply]
   constructor
   · intro h
     rw [hS]
-    exact (finiteModulesK0EquivOfRingEquiv e).symm.bijective.comp
-      (h.comp (finiteProjectiveModulesK0EquivOfRingEquiv e).bijective)
+    exact e.finiteModulesK0Equiv.symm.bijective.comp
+      (h.comp e.finiteProjectiveModulesK0Equiv.bijective)
   · intro h
     rw [hR]
-    exact (finiteModulesK0EquivOfRingEquiv e).bijective.comp
-      (h.comp (finiteProjectiveModulesK0EquivOfRingEquiv e).symm.bijective)
+    exact e.finiteModulesK0Equiv.bijective.comp
+      (h.comp e.finiteProjectiveModulesK0Equiv.symm.bijective)
 
-end TauCeti
+end RingEquiv
