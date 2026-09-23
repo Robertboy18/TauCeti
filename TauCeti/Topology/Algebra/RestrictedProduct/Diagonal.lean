@@ -20,9 +20,10 @@ This file records the diagonal, its coordinate formula, its kernel and the resul
 criterion, its compatibility with componentwise maps and with a change of factors, and the
 continuity criterion. Continuity does not follow from continuity of the coordinate maps: the
 restricted-product topology is finer than the topology induced from `Π i, G i`, so the criterion
-asks for one cofinite set of indices at which every `γ` is integral. Such a uniform set lets the
-diagonal factor through the principal stage `Πʳ i, [G i, U i]_[𝓟 S]`, where Mathlib's
-`RestrictedProduct.continuous_rng_of_principal` reduces continuity to the coordinates.
+asks for one cofinite set `S` of indices at which every `γ` is integral. Such a uniform set lets
+the diagonal factor through the stage `Πʳ i, [G i, U i]_[𝓟 S]`, which carries the subspace
+topology of `Π i, G i`: continuity into that stage is a coordinatewise matter, and its inclusion
+into the restricted product is continuous.
 
 ## References
 
@@ -132,7 +133,9 @@ theorem continuous_rationalDiagonal {Γ : Type w} [MulOneClass Γ] [TopologicalS
     (S : Set ι) (hS : S ∈ cofinite) (huniform : ∀ γ : Γ, ∀ i ∈ S, φ i γ ∈ U i) :
     Continuous (rationalDiagonal φ U h) := by
   have hS' : (cofinite : Filter ι) ≤ 𝓟 S := le_principal_iff.mpr hS
-  -- The diagonal factors through the principal stage at `S`, into which it lands by `huniform`.
+  -- The diagonal factors through the principal stage at `S`, into which it lands by `huniform`;
+  -- Mathlib's `RestrictedProduct.continuous_rng_of_principal` reduces continuity there to the
+  -- coordinates.
   have hf : Continuous fun γ : Γ ↦
       (RestrictedProduct.mk (fun i ↦ φ i γ) (eventually_principal.mpr (huniform γ)) :
         Πʳ i, [G i, (U i : Set (G i))]_[𝓟 S]) :=
