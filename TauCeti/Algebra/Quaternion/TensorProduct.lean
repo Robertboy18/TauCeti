@@ -9,6 +9,7 @@ public import TauCeti.Algebra.Quaternion.CentralSimple
 public import TauCeti.Algebra.Quaternion.SquareSplit
 public import Mathlib.RingTheory.TensorProduct.Maps
 import TauCeti.Algebra.CentralSimple.TensorProduct
+import TauCeti.Algebra.Quaternion.Basis
 import Mathlib.RingTheory.SimpleRing.Congr
 import Mathlib.RingTheory.SimpleRing.Matrix
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
@@ -33,16 +34,16 @@ The construction is the classical one. Writing `i₁, j₁` and `i₂, j₂` for
 two factors, the elements `i₁ ⊗ 1` and `j₁ ⊗ j₂` satisfy the relations of `ℍ[R,a,bc]`
 (`TauCeti.QuaternionAlgebra.linkedBasis`), the elements `i₁ ⊗ i₂` and `1 ⊗ j₂` satisfy those of
 `ℍ[R,a²,c]` (`TauCeti.QuaternionAlgebra.splitBasis`), and the two pairs commute. The universal
-property `QuaternionAlgebra.Basis.liftHom` together with `Algebra.TensorProduct.lift` then
-produces an algebra map `ℍ[R,a,bc] ⊗[R] ℍ[R,a²,c] → ℍ[R,a,b] ⊗[R] ℍ[R,a,c]`, defined over any
-commutative ring. Over a field with `2` invertible and unit parameters both sides are
-`16`-dimensional and the source is a simple ring, so the map is bijective; the factor `ℍ[K,a²,c]`
-is split because its first parameter is a square.
+property `QuaternionAlgebra.Basis.liftHom`, its compatibility with commuting generators
+(`QuaternionAlgebra.Basis.commute_liftHom` in `TauCeti/Algebra/Quaternion/Basis.lean`) and
+`Algebra.TensorProduct.lift` then produce an algebra map
+`ℍ[R,a,bc] ⊗[R] ℍ[R,a²,c] → ℍ[R,a,b] ⊗[R] ℍ[R,a,c]`, defined over any commutative ring. Over a
+field with `2` invertible and unit parameters both sides are `16`-dimensional and the source is a
+simple ring, so the map is bijective; the factor `ℍ[K,a²,c]` is split because its first parameter
+is a square.
 
 ## Main results
 
-* `QuaternionAlgebra.Basis.commute_liftHom`: two quaternion bases of one algebra whose generators
-  commute pairwise induce commuting algebra maps.
 * `TauCeti.QuaternionAlgebra.linkedTensorHom`: the algebra map
   `ℍ[R,a,bc] ⊗[R] ℍ[R,a²,c] →ₐ[R] ℍ[R,a,b] ⊗[R] ℍ[R,a,c]` over a commutative ring.
 * `TauCeti.QuaternionAlgebra.linkedTensorAlgEquiv`: over a field with `2` invertible and unit
@@ -59,33 +60,6 @@ is split because its first parameter is a square.
 public section
 
 open scoped Quaternion TensorProduct
-
-namespace QuaternionAlgebra.Basis
-
-variable {R A : Type*} [CommRing R] [Ring A] [Algebra R A] {c₁ c₂ c₃ d₁ d₂ d₃ : R}
-
-/-- Two quaternion bases of the same algebra whose generators `i` and `j` commute pairwise induce
-commuting algebra maps out of the corresponding quaternion algebras. -/
-theorem commute_liftHom (B₁ : Basis A c₁ c₂ c₃) (B₂ : Basis A d₁ d₂ d₃)
-    (hii : Commute B₁.i B₂.i) (hij : Commute B₁.i B₂.j) (hji : Commute B₁.j B₂.i)
-    (hjj : Commute B₁.j B₂.j) (x : ℍ[R,c₁,c₂,c₃]) (y : ℍ[R,d₁,d₂,d₃]) :
-    Commute (B₁.liftHom x) (B₂.liftHom y) := by
-  have hik : Commute B₁.i B₂.k := B₂.i_mul_j ▸ hii.mul_right hij
-  have hjk : Commute B₁.j B₂.k := B₂.i_mul_j ▸ hji.mul_right hjj
-  have hi : Commute B₁.i (B₂.liftHom y) := by
-    simp only [liftHom_apply, lift]
-    exact (((Algebra.commute_algebraMap_right _ _).add_right (hii.smul_right _)).add_right
-      (hij.smul_right _)).add_right (hik.smul_right _)
-  have hj : Commute B₁.j (B₂.liftHom y) := by
-    simp only [liftHom_apply, lift]
-    exact (((Algebra.commute_algebraMap_right _ _).add_right (hji.smul_right _)).add_right
-      (hjj.smul_right _)).add_right (hjk.smul_right _)
-  have hk : Commute B₁.k (B₂.liftHom y) := B₁.i_mul_j ▸ hi.mul_left hj
-  simp only [liftHom_apply, lift]
-  exact (((Algebra.commute_algebraMap_left _ _).add_left (hi.smul_left _)).add_left
-    (hj.smul_left _)).add_left (hk.smul_left _)
-
-end QuaternionAlgebra.Basis
 
 namespace TauCeti
 

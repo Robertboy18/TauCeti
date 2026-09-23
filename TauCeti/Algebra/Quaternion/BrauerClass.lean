@@ -49,9 +49,9 @@ translates into the solvability of the norm equation `b = x² - ay²` and into t
 * `TauCeti.BrauerGroup.quaternionClass_comm`, `TauCeti.BrauerGroup.quaternionClass_sq`,
   `TauCeti.BrauerGroup.quaternionClass_mul_sq_right`, `TauCeti.BrauerGroup.quaternionClass_one_sub`:
   symmetry, `2`-torsion, square-class invariance and the Steinberg relation.
-* `TauCeti.BrauerGroup.quaternionClass_mul_right`, `TauCeti.BrauerGroup.quaternionClass_mul_left`:
+* `TauCeti.BrauerGroup.quaternionClass_mul`, `TauCeti.BrauerGroup.quaternionClass_mul_left`:
   **bilinearity of the quaternion symbol**.
-* `TauCeti.BrauerGroup.quaternionClass_eq_of_equivalent`: isometric binary forms `⟨a,b⟩ ≅ ⟨c,d⟩`
+* `TauCeti.BrauerGroup.quaternionClass_congr`: isometric binary forms `⟨a,b⟩ ≅ ⟨c,d⟩`
   have equal symbols `[(a,b)] = [(c,d)]`.
 
 ## References
@@ -130,7 +130,7 @@ theorem quaternionClass_eq_one_iff_exists_eq_sq_sub_mul_sq (a b : Kˣ) :
 
 /-- **A quaternion symbol is trivial exactly when `⟨1, -a, -b⟩` is isotropic** (the four-fold
 splitting criterion, read in the Brauer group). -/
-theorem quaternionClass_eq_one_iff_not_anisotropic (a b : Kˣ) :
+theorem quaternionClass_eq_one_iff_not_anisotropic_weightedSumSquares (a b : Kˣ) :
     quaternionClass a b = 1 ↔ ¬(weightedSumSquares K ![1, -(a : K), -(b : K)]).Anisotropic :=
   (quaternionClass_eq_one_iff a b).trans
     (QuaternionAlgebra.nonempty_algEquiv_matrix_iff_not_anisotropic_weightedSumSquares a b)
@@ -206,15 +206,15 @@ theorem quaternionClass_one_right (a : Kˣ) : quaternionClass a 1 = 1 := by
 theorem quaternionClass_neg_self (a : Kˣ) : quaternionClass a (-a) = 1 :=
   quaternionClass_eq_one_of_algEquiv_matrix (QuaternionAlgebra.aNegAEquivMatrix a)
 
-/-- `[(a,c²)] = 1`. -/
+/-- `[(a,c²)] = 1`: square-class invariance at `[(a,1)] = 1`. -/
 @[simp]
-theorem quaternionClass_sq_right (a c : Kˣ) : quaternionClass a (c ^ 2) = 1 :=
-  quaternionClass_eq_one_of_algEquiv_matrix (secondSquareEquivMatrix a c)
+theorem quaternionClass_sq_right (a c : Kˣ) : quaternionClass a (c ^ 2) = 1 := by
+  rw [← one_mul (c ^ 2), quaternionClass_mul_sq_right, quaternionClass_one_right]
 
-/-- `[(c²,b)] = 1`. -/
+/-- `[(c²,b)] = 1`: square-class invariance at `[(1,b)] = 1`. -/
 @[simp]
-theorem quaternionClass_sq_left (b c : Kˣ) : quaternionClass (c ^ 2) b = 1 :=
-  quaternionClass_eq_one_of_algEquiv_matrix (firstSquareEquivMatrix c b)
+theorem quaternionClass_sq_left (b c : Kˣ) : quaternionClass (c ^ 2) b = 1 := by
+  rw [← one_mul (c ^ 2), quaternionClass_mul_sq_left, quaternionClass_one_left]
 
 /-- **The Steinberg relation** `[(a,1-a)] = 1`, for a unit `a` with `1 - a ≠ 0`. -/
 theorem quaternionClass_one_sub (a : Kˣ) (h : (1 : K) - a ≠ 0) :
@@ -228,7 +228,7 @@ theorem quaternionClass_one_sub (a : Kˣ) (h : (1 : K) - a ≠ 0) :
 `[(a,bc)] = [(a,b)] · [(a,c)]`. This is the common slot lemma
 `ℍ[K,a,b] ⊗[K] ℍ[K,a,c] ≃ₐ[K] ℍ[K,a,bc] ⊗[K] M₂(K)` read in the Brauer group. -/
 @[simp]
-theorem quaternionClass_mul_right (a b c : Kˣ) :
+theorem quaternionClass_mul (a b c : Kˣ) :
     quaternionClass a (b * c) = quaternionClass a b * quaternionClass a c :=
   calc quaternionClass a (b * c)
       = quaternionClass a (b * c) * mk (CSA.of K (Matrix (Fin 2) (Fin 2) K)) := by
@@ -246,13 +246,13 @@ theorem quaternionClass_mul_right (a b c : Kˣ) :
 @[simp]
 theorem quaternionClass_mul_left (a b c : Kˣ) :
     quaternionClass (a * b) c = quaternionClass a c * quaternionClass b c := by
-  rw [quaternionClass_comm, quaternionClass_mul_right, quaternionClass_comm a,
+  rw [quaternionClass_comm, quaternionClass_mul, quaternionClass_comm a,
     quaternionClass_comm b]
 
 /-- `[(a,a)] = [(a,-1)]`, since `a = (-1) · (-a)` and `[(a,-a)] = 1`. -/
 theorem quaternionClass_self (a : Kˣ) : quaternionClass a a = quaternionClass a (-1) :=
   calc quaternionClass a a = quaternionClass a (-1 * -a) := by rw [neg_one_mul, neg_neg]
-    _ = quaternionClass a (-1) * quaternionClass a (-a) := quaternionClass_mul_right a (-1) (-a)
+    _ = quaternionClass a (-1) * quaternionClass a (-a) := quaternionClass_mul a (-1) (-a)
     _ = quaternionClass a (-1) := by rw [quaternionClass_neg_self, mul_one]
 
 /-! ### Invariance under isometry of binary forms -/
@@ -260,7 +260,7 @@ theorem quaternionClass_self (a : Kˣ) : quaternionClass a a = quaternionClass a
 /-- **The quaternion symbol is an invariant of the binary form `⟨a,b⟩`**: isometric binary forms
 have equal symbols. This is the binary quaternion lemma read in the Brauer group, and it is what
 makes the Hasse invariant well defined on isometry classes. -/
-theorem quaternionClass_eq_of_equivalent {a b c d : Kˣ}
+theorem quaternionClass_congr {a b c d : Kˣ}
     (h : (weightedSumSquares K ![(a : K), b]).Equivalent (weightedSumSquares K ![(c : K), d])) :
     quaternionClass a b = quaternionClass c d :=
   let ⟨e⟩ := QuaternionAlgebra.nonempty_algEquiv_of_equivalent_binary (a : K) b c d h
