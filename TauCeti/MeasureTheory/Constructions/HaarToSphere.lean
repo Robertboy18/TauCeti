@@ -17,12 +17,13 @@ Haar measure `μ`.  Mathlib's `MeasureTheory.Measure.measurePreserving_homeomorp
 identifies `μ` on `E \ {0}` with the product of the surface measure `μ.toSphere` on the unit
 sphere and the radial measure `r ^ (d - 1) dr` on `(0, ∞)`, but upstream only integrates radial
 functions against it (`MeasureTheory.integral_fun_norm_addHaar`).  This file records the
-integral formula for an arbitrary integrable function,
+integral formula for an arbitrary integrable function, in both orders of integration,
 
-`∫ x, f x ∂μ = ∫ u ∈ S, ∫ r in (0, ∞), r ^ (d - 1) • f (r • u) ∂μ.toSphere`,
+`∫ x, f x ∂μ = ∫ u ∈ S, ∫ r in (0, ∞), r ^ (d - 1) • f (r • u) ∂μ.toSphere`
+`             = ∫ r in (0, ∞), r ^ (d - 1) • ∫ u ∈ S, f (r • u) ∂μ.toSphere`,
 
-and uses it for a radial fundamental theorem of calculus: for a `C¹` function `f` with compact
-support,
+and uses the first for a radial fundamental theorem of calculus: for a `C¹` function `f` with
+compact support,
 
 `∫ x, ‖x‖ ^ (-d) * f' x x ∂μ = -(d * μ (ball 0 1)) * f 0`.
 
@@ -32,7 +33,10 @@ the Laplacian.
 
 ## Main declarations
 
-* `TauCeti.integral_eq_integral_toSphere_integral_Ioi`: integration in polar coordinates.
+* `TauCeti.integral_eq_integral_toSphere_integral_Ioi`: integration in polar coordinates, with
+  the sphere variable outermost.
+* `TauCeti.integral_eq_integral_Ioi_integral_toSphere`: integration in polar coordinates, with
+  the radial variable outermost.
 * `TauCeti.integral_norm_rpow_neg_finrank_mul_fderiv_apply_self`: the radial fundamental theorem
   of calculus.
 -/
@@ -49,12 +53,25 @@ variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensi
   [MeasurableSpace E] [BorelSpace E] [Nontrivial E] {μ : Measure E} [μ.IsAddHaarMeasure]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- **Integration in polar coordinates.** An integrable function on a finite-dimensional real
-normed space is integrated by first integrating along each ray `r ↦ r • u`, against the radial
-Jacobian `r ^ (d - 1)`, and then over the unit sphere against `μ.toSphere`. -/
-theorem integral_eq_integral_toSphere_integral_Ioi (f : E → F) (hf : Integrable f μ) :
-    ∫ x, f x ∂μ = ∫ u : sphere (0 : E) 1, (∫ r in Ioi (0 : ℝ),
-      r ^ (Module.finrank ℝ E - 1) • f (r • (u : E))) ∂μ.toSphere := by
+/-- Integration against `MeasureTheory.Measure.volumeIoiPow k` is integration on `(0, ∞)`
+against the weight `r ^ k`. -/
+private lemma integral_volumeIoiPow (k : ℕ) (h : ℝ → F) :
+    ∫ r : Ioi (0 : ℝ), h r ∂(Measure.volumeIoiPow k) = ∫ r in Ioi (0 : ℝ), r ^ k • h r := by
+  simp only [Measure.volumeIoiPow, ENNReal.ofReal]
+  rw [integral_withDensity_eq_integral_smul (measurable_subtype_coe.pow_const _).real_toNNReal,
+    integral_subtype_comap measurableSet_Ioi fun r ↦ Real.toNNReal (r ^ k) • h r]
+  refine setIntegral_congr_fun measurableSet_Ioi fun r hr ↦ ?_
+  rw [NNReal.smul_def, Real.coe_toNNReal _ (pow_nonneg (le_of_lt hr) _)]
+
+/-- The polar-coordinate identification of `μ` with the product of `μ.toSphere` and the radial
+measure, for an integrable function: the transported integrand is integrable for the product
+measure, and integrates to `∫ f ∂μ`. -/
+private lemma integrable_and_integral_eq_integral_prod_toSphere (f : E → F)
+    (hf : Integrable f μ) :
+    Integrable (fun p : sphere (0 : E) 1 × Ioi (0 : ℝ) ↦ f ((p.2 : ℝ) • (p.1 : E)))
+        (μ.toSphere.prod (Measure.volumeIoiPow (Module.finrank ℝ E - 1))) ∧
+      ∫ x, f x ∂μ = ∫ p : sphere (0 : E) 1 × Ioi (0 : ℝ), f ((p.2 : ℝ) • (p.1 : E))
+        ∂(μ.toSphere.prod (Measure.volumeIoiPow (Module.finrank ℝ E - 1))) := by
   set k := Module.finrank ℝ E - 1
   have hmp := μ.measurePreserving_homeomorphUnitSphereProd
   have hemb := (homeomorphUnitSphereProd E).measurableEmbedding
@@ -63,8 +80,8 @@ theorem integral_eq_integral_toSphere_integral_Ioi (f : E → F) (hf : Integrabl
     funext x
     have hx : ‖(x : E)‖ ≠ 0 := norm_ne_zero_iff.mpr x.2
     simp [hg_def, smul_smul, hx]
-  have hint : Integrable g (μ.toSphere.prod (Measure.volumeIoiPow k)) := by
-    rw [← hmp.integrable_comp_emb hemb, hg,
+  refine ⟨?_, ?_⟩
+  · rw [← hmp.integrable_comp_emb hemb, hg,
       ← integrableOn_iff_comap_subtypeVal (measurableSet_singleton _).compl]
     exact hf.integrableOn
   calc ∫ x, f x ∂μ = ∫ x : ({0}ᶜ : Set E), f x ∂(μ.comap Subtype.val) := by
@@ -73,16 +90,29 @@ theorem integral_eq_integral_toSphere_integral_Ioi (f : E → F) (hf : Integrabl
     _ = ∫ p, g p ∂(μ.toSphere.prod (Measure.volumeIoiPow k)) := by
         rw [← hmp.integral_comp hemb g]
         exact integral_congr_ae (ae_of_all _ fun x ↦ (congrFun hg x).symm)
-    _ = ∫ u, ∫ r, g (u, r) ∂(Measure.volumeIoiPow k) ∂μ.toSphere := integral_prod g hint
-    _ = _ := by
-        refine integral_congr_ae (ae_of_all _ fun u ↦ ?_)
-        simp only [hg_def, Measure.volumeIoiPow, ENNReal.ofReal]
-        rw [integral_withDensity_eq_integral_smul
-            (measurable_subtype_coe.pow_const _).real_toNNReal,
-          integral_subtype_comap measurableSet_Ioi
-            fun r ↦ Real.toNNReal (r ^ k) • f (r • (u : E))]
-        refine setIntegral_congr_fun measurableSet_Ioi fun r hr ↦ ?_
-        rw [NNReal.smul_def, Real.coe_toNNReal _ (pow_nonneg (le_of_lt hr) _)]
+
+/-- **Integration in polar coordinates.** An integrable function on a finite-dimensional real
+normed space is integrated by first integrating along each ray `r ↦ r • u`, against the radial
+Jacobian `r ^ (d - 1)`, and then over the unit sphere against `μ.toSphere`. -/
+theorem integral_eq_integral_toSphere_integral_Ioi (f : E → F) (hf : Integrable f μ) :
+    ∫ x, f x ∂μ = ∫ u : sphere (0 : E) 1, (∫ r in Ioi (0 : ℝ),
+      r ^ (Module.finrank ℝ E - 1) • f (r • (u : E))) ∂μ.toSphere := by
+  obtain ⟨hint, heq⟩ := integrable_and_integral_eq_integral_prod_toSphere f hf
+  rw [heq, integral_prod _ hint]
+  exact integral_congr_ae (ae_of_all _ fun u ↦
+    integral_volumeIoiPow (Module.finrank ℝ E - 1) fun r ↦ f (r • (u : E)))
+
+/-- **Integration in polar coordinates, radial variable outermost.** An integrable function on a
+finite-dimensional real normed space is integrated by first integrating over the sphere of radius
+`r` (parametrized by the unit sphere against `μ.toSphere`), and then in `r` against the radial
+Jacobian `r ^ (d - 1)`. -/
+theorem integral_eq_integral_Ioi_integral_toSphere (f : E → F) (hf : Integrable f μ) :
+    ∫ x, f x ∂μ = ∫ r in Ioi (0 : ℝ), r ^ (Module.finrank ℝ E - 1) •
+      ∫ u : sphere (0 : E) 1, f (r • (u : E)) ∂μ.toSphere := by
+  obtain ⟨hint, heq⟩ := integrable_and_integral_eq_integral_prod_toSphere f hf
+  rw [heq, integral_prod_symm _ hint]
+  exact integral_volumeIoiPow (Module.finrank ℝ E - 1)
+    fun r ↦ ∫ u : sphere (0 : E) 1, f (r • (u : E)) ∂μ.toSphere
 
 /-- **Radial fundamental theorem of calculus.** For a `C¹` function `f` with compact support on a
 nontrivial finite-dimensional real normed space of dimension `d`,
