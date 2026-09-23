@@ -376,6 +376,9 @@ theorem cartanMap_comp_finiteProjectiveModulesK0Equiv :
   rw [cartanMap_of R (e.finiteProjectiveModulesEquivalence.functor.obj ⟨M, hM⟩).property]
   exact congrArg ExactK0.of (FullSubcategory.ext (by simp))
 
+/-- Pointwise form of `RingEquiv.cartanMap_comp_finiteProjectiveModulesK0Equiv`: applying the
+Cartan map of `R` after transporting a class from `K₀(proj S)` along `e` agrees with transporting
+its image under the Cartan map of `S` from `G₀(mod S)` along `e`. -/
 @[simp]
 theorem cartanMap_finiteProjectiveModulesK0Equiv
     (x : ExactK0.{u} (finiteProjectiveModulesExactStructure S)) :
