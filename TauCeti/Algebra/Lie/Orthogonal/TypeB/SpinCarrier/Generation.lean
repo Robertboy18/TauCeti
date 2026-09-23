@@ -106,8 +106,14 @@ theorem weightTorusSubsystemSubgroup_univ_eq_elementarySubgroup (A : CommAlgCat.
         (TauCeti.typeBSimpleCorootGenerator (K := ℚ)) (rep n)
         (lattice n).toAddSubgroup (rep_kostantForm_mem_lattice n)
         (isNilpotent_rep_rootGenerator n) A := by
-  have h := (kostantTorusSubgroup_eq_range _ _ _ A).symm.trans_le
-    (weightTorusSubgroup_le_elementarySubgroup n hn A)
-  exact (kostantTorusSubsystemSubgroup_univ _ _ _ _ _ _ _ _ A).trans (sup_eq_left.2 h)
+  exact kostantTorusSubsystemSubgroup_univ_eq_kostantElementarySubgroup
+    (TauCeti.typeBSimpleRootGeneratorFamily (K := ℚ))
+    (TauCeti.typeBSimpleCorootGenerator (K := ℚ)) (rep n)
+    (lattice n).toAddSubgroup (rep_kostantForm_mem_lattice n)
+    (isNilpotent_rep_rootGenerator n) (latticeBasis n) (basisWeight n)
+    (isCartanWeightVector_latticeBasis n) (rootWeight n)
+    (lie_coroot_rootGenerator n) Sum.inl Sum.inr
+    (isSl2Triple_rep_rootGenerator n) (rootWeight_inr_eq_neg_inl n)
+    (typeBCartanBezout (n + 1)) (rootWeight_sum_mul_bezout n hn) A
 
 end TauCeti.TypeBSpinCarrier
