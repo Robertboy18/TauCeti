@@ -36,12 +36,15 @@ For a **profinite** extension with compact kernel a continuous normalized sectio
 the class is an invariant of the extension itself, `GroupExtension.contCohomologyClass`, and the
 two theorems take their final form, continuity of the inverse equivalence being automatic
 (`GroupExtension.exists_equiv_continuous_iff_contCohomologyClass_eq`,
-`GroupExtension.exists_splitting_continuous_iff_contCohomologyClass_eq_zero`). The twisted
-product of a continuous factor set is such an extension whenever `G` is profinite and `M` is
-compact, and its class read through the canonical section is the class of the factor set
-(`TauCeti.FactorSet.contCohomologyClass_factorSet_canonicalSection`), so every class of `H²(G, M)`
-is the class of a profinite extension: the equivalence classes of profinite extensions of `G` by
-`M` inducing the given action correspond bijectively to `H²(G, M)`. The trivial class is that of
+`GroupExtension.exists_splitting_continuous_iff_contCohomologyClass_eq_zero`). When `G` and `M`
+are both profinite — compactness of `M` alone does not suffice, the twisted product being `M × G`
+as a space — the twisted product of a continuous factor set is such an extension
+(`TauCeti.ProfiniteGroupExtension.ofFactorSet`), and its class, read through the canonical section,
+is the class of the factor set (`TauCeti.ProfiniteGroupExtension.contCohomologyClass_ofFactorSet`),
+so every class of `H²(G, M)` is the class of a profinite extension. Bundling a profinite extension
+of `G` by `M` inducing the given action as `TauCeti.ProfiniteGroupExtension`, the class therefore
+descends to the bijection `TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv` from the
+profinite extensions modulo continuous equivalence onto `H²(G, M)`. The trivial class is that of
 the trivial factor set (`TauCeti.FactorSet.contCohomologyClass_trivial`), whose twisted product is
 the semidirect product.
 
@@ -62,6 +65,12 @@ a profinite group computes with.
   continuous cohomology.**
 * `GroupExtension.contCohomologyClass`: the class of a profinite extension with compact kernel,
   in the root namespace so that it is available as `S.contCohomologyClass`.
+* `TauCeti.ProfiniteGroupExtension`: a profinite extension of `G` by `M` inducing the given
+  action, bundled with its total group, and `TauCeti.ProfiniteGroupExtension.ofFactorSet`, the
+  twisted product of a continuous factor set when `G` and `M` are profinite.
+* `TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv`: **`H²(G, M)` classifies profinite
+  extensions of `G` by `M` inducing the given action up to continuous equivalence**, as a
+  bijection of sets.
 
 ## Main results
 
@@ -74,6 +83,8 @@ a profinite group computes with.
   profinite extensions of `G` by `M` inducing the given action, up to continuous equivalence.**
 * `GroupExtension.exists_splitting_continuous_iff_contCohomologyClass_eq_zero`: **a profinite
   extension has a continuous homomorphic section exactly when its class vanishes.**
+* `TauCeti.ProfiniteGroupExtension.exists_contCohomologyClass_eq`: for profinite `G` and `M`,
+  every class of `H²(G, M)` is the class of a profinite extension.
 
 ## References
 
@@ -457,5 +468,147 @@ theorem _root_.GroupExtension.exists_splitting_continuous_iff_contCohomologyClas
 end Profinite
 
 end GroupExtension
+
+/-! ### The bijection -/
+
+variable (G M) in
+/-- **A profinite extension of `G` by `M` inducing the given action**: a profinite group `E`
+together with an extension `1 → M → E → G → 1` of topological groups — continuous inclusion,
+continuous projection — whose conjugation action on `M` is the given one. The total group is taken
+in the universe of `M × G`, where the twisted products of the factor sets live; up to continuous
+equivalence every profinite extension of `G` by `M` is one of those, and the classification
+`TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv` is stated at this universe for that
+reason. -/
+structure ProfiniteGroupExtension where
+  /-- The total group of the extension. -/
+  E : Type (max u v)
+  [instGroup : Group E]
+  [instTopologicalSpace : TopologicalSpace E]
+  [instIsTopologicalGroup : IsTopologicalGroup E]
+  [instCompactSpace : CompactSpace E]
+  [instTotallyDisconnectedSpace : TotallyDisconnectedSpace E]
+  /-- The extension `1 → M → E → G → 1` of abstract groups. -/
+  toGroupExtension : GroupExtension M E G
+  continuous_inl : Continuous toGroupExtension.inl
+  continuous_rightHom : Continuous toGroupExtension.rightHom
+  inducesAction : GroupExtension.InducesAction toGroupExtension
+
+namespace ProfiniteGroupExtension
+
+attribute [instance] instGroup instTopologicalSpace instIsTopologicalGroup instCompactSpace
+  instTotallyDisconnectedSpace
+
+section Class
+
+variable [ContinuousMul G] [ContinuousSMul G M] [CompactSpace M] [T2Space G]
+  (X Y : ProfiniteGroupExtension G M)
+
+/-- The class of a profinite extension with compact kernel, `GroupExtension.contCohomologyClass`,
+read on the bundled extension. -/
+noncomputable def contCohomologyClass : H2 G (Additive M) :=
+  X.toGroupExtension.contCohomologyClass X.continuous_inl X.continuous_rightHom X.inducesAction
+
+theorem contCohomologyClass_def :
+    X.contCohomologyClass = X.toGroupExtension.contCohomologyClass X.continuous_inl
+      X.continuous_rightHom X.inducesAction :=
+  (rfl)
+
+/-- Two profinite extensions are continuously equivalent exactly when their classes agree:
+`GroupExtension.exists_equiv_continuous_iff_contCohomologyClass_eq` for bundled extensions. -/
+theorem exists_equiv_continuous_iff_contCohomologyClass_eq :
+    (∃ e : X.toGroupExtension.Equiv Y.toGroupExtension, Continuous ⇑e) ↔
+      X.contCohomologyClass = Y.contCohomologyClass :=
+  X.toGroupExtension.exists_equiv_continuous_iff_contCohomologyClass_eq X.continuous_inl
+    X.continuous_rightHom X.inducesAction Y.toGroupExtension Y.continuous_inl Y.continuous_rightHom
+    Y.inducesAction
+
+variable (G M) in
+/-- **Continuous equivalence of profinite extensions** is an equivalence relation on the profinite
+extensions of `G` by `M` inducing the given action: by
+`TauCeti.ProfiniteGroupExtension.exists_equiv_continuous_iff_contCohomologyClass_eq` it is the
+kernel of the class map. -/
+def isEquivSetoid : Setoid (ProfiniteGroupExtension G M) where
+  r X Y := ∃ e : X.toGroupExtension.Equiv Y.toGroupExtension, Continuous ⇑e
+  iseqv :=
+    { refl X := (exists_equiv_continuous_iff_contCohomologyClass_eq X X).2 rfl
+      symm {X Y} h := (exists_equiv_continuous_iff_contCohomologyClass_eq Y X).2
+        ((exists_equiv_continuous_iff_contCohomologyClass_eq X Y).1 h).symm
+      trans {X Y Z} h h' := (exists_equiv_continuous_iff_contCohomologyClass_eq X Z).2
+        (((exists_equiv_continuous_iff_contCohomologyClass_eq X Y).1 h).trans
+          ((exists_equiv_continuous_iff_contCohomologyClass_eq Y Z).1 h')) }
+
+@[simp]
+theorem isEquivSetoid_apply :
+    isEquivSetoid G M X Y ↔ ∃ e : X.toGroupExtension.Equiv Y.toGroupExtension, Continuous ⇑e :=
+  Iff.rfl
+
+end Class
+
+section Realization
+
+variable [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] [ContinuousSMul G M]
+  [CompactSpace M] [TotallyDisconnectedSpace M] (α : FactorSet G M) (hα : Continuous ⇑α)
+
+/-- **The twisted product of a continuous factor set is a profinite extension** when `G` and `M`
+are profinite: it is `M × G` as a space, `TauCeti.FactorSet.Extension.isTopologicalGroup` makes
+it a topological group, and its inclusion and projection are the coordinate maps. Compactness of
+`M` alone would not do: the twisted product of the trivial factor set over the trivial group is `M`
+itself. -/
+def ofFactorSet : ProfiniteGroupExtension G M where
+  E := α.Extension
+  instIsTopologicalGroup := FactorSet.Extension.isTopologicalGroup hα
+  toGroupExtension := α.groupExtension
+  continuous_inl := by
+    rw [FactorSet.groupExtension_inl]
+    exact FactorSet.continuous_inl α
+  continuous_rightHom := by
+    rw [FactorSet.groupExtension_rightHom]
+    exact FactorSet.continuous_rightHom α
+  inducesAction := GroupExtension.inducesAction_groupExtension α
+
+/-- The class of the twisted product of `α` is the class of `α`: read it through the canonical
+section, whose factor set is `α`. -/
+@[simp]
+theorem contCohomologyClass_ofFactorSet :
+    (ofFactorSet α hα).contCohomologyClass = α.contCohomologyClass hα := by
+  have := FactorSet.Extension.isTopologicalGroup hα
+  have hinl : Continuous α.groupExtension.inl := (ofFactorSet α hα).continuous_inl
+  have hrh : Continuous α.groupExtension.rightHom := (ofFactorSet α hα).continuous_rightHom
+  change α.groupExtension.contCohomologyClass hinl hrh
+    (GroupExtension.inducesAction_groupExtension α) = _
+  rw [α.groupExtension.contCohomologyClass_eq hinl hrh _ (FactorSet.continuous_canonicalSection α)
+    α.canonicalSection_one]
+  exact FactorSet.contCohomologyClass_factorSet_canonicalSection α hα _
+
+/-- **Every class of `H²(G, M)` is the class of a profinite extension**, namely of the twisted
+product of a continuous factor set representing it. -/
+theorem exists_contCohomologyClass_eq (c : H2 G (Additive M)) :
+    ∃ X : ProfiniteGroupExtension G M, X.contCohomologyClass = c := by
+  obtain ⟨α, hα, h⟩ := FactorSet.exists_contCohomologyClass_eq c
+  exact ⟨ofFactorSet α hα, (contCohomologyClass_ofFactorSet α hα).trans h⟩
+
+variable (G M) in
+/-- **Continuous `H²` classifies profinite extensions**: the class descends to a bijection from the
+profinite extensions of `G` by `M` inducing the given action, taken modulo continuous
+equivalence, onto `H²(G, M)`. -/
+noncomputable def contCohomologyClassEquiv :
+    Quotient (isEquivSetoid G M) ≃ H2 G (Additive M) :=
+  Equiv.ofBijective
+    (Quotient.lift contCohomologyClass fun X Y h =>
+      (exists_equiv_continuous_iff_contCohomologyClass_eq X Y).1 h)
+    ⟨fun a b => Quotient.inductionOn₂ a b fun X Y h =>
+      Quotient.sound ((exists_equiv_continuous_iff_contCohomologyClass_eq X Y).2 h),
+      fun c => by
+        obtain ⟨X, hX⟩ := exists_contCohomologyClass_eq c
+        exact ⟨Quotient.mk _ X, hX⟩⟩
+
+@[simp]
+theorem contCohomologyClassEquiv_apply_mk (X : ProfiniteGroupExtension G M) :
+    contCohomologyClassEquiv G M (Quotient.mk _ X) = X.contCohomologyClass :=
+  (rfl)
+
+end Realization
+
+end ProfiniteGroupExtension
 
 end TauCeti
