@@ -6,8 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.GroupTheory.FreeGroup.CyclicallyReduced
+public import Mathlib.GroupTheory.PresentedGroup
 public import TauCeti.GroupTheory.Presentation.Relator
-public import TauCeti.GroupTheory.PresentedGroup
 
 /-!
 # Auditable finite group presentations
