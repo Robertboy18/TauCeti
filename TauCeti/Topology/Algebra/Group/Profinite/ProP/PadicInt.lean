@@ -7,9 +7,10 @@ module
 
 public import Mathlib.NumberTheory.Padics.ProperSpace
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Basic
+public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicPow
 public import TauCeti.Topology.Algebra.Group.Profinite.Rank
 import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
+public import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
 
 /-!
 # The additive group of the p-adic integers
@@ -29,6 +30,7 @@ the `ℤ_p` example used when identifying the free pro-`p` group on one generato
   generates `Multiplicative ℤ_[p]`.
 * `TauCeti.topologicalGeneratorRank_multiplicative_padicInt`: its topological generator rank is
   one.
+* `TauCeti.IsProP.padicPow_ofAdd_one_padicInt`: the `p`-adic power of `1` by `l` is `l`.
 
 ## References
 
@@ -138,5 +140,14 @@ theorem topologicalGeneratorRank_multiplicative_padicInt (p : ℕ) [Fact p.Prime
     (isTopologicallyFinitelyGenerated_multiplicative_padicInt p),
     topologicalGeneratorRankNat_multiplicative_padicInt]
   simp
+
+/-- In the additive group of `ℤ_[p]`, the `p`-adic power of `1` by `l` is `l` itself. -/
+@[simp]
+theorem IsProP.padicPow_ofAdd_one_padicInt (p : ℕ) [Fact p.Prime] (l : ℤ_[p]) :
+    (isProP_multiplicative_padicInt p).padicPow (Multiplicative.ofAdd 1) l =
+      Multiplicative.ofAdd l :=
+  ((isProP_multiplicative_padicInt p).eq_padicPow_of_continuous
+    (f := fun l : ℤ_[p] ↦ Multiplicative.ofAdd l) continuous_ofAdd
+    (fun k ↦ by rw [← ofAdd_nsmul, nsmul_one]) l).symm
 
 end TauCeti
