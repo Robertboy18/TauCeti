@@ -17,8 +17,9 @@ open kernel. The predicate is phrased through the kernel and not through a topol
 continuous exactly when its kernel is open (`MonoidHom.continuous_iff_isOpen_ker`), so nothing is
 lost, and the predicate is manifestly invariant under isomorphism of `Q`. The continuous finite
 quotients of `G` are, up to isomorphism, the quotients `G ⧸ U` by its open normal subgroups of
-finite index; for compact `G` every open subgroup has finite index, so they are the quotients by
-all open normal subgroups.
+finite index; when `G` is compact with separately continuous multiplication (in particular a
+compact topological group) every open subgroup has finite index, so they are the quotients by all
+open normal subgroups.
 
 The finite-quotient determinacy of topologically finitely generated profinite groups, the main
 consumer of this predicate, is in `TauCeti.Topology.Algebra.Group.Profinite.FiniteQuotients`.
@@ -58,8 +59,9 @@ some surjective homomorphism `G →* Q` has open kernel. The group `Q` carries n
 is a topological group (`IsTopologicalGroup G`) and `Q` carries the discrete topology, an open
 kernel is the same as continuity (`isFiniteContinuousQuotient_iff_exists_continuous`). Finiteness
 is part of the predicate because an open kernel alone does not force it: a discrete group is a
-quotient of itself with open kernel. For a compact `G` every open subgroup has finite index, so
-there finiteness is automatic (`OpenNormalSubgroup.isFiniteContinuousQuotient`). -/
+quotient of itself with open kernel. When `G` is compact with separately continuous multiplication
+(in particular a compact topological group) every open subgroup has finite index, so there
+finiteness is automatic (`OpenNormalSubgroup.isFiniteContinuousQuotient`). -/
 def IsFiniteContinuousQuotient : Prop :=
   Finite Q ∧ ∃ f : G →* Q, Function.Surjective f ∧ IsOpen (f.ker : Set G)
 
@@ -78,9 +80,9 @@ theorem isFiniteContinuousQuotient_iff :
   Iff.rfl
 
 /-- The quotient of `G` by an open normal subgroup of finite index is a continuous finite quotient
-of `G`. For a compact `G` every open subgroup has finite index
-(`OpenSubgroup.finiteIndex_toSubgroup`), so the finite-index instance is then found
-automatically. -/
+of `G`. When `G` is compact with separately continuous multiplication (in particular a compact
+topological group) every open subgroup has finite index (`OpenSubgroup.finiteIndex_toSubgroup`),
+so the finite-index instance is then found automatically. -/
 theorem _root_.OpenNormalSubgroup.isFiniteContinuousQuotient (U : OpenNormalSubgroup G)
     [U.toSubgroup.FiniteIndex] : IsFiniteContinuousQuotient G (G ⧸ U.toSubgroup) :=
   ⟨inferInstance, QuotientGroup.mk' U.toSubgroup, QuotientGroup.mk'_surjective _, by
