@@ -42,10 +42,12 @@ compatibility predicate `TauCeti.SymplecticForm.Compatible` uses the opposite si
 * `TauCeti.AlmostComplexStructure.IsRiemannForm`: `E` is a Riemann form for `J`.
 * `TauCeti.AlmostComplexStructure.IsRiemannForm.nondegenerate`: a Riemann form is nondegenerate
   when `V` is flat over `ℤ`.
-* `TauCeti.AlmostComplexStructure.IsRiemannForm.isPolarization` and
-  `TauCeti.AlmostComplexStructure.isRiemannForm_iff_isPolarization`: **when `V` is flat over `ℤ`,
-  a Riemann form polarizes the weight-one Hodge structure of `J`**, and every form polarizing it
-  is a Riemann form.
+* `TauCeti.AlmostComplexStructure.IsRiemannForm.isPolarization`: **when `V` is flat over `ℤ`,
+  a Riemann form polarizes the weight-one Hodge structure of `J`**.
+* `TauCeti.AlmostComplexStructure.isRiemannForm_of_isPolarization`: every form polarizing that
+  Hodge structure is a Riemann form, with no flatness assumption.
+* `TauCeti.AlmostComplexStructure.isRiemannForm_iff_isPolarization`: when `V` is flat over `ℤ`,
+  the Riemann forms are exactly the polarizing forms.
 * `TauCeti.AlmostComplexStructure.IsRiemannForm.polarization`: the polarized effective weight-one
   Hodge structure of a lattice with a complex structure and a Riemann form.
 
@@ -150,24 +152,15 @@ theorem polarization_Q [Module.Flat ℤ V] (h : IsRiemannForm J E) (hℂ : IsBas
     (h.polarization hℂ).Q = Hodge.integralFormBaseChange hℂ E := by
   rw [Hodge.Polarization.Q_def, polarization_Qint]
 
-/-- The weight-one Hodge structure of a complex structure admitting a Riemann form is
-polarizable when the integral module is flat. -/
-theorem isPolarizable [Module.Flat ℤ V] (h : IsRiemannForm J E) (hℂ : IsBaseChange ℂ ιℂ) :
-    Hodge.IsPolarizable hℂ (J.latticeHodgeStructure hℂ) :=
-  (h.polarization hℂ).isPolarizable
-
 end IsRiemannForm
 
-/-- **When `V` is flat over `ℤ`, the Riemann forms for `J` are exactly the forms polarizing its
-weight-one Hodge structure.** In the converse direction, `J`-invariance of `E_ℝ` says that the Weil
-operator is an isometry of the polarization, and positivity of `E_ℝ (J x) x` is positivity of the
-Hodge form on real vectors. -/
-theorem isRiemannForm_iff_isPolarization [Module.Flat ℤ V]
-    (J : AlmostComplexStructure (Hodge.Realification V)) (hℂ : IsBaseChange ℂ ιℂ)
-    (E : LinearMap.BilinForm ℤ V) :
-    J.IsRiemannForm E ↔ Hodge.IsPolarization hℂ (J.latticeHodgeStructure hℂ) E := by
-  refine ⟨fun h ↦ h.isPolarization hℂ, fun h ↦
-    ⟨LinearMap.isAlt_iff_eq_neg_flip.mpr ?_, fun x y ↦ ?_, fun x hx ↦ ?_⟩⟩
+/-- **Every form polarizing the weight-one Hodge structure of `J` is a Riemann form for `J`**, with
+no flatness assumption: `J`-invariance of `E_ℝ` says that the Weil operator is an isometry of the
+polarization, and positivity of `E_ℝ (J x) x` is positivity of the Hodge form on real vectors. -/
+theorem isRiemannForm_of_isPolarization {J : AlmostComplexStructure (Hodge.Realification V)}
+    {hℂ : IsBaseChange ℂ ιℂ} {E : LinearMap.BilinForm ℤ V}
+    (h : Hodge.IsPolarization hℂ (J.latticeHodgeStructure hℂ) E) : J.IsRiemannForm E := by
+  refine ⟨LinearMap.isAlt_iff_eq_neg_flip.mpr ?_, fun x y ↦ ?_, fun x hx ↦ ?_⟩
   · ext x y
     exact h.eq_neg_of_odd odd_one y x
   · have hiso := h.isOrthogonal_weilOperator (Hodge.realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] x))
@@ -186,5 +179,13 @@ theorem isRiemannForm_iff_isPolarization [Module.Flat ℤ V]
       latticeComplexification_realificationComplexEquiv_one_tmul,
       Hodge.integralFormBaseChange_realificationComplexEquiv_one_tmul] at hpos
     exact Complex.zero_lt_real.mp hpos
+
+/-- **When `V` is flat over `ℤ`, the Riemann forms for `J` are exactly the forms polarizing its
+weight-one Hodge structure.** Flatness is used only in the forward direction, for nondegeneracy. -/
+theorem isRiemannForm_iff_isPolarization [Module.Flat ℤ V]
+    (J : AlmostComplexStructure (Hodge.Realification V)) (hℂ : IsBaseChange ℂ ιℂ)
+    (E : LinearMap.BilinForm ℤ V) :
+    J.IsRiemannForm E ↔ Hodge.IsPolarization hℂ (J.latticeHodgeStructure hℂ) E :=
+  ⟨fun h ↦ h.isPolarization hℂ, isRiemannForm_of_isPolarization⟩
 
 end TauCeti.AlmostComplexStructure
