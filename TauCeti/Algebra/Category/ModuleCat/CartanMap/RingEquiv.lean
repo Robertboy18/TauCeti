@@ -138,9 +138,25 @@ theorem finiteModulesEquivalence_functor_obj_obj (M : FGModuleCat.{u} S) :
   (rfl)
 
 @[simp]
+theorem finiteModulesEquivalence_functor_map_hom {M N : FGModuleCat.{u} S} (f : M ⟶ N) :
+    (e.finiteModulesEquivalence.functor.map f).hom =
+      eqToHom (e.finiteModulesEquivalence_functor_obj_obj M) ≫
+        (ModuleCat.restrictScalars e.toRingHom).map f.hom ≫
+        eqToHom (e.finiteModulesEquivalence_functor_obj_obj N).symm :=
+  (rfl)
+
+@[simp]
 theorem finiteModulesEquivalence_inverse_obj_obj (M : FGModuleCat.{u} R) :
     (e.finiteModulesEquivalence.inverse.obj M).obj =
       (ModuleCat.restrictScalars e.symm.toRingHom).obj M.obj :=
+  (rfl)
+
+@[simp]
+theorem finiteModulesEquivalence_inverse_map_hom {M N : FGModuleCat.{u} R} (f : M ⟶ N) :
+    (e.finiteModulesEquivalence.inverse.map f).hom =
+      eqToHom (e.finiteModulesEquivalence_inverse_obj_obj M) ≫
+        (ModuleCat.restrictScalars e.symm.toRingHom).map f.hom ≫
+        eqToHom (e.finiteModulesEquivalence_inverse_obj_obj N).symm :=
   (rfl)
 
 @[simp]
@@ -151,10 +167,28 @@ theorem finiteProjectiveModulesEquivalence_functor_obj_obj
   (rfl)
 
 @[simp]
+theorem finiteProjectiveModulesEquivalence_functor_map_hom
+    {M N : (finiteProjectiveModules S).FullSubcategory} (f : M ⟶ N) :
+    (e.finiteProjectiveModulesEquivalence.functor.map f).hom =
+      eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj M) ≫
+        (ModuleCat.restrictScalars e.toRingHom).map f.hom ≫
+        eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj N).symm :=
+  (rfl)
+
+@[simp]
 theorem finiteProjectiveModulesEquivalence_inverse_obj_obj
     (M : (finiteProjectiveModules R).FullSubcategory) :
     (e.finiteProjectiveModulesEquivalence.inverse.obj M).obj =
       (ModuleCat.restrictScalars e.symm.toRingHom).obj M.obj :=
+  (rfl)
+
+@[simp]
+theorem finiteProjectiveModulesEquivalence_inverse_map_hom
+    {M N : (finiteProjectiveModules R).FullSubcategory} (f : M ⟶ N) :
+    (e.finiteProjectiveModulesEquivalence.inverse.map f).hom =
+      eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj M) ≫
+        (ModuleCat.restrictScalars e.symm.toRingHom).map f.hom ≫
+        eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj N).symm :=
   (rfl)
 
 /-- The equivalence of finitely generated module categories induced by a ring isomorphism is
