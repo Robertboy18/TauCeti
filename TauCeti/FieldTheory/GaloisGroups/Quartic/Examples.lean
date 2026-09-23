@@ -64,7 +64,7 @@ open Polynomial Equiv Equiv.Perm
 
 namespace TauCeti
 
-local instance factPrimeFive : Fact (Nat.Prime 5) := ⟨by decide⟩
+private instance factPrimeFive : Fact (Nat.Prime 5) := ⟨by decide⟩
 
 local instance factPrimeSeven : Fact (Nat.Prime 7) := ⟨by decide⟩
 
