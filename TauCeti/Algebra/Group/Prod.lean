@@ -64,11 +64,13 @@ namespace MulEquiv
 
 variable {M N M' N' : Type*} [MulOneClass M] [MulOneClass N] [MulOneClass M'] [MulOneClass N']
 
+/-- The product of two multiplicative isomorphisms acts componentwise. -/
 @[to_additive (attr := simp) prodCongr_apply
 /-- The product of two additive isomorphisms acts componentwise. -/]
 theorem prodCongr_apply (f : M ≃* M') (g : N ≃* N') (x : M × N) :
     f.prodCongr g x = (f x.1, g x.2) := (rfl)
 
+/-- The inverse of a product of two multiplicative isomorphisms is the product of the inverses. -/
 @[to_additive (attr := simp) prodCongr_symm
 /-- The inverse of a product of two additive isomorphisms is the product of the inverses. -/]
 theorem prodCongr_symm (f : M ≃* M') (g : N ≃* N') :

@@ -15,17 +15,17 @@ import TauCeti.NumberTheory.Padics.RingHoms
 /-!
 # The structure theorem for topologically finitely generated abelian pro-`p` groups
 
-A topologically finitely generated abelian pro-`p` group `A` is a finitely generated module over
-the discrete valuation ring `ℤ_[p]`, through the canonical `p`-adic exponentiation
-`TauCeti.IsProP.module`. The structure theorem for finitely generated modules over a discrete
-valuation ring therefore writes `A` as `ℤ_p ^ r × T` with `T = ∏ i, ℤ/p^(e i)` a finite abelian
-`p`-group. The algebraic isomorphism is automatically a homeomorphism: its inverse is continuous
-because the `ℤ_[p]`-action on `A` is continuous and `T` is finite, and a continuous bijection from
-the compact space `ℤ_p ^ r × T` onto the Hausdorff space `A` is a homeomorphism.
+A topologically finitely generated abelian pro-`p` group `A` is topologically isomorphic to
+`ℤ_p ^ r × T`, where `T = ∏ i : Fin m, ℤ/p^(e i)` is a finite abelian `p`-group carrying the
+discrete topology and every exponent `e i` is positive, so that the finite factor has no trivial
+summand. The isomorphism is an isomorphism of topological groups; it is moreover `ℤ_[p]`-linear
+for the canonical `p`-adic exponentiation `TauCeti.IsProP.module`, since every continuous
+homomorphism between abelian pro-`p` groups is (`TauCeti.IsProP.map_padicPow`). This is the
+abelian case of the classification of finitely generated pro-`p` groups; it describes, for
+instance, the abelianisation of any topologically finitely generated pro-`p` group.
 
-The exponents `e i` are all positive, so the finite factor carries no trivial summand. The rank
-`r` and the exponents `e i` are the invariants of `A`; their uniqueness is not proved here. Nor
-is the identification of `T` with the torsion subgroup of `A`.
+The rank `r` and the exponents `e i` are the invariants of `A`; their uniqueness is not proved
+here. Nor is the identification of `T` with the torsion subgroup of `A`.
 
 ## Main result
 
