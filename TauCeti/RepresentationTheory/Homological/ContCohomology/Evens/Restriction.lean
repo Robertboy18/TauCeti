@@ -21,14 +21,11 @@ conjugate, for the multiplication pairing of `𝔽₂`:
 res_U [graph_s(α)] = [α] ⌣ evensConj1([α]).
 ```
 Here `TauCeti.ContCohomology.evensConj1` is defined on explicit `H¹` as `res ∘ cor - id`, and
-equals conjugation by every element outside `U`.
+equals conjugation by every element outside `U`. The class of `α` is represented by the cocycle
+`TauCeti.ContCohomology.evensHomCocycleAmbient` with the lifted trivial `𝔽₂` coefficients of the
+ambient group.
 
-## Main definitions
-
-* `TauCeti.ContCohomology.evensHomCocycleAmbient`: a continuous homomorphism on `U`, as a
-  continuous `1`-cocycle of `U` with the lifted trivial `𝔽₂` coefficients of the ambient group.
-
-## Main results
+## Main result
 
 * `TauCeti.ContCohomology.explicitRes2_evensGraphCocycle`: in explicit cohomology, the restriction
   of the graph-cocycle class for a chosen `s ∉ U` is the cup product with the conjugate class.
@@ -54,38 +51,6 @@ attribute [local instance] TopRep.distribMulAction TopRep.smulCommClass
 local instance : ContinuousSMul G (trivialF2 G).V :=
   (isSmoothDiscrete_trivialF2 G).continuousSMul
 
-omit [IsTopologicalGroup G] in
-private theorem evensHomCochainAmbient_mem_Z1 (U : OpenSubgroup G)
-    (α : U.toSubgroup →* Multiplicative (ZMod 2)) (hα : Continuous α) :
-    (fun h : U.toSubgroup => (trivialF2Equiv G).symm (Multiplicative.toAdd (α h))) ∈
-      Z1 U.toSubgroup (trivialF2 G).V := by
-  refine mem_Z1_iff.2 ⟨?_, fun g h => ?_⟩
-  · exact (continuous_of_discreteTopology : Continuous (trivialF2Equiv G).symm).comp
-      (continuous_toAdd.comp hα)
-  · apply (trivialF2Equiv G).injective
-    simp only [Subgroup.smul_def, TopRep.distribMulAction_smul, trivialF2_ρ_apply_apply, map_add,
-      AddEquiv.apply_symm_apply, map_mul, toAdd_mul]
-    exact add_comm _ _
-
-/-- A continuous homomorphism `α : U → Multiplicative (ZMod 2)` on an open subgroup, as a
-continuous `1`-cocycle of `U` with coefficients in the lifted trivial `𝔽₂` object of the ambient
-group `G`. This is the representative of the class of `α` to which restriction, corestriction and
-the cup products of the ambient group apply. -/
-noncomputable def evensHomCocycleAmbient (U : OpenSubgroup G)
-    (α : U.toSubgroup →* Multiplicative (ZMod 2)) (hα : Continuous α) :
-    Z1 U.toSubgroup (trivialF2 G).V :=
-  ⟨fun h => (trivialF2Equiv G).symm (Multiplicative.toAdd (α h)),
-    evensHomCochainAmbient_mem_Z1 U α hα⟩
-
-omit [IsTopologicalGroup G] in
-/-- The underlying cochain of `evensHomCocycleAmbient`. -/
-@[simp]
-theorem coe_evensHomCocycleAmbient (U : OpenSubgroup G)
-    (α : U.toSubgroup →* Multiplicative (ZMod 2)) (hα : Continuous α) :
-    (evensHomCocycleAmbient U α hα : U.toSubgroup → (trivialF2 G).V) =
-      fun h => (trivialF2Equiv G).symm (Multiplicative.toAdd (α h)) :=
-  (rfl)
-
 /-- Restriction of the explicit graph-cocycle class for a chosen `s ∉ U` is the `(1,1)` cup
 product of the class of `α` with its choice-free conjugate `TauCeti.ContCohomology.evensConj1`,
 for the multiplication pairing of `𝔽₂`. Both sides lie in explicit `H²(U, 𝔽₂)`. -/
@@ -96,9 +61,9 @@ theorem explicitRes2_evensGraphCocycle (U : OpenSubgroup G) (hU : U.toSubgroup.i
       explicitCup11 U.toSubgroup (trivialF2 G).V (trivialF2 G).V (trivialF2 G).V
         (trivialF2Pairing G) continuous_of_discreteTopology
         (fun u m n => trivialF2Pairing_smul_smul G (u : G) m n)
-        (evensHomCocycleAmbient U α hα : H1 U.toSubgroup (trivialF2 G).V)
+        (evensHomCocycleAmbient U.toSubgroup α hα : H1 U.toSubgroup (trivialF2 G).V)
         (evensConj1 G (trivialF2 G).V U.toSubgroup hU U.isOpen'
-          (evensHomCocycleAmbient U α hα : H1 U.toSubgroup (trivialF2 G).V)) := by
+          (evensHomCocycleAmbient U.toSubgroup α hα : H1 U.toSubgroup (trivialF2 G).V)) := by
   have := Subgroup.normal_of_index_eq_two hU
   rw [evensConj1_eq_explicitConj1 G (trivialF2 G).V U.toSubgroup hU U.isOpen' hs,
     explicitConj1_apply_eq_smul, smul_mk, explicitCup11_mk, explicitRes2_mk]

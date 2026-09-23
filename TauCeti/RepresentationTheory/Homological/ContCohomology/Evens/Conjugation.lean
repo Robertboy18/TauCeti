@@ -93,15 +93,15 @@ variable (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 /-- **The conjugation on `H¹(U, M)` of an open subgroup of index two, defined choice-free** as
 `res ∘ cor - id`, with `cor` the degree-one corestriction `TauCeti.ContCohomology.explicitCor1`.
 
-At index two `res ∘ cor` is `1 + s` for either element `s` of the nontrivial coset, so this
-difference is conjugation by `s` for every `s ∉ U` (`evensConj1_eq_explicitConj1`) and depends on
-`U` alone. It is the conjugate `α ↦ s · α` appearing in the identities of the index-two Evens
-norm. -/
+At index two `res ∘ cor` is `1 + s` for every element `s` outside `U`, so this difference is
+conjugation by `s` for every `s ∉ U` (`evensConj1_eq_explicitConj1`) and depends on `U` alone. It
+is the conjugate `α ↦ s · α` appearing in the identities of the index-two Evens norm. -/
 noncomputable def evensConj1 (hU : U.index = 2) (hUo : IsOpen (U : Set G)) : H1 U M →+ H1 U M :=
   haveI : U.FiniteIndex := ⟨by omega⟩
   (explicitRes1 G M U).comp (explicitCor1 G M U hUo) - AddMonoidHom.id (H1 U M)
 
 /-- The defining formula of `evensConj1`: restriction of the corestriction, minus the identity. -/
+@[simp]
 theorem evensConj1_apply (hU : U.index = 2) (hUo : IsOpen (U : Set G)) (x : H1 U M) :
     letI : U.FiniteIndex := ⟨by omega⟩
     evensConj1 G M U hU hUo x = explicitRes1 G M U (explicitCor1 G M U hUo x) - x :=
