@@ -84,12 +84,12 @@ variable {P S} {P' : SSetPair.{w}} {S' : P'.right.Subcomplex} (f : P ⟶ P')
   (h : S ≤ S'.preimage f.right)
 
 include h in
-lemma range_ι_comp_right_le : SSet.Subcomplex.range (S.ι ≫ f.right) ≤ S' := by
+private lemma range_ι_comp_right_le : SSet.Subcomplex.range (S.ι ≫ f.right) ≤ S' := by
   rintro n _ ⟨x, rfl⟩
   exact h n x.2
 
 include h in
-lemma range_ι_comp_left_le :
+private lemma range_ι_comp_left_le :
     SSet.Subcomplex.range ((S.preimage P.hom).ι ≫ f.left) ≤ S'.preimage P'.hom := by
   rintro n _ ⟨x, rfl⟩
   have hx : f.right.app n (P.hom.app n x.1) ∈ S'.obj n := h n x.2
@@ -108,14 +108,6 @@ def restrictMap : P.restrict S ⟶ P'.restrict S' :=
       ext n x
       apply Subtype.ext
       exact congr($(hw).app n x.1))
-
-lemma restrictMap_left :
-    (restrictMap f h).left =
-      SSet.Subcomplex.lift ((S.preimage P.hom).ι ≫ f.left) (range_ι_comp_left_le f h) := (rfl)
-
-lemma restrictMap_right :
-    (restrictMap f h).right = SSet.Subcomplex.lift (S.ι ≫ f.right) (range_ι_comp_right_le f h) :=
-  (rfl)
 
 @[simp]
 lemma restrictMap_left_app_coe {n : SimplexCategoryᵒᵖ} (x : (P.restrict S).left.obj n) :
