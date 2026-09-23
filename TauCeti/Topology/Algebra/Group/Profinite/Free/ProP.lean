@@ -33,6 +33,8 @@ induces a surjection of free pro-`p` groups.
 * `TauCeti.isProP_freeProP`: a free pro-`p` group is pro-`p`.
 * `TauCeti.freeProP.topologicalClosure_closure_range_of_eq_top`: the generators generate the
   free pro-`p` group topologically.
+* `TauCeti.isTopologicallyFinitelyGenerated_freeProP`: for finite `X`, the free pro-`p` group on
+  `X` is topologically finitely generated.
 * `TauCeti.freeProP.hom_ext`: homomorphisms agreeing on the generators are equal.
 * `TauCeti.freeProP.existsUnique_lift`: the universal property.
 * `TauCeti.freeProP.lift_surjective`: a topologically generating map lifts to a surjection.
@@ -168,6 +170,18 @@ theorem topologicalClosure_closure_range_of_eq_top (p : ℕ) (X : Type u) :
       freeProC (finiteGroupClassP.{u} p) X → freeProP p X) ∘ freeProC.of = of :=
     funext fun x ↦ freeProC.equivFreeProP_of p x
   rwa [← Set.range_comp, hof] at h
+
+end freeProP
+
+/-- The free pro-`p` group on a finite type is topologically finitely generated. -/
+theorem isTopologicallyFinitelyGenerated_freeProP (p : ℕ) (X : Type u) [Finite X] :
+    IsTopologicallyFinitelyGenerated (freeProP p X) :=
+  (Set.finite_range _).isTopologicallyFinitelyGenerated
+    (freeProP.topologicalClosure_closure_range_of_eq_top p X)
+
+namespace freeProP
+
+variable {p : ℕ} {X Y Z : Type u}
 
 section HomExt
 

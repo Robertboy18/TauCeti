@@ -19,11 +19,11 @@ import TauCeti.Topology.Algebra.Group.Profinite.ProP.ContinuousDual
 
 The canonical generators of `freeProP p X` generate it topologically
 (`freeProP.topologicalClosure_closure_range_of_eq_top`), so for finite `X` the free pro-`p` group
-is topologically finitely generated. In the Frattini quotient
-`freeProP p X ⧸ proPFrattini p (freeProP p X)`, an `𝔽_p`-vector space, the classes of the
-generators are linearly independent: any assignment of exponents modulo `p` to the generators is
-realised by a continuous character of the free pro-`p` group, through its universal property. For
-finite `X` the classes also span, by Burnside's basis theorem, so they form a basis indexed by
+is topologically finitely generated (`isTopologicallyFinitelyGenerated_freeProP`). In the Frattini
+quotient `freeProP p X ⧸ proPFrattini p (freeProP p X)`, an `𝔽_p`-vector space, the classes of
+the generators are linearly independent: any assignment of exponents modulo `p` to the generators
+is realised by a continuous character of the free pro-`p` group, through its universal property.
+For finite `X` the classes also span, by Burnside's basis theorem, so they form a basis indexed by
 `X`. The Frattini quotient is therefore `𝔽_p^X`, and the topological generator rank of
 `freeProP p X` is the cardinality of `X`, in natural-number and in cardinal form.
 
@@ -40,8 +40,6 @@ rather than by a discrete type.
 
 ## Main results
 
-* `TauCeti.isTopologicallyFinitelyGenerated_freeProP`: for finite `X`, the free pro-`p` group on
-  `X` is topologically finitely generated.
 * `TauCeti.freeProP.linearIndependent_frattiniQuotient_of`: for every `X`, the classes of the
   generators in the Frattini quotient are linearly independent over `𝔽_p`.
 * `TauCeti.freeProP.finrank_quotient_proPFrattini`: for finite `X`, the Frattini quotient has
@@ -63,12 +61,6 @@ open scoped Cardinal
 universe u
 
 variable (p : ℕ) {X : Type u}
-
-/-- The free pro-`p` group on a finite type is topologically finitely generated. -/
-theorem isTopologicallyFinitelyGenerated_freeProP [Finite X] :
-    IsTopologicallyFinitelyGenerated (freeProP p X) :=
-  (Set.finite_range _).isTopologicallyFinitelyGenerated
-    (freeProP.topologicalClosure_closure_range_of_eq_top p X)
 
 namespace freeProP
 
@@ -127,7 +119,7 @@ by `X`. -/
 noncomputable def frattiniQuotientBasis :
     Module.Basis X (ZMod p) (Additive (freeProP p X ⧸ proPFrattini p (freeProP p X))) :=
   Module.Basis.mk (linearIndependent_frattiniQuotient_of p X) <| by
-    have := (isTopologicallyFinitelyGenerated_freeProP p (X := X)).finite_quotient_proPFrattini p
+    have := (isTopologicallyFinitelyGenerated_freeProP p X).finite_quotient_proPFrattini p
     have hspan := (topologicallyGenerates_iff_frattiniQuotient_span_eq_top (isProP_freeProP p X)
       (Set.range (of : X → freeProP p X))).mp (topologicalClosure_closure_range_of_eq_top p X)
     rw [← Set.range_comp] at hspan
@@ -165,7 +157,7 @@ cardinal form. -/
 @[simp]
 theorem topologicalGeneratorRank_freeProP : topologicalGeneratorRank (freeProP p X) = #X := by
   rw [← topologicalGeneratorRankNat_eq_topologicalGeneratorRank
-    (isTopologicallyFinitelyGenerated_freeProP p), topologicalGeneratorRankNat_freeProP,
+    (isTopologicallyFinitelyGenerated_freeProP p X), topologicalGeneratorRankNat_freeProP,
     Nat.cast_card]
 
 end TauCeti
