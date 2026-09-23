@@ -7,6 +7,7 @@ module
 
 public import TauCeti.AlgebraicTopology.SimplicialSet.Homology.Excision
 public import TauCeti.AlgebraicTopology.Singular.Subdivision.Small.Relative
+public import TauCeti.Topology.Category.TopPair
 
 /-!
 # Excision for relative singular homology
@@ -35,9 +36,10 @@ subordinate to the cover which do not lie in the subspace of `P'`
 and the cover enter, and it feeds the complementary-simplex criterion of simplicial excision.
 
 A continuous map `g : X ⟶ Y` carrying `A` into `A'` and `B` into `B'` is a map of excision data:
-it induces maps of pairs `TopPair.interPairMap g hA hB : (A, A ∩ B) ⟶ (A', A' ∩ B')` and
-`TopPair.ofSubsetMap g hB : (X, B) ⟶ (Y, B')` forming a commutative square with the excision maps
-(`TopPair.interPairMap_comp_excisionMap`), so the excision isomorphisms are natural in the data.
+it induces a map of pairs `TopPair.interPairMap g hA hB : (A, A ∩ B) ⟶ (A', A' ∩ B')`, functorial
+in `g`, which together with `TopPair.ofSubsetMap g hB : (X, B) ⟶ (Y, B')` forms a commutative
+square with the excision maps (`TopPair.interPairMap_comp_excisionMap`), so the excision
+isomorphisms are natural in the data.
 Compatibility with the connecting morphism of the pair is `TopPair.singularHomologyδ_naturality`
 applied to the excision map.
 
@@ -214,18 +216,6 @@ theorem isIso_singularHomologyMap_excisionMap_compl (Z : Set X) (h : closure Z �
 variable {A B} {Y : TopCat.{w}} (g : X ⟶ Y) {A' B' : Set Y}
   (hA : Set.MapsTo g A A') (hB : Set.MapsTo g B B')
 
-/-- A continuous map `g : X ⟶ Y` carrying `B` into `B'` induces a map of pairs
-`(X, B) ⟶ (Y, B')`. -/
-def ofSubsetMap : ofSubset B ⟶ ofSubset B' :=
-  TopPair.ofHom g (TopCat.ofHom ⟨hB.restrict, g.hom.continuous.restrict hB⟩)
-
-@[simp]
-lemma ofSubsetMap_fst_apply (x : (ofSubset B).fst) : Hom.fst (ofSubsetMap g hB) x = g x := (rfl)
-
-@[simp]
-lemma ofSubsetMap_snd_apply (x : (ofSubset B).snd) :
-    (Hom.snd (ofSubsetMap g hB) x).1 = g x.1 := (rfl)
-
 /-- A map of excision data: a continuous map `g : X ⟶ Y` carrying `A` into `A'` and `B` into `B'`
 induces a map of pairs `(A, A ∩ B) ⟶ (A', A' ∩ B')`. -/
 def interPairMap : interPair A B ⟶ interPair A' B' :=
@@ -239,6 +229,18 @@ lemma interPairMap_fst_apply (x : (interPair A B).fst) :
 @[simp]
 lemma interPairMap_snd_apply (x : (interPair A B).snd) :
     (Hom.snd (interPairMap g hA hB) x).1.1 = g x.1.1 := (rfl)
+
+@[simp]
+lemma interPairMap_id (hA : Set.MapsTo (𝟙 X) A A) (hB : Set.MapsTo (𝟙 X) B B) :
+    interPairMap (𝟙 X) hA hB = 𝟙 (interPair A B) := by
+  ext : 2 <;> rfl
+
+@[reassoc]
+lemma interPairMap_comp {Z : TopCat.{w}} (g' : Y ⟶ Z) {A'' B'' : Set Z}
+    (hA' : Set.MapsTo g' A' A'') (hB' : Set.MapsTo g' B' B'')
+    (hA'' : Set.MapsTo (g ≫ g') A A'') (hB'' : Set.MapsTo (g ≫ g') B B'') :
+    interPairMap (g ≫ g') hA'' hB'' = interPairMap g hA hB ≫ interPairMap g' hA' hB' := by
+  ext : 2 <;> rfl
 
 /-- The excision maps are natural in the excision data. -/
 @[reassoc]
