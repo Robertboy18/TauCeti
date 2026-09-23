@@ -83,10 +83,14 @@ theorem continuous_restrictedProductOfFinite_symm :
     Continuous (restrictedProductOfFinite U).symm := by
   have h : (cofinite : Filter ι) ≤ ⊥ := cofinite_eq_bot.le
   have key : ⇑(restrictedProductOfFinite U).symm =
-      RestrictedProduct.inclusion G (fun i ↦ (U i : Set (G i))) h ∘ RestrictedProduct.homeoBot := by
+      RestrictedProduct.inclusion G (fun i ↦ (U i : Set (G i))) h ∘
+        fun x ↦ RestrictedProduct.mk x eventually_bot := by
     ext x i
-    rfl
+    simp only [restrictedProductOfFinite_symm_apply, Function.comp_apply,
+      RestrictedProduct.inclusion_apply, RestrictedProduct.mk_apply]
   rw [key]
-  exact (RestrictedProduct.continuous_inclusion h).comp RestrictedProduct.homeoBot.continuous
+  refine (RestrictedProduct.continuous_inclusion h).comp ?_
+  refine RestrictedProduct.continuous_rng_of_bot.mpr (continuous_pi fun i ↦ ?_)
+  simpa only [Function.comp_apply, RestrictedProduct.mk_apply] using continuous_apply i
 
 end TauCeti

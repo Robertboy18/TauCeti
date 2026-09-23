@@ -129,7 +129,12 @@ theorem continuous_restrictedProductSum_symm (hU : ∀ k, IsOpen (U k : Set (G k
   have key : ((restrictedProductSum U).symm ∘ Prod.map (RestrictedProduct.inclusion _ _ hS₁) id) ∘
       Prod.map id (RestrictedProduct.inclusion _ _ hS₂) =
         RestrictedProduct.inclusion _ _ hT ∘ g := by
-    ext y (i | j) <;> rfl
+    ext y (i | j) <;>
+      rw [Function.comp_apply, Function.comp_apply, Function.comp_apply,
+        RestrictedProduct.inclusion_apply, RestrictedProduct.mk_apply,
+        Equiv.sumPiEquivProdPi_symm_apply] <;>
+      simp only [Prod.map_fst, Prod.map_snd, id_eq, restrictedProductSum_symm_apply_inl,
+        restrictedProductSum_symm_apply_inr, RestrictedProduct.inclusion_apply]
   rw [key]
   refine (RestrictedProduct.continuous_inclusion hT).comp ?_
   refine RestrictedProduct.continuous_rng_of_principal.mpr (continuous_pi ?_)
