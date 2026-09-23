@@ -26,8 +26,10 @@ quotient.
 
 ## Main results
 
-* `TauCeti.ConnectedIsoClass.mk_eq_mk_iff_exists_smul`: two connected triples have the same class
-  exactly when a relabeling carries one onto the other.
+* `TauCeti.ConnectedIsoClass.mk_eq_mk_iff_exists_smul`,
+  `TauCeti.ConnectedIsoClass.mk_eq_mk_iff_equivalent`: two connected triples have the same class
+  exactly when a relabeling carries one onto the other, that is, when the underlying permutation
+  triples are isomorphic.
 * `TauCeti.ConnectedIsoClass.mem_orbitFinset`, `TauCeti.ConnectedIsoClass.coe_orbitFinset`: the
   finset of a class consists of the connected triples of that class, and is the class's orbit
   `MulAction.orbitRel.Quotient.orbit`.
@@ -91,11 +93,23 @@ theorem mk_eq_mk_iff_exists_smul {t t' : ConnectedTriple n} :
 theorem mk_surjective : Function.Surjective (mk : ConnectedTriple n → ConnectedIsoClass n) :=
   Quotient.mk''_surjective
 
-/-- Equality of isomorphism classes is decidable: on representatives, search the finitely many
-relabelings. -/
+/-- Two connected triples determine the same isomorphism class exactly when the underlying
+permutation triples are isomorphic. -/
+theorem mk_eq_mk_iff_equivalent {t t' : ConnectedTriple n} :
+    mk t = mk t' ↔ PermutationTriple.Equivalent (t : PermutationTriple n) t' := by
+  rw [mk_eq_mk_iff_exists_smul, PermutationTriple.equivalent_iff_exists_smul_eq]
+  constructor
+  · rintro ⟨τ, rfl⟩
+    exact ⟨τ⁻¹, by simp⟩
+  · rintro ⟨τ, h⟩
+    exact ⟨τ⁻¹, Subtype.ext (by rw [ConnectedTriple.coe_smul, ← h, inv_smul_smul])⟩
+
+/-- Equality of isomorphism classes is decidable: on representatives, decide isomorphism of the
+underlying permutation triples. -/
 instance : DecidableEq (ConnectedIsoClass n) := fun c c' =>
   Quotient.recOnSubsingleton₂ c c' fun t t' =>
-    decidable_of_iff (∃ τ : Perm (Fin n), τ • t' = t) mk_eq_mk_iff_exists_smul.symm
+    decidable_of_iff (PermutationTriple.Equivalent (t : PermutationTriple n) t')
+      mk_eq_mk_iff_equivalent.symm
 
 instance : Fintype (ConnectedIsoClass n) := Fintype.ofSurjective mk mk_surjective
 
