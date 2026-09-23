@@ -21,7 +21,7 @@ integral over `R`, so lying over applies along the restricted map.
 
 * `AlgHom.mapIntegralClosure_comp`: the restriction to integral closures is functorial.
 * `AlgHom.mapIntegralClosure_injective`: it preserves injectivity.
-* `Ideal.comap_mapIntegralClosure_comp`: contraction along the restriction of a composite.
+* `Ideal.comap_mapIntegralClosure_comp`: contraction along a composite of restricted algebra maps.
 * `Ideal.exists_isPrime_comap_mapIntegralClosure_eq`: a prime of the integral closure in `A` is
   the contraction of a prime of the integral closure in `B` along an injective `f`.
 -/
@@ -33,24 +33,28 @@ variable {R A B C : Type*} [CommRing R] [CommRing A] [CommRing B] [CommRing C] [
 
 namespace AlgHom
 
+/-- Restricting a composite algebra homomorphism to integral closures gives the composite of the
+restricted algebra homomorphisms. -/
+@[simp]
 theorem mapIntegralClosure_comp (f : B →ₐ[R] C) (g : A →ₐ[R] B) :
     (f.comp g).mapIntegralClosure = f.mapIntegralClosure.comp g.mapIntegralClosure :=
   AlgHom.ext fun _ => Subtype.ext rfl
 
+/-- Restricting an injective algebra homomorphism to integral closures preserves injectivity. -/
 theorem mapIntegralClosure_injective {f : A →ₐ[R] B} (hf : Function.Injective f) :
     Function.Injective f.mapIntegralClosure :=
   fun _ _ h => Subtype.ext (hf (congrArg Subtype.val h))
 
 end AlgHom
 
-/-- Contracting an ideal along the restriction of a composite to integral closures is the
+/-- Contracting an ideal along a composite of maps between integral closures is the
 composite of the two contractions. -/
+@[simp]
 theorem Ideal.comap_mapIntegralClosure_comp (I : Ideal (integralClosure R C)) (f : B →ₐ[R] C)
     (g : A →ₐ[R] B) :
-    I.comap (f.comp g).mapIntegralClosure =
+    I.comap (f.mapIntegralClosure.comp g.mapIntegralClosure) =
       (I.comap f.mapIntegralClosure).comap g.mapIntegralClosure :=
-  Ideal.ext fun _ => by
-    simp only [Ideal.mem_comap, AlgHom.mapIntegralClosure_comp, AlgHom.comp_apply]
+  (Ideal.comap_comapₐ g.mapIntegralClosure f.mapIntegralClosure).symm
 
 /-- Lying over for integral closures: along an injective `R`-algebra map `f : A → B`, every prime
 of the integral closure of `R` in `A` is the contraction of a prime of the integral closure of `R`

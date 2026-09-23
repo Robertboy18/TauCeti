@@ -73,7 +73,6 @@ attribute [simp] Hom.field_local
 namespace Hom
 
 /-- Two maps are equal when their field and local-ring components agree. -/
-@[ext (iff := false)]
 lemma ext {E F : FiniteDVRExtension R K} {f g : Hom E F}
     (hfield : f.field = g.field) (hlocal : f.localMap = g.localMap) : f = g := by
   cases f
@@ -156,6 +155,7 @@ variable {E F : FiniteDVRExtension R K}
 
 /-- The local-ring component of a map agrees, on the integral closure, with the restriction of the
 field component to the integral closures. -/
+@[simp]
 theorem localMap_algebraMap (T : E ⟶ F) (x : E.integralClosure) :
     T.localMap (algebraMap E.integralClosure E.localRing x) =
       algebraMap F.integralClosure F.localRing
@@ -168,6 +168,7 @@ theorem localMap_algebraMap (T : E ⟶ F) (x : E.integralClosure) :
 /-- The chosen places correspond under the field component of a map: the chosen prime of the
 target pulls back, along the restriction of the field embedding to the integral closures, to the
 chosen prime of the source. -/
+@[simp]
 theorem comap_prime (T : E ⟶ F) :
     F.prime.comap (T.field.restrictScalars R).mapIntegralClosure = E.prime := by
   ext x
@@ -178,6 +179,7 @@ theorem comap_prime (T : E ⟶ F) :
   rfl
 
 /-- A map of chosen extensions is determined by its field component. -/
+@[ext (iff := false)]
 theorem ext_field {f g : E ⟶ F} (h : f.field = g.field) : f = g :=
   Hom.ext h <| AlgHom.ext fun x => IsFractionRing.injective F.localRing F.extensionField <| by
     rw [← f.field_local, ← g.field_local, h]

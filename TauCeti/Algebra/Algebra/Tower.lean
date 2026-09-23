@@ -28,6 +28,9 @@ variable {R S A B C : Type*} [CommSemiring R] [CommSemiring S] [Semiring A] [Sem
   [Semiring C] [Algebra R S] [Algebra S A] [Algebra S B] [Algebra S C] [Algebra R A] [Algebra R B]
   [Algebra R C] [IsScalarTower R S A] [IsScalarTower R S B] [IsScalarTower R S C]
 
+/-- Restricting scalars of a composite algebra homomorphism gives the composite of the restricted
+algebra homomorphisms. -/
+@[simp]
 theorem AlgHom.restrictScalars_comp (f : B →ₐ[S] C) (g : A →ₐ[S] B) :
     (f.comp g).restrictScalars R = (f.restrictScalars R).comp (g.restrictScalars R) :=
   rfl
