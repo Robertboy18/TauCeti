@@ -140,13 +140,6 @@ theorem latticeConj_realificationComplexEquiv_one_tmul (hℂ : IsBaseChange ℂ 
       realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] x) := by
   rw [← realificationComplexEquiv_conj, tmulConj_tmul, map_one]
 
-/-- The image of a real vector under the realification comparison is a real point of the
-lattice-induced conjugation. -/
-theorem realificationComplexEquiv_one_tmul_mem_realPoints (hℂ : IsBaseChange ℂ ιℂ)
-    (x : Realification V) :
-    realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] x) ∈ realPoints (latticeConj hℂ) := by
-  simp
-
 /-- **The real points of the abstract complexification are the realification.** Every vector
 fixed by the lattice-induced conjugation is the image of a real vector under the realification
 comparison. -/
