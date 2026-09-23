@@ -6,8 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Analysis.Normed.Ring.Units
-public import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
-public import Mathlib.Topology.Algebra.ContinuousMonoidHom
 public import Mathlib.Topology.Algebra.Group.Units
 public import TauCeti.Geometry.Toric.Analytic.Character.Basic
 
@@ -203,13 +201,13 @@ finite-dimensional complex space. -/
 instance [Module.Free ℤ N] [Module.Finite ℤ N] : SecondCountableTopology (ComplexTorus N) := by
   classical
   exact (isOpenEmbedding_complexTorusAmbient
-    (integralCharacterRepr (Module.Free.chooseBasis ℤ N))).isEmbedding.secondCountableTopology
+    (Module.Free.chooseBasis ℤ N).integralCharacterRepr).isEmbedding.secondCountableTopology
 
 /-- The complex torus is locally compact: an integral basis of `N` embeds it openly into a
 finite-dimensional complex space. -/
 instance [Module.Free ℤ N] [Module.Finite ℤ N] : LocallyCompactSpace (ComplexTorus N) := by
   classical
   exact (isOpenEmbedding_complexTorusAmbient
-    (integralCharacterRepr (Module.Free.chooseBasis ℤ N))).locallyCompactSpace
+    (Module.Free.chooseBasis ℤ N).integralCharacterRepr).locallyCompactSpace
 
 end TauCeti.Toric

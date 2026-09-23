@@ -34,7 +34,7 @@ torus points.  Given an identification of the character lattice with a free abel
 * `TauCeti.Toric.characterEvaluation`: evaluation of a character as a homomorphism on the torus.
 * `TauCeti.Toric.complexTorusMap`: the torus map induced by an additive map of lattices.
 * `TauCeti.Toric.exists_characterEvaluation_ne`: integral characters separate torus points.
-* `TauCeti.Toric.integralCharacterRepr`: the free presentation of the character lattice dual to an
+* `Module.Basis.integralCharacterRepr`: the free presentation of the character lattice dual to an
   integral basis of `N`.
 * `TauCeti.Toric.complexTorusCoordinates`: coordinates supplied by a free presentation of the
   character lattice.
@@ -150,16 +150,18 @@ theorem exists_characterEvaluation_ne {x y : ComplexTorus N} (h : x ≠ y) :
 
 /-- The free presentation of the character lattice dual to an integral basis `B` of `N`: an
 integral character corresponds to the family of its values on the basis vectors. -/
-noncomputable def integralCharacterRepr {ι : Type*} [Finite ι] [DecidableEq ι]
-    (B : Module.Basis ι ℤ N) : IntegralCharacter N ≃+ (ι →₀ ℤ) :=
-  ((addMonoidHomLequivInt ℤ).trans B.dualBasis.repr).toAddEquiv
+noncomputable def _root_.Module.Basis.integralCharacterRepr {ι : Type*} [Finite ι]
+    (B : Module.Basis ι ℤ N) : IntegralCharacter N ≃+ (ι →₀ ℤ) := by
+  classical
+  exact ((addMonoidHomLequivInt ℤ).trans B.dualBasis.repr).toAddEquiv
 
 /-- The coordinate of an integral character at a basis index is its value on that basis vector. -/
 @[simp]
-theorem integralCharacterRepr_apply {ι : Type*} [Finite ι] [DecidableEq ι]
+theorem _root_.Module.Basis.integralCharacterRepr_apply {ι : Type*} [Finite ι]
     (B : Module.Basis ι ℤ N) (m : IntegralCharacter N) (i : ι) :
-    integralCharacterRepr B m i = m (B i) := by
-  simp [integralCharacterRepr]
+    B.integralCharacterRepr m i = m (B i) := by
+  classical
+  simp [Module.Basis.integralCharacterRepr]
 
 /-- A free presentation of the character lattice identifies the coordinate-free complex torus
 with a product of copies of `ℂˣ`.  The last step is Tau Ceti's `freeAbelianCharEquiv`. -/
@@ -182,8 +184,7 @@ monomial in those coordinates whose exponents are the coordinates of the charact
 theorem complexTorusCoordinates_symm_apply {σ : Type*} (e : IntegralCharacter N ≃+ (σ →₀ ℤ))
     (c : σ → ℂˣ) (m : IntegralCharacter N) :
     (complexTorusCoordinates e).symm c m = (e m).prod fun i n ↦ c i ^ n := by
-  rw [← freeAbelianCharEquiv_symm_apply_ofAdd c (e m)]
-  rfl
+  simp [complexTorusCoordinates, AddChar.toMonoidHomMulEquiv]
 
 /-- The Laurent-monomial formula: a torus point evaluates an integral character `m` to the
 product of its coordinates, in the presentation `e`, raised to the coordinates of `m`. -/
@@ -214,7 +215,7 @@ noncomputable def complexTorusCoordinates (b : Basis κ ℤ N) :
     ComplexTorus N ≃* (κ → ℂˣ) := by
   classical
   letI : Finite κ := Module.Finite.finite_basis b
-  exact TauCeti.Toric.complexTorusCoordinates (integralCharacterRepr b)
+  exact TauCeti.Toric.complexTorusCoordinates b.integralCharacterRepr
 
 /-- The coordinate of a torus point indexed by a basis vector is its value on the coordinate
 functional of that vector. -/
@@ -226,7 +227,7 @@ theorem complexTorusCoordinates_apply (b : Basis κ ℤ N)
   have : Finite κ := Module.Finite.finite_basis b
   rw [complexTorusCoordinates, TauCeti.Toric.complexTorusCoordinates_apply]
   congr 1
-  refine (AddEquiv.symm_apply_eq (integralCharacterRepr b)).2 ?_
+  refine (AddEquiv.symm_apply_eq b.integralCharacterRepr).2 ?_
   ext j
   simp [Finsupp.single_apply, eq_comm]
 
