@@ -69,7 +69,8 @@ variable {R M : Type*} [CommSemiring R] [AddCommMonoid M] [Module R M]
 
 /-- In a space spanned by a family of subspaces paired trivially by `B` except along an
 involution `σ`, a nonzero vector of `W i` pairs nontrivially with some vector of `W (σ i)`. -/
-theorem exists_mem_apply_ne_zero_of_iSup_eq_top {B : BilinForm R M} (hnd : B.Nondegenerate)
+theorem Nondegenerate.exists_mem_apply_ne_zero_of_iSup_eq_top {B : BilinForm R M}
+    (hnd : B.Nondegenerate)
     {ι : Type*} {W : ι → Submodule R M} {σ : ι → ι} (hσ : Function.Involutive σ)
     (hW : ⨆ i, W i = ⊤) (horth : ∀ i j, j ≠ σ i → ∀ v ∈ W i, ∀ w ∈ W j, B v w = 0)
     {i : ι} {v : M} (hv : v ∈ W i) (hv0 : v ≠ 0) : ∃ w ∈ W (σ i), B w v ≠ 0 := by
@@ -255,7 +256,7 @@ private theorem exists_basis_apply_eq_J_of_iSup_eq_top_aux (n : ℕ) :
     by_contra! h
     exact bot_ne_top ((iSup_eq_bot.2 h).symm.trans hW)
   obtain ⟨e, he, he0⟩ := (Submodule.ne_bot_iff _).1 hi
-  obtain ⟨w, hw, hwe⟩ := exists_mem_apply_ne_zero_of_iSup_eq_top hnd hσ hW horth he he0
+  obtain ⟨w, hw, hwe⟩ := hnd.exists_mem_apply_ne_zero_of_iSup_eq_top hσ hW horth he he0
   set f := (B w e)⁻¹ • w with hf_def
   have hf : f ∈ W (σ i) := smul_mem _ _ hw
   have hfe : B f e = 1 := by rw [hf_def]; simp [inv_mul_cancel₀ hwe]
