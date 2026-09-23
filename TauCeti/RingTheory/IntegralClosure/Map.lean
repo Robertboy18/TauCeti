@@ -1,0 +1,63 @@
+/-
+Copyright (c) 2026 The Tau Ceti contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The Tau Ceti contributors
+-/
+module
+
+public import Mathlib.RingTheory.IntegralClosure.IsIntegralClosure.Basic
+public import TauCeti.RingTheory.Ideal.GoingUp
+
+/-!
+# Functoriality of integral closures
+
+An `R`-algebra map `f : A → B` restricts to a map `f.mapIntegralClosure` between the integral
+closures of `R` in `A` and in `B`. This file records that this restriction is functorial and
+preserves injectivity, and that primes of the integral closure of `R` in `A` are contractions of
+primes of the integral closure of `R` in `B` when `f` is injective: the integral closure in `B` is
+integral over `R`, so lying over applies along the restricted map.
+
+## Main results
+
+* `AlgHom.mapIntegralClosure_comp`: the restriction to integral closures is functorial.
+* `AlgHom.mapIntegralClosure_injective`: it preserves injectivity.
+* `Ideal.comap_mapIntegralClosure_comp`: contraction along the restriction of a composite.
+* `Ideal.exists_isPrime_comap_mapIntegralClosure_eq`: a prime of the integral closure in `A` is
+  the contraction of a prime of the integral closure in `B` along an injective `f`.
+-/
+
+public section
+
+variable {R A B C : Type*} [CommRing R] [CommRing A] [CommRing B] [CommRing C] [Algebra R A]
+  [Algebra R B] [Algebra R C]
+
+namespace AlgHom
+
+theorem mapIntegralClosure_comp (f : B →ₐ[R] C) (g : A →ₐ[R] B) :
+    (f.comp g).mapIntegralClosure = f.mapIntegralClosure.comp g.mapIntegralClosure :=
+  AlgHom.ext fun _ => Subtype.ext rfl
+
+theorem mapIntegralClosure_injective {f : A →ₐ[R] B} (hf : Function.Injective f) :
+    Function.Injective f.mapIntegralClosure :=
+  fun _ _ h => Subtype.ext (hf (congrArg Subtype.val h))
+
+end AlgHom
+
+/-- Contracting an ideal along the restriction of a composite to integral closures is the
+composite of the two contractions. -/
+theorem Ideal.comap_mapIntegralClosure_comp (I : Ideal (integralClosure R C)) (f : B →ₐ[R] C)
+    (g : A →ₐ[R] B) :
+    I.comap (f.comp g).mapIntegralClosure =
+      (I.comap f.mapIntegralClosure).comap g.mapIntegralClosure :=
+  Ideal.ext fun _ => by
+    simp only [Ideal.mem_comap, AlgHom.mapIntegralClosure_comp, AlgHom.comp_apply]
+
+/-- Lying over for integral closures: along an injective `R`-algebra map `f : A → B`, every prime
+of the integral closure of `R` in `A` is the contraction of a prime of the integral closure of `R`
+in `B`. -/
+theorem Ideal.exists_isPrime_comap_mapIntegralClosure_eq (P : Ideal (integralClosure R A))
+    [P.IsPrime] {f : A →ₐ[R] B} (hf : Function.Injective f) :
+    ∃ Q : Ideal (integralClosure R B), Q.IsPrime ∧ Q.comap f.mapIntegralClosure = P :=
+  P.exists_comap_eq_of_isIntegral f.mapIntegralClosure <| by
+    rw [(RingHom.injective_iff_ker_eq_bot _).mp (AlgHom.mapIntegralClosure_injective hf)]
+    exact bot_le
