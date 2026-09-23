@@ -26,7 +26,8 @@ providing the comparison needed for computations using a chosen coset representa
 
 The computation is carried out on cochains for an arbitrary coefficient module, with no topology:
 `cochainsCor1_indexTwoTransversal_apply_coe` is the two-term formula for the corestriction cochain
-on the elements of `U`.
+on the elements of `U`. The simp rule `sum_indexTwoTransversal_smul_lWord` evaluates the sum
+produced by `cochainsCor1_apply`; the named corestriction formula is also available for rewriting.
 
 ## Main definitions
 
@@ -61,6 +62,28 @@ variable {G : Type u} [Group G] {M : Type v} [AddCommGroup M] [DistribMulAction 
 
 attribute [local instance] Subgroup.fintypeQuotientOfFiniteIndex
 
+/-- The corestriction sum on the transversal `{1, s}`, evaluated on an element of `U`, has the
+two terms `f γ` and `s • f (s⁻¹ γ s)`. -/
+@[simp]
+theorem sum_indexTwoTransversal_smul_lWord (hU : U.index = 2) {s : G} (hs : s ∉ U)
+    (f : U → M) (γ : G) (hγ : γ ∈ U) :
+    letI : U.FiniteIndex := ⟨by omega⟩
+    ∑ u, U.indexTwoTransversal s u •
+      f ⟨lWord U (U.indexTwoTransversal s) u γ,
+        lWord_mem U _ (Subgroup.indexTwoTransversal_mk hU hs) _ _⟩ =
+      f ⟨γ, hγ⟩ + s • f ⟨s⁻¹ * γ * s, (Subgroup.normal_of_index_eq_two hU).conj_mem' γ hγ s⟩ := by
+  have : U.FiniteIndex := ⟨by omega⟩
+  have h1 : (⟨lWord U (U.indexTwoTransversal s) (QuotientGroup.mk 1) γ,
+      lWord_mem U _ (Subgroup.indexTwoTransversal_mk hU hs) _ _⟩ : U) = ⟨γ, hγ⟩ :=
+    Subtype.ext (lWord_indexTwoTransversal_mk_one_of_mem s hγ)
+  have h2 : (⟨lWord U (U.indexTwoTransversal s) (QuotientGroup.mk s) γ,
+      lWord_mem U _ (Subgroup.indexTwoTransversal_mk hU hs) _ _⟩ : U) =
+      ⟨s⁻¹ * γ * s, (Subgroup.normal_of_index_eq_two hU).conj_mem' γ hγ s⟩ :=
+    Subtype.ext (lWord_indexTwoTransversal_mk_of_mem hU hs hγ)
+  rw [sum_quotient_eq_add_of_index_two hU hs, h1, h2,
+    Subgroup.indexTwoTransversal_mk_one, one_smul,
+    Subgroup.indexTwoTransversal_of_ne s (mk_ne_mk_one_of_notMem hs)]
+
 /-- **The corestriction cochain over the transversal `{1, s}`, on the subgroup.** For `U` of index
 two, `s ∉ U` and `γ ∈ U`, the two terms of the corestriction sum of `f : U → M` are `f γ` at the
 trivial coset and `s • f (s⁻¹ γ s)` at the coset of `s`. -/
@@ -70,16 +93,7 @@ theorem cochainsCor1_indexTwoTransversal_apply_coe (hU : U.index = 2) {s : G} (h
     cochainsCor1 G M U (U.indexTwoTransversal s) (Subgroup.indexTwoTransversal_mk hU hs) f γ =
       f γ + s • f ⟨s⁻¹ * γ * s, (Subgroup.normal_of_index_eq_two hU).conj_mem' γ γ.2 s⟩ := by
   have : U.FiniteIndex := ⟨by omega⟩
-  have h1 : (⟨lWord U (U.indexTwoTransversal s) (QuotientGroup.mk 1) γ,
-      lWord_mem U _ (Subgroup.indexTwoTransversal_mk hU hs) _ _⟩ : U) = γ :=
-    Subtype.ext (lWord_indexTwoTransversal_mk_one_of_mem s γ.2)
-  have h2 : (⟨lWord U (U.indexTwoTransversal s) (QuotientGroup.mk s) γ,
-      lWord_mem U _ (Subgroup.indexTwoTransversal_mk hU hs) _ _⟩ : U) =
-      ⟨s⁻¹ * γ * s, (Subgroup.normal_of_index_eq_two hU).conj_mem' γ γ.2 s⟩ :=
-    Subtype.ext (lWord_indexTwoTransversal_mk_of_mem hU hs γ.2)
-  rw [cochainsCor1_apply, sum_quotient_eq_add_of_index_two hU hs, h1, h2,
-    Subgroup.indexTwoTransversal_mk_one, one_smul,
-    Subgroup.indexTwoTransversal_of_ne s (mk_ne_mk_one_of_notMem hs)]
+  simp [hU, hs]
 
 end Cochain
 
