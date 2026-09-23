@@ -46,9 +46,7 @@ a separate scheme-theoretic comparison.
 
 * R. Steinberg, *Lectures on Chevalley Groups*, Section 3.
 * R. W. Carter, *Simple Groups of Lie Type*, Sections 6.4 and 7.1.
-
-The formal template is `TauCeti.Algebra.Lie.Orthogonal.TypeD.SpinCarrier.Generation`, whose
-specialization of the generic coroot-generation theorem this file adapts to the type-`B` data.
+* `TauCeti.Algebra.Lie.Orthogonal.TypeD.SpinCarrier.Generation`.
 -/
 
 public section

@@ -11,17 +11,18 @@ public import Mathlib.LinearAlgebra.Matrix.Cartan
 # Row primitivity of the type-`B` Cartan matrix
 
 In rank at least three, every row of the type-`B` Cartan matrix `CartanMatrix.B (n + 1)` contains
-an entry `-1`: each node of the Dynkin diagram is joined by a single bond to a neighbour, since the
-double bond `-2` sits only in the row of the second-to-last node, which in rank at least three also
-has a neighbour on the other side. Rank two is the exception: the long-root row of `B₂` is
-`(2, -2)`, whose entries generate only `2ℤ`.
+an entry `-1`. The final row uses the `-1` entry on its side of the double bond. The
+second-to-last row has entry `-2` across that bond, but in rank at least three it also has a
+`-1` entry towards the preceding node. The other rows use a neighbouring entry along the
+single-bond chain. Rank two is the exception: the long-root row of `B₂` is `(2, -2)`, whose
+entries generate only `2ℤ`.
 
 This file names such a neighbour `TauCeti.typeBCartanNeighbor` and packages the resulting
 Bezout certificate `TauCeti.typeBCartanBezout`, the integer coefficients `-1` at that neighbour and
 `0` elsewhere, whose pairing with the Cartan row is `1`. It says that every simple root of type
 `B` in rank at least three is a primitive character of a split torus whose weights are the Cartan
-rows, which is the arithmetic input that the Kostant coroot-generation theorem
-`TauCeti.kostantTorusSubgroup_le_kostantElementarySubgroup` requires of a Dynkin type.
+rows. This is the arithmetic hypothesis in
+`TauCeti.UniversalEnvelopingAlgebra.kostantTorusSubgroup_le_kostantElementarySubgroup`.
 
 ## Main declarations
 
@@ -33,6 +34,7 @@ rows, which is the arithmetic input that the Kostant coroot-generation theorem
 ## References
 
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate II.
+* `TauCeti.Algebra.Lie.Orthogonal.TypeD.SpinCarrier.Generation`.
 -/
 
 public section
@@ -41,9 +43,9 @@ namespace TauCeti
 
 variable {n : ℕ}
 
-/-- A node of the type-`B` Dynkin diagram adjacent to `i`: the successor of `i`, except at the
-last two nodes, where it is the predecessor. In rank at least three the Cartan entry of row `i`
-at this node is `-1`. -/
+/-- A column index chosen as the successor of `i`, except at the last two indices, where it
+is the predecessor. In rank at least three this is an adjacent node of the type-`B` Dynkin
+diagram, with Cartan entry `-1` in row `i`. -/
 def typeBCartanNeighbor (n : ℕ) (i : Fin (n + 1)) : Fin (n + 1) :=
   ⟨if (i : ℕ) + 1 < n then (i : ℕ) + 1 else (i : ℕ) - 1, by split_ifs <;> omega⟩
 
@@ -59,8 +61,8 @@ theorem cartanMatrixB_typeBCartanNeighbor (hn : 2 ≤ n) (i : Fin (n + 1)) :
   simp only [CartanMatrix.B, Matrix.of_apply, Fin.ext_iff, val_typeBCartanNeighbor]
   split_ifs <;> omega
 
-/-- The Bezout coefficients certifying that row `i` of the type-`B` Cartan matrix is primitive:
-`-1` at the neighbour `typeBCartanNeighbor n i` and `0` elsewhere. -/
+/-- Integer coefficients supported at the chosen column: `-1` at `typeBCartanNeighbor n i`
+and `0` elsewhere. They certify row primitivity in rank at least three. -/
 def typeBCartanBezout (n : ℕ) (i j : Fin (n + 1)) : ℤ :=
   if j = typeBCartanNeighbor n i then -1 else 0
 
