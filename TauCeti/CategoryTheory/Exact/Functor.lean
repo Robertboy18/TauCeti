@@ -40,9 +40,7 @@ finite-colimit exactness.
 * `TauCeti.ExactStructure.isConflationExact_split`: every additive functor preserves split
   conflations.
 * `TauCeti.ExactStructure.isConflationExact_abelian_iff`: for canonical abelian exact structures,
-  conflation-exactness agrees with Mathlib's exact-functor predicate; in particular an additive
-  equivalence is conflation-exact
-  (`TauCeti.ExactStructure.isConflationExact_abelian_of_isEquivalence`).
+  conflation-exactness agrees with Mathlib's exact-functor predicate.
 
 ## References
 
@@ -216,14 +214,6 @@ theorem isConflationExact_abelian (F : A ⥤ B) [F.Additive]
     [PreservesFiniteLimits F] [PreservesFiniteColimits F] :
     (abelian A).IsConflationExact (abelian B) F :=
   (isConflationExact_abelian_iff F).mpr ⟨inferInstance, inferInstance⟩
-
-/-- An additive equivalence between abelian categories is conflation-exact for the canonical
-exact structures: an equivalence preserves all limits and colimits. -/
-theorem isConflationExact_abelian_of_isEquivalence (F : A ⥤ B) [F.Additive] [F.IsEquivalence] :
-    (abelian A).IsConflationExact (abelian B) F :=
-  haveI : PreservesLimitsOfSize.{0, 0} F :=
-    F.asEquivalence.symm.toAdjunction.rightAdjoint_preservesLimits
-  isConflationExact_abelian F
 
 /-- A faithful additive functor between abelian categories reflects conflations of the canonical
 exact structures. No exactness assumption is needed for this direction. -/

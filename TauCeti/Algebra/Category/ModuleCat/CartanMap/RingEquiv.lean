@@ -92,36 +92,23 @@ structures of the two module categories. -/
 theorem isConflationExact_restrictScalars_of_ringEquiv :
     (ExactStructure.abelian (ModuleCat.{u} S)).IsConflationExact
       (ExactStructure.abelian (ModuleCat.{u} R)) (ModuleCat.restrictScalars e.toRingHom) :=
-  ExactStructure.isConflationExact_abelian_of_isEquivalence _
+  ExactStructure.isConflationExact_abelian _
 
-/-- The finitely generated modules, pulled back along the functor of the equivalence
-`ModuleCat.restrictScalarsEquivalenceOfRingEquiv e`. This restates
-`TauCeti.isFG_inverseImage_restrictScalars` in the syntactic form consumed by
-`CategoryTheory.Equivalence.congrFullSubcategory` and its additivity instance. -/
-theorem isFG_inverseImage_restrictScalarsEquivalenceOfRingEquiv_functor :
-    (ModuleCat.isFG.{u} R).inverseImage
-        (ModuleCat.restrictScalarsEquivalenceOfRingEquiv e).functor =
-      ModuleCat.isFG.{u} S :=
-  isFG_inverseImage_restrictScalars e
+/-! ### The equivalences of module subcategories
 
-/-- The finitely generated projective modules, pulled back along the functor of the equivalence
-`ModuleCat.restrictScalarsEquivalenceOfRingEquiv e`. This restates
-`TauCeti.finiteProjectiveModules_inverseImage_restrictScalars` in the syntactic form consumed by
-`CategoryTheory.Equivalence.congrFullSubcategory` and its additivity instance. -/
-theorem finiteProjectiveModules_inverseImage_restrictScalarsEquivalenceOfRingEquiv_functor :
-    (finiteProjectiveModules R).inverseImage
-        (ModuleCat.restrictScalarsEquivalenceOfRingEquiv e).functor =
-      finiteProjectiveModules S :=
-  finiteProjectiveModules_inverseImage_restrictScalars e
-
-/-! ### The equivalences of module subcategories -/
+The two pullback equalities above are transported along
+`ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor` before being passed to
+`CategoryTheory.Equivalence.congrFullSubcategory`: the additivity instance of the restricted
+equivalence is found by instance search only when the hypothesis is stated syntactically for the
+functor of `ModuleCat.restrictScalarsEquivalenceOfRingEquiv e`. -/
 
 /-- **Restriction of scalars on finitely generated modules.** A ring isomorphism `e : R ≃+* S`
 induces an equivalence from the finitely generated `S`-modules to the finitely generated
 `R`-modules, sending a module to the same module with scalars restricted along `e`. -/
 noncomputable def finiteModulesEquivalenceOfRingEquiv : FGModuleCat.{u} S ≌ FGModuleCat.{u} R :=
   (ModuleCat.restrictScalarsEquivalenceOfRingEquiv e).congrFullSubcategory
-    (isFG_inverseImage_restrictScalarsEquivalenceOfRingEquiv_functor e)
+    (ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor e ▸
+      isFG_inverseImage_restrictScalars e)
 
 /-- **Restriction of scalars on finitely generated projective modules.** A ring isomorphism
 `e : R ≃+* S` induces an equivalence from the finitely generated projective `S`-modules to the
@@ -130,7 +117,8 @@ restricted along `e`. -/
 noncomputable def finiteProjectiveModulesEquivalenceOfRingEquiv :
     (finiteProjectiveModules S).FullSubcategory ≌ (finiteProjectiveModules R).FullSubcategory :=
   (ModuleCat.restrictScalarsEquivalenceOfRingEquiv e).congrFullSubcategory
-    (finiteProjectiveModules_inverseImage_restrictScalarsEquivalenceOfRingEquiv_functor e)
+    (ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor e ▸
+      finiteProjectiveModules_inverseImage_restrictScalars e)
 
 instance : (finiteModulesEquivalenceOfRingEquiv e).functor.Additive := by
   unfold finiteModulesEquivalenceOfRingEquiv
