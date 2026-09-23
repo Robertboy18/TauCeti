@@ -10,30 +10,27 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Clas
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Conjugation
 
 /-!
-# The restriction of the index-two graph class, on the explicit model
+# Restriction of the explicit Evens graph-cocycle class
 
 Let `U` be an open subgroup of index two in a topological group `G` and let
-`α : U →* Multiplicative (ZMod 2)` be a continuous homomorphism, that is a class in `H¹(U, 𝔽₂)`.
-The index-two Evens norm `N^{Ev}(α) ∈ H²(G, 𝔽₂)` is the class of the two-point graph cocycle of
-`TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Cochain`, and its restriction back
-to `U` is the cup product of `α` with its conjugate:
+`α : U →* Multiplicative (ZMod 2)` be a continuous homomorphism. For a chosen `s ∉ U`, this file
+computes the restriction of the class of `evensGraphCocycle U s α` in the explicit
+inhomogeneous cohomology model. It is the `(1,1)` cup product of the class of `α` with its
+conjugate, for the multiplication pairing of `𝔽₂`:
 ```text
-res_U N^{Ev}(α) = α ⌣ (s · α),
+res_U [graph_s(α)] = [α] ⌣ evensConj1([α]).
 ```
-where `s · α` is the conjugation action of the nontrivial coset, in the choice-free form
-`TauCeti.ContCohomology.evensConj1`. This is the first of the four identities characterizing the
-index-two norm, in the form Kozlowski's index-two expansion uses.
+Here `TauCeti.ContCohomology.evensConj1` is defined on explicit `H¹` as `res ∘ cor - id`, and
+equals conjugation by every element outside `U`.
 
-This file proves the identity on the explicit inhomogeneous model: both sides are classes in the
-explicit `H²(U, 𝔽₂)` of `TauCeti.RepresentationTheory.Homological.ContCohomology.LowDegree`, the
-left-hand side being the class of the graph cocycle that `TauCeti.ContCohomology.graphClass` is
-built from, and the right-hand side the explicit `(1,1)` cup product of
-`TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Product`. The identity holds already
-at the level of cochains. On `U × U` the graph cochain is `α γ * α (s⁻¹ η s)`, which is the
-`(1,1)` cup-product cochain of `α` with its conjugate for the multiplication pairing of `𝔽₂`;
-passing to classes gives the identity in the explicit `H²(U, 𝔽₂)`. The statement for the canonical
-`graphClass` against a canonical cup product is not made here, since that cup product does not yet
-exist; when it does, this explicit computation is the input to it.
+The proof compares cochains: on `U × U` the graph cochain is `α γ * α (s⁻¹ η s)`, which is the
+cup-product cochain of `α` with its conjugate. Passing to classes gives the identity in explicit
+`H²(U, 𝔽₂)`.
+
+This calculation is a step toward a restriction identity for the canonical graph class.
+Transporting it to canonical cohomology requires compatibility of restriction, cup products,
+and conjugation with the explicit model. The general Evens norm also needs its comparison with
+the graph class.
 
 ## Main definitions
 
@@ -42,8 +39,8 @@ exist; when it does, this explicit computation is the input to it.
 
 ## Main results
 
-* `TauCeti.ContCohomology.explicitRes2_evensGraphCocycle`: the restriction of the class of the
-  graph cocycle is the cup product of `α` with its conjugate, on the explicit model.
+* `TauCeti.ContCohomology.explicitRes2_evensGraphCocycle`: in explicit cohomology, the restriction
+  of the graph-cocycle class for a chosen `s ∉ U` is the cup product with the conjugate class.
 
 ## References
 
@@ -98,16 +95,9 @@ theorem coe_evensHomCocycleAmbient (U : OpenSubgroup G)
       fun h => (trivialF2Equiv G).symm (Multiplicative.toAdd (α h)) :=
   (rfl)
 
-/-- **The explicit-model form of identity 1 of the index-two Evens norm,
-`res_U N^{Ev}(α) = α ⌣ (s · α)`.** The restriction to `U` of the class of the two-point graph
-cocycle, formed with any `s ∉ U`, is the `(1,1)` cup product, for the multiplication pairing of
-`𝔽₂`, of the class of `α` with its conjugate `TauCeti.ContCohomology.evensConj1`. The right-hand
-side does not mention `s`.
-
-Both sides are classes in the explicit `H²(U, 𝔽₂)`. The left-hand side is the class that
-`TauCeti.ContCohomology.graphClass_eq_cochainClass` identifies with the canonical
-`TauCeti.ContCohomology.graphClass` for every `s ∉ U`, so the statement is about the choice-free
-class, presented on a representative. -/
+/-- Restriction of the explicit graph-cocycle class for a chosen `s ∉ U` is the `(1,1)` cup
+product of the class of `α` with its choice-free conjugate `TauCeti.ContCohomology.evensConj1`,
+for the multiplication pairing of `𝔽₂`. Both sides lie in explicit `H²(U, 𝔽₂)`. -/
 theorem explicitRes2_evensGraphCocycle (U : OpenSubgroup G) (hU : U.toSubgroup.index = 2)
     {s : G} (hs : s ∉ U) (α : U.toSubgroup →* Multiplicative (ZMod 2)) (hα : Continuous α) :
     explicitRes2 G (trivialF2 G).V U.toSubgroup

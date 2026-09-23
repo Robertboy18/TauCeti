@@ -13,16 +13,16 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Corestrict
 # The conjugation on `H¹` of an index-two subgroup, as `res ∘ cor - id`
 
 Let `U` be an open subgroup of index two in a topological group `G` and let `M` be a topological
-`G`-module. On `H¹(U, M)` the composite `res_U ∘ cor_U` of degree-one corestriction and restriction
-is `1 + s` for either element `s` of the nontrivial coset: computed on the transversal `{1, s}`, the
-corestriction sum has two terms, the first restricts to the identity and the second to conjugation
-by `s`. The difference `res ∘ cor - id` is therefore the conjugation action of the nontrivial coset
-on `H¹(U, M)`, and it is defined here without choosing an element of that coset.
+`G`-module. On explicit `H¹(U, M)`, the composite `res_U ∘ cor_U` of degree-one corestriction and
+restriction is `1 + s` for any element `s` of the nontrivial coset: computed on the transversal
+`{1, s}`, the corestriction sum has two terms, the first restricts to the identity and the second to
+conjugation by `s`. The difference `res ∘ cor - id` is therefore the conjugation action of the
+nontrivial coset on explicit `H¹(U, M)`, defined without choosing an element of that coset.
 
-This is the map written `α ↦ s · α` in the identities of the index-two Evens norm, whose right-hand
-sides are cup products with the *conjugate* class. Defining it as `res ∘ cor - id` is what makes
-those identities statements about `U` rather than about a chosen `s`; the theorem
-`evensConj1_eq_explicitConj1` then identifies it with conjugation by **every** element outside `U`.
+This explicit map supplies the conjugate class in the graph-cocycle restriction computation of
+`TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Restriction`. The theorem
+`evensConj1_eq_explicitConj1` identifies it with conjugation by **every** element outside `U`,
+providing the comparison needed for computations using a chosen coset representative.
 
 The computation is carried out on cochains for an arbitrary coefficient module, with no topology:
 `cochainsCor1_indexTwoTransversal_apply_coe` is the two-term formula for the corestriction cochain
