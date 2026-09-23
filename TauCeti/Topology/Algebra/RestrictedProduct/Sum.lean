@@ -16,14 +16,11 @@ when its preimages under `Sum.inl` and `Sum.inr` are, so the restrictedness cond
 in both directions; the equivalence `restrictedProductSum` is the restriction of
 `Equiv.sumPiEquivProdPi` to the restricted subtypes.
 
-The forward map is a pair of componentwise maps out of a single restricted product, so it is
-continuous for every reference family.  The inverse is a map out of a *product* of two
-restricted products, and the restricted-product topology is the final topology over the
-principal stages; a product of two final topologies need not be the final topology over pairs
-of stages.  When every reference subgroup is open each stage embeds as an open subset, which is
-Mathlib's universal property with parameters, and then the inverse is continuous too
-(`continuous_restrictedProductSum_symm`).  This is the same openness hypothesis under which
-Mathlib's `RestrictedProduct.isTopologicalGroup` holds.
+The forward map is continuous for every reference family (`continuous_restrictedProductSum`).
+The inverse is continuous when every reference subgroup is open
+(`continuous_restrictedProductSum_symm`); this is the same openness hypothesis under which
+Mathlib's `RestrictedProduct.isTopologicalGroup` holds, so under it `restrictedProductSum` is a
+homeomorphism.
 
 ## References
 
@@ -96,8 +93,8 @@ theorem restrictedProductSum_symm_apply_inr
 
 variable [∀ k, TopologicalSpace (G k)]
 
-/-- The splitting over a sum is continuous for every reference family: it is a pair of
-componentwise maps out of a single restricted product. -/
+/-- The splitting over a sum is continuous for every reference family; unlike its inverse, it
+needs no openness hypothesis on the reference subgroups. -/
 theorem continuous_restrictedProductSum : Continuous (restrictedProductSum U) := by
   refine continuous_prodMk.mpr ⟨?_, ?_⟩
   · exact RestrictedProduct.mapAlong_continuous G (fun i ↦ G (Sum.inl i)) Sum.inl
@@ -108,9 +105,8 @@ theorem continuous_restrictedProductSum : Continuous (restrictedProductSum U) :=
       fun _ ↦ continuous_id
 
 /-- The inverse of the splitting over a sum is continuous when every reference subgroup is open.
-The map is out of a product of two restricted products, so this is Mathlib's universal property
-with parameters, and the stage `𝓟 S₁ × 𝓟 S₂` lands in the stage `𝓟 (Sum.elim (· ∈ S₁) (· ∈ S₂))`
-of the restricted product over the sum. -/
+This is the same openness hypothesis under which Mathlib's `RestrictedProduct.isTopologicalGroup`
+holds; the forward direction `continuous_restrictedProductSum` needs no such hypothesis. -/
 theorem continuous_restrictedProductSum_symm (hU : ∀ k, IsOpen (U k : Set (G k))) :
     Continuous (restrictedProductSum U).symm := by
   rw [RestrictedProduct.continuous_dom_prod_right fun i ↦ hU (Sum.inl i)]
