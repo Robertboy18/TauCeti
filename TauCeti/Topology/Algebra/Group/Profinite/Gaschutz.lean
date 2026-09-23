@@ -18,8 +18,9 @@ topologically generates `H` lifts along `f` to an `ι`-tuple that topologically 
 rank: a generating `n`-tuple of `H` lifts to a generating `n`-tuple of `G` as soon as
 `topologicalGeneratorRankNat G ≤ n`, which is
 `exists_comp_eq_and_topologicalClosure_closure_range_eq_top_of_topologicalGeneratorRankNat_le`.
-This is the mechanism behind minimal presentations: a minimal generating tuple of a quotient can
-be pulled back to a minimal generating tuple of the group.
+This is the mechanism behind minimal presentations: when `G` and a quotient of it have the same
+generator rank `n`, a minimal generating `n`-tuple of the quotient pulls back to a minimal
+generating `n`-tuple of `G`.
 
 The proof reduces to Gaschütz's lemma for finite groups
 (`MonoidHom.exists_comp_eq_and_closure_range_eq_top_of_surjective`) by compactness. For each open
