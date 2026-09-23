@@ -173,7 +173,8 @@ def linkedTensorHom : ℍ[R,a,b * c] ⊗[R] ℍ[R,a ^ 2,c] →ₐ[R] ℍ[R,a,b] 
 @[simp]
 theorem linkedTensorHom_tmul (x : ℍ[R,a,b * c]) (y : ℍ[R,a ^ 2,c]) :
     linkedTensorHom a b c (x ⊗ₜ y) =
-      (linkedBasis a b c).liftHom x * (splitBasis a b c).liftHom y := (rfl)
+      (linkedBasis a b c).liftHom x * (splitBasis a b c).liftHom y := by
+  rw [linkedTensorHom, Algebra.TensorProduct.lift_tmul]
 
 end CommRing
 
@@ -208,7 +209,8 @@ noncomputable def linkedTensorAlgEquiv :
 @[simp]
 theorem linkedTensorAlgEquiv_apply
     (x : ℍ[K,(a : K),(b : K) * (c : K)] ⊗[K] ℍ[K,(a : K) ^ 2,(c : K)]) :
-    linkedTensorAlgEquiv a b c x = linkedTensorHom (a : K) (b : K) (c : K) x := (rfl)
+    linkedTensorAlgEquiv a b c x = linkedTensorHom (a : K) (b : K) (c : K) x := by
+  rw [linkedTensorAlgEquiv, AlgEquiv.ofBijective_apply]
 
 /-- **The common slot lemma** (Lam III.2.11, Gille–Szamuely 1.5.2): for units `a b c` of a field
 with `2` invertible, `ℍ[K,a,b] ⊗[K] ℍ[K,a,c] ≃ₐ[K] ℍ[K,a,bc] ⊗[K] M₂(K)`. In the Brauer group this

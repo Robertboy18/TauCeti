@@ -9,7 +9,6 @@ public import TauCeti.Algebra.BrauerGroup.Group
 public import TauCeti.Algebra.Quaternion.CentralSimple
 import TauCeti.Algebra.BrauerGroup.Splitting
 import TauCeti.Algebra.BrauerGroup.Division
-import TauCeti.Algebra.BrauerGroup.Quaternion
 import TauCeti.Algebra.Quaternion.TensorProduct
 import TauCeti.Algebra.Quaternion.Steinberg
 import TauCeti.Algebra.Quaternion.Binary
@@ -48,7 +47,7 @@ translates into the solvability of the norm equation `b = x² - ay²` and into t
   algebras are isomorphic, and `TauCeti.BrauerGroup.quaternionClass_eq_one_iff`: a symbol is
   trivial exactly when its algebra is split.
 * `TauCeti.BrauerGroup.quaternionClass_comm`, `TauCeti.BrauerGroup.quaternionClass_sq`,
-  `TauCeti.BrauerGroup.quaternionClass_sq_mul_right`, `TauCeti.BrauerGroup.quaternionClass_one_sub`:
+  `TauCeti.BrauerGroup.quaternionClass_mul_sq_right`, `TauCeti.BrauerGroup.quaternionClass_one_sub`:
   symmetry, `2`-torsion, square-class invariance and the Steinberg relation.
 * `TauCeti.BrauerGroup.quaternionClass_mul_right`, `TauCeti.BrauerGroup.quaternionClass_mul_left`:
   **bilinearity of the quaternion symbol**.
@@ -167,16 +166,16 @@ theorem quaternionClass_comm (a b : Kˣ) : quaternionClass a b = quaternionClass
   quaternionClass_eq_of_algEquiv (_root_.QuaternionAlgebra.swapEquiv (a : K) (b : K))
 
 /-- The quaternion symbol is invariant under multiplying its second argument by a square. -/
-@[simp]
-theorem quaternionClass_sq_mul_right (a b c : Kˣ) :
-    quaternionClass a (c ^ 2 * b) = quaternionClass a b :=
-  quaternionClass_eq_of_algEquiv (QuaternionAlgebra.rescaleJEquiv (a : K) (b : K) c)
+theorem quaternionClass_mul_sq_right (a b c : Kˣ) :
+    quaternionClass a (b * c ^ 2) = quaternionClass a b := by
+  rw [mul_comm b (c ^ 2)]
+  exact quaternionClass_eq_of_algEquiv (QuaternionAlgebra.rescaleJEquiv (a : K) (b : K) c)
 
 /-- The quaternion symbol is invariant under multiplying its first argument by a square. -/
-@[simp]
-theorem quaternionClass_sq_mul_left (a b c : Kˣ) :
-    quaternionClass (c ^ 2 * a) b = quaternionClass a b :=
-  quaternionClass_eq_of_algEquiv (QuaternionAlgebra.rescaleIEquiv (a : K) (b : K) c)
+theorem quaternionClass_mul_sq_left (a b c : Kˣ) :
+    quaternionClass (a * c ^ 2) b = quaternionClass a b := by
+  rw [mul_comm a (c ^ 2)]
+  exact quaternionClass_eq_of_algEquiv (QuaternionAlgebra.rescaleIEquiv (a : K) (b : K) c)
 
 /-- **The quaternion symbol is its own inverse**: quaternion conjugation is an isomorphism of
 `ℍ[K,a,b]` with its opposite algebra. -/
@@ -228,6 +227,7 @@ theorem quaternionClass_one_sub (a : Kˣ) (h : (1 : K) - a ≠ 0) :
 /-- **Bilinearity of the quaternion symbol in the second argument**:
 `[(a,bc)] = [(a,b)] · [(a,c)]`. This is the common slot lemma
 `ℍ[K,a,b] ⊗[K] ℍ[K,a,c] ≃ₐ[K] ℍ[K,a,bc] ⊗[K] M₂(K)` read in the Brauer group. -/
+@[simp]
 theorem quaternionClass_mul_right (a b c : Kˣ) :
     quaternionClass a (b * c) = quaternionClass a b * quaternionClass a c :=
   calc quaternionClass a (b * c)
@@ -243,6 +243,7 @@ theorem quaternionClass_mul_right (a b c : Kˣ) :
 
 /-- **Bilinearity of the quaternion symbol in the first argument**:
 `[(ab,c)] = [(a,c)] · [(b,c)]`. -/
+@[simp]
 theorem quaternionClass_mul_left (a b c : Kˣ) :
     quaternionClass (a * b) c = quaternionClass a c * quaternionClass b c := by
   rw [quaternionClass_comm, quaternionClass_mul_right, quaternionClass_comm a,
@@ -264,12 +265,6 @@ theorem quaternionClass_eq_of_equivalent {a b c d : Kˣ}
     quaternionClass a b = quaternionClass c d :=
   let ⟨e⟩ := QuaternionAlgebra.nonempty_algEquiv_of_equivalent_binary (a : K) b c d h
   quaternionClass_eq_of_algEquiv e
-
-/-! ### Worked example -/
-
-/-- Hamilton's quaternions have nontrivial Brauer class over `ℝ`. -/
-example : quaternionClass (-1 : ℝˣ) (-1) ≠ 1 := by
-  simpa [quaternionClass_def] using Quaternion.mk_ne_one
 
 end BrauerGroup
 
