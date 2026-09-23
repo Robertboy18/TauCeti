@@ -55,6 +55,7 @@ theorem val_typeDCartanNeighbor (i : Fin n) :
 
 /-- In rank at least three, the type-`D` Cartan matrix has entry `-1` at each node and its
 chosen neighbour. -/
+@[simp]
 theorem cartanMatrixD_typeDCartanNeighbor (hn : 3 ≤ n) (i : Fin n) :
     CartanMatrix.D n i (typeDCartanNeighbor n i) = -1 := by
   simp only [CartanMatrix.D, Matrix.of_apply, Fin.ext_iff, val_typeDCartanNeighbor]
