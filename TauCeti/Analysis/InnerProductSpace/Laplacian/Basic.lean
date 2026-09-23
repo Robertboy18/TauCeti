@@ -41,9 +41,9 @@ corollaries, where smoothness re-enters, live in the companion files
 
 The file also records the base second-derivative computation `laplacian_norm_sq`
 (`Δ ‖x‖² = 2 · dim E`), a reusable characteristic value of the Laplacian on the squared norm,
-its chain-rule generalization `laplacian_comp_norm_sq` to radial functions `x ↦ ρ (‖x‖²)`, and
-the locality statement `tsupport_laplacian_subset` that `Δ f` vanishes wherever `f` vanishes
-identically.
+its chain-rule generalization `ContDiff.laplacian_comp_norm_sq` to radial functions
+`x ↦ ρ (‖x‖²)`, and the locality statement `tsupport_laplacian_subset` that `Δ f` vanishes
+wherever `f` vanishes identically.
 
 ## Main declarations
 
@@ -57,7 +57,7 @@ identically.
 * `TauCeti.laplacian_comp_smul_right`: the origin-centered homothety special case.
 * `TauCeti.laplacian_norm_sq`: `Δ (fun x => ‖x‖ ^ 2) x = 2 * dim E`, the Laplacian of the
   squared norm.
-* `TauCeti.laplacian_comp_norm_sq`: the Laplacian of a radial function `x ↦ ρ (‖x‖ ^ 2)` is
+* `ContDiff.laplacian_comp_norm_sq`: the Laplacian of a radial function `x ↦ ρ (‖x‖ ^ 2)` is
   `4 ‖x‖² ρ'' (‖x‖²) + 2 (dim E) ρ' (‖x‖²)`.
 * `TauCeti.tsupport_laplacian_subset`: `tsupport (Δ f) ⊆ tsupport f`.
 -/
@@ -220,14 +220,12 @@ theorem laplacian_norm_sq (x : E) :
 
 /-- **The Laplacian of a radial function.** For a `C²` function `ρ : ℝ → ℝ`, the Laplacian of
 `x ↦ ρ (‖x‖ ^ 2)` is `4 ‖x‖² ρ'' (‖x‖²) + 2 (dim E) ρ' (‖x‖²)`. -/
-theorem laplacian_comp_norm_sq {ρ : ℝ → ℝ} (hρ : ContDiff ℝ 2 ρ) (x : E) :
+@[simp]
+theorem _root_.ContDiff.laplacian_comp_norm_sq {ρ : ℝ → ℝ} (hρ : ContDiff ℝ 2 ρ) (x : E) :
     Δ (fun y : E => ρ (‖y‖ ^ 2)) x =
       4 * ‖x‖ ^ 2 * deriv (deriv ρ) (‖x‖ ^ 2) +
         2 * (Module.finrank ℝ E : ℝ) * deriv ρ (‖x‖ ^ 2) := by
-  have hρ' : ContDiff ℝ (1 + 1) ρ := by
-    rw [show (1 : WithTop ℕ∞) + 1 = 2 by norm_num]
-    exact hρ
-  have hρ1 : ContDiff ℝ 1 (deriv ρ) := (contDiff_succ_iff_deriv.mp hρ').2.2
+  have hρ1 : ContDiff ℝ 1 (deriv ρ) := hρ.deriv'
   have hρd : Differentiable ℝ ρ := hρ.differentiable (by norm_num)
   have hρ'd : Differentiable ℝ (deriv ρ) := hρ1.differentiable one_ne_zero
   -- The first derivative, by the chain rule through the squared norm.

@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Analysis.Sobolev.WeakDeriv.Basic
 public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
+import TauCeti.Analysis.Calculus.SecondDerivative
 
 /-!
 # The Laplacian against test functions
@@ -30,12 +31,12 @@ function is compactly supported in `Ω`, and no regularity of `∂Ω` is used.
 
 ## Main declarations
 
-* `TauCeti.integral_fderiv_fderiv_smul_eq_integral_smul_fderiv_fderiv`: second-order integration
-  by parts in one direction, `∫ ∂ᵥ∂ᵥφ • u = ∫ φ • ∂ᵥ∂ᵥu`.
-* `TauCeti.integral_laplacian_smul_eq_integral_smul_laplacian`: Green's second identity against a
-  test function, `∫ Δφ • u = ∫ φ • Δu`.
-* `TauCeti.integral_laplacian_smul_eq_zero_of_harmonicOnNhd`: a harmonic function is weakly
-  harmonic.
+* `ContDiffOn.integral_fderiv_fderiv_smul_eq_integral_smul_fderiv_fderiv`: second-order
+  integration by parts in one direction, `∫ ∂ᵥ∂ᵥφ • u = ∫ φ • ∂ᵥ∂ᵥu`.
+* `ContDiffOn.integral_laplacian_smul_eq_integral_smul_laplacian`: Green's second identity
+  against a test function, `∫ Δφ • u = ∫ φ • Δu`.
+* `InnerProductSpace.HarmonicOnNhd.integral_laplacian_smul_eq_zero`: a harmonic function is
+  weakly harmonic.
 -/
 
 public section
@@ -69,20 +70,11 @@ private lemma lineDeriv_lineDeriv_testFunction (φ : 𝓓(Ω, ℝ)) (v x : E) :
   exact (((φ.contDiff.fderiv_right (by simp)).clm_apply contDiff_const).differentiable
     one_ne_zero x).lineDeriv_eq_fderiv
 
-omit [FiniteDimensional ℝ E] [MeasurableSpace E] [BorelSpace E] [CompleteSpace F] in
-/-- The second directional derivative of a `C²` function is continuous on the open set. -/
-private lemma continuousOn_fderiv_fderiv_apply (hu : ContDiffOn ℝ 2 u Ω) (v : E) :
-    ContinuousOn (fun x ↦ fderiv ℝ (fun y ↦ fderiv ℝ u y v) x v) Ω := by
-  have hΩ : IsOpen (Ω : Set E) := Ω.isOpen
-  have hu1 : ContDiffOn ℝ 1 (fderiv ℝ u) Ω := hu.fderiv_of_isOpen hΩ (by norm_num)
-  exact ((hu1.clm_apply contDiffOn_const).continuousOn_fderiv_of_isOpen hΩ le_rfl).clm_apply
-    continuousOn_const
-
 /-- **Second-order integration by parts against a test function**, in one direction `v`. For
 `u` of class `C²` on the open set `Ω` and a test function `φ` on `Ω`,
 `∫ ∂ᵥ∂ᵥφ • u = ∫ φ • ∂ᵥ∂ᵥu`. -/
-theorem integral_fderiv_fderiv_smul_eq_integral_smul_fderiv_fderiv (hu : ContDiffOn ℝ 2 u Ω)
-    (φ : 𝓓(Ω, ℝ)) (v : E) :
+theorem _root_.ContDiffOn.integral_fderiv_fderiv_smul_eq_integral_smul_fderiv_fderiv
+    (hu : ContDiffOn ℝ 2 u Ω) (φ : 𝓓(Ω, ℝ)) (v : E) :
     ∫ x, fderiv ℝ (fun y ↦ fderiv ℝ (φ : E → ℝ) y v) x v • u x ∂μ =
       ∫ x, (φ : E → ℝ) x • fderiv ℝ (fun y ↦ fderiv ℝ u y v) x v ∂μ := by
   have hΩ : IsOpen (Ω : Set E) := Ω.isOpen
@@ -92,7 +84,7 @@ theorem integral_fderiv_fderiv_smul_eq_integral_smul_fderiv_fderiv (hu : ContDif
   have hu_loc : LocallyIntegrableOn u Ω μ := hu.continuousOn.locallyIntegrableOn hΩ.measurableSet
   have hg_loc : LocallyIntegrableOn g Ω μ := hg.continuousOn.locallyIntegrableOn hΩ.measurableSet
   have hg'_loc : LocallyIntegrableOn (fun x ↦ fderiv ℝ g x v) Ω μ :=
-    (continuousOn_fderiv_fderiv_apply hu v).locallyIntegrableOn hΩ.measurableSet
+    (hu.continuousOn_fderiv_fderiv_apply hΩ v).locallyIntegrableOn hΩ.measurableSet
   -- Both `u` and `∂ᵥu` are classically, hence weakly, differentiable on `Ω`.
   have h1 : HasWeakLineDerivOn μ Ω u g v :=
     hasWeakLineDerivOn_of_hasLineDerivAt hu_loc hg_loc fun x hx ↦
@@ -114,8 +106,8 @@ theorem integral_fderiv_fderiv_smul_eq_integral_smul_fderiv_fderiv (hu : ContDif
 /-- **Green's second identity against a test function.** For `u` of class `C²` on the open set
 `Ω` and a test function `φ` on `Ω`, `∫ Δφ • u ∂μ = ∫ φ • Δu ∂μ`: the classical Laplacian of a `C²`
 function is its distributional Laplacian. -/
-theorem integral_laplacian_smul_eq_integral_smul_laplacian (hu : ContDiffOn ℝ 2 u Ω)
-    (φ : 𝓓(Ω, ℝ)) :
+theorem _root_.ContDiffOn.integral_laplacian_smul_eq_integral_smul_laplacian
+    (hu : ContDiffOn ℝ 2 u Ω) (φ : 𝓓(Ω, ℝ)) :
     ∫ x, Δ (φ : E → ℝ) x • u x ∂μ = ∫ x, (φ : E → ℝ) x • Δ u x ∂μ := by
   have hΩ : IsOpen (Ω : Set E) := Ω.isOpen
   set b := stdOrthonormalBasis ℝ E
@@ -149,14 +141,14 @@ theorem integral_laplacian_smul_eq_integral_smul_laplacian (hu : ContDiffOn ℝ 
   have hint₂ : ∀ i,
       Integrable (fun x ↦ (φ : E → ℝ) x • fderiv ℝ (fun y ↦ fderiv ℝ u y (b i)) x (b i)) μ :=
     fun i ↦ integrable_smul_of_locallyIntegrableOn
-      ((continuousOn_fderiv_fderiv_apply hu (b i)).locallyIntegrableOn hΩ.measurableSet) φ
+      ((hu.continuousOn_fderiv_fderiv_apply hΩ (b i)).locallyIntegrableOn hΩ.measurableSet) φ
   calc ∫ x, Δ (φ : E → ℝ) x • u x ∂μ
       = ∑ i, ∫ x, fderiv ℝ (fun y ↦ fderiv ℝ (φ : E → ℝ) y (b i)) x (b i) • u x ∂μ := by
         simp_rw [hΔφ, Finset.sum_smul]
         exact integral_finsetSum _ fun i _ ↦ hint₁ i
     _ = ∑ i, ∫ x, (φ : E → ℝ) x • fderiv ℝ (fun y ↦ fderiv ℝ u y (b i)) x (b i) ∂μ :=
         Finset.sum_congr rfl fun i _ ↦
-          integral_fderiv_fderiv_smul_eq_integral_smul_fderiv_fderiv hu φ (b i)
+          hu.integral_fderiv_fderiv_smul_eq_integral_smul_fderiv_fderiv φ (b i)
     _ = ∫ x, (φ : E → ℝ) x • Δ u x ∂μ := by
         rw [← integral_finsetSum _ fun i _ ↦ hint₂ i]
         refine integral_congr_ae (ae_of_all _ fun x ↦ ?_)
@@ -167,9 +159,10 @@ theorem integral_laplacian_smul_eq_integral_smul_laplacian (hu : ContDiffOn ℝ 
 
 /-- **A harmonic function is weakly harmonic.** If `u` is harmonic on the open set `Ω`, then
 `∫ Δφ • u ∂μ = 0` for every test function `φ` on `Ω`. -/
-theorem integral_laplacian_smul_eq_zero_of_harmonicOnNhd (hu : HarmonicOnNhd u Ω) (φ : 𝓓(Ω, ℝ)) :
+theorem _root_.InnerProductSpace.HarmonicOnNhd.integral_laplacian_smul_eq_zero
+    (hu : HarmonicOnNhd u Ω) (φ : 𝓓(Ω, ℝ)) :
     ∫ x, Δ (φ : E → ℝ) x • u x ∂μ = 0 := by
-  rw [integral_laplacian_smul_eq_integral_smul_laplacian hu.contDiffOn φ]
+  rw [hu.contDiffOn.integral_laplacian_smul_eq_integral_smul_laplacian φ]
   refine integral_eq_zero_of_ae (ae_of_all _ fun x ↦ ?_)
   beta_reduce
   by_cases hx : x ∈ (Ω : Set E)

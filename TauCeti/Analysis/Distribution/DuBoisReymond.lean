@@ -33,9 +33,10 @@ interval, and everywhere by continuity.
 
 ## Main declarations
 
-* `TauCeti.exists_contDiff_deriv_eq_of_integral_eq_zero`: the primitive of a test function on an
-  interval with total integral zero is a test function on the interval.
-* `TauCeti.exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero`: **the du Bois-Reymond lemma**.
+* `ContDiff.exists_contDiff_deriv_eq_of_integral_eq_zero`: the primitive of a test function on
+  an interval with total integral zero is a test function on the interval.
+* `ContinuousOn.exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero`: **the du Bois-Reymond
+  lemma**.
 -/
 
 public section
@@ -50,8 +51,8 @@ variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 /-- **The primitive of a mean-zero test function is a test function.** If `φ : ℝ → ℝ` is smooth
 with `tsupport φ ⊆ Ioo a b` and `∫ φ = 0`, then `φ` is the derivative of a smooth compactly
 supported function `ψ` with `tsupport ψ ⊆ Ioo a b`. -/
-theorem exists_contDiff_deriv_eq_of_integral_eq_zero {a b : ℝ} {φ : ℝ → ℝ} (hφ : ContDiff ℝ ∞ φ)
-    (hφs : tsupport φ ⊆ Ioo a b) (hint : ∫ x, φ x = 0) :
+theorem _root_.ContDiff.exists_contDiff_deriv_eq_of_integral_eq_zero {a b : ℝ} {φ : ℝ → ℝ}
+    (hφ : ContDiff ℝ ∞ φ) (hφs : tsupport φ ⊆ Ioo a b) (hint : ∫ x, φ x = 0) :
     ∃ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ ∧ HasCompactSupport ψ ∧ tsupport ψ ⊆ Ioo a b ∧ deriv ψ = φ := by
   have hφc : Continuous φ := hφ.continuous
   have hφ0 : ∀ x, x ∉ Ioo a b → φ x = 0 := fun x hx ↦
@@ -114,8 +115,8 @@ variable [CompleteSpace F]
 /-- **The du Bois-Reymond lemma.** A function continuous on an open interval whose pairing with
 the derivative of every test function on the interval vanishes,
 `∫ x, deriv ψ x • f x = 0`, is constant on the interval. -/
-theorem exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero {a b : ℝ} {f : ℝ → F}
-    (hf : ContinuousOn f (Ioo a b))
+theorem _root_.ContinuousOn.exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero {a b : ℝ}
+    {f : ℝ → F} (hf : ContinuousOn f (Ioo a b))
     (h : ∀ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ → tsupport ψ ⊆ Ioo a b → ∫ x, deriv ψ x • f x = 0) :
     ∃ c : F, EqOn f (fun _ ↦ c) (Ioo a b) := by
   rcases le_or_gt b a with hba | hab
@@ -158,7 +159,7 @@ theorem exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero {a b : ℝ} {f : �
       simp only [hφ_def]
       rw [integral_sub hgi (hρi.const_mul _), MeasureTheory.integral_const_mul, hρint, mul_one,
         sub_self]
-    obtain ⟨ψ, hψ, -, hψs, hψd⟩ := exists_contDiff_deriv_eq_of_integral_eq_zero hφ hφs hφint
+    obtain ⟨ψ, hψ, -, hψs, hψd⟩ := hφ.exists_contDiff_deriv_eq_of_integral_eq_zero hφs hφint
     have h0 := h ψ hψ hψs
     rw [hψd] at h0
     simp only [hφ_def, sub_smul, mul_smul] at h0

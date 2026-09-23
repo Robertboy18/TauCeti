@@ -33,15 +33,17 @@ the Laplacian.
 
 ## Main declarations
 
+* `TauCeti.integral_volumeIoiPow`: integration against Mathlib's radial measure
+  `MeasureTheory.Measure.volumeIoiPow k` is integration on `(0, ∞)` against the weight `r ^ k`.
 * `TauCeti.integral_eq_integral_toSphere_integral_Ioi`: integration in polar coordinates, with
   the sphere variable outermost.
 * `TauCeti.integral_eq_integral_Ioi_integral_toSphere`: integration in polar coordinates, with
   the radial variable outermost.
 * `TauCeti.integral_norm_rpow_neg_finrank_mul_fderiv_apply_self`: the radial fundamental theorem
   of calculus.
-* `TauCeti.continuousOn_integral_toSphere_smul`: the sphere integrals `r ↦ ∫ u ∈ S, f (r • u)`
-  depend continuously on the radius `r ∈ [0, R]` when `f` is continuous on the closed ball of
-  radius `R`.
+* `ContinuousOn.integral_toSphere_smul`: the sphere integrals `r ↦ ∫ u ∈ S, f (r • u)` depend
+  continuously on the radius `r ∈ [0, R]` when `f` is continuous on the closed ball of radius
+  `R`.
 -/
 
 public section
@@ -58,7 +60,7 @@ variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensi
 
 /-- Integration against `MeasureTheory.Measure.volumeIoiPow k` is integration on `(0, ∞)`
 against the weight `r ^ k`. -/
-private lemma integral_volumeIoiPow (k : ℕ) (h : ℝ → F) :
+theorem integral_volumeIoiPow (k : ℕ) (h : ℝ → F) :
     ∫ r : Ioi (0 : ℝ), h r ∂(Measure.volumeIoiPow k) = ∫ r in Ioi (0 : ℝ), r ^ k • h r := by
   simp only [Measure.volumeIoiPow, ENNReal.ofReal]
   rw [integral_withDensity_eq_integral_smul (measurable_subtype_coe.pow_const _).real_toNNReal,
@@ -121,7 +123,7 @@ omit [Nontrivial E] in
 /-- The integral of `f` over the sphere of radius `r` about the origin, parametrized by the unit
 sphere, depends continuously on `r ∈ [0, R]` when `f` is continuous on the closed ball of radius
 `R`. -/
-theorem continuousOn_integral_toSphere_smul {f : E → F} {R : ℝ}
+theorem _root_.ContinuousOn.integral_toSphere_smul {f : E → F} {R : ℝ}
     (hf : ContinuousOn f (closedBall (0 : E) R)) :
     ContinuousOn (fun r : ℝ ↦ ∫ u : sphere (0 : E) 1, f (r • (u : E)) ∂μ.toSphere) (Icc 0 R) := by
   obtain ⟨C, hC⟩ := (isCompact_closedBall (0 : E) R).exists_bound_of_continuousOn hf

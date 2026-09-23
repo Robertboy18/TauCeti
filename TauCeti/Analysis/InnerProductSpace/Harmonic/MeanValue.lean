@@ -18,16 +18,18 @@ import Mathlib.Analysis.SpecialFunctions.Sqrt
 /-!
 # The mean-value property of harmonic functions
 
-Let `E` be a nontrivial finite-dimensional real inner product space with an additive Haar measure
-`μ`, and let `u : E → F` be harmonic on a neighbourhood of the closed ball `closedBall x₀ R`. This
-file proves the **mean-value property**: `u x₀` is the average of `u` over the sphere of radius `R`
+Let `E` be a finite-dimensional real inner product space with an additive Haar measure `μ`, and
+let `u : E → F` be harmonic on a neighbourhood of the closed ball `closedBall x₀ R`. This file
+proves the **mean-value property**: `u x₀` is the average of `u` over the sphere of radius `R`
 about `x₀`, and the average of `u` over the ball of radius `R` about `x₀`,
 
 `⨍ θ ∈ S, u (x₀ + R • θ) ∂μ.toSphere = u x₀` and `⨍ x in ball x₀ R, u x ∂μ = u x₀`.
 
 The sphere of radius `R` about `x₀` is parametrized by the unit sphere `S` through
 `θ ↦ x₀ + R • θ`, and carries Mathlib's surface measure `μ.toSphere`, the measure that makes
-`μ` the product of the surface and radial measures in polar coordinates.
+`μ` the product of the surface and radial measures in polar coordinates. Only the sphere average
+needs `E ≠ 0`: in the trivial space the unit sphere is empty, and the integral identities hold
+with both sides zero.
 
 ## The argument
 
@@ -35,12 +37,14 @@ Write `Φ s = ∫ θ ∈ S, u (s • θ) ∂μ.toSphere` for the sphere integral
 origin. The classical proof differentiates `Φ` in `s` and evaluates `Φ'` by the divergence theorem
 on the ball; the proof here instead shows that the *distributional* derivative of `Φ` on `(0, R)`
 vanishes, and then applies the du Bois-Reymond lemma
-`TauCeti.exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero`. No divergence theorem is needed.
+`ContinuousOn.exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero`. No divergence theorem is
+needed.
 
-A harmonic function is weakly harmonic (`TauCeti.integral_laplacian_smul_eq_zero_of_harmonicOnNhd`):
-`∫ Δχ • u ∂μ = 0` for every test function `χ` supported in the ball. Taking `χ` radial,
-`χ x = ρ (‖x‖ ^ 2)`, the Laplacian `Δχ x = 4 ‖x‖² ρ'' (‖x‖²) + 2 n ρ' (‖x‖²)` is radial too
-(`TauCeti.laplacian_comp_norm_sq`), and integrating in polar coordinates with the radial variable
+A harmonic function is weakly harmonic
+(`InnerProductSpace.HarmonicOnNhd.integral_laplacian_smul_eq_zero`): `∫ Δχ • u ∂μ = 0` for every
+test function `χ` supported in the ball. Taking `χ` radial, `χ x = ρ (‖x‖ ^ 2)`, the Laplacian
+`Δχ x = 4 ‖x‖² ρ'' (‖x‖²) + 2 n ρ' (‖x‖²)` is radial too (`ContDiff.laplacian_comp_norm_sq`),
+and integrating in polar coordinates with the radial variable
 outermost (`TauCeti.integral_eq_integral_Ioi_integral_toSphere`) turns the identity into
 
 `∫ s in (0, ∞), s ^ (n - 1) (4 s² ρ'' (s²) + 2 n ρ' (s²)) • Φ s = 0`,
@@ -53,11 +57,12 @@ polar coordinates once more, gives the ball version.
 
 ## Main declarations
 
-* `TauCeti.integral_toSphere_eq_of_harmonicOnNhd`,
-  `TauCeti.average_toSphere_eq_of_harmonicOnNhd`: **the mean-value property on spheres**, in
+* `InnerProductSpace.HarmonicOnNhd.integral_toSphere_eq`,
+  `InnerProductSpace.HarmonicOnNhd.average_toSphere_eq`: **the mean-value property on spheres**,
+  in integral and in average form.
+* `InnerProductSpace.HarmonicOnNhd.setIntegral_ball_eq`,
+  `InnerProductSpace.HarmonicOnNhd.setAverage_ball_eq`: **the mean-value property on balls**, in
   integral and in average form.
-* `TauCeti.setIntegral_ball_eq_of_harmonicOnNhd`, `TauCeti.setAverage_ball_eq_of_harmonicOnNhd`:
-  **the mean-value property on balls**, in integral and in average form.
 
 ## References
 
@@ -136,9 +141,9 @@ private lemma integral_deriv_smul_integral_toSphere_eq_zero {Ω : Opens E}
   have hΔ : Δ (χ : E → ℝ) = fun x ↦
       4 * ‖x‖ ^ 2 * deriv σ (‖x‖ ^ 2) + 2 * (Module.finrank ℝ E : ℝ) * σ (‖x‖ ^ 2) := by
     funext x
-    rw [hχ, laplacian_comp_norm_sq (hρ.of_le (by simp)), hρ']
+    rw [hχ, (hρ.of_le (by simp)).laplacian_comp_norm_sq, hρ']
   -- Weak harmonicity against `χ`, in polar coordinates.
-  have hgreen := integral_laplacian_smul_eq_zero_of_harmonicOnNhd (μ := μ) hu χ
+  have hgreen := hu.integral_laplacian_smul_eq_zero (μ := μ) χ
   have hΔcont : Continuous (Δ (χ : E → ℝ)) := by
     rw [hΔ]
     have hσ' : Continuous (deriv σ) := hσ.continuous_deriv (by simp)
@@ -200,39 +205,43 @@ private lemma integral_toSphere_eq_of_harmonicOnNhd_zero
   have hΩ : closedBall (0 : E) R ⊆ Ω := fun x hx ↦ hu x hx
   have huΩ : HarmonicOnNhd u Ω := fun x hx ↦ hx
   set Φ : ℝ → F := fun s ↦ ∫ θ : sphere (0 : E) 1, u (s • (θ : E)) ∂μ.toSphere with hΦ_def
-  have hΦc : ContinuousOn Φ (Icc 0 R) :=
-    continuousOn_integral_toSphere_smul hu.contDiffOn.continuousOn
-  obtain ⟨c, hc⟩ := exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero
-    (hΦc.mono Ioo_subset_Icc_self) fun ψ hψ hψs ↦
-      integral_deriv_smul_integral_toSphere_eq_zero huΩ hΩ hR hψ hψs
+  have hΦc : ContinuousOn Φ (Icc 0 R) := hu.contDiffOn.continuousOn.integral_toSphere_smul
+  obtain ⟨c, hc⟩ :=
+    (hΦc.mono Ioo_subset_Icc_self).exists_eqOn_const_Ioo_of_integral_deriv_smul_eq_zero
+      fun ψ hψ hψs ↦ integral_deriv_smul_integral_toSphere_eq_zero huΩ hΩ hR hψ hψs
   have hIcc : EqOn Φ (fun _ ↦ c) (Icc 0 R) :=
     hc.of_subset_closure hΦc continuousOn_const Ioo_subset_Icc_self (by rw [closure_Ioo hR.ne])
   calc Φ R = c := hIcc ⟨hR.le, le_rfl⟩
     _ = Φ 0 := (hIcc ⟨le_rfl, hR.le⟩).symm
     _ = μ.toSphere.real univ • u 0 := by simp [hΦ_def, integral_const]
 
+omit [Nontrivial E] in
 /-- **The mean-value property on spheres.** If `u` is harmonic on a neighbourhood of the closed
 ball `closedBall x₀ R`, `0 ≤ R`, then the integral of `u` over the sphere of radius `R` about `x₀`,
 parametrized by the unit sphere with the surface measure `μ.toSphere`, is the total surface
-measure times `u x₀`. -/
-theorem integral_toSphere_eq_of_harmonicOnNhd {x₀ : E}
+measure times `u x₀`. (In the trivial space the unit sphere is empty and both sides vanish.) -/
+theorem _root_.InnerProductSpace.HarmonicOnNhd.integral_toSphere_eq {x₀ : E}
     (hu : HarmonicOnNhd u (closedBall x₀ R)) (hR : 0 ≤ R) :
     ∫ θ : sphere (0 : E) 1, u (x₀ + R • (θ : E)) ∂μ.toSphere = μ.toSphere.real univ • u x₀ := by
+  rcases subsingleton_or_nontrivial E with hE | hE
+  · have : IsEmpty (sphere (0 : E) 1) :=
+      ⟨fun θ ↦ by simpa [Subsingleton.elim (θ : E) 0] using norm_eq_of_mem_sphere θ⟩
+    simp [integral_of_isEmpty, Measure.eq_zero_of_isEmpty]
   have h := integral_toSphere_eq_of_harmonicOnNhd_zero (μ := μ)
     ((harmonicOnNhd_comp_add_right_closedBall_zero_iff x₀ R).mpr hu) hR
   simpa [add_comm] using h
 
 /-- **The mean-value property on spheres, average form.** A function harmonic on a neighbourhood
-of the closed ball `closedBall x₀ R`, `0 ≤ R`, has value `u x₀` at the centre equal to its average
-over the sphere of radius `R` about `x₀`. -/
-theorem average_toSphere_eq_of_harmonicOnNhd {x₀ : E}
+of the closed ball `closedBall x₀ R`, `0 ≤ R`, in a nontrivial space has value `u x₀` at the
+centre equal to its average over the sphere of radius `R` about `x₀`. -/
+theorem _root_.InnerProductSpace.HarmonicOnNhd.average_toSphere_eq {x₀ : E}
     (hu : HarmonicOnNhd u (closedBall x₀ R)) (hR : 0 ≤ R) :
     ⨍ θ : sphere (0 : E) 1, u (x₀ + R • (θ : E)) ∂μ.toSphere = u x₀ := by
   have hpos : 0 < μ.toSphere.real univ := by
     rw [Measure.toSphere_real_apply_univ, measureReal_def]
     exact mul_pos (Nat.cast_pos.mpr Module.finrank_pos)
       (ENNReal.toReal_pos (measure_ball_pos μ 0 one_pos).ne' measure_ball_lt_top.ne)
-  rw [average_eq, integral_toSphere_eq_of_harmonicOnNhd hu hR, smul_smul,
+  rw [average_eq, hu.integral_toSphere_eq hR, smul_smul,
     inv_mul_cancel₀ hpos.ne', one_smul]
 
 /-- The mean-value property on balls about the origin. -/
@@ -276,14 +285,19 @@ private lemma setIntegral_ball_eq_of_harmonicOnNhd_zero
   congr 1
   field_simp
 
+omit [Nontrivial E] in
 /-- **The mean-value property on balls.** If `u` is harmonic on a neighbourhood of the closed
 ball `closedBall x₀ R`, then the integral of `u` over the open ball of radius `R` about `x₀` is
 the measure of the ball times `u x₀`. (For `R ≤ 0` the ball is empty and both sides vanish.) -/
-theorem setIntegral_ball_eq_of_harmonicOnNhd {x₀ : E}
+theorem _root_.InnerProductSpace.HarmonicOnNhd.setIntegral_ball_eq {x₀ : E}
     (hu : HarmonicOnNhd u (closedBall x₀ R)) :
     ∫ x in ball x₀ R, u x ∂μ = μ.real (ball x₀ R) • u x₀ := by
   rcases le_or_gt R 0 with hR | hR
   · simp [ball_eq_empty.mpr hR]
+  rcases subsingleton_or_nontrivial E with hE | hE
+  · -- In the trivial space `u` is constant, with value `u x₀`.
+    rw [setIntegral_congr_fun measurableSet_ball (g := fun _ ↦ u x₀)
+      fun x _ ↦ congrArg u (Subsingleton.elim x x₀), setIntegral_const]
   have h := setIntegral_ball_eq_of_harmonicOnNhd_zero (μ := μ)
     ((harmonicOnNhd_comp_add_right_closedBall_zero_iff x₀ R).mpr hu) hR
   rw [zero_add] at h
@@ -295,16 +309,17 @@ theorem setIntegral_ball_eq_of_harmonicOnNhd {x₀ : E}
   rw [indicator_apply, indicator_apply]
   simp only [mem_ball, dist_eq_norm, add_sub_cancel_right, sub_zero]
 
+omit [Nontrivial E] in
 /-- **The mean-value property on balls, average form.** A function harmonic on a neighbourhood
 of the closed ball `closedBall x₀ R`, `0 < R`, has value `u x₀` at the centre equal to its average
 over the open ball of radius `R` about `x₀`. -/
-theorem setAverage_ball_eq_of_harmonicOnNhd {x₀ : E}
+theorem _root_.InnerProductSpace.HarmonicOnNhd.setAverage_ball_eq {x₀ : E}
     (hu : HarmonicOnNhd u (closedBall x₀ R)) (hR : 0 < R) :
     ⨍ x in ball x₀ R, u x ∂μ = u x₀ := by
   have hpos : 0 < μ.real (ball x₀ R) := by
     rw [measureReal_def]
     exact ENNReal.toReal_pos (measure_ball_pos μ x₀ hR).ne' measure_ball_lt_top.ne
-  rw [setAverage_eq, setIntegral_ball_eq_of_harmonicOnNhd hu, smul_smul,
+  rw [setAverage_eq, hu.setIntegral_ball_eq, smul_smul,
     inv_mul_cancel₀ hpos.ne', one_smul]
 
 end TauCeti
