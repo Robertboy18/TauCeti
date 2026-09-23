@@ -152,6 +152,7 @@ theorem topologicalGeneratorRank_multiplicative_padicInt (p : ℕ) [Fact p.Prime
 
 /-- Two continuous homomorphisms out of the additive group of the `p`-adic integers into a
 Hausdorff group that agree at `1` are equal. -/
+@[ext]
 theorem continuousMonoidHom_ext_multiplicative_padicInt {p : ℕ} [Fact p.Prime] {Q : Type*} [Group Q]
     [TopologicalSpace Q] [T2Space Q] {f g : Multiplicative ℤ_[p] →ₜ* Q}
     (h : f (Multiplicative.ofAdd 1) = g (Multiplicative.ofAdd 1)) : f = g :=

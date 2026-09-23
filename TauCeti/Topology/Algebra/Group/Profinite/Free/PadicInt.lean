@@ -106,11 +106,6 @@ theorem equivPadicInt_symm_ofAdd (l : ℤ_[p]) :
   simp only [ContinuousMonoidHom.coe_coe, IsProP.padicPowHom_apply, toAdd_ofAdd] at h
   exact h
 
-/-- The inverse of the isomorphism with `ℤ_p` sends `1` to the generator. -/
-theorem equivPadicInt_symm_ofAdd_one :
-    (equivPadicInt p X).symm (Multiplicative.ofAdd (1 : ℤ_[p])) = of default := by
-  simp
-
 /-- The isomorphism with `ℤ_p` is the unique topological isomorphism carrying the generator
 to `1`. -/
 theorem equivPadicInt_unique (e : freeProP p X ≃ₜ* Multiplicative ℤ_[p])
