@@ -7,7 +7,7 @@ module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Product
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Class
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Conjugation
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Corestriction.IndexTwo
 
 /-!
 # Restriction of the explicit Evens graph-cocycle class

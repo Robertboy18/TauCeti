@@ -10,7 +10,7 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Conjugatio
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Corestriction.Basic
 
 /-!
-# The conjugation on `H¹` of an index-two subgroup, as `res ∘ cor - id`
+# Corestriction at index two, and the conjugation `res ∘ cor - id`
 
 Let `U` be an open subgroup of index two in a topological group `G` and let `M` be a topological
 `G`-module. On explicit `H¹(U, M)`, the composite `res_U ∘ cor_U` of degree-one corestriction and
@@ -19,7 +19,9 @@ restriction is `1 + s` for any element `s` of the nontrivial coset: computed on 
 conjugation by `s`. The difference `res ∘ cor - id` is therefore the conjugation action of the
 nontrivial coset on explicit `H¹(U, M)`, defined without choosing an element of that coset.
 
-This explicit map supplies the conjugate class in the graph-cocycle restriction computation of
+This is the conjugation `evensConj` of the index-two Evens norm, hence the name `evensConj1`; it
+is stated for an arbitrary topological coefficient module and uses only the corestriction and
+conjugation APIs. It supplies the conjugate class in the graph-cocycle restriction computation of
 `TauCeti.RepresentationTheory.Homological.ContCohomology.Evens.Restriction`. The theorem
 `evensConj1_eq_explicitConj1` identifies it with conjugation by **every** element outside `U`,
 providing the comparison needed for computations using a chosen coset representative.
