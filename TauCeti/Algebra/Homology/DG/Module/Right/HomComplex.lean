@@ -227,6 +227,7 @@ theorem dgRightModuleHomComplex_d (hM : IsDGRightModule h ℳ dM)
 
 /-- The differential of the Hom complex, evaluated on a homogeneous cochain, is the graded
 commutator with the module differentials. -/
+@[simp↓]
 theorem dgRightModuleHomComplex_d_apply (hM : IsDGRightModule h ℳ dM)
     (hN : IsDGRightModule h ℳN dN) (p : ℤ) (f : (dgRightModuleHomComplex hM hN).X p) :
     ((dgRightModuleHomComplex hM hN).d p (p + 1)).hom f =

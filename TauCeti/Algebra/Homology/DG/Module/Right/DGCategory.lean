@@ -58,10 +58,9 @@ enrichment fixes the universe of the ground ring, so the differential graded str
 composition and identity cochains of `TauCeti/Algebra/Homology/DG/Module/Right/Composition.lean`
 are stated in that generality as well.
 
-The Hom-complex construction is accessed through `homComplexData_hom` and `dgHomComplex_eq`.
-The linear equivalence `dgHomLinearEquivCochains` transports homogeneous morphisms across this
-equality, and the operation lemmas express the differential, identity and composition after that
-transport, so their statements do not depend on unfolding the body of `homComplexData`.
+The linear equivalence `dgHomLinearEquivCochains` identifies homogeneous morphisms with
+right-module cochains. Under this identification, the differential is the graded commutator,
+the identity is the identity cochain, and composition carries the Koszul sign.
 
 ## References
 
@@ -125,6 +124,7 @@ noncomputable instance instDGCategory : DGCategory R (DGRightModuleCat.{u, u, u}
 
 /-- The Hom complex of the differential graded category of right modules is the Hom complex of
 the two modules. -/
+@[simp↓]
 theorem dgHomComplex_eq :
     dgHomComplex R M N = dgRightModuleHomComplex M.isDGRightModule N.isDGRightModule :=
   (rfl)
@@ -137,30 +137,43 @@ noncomputable def dgHomLinearEquivCochains (n : ℤ) :
   (eqToIso (congrArg (fun K : CochainComplex (ModuleCat R) ℤ => K.X n)
     (dgHomComplex_eq M N))).toLinearEquiv
 
-/-- Transported composition in the explicit Hom-complex data is composition of cochains in
-reversed order, with the Koszul sign converting Keller's factor order into Mathlib's.
+/-- The identification with cochains acts by transport along the equality of the degree-`n`
+terms of the Hom complexes. -/
+theorem dgHomLinearEquivCochains_apply (n : ℤ) (f : DGHom R n M N) :
+    dgHomLinearEquivCochains M N n f =
+      (eqToHom (congrArg (fun K : CochainComplex (ModuleCat R) ℤ => K.X n)
+        (dgHomComplex_eq M N))).hom f :=
+  Iso.toLinearEquiv_apply _ _
 
-This holds by definition: the sign is the enriched-order composition of Keller-ordered data,
-`TauCeti.DGCategoryData.ofKeller_comp`, and `dgHomLinearEquivCochains` is transport along the
-definitional equality `dgHomComplex_eq`, so it fixes the underlying cochain. -/
+/-- Transported composition in the explicit Hom-complex data is composition of cochains in
+reversed order, with the Koszul sign converting Keller's factor order into Mathlib's. -/
 @[simp]
 theorem homComplexData_comp {p q n : ℤ} (hpq : p + q = n)
     (f : DGHom R p M N) (g : DGHom R q N P) :
     dgHomLinearEquivCochains M P n ((homComplexData (h := h)).comp p q n hpq f g) =
       (p * q).negOnePow • dgRightModuleCochains.comp
-        (dgHomLinearEquivCochains N P q g) (dgHomLinearEquivCochains M N p f) (by omega) :=
-  (rfl)
+        (dgHomLinearEquivCochains N P q g) (dgHomLinearEquivCochains M N p f) (by omega) := by
+  simp only [dgHomLinearEquivCochains_apply]
+  unfold homComplexData
+  generalize_proofs (config := { maxDepth := 0, abstract := false })
+  erw [DGCategoryData.ofKeller_comp]
+  · exact congrArg (fun c : (dgRightModuleHomComplex M.isDGRightModule P.isDGRightModule).X n =>
+        (p * q).negOnePow • c)
+      (LinearMap.mk₂_apply R _ g f)
+  all_goals assumption
 
-/-- The transported identity of the explicit data is the identity cochain.
-
-This holds by definition: the identity of Keller-ordered data is the given one,
-`TauCeti.DGCategoryData.ofKeller_id`, and `dgHomLinearEquivCochains` is transport along the
-definitional equality `dgHomComplex_eq`, so it fixes the underlying cochain. -/
+/-- The transported identity of the explicit data is the identity cochain. -/
 @[simp]
 theorem homComplexData_id :
     dgHomLinearEquivCochains M M 0 ((homComplexData (h := h)).id M) =
-      dgRightModuleCochains.id (R := R) (A := A) (ℳ := M.grading) :=
-  (rfl)
+      dgRightModuleCochains.id (R := R) (A := A) (ℳ := M.grading) := by
+  simp only [dgHomLinearEquivCochains_apply]
+  unfold homComplexData
+  generalize_proofs (config := { maxDepth := 0, abstract := false })
+  erw [DGCategoryData.ofKeller_id]
+  · erw [eqToHom_refl]
+    exact ModuleCat.id_apply _ _
+  all_goals assumption
 
 /-- The transported differential of the explicit data is the graded commutator with the module
 differentials. -/
@@ -175,6 +188,7 @@ theorem homComplexData_d_apply (n : ℤ) (f : DGHom R n M N) :
 
 /-- The differential of the differential graded category of right modules is the graded
 commutator with the module differentials, after transport to cochains. -/
+@[simp↓]
 theorem dgDifferential_eq (n : ℤ) (f : DGHom R n M N) :
     dgHomLinearEquivCochains M N (n + 1) (dgDifferential R n f) =
       dgRightModuleCochains.differential (hM := M.isDGRightModule) (hN := N.isDGRightModule) n
@@ -185,6 +199,7 @@ theorem dgDifferential_eq (n : ℤ) (f : DGHom R n M N) :
 
 /-- The identity of the differential graded category of right modules transports to the identity
 cochain. -/
+@[simp↓]
 theorem dgId_eq :
     dgHomLinearEquivCochains M M 0 (dgId R M) =
       dgRightModuleCochains.id (R := R) (A := A) (ℳ := M.grading) :=
@@ -194,6 +209,7 @@ theorem dgId_eq :
 /-- Composition in the differential graded category of right modules is composition of cochains,
 carrying the Koszul sign which converts Mathlib's enriched factor order into composition of the
 underlying maps, after transport to cochains. -/
+@[simp↓]
 theorem dgComp_eq {p q n : ℤ} (f : DGHom R p M N) (g : DGHom R q N P) (hpq : p + q = n) :
     dgHomLinearEquivCochains M P n (dgComp R f g hpq) =
       (p * q).negOnePow • dgRightModuleCochains.comp
