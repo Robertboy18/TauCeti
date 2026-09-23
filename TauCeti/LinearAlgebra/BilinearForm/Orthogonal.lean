@@ -10,17 +10,18 @@ public import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
 /-!
 # Orthogonal complements of bilinear forms
 
-This file records two facts about the orthogonal complement `LinearMap.BilinForm.orthogonal` that
-Mathlib lacks. A vector lies in the orthogonal complement of the span of two vectors exactly when
-it is orthogonal to both. Adjoining an orthogonal vector whose self-pairing is a right
-non-zero-divisor to a left-separating subspace of a reflexive bilinear space produces a
+This file records three facts about the orthogonal complement `LinearMap.BilinForm.orthogonal`
+that Mathlib lacks. A vector lies in the orthogonal complement of the span of one or two vectors
+exactly when it is orthogonal to each of them. Adjoining an orthogonal vector whose self-pairing
+is a right non-zero-divisor to a left-separating subspace of a reflexive bilinear space produces a
 nondegenerate restriction; this is the structural step used when a Cartan--Dieudonne argument
 enlarges a fixed subspace.
 
 ## Main results
 
-* `LinearMap.BilinForm.mem_orthogonal_span_pair_iff`: membership in the orthogonal complement of
-  the span of two vectors.
+* `LinearMap.BilinForm.mem_orthogonal_span_singleton_iff`,
+  `LinearMap.BilinForm.mem_orthogonal_span_pair_iff`: membership in the orthogonal complement of
+  the span of one or two vectors.
 * `TauCeti.BilinForm.restrict_nondegenerate_sup_span_singleton`: adjoining an orthogonal vector
   to a left-separating subspace produces a nondegenerate restriction.
 -/
@@ -30,6 +31,11 @@ public section
 namespace LinearMap.BilinForm
 
 variable {K V : Type*} [CommSemiring K] [AddCommMonoid V] [Module K V]
+
+/-- A vector is orthogonal to the span of a vector `x` exactly when it is orthogonal to `x`. -/
+theorem mem_orthogonal_span_singleton_iff (B : LinearMap.BilinForm K V) {x y : V} :
+    y ∈ B.orthogonal (K ∙ x) ↔ B x y = 0 := by
+  rw [orthogonal, Submodule.orthogonalBilin_span_singleton, LinearMap.mem_ker]
 
 /-- A vector is orthogonal to the span of two vectors exactly when it is orthogonal to both. -/
 theorem mem_orthogonal_span_pair_iff (B : LinearMap.BilinForm K V) {x y z : V} :
