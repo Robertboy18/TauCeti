@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Topology.Algebra.Group.FiniteQuotients
 public import TauCeti.Topology.Algebra.Group.Profinite.Generation
 public import TauCeti.Topology.Algebra.Group.Profinite.Hopfian
 public import TauCeti.Topology.Algebra.Group.Profinite.Limit
@@ -13,55 +14,32 @@ public import TauCeti.Topology.Compactness.InverseSystem
 /-!
 # Finite-quotient determinacy of profinite groups
 
-A finite group `Q` **occurs as a continuous finite quotient** of a topological group `G`, written
-`IsFiniteContinuousQuotient G Q`, when `Q` is finite and some surjective homomorphism `G →* Q` has
-open kernel. The predicate is phrased through the kernel and not through a topology on `Q`: a
-homomorphism into a finite discrete group is continuous exactly when its kernel is open
-(`MonoidHom.continuous_iff_isOpen_ker`), so nothing is lost, and the predicate is manifestly
-invariant under isomorphism of `Q`. The continuous finite quotients of `G` are, up to isomorphism,
-the quotients `G ⧸ U` by its open normal subgroups of finite index; for compact `G` every open
-subgroup has finite index, so they are the quotients by all open normal subgroups.
+A topologically finitely generated profinite group is determined by its continuous finite
+quotients (`TauCeti.IsFiniteContinuousQuotient`, defined in
+`TauCeti.Topology.Algebra.Group.FiniteQuotients`): if `G` is topologically finitely generated and
+the profinite groups `G` and `H` have the same continuous finite quotients, then `G ≃ₜ* H`. Finite
+generation is assumed on one side only, and is a conclusion on the other.
 
-The main theorem is that the continuous finite quotients determine a topologically finitely
-generated profinite group: if `G` is topologically finitely generated and `G` and `H` have the same
-continuous finite quotients, then `G ≃ₜ* H`. Finite generation is assumed on one side only, and is
-a conclusion on the other. The proof has three steps.
+The theorem is assembled from three implications between finite-quotient data and maps.
 
-* If every continuous finite quotient of `H` is one of `G`, then `H` is topologically finitely
-  generated, because each finite quotient of `H` is then a finite quotient of `G`, and so needs no
-  more generators than `G` does
-  (`IsTopologicallyFinitelyGenerated.of_forall_isFiniteContinuousQuotient`).
-* If `H` is topologically finitely generated and every finite quotient `G ⧸ N` of `G` occurs as a
-  continuous quotient of `H`, then there is a continuous surjection `H ↠ G`
-  (`exists_continuous_surjective_of_forall_isFiniteContinuousQuotient`). The surjections
-  `H ↠ G ⧸ N` with open kernel form, as `N` shrinks, an inverse system of nonempty finite sets:
-  finite because a topologically finitely generated group has only finitely many homomorphisms with
-  open kernel into a fixed finite group. Kőnig's lemma provides a compatible family, the limit
-  description of `G` assembles it into a homomorphism `H →* G`, which is continuous because each of
-  its finite-quotient shadows has open kernel, and surjective because its image is closed and
-  dense. The bonding maps of the system need not be surjective, and no stabilization of the level
-  sets is needed: an inverse limit of nonempty finite sets is nonempty regardless.
-* A topologically finitely generated profinite group is Hopfian, so if `φ : G ↠ H` and `ψ : H ↠ G`
-  are continuous surjections then `ψ ∘ φ` is bijective, hence so is `φ`
-  (`IsTopologicallyFinitelyGenerated.bijective_of_surjective_of_surjective`), and a continuous
-  bijection of compact Hausdorff groups is a topological isomorphism.
+* **Finite generation descends.** If `G` is topologically finitely generated and every continuous
+  finite quotient of the profinite group `H` is one of `G`, then `H` is topologically finitely
+  generated (`IsTopologicallyFinitelyGenerated.of_forall_isFiniteContinuousQuotient`).
+* **Finite-quotient data produces a surjection.** If `H` is a topologically finitely generated
+  compact group and every quotient `G ⧸ N` of the profinite group `G` by an open normal subgroup
+  occurs as a continuous quotient of `H`, then there is a continuous surjection `H ↠ G`
+  (`exists_continuous_surjective_of_forall_isFiniteContinuousQuotient`).
+* **Surjections in both directions are isomorphisms.** If `G` is topologically finitely generated
+  and profinite, continuous surjections `G ↠ H` and `H ↠ G` make `G ↠ H` bijective
+  (`IsTopologicallyFinitelyGenerated.bijective_of_surjective_of_surjective`, the Hopf property of
+  `G`), hence a topological isomorphism when `H` is also compact Hausdorff.
 
 Finite generation cannot be dropped on both sides: for a prime `p`, the products `∏_{i : ℕ} ℤ/p`
 and `∏_{i : ℝ} ℤ/p` have the same continuous finite quotients, namely the finite elementary abelian
 `p`-groups, but they have different cardinalities.
 
-## Main definitions
-
-* `TauCeti.IsFiniteContinuousQuotient`: `Q` occurs as a continuous finite quotient of `G`.
-
 ## Main results
 
-* `TauCeti.isFiniteContinuousQuotient_iff_exists_openNormalSubgroup`: the continuous finite
-  quotients of `G` are the quotients by its open normal subgroups of finite index, up to
-  isomorphism.
-* `TauCeti.isFiniteContinuousQuotient_congr_left`,
-  `TauCeti.isFiniteContinuousQuotient_congr_right`: the predicate depends only on the topological
-  isomorphism class of `G` and on the isomorphism class of `Q`.
 * `TauCeti.IsTopologicallyFinitelyGenerated.of_forall_isFiniteContinuousQuotient`: a profinite
   group whose continuous finite quotients all occur for a topologically finitely generated one is
   topologically finitely generated.
@@ -86,99 +64,6 @@ public section
 namespace TauCeti
 
 universe u v
-
-section Defs
-
-variable (G : Type u) [Group G] [TopologicalSpace G] (Q : Type v) [Group Q]
-
-/-- `Q` **occurs as a continuous finite quotient** of the topological group `G`: `Q` is finite and
-some surjective homomorphism `G →* Q` has open kernel. The group `Q` carries no topology; for the
-discrete topology on `Q` an open kernel is the same as continuity
-(`isFiniteContinuousQuotient_iff_exists_continuous`). Finiteness is part of the predicate because
-an open kernel alone does not force it: a discrete group is a quotient of itself with open kernel.
-For a compact `G` every open subgroup has finite index, so there finiteness is automatic
-(`OpenNormalSubgroup.isFiniteContinuousQuotient`). -/
-def IsFiniteContinuousQuotient : Prop :=
-  Finite Q ∧ ∃ f : G →* Q, Function.Surjective f ∧ IsOpen (f.ker : Set G)
-
-end Defs
-
-section Basic
-
-variable {G : Type u} [Group G] [TopologicalSpace G] {Q : Type v} [Group Q]
-
-/-- The defining property of a continuous finite quotient: the body of
-`TauCeti.IsFiniteContinuousQuotient` is not exposed, so unfolding it goes through this lemma. -/
-theorem isFiniteContinuousQuotient_iff :
-    IsFiniteContinuousQuotient G Q ↔
-      Finite Q ∧ ∃ f : G →* Q, Function.Surjective f ∧ IsOpen (f.ker : Set G) :=
-  Iff.rfl
-
-/-- The quotient of `G` by an open normal subgroup of finite index is a continuous finite quotient
-of `G`. For a compact `G` every open subgroup has finite index
-(`OpenSubgroup.finiteIndex_toSubgroup`), so the finite-index instance is then found
-automatically. -/
-theorem _root_.OpenNormalSubgroup.isFiniteContinuousQuotient (U : OpenNormalSubgroup G)
-    [U.toSubgroup.FiniteIndex] : IsFiniteContinuousQuotient G (G ⧸ U.toSubgroup) :=
-  ⟨inferInstance, QuotientGroup.mk' U.toSubgroup, QuotientGroup.mk'_surjective _, by
-    rw [QuotientGroup.ker_mk']
-    exact U.isOpen⟩
-
-/-- A continuous finite quotient is finite. -/
-theorem IsFiniteContinuousQuotient.finite (h : IsFiniteContinuousQuotient G Q) : Finite Q :=
-  h.1
-
-/-- For a finite group `Q` carrying the discrete topology, occurring as a continuous finite
-quotient is the existence of a continuous surjective homomorphism onto `Q`. -/
-theorem isFiniteContinuousQuotient_iff_exists_continuous [IsTopologicalGroup G] [Finite Q]
-    [TopologicalSpace Q] [DiscreteTopology Q] :
-    IsFiniteContinuousQuotient G Q ↔ ∃ f : G →* Q, Function.Surjective f ∧ Continuous f := by
-  rw [isFiniteContinuousQuotient_iff, and_iff_right ‹Finite Q›]
-  simp only [MonoidHom.continuous_iff_isOpen_ker]
-
-/-- A continuous finite quotient of a continuous surjective image of `G` is a continuous finite
-quotient of `G`. -/
-theorem IsFiniteContinuousQuotient.comp {G' : Type*} [Group G'] [TopologicalSpace G']
-    (h : IsFiniteContinuousQuotient G Q) {φ : G' →* G} (hφ : Continuous φ)
-    (hsurj : Function.Surjective φ) : IsFiniteContinuousQuotient G' Q := by
-  obtain ⟨hfin, f, hf, hopen⟩ := h
-  refine ⟨hfin, f.comp φ, hf.comp hsurj, ?_⟩
-  rw [← MonoidHom.comap_ker, Subgroup.coe_comap]
-  exact hopen.preimage hφ
-
-/-- Occurring as a continuous finite quotient is transported along an isomorphism of the
-quotient. -/
-theorem IsFiniteContinuousQuotient.of_mulEquiv {Q' : Type*} [Group Q']
-    (h : IsFiniteContinuousQuotient G Q) (e : Q ≃* Q') : IsFiniteContinuousQuotient G Q' := by
-  obtain ⟨_, f, hf, hopen⟩ := h
-  exact ⟨Finite.of_equiv Q e, (e : Q →* Q').comp f, e.surjective.comp hf, by
-    rwa [MonoidHom.ker_mulEquiv_comp]⟩
-
-/-- Occurring as a continuous finite quotient depends only on the topological isomorphism class
-of the group. -/
-theorem isFiniteContinuousQuotient_congr_left {G' : Type*} [Group G'] [TopologicalSpace G']
-    (e : G ≃ₜ* G') : IsFiniteContinuousQuotient G Q ↔ IsFiniteContinuousQuotient G' Q :=
-  ⟨fun h ↦ h.comp (φ := (e.symm : G' →* G)) e.symm.continuous e.symm.surjective,
-    fun h ↦ h.comp (φ := (e : G →* G')) e.continuous e.surjective⟩
-
-/-- Occurring as a continuous finite quotient depends only on the isomorphism class of the
-quotient. -/
-theorem isFiniteContinuousQuotient_congr_right {Q' : Type*} [Group Q'] (e : Q ≃* Q') :
-    IsFiniteContinuousQuotient G Q ↔ IsFiniteContinuousQuotient G Q' :=
-  ⟨fun h ↦ h.of_mulEquiv e, fun h ↦ h.of_mulEquiv e.symm⟩
-
-/-- The continuous finite quotients of `G` are, up to isomorphism, exactly the quotients of `G` by
-its open normal subgroups of finite index. -/
-theorem isFiniteContinuousQuotient_iff_exists_openNormalSubgroup :
-    IsFiniteContinuousQuotient G Q ↔
-      ∃ U : OpenNormalSubgroup G, U.toSubgroup.FiniteIndex ∧ Nonempty (G ⧸ U.toSubgroup ≃* Q) := by
-  refine ⟨fun h ↦ ?_, fun ⟨U, hU, ⟨e⟩⟩ ↦ U.isFiniteContinuousQuotient.of_mulEquiv e⟩
-  obtain ⟨_, f, hf, hopen⟩ := h
-  have e := QuotientGroup.quotientKerEquivOfSurjective f hf
-  have : Finite (G ⧸ f.ker) := Finite.of_equiv Q e.symm
-  exact ⟨⟨⟨f.ker, hopen⟩, inferInstance⟩, Subgroup.finiteIndex_of_finite_quotient, ⟨e⟩⟩
-
-end Basic
 
 section FiniteGeneration
 
@@ -273,25 +158,6 @@ theorem exists_continuous_surjective_of_forall_isFiniteContinuousQuotient
   exact (x N).2.1
 
 end Surjection
-
-section Hopf
-
-variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
-  [TotallyDisconnectedSpace G]
-
-/-- **Continuous surjections in both directions are bijective.** If `G` is a topologically
-finitely generated profinite group and `φ : G →* H`, `ψ : H →* G` are continuous surjections,
-then `φ` is bijective: the endomorphism `ψ ∘ φ` of `G` is surjective, hence bijective by the Hopf
-property, so `φ` is injective. -/
-theorem IsTopologicallyFinitelyGenerated.bijective_of_surjective_of_surjective
-    {H : Type*} [Group H] [TopologicalSpace H] (hG : IsTopologicallyFinitelyGenerated G)
-    {φ : G →* H} {ψ : H →* G} (hφ : Continuous φ) (hφs : Function.Surjective φ)
-    (hψ : Continuous ψ) (hψs : Function.Surjective ψ) : Function.Bijective φ := by
-  have hinj := hG.injective_of_surjective (f := ψ.comp φ) (hψ.comp hφ) (hψs.comp hφs)
-  rw [MonoidHom.coe_comp] at hinj
-  exact ⟨hinj.of_comp, hφs⟩
-
-end Hopf
 
 section Determinacy
 
