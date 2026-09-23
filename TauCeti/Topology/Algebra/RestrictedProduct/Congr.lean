@@ -142,8 +142,11 @@ def doubleCosetCongr (U U' : ∀ i, Subgroup (G i))
   DoubleCoset.quotientCongr Γ K (restrictedProductCongr U U' h) rfl rfl
 
 /-- The transported double-coset space sends the double coset of `x` to the double coset of its
-image under the change-of-family equivalence. -/
-@[simp]
+image under the change-of-family equivalence.
+
+Not a `simp` lemma: the type of `doubleCosetCongr` mentions the coercions `↑(Γ.map e)` and
+`↑(K.map e)`, which `Subgroup.coe_map` rewrites, so the left-hand side is not in simp-normal form.
+Use `DoubleCoset.quotientCongr_apply_mk` after unfolding, or rewrite with this lemma directly. -/
 theorem doubleCosetCongr_apply_mk (U U' : ∀ i, Subgroup (G i))
     (h : ∀ᶠ i in cofinite, U i = U' i)
     (Γ K : Subgroup (Πʳ i, [G i, (U i : Set (G i))]))
@@ -158,8 +161,9 @@ theorem doubleCosetCongr_apply_mk (U U' : ∀ i, Subgroup (G i))
   DoubleCoset.quotientCongr_apply_mk Γ K _ rfl rfl x
 
 /-- The inverse of the transported double-coset space sends the double coset of `y` to the double
-coset of its image under the inverse change-of-family equivalence. -/
-@[simp]
+coset of its image under the inverse change-of-family equivalence.
+
+Not a `simp` lemma, for the same reason as `doubleCosetCongr_apply_mk`. -/
 theorem doubleCosetCongr_symm_apply_mk (U U' : ∀ i, Subgroup (G i))
     (h : ∀ᶠ i in cofinite, U i = U' i)
     (Γ K : Subgroup (Πʳ i, [G i, (U i : Set (G i))]))
