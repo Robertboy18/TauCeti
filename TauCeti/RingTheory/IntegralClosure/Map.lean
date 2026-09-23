@@ -21,7 +21,6 @@ integral over `R`, so lying over applies along the restricted map.
 
 * `AlgHom.mapIntegralClosure_comp`: the restriction to integral closures is functorial.
 * `AlgHom.mapIntegralClosure_injective`: it preserves injectivity.
-* `Ideal.comap_mapIntegralClosure_comp`: contraction along a composite of restricted algebra maps.
 * `Ideal.exists_isPrime_comap_mapIntegralClosure_eq`: a prime of the integral closure in `A` is
   the contraction of a prime of the integral closure in `B` along an injective `f`.
 -/
@@ -46,15 +45,6 @@ theorem mapIntegralClosure_injective {f : A →ₐ[R] B} (hf : Function.Injectiv
   fun _ _ h => Subtype.ext (hf (congrArg Subtype.val h))
 
 end AlgHom
-
-/-- Contracting an ideal along a composite of maps between integral closures is the
-composite of the two contractions. -/
-@[simp]
-theorem Ideal.comap_mapIntegralClosure_comp (I : Ideal (integralClosure R C)) (f : B →ₐ[R] C)
-    (g : A →ₐ[R] B) :
-    I.comap (f.mapIntegralClosure.comp g.mapIntegralClosure) =
-      (I.comap f.mapIntegralClosure).comap g.mapIntegralClosure :=
-  (Ideal.comap_comapₐ g.mapIntegralClosure f.mapIntegralClosure).symm
 
 /-- Lying over for integral closures: along an injective `R`-algebra map `f : A → B`, every prime
 of the integral closure of `R` in `A` is the contraction of a prime of the integral closure of `R`

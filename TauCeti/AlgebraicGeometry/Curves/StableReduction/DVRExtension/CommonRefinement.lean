@@ -95,16 +95,16 @@ theorem nonempty_binaryCofan_of_isGalois (N : Type u) [Field N] [Algebra K N]
   have hQ₁F : Q₁.comap (((σ : N →ₐ[K] N).comp k₂).restrictScalars R).mapIntegralClosure =
       F.prime := by
     rw [AlgHom.restrictScalars_comp, AlgHom.mapIntegralClosure_comp,
-      Ideal.comap_mapIntegralClosure_comp, hσ', hQ₂F]
+      ← Ideal.comap_comapₐ, hσ', hQ₂F]
   -- assemble the refinement on the chosen extension cut out by `Q₁`
   obtain ⟨e, he⟩ := exists_algEquiv_comap_prime_eq R K N Q₁
   refine ⟨Limits.BinaryCofan.mk (P := of R K N Q₁)
     (Hom.ofAlgHom ((e.symm : N →ₐ[K] _).comp k₁) ?_)
     (Hom.ofAlgHom ((e.symm : N →ₐ[K] _).comp ((σ : N →ₐ[K] N).comp k₂)) ?_)⟩
   · rw [AlgHom.restrictScalars_comp, AlgHom.mapIntegralClosure_comp,
-      Ideal.comap_mapIntegralClosure_comp, he, hQ₁E]
+      ← Ideal.comap_comapₐ, he, hQ₁E]
   · rw [AlgHom.restrictScalars_comp, AlgHom.mapIntegralClosure_comp,
-      Ideal.comap_mapIntegralClosure_comp, he, hQ₁F]
+      ← Ideal.comap_comapₐ, he, hQ₁F]
 
 /-- Any two chosen finite extensions of a discrete valuation ring admit a common refinement: a
 chosen extension receiving maps from both. Its extension field is the Galois closure of the
