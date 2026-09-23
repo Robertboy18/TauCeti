@@ -18,12 +18,12 @@ arithmetic theorem about `Γ`, and nothing here manufactures it.
 
 This file records the diagonal, its coordinate formula, its kernel and the resulting injectivity
 criterion, its compatibility with componentwise maps and with a change of factors, and the
-continuity criterion. Continuity does not follow from continuity of the coordinate maps: the
-restricted-product topology is finer than the topology induced from `Π i, G i`, so the criterion
-asks for one cofinite set `S` of indices at which every `γ` is integral. Such a uniform set lets
-the diagonal factor through the stage `Πʳ i, [G i, U i]_[𝓟 S]`, which carries the subspace
-topology of `Π i, G i`: continuity into that stage is a coordinatewise matter, and its inclusion
-into the restricted product is continuous.
+continuity criterion. Continuity does not follow from continuity of the coordinate maps, because
+the restricted-product topology is finer than the topology induced from `Π i, G i`. The criterion
+asks for one cofinite set `S` of indices at which every `γ` is integral. Such a uniform set is
+what the restricted-product topology rewards: on the subset `{x | ∀ i ∈ S, x i ∈ U i}`, which
+then contains the image of the diagonal, it coincides with the topology induced from
+`Π i, G i`, so continuity there is decided by the coordinates.
 
 ## References
 
@@ -93,7 +93,8 @@ theorem injective_rationalDiagonal {Γ : Type w} [MulOneClass Γ] (φ : ∀ i, �
   exact hi (by simpa using congrArg (fun x ↦ x i) hab)
 
 /-- A componentwise map applied after the diagonal is the diagonal of the composed coordinate
-maps, whose eventual integrality follows from that of the original coordinates. -/
+maps, whose eventual integrality follows from that of the original coordinates together with the
+hypothesis `hψ` that `ψ i` eventually maps `U i` into `V i`. -/
 theorem restrictedProductMap_comp_rationalDiagonal {Γ : Type w} [MulOneClass Γ]
     {H : ι → Type z} [∀ i, Group (H i)]
     (φ : ∀ i, Γ →* G i) (ψ : ∀ i, G i →* H i)
@@ -107,8 +108,9 @@ theorem restrictedProductMap_comp_rationalDiagonal {Γ : Type w} [MulOneClass Γ
   simp
 
 /-- A change of factors applied after the diagonal is the diagonal of the transported coordinate
-maps, whose eventual integrality follows from that of the original coordinates. The change of
-reference family is the case in which every `ψ i` is the identity. -/
+maps, whose eventual integrality follows from that of the original coordinates together with the
+hypothesis `hψ` that `ψ i` eventually maps `U i` bijectively onto `V i`. The change of reference
+family is the case in which every `ψ i` is the identity. -/
 theorem restrictedProductCongrRight_comp_rationalDiagonal {Γ : Type w} [MulOneClass Γ]
     {H : ι → Type z} [∀ i, Group (H i)]
     (φ : ∀ i, Γ →* G i) (ψ : ∀ i, G i ≃* H i)
