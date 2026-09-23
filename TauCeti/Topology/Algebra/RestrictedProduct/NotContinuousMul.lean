@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Topology.Algebra.RestrictedProduct.TopologicalSpace
+public import TauCeti.Topology.Algebra.RestrictedProduct.TopologicalSpace
 public import Mathlib.NumberTheory.Real.Irrational
 public import Mathlib.Topology.Instances.Rat
 
@@ -34,8 +34,8 @@ over `ℕ ⊕ ℕ` into two restricted products, and through the inverse of the 
 `{0}` factor times the rest, so neither of those inverses is continuous for this family either;
 openness of the reference subgroups is the hypothesis that restores their continuity.
 
-Two general facts about the restricted-product topology are recorded first: a set is open if and
-only if its preimage in every principal stage is open, and inserting a single factor is continuous.
+The openness of the witness is checked stage by stage with `isOpen_restrictedProduct_iff`, and the
+neighbourhood argument uses `continuous_restrictedProduct_mulSingle`.
 
 ## References
 
@@ -51,41 +51,6 @@ namespace TauCeti
 
 open Filter Multiplicative
 open scoped RestrictedProduct
-
-universe u v w
-
-section General
-
-variable {ι : Type u} {R : ι → Type v} {A : ∀ i, Set (R i)} {𝓕 : Filter ι}
-variable [∀ i, TopologicalSpace (R i)]
-
-/-- A subset of a restricted product is open if and only if its preimage in every principal
-stage `Πʳ i, [R i, A i]_[𝓟 S]` with `𝓕 ≤ 𝓟 S` is open. -/
-theorem isOpen_restrictedProduct_iff {s : Set (Πʳ i, [R i, A i]_[𝓕])} :
-    IsOpen s ↔ ∀ (S : Set ι) (hS : 𝓕 ≤ 𝓟 S),
-      IsOpen (RestrictedProduct.inclusion R A hS ⁻¹' s) := by
-  simp only [isOpen_iff_continuous_mem]
-  exact RestrictedProduct.continuous_dom
-
-variable {S : ι → Type w} {G : ι → Type v} [∀ i, SetLike (S i) (G i)] (B : ∀ i, S i)
-variable [DecidableEq ι] [∀ i, One (G i)] [∀ i, OneMemClass (S i) (G i)]
-variable [∀ i, TopologicalSpace (G i)]
-
-/-- Inserting a single factor into a restricted product is continuous. -/
-@[continuity, fun_prop]
-theorem continuous_restrictedProduct_mulSingle (i : ι) :
-    Continuous (RestrictedProduct.mulSingle B i) := by
-  have h : (cofinite : Filter ι) ≤ 𝓟 {i}ᶜ :=
-    le_principal_iff.2 (Set.finite_singleton i).compl_mem_cofinite
-  let f : G i → Πʳ j, [G j, B j]_[𝓟 {i}ᶜ] := fun x ↦
-    ⟨Pi.mulSingle i x, eventually_principal.2 fun j hj ↦ by
-      rw [Pi.mulSingle_eq_of_ne (Set.notMem_singleton_iff.1 hj)]
-      exact one_mem _⟩
-  have hf : Continuous f :=
-    RestrictedProduct.continuous_rng_of_principal.2 (continuous_mulSingle i)
-  exact (RestrictedProduct.continuous_inclusion h).comp hf
-
-end General
 
 section Witness
 
@@ -147,8 +112,7 @@ private theorem one_mem_escapeSet : (1 : Πʳ _ : ℕ, [Multiplicative ℚ,
   rw [realCoord_one, realCoord_one, abs_zero, zero_sub, abs_neg]
   positivity
 
-/-- On every principal stage only finitely many coordinates are free, and at the frozen
-coordinates the defining inequality holds because `√2 / (n + 1)` is irrational. -/
+/-- The set `escapeSet` is open in the restricted-product topology. -/
 private theorem isOpen_escapeSet : IsOpen escapeSet := by
   rw [isOpen_restrictedProduct_iff]
   intro S hS
