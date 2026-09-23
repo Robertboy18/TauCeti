@@ -166,13 +166,17 @@ commutator `⁅a, y ^ n⁆` is the power `⁅a, y⁆ ^ n`: one lies in `N` exact
 is `Commute.commutatorElement_pow_right` read in the quotient `G ⧸ N`. -/
 theorem commutatorElement_pow_right_mem_iff [N.Normal] {a y : G} (h : ⁅⁅a, y⁆, y⁆ ∈ N) (n : ℕ) :
     ⁅a, y ^ n⁆ ∈ N ↔ ⁅a, y⁆ ^ n ∈ N := by
-  have hcomm : Commute (QuotientGroup.mk' N y) ⁅QuotientGroup.mk' N a, QuotientGroup.mk' N y⁆ := by
-    rw [← map_commutatorElement, ← commutatorElement_eq_one_iff_commute, ← map_commutatorElement,
-      QuotientGroup.mk'_apply, QuotientGroup.eq_one_iff, ← commutatorElement_inv]
-    exact N.inv_mem h
-  rw [← QuotientGroup.eq_one_iff (N := N), ← QuotientGroup.eq_one_iff (N := N),
-    ← QuotientGroup.mk'_apply, ← QuotientGroup.mk'_apply, map_commutatorElement, map_pow, map_pow,
-    map_commutatorElement, hcomm.commutatorElement_pow_right]
+  set π := QuotientGroup.mk' N
+  -- Membership in `N` is vanishing under the quotient map.
+  have hmem (x : G) : x ∈ N ↔ π x = 1 := (QuotientGroup.eq_one_iff x).symm
+  -- The hypothesis says that `⁅π a, π y⁆` commutes with `π y` in the quotient.
+  have hcomm : Commute ⁅π a, π y⁆ (π y) := by
+    simpa only [map_commutatorElement, commutatorElement_eq_one_iff_commute] using (hmem _).mp h
+  -- `Commute.commutatorElement_pow_right` in the quotient, pulled back along `π`.
+  have key : π ⁅a, y ^ n⁆ = π (⁅a, y⁆ ^ n) := by
+    simpa only [map_commutatorElement, map_pow] using
+      (hcomm.symm.commutatorElement_pow_right n).symm
+  rw [hmem, hmem, key]
 
 end TauCeti
 

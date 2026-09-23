@@ -23,7 +23,7 @@ series of a profinite group.
 
 ## Main results
 
-* `Subgroup.map_topologicalClosure_le`: a continuous homomorphism maps the topological closure of
+* `MonoidHom.map_topologicalClosure_le`: a continuous homomorphism maps the topological closure of
   a subgroup into the topological closure of its image.
 * `Subgroup.commutator_topologicalClosure_right_le`: a closed subgroup containing `⁅A, B⁆`
   contains `⁅A, B.topologicalClosure⁆`.
@@ -48,8 +48,8 @@ variable {G H : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
 /-- A continuous homomorphism maps the topological closure of a subgroup into the topological
 closure of its image. -/
-theorem map_topologicalClosure_le (f : G →* H) (hf : Continuous f) (S : Subgroup G) :
-    S.topologicalClosure.map f ≤ (S.map f).topologicalClosure := by
+theorem _root_.MonoidHom.map_topologicalClosure_le (f : G →* H) (hf : Continuous f)
+    (S : Subgroup G) : S.topologicalClosure.map f ≤ (S.map f).topologicalClosure := by
   rw [← SetLike.coe_subset_coe, coe_map, topologicalClosure_coe, topologicalClosure_coe, coe_map]
   exact image_closure_subset_closure_image hf
 
