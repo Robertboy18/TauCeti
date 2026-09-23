@@ -138,16 +138,8 @@ theorem finiteModulesEquivalence_functor_map_hom {M N : FGModuleCat.{u} S} (f : 
         eqToHom (e.finiteModulesEquivalence_functor_obj_obj N).symm := by
   have h : e.finiteModulesEquivalence.functor ⋙ (ModuleCat.isFG R).ι =
       (ModuleCat.isFG S).ι ⋙ ModuleCat.restrictScalars e.toRingHom := by
-    simp only [finiteModulesEquivalence, Equivalence.congrFullSubcategory_functor_eq_lift,
+    rw [finiteModulesEquivalence, Equivalence.congrFullSubcategory_functor_comp_ι,
       ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor]
-    apply CategoryTheory.Functor.ext
-    case h_obj =>
-      intro X
-      simp only [Functor.comp_obj, ι_obj_lift_obj]
-    case h_map =>
-      intro X Y g
-      simp only [Functor.comp_map, ι_obj_lift_map, eqToHom_refl,
-        Category.id_comp, Category.comp_id]
   simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
 
 @[simp]
@@ -166,16 +158,8 @@ theorem finiteModulesEquivalence_inverse_map_hom {M N : FGModuleCat.{u} R} (f : 
         eqToHom (e.finiteModulesEquivalence_inverse_obj_obj N).symm := by
   have h : e.finiteModulesEquivalence.inverse ⋙ (ModuleCat.isFG S).ι =
       (ModuleCat.isFG R).ι ⋙ ModuleCat.restrictScalars e.symm.toRingHom := by
-    simp only [finiteModulesEquivalence, Equivalence.congrFullSubcategory_inverse_eq_lift,
+    rw [finiteModulesEquivalence, Equivalence.congrFullSubcategory_inverse_comp_ι,
       ModuleCat.restrictScalarsEquivalenceOfRingEquiv_inverse, toRingHom_eq_coe]
-    apply CategoryTheory.Functor.ext
-    case h_obj =>
-      intro X
-      simp only [Functor.comp_obj, ι_obj_lift_obj]
-    case h_map =>
-      intro X Y g
-      simp only [Functor.comp_map, ι_obj_lift_map, eqToHom_refl,
-        Category.id_comp, Category.comp_id]
   simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
 
 @[simp]
@@ -196,17 +180,8 @@ theorem finiteProjectiveModulesEquivalence_functor_map_hom
         eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj N).symm := by
   have h : e.finiteProjectiveModulesEquivalence.functor ⋙ (finiteProjectiveModules R).ι =
       (finiteProjectiveModules S).ι ⋙ ModuleCat.restrictScalars e.toRingHom := by
-    simp only [finiteProjectiveModulesEquivalence,
-      Equivalence.congrFullSubcategory_functor_eq_lift,
+    rw [finiteProjectiveModulesEquivalence, Equivalence.congrFullSubcategory_functor_comp_ι,
       ModuleCat.restrictScalarsEquivalenceOfRingEquiv_functor]
-    apply CategoryTheory.Functor.ext
-    case h_obj =>
-      intro X
-      simp only [Functor.comp_obj, ι_obj_lift_obj]
-    case h_map =>
-      intro X Y g
-      simp only [Functor.comp_map, ι_obj_lift_map, eqToHom_refl,
-        Category.id_comp, Category.comp_id]
   simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
 
 @[simp]
@@ -227,17 +202,8 @@ theorem finiteProjectiveModulesEquivalence_inverse_map_hom
         eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj N).symm := by
   have h : e.finiteProjectiveModulesEquivalence.inverse ⋙ (finiteProjectiveModules S).ι =
       (finiteProjectiveModules R).ι ⋙ ModuleCat.restrictScalars e.symm.toRingHom := by
-    simp only [finiteProjectiveModulesEquivalence,
-      Equivalence.congrFullSubcategory_inverse_eq_lift,
+    rw [finiteProjectiveModulesEquivalence, Equivalence.congrFullSubcategory_inverse_comp_ι,
       ModuleCat.restrictScalarsEquivalenceOfRingEquiv_inverse, toRingHom_eq_coe]
-    apply CategoryTheory.Functor.ext
-    case h_obj =>
-      intro X
-      simp only [Functor.comp_obj, ι_obj_lift_obj]
-    case h_map =>
-      intro X Y g
-      simp only [Functor.comp_map, ι_obj_lift_map, eqToHom_refl,
-        Category.id_comp, Category.comp_id]
   simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
 
 /-- The equivalence of finitely generated module categories induced by a ring isomorphism is
