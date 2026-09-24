@@ -7,7 +7,6 @@ module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
 public import TauCeti.Topology.Algebra.Group.Subgroup
-import TauCeti.GroupTheory.QuotientGroup.KerEquiv
 
 /-!
 # Profinite groups defined by generators and relators
@@ -285,43 +284,34 @@ section OfSurjective
 
 variable {G : Type v} [Group G] [TopologicalSpace G] [T2Space G]
 
-/-- The algebraic isomorphism underlying `equivOfSurjective`: the kernel of a continuous
-homomorphism to a Hausdorff group is closed and normal, so it is its own closed normal closure,
-and the first isomorphism theorem applies. -/
-private noncomputable def mulEquivOfSurjective (φ : freeProfiniteGroup X →ₜ* G)
-    (hφ : Function.Surjective φ) :
-    presentedProfiniteGroup X ((φ : freeProfiniteGroup X →* G).ker : Set (freeProfiniteGroup X))
-      ≃* G :=
-  (QuotientGroup.quotientMulEquivOfEq (Subgroup.topologicalClosure_normalClosure_eq_self _
-    (isClosed_singleton.preimage (map_continuous φ)))).trans
-    (QuotientGroup.quotientKerEquivOfSurjective (φ : freeProfiniteGroup X →* G) hφ)
-
-private theorem mulEquivOfSurjective_mk (φ : freeProfiniteGroup X →ₜ* G)
-    (hφ : Function.Surjective φ) (x : freeProfiniteGroup X) :
-    mulEquivOfSurjective φ hφ (mk _ x) = φ x := by
-  rw [mulEquivOfSurjective, mk_apply, MulEquiv.trans_apply, QuotientGroup.quotientMulEquivOfEq_mk]
-  exact TauCeti.QuotientGroup.quotientKerEquivOfSurjective_apply_mk
-    (φ : freeProfiniteGroup X →* G) hφ x
+/-- The kernel of a continuous homomorphism to a Hausdorff group is closed and normal, so it is
+its own closed normal closure. -/
+private theorem topologicalClosure_normalClosure_ker (φ : freeProfiniteGroup X →ₜ* G) :
+    (Subgroup.normalClosure
+      ((φ : freeProfiniteGroup X →* G).ker : Set (freeProfiniteGroup X))).topologicalClosure =
+      (φ : freeProfiniteGroup X →* G).ker :=
+  Subgroup.topologicalClosure_normalClosure_eq_self _
+    (isClosed_singleton.preimage (map_continuous φ))
 
 /-- A Hausdorff group that is a continuous image of the free profinite group on `X` is presented
-on `X`, with the kernel as its set of relators. -/
+on `X`, with the kernel as its set of relators. Algebraically this is the first isomorphism
+theorem, `QuotientGroup.liftEquiv`. -/
 noncomputable def equivOfSurjective (φ : freeProfiniteGroup X →ₜ* G)
     (hφ : Function.Surjective φ) :
     presentedProfiniteGroup X ((φ : freeProfiniteGroup X →* G).ker : Set (freeProfiniteGroup X))
       ≃ₜ* G :=
-  have hcont : Continuous (mulEquivOfSurjective φ hφ) :=
-    (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr <|
-      (funext (mulEquivOfSurjective_mk φ hφ) :
-        ⇑(mulEquivOfSurjective φ hφ) ∘ QuotientGroup.mk = ⇑φ) ▸ map_continuous φ
-  ContinuousMulEquiv.mk (mulEquivOfSurjective φ hφ) hcont
-    (hcont.continuous_symm_of_equiv_compact_to_t2 (f := (mulEquivOfSurjective φ hφ).toEquiv))
+  have hcont : Continuous (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ)) :=
+    (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr (map_continuous φ)
+  ContinuousMulEquiv.mk (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ))
+    hcont (hcont.continuous_symm_of_equiv_compact_to_t2
+      (f := (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ)).toEquiv))
 
 /-- The presentation isomorphism of a continuous image sends the class of an element to its
 image. -/
 @[simp]
 theorem equivOfSurjective_mk (φ : freeProfiniteGroup X →ₜ* G) (hφ : Function.Surjective φ)
     (x : freeProfiniteGroup X) : equivOfSurjective φ hφ (mk _ x) = φ x :=
-  mulEquivOfSurjective_mk φ hφ x
+  QuotientGroup.liftEquiv_mk _ hφ (topologicalClosure_normalClosure_ker φ) x
 
 /-- The presentation isomorphism of a continuous image matches the generators. -/
 @[simp]
@@ -565,38 +555,31 @@ section OfSurjective
 
 variable {G : Type v} [Group G] [TopologicalSpace G] [T2Space G]
 
-/-- The algebraic isomorphism underlying `equivOfSurjective`: the kernel of a continuous
-homomorphism to a Hausdorff group is closed and normal, so it is its own closed normal closure,
-and the first isomorphism theorem applies. -/
-private noncomputable def mulEquivOfSurjective (φ : freeProP p X →ₜ* G)
-    (hφ : Function.Surjective φ) :
-    presentedProP p X ((φ : freeProP p X →* G).ker : Set (freeProP p X)) ≃* G :=
-  (QuotientGroup.quotientMulEquivOfEq (Subgroup.topologicalClosure_normalClosure_eq_self _
-    (isClosed_singleton.preimage (map_continuous φ)))).trans
-    (QuotientGroup.quotientKerEquivOfSurjective (φ : freeProP p X →* G) hφ)
-
-private theorem mulEquivOfSurjective_mk (φ : freeProP p X →ₜ* G) (hφ : Function.Surjective φ)
-    (x : freeProP p X) : mulEquivOfSurjective φ hφ (mk p _ x) = φ x := by
-  rw [mulEquivOfSurjective, mk_apply, MulEquiv.trans_apply, QuotientGroup.quotientMulEquivOfEq_mk]
-  exact TauCeti.QuotientGroup.quotientKerEquivOfSurjective_apply_mk (φ : freeProP p X →* G) hφ x
+/-- The kernel of a continuous homomorphism to a Hausdorff group is closed and normal, so it is
+its own closed normal closure. -/
+private theorem topologicalClosure_normalClosure_ker (φ : freeProP p X →ₜ* G) :
+    (Subgroup.normalClosure ((φ : freeProP p X →* G).ker : Set (freeProP p X))).topologicalClosure
+      = (φ : freeProP p X →* G).ker :=
+  Subgroup.topologicalClosure_normalClosure_eq_self _
+    (isClosed_singleton.preimage (map_continuous φ))
 
 /-- A Hausdorff group that is a continuous image of the free pro-`p` group on `X` is presented on
-`X`, with the kernel as its set of relators. -/
+`X`, with the kernel as its set of relators. Algebraically this is the first isomorphism theorem,
+`QuotientGroup.liftEquiv`. -/
 noncomputable def equivOfSurjective (φ : freeProP p X →ₜ* G) (hφ : Function.Surjective φ) :
     presentedProP p X ((φ : freeProP p X →* G).ker : Set (freeProP p X)) ≃ₜ* G :=
-  have hcont : Continuous (mulEquivOfSurjective φ hφ) :=
-    (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr <|
-      (funext (mulEquivOfSurjective_mk φ hφ) :
-        ⇑(mulEquivOfSurjective φ hφ) ∘ QuotientGroup.mk = ⇑φ) ▸ map_continuous φ
-  ContinuousMulEquiv.mk (mulEquivOfSurjective φ hφ) hcont
-    (hcont.continuous_symm_of_equiv_compact_to_t2 (f := (mulEquivOfSurjective φ hφ).toEquiv))
+  have hcont : Continuous (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ)) :=
+    (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr (map_continuous φ)
+  ContinuousMulEquiv.mk (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ))
+    hcont (hcont.continuous_symm_of_equiv_compact_to_t2
+      (f := (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ)).toEquiv))
 
 /-- The presentation isomorphism of a continuous image sends the class of an element to its
 image. -/
 @[simp]
 theorem equivOfSurjective_mk (φ : freeProP p X →ₜ* G) (hφ : Function.Surjective φ)
     (x : freeProP p X) : equivOfSurjective φ hφ (mk p _ x) = φ x :=
-  mulEquivOfSurjective_mk φ hφ x
+  QuotientGroup.liftEquiv_mk _ hφ (topologicalClosure_normalClosure_ker φ) x
 
 /-- The presentation isomorphism of a continuous image matches the generators. -/
 @[simp]
