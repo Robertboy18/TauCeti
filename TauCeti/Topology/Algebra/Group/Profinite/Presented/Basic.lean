@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Topology.Algebra.Group.Profinite.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Basic
 public import TauCeti.Topology.Algebra.Group.Subgroup
 
