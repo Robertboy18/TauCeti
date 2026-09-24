@@ -87,6 +87,8 @@ The remainder is the constant `f(c)`; see `PowerSeries.X_sub_C_mul_divXSubC_add_
 noncomputable def divXSubC (hc : HasEval c) (f : A⟦X⟧) : A⟦X⟧ :=
   mk fun n ↦ aeval hc (mk fun k ↦ coeff (n + 1 + k) f)
 
+/-- The `n`-th coefficient of the quotient is the value at `c` of the shifted tail
+`∑ₖ f_{n+1+k} X^k` of `f`. -/
 @[simp]
 theorem coeff_divXSubC (hc : HasEval c) (f : A⟦X⟧) (n : ℕ) :
     coeff n (divXSubC hc f) = aeval hc (mk fun k ↦ coeff (n + 1 + k) f) :=
@@ -102,10 +104,11 @@ theorem hasSum_coeff_divXSubC (hc : HasEval c) (f : A⟦X⟧) (n : ℕ) :
 theorem aeval_mk_coeff_add (hc : HasEval c) (f : A⟦X⟧) (n : ℕ) :
     aeval hc (mk fun k ↦ coeff (n + k) f) =
       coeff n f + c * aeval hc (mk fun k ↦ coeff (n + 1 + k) f) := by
-  have : (mk fun k ↦ coeff (n + k) f) = X * (mk fun k ↦ coeff (n + 1 + k) f) + C (coeff n f) := by
+  have htail :
+      (mk fun k ↦ coeff (n + k) f) = X * (mk fun k ↦ coeff (n + 1 + k) f) + C (coeff n f) := by
     refine (eq_X_mul_shift_add_const _).trans ?_
     simp [add_assoc, add_comm 1]
-  rw [this, map_add, map_mul, aeval_X, aeval_C, Algebra.algebraMap_self, RingHom.id_apply, add_comm]
+  simpa [add_comm] using congrArg (aeval hc) htail
 
 /-- **Division by `X - C c`.** At a point `c` where power series can be evaluated,
 `f = (X - C c) * q + C (f(c))` with `q = divXSubC hc f`. -/
@@ -116,8 +119,7 @@ theorem X_sub_C_mul_divXSubC_add_C_aeval (hc : HasEval c) (f : A⟦X⟧) :
   ext (_ | n)
   · have h := aeval_mk_coeff_add hc f 0
     rw [hf] at h
-    rw [map_add, coeff_zero_C, h, sub_mul, map_sub, coeff_zero_X_mul, coeff_C_mul, coeff_divXSubC]
-    ring
+    simp [sub_mul, divXSubC, h]
   · simp [sub_mul, aeval_mk_coeff_add hc f (n + 1)]
 
 /-- A power series vanishing at `c` factors as `f = (X - C c) * divXSubC hc f`. -/
