@@ -16,10 +16,9 @@ public import TauCeti.Topology.Compactness.InverseSystem
 A `PLowerCentralSeriesComparison p G H S` assigns to each datum in `S k` a continuous
 surjection `G ⧸ λ_k → H ⧸ λ_k`. Its bonding maps commute with the quotient projections.
 When every `S k` is finite and nonempty, there is a compatible sequence of data. If `G` is
-compact and `H` is a topologically finitely generated pro-`p` group, the corresponding
-quotient maps come from a continuous surjection `G → H`.
+compact and `H` is a pro-`p` group, the corresponding quotient maps come from a continuous
+surjection `G → H`.
 
-This is the levelwise comparison schema of Layer 8 of the ProfiniteProPGroups roadmap.
 Surjectivity of the bonding maps is unnecessary: a tower of nonempty finite sets already
 has a compatible sequence. Surjectivity of the realization maps is essential.
 
@@ -68,9 +67,9 @@ variable {p G H S} [CompactSpace G] [CompactSpace H] [TotallyDisconnectedSpace H
 
 /-- **Levelwise comparison.** Finite nonempty comparison data give a compatible sequence and
 a continuous surjection inducing its realization on every quotient. The source need only be
-compact; finite generation of the pro-`p` target is used by the selected continuity criterion. -/
+compact and the target any pro-`p` group; neither is assumed finitely generated. -/
 theorem exists_continuous_surjective (C : PLowerCentralSeriesComparison p G H S)
-    (hH : IsProP p H) (hfg : IsTopologicallyFinitelyGenerated H) (hp : p.Prime) :
+    (hH : IsProP p H) (hp : p.Prime) :
     ∃ (s : ∀ k, S k) (φ : G →ₜ* H),
       (∀ k, C.bond k (s (k + 1)) = s k) ∧ Function.Surjective φ ∧
         ∀ k g, (φ g : H ⧸ pLowerCentralSeries p H k) =
@@ -91,7 +90,7 @@ theorem exists_continuous_surjective (C : PLowerCentralSeriesComparison p G H S)
       C.map k (s k) (g : G ⧸ pLowerCentralSeries p G k) :=
     fun k g ↦ DFunLike.congr_fun (hφ k) g
   have hcont : Continuous φ :=
-    (hH.continuous_iff_forall_continuous_mk_pLowerCentralSeries hfg hp).mpr fun k ↦
+    (hH.continuous_iff_forall_continuous_mk_pLowerCentralSeries hp).mpr fun k ↦
       ((C.map k (s k)).continuous.comp QuotientGroup.continuous_mk).congr
         fun g ↦ (hφk k g).symm
   have hsurj : Function.Surjective φ := by
@@ -101,8 +100,8 @@ theorem exists_continuous_surjective (C : PLowerCentralSeriesComparison p G H S)
     have hcomp : (QuotientGroup.mk' U.toSubgroup).comp φ =
         (QuotientGroup.mapOfLE hk).comp (x k) := by
       ext g
-      change (φ g : H ⧸ U.toSubgroup) =
-        QuotientGroup.mapOfLE hk (C.map k (s k) (g : G ⧸ pLowerCentralSeries p G k))
+      simp only [x, MonoidHom.comp_apply, ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_coe,
+        QuotientGroup.mk'_apply]
       rw [← hφk k g, QuotientGroup.mapOfLE_mk]
     rw [hcomp]
     exact (QuotientGroup.mapOfLE_surjective hk).comp
@@ -111,18 +110,19 @@ theorem exists_continuous_surjective (C : PLowerCentralSeriesComparison p G H S)
 
 variable [TotallyDisconnectedSpace G]
 
-/-- **Two-sided comparison.** For finitely generated pro-`p` groups, comparison data in both
-directions give an isomorphism realizing a compatible sequence of the forward data. -/
+/-- **Two-sided comparison.** For a topologically finitely generated pro-`p` source and a pro-`p`
+target, comparison data in both directions give an isomorphism realizing a compatible sequence of
+the forward data. -/
 theorem exists_continuousMulEquiv {T : ℕ → Type*} [∀ k, Finite (T k)] [∀ k, Nonempty (T k)]
     (C : PLowerCentralSeriesComparison p G H S) (D : PLowerCentralSeriesComparison p H G T)
-    (hG : IsProP p G) (hGfg : IsTopologicallyFinitelyGenerated G)
-    (hH : IsProP p H) (hHfg : IsTopologicallyFinitelyGenerated H) (hp : p.Prime) :
+    (hG : IsProP p G) (hGfg : IsTopologicallyFinitelyGenerated G) (hH : IsProP p H)
+    (hp : p.Prime) :
     ∃ (s : ∀ k, S k) (e : G ≃ₜ* H),
       (∀ k, C.bond k (s (k + 1)) = s k) ∧
         ∀ k g, (e g : H ⧸ pLowerCentralSeries p H k) =
           C.map k (s k) (g : G ⧸ pLowerCentralSeries p G k) := by
-  obtain ⟨s, φ, hs, hφs, hφ⟩ := C.exists_continuous_surjective hH hHfg hp
-  obtain ⟨_, ψ, _, hψs, _⟩ := D.exists_continuous_surjective hG hGfg hp
+  obtain ⟨s, φ, hs, hφs, hφ⟩ := C.exists_continuous_surjective hH hp
+  obtain ⟨_, ψ, _, hψs, _⟩ := D.exists_continuous_surjective hG hp
   have hb := hGfg.bijective_of_surjective_of_surjective φ.continuous hφs ψ.continuous hψs
   let e : G ≃ₜ* H := ContinuousMulEquiv.mk (MulEquiv.ofBijective φ.toMonoidHom hb)
     φ.continuous (φ.continuous.continuous_symm_of_equiv_compact_to_t2
@@ -154,7 +154,7 @@ theorem exists_continuousMulEquiv_preserving {ι K : Type*}
         (∀ k g, (e g : G ⧸ pLowerCentralSeries p G k) =
           C.map k (s k) (g : G ⧸ pLowerCentralSeries p G k)) ∧
         (∀ i, e (a i) = b i) ∧ ψ.comp (e : G →ₜ* G) = χ := by
-  obtain ⟨s, φ, hs, hφs, hφ⟩ := C.exists_continuous_surjective hG hfg hp
+  obtain ⟨s, φ, hs, hφs, hφ⟩ := C.exists_continuous_surjective hG hp
   let e := hfg.continuousMulEquivOfSurjective φ.continuous hφs
   have he (g : G) : e g = φ g :=
     hfg.continuousMulEquivOfSurjective_apply φ.continuous hφs g

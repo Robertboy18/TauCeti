@@ -27,13 +27,12 @@ are finite `p`-groups. Without finite generation the terms need not be open: an 
 of copies of `ℤ ⧸ p` has `λ_1 = 1`.
 
 In a pro-`p` group the series is **cofinal** among the open normal subgroups: every open normal
-subgroup `U` contains some `λ_k`, because `G ⧸ U` is a finite `p`-group, whose lower `p`-central
-series reaches the trivial subgroup, and `λ_k` maps onto the lower `p`-central series of `G ⧸ U`.
-So the `λ_k` have trivial intersection, and a pro-`p` group is the inverse limit of its quotients
-`G ⧸ λ_k`: a compatible sequence of cosets comes from a unique element. Cofinality needs no
-finite generation. With it, the `λ_k` are open, so they form a neighbourhood basis of `1` and the
-quotients `G ⧸ λ_k` are finite `p`-groups; this is what lets two topologically finitely generated
-pro-`p` groups be compared level by level along their lower `p`-series.
+subgroup contains some `λ_k`. So the `λ_k` have trivial intersection, and a pro-`p` group is the
+inverse limit of its quotients `G ⧸ λ_k`: a compatible sequence of cosets comes from a unique
+element, and a map into `G` is continuous as soon as its composites with the quotient maps are.
+Cofinality needs no finite generation. With it, the `λ_k` are open, so they form a neighbourhood
+basis of `1` and the quotients `G ⧸ λ_k` are finite `p`-groups; this is what lets two topologically
+finitely generated pro-`p` groups be compared level by level along their lower `p`-series.
 
 ## Main results
 
@@ -48,11 +47,10 @@ pro-`p` groups be compared level by level along their lower `p`-series.
 * `TauCeti.IsProP.existsUnique_forall_mk_eq_pLowerCentralSeries` and
   `TauCeti.IsProP.existsUnique_monoidHom_mk'_comp_eq_pLowerCentralSeries`: a pro-`p` group is the
   inverse limit of its quotients `G ⧸ λ_k`, for elements and for homomorphisms.
-* `TauCeti.IsProP.hasAntitoneBasis_nhds_one_pLowerCentralSeries` and
-  `TauCeti.IsProP.continuous_iff_forall_continuous_mk_pLowerCentralSeries`: in a topologically
-  finitely generated pro-`p` group the lower `p`-series is a neighbourhood basis of `1`, and a map
-  into the group is continuous exactly when its composites with the quotient maps `G → G ⧸ λ_k`
-  are.
+* `TauCeti.IsProP.continuous_iff_forall_continuous_mk_pLowerCentralSeries`: a map into a pro-`p`
+  group is continuous exactly when its composites with the quotient maps `G → G ⧸ λ_k` are.
+* `TauCeti.IsProP.hasAntitoneBasis_nhds_one_pLowerCentralSeries`: in a topologically finitely
+  generated pro-`p` group the lower `p`-series is a neighbourhood basis of `1`.
 
 ## References
 
@@ -125,8 +123,7 @@ open Filter Topology
 
 omit [TotallyDisconnectedSpace G] in
 /-- **Cofinality of the lower `p`-series.** In a compact pro-`p` group every open normal subgroup
-contains a term of the lower `p`-series, because the quotient by it is a finite `p`-group, whose
-lower `p`-central series reaches the trivial subgroup. No finite generation is needed. -/
+contains a term of the lower `p`-series. No finite generation is needed. -/
 theorem IsProP.exists_pLowerCentralSeries_le (hG : IsProP p G) (hp : p.Prime)
     (U : OpenNormalSubgroup G) : ∃ k, pLowerCentralSeries p G k ≤ U.toSubgroup := by
   have := Fact.mk hp
@@ -175,13 +172,12 @@ theorem IsProP.hasAntitoneBasis_nhds_one_pLowerCentralSeries (hG : IsProP p G)
   hasAntitoneBasis_nhds_one_of_iInf_eq_bot pLowerCentralSeries_antitone
     (hfg.isOpen_pLowerCentralSeries hp) (hG.iInf_pLowerCentralSeries_eq_bot hp)
 
-/-- A map into a topologically finitely generated pro-`p` group is continuous exactly when all of
-its composites with the quotient maps `G → G ⧸ λ_k` are. -/
+/-- A map into a pro-`p` group is continuous exactly when all of its composites with the quotient
+maps `G → G ⧸ λ_k` are. No finite generation is needed. -/
 theorem IsProP.continuous_iff_forall_continuous_mk_pLowerCentralSeries (hG : IsProP p G)
-    (hfg : IsTopologicallyFinitelyGenerated G) (hp : p.Prime) {X : Type*} [TopologicalSpace X]
-    {f : X → G} :
+    (hp : p.Prime) {X : Type*} [TopologicalSpace X] {f : X → G} :
     Continuous f ↔ ∀ k, Continuous fun x ↦ (f x : G ⧸ pLowerCentralSeries p G k) :=
-  continuous_iff_forall_continuous_mk_of_hasBasis
-    (hG.hasAntitoneBasis_nhds_one_pLowerCentralSeries hfg hp).1
+  continuous_iff_forall_continuous_mk_of_iInf_eq_bot isClosed_pLowerCentralSeries
+    (hG.iInf_pLowerCentralSeries_eq_bot hp)
 
 end TauCeti

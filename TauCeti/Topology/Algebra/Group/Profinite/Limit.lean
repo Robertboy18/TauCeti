@@ -40,11 +40,11 @@ The unbundled workhorse of profinite group theory, phrased for the type-class st
   a compatible sequence of cosets comes from a unique element
   (`existsUnique_forall_mk_eq_of_iInf_eq_bot`), a compatible sequence of homomorphisms into the
   quotients `G ⧸ N k` from a unique homomorphism into `G`
-  (`existsUnique_monoidHom_mk'_comp_eq_of_iInf_eq_bot`), and when the `N k` are open and
-  decreasing they form a neighbourhood basis of `1` (`hasAntitoneBasis_nhds_one_of_iInf_eq_bot`),
-  in which case a map into `G` is continuous as soon as its composites with the quotient maps are
-  (`continuous_iff_forall_continuous_mk_of_hasBasis`). The lower `p`-series of a topologically
-  finitely generated pro-`p` group is such a sequence.
+  (`existsUnique_monoidHom_mk'_comp_eq_of_iInf_eq_bot`), a map into `G` is continuous as soon as
+  its composites with the quotient maps are (`continuous_iff_forall_continuous_mk_of_iInf_eq_bot`),
+  and when the `N k` are open and decreasing they form a neighbourhood basis of `1`
+  (`hasAntitoneBasis_nhds_one_of_iInf_eq_bot`). The lower `p`-series of a pro-`p` group is such a
+  sequence.
 -/
 
 public section
@@ -250,9 +250,9 @@ The limit description of a profinite group runs over all of its open normal subg
 sequence `N : ℕ → Subgroup G` of closed subgroups of a compact group `G` has trivial intersection,
 the same identifications hold along that sequence: a compatible sequence of cosets is realized by a
 unique element, and a compatible sequence of homomorphisms into the quotients `G ⧸ N k` is induced
-by a unique homomorphism into `G`. When the `N k` are moreover open and decreasing, they are a
-neighbourhood basis of `1`, and continuity of a map into `G` can be tested one quotient at a time.
-The lower `p`-series of a topologically finitely generated pro-`p` group is such a sequence. -/
+by a unique homomorphism into `G`, and continuity of a map into `G` can be tested one quotient at a
+time. When the `N k` are moreover open and decreasing, they are a neighbourhood basis of `1`. The
+lower `p`-series of a pro-`p` group is such a sequence. -/
 
 section Sequential
 
@@ -318,45 +318,31 @@ of `1`** in a compact group. -/
 theorem hasAntitoneBasis_nhds_one_of_iInf_eq_bot [CompactSpace G] (hanti : Antitone N)
     (hopen : ∀ k, IsOpen (N k : Set G)) (hN : ⨅ k, N k = ⊥) :
     (𝓝 (1 : G)).HasAntitoneBasis fun k ↦ (N k : Set G) := by
-  refine ⟨hasBasis_iff.mpr fun t ↦ ⟨fun ht ↦ ?_, ?_⟩,
-    fun _ _ h ↦ SetLike.coe_subset_coe.mpr (hanti h)⟩
-  · obtain ⟨V, hVt, hVopen, hV⟩ := mem_nhds_iff.mp ht
-    -- If no `N k` lies inside `V`, the closed sets `N k \ V` are nonempty and decreasing, so by
-    -- compactness they have a common point, which lies in every `N k` and so is `1 ∈ V`.
-    by_contra! hcon
-    obtain ⟨g, hg⟩ := IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
-      (fun k ↦ (N k : Set G) \ V) (fun k ↦ Set.sdiff_subset_sdiff_left (hanti (Nat.le_succ k)))
-      (fun k ↦ Set.sdiff_nonempty.mpr fun h ↦ hcon k trivial (h.trans hVt))
-      (((N 0).isClosed_of_isOpen (hopen 0)).sdiff hVopen).isCompact
-      fun k ↦ ((N k).isClosed_of_isOpen (hopen k)).sdiff hVopen
-    have hg1 : g = 1 := by
-      rw [← Subgroup.mem_bot, ← hN, Subgroup.mem_iInf]
-      exact fun k ↦ (Set.mem_iInter.mp hg k).1
-    exact (Set.mem_iInter.mp hg 0).2 (hg1 ▸ hV)
+  have hanti' : Antitone fun k ↦ (N k : Set G) := fun _ _ h ↦ SetLike.coe_subset_coe.mpr (hanti h)
+  refine ⟨hasBasis_iff.mpr fun t ↦ ⟨fun ht ↦ ?_, ?_⟩, hanti'⟩
+  · -- The `N k` are closed and decreasing with intersection `{1}`, so by compactness one of them
+    -- lies inside any neighbourhood of `1`.
+    obtain ⟨k, hk⟩ := exists_subset_nhds_of_compactSpace hanti'.directed_ge
+      (fun k ↦ (N k).isClosed_of_isOpen (hopen k))
+      (by rwa [← Subgroup.coe_iInf, hN, Subgroup.coe_bot, nhdsSet_singleton])
+    exact ⟨k, trivial, hk⟩
   · rintro ⟨k, -, hk⟩
     exact mem_of_superset ((hopen k).mem_nhds (N k).one_mem) hk
 
-/-- A map into a group `G` whose identity has a neighbourhood basis of subgroups `N i` is
-continuous exactly when all of its composites with the quotient maps `G → G ⧸ N i` are. The
-subgroups are open, being neighbourhoods of `1`, so the quotients are discrete and continuity of a
-map built from the sequential limit description can be checked one quotient at a time. -/
-theorem continuous_iff_forall_continuous_mk_of_hasBasis {ι : Type*} {N : ι → Subgroup G}
-    {X : Type*} [TopologicalSpace X] {f : X → G}
-    (hbasis : (𝓝 (1 : G)).HasBasis (fun _ : ι ↦ True) fun i ↦ (N i : Set G)) :
+omit [SeparatelyContinuousMul G] in
+/-- A map into a compact group `G` is continuous exactly when all of its composites with the
+quotient maps `G → G ⧸ N i` are, for any family of closed normal subgroups `N i` with trivial
+intersection: `G` embeds into the product of the Hausdorff quotients `G ⧸ N i`. -/
+theorem continuous_iff_forall_continuous_mk_of_iInf_eq_bot [IsTopologicalGroup G] [CompactSpace G]
+    {ι : Type*} {N : ι → Subgroup G} [∀ i, (N i).Normal] (hclosed : ∀ i, IsClosed (N i : Set G))
+    (hN : ⨅ i, N i = ⊥) {X : Type*} [TopologicalSpace X] {f : X → G} :
     Continuous f ↔ ∀ i, Continuous fun x ↦ (f x : G ⧸ N i) := by
   refine ⟨fun hf i ↦ QuotientGroup.continuous_mk.comp hf, fun h ↦ ?_⟩
-  refine continuous_iff_continuousAt.mpr fun x₀ ↦ tendsto_def.mpr fun V hV ↦ ?_
-  obtain ⟨W, hWV, hWopen, hWx⟩ := mem_nhds_iff.mp hV
-  -- A subgroup `N i` small enough that the coset `f x₀ * N i` stays inside `W`.
-  obtain ⟨i, -, hi⟩ := hbasis.mem_iff.mp
-    ((hWopen.preimage (continuous_const_mul (f x₀))).mem_nhds (by simpa using hWx))
-  have : DiscreteTopology (G ⧸ N i) :=
-    QuotientGroup.discreteTopology ((N i).isOpen_of_mem_nhds (hbasis.mem_of_mem trivial))
-  refine mem_of_superset (((h i).isOpen_preimage _ (isOpen_discrete {(f x₀ : G ⧸ N i)})).mem_nhds
-    rfl) fun x hx ↦ ?_
-  have hmem : (f x₀)⁻¹ * f x ∈ N i := by
-    simpa using (N i).inv_mem (QuotientGroup.eq.mp hx)
-  exact hWV (by simpa using hi hmem)
+  have := hclosed
+  have he : IsInducing fun g : G ↦ fun i ↦ (g : G ⧸ N i) :=
+    ((continuous_pi fun i ↦ QuotientGroup.continuous_mk).isClosedEmbedding fun a b hab ↦
+      eq_of_forall_mk_eq_of_iInf_eq_bot hN fun i ↦ congr_fun hab i).isInducing
+  exact he.continuous_iff.mpr (continuous_pi h)
 
 end Sequential
 
