@@ -64,8 +64,7 @@ def levelMap (α : A →ₜ* B) (hα : Function.Surjective α) (U : OpenNormalSu
 @[simp]
 theorem levelMap_mk (α : A →ₜ* B) (hα : Function.Surjective α)
     (U : OpenNormalSubgroup A) (a : A) :
-    levelMap α hα U (QuotientGroup.mk' U.toSubgroup a) =
-      QuotientGroup.mk' (levelImage α hα U).toSubgroup (α a) :=
+    levelMap α hα U (a : A ⧸ U.toSubgroup) = (α a : B ⧸ (levelImage α hα U).toSubgroup) :=
   (rfl)
 
 theorem levelMap_surjective (α : A →ₜ* B) (hα : Function.Surjective α)

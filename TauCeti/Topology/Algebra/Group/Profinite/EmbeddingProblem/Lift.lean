@@ -64,9 +64,9 @@ theorem exists_continuous_lift_of_compatible_levelSolutions
   have hmem : (φ g)⁻¹ * a ∈ α.toMonoidHom.ker := by
     rw [α.toMonoidHom.ker.eq_iInf_sup_openNormalSubgroup hker]
     refine Subgroup.mem_iInf.mpr fun U ↦ ?_
-    have hquot : QuotientGroup.mk' U.toSubgroup (φ g) = (β U).1 g := by
-      simpa only [MonoidHom.comp_apply, ContinuousMonoidHom.coe_toMonoidHom,
-        MonoidHom.coe_coe] using
+    have hquot : ((φ g : A) : A ⧸ U.toSubgroup) = (β U).1 g := by
+      simpa only [MonoidHom.comp_apply, QuotientGroup.mk'_apply,
+        ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_coe] using
         DFunLike.congr_fun (hφ U) g
     have hlevel := (β U).2 g
     rw [← hquot, levelMap_mk, ← ha] at hlevel

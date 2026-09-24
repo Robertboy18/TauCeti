@@ -44,13 +44,10 @@ def levelSolutionMap (α : A →ₜ* B) (hα : Function.Surjective α) (f : G �
   intro g
   change levelMap α hα U (QuotientGroup.mapOfLE hVU (β.1 g)) =
     QuotientGroup.mk' (levelImage α hα U).toSubgroup (f g)
-  obtain ⟨a, ha⟩ := QuotientGroup.mk'_surjective V.toSubgroup (β.1 g)
+  obtain ⟨a, ha⟩ := QuotientGroup.mk_surjective (β.1 g)
   have hβ := β.2 g
   rw [← ha, levelMap_mk] at hβ
-  have hq : QuotientGroup.mapOfLE hVU (QuotientGroup.mk' V.toSubgroup a) =
-      QuotientGroup.mk' U.toSubgroup a :=
-    DFunLike.congr_fun (QuotientGroup.mapOfLE_comp_mk' hVU) a
-  rw [← ha, hq, levelMap_mk]
+  rw [← ha, QuotientGroup.mapOfLE_mk, levelMap_mk]
   simpa only [QuotientGroup.mk'_apply, QuotientGroup.mapOfLE_mk] using
     congrArg (QuotientGroup.mapOfLE (levelImage_mono α hα hVU)) hβ
 
@@ -97,7 +94,7 @@ theorem levelSolutionMap_surjective {p : ℕ} (hG : HasPGroupSolutions p G)
     ((QuotientGroup.mk' (levelImage α hα V).toSubgroup).comp f.toMonoidHom)
   have hmem : ∀ g, γ g ∈ φ.range := by
     intro g
-    obtain ⟨a, ha⟩ := QuotientGroup.mk'_surjective U.toSubgroup (β.1 g)
+    obtain ⟨a, ha⟩ := QuotientGroup.mk_surjective (β.1 g)
     have hβ := β.2 g
     rw [← ha, levelMap_mk] at hβ
     have hm : (α a)⁻¹ * f g ∈ U.toSubgroup.map α.toMonoidHom := by
@@ -105,17 +102,13 @@ theorem levelSolutionMap_surjective {p : ℕ} (hG : HasPGroupSolutions p G)
       exact QuotientGroup.eq.mp hβ
     obtain ⟨t, ht, hat⟩ := Subgroup.mem_map.mp hm
     change α t = (α a)⁻¹ * f g at hat
-    refine ⟨QuotientGroup.mk' V.toSubgroup (a * t), Prod.ext ?_ ?_⟩
-    · change QuotientGroup.mapOfLE hVU (QuotientGroup.mk' V.toSubgroup (a * t)) = β.1 g
-      have hq : QuotientGroup.mapOfLE hVU (QuotientGroup.mk' V.toSubgroup (a * t)) =
-          QuotientGroup.mk' U.toSubgroup (a * t) :=
-        DFunLike.congr_fun (QuotientGroup.mapOfLE_comp_mk' hVU) (a * t)
-      rw [hq, ← ha, map_mul,
-        show QuotientGroup.mk' U.toSubgroup t = 1 from (QuotientGroup.eq_one_iff t).mpr ht,
-        mul_one]
-    · change levelMap α hα V (QuotientGroup.mk' V.toSubgroup (a * t)) =
+    refine ⟨((a * t : A) : A ⧸ V.toSubgroup), Prod.ext ?_ ?_⟩
+    · change QuotientGroup.mapOfLE hVU ((a * t : A) : A ⧸ V.toSubgroup) = β.1 g
+      rw [QuotientGroup.mapOfLE_mk, ← ha, QuotientGroup.mk_mul,
+        (QuotientGroup.eq_one_iff t).mpr ht, mul_one]
+    · change levelMap α hα V ((a * t : A) : A ⧸ V.toSubgroup) =
         QuotientGroup.mk' (levelImage α hα V).toSubgroup (f g)
-      rw [levelMap_mk, map_mul, hat, mul_inv_cancel_left]
+      rw [levelMap_mk, map_mul, hat, mul_inv_cancel_left, QuotientGroup.mk'_apply]
   let γ' : G →* φ.range := γ.codRestrict _ hmem
   have hγ : IsOpen (γ'.ker : Set G) := (MonoidHom.continuous_iff_isOpen_ker _).mp
     ((β.1.continuous.prodMk (QuotientGroup.continuous_mk.comp f.continuous)).subtype_mk _)
