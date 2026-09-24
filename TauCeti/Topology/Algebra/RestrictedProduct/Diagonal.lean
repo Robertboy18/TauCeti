@@ -126,6 +126,7 @@ theorem restrictedProductCongrRight_comp_rationalDiagonal {Γ : Type w} [MulOneC
 /-- A change of reference family applied after the diagonal is the diagonal with respect to the
 new family. The eventual-integrality evidence for the new family is an argument, so that the
 statement applies to whichever such evidence a consumer holds. -/
+@[simp]
 theorem rationalDiagonal_change_family {Γ : Type w} [MulOneClass Γ] (φ : ∀ i, Γ →* G i)
     (U U' : ∀ i, Subgroup (G i))
     (hU : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U i)
