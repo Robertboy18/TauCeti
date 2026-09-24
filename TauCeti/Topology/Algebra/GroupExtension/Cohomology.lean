@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.LowDegree
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.ExplicitFunctoriality
 public import TauCeti.Topology.Algebra.GroupAction.TypeTags
 public import TauCeti.Topology.Algebra.GroupExtension.Profinite
 
@@ -39,16 +39,27 @@ the class is an invariant of the extension itself, `GroupExtension.contCohomolog
 two theorems take their final form, continuity of the inverse equivalence being automatic
 (`GroupExtension.exists_equiv_continuous_iff_contCohomologyClass_eq`,
 `GroupExtension.exists_splitting_continuous_iff_contCohomologyClass_eq_zero`). When `G` and `M`
-are both profinite — compactness of `M` alone does not suffice, the twisted product being `M × G`
-as a space — the twisted product of a continuous factor set is such an extension
-(`TauCeti.ProfiniteGroupExtension.ofFactorSet`), and its class, read through the canonical section,
-is the class of the factor set (`TauCeti.ProfiniteGroupExtension.contCohomologyClass_ofFactorSet`),
-so every class of `H²(G, M)` is the class of a profinite extension. Bundling a profinite extension
-of `G` by `M` inducing the given action as `TauCeti.ProfiniteGroupExtension`, the class therefore
+are both profinite the twisted product of a continuous factor set is such an extension, the bundled
+`TauCeti.ProfiniteGroupExtension.ofFactorSet` of
+`TauCeti/Topology/Algebra/GroupExtension/Profinite.lean`, and its class, read through the canonical
+section, is the class of the factor set
+(`TauCeti.ProfiniteGroupExtension.contCohomologyClass_ofFactorSet`), so every class of `H²(G, M)`
+is the class of a profinite extension. On the bundled profinite extensions
+`TauCeti.ProfiniteGroupExtension` of `G` by `M` inducing the given action, the class therefore
 descends to the bijection `TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv` from the
 profinite extensions modulo continuous equivalence onto `H²(G, M)`. The trivial class is that of
 the trivial factor set (`TauCeti.FactorSet.contCohomologyClass_trivial`), whose twisted product is
 the semidirect product.
+
+The classification is natural in the coefficient module. A continuous `G`-equivariant homomorphism
+`f : M →*[G] N` of profinite modules pushes a factor set forward (`TauCeti.FactorSet.map`) and a
+profinite extension forward (`TauCeti.ProfiniteGroupExtension.map`, the twisted product of the
+pushforward of the factor set of a continuous section), and in both cases the class of the
+pushforward is the image of the class under the coefficient map
+`TauCeti.ContCohomology.explicitCoeff2` of `f`, read additively
+(`TauCeti.FactorSet.contCohomologyClass_map`,
+`TauCeti.ProfiniteGroupExtension.contCohomologyClass_map`). So the bijection commutes with
+pushforward (`TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv_map`).
 
 The coboundaries here are those of the *continuous* complex, `B²` being the image of the
 continuous `1`-cochains; this is what makes the classification a statement about topological
@@ -67,13 +78,13 @@ a profinite group computes with.
   continuous cohomology.**
 * `GroupExtension.contCohomologyClass`: the class of a profinite extension with compact kernel,
   in the root namespace so that it is available as `S.contCohomologyClass`.
-* `TauCeti.ProfiniteGroupExtension`: an extension of `G` by `M` with profinite total group,
-  continuous inclusion and projection, inducing the given action, bundled with its total group,
-  and `TauCeti.ProfiniteGroupExtension.ofFactorSet`, the twisted product of a continuous factor
-  set when `G` and `M` are profinite.
+* `TauCeti.ProfiniteGroupExtension.continuousEquivSetoid`: continuous equivalence of bundled
+  profinite extensions, the kernel of the class map.
 * `TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv`: **`H²(G, M)` classifies profinite
   extensions of `G` by `M` inducing the given action up to continuous equivalence**, as a
   bijection of sets.
+* `TauCeti.ProfiniteGroupExtension.map`: the pushforward of a profinite extension along a
+  continuous equivariant homomorphism of profinite coefficient modules.
 
 ## Main results
 
@@ -88,6 +99,10 @@ a profinite group computes with.
   extension has a continuous homomorphic section exactly when its class vanishes.**
 * `TauCeti.ProfiniteGroupExtension.exists_contCohomologyClass_eq`: for profinite `G` and `M`,
   every class of `H²(G, M)` is the class of a profinite extension.
+* `TauCeti.FactorSet.contCohomologyClass_map` and
+  `TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv_map`: **the classification is natural
+  in the coefficient module**: the class of a pushforward is the image of the class under the
+  coefficient map.
 
 ## References
 
@@ -256,6 +271,34 @@ theorem contCohomologyClass_factorSet_canonicalSection
   contCohomologyClass_congr (GroupExtension.factorSet_canonicalSection α) h
 
 end Class
+
+/-! ### Naturality in the coefficient module -/
+
+section Map
+
+variable [ContinuousMul G] [ContinuousSMul G M] {N : Type*} [CommGroup N] [TopologicalSpace N]
+  [IsTopologicalGroup N] [MulDistribMulAction G N] [ContinuousSMul G N] (f : M →*[G] N)
+  (hf : Continuous f) (α : FactorSet G M) (hα : Continuous ⇑α)
+
+/-- **The class of a continuous factor set is natural in the coefficient module**: the class of the
+pushforward `α.map f` along a continuous equivariant homomorphism `f` is the image of the class of
+`α` under the coefficient map `TauCeti.ContCohomology.explicitCoeff2` of `f`, read additively. -/
+@[simp]
+theorem contCohomologyClass_map :
+    (α.map f).contCohomologyClass (continuous_map f hf hα) =
+      explicitCoeff2 G (Additive M) f.toAdditive (f.continuous_toAdditive hf)
+        (α.contCohomologyClass hα) := by
+  rw [contCohomologyClass_def, contCohomologyClass_def, H2pi, QuotientAddGroup.mk'_apply,
+    QuotientAddGroup.mk'_apply, explicitCoeff2_mk]
+  congr 1
+  refine Subtype.ext (funext fun ⟨g, h⟩ => ?_)
+  -- `explicitCoeff2_mk` coerces `f.toAdditive` to an additive homomorphism, which blocks a
+  -- rewrite with `cocyclesMap2_apply`; supplying the cocycle and the pair by hand unifies it.
+  refine Eq.trans ?_ (cocyclesMap2_apply G (Additive M) G (Additive N) (ContinuousMonoidHom.id G)
+    _ _ _ (α.toZ2 hα) g h).symm
+  simp
+
+end Map
 
 end FactorSet
 
@@ -474,36 +517,7 @@ end GroupExtension
 
 /-! ### The bijection -/
 
-variable (G M) in
-/-- **An extension of `G` by `M` with profinite total group inducing the given action**: a
-profinite group `E` together with an extension `1 → M → E → G → 1` of abstract groups whose
-inclusion and projection are continuous and whose conjugation action on `M` is the given one.
-Only the total group is required to be profinite; `G` and `M` carry just their topologies and the
-action. The classification below adds what it needs: for the class and the equivalence criterion,
-`G` Hausdorff with continuous multiplication acting continuously on a compact `M`; for realizing
-every class, `G` and `M` both profinite. The total group is taken in the universe of `M × G`,
-where the twisted products of the factor sets live; under those hypotheses every such extension
-is, up to continuous equivalence, one of those, and the classification
-`TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv` is stated at this universe for that
-reason. -/
-structure ProfiniteGroupExtension where
-  /-- The total group of the extension. -/
-  E : Type (max u v)
-  [instGroup : Group E]
-  [instTopologicalSpace : TopologicalSpace E]
-  [instIsTopologicalGroup : IsTopologicalGroup E]
-  [instCompactSpace : CompactSpace E]
-  [instTotallyDisconnectedSpace : TotallyDisconnectedSpace E]
-  /-- The extension `1 → M → E → G → 1` of abstract groups. -/
-  toGroupExtension : GroupExtension M E G
-  continuous_inl : Continuous toGroupExtension.inl
-  continuous_rightHom : Continuous toGroupExtension.rightHom
-  inducesAction : GroupExtension.InducesAction toGroupExtension
-
 namespace ProfiniteGroupExtension
-
-attribute [instance] instGroup instTopologicalSpace instIsTopologicalGroup instCompactSpace
-  instTotallyDisconnectedSpace
 
 section Class
 
@@ -533,14 +547,15 @@ variable (G M) in
 /-- **Continuous equivalence of profinite extensions** is an equivalence relation on the profinite
 extensions of `G` by `M` inducing the given action: by
 `TauCeti.ProfiniteGroupExtension.exists_equiv_continuous_iff_contCohomologyClass_eq` it is the
-kernel of the class map, and `TauCeti.ProfiniteGroupExtension.isEquivSetoid_apply` reads it back
-as the existence of a continuous equivalence. -/
-noncomputable def isEquivSetoid : Setoid (ProfiniteGroupExtension G M) :=
+kernel of the class map, and `TauCeti.ProfiniteGroupExtension.continuousEquivSetoid_apply` reads
+it back as the existence of a continuous equivalence. -/
+noncomputable def continuousEquivSetoid : Setoid (ProfiniteGroupExtension G M) :=
   Setoid.ker contCohomologyClass
 
 @[simp]
-theorem isEquivSetoid_apply :
-    isEquivSetoid G M X Y ↔ ∃ e : X.toGroupExtension.Equiv Y.toGroupExtension, Continuous ⇑e :=
+theorem continuousEquivSetoid_apply :
+    continuousEquivSetoid G M X Y ↔
+      ∃ e : X.toGroupExtension.Equiv Y.toGroupExtension, Continuous ⇑e :=
   Setoid.ker_def.trans (exists_equiv_continuous_iff_contCohomologyClass_eq X Y).symm
 
 end Class
@@ -549,29 +564,6 @@ section Realization
 
 variable [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] [ContinuousSMul G M]
   [CompactSpace M] [TotallyDisconnectedSpace M] (α : FactorSet G M) (hα : Continuous ⇑α)
-
-/-- **The twisted product of a continuous factor set is a profinite extension** when `G` and `M`
-are profinite: it is `M × G` as a space, `TauCeti.FactorSet.Extension.isTopologicalGroup` makes
-it a topological group, and its inclusion and projection are the coordinate maps. Compactness of
-`M` alone would not do: the twisted product of the trivial factor set over the trivial group is `M`
-itself. The realization is an abbreviation so that its total group and group structure remain
-definitionally those of `α.Extension`; the underlying extension is given by
-`TauCeti.ProfiniteGroupExtension.ofFactorSet_toGroupExtension`. -/
-abbrev ofFactorSet : ProfiniteGroupExtension G M where
-  E := α.Extension
-  instIsTopologicalGroup := FactorSet.Extension.isTopologicalGroup hα
-  toGroupExtension := α.groupExtension
-  continuous_inl := by
-    rw [FactorSet.groupExtension_inl]
-    exact FactorSet.continuous_inl α
-  continuous_rightHom := by
-    rw [FactorSet.groupExtension_rightHom]
-    exact FactorSet.continuous_rightHom α
-  inducesAction := GroupExtension.inducesAction_groupExtension α
-
-@[simp]
-theorem ofFactorSet_toGroupExtension : (ofFactorSet α hα).toGroupExtension = α.groupExtension :=
-  rfl
 
 /-- The class of the twisted product of `α` is the class of `α`: read it through the canonical
 section, whose factor set is `α`. -/
@@ -597,7 +589,7 @@ variable (G M) in
 profinite extensions of `G` by `M` inducing the given action, taken modulo continuous
 equivalence, onto `H²(G, M)`. -/
 noncomputable def contCohomologyClassEquiv :
-    Quotient (isEquivSetoid G M) ≃ H2 G (Additive M) :=
+    Quotient (continuousEquivSetoid G M) ≃ H2 G (Additive M) :=
   Setoid.quotientKerEquivOfSurjective _ exists_contCohomologyClass_eq
 
 @[simp]
@@ -606,6 +598,68 @@ theorem contCohomologyClassEquiv_apply_mk (X : ProfiniteGroupExtension G M) :
   (rfl)
 
 end Realization
+
+/-! ### Naturality in the coefficient module -/
+
+section Map
+
+variable [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] [ContinuousSMul G M]
+  [CompactSpace M] {N : Type*} [CommGroup N] [TopologicalSpace N] [IsTopologicalGroup N]
+  [MulDistribMulAction G N] [ContinuousSMul G N] [CompactSpace N] [TotallyDisconnectedSpace N]
+  (f : M →*[G] N) (hf : Continuous f) (X : ProfiniteGroupExtension G M)
+
+/-- **Pushforward of a profinite extension along a continuous equivariant homomorphism `f` to a
+profinite coefficient module**: the twisted product of the pushforward along `f` of the factor set
+of a continuous normalized section of `X`, of which
+`TauCeti.GroupExtension.exists_continuous_section` provides one. Its class is the image of the class
+of `X` under the coefficient map of `f` (`TauCeti.ProfiniteGroupExtension.contCohomologyClass_map`),
+which determines it up to continuous equivalence. -/
+noncomputable def map : ProfiniteGroupExtension G N :=
+  ofFactorSet
+    ((GroupExtension.factorSet
+      (GroupExtension.exists_continuous_section X.continuous_inl X.continuous_rightHom).choose
+      (GroupExtension.exists_continuous_section X.continuous_inl
+        X.continuous_rightHom).choose_spec.2 X.inducesAction).map f)
+    (FactorSet.continuous_map f hf (GroupExtension.continuous_factorSet
+      (X.continuous_inl.isClosedEmbedding X.toGroupExtension.inl_injective).isEmbedding
+      (GroupExtension.exists_continuous_section X.continuous_inl
+        X.continuous_rightHom).choose_spec.1 _ X.inducesAction))
+
+/-- **The class of a profinite extension is natural in the coefficient module**: the class of the
+pushforward `X.map f` is the image of the class of `X` under the coefficient map
+`TauCeti.ContCohomology.explicitCoeff2` of `f`, read additively. -/
+@[simp]
+theorem contCohomologyClass_map :
+    (X.map f hf).contCohomologyClass =
+      explicitCoeff2 G (Additive M) f.toAdditive (f.continuous_toAdditive hf)
+        X.contCohomologyClass := by
+  rw [map, contCohomologyClass_ofFactorSet, FactorSet.contCohomologyClass_map f hf,
+    contCohomologyClass_def, X.toGroupExtension.contCohomologyClass_eq X.continuous_inl
+      X.continuous_rightHom X.inducesAction
+      (GroupExtension.exists_continuous_section X.continuous_inl
+        X.continuous_rightHom).choose_spec.1
+      (GroupExtension.exists_continuous_section X.continuous_inl
+        X.continuous_rightHom).choose_spec.2]
+
+/-- Pushforward respects continuous equivalence, so it descends to the quotient by
+`TauCeti.ProfiniteGroupExtension.continuousEquivSetoid`. -/
+theorem continuousEquivSetoid_map {X Y : ProfiniteGroupExtension G M}
+    (h : continuousEquivSetoid G M X Y) :
+    continuousEquivSetoid G N (X.map f hf) (Y.map f hf) :=
+  Setoid.ker_def.2 (by rw [contCohomologyClass_map, contCohomologyClass_map, Setoid.ker_def.1 h])
+
+/-- **The classification is natural in the coefficient module**: the bijection
+`TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv` commutes with pushforward along `f` on
+the extensions and with the coefficient map of `f` on `H²`. -/
+theorem contCohomologyClassEquiv_map [TotallyDisconnectedSpace M]
+    (q : Quotient (continuousEquivSetoid G M)) :
+    contCohomologyClassEquiv G N
+        (Quotient.map' (map f hf) (fun _ _ => continuousEquivSetoid_map f hf) q) =
+      explicitCoeff2 G (Additive M) f.toAdditive (f.continuous_toAdditive hf)
+        (contCohomologyClassEquiv G M q) :=
+  Quotient.inductionOn q fun X => contCohomologyClass_map f hf X
+
+end Map
 
 end ProfiniteGroupExtension
 

@@ -17,7 +17,9 @@ the two actions are the same map `M × A → A`, so continuity of one is continu
 file records that as the instance `Additive.continuousSMul`. It is what lets a multiplicative
 coefficient module — a finite discrete `G`-module written multiplicatively, as in the extension
 dictionary — be fed to the continuous cohomology of `Additive M`, whose hypotheses ask for a
-continuous action.
+continuous action. Likewise a continuous equivariant homomorphism of such modules stays continuous
+when read additively (`MulDistribMulActionHom.continuous_toAdditive`), as the coefficient maps of
+that cohomology require.
 -/
 
 public section
@@ -34,3 +36,15 @@ instance continuousSMul [ContinuousSMul M A] : ContinuousSMul M (Additive A) whe
     continuous_ofMul.comp (continuous_fst.smul (continuous_toMul.comp continuous_snd))
 
 end Additive
+
+namespace MulDistribMulActionHom
+
+variable {M A B : Type*} [Monoid M] [Monoid A] [Monoid B] [MulDistribMulAction M A]
+  [MulDistribMulAction M B] [TopologicalSpace A] [TopologicalSpace B]
+
+/-- An equivariant monoid homomorphism read additively, `MulDistribMulActionHom.toAdditive`, is
+continuous when the homomorphism is: it is the same map between the same topological spaces. -/
+theorem continuous_toAdditive (f : A →*[M] B) (hf : Continuous f) : Continuous f.toAdditive :=
+  (continuous_ofMul.comp (hf.comp continuous_toMul)).congr fun x => (f.toAdditive_apply x).symm
+
+end MulDistribMulActionHom

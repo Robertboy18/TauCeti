@@ -37,8 +37,19 @@ the kernel, which is closed because it is compact and `E`, being profinite, is H
 asks the kernel to be *open*: an open kernel would force `G` to be discrete, whereas the extensions
 this dictionary is used on have infinite `G`.
 
+Bundling the data, `TauCeti.ProfiniteGroupExtension G M` is an extension of `G` by `M` with
+profinite total group, continuous inclusion and projection, inducing the given action of `G` on
+`M`. When `G` and `M` are both profinite the twisted product of a continuous factor set is one
+(`TauCeti.ProfiniteGroupExtension.ofFactorSet`); compactness of `M` alone would not do, the
+twisted product being `M × G` as a space. The continuous cohomology classifying these bundled
+extensions is the subject of `TauCeti/Topology/Algebra/GroupExtension/Cohomology.lean`.
+
 ## Main definitions
 
+* `TauCeti.ProfiniteGroupExtension`: an extension of `G` by `M` with profinite total group,
+  continuous inclusion and projection, inducing the given action, bundled with its total group, and
+  `TauCeti.ProfiniteGroupExtension.ofFactorSet`, the twisted product of a continuous factor set
+  when `G` and `M` are profinite.
 * `TauCeti.GroupExtension.continuousMulEquivOfEquiv`: an equivalence of extensions with compact
   total group is a homeomorphism as soon as it is continuous, hence a `ContinuousMulEquiv`, and
   `TauCeti.GroupExtension.continuousMulEquivOfMonoidHom` is its form for a bare morphism. Neither
@@ -290,3 +301,75 @@ theorem exists_continuous_factorSet [IsTopologicalGroup E] [CompactSpace E]
 end FactorSet
 
 end TauCeti.GroupExtension
+
+namespace TauCeti
+
+/-! ### Bundled profinite extensions -/
+
+universe u v
+
+variable {G : Type u} {M : Type v} [Group G] [TopologicalSpace G] [CommGroup M]
+  [TopologicalSpace M] [MulDistribMulAction G M]
+
+variable (G M) in
+/-- **An extension of `G` by `M` with profinite total group inducing the given action**: a
+profinite group `E` together with an extension `1 → M → E → G → 1` of abstract groups whose
+inclusion and projection are continuous and whose conjugation action on `M` is the given one.
+Only the total group is required to be profinite; `G` and `M` carry just their topologies and the
+action. The classification in `TauCeti/Topology/Algebra/GroupExtension/Cohomology.lean` adds what
+it needs: for the class and the equivalence criterion, `G` Hausdorff with continuous multiplication
+acting continuously on a compact `M`; for realizing every class, `G` and `M` both profinite. The
+total group is taken in the universe of `M × G`, where the twisted products of the factor sets
+live; under those hypotheses every such extension is, up to continuous equivalence, one of those
+(`TauCeti.ProfiniteGroupExtension.ofFactorSet`), and the classification
+`TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv` is stated at this universe for that
+reason. -/
+structure ProfiniteGroupExtension where
+  /-- The total group of the extension. -/
+  E : Type (max u v)
+  [instGroup : Group E]
+  [instTopologicalSpace : TopologicalSpace E]
+  [instIsTopologicalGroup : IsTopologicalGroup E]
+  [instCompactSpace : CompactSpace E]
+  [instTotallyDisconnectedSpace : TotallyDisconnectedSpace E]
+  /-- The extension `1 → M → E → G → 1` of abstract groups. -/
+  toGroupExtension : GroupExtension M E G
+  continuous_inl : Continuous toGroupExtension.inl
+  continuous_rightHom : Continuous toGroupExtension.rightHom
+  inducesAction : GroupExtension.InducesAction toGroupExtension
+
+namespace ProfiniteGroupExtension
+
+attribute [instance] instGroup instTopologicalSpace instIsTopologicalGroup instCompactSpace
+  instTotallyDisconnectedSpace
+
+variable [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G]
+  [IsTopologicalGroup M] [ContinuousSMul G M] [CompactSpace M] [TotallyDisconnectedSpace M]
+  (α : FactorSet G M) (hα : Continuous ⇑α)
+
+/-- **The twisted product of a continuous factor set is a profinite extension** when `G` and `M`
+are profinite: it is `M × G` as a space, `TauCeti.FactorSet.Extension.isTopologicalGroup` makes
+it a topological group, and its inclusion and projection are the coordinate maps. Compactness of
+`M` alone would not do: the twisted product of the trivial factor set over the trivial group is `M`
+itself. The realization is an abbreviation so that its total group and group structure remain
+definitionally those of `α.Extension`; the underlying extension is given by
+`TauCeti.ProfiniteGroupExtension.ofFactorSet_toGroupExtension`. -/
+abbrev ofFactorSet : ProfiniteGroupExtension G M where
+  E := α.Extension
+  instIsTopologicalGroup := FactorSet.Extension.isTopologicalGroup hα
+  toGroupExtension := α.groupExtension
+  continuous_inl := by
+    rw [FactorSet.groupExtension_inl]
+    exact FactorSet.continuous_inl α
+  continuous_rightHom := by
+    rw [FactorSet.groupExtension_rightHom]
+    exact FactorSet.continuous_rightHom α
+  inducesAction := GroupExtension.inducesAction_groupExtension α
+
+@[simp]
+theorem ofFactorSet_toGroupExtension : (ofFactorSet α hα).toGroupExtension = α.groupExtension :=
+  rfl
+
+end ProfiniteGroupExtension
+
+end TauCeti
