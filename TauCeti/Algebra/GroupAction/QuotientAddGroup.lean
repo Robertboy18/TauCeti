@@ -26,8 +26,12 @@ by `G` modulo `N`, which is what lets a `G`-stable subgroup be enlarged one elem
 
 * `AddSubgroup.quotientDistribMulAction`: the action of `G` on `M ⧸ N` for a `G`-stable `N`.
 * `AddSubgroup.quotientDistribMulAction_smul_mk`: its defining equation `g • ↑x = ↑(g • x)`.
+* `AddSubgroup.subquotientDistribMulAction`: the induced action on `K ⧸ N.addSubgroupOf K`
+  for two stable subgroups `N` and `K`.
 * `TauCeti.smul_mem_sup_zmultiples`: if `N` is `G`-stable and `g • x - x ∈ N` for every `g`,
   then `N ⊔ zmultiples x` is `G`-stable.
+* `TauCeti.subquotient_smul_eq_self_of_eq_sup_zmultiples`: adjoining a generator fixed modulo
+  `N` gives a quotient on which the induced action is trivial.
 -/
 
 public section
@@ -58,6 +62,31 @@ theorem _root_.AddSubgroup.quotientDistribMulAction_smul_mk (N : AddSubgroup M)
     g • (x : M ⧸ N) = ((g • x : M) : M ⧸ N) :=
   rfl
 
+/-- The induced action on `K ⧸ N.addSubgroupOf K` for two `G`-stable additive subgroups.
+The action is restricted to `K` before passing to the quotient. See note
+[reducible non-instances]. -/
+abbrev _root_.AddSubgroup.subquotientDistribMulAction (N K : AddSubgroup M)
+    (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) (hK : ∀ g : G, ∀ x ∈ K, g • x ∈ K) :
+    DistribMulAction G (K ⧸ N.addSubgroupOf K) :=
+  letI : DistribMulAction G K :=
+    { smul g x := ⟨g • (x : M), hK g x x.property⟩
+      one_smul x := Subtype.ext (one_smul G (x : M))
+      mul_smul g h x := Subtype.ext (mul_smul g h (x : M))
+      smul_zero g := Subtype.ext (smul_zero g)
+      smul_add g x y := Subtype.ext (smul_add g (x : M) (y : M)) }
+  (N.addSubgroupOf K).quotientDistribMulAction fun g x hx ↦
+    AddSubgroup.mem_addSubgroupOf.mpr (hN g x (AddSubgroup.mem_addSubgroupOf.mp hx))
+
+/-- The induced action on a subquotient acts on representatives by the original action. -/
+@[simp]
+theorem _root_.AddSubgroup.subquotientDistribMulAction_smul_mk (N K : AddSubgroup M)
+    (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) (hK : ∀ g : G, ∀ x ∈ K, g • x ∈ K)
+    (g : G) (x : K) :
+    letI := N.subquotientDistribMulAction K hN hK
+    g • (x : K ⧸ N.addSubgroupOf K) =
+      ((⟨g • (x : M), hK g x x.property⟩ : K) : K ⧸ N.addSubgroupOf K) :=
+  rfl
+
 /-- If `N` is `G`-stable and `g • x - x ∈ N` for every `g`, then `N ⊔ zmultiples x` is
 `G`-stable. -/
 theorem smul_mem_sup_zmultiples {N : AddSubgroup M} (hN : ∀ g : G, ∀ y ∈ N, g • y ∈ N) {x : M}
@@ -72,5 +101,24 @@ theorem smul_mem_sup_zmultiples {N : AddSubgroup M} (hN : ∀ g : G, ∀ y ∈ N
     (AddSubgroup.mem_sup_left
       (AddSubgroup.add_mem _ (hN g n hn) (AddSubgroup.zsmul_mem _ (hx g) k)))
     (AddSubgroup.mem_sup_right (AddSubgroup.zsmul_mem _ (AddSubgroup.mem_zmultiples x) k))
+
+/-- If `K` is obtained from `N` by adjoining an element fixed modulo `N`, then the induced
+action on `K ⧸ N.addSubgroupOf K` is trivial. No finiteness or torsion assumption is needed. -/
+theorem subquotient_smul_eq_self_of_eq_sup_zmultiples {N K : AddSubgroup M}
+    (hN : ∀ g : G, ∀ y ∈ N, g • y ∈ N) (hK : ∀ g : G, ∀ y ∈ K, g • y ∈ K)
+    {x : M} (hgen : K = N ⊔ AddSubgroup.zmultiples x) (hx : ∀ g : G, g • x - x ∈ N)
+    (g : G) (y : K ⧸ N.addSubgroupOf K) :
+    letI := N.subquotientDistribMulAction K hN hK
+    g • y = y := by
+  let := N.subquotientDistribMulAction K hN hK
+  obtain ⟨⟨y, hy⟩, rfl⟩ := QuotientAddGroup.mk_surjective y
+  rw [AddSubgroup.subquotientDistribMulAction_smul_mk, QuotientAddGroup.eq_iff_sub_mem,
+    AddSubgroup.mem_addSubgroupOf]
+  change g • y - y ∈ N
+  rw [hgen] at hy
+  obtain ⟨n, hn, m, hm, rfl⟩ := AddSubgroup.mem_sup.mp hy
+  obtain ⟨k, rfl⟩ := AddSubgroup.mem_zmultiples_iff.mp hm
+  rw [smul_add, smul_comm g k, add_sub_add_comm, ← zsmul_sub]
+  exact N.add_mem (N.sub_mem (hN g n hn) hn) (N.zsmul_mem (hx g) k)
 
 end TauCeti
