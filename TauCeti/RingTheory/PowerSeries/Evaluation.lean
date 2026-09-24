@@ -109,6 +109,7 @@ theorem aeval_mk_coeff_add (hc : HasEval c) (f : A⟦X⟧) (n : ℕ) :
 
 /-- **Division by `X - C c`.** At a point `c` where power series can be evaluated,
 `f = (X - C c) * q + C (f(c))` with `q = divXSubC hc f`. -/
+@[simp]
 theorem X_sub_C_mul_divXSubC_add_C_aeval (hc : HasEval c) (f : A⟦X⟧) :
     (X - C c) * divXSubC hc f + C (aeval hc f) = f := by
   have hf : (mk fun k ↦ coeff (0 + k) f) = f := by ext; simp
