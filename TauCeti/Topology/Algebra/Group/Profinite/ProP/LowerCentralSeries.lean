@@ -21,11 +21,9 @@ fourth powers and commutators are trivial, so `λ_1` is trivial, while the pro-`
 subgroup is the whole group.
 
 For a topologically finitely generated profinite group and a prime `p`, every `λ_k` is open, hence
-of finite index: `λ_k` is itself a topologically finitely generated profinite group, so its pro-`p`
-Frattini subgroup is open in it, and that Frattini subgroup lies in `λ_{k+1}`. In a topologically
-finitely generated pro-`p` group the quotients `G ⧸ λ_k` are then finite `p`-groups. Without
-finite generation the terms need not be open: an infinite product of copies of `ℤ ⧸ p` has
-`λ_1 = 1`.
+of finite index, and in a topologically finitely generated pro-`p` group the quotients `G ⧸ λ_k`
+are finite `p`-groups. Without finite generation the terms need not be open: an infinite product
+of copies of `ℤ ⧸ p` has `λ_1 = 1`.
 
 ## Main results
 

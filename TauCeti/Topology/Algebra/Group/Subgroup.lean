@@ -16,9 +16,8 @@ connects topological generation in a group with additive generation on its `Addi
 
 A continuous homomorphism carries the topological closure of a subgroup into the topological
 closure of its image, and a closed subgroup containing the commutators `⁅A, B⁆` also contains the
-commutators `⁅A, closure B⁆`: for fixed `a` the map `y ↦ ⁅a, y⁆` is continuous, so the condition
-`⁅a, y⁆ ∈ N` is closed in `y`. These are the two closure facts needed to run commutator calculus
-on closed subgroups that are given as topological closures, such as the terms of a lower central
+commutators `⁅A, closure B⁆`. These are the two closure facts needed to run commutator calculus on
+closed subgroups that are given as topological closures, such as the terms of a lower central
 series of a profinite group.
 
 ## Main results
