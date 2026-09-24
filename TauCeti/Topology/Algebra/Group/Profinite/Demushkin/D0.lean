@@ -13,8 +13,10 @@ This file defines the pro-`2` group `D₀`, presented on three generators `A, S,
 relator `A²S⁴(S,Y)`, where `(x, y) = x⁻¹y⁻¹xy` is Labute's commutator convention. In Labute's
 classification of Demushkin groups with `q = 2` and odd rank, `D₀` is the normal form of rank
 `3` with `f = 2`; it is the abstract group that the local theory identifies with the maximal
-pro-`2` quotient of the absolute Galois group of `ℚ₂`. Neither that identification nor the
-Demushkin property itself is established here.
+pro-`2` quotient of the absolute Galois group of `ℚ₂`. The name `D₀`, the marked generators
+`A, S, Y` and the relator `A²S⁴[S,Y]` follow Roe–Turturean, §3.1, equation (3.1), whose commutator
+convention is the same. Neither that identification nor the Demushkin property itself is
+established here.
 
 What is established is that the presentation is not vacuous. The map on the free pro-`2` group
 sending `A ↦ 0`, `S ↦ 1`, `Y ↦ 0` in `ℤ/2` kills the relator, because the commutator dies in
@@ -45,6 +47,8 @@ continuous homomorphism out of `D₀` is determined by its values on `A`, `S` an
 
 * J. P. Labute, *Classification of Demushkin groups*, Canad. J. Math. 19 (1967), 106–132.
 * J. Neukirch, A. Schmidt, K. Wingberg, *Cohomology of Number Fields*, 2nd ed., Chapter III, §9.
+* D. Roe, D. Turturean, *A Presentation of the Absolute Galois Group of ℚ₂*, preprint (2026),
+  §3.1, <https://roed314.github.io/gq2/>.
 * J.-P. Serre, *Galois Cohomology*, Chapter I, §4.5.
 -/
 
