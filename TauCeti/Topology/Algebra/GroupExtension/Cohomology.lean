@@ -24,11 +24,13 @@ continuous factor set (`TauCeti.FactorSet.exists_contCohomologyClass_eq`). So th
 to a bijection `TauCeti.FactorSet.contCohomologyClassEquiv` from the continuous factor sets modulo
 continuous cohomology onto `H²(G, M)`.
 
-Read through the extension dictionary, this classifies extensions of topological groups. An
-extension `1 → M → E → G → 1` with a continuous normalized section has a class, that of the factor
-set of the section, which does not depend on the section
-(`TauCeti.GroupExtension.contCohomologyClass_factorSet_eq`); two such extensions are equivalent by
-a continuous equivalence with continuous inverse exactly when their classes agree
+Read through the extension dictionary, this classifies extensions of topological groups. Consider
+an extension `1 → M → E → G → 1` of topological groups inducing the given action of `G` on `M`,
+whose kernel is embedded (`S.inl` is an embedding) and which has a continuous normalized section.
+It has a class, that of the factor set of the section, which does not depend on the section
+(`TauCeti.GroupExtension.contCohomologyClass_factorSet_eq`); two such extensions, both with
+continuous projection, are equivalent by a continuous equivalence with continuous inverse exactly
+when their classes agree
 (`TauCeti.GroupExtension.exists_equiv_continuous_iff_contCohomologyClass_factorSet_eq`); and the
 class vanishes exactly when the extension has a continuous homomorphic section
 (`TauCeti.GroupExtension.exists_splitting_continuous_iff_contCohomologyClass_factorSet_eq_zero`).
@@ -526,21 +528,15 @@ variable (G M) in
 /-- **Continuous equivalence of profinite extensions** is an equivalence relation on the profinite
 extensions of `G` by `M` inducing the given action: by
 `TauCeti.ProfiniteGroupExtension.exists_equiv_continuous_iff_contCohomologyClass_eq` it is the
-kernel of the class map. -/
-def isEquivSetoid : Setoid (ProfiniteGroupExtension G M) where
-  r X Y := ∃ e : X.toGroupExtension.Equiv Y.toGroupExtension, Continuous ⇑e
-  iseqv :=
-    { refl X := (exists_equiv_continuous_iff_contCohomologyClass_eq X X).2 rfl
-      symm {X Y} h := (exists_equiv_continuous_iff_contCohomologyClass_eq Y X).2
-        ((exists_equiv_continuous_iff_contCohomologyClass_eq X Y).1 h).symm
-      trans {X Y Z} h h' := (exists_equiv_continuous_iff_contCohomologyClass_eq X Z).2
-        (((exists_equiv_continuous_iff_contCohomologyClass_eq X Y).1 h).trans
-          ((exists_equiv_continuous_iff_contCohomologyClass_eq Y Z).1 h')) }
+kernel of the class map, and `TauCeti.ProfiniteGroupExtension.isEquivSetoid_apply` reads it back
+as the existence of a continuous equivalence. -/
+noncomputable def isEquivSetoid : Setoid (ProfiniteGroupExtension G M) :=
+  Setoid.ker contCohomologyClass
 
 @[simp]
 theorem isEquivSetoid_apply :
     isEquivSetoid G M X Y ↔ ∃ e : X.toGroupExtension.Equiv Y.toGroupExtension, Continuous ⇑e :=
-  Iff.rfl
+  Setoid.ker_def.trans (exists_equiv_continuous_iff_contCohomologyClass_eq X Y).symm
 
 end Class
 
@@ -553,8 +549,10 @@ variable [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] [C
 are profinite: it is `M × G` as a space, `TauCeti.FactorSet.Extension.isTopologicalGroup` makes
 it a topological group, and its inclusion and projection are the coordinate maps. Compactness of
 `M` alone would not do: the twisted product of the trivial factor set over the trivial group is `M`
-itself. -/
-def ofFactorSet : ProfiniteGroupExtension G M where
+itself. The definition is exposed so that the total group `(ofFactorSet α hα).E` unfolds to
+`α.Extension`, on which `TauCeti.ProfiniteGroupExtension.ofFactorSet_toGroupExtension` reads
+off the underlying extension. -/
+@[expose] def ofFactorSet : ProfiniteGroupExtension G M where
   E := α.Extension
   instIsTopologicalGroup := FactorSet.Extension.isTopologicalGroup hα
   toGroupExtension := α.groupExtension
@@ -566,19 +564,20 @@ def ofFactorSet : ProfiniteGroupExtension G M where
     exact FactorSet.continuous_rightHom α
   inducesAction := GroupExtension.inducesAction_groupExtension α
 
+@[simp]
+theorem ofFactorSet_toGroupExtension : (ofFactorSet α hα).toGroupExtension = α.groupExtension :=
+  rfl
+
 /-- The class of the twisted product of `α` is the class of `α`: read it through the canonical
 section, whose factor set is `α`. -/
 @[simp]
 theorem contCohomologyClass_ofFactorSet :
     (ofFactorSet α hα).contCohomologyClass = α.contCohomologyClass hα := by
   have := FactorSet.Extension.isTopologicalGroup hα
-  have hinl : Continuous α.groupExtension.inl := (ofFactorSet α hα).continuous_inl
-  have hrh : Continuous α.groupExtension.rightHom := (ofFactorSet α hα).continuous_rightHom
-  change α.groupExtension.contCohomologyClass hinl hrh
-    (GroupExtension.inducesAction_groupExtension α) = _
-  rw [α.groupExtension.contCohomologyClass_eq hinl hrh _ (FactorSet.continuous_canonicalSection α)
-    α.canonicalSection_one]
-  exact FactorSet.contCohomologyClass_factorSet_canonicalSection α hα _
+  rw [contCohomologyClass_def]
+  simp only [ofFactorSet_toGroupExtension]
+  exact (α.groupExtension.contCohomologyClass_eq _ _ _ (FactorSet.continuous_canonicalSection α)
+    α.canonicalSection_one).trans (FactorSet.contCohomologyClass_factorSet_canonicalSection α hα _)
 
 /-- **Every class of `H²(G, M)` is the class of a profinite extension**, namely of the twisted
 product of a continuous factor set representing it. -/
@@ -593,14 +592,7 @@ profinite extensions of `G` by `M` inducing the given action, taken modulo conti
 equivalence, onto `H²(G, M)`. -/
 noncomputable def contCohomologyClassEquiv :
     Quotient (isEquivSetoid G M) ≃ H2 G (Additive M) :=
-  Equiv.ofBijective
-    (Quotient.lift contCohomologyClass fun X Y h =>
-      (exists_equiv_continuous_iff_contCohomologyClass_eq X Y).1 h)
-    ⟨fun a b => Quotient.inductionOn₂ a b fun X Y h =>
-      Quotient.sound ((exists_equiv_continuous_iff_contCohomologyClass_eq X Y).2 h),
-      fun c => by
-        obtain ⟨X, hX⟩ := exists_contCohomologyClass_eq c
-        exact ⟨Quotient.mk _ X, hX⟩⟩
+  Setoid.quotientKerEquivOfSurjective _ exists_contCohomologyClass_eq
 
 @[simp]
 theorem contCohomologyClassEquiv_apply_mk (X : ProfiniteGroupExtension G M) :

@@ -254,8 +254,9 @@ variable {α β : FactorSet G M} {x : G → M}
 
 include hxc
 
-/-- **Rescaling the canonical section by a continuous function is continuous**: under
-`TauCeti.FactorSet.Extension.homeomorphProd` the rescaling is `(a, g) ↦ (a * x g, g)`. -/
+/-- **The rescaling equivalence between the twisted products of `α` and `β` is continuous** when
+the rescaling function `x` is: under `TauCeti.FactorSet.Extension.homeomorphProd` it is
+`(a, g) ↦ (a * x g, g)`. -/
 theorem continuous_rescaleEquiv [ContinuousMul M] : Continuous ⇑(rescaleEquiv α β x hx) := by
   refine Extension.isInducing_leftRight.continuous_iff.2 ?_
   simp only [Function.comp_def, rescaleEquiv_apply]
