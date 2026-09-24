@@ -34,12 +34,14 @@ rewritable.
 * `TauCeti.QuotientGroup.mapOfLE_comp_mk'`: composing it with the quotient map of `G` modulo
   `V` gives the quotient map of `G` modulo `U`.
 * `TauCeti.QuotientGroup.mapOfLE_surjective`: the map is surjective.
+* `TauCeti.QuotientGroup.ker_mapOfLE`: its kernel is the image of `U` in `G ⧸ V`.
 
 ## Usage
 
-Work with `mapOfLE` through the five lemmas above: `mapOfLE_mk` evaluates it on classes,
+Work with `mapOfLE` through the six lemmas above: `mapOfLE_mk` evaluates it on classes,
 `mapOfLE_refl`, `mapOfLE_comp` and `mapOfLE_comp_mk'` simplify identities and composites, and
-`mapOfLE_surjective` feeds constructions that need a surjection, such as `Sylow.mapSurjective`.
+`mapOfLE_surjective` feeds constructions that need a surjection, such as `Sylow.mapSurjective`, and
+`ker_mapOfLE` identifies its kernel.
 To identify `mapOfLE hVU` with another homomorphism out of `G ⧸ V`, compare the two on classes with
 `QuotientGroup.induction_on` and `mapOfLE_mk`.
 -/
@@ -90,6 +92,11 @@ theorem mapOfLE_surjective [U.Normal] [V.Normal] (hVU : V ≤ U) :
     Function.Surjective (mapOfLE hVU) :=
   _root_.QuotientGroup.map_surjective_of_surjective V U (.id G)
     _root_.QuotientGroup.mk_surjective _
+
+/-- The kernel of the quotient homomorphism `G ⧸ V →* G ⧸ U` is the image of `U` in `G ⧸ V`. -/
+theorem ker_mapOfLE [U.Normal] [V.Normal] (hVU : V ≤ U) :
+    (mapOfLE hVU).ker = U.map (_root_.QuotientGroup.mk' V) :=
+  (_root_.QuotientGroup.ker_map V U (.id G) fun _ hv ↦ hVU hv).trans (by rw [Subgroup.comap_id])
 
 end QuotientGroup
 
