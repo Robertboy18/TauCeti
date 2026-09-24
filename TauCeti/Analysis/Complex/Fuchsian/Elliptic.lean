@@ -42,9 +42,9 @@ The cyclic quotient model follows Farkas–Kra, *Riemann Surfaces*, Chapter I §
 * `Subgroup.exists_stabilizerBallQuotientChart_quotientMk_eventuallyEq` and
   `Subgroup.mdifferentiableAt_stabilizerBallQuotientChart_comp_quotientMk`: the chart composed with
   the orbit projection is locally a power of a disc coordinate, hence holomorphic.
-* `Subgroup.differentiableAt_stabilizerBallQuotientChart_symm_pow` and
-  `Subgroup.differentiableOn_stabilizerBallQuotientChart_symm_trans`: transition maps between two
-  charts are holomorphic, first pulled back to the disc coordinate and then descended.
+* `Subgroup.differentiableOn_stabilizerBallQuotientChart_symm_trans`: transition maps between two
+  charts are holomorphic, being descents through `u ↦ u ^ m` of holomorphic pullbacks to the disc
+  coordinate.
 
 ## References
 
@@ -171,7 +171,7 @@ theorem mdifferentiableAt_stabilizerBallQuotientChart_comp_quotientMk {τ : ℍ}
 `w ↦ w ^ m` to the disc coordinate at `z`, is holomorphic at every point `w₀` of the disc of radius
 `tanh (ε / 2)` whose orbit lies in the source of the second chart: near `w₀` it is the second chart
 composed with the orbit projection and the inverse disc coordinate at `z`. -/
-theorem differentiableAt_stabilizerBallQuotientChart_symm_pow {z' : ℍ} {ε' : ℝ}
+private theorem differentiableAt_stabilizerBallQuotientChart_symm_pow {z' : ℍ} {ε' : ℝ}
     [Finite (stabilizer Γ z')] (hε' : 0 < ε')
     (hopen' : IsOpenEmbedding (stabilizerBallQuotientToQuotient Γ z' ε')) {w₀ : ℂ}
     (hw₀ : ‖w₀‖ < Real.tanh (ε / 2))

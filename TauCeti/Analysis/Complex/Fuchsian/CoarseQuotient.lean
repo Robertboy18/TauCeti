@@ -24,11 +24,11 @@ holomorphic (`Subgroup.differentiableOn_stabilizerBallQuotientChart_symm_trans`)
 analytic, and the local formula for a chart along the orbit projection makes the projection
 `ℍ → Γ \ ℍ` holomorphic.
 
-On the free locus every chart is a disc coordinate pushed forward along the orbit projection. At
-an elliptic orbit of stabilizer order `m` the chart is the cyclic quotient model `u ↦ u ^ m`: near a
-point of the disc about the elliptic point, the chart composed with the orbit projection is the
+The chart centred at an orbit of stabilizer order `m` is the cyclic quotient model `u ↦ u ^ m`:
+near a point of the disc about the centre, the chart composed with the orbit projection is the
 `m`-th power of the disc coordinate
-(`Subgroup.exists_stabilizerBallQuotientChart_quotientMk_eventuallyEq`).
+(`Subgroup.exists_stabilizerBallQuotientChart_quotientMk_eventuallyEq`). At a free orbit `m = 1`,
+so the chart centred there is a disc coordinate pushed forward along the orbit projection.
 
 ## Main declarations
 
