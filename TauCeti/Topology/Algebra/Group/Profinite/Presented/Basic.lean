@@ -146,20 +146,13 @@ section Lift
 variable {P : Type u} [Group P] [TopologicalSpace P] [IsTopologicalGroup P] [CompactSpace P]
   [TotallyDisconnectedSpace P]
 
-/-- The closed normal closure of the relators lies in the kernel of the free profinite lift of a
-map that kills every relator. -/
-theorem topologicalClosure_normalClosure_le_ker_lift (f : X → P)
-    (h : ∀ r ∈ rels, freeProfiniteGroup.lift f r = 1) :
-    (Subgroup.normalClosure rels).topologicalClosure ≤
-      (freeProfiniteGroup.lift f).toMonoidHom.ker :=
-  Subgroup.topologicalClosure_normalClosure_le_ker (map_continuous (freeProfiniteGroup.lift f)) h
-
 /-- The continuous homomorphism to a profinite group `P` induced by a map `f : X → P` on the
 generators under which every relator becomes trivial. -/
 noncomputable def lift (f : X → P) (h : ∀ r ∈ rels, freeProfiniteGroup.lift f r = 1) :
     presentedProfiniteGroup X rels →ₜ* P :=
   ⟨QuotientGroup.lift _ (freeProfiniteGroup.lift f).toMonoidHom
-      (topologicalClosure_normalClosure_le_ker_lift f h),
+      (Subgroup.topologicalClosure_normalClosure_le_ker
+        (map_continuous (freeProfiniteGroup.lift f)) h),
     (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr
       (map_continuous (freeProfiniteGroup.lift f))⟩
 
@@ -167,7 +160,9 @@ noncomputable def lift (f : X → P) (h : ∀ r ∈ rels, freeProfiniteGroup.lif
 @[simp]
 theorem lift_mk (f : X → P) (h : ∀ r ∈ rels, freeProfiniteGroup.lift f r = 1)
     (x : freeProfiniteGroup X) : lift f h (mk rels x) = freeProfiniteGroup.lift f x :=
-  QuotientGroup.lift_mk' _ (topologicalClosure_normalClosure_le_ker_lift f h) x
+  QuotientGroup.lift_mk' _
+    (Subgroup.topologicalClosure_normalClosure_le_ker
+      (map_continuous (freeProfiniteGroup.lift f)) h) x
 
 /-- The induced homomorphism agrees with `f` on each generator. -/
 @[simp]
