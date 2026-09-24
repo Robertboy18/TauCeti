@@ -94,9 +94,10 @@ theorem AddMonoidHom.coe_toPadicIntLinearMap (f : E →+ F) (hf : Continuous f) 
 /-- Reinterpret a continuous additive equivalence between two topological `ℤ_[p]`-modules as a
 continuous `ℤ_[p]`-linear equivalence. The prime is explicit because the equivalence does not
 determine it. -/
-noncomputable def AddEquiv.toPadicIntLinearEquiv (e : E ≃+ F) (h₁ : Continuous e)
+def AddEquiv.toPadicIntLinearEquiv (e : E ≃+ F) (h₁ : Continuous e)
     (h₂ : Continuous e.symm) : E ≃L[ℤ_[p]] F :=
-  { e.toLinearEquiv (TauCeti.map_padicInt_smul e h₁) with
+  -- Reuse the continuous linear map to keep the supplied functions computable.
+  { e, e.toAddMonoidHom.toPadicIntLinearMap p h₁ with
     continuous_toFun := h₁
     continuous_invFun := h₂ }
 
