@@ -140,6 +140,7 @@ theorem ofCusp_mem_cuspNhd_iff {C : Γ.CuspOrbit} : ofCusp C ∈ cuspNhd D A ↔
 theorem ofCusp_mem_cuspNhd : ofCusp D.cuspOrbit ∈ cuspNhd D A :=
   (ofCusp_mem_cuspNhd_iff D A).mpr rfl
 
+@[simp]
 theorem preimage_ofQuotient_cuspNhd :
     ofQuotient ⁻¹' cuspNhd D A = Quotient.mk (orbitRel Γ ℍ) '' horodisc D A := by
   ext p
@@ -224,19 +225,23 @@ theorem isOpenEmbedding_ofQuotient : IsOpenEmbedding (ofQuotient (Γ := Γ)) :=
   .of_continuous_injective_isOpenMap continuous_ofQuotient ofQuotient_injective
     isOpenMap_ofQuotient
 
+@[simp]
 theorem isOpen_range_ofQuotient : IsOpen (range (ofQuotient (Γ := Γ))) :=
   isOpenEmbedding_ofQuotient.isOpen_range
 
 /-- The cusp orbits form a closed subset of the compactified quotient. -/
+@[simp]
 theorem isClosed_range_ofCusp : IsClosed (range (ofCusp (Γ := Γ))) := by
   rw [← compl_range_ofQuotient]
   exact isOpen_range_ofQuotient.isClosed_compl
 
+@[simp]
 theorem isOpen_cuspNhd : IsOpen (cuspNhd D A) := by
   refine ⟨?_, fun C hC ↦ ⟨D, ((ofCusp_mem_cuspNhd_iff D A).mp hC).symm, A, subset_rfl⟩⟩
   rw [preimage_ofQuotient_cuspNhd]
   exact MulAction.isOpenQuotientMap_quotientMk.isOpenMap _ (isOpen_horodisc D A)
 
+@[simp]
 theorem cuspNhd_mem_nhds : cuspNhd D A ∈ 𝓝 (ofCusp D.cuspOrbit) :=
   (isOpen_cuspNhd D A).mem_nhds (ofCusp_mem_cuspNhd D A)
 
@@ -337,8 +342,7 @@ instance instSecondCountableTopology : SecondCountableTopology Γ.CompactifiedQu
     · cases x with
       | ofQuotient p =>
         obtain ⟨v, hv, hpv, hvu⟩ := (TopologicalSpace.isBasis_countableBasis
-          (orbitRel.Quotient Γ ℍ)).exists_subset_of_mem_open (show p ∈ ofQuotient ⁻¹' u from hx)
-          hu.1
+          (orbitRel.Quotient Γ ℍ)).exists_subset_of_mem_open hx hu.1
         exact ⟨ofQuotient '' v, Or.inl ⟨v, hv, rfl⟩, ⟨p, hpv, rfl⟩, image_subset_iff.mpr hvu⟩
       | ofCusp C =>
         obtain ⟨D', hD', A', hA'⟩ := hu.2 C hx
