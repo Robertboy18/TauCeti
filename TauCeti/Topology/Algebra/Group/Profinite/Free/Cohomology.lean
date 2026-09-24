@@ -6,19 +6,16 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologyComparison
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
-public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Extension
+public import TauCeti.Topology.Algebra.Group.Profinite.Free.Extension
 public import TauCeti.Topology.Algebra.GroupExtension.Cohomology
 
 /-!
 # `H²` of a free pro-`p` group vanishes
 
-Let `F = freeProP p X` be the free pro-`p` group on a type `X`, and let `1 → M → E → F → 1` be an
-extension of topological groups with profinite total group `E` and pro-`p` kernel `M`. Then `E` is
-pro-`p`, so the universal property of `F` extends any choice of preimages of the generators to a
-continuous homomorphism `F → E`, which is a section of the projection because both composites agree
-on the generators. So the extension splits by a continuous homomorphic section
-(`GroupExtension.exists_splitting_continuous_freeProP`).
+Let `F = freeProP p X` be the free pro-`p` group on a type `X`. Every extension `1 → M → E → F → 1`
+of topological groups with profinite total group `E` and pro-`p` kernel `M` splits by a continuous
+homomorphic section (`GroupExtension.exists_splitting_continuous_freeProP`, in
+`TauCeti.Topology.Algebra.Group.Profinite.Free.Extension`).
 
 Read through the classification of profinite extensions by continuous `H²`, this is the vanishing of
 the second continuous cohomology of a free pro-`p` group with coefficients in any profinite pro-`p`
@@ -33,8 +30,6 @@ the argument uses nothing else about `F`.
 
 ## Main results
 
-* `GroupExtension.exists_splitting_continuous_freeProP`: every profinite extension of a free
-  pro-`p` group by a pro-`p` group splits by a continuous homomorphic section.
 * `TauCeti.freeProP.subsingleton_H2`: **`H²(F, M) = 0`** for `F` free pro-`p` and `M` a profinite
   pro-`p` abelian `F`-module.
 * `TauCeti.freeProP.subsingleton_continuousCohomology_two`: the same in Mathlib's
@@ -57,31 +52,6 @@ open ContCohomology
 variable {p : ℕ} {X : Type u}
 
 namespace freeProP
-
-/-! ### Extensions of a free pro-`p` group split -/
-
-section Splitting
-
-variable {M : Type*} [Group M] [TopologicalSpace M]
-  {E : Type u} [Group E] [TopologicalSpace E] [IsTopologicalGroup E] [CompactSpace E]
-  [TotallyDisconnectedSpace E] (S : GroupExtension M E (freeProP p X))
-
-/-- **Extensions of a free pro-`p` group by a pro-`p` group split.** An extension
-`1 → M → E → freeProP p X → 1` of topological groups with profinite total group and pro-`p` kernel
-has a continuous homomorphic section. -/
-theorem _root_.GroupExtension.exists_splitting_continuous_freeProP (hinl : Continuous S.inl)
-    (hrh : Continuous S.rightHom) (hM : IsProP p M) : ∃ s : S.Splitting, Continuous ⇑s := by
-  have hE : IsProP p E := S.isProP hinl hrh hM (isProP_freeProP p X)
-  choose e he using fun x : X ↦ S.rightHom_surjective (of x)
-  -- The projection, bundled with its continuity; it evaluates as `S.rightHom` by construction.
-  let π : E →ₜ* freeProP p X := ⟨S.rightHom, hrh⟩
-  have hπ : ∀ z, π z = S.rightHom z := fun _ ↦ rfl
-  have hs : π.comp (lift hE e) = ContinuousMonoidHom.id (freeProP p X) :=
-    hom_ext fun x ↦ by simp [hπ, he]
-  exact ⟨GroupExtension.Splitting.mk (lift hE e).toMonoidHom fun y ↦ by
-    simpa [hπ] using DFunLike.congr_fun hs y, (lift hE e).continuous⟩
-
-end Splitting
 
 /-! ### The vanishing of `H²` -/
 
