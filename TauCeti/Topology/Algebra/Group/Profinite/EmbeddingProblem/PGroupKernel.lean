@@ -134,8 +134,7 @@ theorem HasElementaryAbelianSolutions.exists_comp_eq (h : HasElementaryAbelianSo
 /-- Under `HasElementaryAbelianSolutions p G`, every finite embedding problem `P` has, for every
 `k`, a solution modulo the `k`-th term `λ_k` of the lower `p`-central series of its kernel: there is
 a homomorphism `β : G → E ⧸ λ_k` with open kernel whose composite with the map `E ⧸ λ_k → Q` induced
-by `α` is `π`. This is proved by induction on `k` and is the engine of
-`TauCeti.HasElementaryAbelianSolutions.hasPGroupSolutions`. -/
+by `α` is `π`. This is the engine of `TauCeti.HasElementaryAbelianSolutions.hasPGroupSolutions`. -/
 private theorem HasElementaryAbelianSolutions.exists_comp_lift_pLowerCentralSeries_eq
     (h : HasElementaryAbelianSolutions p G) (P : FiniteEmbeddingProblem.{u, u, u} G) (k : ℕ) :
     ∃ β : G →* P.E ⧸ P.α.ker.pLowerCentralSeries p k, IsOpen (β.ker : Set G) ∧
@@ -179,9 +178,7 @@ private theorem HasElementaryAbelianSolutions.exists_comp_lift_pLowerCentralSeri
 
 /-- **Solvability with `p`-group kernel from solvability with elementary abelian kernel.** For a
 prime `p`, if every finite embedding problem for `G` with elementary abelian kernel has a solution,
-then every finite embedding problem for `G` whose kernel is a `p`-group has a solution. The proof
-filters the kernel by its lower `p`-central series, whose factors are elementary abelian, and lifts
-a solution through the filtration one stage at a time. -/
+then every finite embedding problem for `G` whose kernel is a `p`-group has a solution. -/
 theorem HasElementaryAbelianSolutions.hasPGroupSolutions [Fact p.Prime]
     (h : HasElementaryAbelianSolutions p G) : HasPGroupSolutions p G := by
   intro P hP
