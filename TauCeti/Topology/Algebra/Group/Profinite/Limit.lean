@@ -35,10 +35,11 @@ The unbundled workhorse of profinite group theory, phrased for the type-class st
   the quotient maps and `G` is compact, its image in every `G ⧸ U` is exactly `H U`
   (`map_mk'_limitSubgroup`). Conversely a closed subgroup is cut out by its own images
   (`limitSubgroup_map_mk'`), so the two constructions are mutually inverse.
-* The sequential forms of the limit description, along a sequence `N : ℕ → Subgroup G` of closed
-  subgroups of a compact group with trivial intersection in place of all open normal subgroups:
-  a compatible sequence of cosets comes from a unique element
-  (`existsUnique_forall_mk_eq_of_iInf_eq_bot`); when the `N k` are moreover normal and decreasing,
+* Sequential reconstruction along a sequence `N : ℕ → Subgroup G` of closed subgroups of a
+  compact group with trivial intersection: a coset sequence `x k` has a unique common representative
+  if every representative of `x (k + 1)` also represents `x k`
+  (`existsUnique_forall_mk_eq_of_iInf_eq_bot`). For decreasing `N`, this is the inverse-limit
+  description. When the `N k` are normal and decreasing,
   a compatible sequence of homomorphisms into the quotients `G ⧸ N k` comes from a unique
   homomorphism into `G` (`existsUnique_monoidHom_mk'_comp_eq_of_iInf_eq_bot`); when they are
   normal, a map into `G` is continuous as soon as its composites with the quotient maps are
@@ -249,8 +250,9 @@ end LimitSubgroup
 
 The limit description of a profinite group runs over all of its open normal subgroups. When a
 sequence `N : ℕ → Subgroup G` of closed subgroups of a compact group `G` has trivial intersection,
-the same identifications hold along that sequence: a compatible sequence of cosets is realized by a
-unique element; when the `N k` are moreover normal and decreasing, a compatible sequence of
+a coset sequence `x k` has a unique common representative if every representative of `x (k + 1)`
+also represents `x k`: the coset fibers are nested. For decreasing `N`, this is the inverse-limit
+description. When the `N k` are normal and decreasing, a compatible sequence of
 homomorphisms into the quotients `G ⧸ N k` is induced by a unique homomorphism into `G`; and when
 they are normal, continuity of a map into `G` can be tested one quotient at a time. When the `N k`
 are open and decreasing, they are a neighbourhood basis of `1`. The lower `p`-series of a pro-`p`
@@ -273,11 +275,11 @@ theorem eq_of_forall_mk_eq_of_iInf_eq_bot {ι : Type*} {N : ι → Subgroup G} (
 
 variable [TopologicalSpace G] [SeparatelyContinuousMul G] {N : ℕ → Subgroup G}
 
-/-- **Sequential limit description of a compact group.** A sequence of cosets of closed subgroups
-`N k` of a compact group `G` with trivial intersection, compatible along the quotient maps, is
-realized by a unique element of `G`: the natural map from `G` to the inverse limit of the
-quotients `G ⧸ N k` is bijective. Compatibility is stated on elements, so the `N k` need not be
-normal. -/
+/-- **Sequential coset reconstruction in a compact group.** Suppose the closed subgroups `N k`
+of a compact group `G` have trivial intersection, and let `x k : G ⧸ N k`. If every representative
+of `x (k + 1)` also represents `x k`, the coset fibers are nested and have a unique common
+representative in `G`. For decreasing `N`, this is the inverse-limit description of `G` using
+the coset spaces `G ⧸ N k`; normality is not required. -/
 theorem existsUnique_forall_mk_eq_of_iInf_eq_bot [CompactSpace G]
     (hclosed : ∀ k, IsClosed (N k : Set G)) (hN : ⨅ k, N k = ⊥) (x : ∀ k, G ⧸ N k)
     (hcompat : ∀ (k : ℕ) (g : G), (g : G ⧸ N (k + 1)) = x (k + 1) → (g : G ⧸ N k) = x k) :
