@@ -26,8 +26,9 @@ The statement records only a topological group isomorphism, not a `ℤ_[p]`-line
 for the canonical `p`-adic exponentiation `TauCeti.IsProP.module`. (Every continuous
 homomorphism between abelian pro-`p` groups commutes with `p`-adic exponentiation,
 `TauCeti.IsProP.map_padicPow`, so no information is lost, but no linear equivalence is packaged
-here.) The rank `r` and the exponents `e i` are the invariants of `A`; their uniqueness is not
-proved here. Nor is the identification of `T` with the torsion subgroup of `A`.
+here.) The rank `r` and the exponents `e i` are the invariants of `A`. The identification of `T`
+with the torsion subgroup of `A`, and the uniqueness of `r` and of `T` up to isomorphism, are
+proved in `TauCeti.Topology.Algebra.Group.Profinite.ProP.Torsion`.
 
 ## Main result
 

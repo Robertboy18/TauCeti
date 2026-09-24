@@ -1,0 +1,102 @@
+/-
+Copyright (c) 2026 The Tau Ceti contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The Tau Ceti contributors
+-/
+module
+
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Topology.Algebra.Module.Equiv
+public import Mathlib.Topology.Algebra.ContinuousMonoidHom
+public import Mathlib.LinearAlgebra.Dimension.Finrank
+import Mathlib.Algebra.Group.Equiv.TypeTags
+import Mathlib.LinearAlgebra.Dimension.Constructions
+
+/-!
+# Continuous additive maps between `ℤ_[p]`-modules are `ℤ_[p]`-linear
+
+A continuous additive map `f : E →+ F` between topological `ℤ_[p]`-modules is automatically
+`ℤ_[p]`-linear: it commutes with natural-number multiples, and `ℕ` is dense in `ℤ_[p]`. This is
+the `p`-adic counterpart of `map_real_smul`, proved by the same density argument.
+
+In particular the rank of a finite free `ℤ_[p]`-module is a topological invariant: a continuous
+additive isomorphism between two such modules preserves `Module.finrank`, and `ℤ_[p] ^ r` and
+`ℤ_[p] ^ r'` are topologically isomorphic groups only when `r = r'`.
+
+## Main results
+
+* `TauCeti.map_padicInt_smul`: a continuous additive map between topological `ℤ_[p]`-modules
+  commutes with scalar multiplication by `ℤ_[p]`.
+* `AddMonoidHom.toPadicIntLinearMap`, `AddEquiv.toPadicIntLinearEquiv`: the resulting continuous
+  `ℤ_[p]`-linear map and continuous `ℤ_[p]`-linear equivalence.
+* `AddEquiv.finrank_padicInt_eq`: a continuous additive isomorphism preserves the `ℤ_[p]`-rank.
+* `TauCeti.eq_of_continuousMulEquiv_pi_padicInt`: topologically isomorphic groups `ℤ_[p] ^ r` and
+  `ℤ_[p] ^ r'` have `r = r'`.
+-/
+
+public section
+
+variable {E : Type*} [AddCommGroup E] [TopologicalSpace E]
+  {F : Type*} [AddCommGroup F] [TopologicalSpace F] [T2Space F]
+
+section
+
+variable {p : ℕ} [Fact p.Prime] [Module ℤ_[p] E] [ContinuousSMul ℤ_[p] E] [Module ℤ_[p] F]
+  [ContinuousSMul ℤ_[p] F]
+
+/-- A continuous additive map between two topological `ℤ_[p]`-modules is `ℤ_[p]`-linear. -/
+theorem TauCeti.map_padicInt_smul {G : Type*} [FunLike G E F] [AddMonoidHomClass G E F] (f : G)
+    (hf : Continuous f) (c : ℤ_[p]) (x : E) : f (c • x) = c • f x :=
+  suffices (fun c : ℤ_[p] ↦ f (c • x)) = fun c : ℤ_[p] ↦ c • f x from congr_fun this c
+  PadicInt.denseRange_natCast.equalizer (hf.comp (continuous_id.smul continuous_const))
+    (continuous_id.smul continuous_const) (funext fun n ↦ by simp [Nat.cast_smul_eq_nsmul])
+
+/-- A continuous additive isomorphism between topological `ℤ_[p]`-modules preserves the
+`ℤ_[p]`-rank: the rank of a finite free `ℤ_[p]`-module is a topological invariant. -/
+theorem AddEquiv.finrank_padicInt_eq (e : E ≃+ F) (he : Continuous e) :
+    Module.finrank ℤ_[p] E = Module.finrank ℤ_[p] F :=
+  LinearEquiv.finrank_eq { e with map_smul' := TauCeti.map_padicInt_smul e he }
+
+/-- The rank of `ℤ_[p] ^ r` is a topological invariant: if the additive groups `ℤ_[p] ^ r` and
+`ℤ_[p] ^ r'`, written multiplicatively, are topologically isomorphic, then `r = r'`. -/
+theorem TauCeti.eq_of_continuousMulEquiv_pi_padicInt {r r' : ℕ}
+    (e : Multiplicative (Fin r → ℤ_[p]) ≃ₜ* Multiplicative (Fin r' → ℤ_[p])) : r = r' := by
+  have hf : Continuous (AddEquiv.toMultiplicative.symm e.toMulEquiv) :=
+    continuous_toAdd.comp (e.continuous.comp continuous_ofAdd)
+  simpa [Module.finrank_fin_fun] using
+    (AddEquiv.toMultiplicative.symm e.toMulEquiv).finrank_padicInt_eq (p := p) hf
+
+end
+
+section
+
+variable (p : ℕ) [Fact p.Prime] [Module ℤ_[p] E] [ContinuousSMul ℤ_[p] E] [Module ℤ_[p] F]
+  [ContinuousSMul ℤ_[p] F]
+
+/-- Reinterpret a continuous additive homomorphism between two topological `ℤ_[p]`-modules as a
+continuous `ℤ_[p]`-linear map. The prime is explicit because the map does not determine it. -/
+def AddMonoidHom.toPadicIntLinearMap (f : E →+ F) (hf : Continuous f) : E →L[ℤ_[p]] F :=
+  ⟨{ toFun := f
+     map_add' := f.map_add
+     map_smul' := TauCeti.map_padicInt_smul f hf }, hf⟩
+
+@[simp]
+theorem AddMonoidHom.coe_toPadicIntLinearMap (f : E →+ F) (hf : Continuous f) :
+    ⇑(f.toPadicIntLinearMap p hf) = f :=
+  (rfl)
+
+/-- Reinterpret a continuous additive equivalence between two topological `ℤ_[p]`-modules as a
+continuous `ℤ_[p]`-linear equivalence. The prime is explicit because the equivalence does not
+determine it. -/
+def AddEquiv.toPadicIntLinearEquiv (e : E ≃+ F) (h₁ : Continuous e) (h₂ : Continuous e.symm) :
+    E ≃L[ℤ_[p]] F :=
+  { e, e.toAddMonoidHom.toPadicIntLinearMap p h₁ with
+    continuous_toFun := h₁
+    continuous_invFun := h₂ }
+
+@[simp]
+theorem AddEquiv.coe_toPadicIntLinearEquiv (e : E ≃+ F) (h₁ : Continuous e)
+    (h₂ : Continuous e.symm) : ⇑(e.toPadicIntLinearEquiv p h₁ h₂) = e :=
+  (rfl)
+
+end
