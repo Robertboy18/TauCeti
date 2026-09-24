@@ -35,6 +35,16 @@ The unbundled workhorse of profinite group theory, phrased for the type-class st
   the quotient maps and `G` is compact, its image in every `G ⧸ U` is exactly `H U`
   (`map_mk'_limitSubgroup`). Conversely a closed subgroup is cut out by its own images
   (`limitSubgroup_map_mk'`), so the two constructions are mutually inverse.
+* The sequential forms of the limit description, along a sequence `N : ℕ → Subgroup G` of closed
+  subgroups of a compact group with trivial intersection in place of all open normal subgroups:
+  a compatible sequence of cosets comes from a unique element
+  (`existsUnique_forall_mk_eq_of_iInf_eq_bot`), a compatible sequence of homomorphisms into the
+  quotients `G ⧸ N k` from a unique homomorphism into `G`
+  (`existsUnique_monoidHom_mk'_comp_eq_of_iInf_eq_bot`), and when the `N k` are open and
+  decreasing they form a neighbourhood basis of `1` (`hasAntitoneBasis_nhds_one_of_iInf_eq_bot`),
+  in which case a map into `G` is continuous as soon as its composites with the quotient maps are
+  (`continuous_iff_forall_continuous_mk_of_hasBasis`). The lower `p`-series of a topologically
+  finitely generated pro-`p` group is such a sequence.
 -/
 
 public section
@@ -233,5 +243,121 @@ theorem map_mk'_limitSubgroup [CompactSpace G]
       (Set.mem_iInter.mp hg U).1⟩
 
 end LimitSubgroup
+
+/-! ### Sequential limit descriptions
+
+The limit description of a profinite group runs over all of its open normal subgroups. When a
+sequence `N : ℕ → Subgroup G` of closed subgroups of a compact group `G` has trivial intersection,
+the same identifications hold along that sequence: a compatible sequence of cosets is realized by a
+unique element, and a compatible sequence of homomorphisms into the quotients `G ⧸ N k` is induced
+by a unique homomorphism into `G`. When the `N k` are moreover open and decreasing, they are a
+neighbourhood basis of `1`, and continuity of a map into `G` can be tested one quotient at a time.
+The lower `p`-series of a topologically finitely generated pro-`p` group is such a sequence. -/
+
+section Sequential
+
+open Filter Topology
+
+variable {G : Type*} [Group G]
+
+/-- Two elements of a group with the same class modulo every member of a family of subgroups with
+trivial intersection are equal. -/
+theorem eq_of_forall_mk_eq_of_iInf_eq_bot {ι : Type*} {N : ι → Subgroup G} (hN : ⨅ i, N i = ⊥)
+    {x y : G} (h : ∀ i, (x : G ⧸ N i) = (y : G ⧸ N i)) : x = y := by
+  refine inv_mul_eq_one.mp ?_
+  rw [← Subgroup.mem_bot, ← hN, Subgroup.mem_iInf]
+  exact fun i ↦ QuotientGroup.eq.mp (h i)
+
+variable [TopologicalSpace G] [SeparatelyContinuousMul G] {N : ℕ → Subgroup G}
+
+/-- **Sequential limit description of a compact group.** A sequence of cosets of closed subgroups
+`N k` of a compact group `G` with trivial intersection, compatible along the quotient maps, is
+realized by a unique element of `G`: the natural map from `G` to the inverse limit of the
+quotients `G ⧸ N k` is bijective. Compatibility is stated on elements, so the `N k` need not be
+normal. -/
+theorem existsUnique_forall_mk_eq_of_iInf_eq_bot [CompactSpace G]
+    (hclosed : ∀ k, IsClosed (N k : Set G)) (hN : ⨅ k, N k = ⊥) (x : ∀ k, G ⧸ N k)
+    (hcompat : ∀ (k : ℕ) (g : G), (g : G ⧸ N (k + 1)) = x (k + 1) → (g : G ⧸ N k) = x k) :
+    ∃! g : G, ∀ k, (g : G ⧸ N k) = x k := by
+  have hcl (k : ℕ) : IsClosed ((QuotientGroup.mk : G → G ⧸ N k) ⁻¹' {x k}) := by
+    have : T1Space (G ⧸ N k) := QuotientGroup.t1Space_iff.mpr (hclosed k)
+    exact isClosed_singleton.preimage QuotientGroup.continuous_mk
+  obtain ⟨g, hg⟩ := IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
+    (fun k ↦ (QuotientGroup.mk : G → G ⧸ N k) ⁻¹' {x k}) (fun k g hg ↦ hcompat k g hg)
+    (fun k ↦ QuotientGroup.mk_surjective (x k)) (hcl 0).isCompact hcl
+  exact ⟨g, fun k ↦ Set.mem_iInter.mp hg k, fun g' hg' ↦ eq_of_forall_mk_eq_of_iInf_eq_bot hN
+    fun k ↦ (hg' k).trans (Set.mem_iInter.mp hg k).symm⟩
+
+/-- **Sequential limit description of a compact group, for homomorphisms.** A sequence of
+homomorphisms `x k : H →* G ⧸ N k` into the quotients of a compact group `G` by a decreasing
+sequence of closed normal subgroups with trivial intersection, compatible along the quotient maps,
+is induced by a unique homomorphism `H →* G`. -/
+theorem existsUnique_monoidHom_mk'_comp_eq_of_iInf_eq_bot [CompactSpace G] [∀ k, (N k).Normal]
+    {H : Type*} [MulOneClass H] (hle : ∀ k, N (k + 1) ≤ N k)
+    (hclosed : ∀ k, IsClosed (N k : Set G)) (hN : ⨅ k, N k = ⊥) (x : ∀ k, H →* G ⧸ N k)
+    (hx : ∀ k, (QuotientGroup.mapOfLE (hle k)).comp (x (k + 1)) = x k) :
+    ∃! φ : H →* G, ∀ k, (QuotientGroup.mk' (N k)).comp φ = x k := by
+  -- For a fixed `a : H`, the classes `x k a` form a compatible sequence of cosets, so the
+  -- sequential limit description realizes them by a unique element `φ a`.
+  have hcompat (a : H) (k : ℕ) (g : G) (hg : (g : G ⧸ N (k + 1)) = x (k + 1) a) :
+      (g : G ⧸ N k) = x k a := by
+    rw [← hx k, MonoidHom.comp_apply, ← hg, QuotientGroup.mapOfLE_mk]
+  choose φ hφ using fun a : H ↦
+    (existsUnique_forall_mk_eq_of_iInf_eq_bot hclosed hN (fun k ↦ x k a) (hcompat a)).exists
+  refine ⟨MonoidHom.mk' φ fun a b ↦ eq_of_forall_mk_eq_of_iInf_eq_bot hN fun k ↦ ?_,
+    fun k ↦ MonoidHom.ext (hφ · k), fun ψ hψ ↦ MonoidHom.ext fun a ↦
+      eq_of_forall_mk_eq_of_iInf_eq_bot hN fun k ↦ ?_⟩
+  · -- Multiplicativity is checked in every quotient, where it is that of `x k`.
+    calc (φ (a * b) : G ⧸ N k) = x k (a * b) := hφ (a * b) k
+      _ = x k a * x k b := map_mul _ _ _
+      _ = ((φ a * φ b : G) : G ⧸ N k) := by rw [QuotientGroup.mk_mul, ← hφ a k, ← hφ b k]
+  · exact (DFunLike.congr_fun (hψ k) a).trans (hφ a k).symm
+
+/-- **A decreasing sequence of open subgroups with trivial intersection is a neighbourhood basis
+of `1`** in a compact group. -/
+theorem hasAntitoneBasis_nhds_one_of_iInf_eq_bot [CompactSpace G] (hanti : Antitone N)
+    (hopen : ∀ k, IsOpen (N k : Set G)) (hN : ⨅ k, N k = ⊥) :
+    (𝓝 (1 : G)).HasAntitoneBasis fun k ↦ (N k : Set G) := by
+  refine ⟨hasBasis_iff.mpr fun t ↦ ⟨fun ht ↦ ?_, ?_⟩,
+    fun _ _ h ↦ SetLike.coe_subset_coe.mpr (hanti h)⟩
+  · obtain ⟨V, hVt, hVopen, hV⟩ := mem_nhds_iff.mp ht
+    -- If no `N k` lies inside `V`, the closed sets `N k \ V` are nonempty and decreasing, so by
+    -- compactness they have a common point, which lies in every `N k` and so is `1 ∈ V`.
+    by_contra! hcon
+    obtain ⟨g, hg⟩ := IsCompact.nonempty_iInter_of_sequence_nonempty_isCompact_isClosed
+      (fun k ↦ (N k : Set G) \ V) (fun k ↦ Set.sdiff_subset_sdiff_left (hanti (Nat.le_succ k)))
+      (fun k ↦ Set.sdiff_nonempty.mpr fun h ↦ hcon k trivial (h.trans hVt))
+      (((N 0).isClosed_of_isOpen (hopen 0)).sdiff hVopen).isCompact
+      fun k ↦ ((N k).isClosed_of_isOpen (hopen k)).sdiff hVopen
+    have hg1 : g = 1 := by
+      rw [← Subgroup.mem_bot, ← hN, Subgroup.mem_iInf]
+      exact fun k ↦ (Set.mem_iInter.mp hg k).1
+    exact (Set.mem_iInter.mp hg 0).2 (hg1 ▸ hV)
+  · rintro ⟨k, -, hk⟩
+    exact mem_of_superset ((hopen k).mem_nhds (N k).one_mem) hk
+
+/-- A map into a group `G` whose identity has a neighbourhood basis of subgroups `N i` is
+continuous exactly when all of its composites with the quotient maps `G → G ⧸ N i` are. The
+subgroups are open, being neighbourhoods of `1`, so the quotients are discrete and continuity of a
+map built from the sequential limit description can be checked one quotient at a time. -/
+theorem continuous_iff_forall_continuous_mk_of_hasBasis {ι : Type*} {N : ι → Subgroup G}
+    {X : Type*} [TopologicalSpace X] {f : X → G}
+    (hbasis : (𝓝 (1 : G)).HasBasis (fun _ : ι ↦ True) fun i ↦ (N i : Set G)) :
+    Continuous f ↔ ∀ i, Continuous fun x ↦ (f x : G ⧸ N i) := by
+  refine ⟨fun hf i ↦ QuotientGroup.continuous_mk.comp hf, fun h ↦ ?_⟩
+  refine continuous_iff_continuousAt.mpr fun x₀ ↦ tendsto_def.mpr fun V hV ↦ ?_
+  obtain ⟨W, hWV, hWopen, hWx⟩ := mem_nhds_iff.mp hV
+  -- A subgroup `N i` small enough that the coset `f x₀ * N i` stays inside `W`.
+  obtain ⟨i, -, hi⟩ := hbasis.mem_iff.mp
+    ((hWopen.preimage (continuous_const_mul (f x₀))).mem_nhds (by simpa using hWx))
+  have : DiscreteTopology (G ⧸ N i) :=
+    QuotientGroup.discreteTopology ((N i).isOpen_of_mem_nhds (hbasis.mem_of_mem trivial))
+  refine mem_of_superset (((h i).isOpen_preimage _ (isOpen_discrete {(f x₀ : G ⧸ N i)})).mem_nhds
+    rfl) fun x hx ↦ ?_
+  have hmem : (f x₀)⁻¹ * f x ∈ N i := by
+    simpa using (N i).inv_mem (QuotientGroup.eq.mp hx)
+  exact hWV (by simpa using hi hmem)
+
+end Sequential
 
 end TauCeti
