@@ -14,15 +14,15 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Sylow.Functoriality
 
 In a commutative profinite group `G`, a Sylow pro-`p` subgroup `P` maps isomorphically onto the
 maximal pro-`p` quotient `G(p) = G ⧸ proPKernel p G`: the restriction of the quotient map to `P`
-is a topological group isomorphism `P ≃ₜ* G(p)`. Surjectivity is the functoriality of Sylow
-subgroups, since the image of `P` is a Sylow pro-`p` subgroup of the pro-`p` group `G(p)`.
-Injectivity is where commutativity enters: a nontrivial element of `P` has nontrivial image of
-`p`-power order in some finite quotient `G ⧸ U`, and in a finite commutative group such an
-element survives in a `p`-group quotient, so it lies outside the pro-`p` kernel.
+is a topological group isomorphism `P ≃ₜ* G(p)`. In particular a pro-`p` subgroup of `G` meets
+the pro-`p` kernel trivially. Conversely, a closed subgroup that maps bijectively onto `G(p)` is
+Sylow pro-`p`, so the bijection characterizes the Sylow pro-`p` subgroups of a commutative
+profinite group.
 
-Conversely, a closed subgroup that maps bijectively onto `G(p)` is Sylow pro-`p`, so the
-bijection characterizes the Sylow pro-`p` subgroups of a commutative profinite group. This is the
-form in which the `p`-Sylow subgroups of the profinite integers are identified with `ℤ_p`.
+The isomorphism transfers questions about a Sylow pro-`p` subgroup, a subgroup of `G`, to the
+maximal pro-`p` quotient, a quotient of `G` determined by its universal property. This is the
+form in which the `p`-Sylow subgroups of the profinite integers are identified with `ℤ_p`, in
+`TauCeti.Topology.Algebra.Group.Profinite.ZHat.PadicInt`.
 
 ## Main results
 

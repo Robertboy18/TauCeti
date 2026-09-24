@@ -101,7 +101,7 @@ theorem exists_isPGroup_quotient_notMem_of_pow_pow_eq_one {A : Type*} [Group A]
     [IsMulCommutative A] [Finite A] [hp : Fact p.Prime] {a : A} {k : ℕ} (ha : a ^ p ^ k = 1)
     (ha1 : a ≠ 1) : ∃ N : Subgroup A, IsPGroup p (A ⧸ N) ∧ a ∉ N := by
   let f : A →* A := MonoidHom.mk' (fun b ↦ b ^ ordCompl[p] (Nat.card A))
-    fun b c ↦ Commute.mul_pow (show Commute b c from mul_comm' b c) _
+    fun b c ↦ Commute.mul_pow ((commute_iff_eq b c).mpr (mul_comm' b c)) _
   refine ⟨f.ker, ?_, fun h ↦ ha1 ?_⟩
   · -- The quotient by the kernel is the range, whose elements are killed by `ordProj[p]`.
     refine IsPGroup.of_equiv ?_ (QuotientGroup.quotientKerEquivRange f).symm
