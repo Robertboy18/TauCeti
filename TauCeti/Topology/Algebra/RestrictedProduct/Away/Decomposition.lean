@@ -21,21 +21,17 @@ finitely many indices never affect restrictedness, and its restriction away from
 shape in which an adelic group is split into the local groups at a finite set of places times the
 restricted product over the remaining places.
 
-The decomposition `awayDecomposition S hS U` is not built from scratch. It is the composite of
-three equivalences that are each coordinatewise the identity: reindexing along
-`Equiv.sumCompl (· ∈ S)` (`restrictedProductReindex`), the splitting of a restricted product over a
-sum of index types (`restrictedProductSum`), and the collapse of the restricted product over the
-finite index type `S` to the plain product (`restrictedProductOfFinite`). Its coordinate formulas
-in both directions are the compositions of theirs, and its second component is the restriction
-`restrictAway S U`.
+The decomposition `awayDecomposition S hS U` is the composite of three equivalences that are each
+coordinatewise the identity: reindexing along `Equiv.sumCompl (· ∈ S)`
+(`restrictedProductReindex`), the splitting of a restricted product over a sum of index types
+(`restrictedProductSum`), and the collapse of the restricted product over the finite index type
+`S` to the plain product (`restrictedProductOfFinite`). It is pinned by its coordinate formulas in
+both directions, and its second component is the restriction `restrictAway S U`.
 
-The decomposition is continuous for every reference family, since each of the three steps is. Its
-inverse is a map out of a product with a restricted-product factor, and is continuous when the
-reference subgroups **away from `S`** are open
-(`continuous_restrictedProduct_of_apply_eq_of_isOpen`, Mathlib's
-`RestrictedProduct.continuous_dom_prod_left` with the finite product as parameter space); the
-reference subgroups at `S` play no role, as the finite factor carries no integrality condition.
-The openness hypothesis cannot be dropped: see `not_continuous_awayDecomposition_symm`.
+The decomposition is continuous for every reference family. Its inverse is continuous when the
+reference subgroups **away from `S`** are open; the reference subgroups at `S` play no role, as
+the finite factor carries no integrality condition. The openness hypothesis cannot be dropped: see
+`not_continuous_awayDecomposition_symm`.
 
 ## References
 
@@ -100,8 +96,10 @@ theorem awayDecomposition_fst (x : RestrictedProductGroup U) (i : S) :
   -- `h` is the goal up to the computation rule `Equiv.sumCompl_apply_inl`, which holds by `rfl`.
   exact h
 
-/-- The second component of the decomposition records the coordinates away from `S`. -/
-@[simp]
+/-- The second component of the decomposition records the coordinates away from `S`.
+
+Not a `simp` lemma: `simp` proves it from `awayDecomposition_snd_eq_restrictAway` and
+`restrictAway_apply`. -/
 theorem awayDecomposition_snd (x : RestrictedProductGroup U) (j : {i // i ∉ S}) :
     (awayDecomposition S hS U x).2 j = x j := by
   let _ : DecidablePred (· ∈ S) := Classical.decPred _
@@ -113,10 +111,11 @@ theorem awayDecomposition_snd (x : RestrictedProductGroup U) (j : {i // i ∉ S}
   exact h
 
 /-- The second component of the decomposition is the restriction away from `S`. -/
+@[simp]
 theorem awayDecomposition_snd_eq_restrictAway (x : RestrictedProductGroup U) :
     (awayDecomposition S hS U x).2 = restrictAway S U x := by
   ext j
-  simp
+  simp [awayDecomposition_snd]
 
 /-- At an index `i ∈ S`, the inverse of the decomposition reads its coordinate off the plain
 product over `S`. -/
@@ -142,11 +141,11 @@ theorem awayDecomposition_symm_apply_of_notMem
 
 variable [∀ i, TopologicalSpace (G i)]
 
-/-- The decomposition is continuous for every reference family: each of its three steps is a
-continuous map out of a single restricted product. -/
+/-- The decomposition is continuous for every reference family. -/
 theorem continuous_awayDecomposition : Continuous (awayDecomposition S hS U) := by
   let _ : DecidablePred (· ∈ S) := Classical.decPred _
   have : Finite S := hS.to_subtype
+  -- Each of the three steps is a continuous map out of a single restricted product.
   have hc : Continuous ((restrictedProductReindex U (Equiv.sumCompl (· ∈ S))).trans
       (restrictedProductSum fun k ↦ U (Equiv.sumCompl (· ∈ S) k))) :=
     (continuous_restrictedProductSum _).comp (continuous_restrictedProductReindex U _)
@@ -159,6 +158,7 @@ condition. Together with `continuous_awayDecomposition` this makes the decomposi
 homeomorphism for such families. -/
 theorem continuous_awayDecomposition_symm (hU : ∀ i ∉ S, IsOpen (U i : Set (G i))) :
     Continuous (awayDecomposition S hS U).symm :=
+  -- A map out of a product with a restricted-product factor, coordinatewise the identity.
   continuous_restrictedProduct_of_apply_eq_of_isOpen hS hU
     (fun y i ↦ awayDecomposition_symm_apply_of_mem S hS U y i.1 i.2)
     fun y j ↦ awayDecomposition_symm_apply_of_notMem S hS U y j.1 j.2
