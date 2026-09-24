@@ -29,15 +29,18 @@ modules in Labute's classification of Demushkin groups are studied.
 It is an `R`-algebra; each group element `γ` gives an element `of R Γ γ`, the family of its
 classes, and each open normal subgroup `U` gives the projection `proj R Γ U` onto `R[Γ ⧸ U]`,
 which is surjective. Two elements with the same projections are equal, and these two facts are
-the inverse-limit description of the algebra.
+the inverse-limit description of the algebra. Its universal property is `lift`: a compatible
+family of `R`-algebra homomorphisms into the levels `R[Γ ⧸ U]` assembles into an `R`-algebra
+homomorphism into `R[[Γ]]`, unique with the prescribed projections (`algHom_ext`).
 
 When `R` is a topological ring, the completed group algebra carries the inverse-limit topology:
 the coarsest topology making every coefficient of every projection continuous. Scalar
-multiplication by `R` is continuous when multiplication in `R` is. If `Γ` is compact, its open
-normal quotients are finite and the completed algebra is a topological ring. Under the same
-compactness assumption on `Γ`, it is compact when `R` is compact Hausdorff. It is totally
-disconnected when `R` is, and the map from `Γ` is continuous. It is commutative when `Γ` is,
-stated as the `IsMulCommutative` mixin so that no second ring structure is installed.
+multiplication by `R` is continuous when multiplication in `R` is. When every open normal
+quotient `Γ ⧸ U` is finite, as it is for a compact `Γ` with separately continuous
+multiplication, the completed algebra is a topological ring, and it is compact when `R` is
+compact Hausdorff. It is totally disconnected when `R` is, and the map from `Γ` is continuous.
+It is commutative when `Γ` is, stated as the `IsMulCommutative` mixin so that no second ring
+structure is installed.
 
 For a general topological group `Γ` the map `of R Γ` need not be injective and the algebra may be
 commutative without `Γ` being so (both happen for an indiscrete `Γ`, whose only open normal
@@ -53,6 +56,8 @@ commutative exactly when `Γ` is (`isMulCommutative_iff`).
 * `TauCeti.completedGroupAlgebra.of R Γ`: the group elements inside `R[[Γ]]`.
 * `TauCeti.completedGroupAlgebra.mk`: an element from a compatible family of elements
   of the group algebras `R[Γ ⧸ U]`.
+* `TauCeti.completedGroupAlgebra.lift`: the `R`-algebra homomorphism into `R[[Γ]]` assembled
+  from a compatible family of `R`-algebra homomorphisms into the group algebras `R[Γ ⧸ U]`.
 * `TauCeti.completedGroupAlgebra.coeffFamily R Γ`: all coefficients of all projections, the map
   along which the topology is induced.
 
@@ -60,6 +65,9 @@ commutative exactly when `Γ` is (`isMulCommutative_iff`).
 
 * `TauCeti.completedGroupAlgebra.ext`, `TauCeti.completedGroupAlgebra.proj_surjective`: the
   inverse-limit description.
+* `TauCeti.completedGroupAlgebra.proj_lift`, `TauCeti.completedGroupAlgebra.algHom_ext`: the
+  universal property, an algebra homomorphism into `R[[Γ]]` is determined by its compositions
+  with the projections and `lift` has the prescribed ones.
 * `TauCeti.completedGroupAlgebra.proj_of`: a group element projects to the corresponding basis
   element of the quotient group algebra.
 * `TauCeti.completedGroupAlgebra.isEmbedding_coeffFamily`,
@@ -181,6 +189,53 @@ theorem proj_mk (x : ∀ U : OpenNormalSubgroup Γ, MonoidAlgebra R (Γ ⧸ U.to
     (U : OpenNormalSubgroup Γ) :
     proj R Γ U (mk R Γ x hx) = x U :=
   (rfl)
+
+section Lift
+
+variable {A : Type*} [Semiring A] [Algebra R A]
+
+/-- The universal property of the completed group algebra: a family of `R`-algebra
+homomorphisms `f U : A →ₐ[R] R[Γ ⧸ U]`, compatible along the maps induced by the quotient maps
+`Γ ⧸ U → Γ ⧸ V` for `U ≤ V`, assembles into an `R`-algebra homomorphism `A →ₐ[R] R[[Γ]]`
+whose projection at `U` is `f U` (`proj_lift`). It is the unique such homomorphism
+(`algHom_ext`). -/
+noncomputable def lift (f : ∀ U : OpenNormalSubgroup Γ, A →ₐ[R] MonoidAlgebra R (Γ ⧸ U.toSubgroup))
+    (hf : ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V) (a : A),
+      MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (f U a) = f V a) :
+    A →ₐ[R] completedGroupAlgebra R Γ where
+  toFun a := mk R Γ (fun U ↦ f U a) fun _ _ hUV ↦ hf hUV a
+  map_one' := ext fun U ↦ by simp
+  map_mul' a b := ext fun U ↦ by simp
+  map_zero' := ext fun U ↦ by simp
+  map_add' a b := ext fun U ↦ by simp
+  commutes' r := ext fun U ↦ by simp
+
+/-- The projection of the lift of a compatible family `f` at `U` is `f U`. -/
+@[simp]
+theorem proj_lift (f : ∀ U : OpenNormalSubgroup Γ, A →ₐ[R] MonoidAlgebra R (Γ ⧸ U.toSubgroup))
+    (hf : ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V) (a : A),
+      MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (f U a) = f V a)
+    (U : OpenNormalSubgroup Γ) (a : A) :
+    proj R Γ U (lift R Γ f hf a) = f U a :=
+  (rfl)
+
+/-- The lift of a compatible family `f` composed with the projection at `U` is `f U`. -/
+theorem proj_comp_lift
+    (f : ∀ U : OpenNormalSubgroup Γ, A →ₐ[R] MonoidAlgebra R (Γ ⧸ U.toSubgroup))
+    (hf : ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V) (a : A),
+      MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (f U a) = f V a)
+    (U : OpenNormalSubgroup Γ) :
+    (proj R Γ U).comp (lift R Γ f hf) = f U :=
+  AlgHom.ext fun a ↦ proj_lift R Γ f hf U a
+
+variable {R Γ} in
+/-- Two `R`-algebra homomorphisms into the completed group algebra with the same compositions
+with every projection are equal; this is the uniqueness half of the universal property. -/
+theorem algHom_ext {g₁ g₂ : A →ₐ[R] completedGroupAlgebra R Γ}
+    (h : ∀ U, (proj R Γ U).comp g₁ = (proj R Γ U).comp g₂) : g₁ = g₂ :=
+  AlgHom.ext fun a ↦ ext fun U ↦ AlgHom.congr_fun (h U) a
+
+end Lift
 
 /-- The group elements inside the completed group algebra: `γ` goes to the family of the basis
 elements at its classes in the quotients `Γ ⧸ U`. This is the analogue of `MonoidAlgebra.of`;
@@ -333,10 +388,19 @@ theorem continuous_of [SeparatelyContinuousMul Γ] : Continuous (of R Γ) := by
     (f := fun q : Γ ⧸ U.toSubgroup ↦ (MonoidAlgebra.single q (1 : R)).coeff g)).comp
     (QuotientGroup.continuous_mk (N := U.toSubgroup))
 
-section CompactGroup
+section FiniteQuotients
 
-variable [SeparatelyContinuousMul Γ] [CompactSpace Γ]
+/-! The results of this section assume that every open normal quotient `Γ ⧸ U` is finite, so
+that each coefficient of a product at `U` is a finite sum of products of coefficients
+(`coeff_proj_mul`). For a compact `Γ` with separately continuous multiplication this hypothesis
+is Mathlib's instance `Finite (Γ ⧸ U.toSubgroup)` for open subgroups `U`, so the instances
+below apply to compact groups without further assumptions. -/
 
+variable [∀ U : OpenNormalSubgroup Γ, Finite (Γ ⧸ U.toSubgroup)]
+
+/-- When every open normal quotient of `Γ` is finite, multiplication in the completed group
+algebra is continuous: each coefficient of a product is a finite sum of products of
+coefficients. -/
 instance [IsTopologicalSemiring R] : ContinuousMul (completedGroupAlgebra R Γ) where
   continuous_mul := by
     refine continuous_iff.mpr fun U g ↦ ?_
@@ -346,8 +410,8 @@ instance [IsTopologicalSemiring R] : ContinuousMul (completedGroupAlgebra R Γ) 
       ((continuous_coeff_proj R Γ U h).comp continuous_fst).mul
         ((continuous_coeff_proj R Γ U _).comp continuous_snd)
 
-/-- The completed group algebra of a compact group over a topological ring is a topological
-ring. -/
+/-- When every open normal quotient of `Γ` is finite, the completed group algebra over a
+topological ring is a topological ring. -/
 instance [IsTopologicalRing R] : IsTopologicalRing (completedGroupAlgebra R Γ) where
 
 /-- The compatible coefficient families form a closed subset of the product of copies of `R`,
@@ -390,13 +454,13 @@ theorem isClosedEmbedding_coeffFamily [T2Space R] [ContinuousAdd R] :
     · exact (continuous_apply a).comp (continuous_apply U)
     · exact continuous_const
 
-/-- The completed group algebra of a compact group over a compact Hausdorff ring with continuous
-addition is compact. -/
+/-- When every open normal quotient of `Γ` is finite, the completed group algebra over a
+compact Hausdorff ring with continuous addition is compact. -/
 instance [T2Space R] [CompactSpace R] [ContinuousAdd R] :
     CompactSpace (completedGroupAlgebra R Γ) :=
   (isClosedEmbedding_coeffFamily R Γ).compactSpace
 
-end CompactGroup
+end FiniteQuotients
 
 /-- Over a nontrivial Hausdorff coefficient ring, the group elements of a profinite group form a
 closed subset of the completed group algebra homeomorphic to the group. -/
