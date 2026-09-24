@@ -8,6 +8,7 @@ module
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
 public import TauCeti.Topology.Algebra.Group.Profinite.Rank
 public import TauCeti.Topology.Algebra.Group.Subgroup
+import TauCeti.GroupTheory.QuotientGroup.KerEquiv
 
 /-!
 # Presented pro-`p` groups
@@ -24,10 +25,10 @@ only needs a Hausdorff target, in any universe, while existence needs `P` profin
 the universe of `X`. With no relators the presented group is the free pro-`p` group.
 
 Every Hausdorff group that is a continuous image of `freeProP p X` is presented on `X`, with the
-kernel as its set of relators (`presentedProP.equivOfSurjective`). Consequently a topologically
-finitely generated pro-`p` group `G` has a presentation on any finite type with at least
-`topologicalGeneratorRankNat G` elements; a presentation on exactly that many generators is what
-is called a **minimal presentation** of `G`.
+kernel as its set of relators (`presentedProP.equivOfSurjective`). Combined with
+`IsProP.exists_surjective_freeProP`, a topologically finitely generated pro-`p` group `G` has a
+presentation on any finite type with at least `topologicalGeneratorRankNat G` elements; a
+presentation on exactly that many generators is what is called a **minimal presentation** of `G`.
 
 ## Main definitions
 
@@ -49,11 +50,9 @@ is called a **minimal presentation** of `G`.
 * `TauCeti.presentedProP.lift_surjective`: a topologically generating map lifts to a surjection.
 * `TauCeti.isTopologicallyFinitelyGenerated_presentedProP`: a group presented on a finite type is
   topologically finitely generated.
-* `TauCeti.IsProP.exists_surjective_freeProP`: a topologically finitely generated pro-`p` group is
-  a continuous image of the free pro-`p` group on any finite type with at least
-  `topologicalGeneratorRankNat` elements.
-* `TauCeti.IsProP.exists_continuousMulEquiv_presentedProP`: hence it has a presentation on any
-  such type.
+* `TauCeti.IsProP.exists_continuousMulEquiv_presentedProP`: a topologically finitely generated
+  pro-`p` group has a presentation on any finite type with at least `topologicalGeneratorRankNat`
+  elements.
 
 ## References
 
@@ -96,16 +95,20 @@ theorem mk_surjective : Function.Surjective (mk rels) :=
   QuotientGroup.mk'_surjective _
 
 /-- The kernel of the canonical projection is the closed normal closure of the relators. -/
-theorem ker_mk : (mk rels).toMonoidHom.ker = (Subgroup.normalClosure rels).topologicalClosure :=
+@[simp]
+theorem ker_mk : (mk rels : freeProP p X →* presentedProP p X rels).ker =
+    (Subgroup.normalClosure rels).topologicalClosure :=
   QuotientGroup.ker_mk' _
 
 /-- An element of the free pro-`p` group dies in the presented pro-`p` group exactly when it lies
 in the closed normal closure of the relators. -/
+@[simp]
 theorem mk_eq_one_iff {x : freeProP p X} :
     mk rels x = 1 ↔ x ∈ (Subgroup.normalClosure rels).topologicalClosure :=
   QuotientGroup.eq_one_iff x
 
 /-- Every relator dies in the presented pro-`p` group. -/
+@[simp]
 theorem mk_eq_one_of_mem {r : freeProP p X} (hr : r ∈ rels) : mk rels r = 1 :=
   (mk_eq_one_iff rels).mpr <|
     (Subgroup.normalClosure rels).le_topologicalClosure (Subgroup.subset_normalClosure hr)
@@ -299,9 +302,7 @@ private noncomputable def mulEquivOfSurjective (φ : freeProP p X →ₜ* G)
 private theorem mulEquivOfSurjective_mk (φ : freeProP p X →ₜ* G) (hφ : Function.Surjective φ)
     (x : freeProP p X) : mulEquivOfSurjective φ hφ (mk _ x) = φ x := by
   rw [mulEquivOfSurjective, mk_apply, MulEquiv.trans_apply, QuotientGroup.quotientMulEquivOfEq_mk]
-  unfold QuotientGroup.quotientKerEquivOfSurjective
-  rw [QuotientGroup.quotientKerEquivOfRightInverse_apply]
-  rfl
+  exact TauCeti.QuotientGroup.quotientKerEquivOfSurjective_apply_mk (φ : freeProP p X →* G) hφ x
 
 /-- A Hausdorff group that is a continuous image of the free pro-`p` group on `X` is presented on
 `X`, with the kernel as its set of relators. -/
@@ -337,26 +338,6 @@ section Existence
 
 variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [CompactSpace G] [TotallyDisconnectedSpace G]
-
-/-- A topologically finitely generated pro-`p` group is a continuous image of the free pro-`p`
-group on any finite type with at least `topologicalGeneratorRankNat G` elements. -/
-theorem IsProP.exists_surjective_freeProP (hG : IsProP p G) (h : IsTopologicallyFinitelyGenerated G)
-    (X : Type u) [Finite X] (hX : topologicalGeneratorRankNat G h ≤ Nat.card X) :
-    ∃ φ : freeProP p X →ₜ* G, Function.Surjective φ := by
-  classical
-  obtain ⟨s, hs, hgen⟩ := exists_finset_card_eq_topologicalGeneratorRankNat h
-  have _ : Fintype X := Fintype.ofFinite X
-  obtain ⟨e⟩ : Nonempty (s ↪ X) :=
-    Function.Embedding.nonempty_of_card_le (by
-      rw [← Nat.card_eq_fintype_card, ← Nat.card_eq_fintype_card, Nat.card_eq_finsetCard, hs]
-      exact hX)
-  -- Send the image of `s` under `e` back to `s`, and everything else to `1`.
-  let f : X → G := Function.extend e Subtype.val fun _ ↦ 1
-  refine ⟨freeProP.lift hG f, freeProP.lift_surjective hG ?_⟩
-  have hsub : (s : Set G) ⊆ Set.range f := fun a ha ↦
-    ⟨e ⟨a, ha⟩, by simp [f, e.injective.extend_apply]⟩
-  refine Dense.mono (SetLike.coe_subset_coe.mpr (Subgroup.closure_mono hsub)) ?_
-  rw [dense_iff_closure_eq, ← Subgroup.topologicalClosure_coe, hgen, Subgroup.coe_top]
 
 /-- **Every topologically finitely generated pro-`p` group has a presentation** on any finite type
 with at least `topologicalGeneratorRankNat G` elements, in particular on a type with exactly

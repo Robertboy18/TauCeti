@@ -80,16 +80,20 @@ theorem mk_surjective : Function.Surjective (mk rels) :=
   QuotientGroup.mk'_surjective _
 
 /-- The kernel of the canonical projection is the closed normal closure of the relators. -/
-theorem ker_mk : (mk rels).toMonoidHom.ker = (Subgroup.normalClosure rels).topologicalClosure :=
+@[simp]
+theorem ker_mk : (mk rels : freeProfiniteGroup X →* presentedProfiniteGroup X rels).ker =
+    (Subgroup.normalClosure rels).topologicalClosure :=
   QuotientGroup.ker_mk' _
 
 /-- An element of the free profinite group dies in the presented profinite group exactly when it
 lies in the closed normal closure of the relators. -/
+@[simp]
 theorem mk_eq_one_iff {x : freeProfiniteGroup X} :
     mk rels x = 1 ↔ x ∈ (Subgroup.normalClosure rels).topologicalClosure :=
   QuotientGroup.eq_one_iff x
 
 /-- Every relator dies in the presented profinite group. -/
+@[simp]
 theorem mk_eq_one_of_mem {r : freeProfiniteGroup X} (hr : r ∈ rels) : mk rels r = 1 :=
   (mk_eq_one_iff rels).mpr <|
     (Subgroup.normalClosure rels).le_topologicalClosure (Subgroup.subset_normalClosure hr)
