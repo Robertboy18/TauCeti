@@ -219,6 +219,7 @@ instance instCommGroupQuotientPLowerCentralSeries (k : ℕ) :
       (pLowerCentralSeries_antitone (by omega) (commutator_mem_pLowerCentralSeries x.2 y.2))).eq
 
 /-- **The graded pieces are killed by `p`.** -/
+@[simp]
 theorem nsmul_gradedPiece_eq_zero {k : ℕ} (x : gradedPiece p G k) : p • x = 0 := by
   obtain ⟨y, rfl⟩ := gradedMk_surjective k x
   rw [← gradedMk_pow, gradedMk_eq_zero_iff, coe_pow]
@@ -619,6 +620,7 @@ theorem gradedMap_id (k : ℕ) :
 
 /-- The graded map induced by a composite is the composite of the graded maps: `gr_k` is a
 functor. -/
+@[simp]
 theorem gradedMap_comp (g : H →* K) (hg : Continuous g) (f : G →* H) (hf : Continuous f) (k : ℕ) :
     gradedMap p (g.comp f) (hg.comp hf) k = (gradedMap p g hg k).comp (gradedMap p f hf k) := by
   refine AddMonoidHom.ext fun x => ?_
@@ -641,6 +643,7 @@ theorem gradedMap_surjective (f : G →* H) (hf : Continuous f) (hfc : IsClosedM
   exact Subtype.ext hxy
 
 /-- **Naturality of the bracket.** -/
+@[simp]
 theorem gradedMap_gradedBracket (f : G →* H) (hf : Continuous f) {j k : ℕ} (x : gradedPiece p G j)
     (y : gradedPiece p G k) :
     gradedMap p f hf (j + k + 1) (gradedBracket p G j k x y) =
@@ -653,6 +656,7 @@ theorem gradedMap_gradedBracket (f : G →* H) (hf : Continuous f) {j k : ℕ} (
   exact Subtype.ext (map_commutatorElement f _ _)
 
 /-- **Naturality of the `p`-power operator.** -/
+@[simp]
 theorem gradedMap_gradedPow (f : G →* H) (hf : Continuous f) {k : ℕ} (x : gradedPiece p G k) :
     gradedMap p f hf (k + 1) (gradedPow p G k x) = gradedPow p H k (gradedMap p f hf k x) := by
   obtain ⟨x, rfl⟩ := gradedMk_surjective k x
