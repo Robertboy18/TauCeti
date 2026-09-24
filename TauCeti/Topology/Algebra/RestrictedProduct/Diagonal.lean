@@ -131,7 +131,7 @@ theorem rationalDiagonal_change_family {Γ : Type w} [MulOneClass Γ] (φ : ∀ 
     (hU : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U i)
     (hU' : ∀ γ : Γ, ∀ᶠ i in cofinite, φ i γ ∈ U' i)
     (h : ∀ᶠ i in cofinite, U i = U' i) :
-    (restrictedProductCongr U U' h).toMonoidHom.comp (rationalDiagonal φ U hU) =
+    (restrictedProductCongr U U' h : _ →* _).comp (rationalDiagonal φ U hU) =
       rationalDiagonal φ U' hU' := by
   ext γ i
   simp
