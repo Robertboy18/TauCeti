@@ -8,7 +8,6 @@ module
 public import Mathlib.LinearAlgebra.BilinearForm.IsometryEquiv
 public import Mathlib.LinearAlgebra.Matrix.BilinearForm
 public import TauCeti.LinearAlgebra.BilinearForm.SymplecticBasis
-import Mathlib.LinearAlgebra.Basis.Fin
 import Mathlib.LinearAlgebra.Basis.SMul
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.Tactic.LinearCombination
@@ -121,32 +120,6 @@ private theorem IsSymm.exists_apply_self_ne_zero_and_restrict_orthogonal_isAlt_i
       hB.exists_apply_self_ne_zero_and_not_isAlt_restrict_orthogonal hx hW.1 hW.2
     exact ⟨y, hy, fun h' => (hy' h').elim⟩
   · exact ⟨x, hx, fun h' => not_not.1 (not_and.1 hW h')⟩
-
-/-- Adjoining a non-isotropic vector `x` to an orthogonal basis of the orthogonal complement of
-`x` gives an orthogonal basis of the whole space, for a reflexive form. -/
-theorem IsRefl.exists_orthogonal_basis_of_orthogonal_span_singleton (hB : B.IsRefl) {x : V}
-    (hx : B x x ≠ 0) {d : ℕ} {v : Basis (Fin d) K (B.orthogonal (K ∙ x))}
-    (hv : (B.restrict (B.orthogonal (K ∙ x))).iIsOrtho v) :
-    ∃ b : Basis (Fin (d + 1)) K V, B.iIsOrtho b := by
-  have hli : ∀ c : K, ∀ y ∈ B.orthogonal (K ∙ x), c • x + y = 0 → c = 0 := by
-    intro c y hy hc
-    have hxy : B x y = 0 := (mem_orthogonal_span_singleton_iff B).1 hy
-    have := congrArg (B x) hc
-    rw [map_add, map_smul, hxy, add_zero, map_zero, smul_eq_mul] at this
-    exact (mul_eq_zero.1 this).resolve_right hx
-  have hsp : ∀ z : V, ∃ c : K, z + c • x ∈ B.orthogonal (K ∙ x) := fun z =>
-    ⟨-(B x z / B x x), by
-      rw [mem_orthogonal_span_singleton_iff, map_add, map_smul, smul_eq_mul, neg_mul,
-        div_mul_cancel₀ _ hx, add_neg_cancel]⟩
-  refine ⟨Basis.mkFinCons x v hli hsp, ?_⟩
-  rw [iIsOrtho_def, Basis.coe_mkFinCons]
-  intro i j
-  refine Fin.cases ?_ (fun i => ?_) i <;> refine Fin.cases ?_ (fun j => ?_) j <;> intro hij <;>
-    simp only [Fin.cons_zero, Fin.cons_succ, Function.comp_apply]
-  · exact (hij rfl).elim
-  · exact (mem_orthogonal_span_singleton_iff B).1 (v j).2
-  · exact hB.eq_zero ((mem_orthogonal_span_singleton_iff B).1 (v i).2)
-  · simpa using iIsOrtho_def.1 hv i j fun h => hij (congrArg Fin.succ h)
 
 variable [FiniteDimensional K V]
 

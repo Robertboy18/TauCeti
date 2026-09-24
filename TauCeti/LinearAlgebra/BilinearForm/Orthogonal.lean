@@ -6,22 +6,27 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.LinearAlgebra.BilinearForm.Orthogonal
+import Mathlib.LinearAlgebra.Basis.Fin
 
 /-!
 # Orthogonal complements of bilinear forms
 
-This file records three facts about the orthogonal complement `LinearMap.BilinForm.orthogonal`
+This file records four facts about the orthogonal complement `LinearMap.BilinForm.orthogonal`
 that Mathlib lacks. A vector lies in the orthogonal complement of the span of one or two vectors
-exactly when it is orthogonal to each of them. Adjoining an orthogonal vector whose self-pairing
-is a right non-zero-divisor to a left-separating subspace of a reflexive bilinear space produces a
-nondegenerate restriction; this is the structural step used when a Cartan--Dieudonne argument
-enlarges a fixed subspace.
+exactly when it is orthogonal to each of them. Over a field, adjoining a non-isotropic vector `x`
+to an orthogonal basis of the orthogonal complement of `x` gives an orthogonal basis of the whole
+space, for a reflexive form; this is the inductive step of every diagonalization argument.
+Adjoining an orthogonal vector whose self-pairing is a right non-zero-divisor to a left-separating
+subspace of a reflexive bilinear space produces a nondegenerate restriction; this is the
+structural step used when a Cartan--Dieudonne argument enlarges a fixed subspace.
 
 ## Main results
 
 * `LinearMap.BilinForm.mem_orthogonal_span_singleton_iff`,
   `LinearMap.BilinForm.mem_orthogonal_span_pair_iff`: membership in the orthogonal complement of
   the span of one or two vectors.
+* `LinearMap.BilinForm.IsRefl.exists_orthogonal_basis_of_orthogonal_span_singleton`: an
+  orthogonal basis of `x^⊥` extends by `x` to an orthogonal basis of the whole space.
 * `TauCeti.BilinForm.restrict_nondegenerate_sup_span_singleton`: adjoining an orthogonal vector
   to a left-separating subspace produces a nondegenerate restriction.
 -/
@@ -46,6 +51,40 @@ theorem mem_orthogonal_span_pair_iff (B : LinearMap.BilinForm K V) {x y z : V} :
   · rintro ⟨hx, hy⟩ n hn
     obtain ⟨a, b, rfl⟩ := Submodule.mem_span_pair.1 hn
     simp [hx, hy]
+
+section Field
+
+open Module
+
+variable {K V : Type*} [Field K] [AddCommGroup V] [Module K V] {B : LinearMap.BilinForm K V}
+
+/-- Adjoining a non-isotropic vector `x` to an orthogonal basis of the orthogonal complement of
+`x` gives an orthogonal basis of the whole space, for a reflexive form. -/
+theorem IsRefl.exists_orthogonal_basis_of_orthogonal_span_singleton (hB : B.IsRefl) {x : V}
+    (hx : B x x ≠ 0) {d : ℕ} {v : Basis (Fin d) K (B.orthogonal (K ∙ x))}
+    (hv : (B.restrict (B.orthogonal (K ∙ x))).iIsOrtho v) :
+    ∃ b : Basis (Fin (d + 1)) K V, B.iIsOrtho b := by
+  have hli : ∀ c : K, ∀ y ∈ B.orthogonal (K ∙ x), c • x + y = 0 → c = 0 := by
+    intro c y hy hc
+    have hxy : B x y = 0 := (mem_orthogonal_span_singleton_iff B).1 hy
+    have := congrArg (B x) hc
+    rw [map_add, map_smul, hxy, add_zero, map_zero, smul_eq_mul] at this
+    exact (mul_eq_zero.1 this).resolve_right hx
+  have hsp : ∀ z : V, ∃ c : K, z + c • x ∈ B.orthogonal (K ∙ x) := fun z =>
+    ⟨-(B x z / B x x), by
+      rw [mem_orthogonal_span_singleton_iff, map_add, map_smul, smul_eq_mul, neg_mul,
+        div_mul_cancel₀ _ hx, add_neg_cancel]⟩
+  refine ⟨Basis.mkFinCons x v hli hsp, ?_⟩
+  rw [iIsOrtho_def, Basis.coe_mkFinCons]
+  intro i j
+  refine Fin.cases ?_ (fun i => ?_) i <;> refine Fin.cases ?_ (fun j => ?_) j <;> intro hij <;>
+    simp only [Fin.cons_zero, Fin.cons_succ, Function.comp_apply]
+  · exact (hij rfl).elim
+  · exact (mem_orthogonal_span_singleton_iff B).1 (v j).2
+  · exact hB.eq_zero ((mem_orthogonal_span_singleton_iff B).1 (v i).2)
+  · simpa using iIsOrtho_def.1 hv i j fun h => hij (congrArg Fin.succ h)
+
+end Field
 
 end LinearMap.BilinForm
 
