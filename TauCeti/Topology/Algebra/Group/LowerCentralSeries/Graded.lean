@@ -520,7 +520,7 @@ theorem gradedPow_add_zero_of_two (hp : p = 2) (x y : gradedPiece p G 0) :
     exact commute_mk_of_mem_pLowerCentralSeries (commutator_mem_pLowerCentralSeries_succ y.2 x) g
   have hyx : ((y : G) : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) * (x : G) =
       c * (x : G) * (y : G) := by
-    rw [hc, QuotientGroup.mk_commutatorElement]; group
+    rw [hc, commutatorElement_def]; simp only [QuotientGroup.mk_mul, QuotientGroup.mk_inv]; group
   calc (((x : G) : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) * (y : G)) ^ 2
       = (x : G) * (((y : G) : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) * (x : G)) * (y : G) := by
         simp only [sq, mul_assoc]
@@ -542,7 +542,7 @@ theorem gradedPow_gradedBracket_left {j k : ℕ} (hj : 1 ≤ j) (x : gradedPiece
   obtain ⟨y, rfl⟩ := gradedMk_surjective k y
   rw [gradedBracket_gradedMk, gradedPow_gradedMk, gradedPow_gradedMk, gradedBracket_gradedMk,
     gradedCast_gradedMk, gradedMk_eq_gradedMk_iff]
-  simp only [QuotientGroup.mk_pow, QuotientGroup.mk_commutatorElement]
+  simp only [← QuotientGroup.mk'_apply, map_commutatorElement, map_pow]
   exact (QuotientGroup.commute_mk_iff.mpr (pLowerCentralSeries_antitone (by omega)
     (commutator_mem_pLowerCentralSeries x.2
       (commutator_mem_pLowerCentralSeries x.2 y.2)))).commutatorElement_pow_left p
@@ -557,7 +557,7 @@ theorem gradedPow_gradedBracket_right {j k : ℕ} (hk : 1 ≤ k) (x : gradedPiec
   obtain ⟨y, rfl⟩ := gradedMk_surjective k y
   rw [gradedBracket_gradedMk, gradedPow_gradedMk, gradedPow_gradedMk, gradedBracket_gradedMk,
     gradedCast_gradedMk, gradedMk_eq_gradedMk_iff]
-  simp only [QuotientGroup.mk_pow, QuotientGroup.mk_commutatorElement]
+  simp only [← QuotientGroup.mk'_apply, map_commutatorElement, map_pow]
   exact (QuotientGroup.commute_mk_iff.mpr (pLowerCentralSeries_antitone (by omega)
     (commutator_mem_pLowerCentralSeries y.2
       (commutator_mem_pLowerCentralSeries x.2 y.2)))).commutatorElement_pow_right p

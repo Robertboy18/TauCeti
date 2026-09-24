@@ -33,9 +33,8 @@ which quantifies over both subgroups. Neither reduces a comparison to generators
   subgroup presented by generators is tested on those generators.
 * `TauCeti.commutator_le_iff_map_mk'_eq_bot`: `⁅A, B⁆ ≤ N` for a normal `N` says that the images
   of `A` and `B` in `G ⧸ N` commute.
-* `QuotientGroup.mk_commutatorElement` and `QuotientGroup.commute_mk_iff`: the class of a
-  commutator in `G ⧸ N` is the commutator of the classes, so two classes commute exactly when the
-  commutator of representatives lies in `N`.
+* `QuotientGroup.commute_mk_iff`: two classes in `G ⧸ N` commute exactly when the commutator of
+  representatives lies in `N`.
 * `TauCeti.commutatorElement_pow_right_mem_iff`: when `⁅a, y⁆` commutes with `y` modulo a normal
   `N`, the commutator `⁅a, y ^ n⁆` lies in `N` exactly when `⁅a, y⁆ ^ n` does.
 * `TauCeti.commutatorElement_mul_mul_eq_mul_of_commute`: the commutator of two paired products
@@ -163,15 +162,11 @@ theorem commutator_le_iff_map_mk'_eq_bot {A B : Subgroup G} [N.Normal] :
     ⁅A, B⁆ ≤ N ↔ ⁅A.map (QuotientGroup.mk' N), B.map (QuotientGroup.mk' N)⁆ = ⊥ := by
   rw [← map_commutator, map_eq_bot_iff, QuotientGroup.ker_mk']
 
-/-- The class of a commutator in a quotient group is the commutator of the classes. -/
-theorem _root_.QuotientGroup.mk_commutatorElement [N.Normal] (a b : G) :
-    ((⁅a, b⁆ : G) : G ⧸ N) = ⁅(a : G ⧸ N), (b : G ⧸ N)⁆ :=
-  map_commutatorElement (QuotientGroup.mk' N) a b
-
 /-- Two classes in `G ⧸ N` commute exactly when the commutator of representatives lies in `N`. -/
 theorem _root_.QuotientGroup.commute_mk_iff [N.Normal] {a b : G} :
     Commute (a : G ⧸ N) (b : G ⧸ N) ↔ ⁅a, b⁆ ∈ N := by
-  rw [← commutatorElement_eq_one_iff_commute, ← QuotientGroup.mk_commutatorElement,
+  rw [← commutatorElement_eq_one_iff_commute, ← QuotientGroup.mk'_apply N a,
+    ← QuotientGroup.mk'_apply N b, ← map_commutatorElement, QuotientGroup.mk'_apply,
     QuotientGroup.eq_one_iff]
 
 /-- If the commutator `⁅a, y⁆` commutes with `y` modulo a normal subgroup `N`, then modulo `N` the
