@@ -9,7 +9,7 @@ public import Mathlib.Analysis.Normed.Ring.Units
 public import Mathlib.Data.Nat.Totient
 public import Mathlib.Data.ZMod.QuotientGroup
 public import Mathlib.GroupTheory.Index
-public import Mathlib.NumberTheory.Multiplicity
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
 public import Mathlib.Topology.Algebra.Group.Subgroup
 public import Mathlib.Topology.Algebra.Group.Units
 public import TauCeti.NumberTheory.Padics.RingHoms
@@ -23,11 +23,13 @@ For a prime `p` and `f : ℕ`, the **principal unit group of level `f`** is
 basis of `1` in `ℤ_pˣ`; the index of `U^(f)` in `ℤ_pˣ` is Euler's totient `φ(p ^ f)`.
 
 The main results are about the structure of these groups as topological groups. Raising to
-the `p`-th power moves an element of exact level `f` (in `U^(f)` but not in `U^(f+1)`) to exact
-level `f + 1`, provided `f ≥ 1`, and `f ≥ 2` when `p = 2` (the *lifting-the-exponent*
-step; for `p = 2` and `f = 1` it fails, since `(-1)^2 = 1`). Iterating, an element of exact
-level `f` generates each finite quotient `U^(f) / U^(f+k)`, which is cyclic of order `p ^ k`,
-so the closed subgroup it generates is all of `U^(f)`: the groups `U^(f)` are **procyclic**.
+the `p ^ k`-th power moves an element of exact level `f` (in `U^(f)` but not in `U^(f+1)`) to
+exact level `f + k`, provided `f ≥ 1`, and `f ≥ 2` when `p = 2` (the *lifting-the-exponent*
+step, read off from Mathlib's expansion `(1 + p^f x)^(p^k) = 1 + p^(f+k) (x + p y)`,
+`ZMod.exists_one_add_mul_pow_prime_pow_eq`; for `p = 2` and `f = 1` it fails, since
+`(-1)^2 = 1`). Hence an element of exact level `f` generates each finite quotient
+`U^(f) / U^(f+k)`, which is cyclic of order `p ^ k`, so the closed subgroup it generates is all
+of `U^(f)`: the groups `U^(f)` are **procyclic**.
 Consequently every nontrivial closed subgroup of `1 + pℤ_p` (of `1 + 4ℤ_2` when `p = 2`) is
 one of the `U^(f)`, and `f` is determined by the subgroup through its index.
 
@@ -74,6 +76,7 @@ noncomputable def unitsPrincipal (f : ℕ) : Subgroup ℤ_[p]ˣ :=
   (Units.map (PadicInt.toZModPow (p := p) f).toMonoidHom).ker
 
 /-- A unit lies in `U^(f)` iff it reduces to `1` modulo `p ^ f`. -/
+@[simp]
 theorem mem_unitsPrincipal_iff_toZModPow {f : ℕ} {u : ℤ_[p]ˣ} :
     u ∈ unitsPrincipal p f ↔ PadicInt.toZModPow f (u : ℤ_[p]) = 1 := by
   rw [unitsPrincipal, MonoidHom.mem_ker, Units.ext_iff, Units.coe_map,
@@ -94,7 +97,7 @@ variable (p) in
 @[simp]
 theorem unitsPrincipal_zero : unitsPrincipal p 0 = ⊤ := by
   ext u
-  simp [mem_unitsPrincipal_iff]
+  simp only [mem_unitsPrincipal_iff, pow_zero, one_dvd, Subgroup.mem_top]
 
 variable (p) in
 /-- The principal unit groups decrease with the level. -/
@@ -102,17 +105,22 @@ theorem unitsPrincipal_antitone : Antitone (unitsPrincipal p) := fun _ _ hfg _ h
   mem_unitsPrincipal_iff.mpr <| (pow_dvd_pow _ hfg).trans (mem_unitsPrincipal_iff.mp hu)
 
 variable (p) in
+/-- Every principal unit group is open: it is the kernel of a continuous map to a discrete
+group. -/
 theorem isOpen_unitsPrincipal (f : ℕ) : IsOpen (unitsPrincipal p f : Set ℤ_[p]ˣ) := by
   rw [unitsPrincipal, MonoidHom.coe_ker]
   exact (isOpen_discrete _).preimage ((PadicInt.continuous_toZModPow f).units_map _)
 
 variable (p) in
+/-- Every principal unit group is closed: it is the kernel of a continuous map to a discrete
+group. -/
 theorem isClosed_unitsPrincipal (f : ℕ) : IsClosed (unitsPrincipal p f : Set ℤ_[p]ˣ) := by
   rw [unitsPrincipal, MonoidHom.coe_ker]
   exact isClosed_singleton.preimage ((PadicInt.continuous_toZModPow f).units_map _)
 
 variable (p) in
 /-- The principal unit groups have trivial intersection: `U^(∞) = {1}`. -/
+@[simp]
 theorem iInf_unitsPrincipal_eq_bot : ⨅ f, unitsPrincipal p f = ⊥ := by
   refine (eq_bot_iff).mpr fun u hu ↦ ?_
   rw [Subgroup.mem_iInf] at hu
@@ -159,6 +167,11 @@ theorem index_unitsPrincipal_two (f : ℕ) : (unitsPrincipal 2 f).index = 2 ^ (f
   · rw [index_unitsPrincipal_of_pos 2 f.succ_pos]
     simp
 
+/-- The dyadic filtration starts at level `2`: `U^(1) = 1 + 2ℤ_2` is all of `ℤ_2ˣ`. -/
+@[simp]
+theorem unitsPrincipal_two_one : unitsPrincipal 2 1 = ⊤ :=
+  Subgroup.index_eq_one.mp ((index_unitsPrincipal_two 1).trans (pow_zero 2))
+
 instance (f : ℕ) : (unitsPrincipal p f).FiniteIndex :=
   ⟨by rw [index_unitsPrincipal]; exact (Nat.totient_pos.mpr (pow_pos hp.out.pos f)).ne'⟩
 
@@ -182,75 +195,44 @@ theorem _root_.PadicInt.isUnit_one_add_of_dvd {x : ℤ_[p]} (hx : (p : ℤ_[p]) 
     (neg_mem (Ideal.mul_mem_right c _ ((IsLocalRing.mem_maximalIdeal _).mpr PadicInt.p_nonunit)))
   rwa [sub_neg_eq_add] at this
 
-/-- The geometric sum `1 + a + ⋯ + a ^ (p - 1)` is `p` times a unit when `a ≡ 1 mod p`, and
-moreover `a ≡ 1 mod 4` if `p = 2`. -/
-theorem exists_geom_sum_eq_mul_unit {a : ℤ_[p]} (ha : (p : ℤ_[p]) ∣ a - 1)
-    (ha₂ : p = 2 → (p : ℤ_[p]) ^ 2 ∣ a - 1) :
-    ∃ w : ℤ_[p]ˣ, ∑ i ∈ Finset.range p, a ^ i = p * w := by
-  have hunit : ∀ c : ℤ_[p], IsUnit (1 + p * c) := fun c ↦
-    PadicInt.isUnit_one_add_of_dvd (dvd_mul_right _ _)
-  rcases hp.out.eq_two_or_odd' with rfl | hodd
-  · obtain ⟨c, hc⟩ := ha₂ rfl
-    refine ⟨(hunit c).unit, ?_⟩
-    rw [IsUnit.unit_spec, Finset.sum_range_succ, Finset.sum_range_one, pow_zero, pow_one,
-      ← sub_add_cancel a 1, hc]
-    push_cast
-    ring
-  · obtain ⟨b, hb⟩ := ha
-    have ha' : a = 1 + p * b := by rw [← hb]; ring
-    subst ha'
-    have h := odd_sq_dvd_geom_sum₂_sub (R := ℤ_[p]) 1 b hodd
-    simp only [one_pow, mul_one] at h
-    obtain ⟨c, hc⟩ := h
-    refine ⟨(hunit c).unit, ?_⟩
-    rw [IsUnit.unit_spec, mul_add, mul_one, ← mul_assoc, ← sq, ← hc]
-    ring
-
-/-- For `u ≡ 1 mod p^f` with `f ≥ 1`, `u ^ p ≡ 1 mod p^(f+1)`. -/
-theorem pow_mem_unitsPrincipal_succ {f : ℕ} (hf : 0 < f) {u : ℤ_[p]ˣ}
-    (hu : u ∈ unitsPrincipal p f) : u ^ p ∈ unitsPrincipal p (f + 1) := by
-  rw [mem_unitsPrincipal_iff] at hu ⊢
-  rw [Units.val_pow_eq_pow_val, ← geom_sum_mul, pow_succ']
-  refine mul_dvd_mul ?_ hu
-  have := dvd_geom_sum₂_self (R := ℤ_[p]) (n := p) (x := (u : ℤ_[p])) (y := 1)
-    ((dvd_pow_self _ hf.ne').trans hu)
-  simpa only [one_pow, mul_one] using this
-
-/-- For `u` of exact level `f`, that is `u ≡ 1 mod p^f` but `u ≢ 1 mod p^(f+1)`, the power
-`u ^ p` is not `≡ 1 mod p^(f+2)`, provided `f ≥ 1`, and `f ≥ 2` when `p = 2`; together with
-`pow_mem_unitsPrincipal_succ`, `u ^ p` has exact level `f + 1`. -/
-theorem pow_notMem_unitsPrincipal_add_two {f : ℕ} (hf : 0 < f) (hf₂ : p = 2 → 2 ≤ f) {u : ℤ_[p]ˣ}
-    (hu : u ∈ unitsPrincipal p f) (hu' : u ∉ unitsPrincipal p (f + 1)) :
-    u ^ p ∉ unitsPrincipal p (f + 2) := by
-  rw [mem_unitsPrincipal_iff] at hu hu' ⊢
-  obtain ⟨w, hw⟩ := exists_geom_sum_eq_mul_unit (a := (u : ℤ_[p]))
-    ((dvd_pow_self _ hf.ne').trans hu)
-    (fun h2 ↦ (pow_dvd_pow _ (hf₂ h2)).trans hu)
-  rw [Units.val_pow_eq_pow_val, ← geom_sum_mul, hw, pow_succ', mul_assoc,
-    mul_dvd_mul_iff_left (Nat.cast_ne_zero.mpr hp.out.ne_zero), Units.dvd_mul_left]
-  exact hu'
-
 /-- For `u ≡ 1 mod p^f` with `f ≥ 1`, `u ^ (p ^ k) ≡ 1 mod p^(f+k)`. -/
 theorem pow_pow_mem_unitsPrincipal {f : ℕ} (hf : 0 < f) {u : ℤ_[p]ˣ}
     (hu : u ∈ unitsPrincipal p f) (k : ℕ) : u ^ p ^ k ∈ unitsPrincipal p (f + k) := by
-  induction k with
-  | zero => simpa using hu
-  | succ k ih =>
-    rw [pow_succ, pow_mul, ← add_assoc]
-    exact pow_mem_unitsPrincipal_succ (by omega) ih
+  rw [mem_unitsPrincipal_iff] at hu ⊢
+  obtain ⟨x, hx⟩ := hu
+  obtain ⟨y, hy⟩ := ZMod.exists_one_add_mul_pow_prime_pow_eq (R := ℤ_[p]) (u := (p : ℤ_[p]) ^ f)
+    (v := 1) hp.out (one_dvd _)
+    (by rw [mul_one, ← pow_succ', ← pow_mul]; exact pow_dvd_pow _ (by nlinarith [hp.out.two_le]))
+    x k
+  rw [Units.val_pow_eq_pow_val, sub_eq_iff_eq_add'.mp hx, hy, add_sub_cancel_left]
+  exact Dvd.intro (x + y) (by rw [pow_add]; ring)
 
-/-- For `u` of exact level `f`, the power `u ^ (p ^ k)` is not `≡ 1 mod p^(f+k+1)`, provided
-`f ≥ 1`, and `f ≥ 2` when `p = 2`; together with `pow_pow_mem_unitsPrincipal`, it has exact
-level `f + k`. -/
+/-- For `u` of exact level `f`, that is `u ≡ 1 mod p^f` but `u ≢ 1 mod p^(f+1)`, the power
+`u ^ (p ^ k)` is not `≡ 1 mod p^(f+k+1)`, provided `f ≥ 1`, and `f ≥ 2` when `p = 2`; together
+with `pow_pow_mem_unitsPrincipal`, it has exact level `f + k`. This is where the level
+restriction enters: `(1 + p^f x)^(p^k) = 1 + p^(f+k) (x + p y)` needs `p^(f+2) ∣ p^(fp)`. -/
 theorem pow_pow_notMem_unitsPrincipal {f : ℕ} (hf : 0 < f) (hf₂ : p = 2 → 2 ≤ f) {u : ℤ_[p]ˣ}
     (hu : u ∈ unitsPrincipal p f) (hu' : u ∉ unitsPrincipal p (f + 1)) (k : ℕ) :
     u ^ p ^ k ∉ unitsPrincipal p (f + k + 1) := by
-  induction k with
-  | zero => simpa using hu'
-  | succ k ih =>
-    rw [pow_succ, pow_mul, show f + (k + 1) + 1 = f + k + 2 by omega]
-    exact pow_notMem_unitsPrincipal_add_two (by omega) (fun h2 ↦ by have := hf₂ h2; omega)
-      (pow_pow_mem_unitsPrincipal hf hu k) ih
+  rw [mem_unitsPrincipal_iff] at hu hu' ⊢
+  obtain ⟨x, hx⟩ := hu
+  have hfp : f + 2 ≤ f * p := by
+    rcases Nat.lt_or_ge p 3 with h3 | h3
+    · have hp2 : p = 2 := by have := hp.out.two_le; omega
+      have := hf₂ hp2
+      rw [hp2]
+      omega
+    · nlinarith
+  obtain ⟨y, hy⟩ := ZMod.exists_one_add_mul_pow_prime_pow_eq (R := ℤ_[p]) (u := (p : ℤ_[p]) ^ f)
+    (v := p) hp.out (dvd_pow_self _ hf.ne')
+    (by rw [← pow_succ', ← pow_succ, ← pow_mul]; exact pow_dvd_pow _ hfp) x k
+  have hp0 : (p : ℤ_[p]) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
+  rw [hx, pow_succ, mul_dvd_mul_iff_left (pow_ne_zero _ hp0)] at hu'
+  rw [Units.val_pow_eq_pow_val, sub_eq_iff_eq_add'.mp hx, hy, add_sub_cancel_left,
+    show (p : ℤ_[p]) ^ (f + k + 1) = p ^ k * p ^ f * p by ring,
+    mul_dvd_mul_iff_left (mul_ne_zero (pow_ne_zero _ hp0) (pow_ne_zero _ hp0)),
+    dvd_add_left (dvd_mul_right _ _)]
+  exact hu'
 
 /-! ### Procyclicity -/
 
