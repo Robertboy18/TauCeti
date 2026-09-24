@@ -48,8 +48,7 @@ theorem HasPGroupSolutions.exists_isSolution (hG : HasPGroupSolutions p G)
       π_surjective := eQ.symm.surjective.comp P.π_surjective
       α := α
       α_surjective := eQ.symm.surjective.comp (P.α_surjective.comp eE.surjective) }
-  have hα : IsPGroup p P'.α.ker := by
-    change IsPGroup p α.ker
+  have hα : IsPGroup p α.ker := by
     rw [MonoidHom.ker_comp_of_injective _ _ eQ.symm.injective]
     exact hP.comap_of_injective eE.toMonoidHom eE.injective
   obtain ⟨β, hβ⟩ := hasPGroupSolutions_iff.mp hG P' hα
@@ -58,7 +57,7 @@ theorem HasPGroupSolutions.exists_isSolution (hG : HasPGroupSolutions p G)
     exact hβ.isOpen_ker
   · ext g
     have h := DFunLike.congr_fun hβ.comp_eq g
-    change eQ.symm (P.α (eE (β g))) = eQ.symm (P.π g) at h
+    simp only [P', α, π, MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom] at h
     exact eQ.symm.injective h
 
 /-- An open-kernel map lifts through a finite surjection whose kernel is a `p`-group. -/

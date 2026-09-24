@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+import TauCeti.Topology.Algebra.ContinuousMonoidHom
 import TauCeti.GroupTheory.PGroup
 public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Solutions
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
@@ -39,16 +40,16 @@ theorem hasPGroupSolutions_freeProP (p : ℕ) (X : Type u) :
   have hE : IsPGroup p P.E := IsPGroup.of_subgroup_of_quotient hP
     (hQ.of_equiv (QuotientGroup.quotientKerEquivOfSurjective P.α P.α_surjective).symm)
   let t : X → P.E := fun x ↦ (P.α_surjective (P.π (freeProP.of x))).choose
-  let β : freeProP p X →ₜ* P.E := freeProP.lift hE.isProP t
-  have hcomp : (⟨P.α, continuous_of_discreteTopology⟩ : P.E →ₜ* P.Q).comp β =
-      ⟨P.π, hπ⟩ := by
+  have hcomp : (⟨P.α, continuous_of_discreteTopology⟩ : P.E →ₜ* P.Q).comp
+      (freeProP.lift hE.isProP t) = ⟨P.π, hπ⟩ := by
     apply freeProP.hom_ext
     intro x
-    change P.α (freeProP.lift hE.isProP t (freeProP.of x)) = P.π (freeProP.of x)
-    rw [freeProP.lift_of]
+    rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, ContinuousMonoidHom.coe_mk P.α,
+      ContinuousMonoidHom.coe_mk P.π, freeProP.lift_of]
     exact (P.α_surjective (P.π (freeProP.of x))).choose_spec
-  exact ⟨β.toMonoidHom, FiniteEmbeddingProblem.isSolution_iff.mpr
-    ⟨β.toMonoidHom.continuous_iff_isOpen_ker.mp β.continuous,
+  exact ⟨(freeProP.lift hE.isProP t).toMonoidHom, FiniteEmbeddingProblem.isSolution_iff.mpr
+    ⟨(freeProP.lift hE.isProP t).toMonoidHom.continuous_iff_isOpen_ker.mp
+      (freeProP.lift hE.isProP t).continuous,
       MonoidHom.ext fun g ↦ DFunLike.congr_fun hcomp g⟩⟩
 
 end TauCeti

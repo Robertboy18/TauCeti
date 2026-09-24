@@ -69,12 +69,8 @@ theorem exists_isSolution_iff_obstruction_eq_zero :
       exact X.toGroupExtension.exists_splitting_continuous_iff_contCohomologyClass_eq_zero
         X.continuous_inl X.continuous_rightHom X.inducesAction
     _ ↔ P.obstruction hcomm = 0 := by
-      change X.contCohomologyClass = 0 ↔ e X.contCohomologyClass = 0
-      constructor
-      · intro h
-        rw [h, map_zero]
-      · intro h
-        exact e.injective (by simpa using h)
+      unfold obstruction
+      exact (AddEquiv.map_eq_zero_iff e).symm
 
 /-- Vanishing of canonical continuous `H²` for the actual kernel module solves the embedding
 problem. -/
@@ -109,8 +105,7 @@ theorem hasElementaryAbelianSolutions_of_subsingleton_continuousCohomology_two {
   apply P.exists_isSolution_of_subsingleton_continuousCohomology_two hcomm
   apply h (Additive P.α.ker)
   intro m
-  change m.toMul ^ p = 1
-  apply Subtype.ext
-  exact hpow m.toMul m.toMul.property
+  rw [← ofMul_toMul m, ← ofMul_pow, ofMul_eq_zero]
+  exact Subtype.ext (hpow m.toMul m.toMul.property)
 
 end TauCeti

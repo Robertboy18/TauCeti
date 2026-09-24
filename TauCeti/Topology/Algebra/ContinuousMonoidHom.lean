@@ -27,6 +27,12 @@ variable {G : Type*} [Group G] [TopologicalSpace G]
 
 namespace ContinuousMonoidHom
 
+/-- Evaluating a continuous homomorphism assembled from a homomorphism and a continuity proof. -/
+@[simp]
+theorem _root_.ContinuousMonoidHom.coe_mk {A B : Type*} [Monoid A] [TopologicalSpace A] [Monoid B]
+    [TopologicalSpace B] (f : A →* B) (hf : Continuous f) : ⇑(⟨f, hf⟩ : A →ₜ* B) = f :=
+  rfl
+
 -- Both definitions below are exposed: downstream, `TopRep.res` objects taken along them have to
 -- be definitionally the ones taken along the bare `Subgroup.subtype` and `QuotientGroup.mk'`.
 /-- The inclusion of a subgroup, carrying the subspace topology, as a continuous homomorphism. -/

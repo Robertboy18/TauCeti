@@ -16,7 +16,7 @@ Two solvability predicates for the finite embedding problems of a topological gr
 reduction of one to the other.
 
 * `TauCeti.HasElementaryAbelianSolutions p G`: every finite embedding problem for `G` whose kernel
-  `ker α` is elementary abelian, that is killed by `p` and commutative, has a solution.
+  `ker α` is commutative and killed by `p` (elementary abelian, when `p` is prime) has a solution.
 * `TauCeti.HasPGroupSolutions p G`: every finite embedding problem for `G` whose kernel is a
   `p`-group has a solution.
 
@@ -36,24 +36,24 @@ of `G`. Every finite group is isomorphic to one in any universe, so this is no r
 finite groups that occur, and it keeps the predicates free of universe parameters that nothing
 else would determine. Only the elementary abelian case consumes cohomology: the extension
 `1 → ker α → E → Q → 1` has a class in `H²(Q, ker α)`, and its pullback along `π` to `H²(G, ker α)`
-is the obstruction to solving the problem, so the vanishing of `H²(G, M)` for the finite elementary
-abelian `p`-primary `G`-modules `M` gives `HasElementaryAbelianSolutions p G`, and the theorem here
+is the obstruction to solving the problem, so the vanishing of `H²(G, M)` for the finite discrete
+`G`-modules `M` killed by `p` gives `HasElementaryAbelianSolutions p G`, and the theorem here
 extends it to `p`-group kernels.
 
 ## Main definitions
 
-* `TauCeti.HasElementaryAbelianSolutions`: every finite embedding problem with elementary abelian
-  kernel has a solution.
+* `TauCeti.HasElementaryAbelianSolutions`: every finite embedding problem with commutative kernel
+  killed by `p` has a solution.
 * `TauCeti.HasPGroupSolutions`: every finite embedding problem with `p`-group kernel has a
   solution.
 
 ## Main results
 
 * `TauCeti.HasPGroupSolutions.hasElementaryAbelianSolutions`: solvability with `p`-group kernel
-  gives solvability with elementary abelian kernel.
+  gives solvability with commutative kernel killed by `p`.
 * `TauCeti.HasElementaryAbelianSolutions.exists_comp_eq`: under
   `HasElementaryAbelianSolutions p G`, a homomorphism `β : G → F` with open kernel lifts through a
-  surjection `φ : E ↠ F` of finite groups whose kernel is elementary abelian.
+  surjection `φ : E ↠ F` of finite groups whose kernel is commutative and killed by `p`.
 * `TauCeti.HasElementaryAbelianSolutions.hasPGroupSolutions`: for a prime `p`, solvability with
   elementary abelian kernel gives solvability with `p`-group kernel.
 
@@ -89,16 +89,16 @@ theorem hasPGroupSolutions_iff :
         ∃ β : G →* P.E, P.IsSolution β :=
   Iff.rfl
 
-/-- Solvability with `p`-group kernel gives solvability with elementary abelian kernel: a group
-killed by `p` is a `p`-group. -/
+/-- Solvability with `p`-group kernel gives solvability with commutative kernel killed by `p`:
+such a kernel is a `p`-group. -/
 theorem HasPGroupSolutions.hasElementaryAbelianSolutions (h : HasPGroupSolutions p G) :
     HasElementaryAbelianSolutions p G := hasElementaryAbelianSolutions_iff.mpr fun P hpow _ ↦
   h P fun x ↦ ⟨1, Subtype.ext <| by simpa using hpow x x.2⟩
 
-/-- **Lifting through an elementary abelian kernel.** If every finite embedding problem for `G`
-with elementary abelian kernel has a solution, then a homomorphism `β : G → F` with open kernel
-lifts, with open kernel, through every surjection `φ : E ↠ F` of finite groups whose kernel is
-killed by `p` and commutative. -/
+/-- **Lifting through a commutative kernel killed by `p`.** If every finite embedding problem for
+`G` with commutative kernel killed by `p` has a solution, then a homomorphism `β : G → F` with open
+kernel lifts, with open kernel, through every surjection `φ : E ↠ F` of finite groups whose kernel
+is commutative and killed by `p`. -/
 theorem HasElementaryAbelianSolutions.exists_comp_eq (h : HasElementaryAbelianSolutions p G)
     {E F : Type u} [Group E] [Finite E] [Group F] (φ : E →* F) (hφ : Function.Surjective φ)
     (hpow : ∀ x ∈ φ.ker, x ^ p = 1) (hcomm : ∀ x ∈ φ.ker, ∀ y ∈ φ.ker, x * y = y * x)

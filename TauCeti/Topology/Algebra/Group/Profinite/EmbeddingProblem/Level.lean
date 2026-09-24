@@ -67,6 +67,7 @@ theorem levelMap_mk (α : A →ₜ* B) (hα : Function.Surjective α)
     levelMap α hα U (a : A ⧸ U.toSubgroup) = (α a : B ⧸ (levelImage α hα U).toSubgroup) :=
   (rfl)
 
+/-- The finite quotient map induced by a surjection is surjective. -/
 theorem levelMap_surjective (α : A →ₜ* B) (hα : Function.Surjective α)
     (U : OpenNormalSubgroup A) : Function.Surjective (levelMap α hα U) :=
   QuotientGroup.map_surjective_of_surjective _ _ _
@@ -126,6 +127,7 @@ theorem nonempty_isSolution_levelProblem {p : ℕ} (hG : HasPGroupSolutions p G)
   obtain ⟨β, hβ⟩ := hG.exists_isSolution (levelProblem α hα f U) (hE.to_subgroup _)
   exact ⟨β, hβ⟩
 
+/-- Solvability of all finite `p`-kernel embedding problems gives a solution at every level. -/
 theorem nonempty_levelSolution {p : ℕ} (hG : HasPGroupSolutions p G) (hA : IsProP p A)
     (α : A →ₜ* B) (hα : Function.Surjective α) (f : G →ₜ* B) (U : OpenNormalSubgroup A) :
     Nonempty (LevelSolution α hα f U) :=

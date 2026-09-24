@@ -5,6 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+import TauCeti.Topology.Algebra.Group.Generation
+
 public import TauCeti.GroupTheory.GroupExtension.Of.Surjective
 public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Basic
 public import TauCeti.Topology.Algebra.GroupExtension.Profinite
@@ -63,10 +65,8 @@ theorem pullbackFst_surjective : Function.Surjective P.pullbackFst := by
 def kernelEquivPullbackKer : P.α.ker ≃* P.pullbackFst.ker where
   toFun n := ⟨⟨(1, n), by simpa using n.property.symm⟩, rfl⟩
   invFun x := ⟨x.1.1.2, by
-    change P.α x.1.1.2 = 1
-    rw [← (P.mem_pullback _).mp x.1.property]
-    change P.π (P.pullbackFst x.1) = 1
-    rw [x.property, map_one]⟩
+    have hx : x.1.1.1 = 1 := (P.pullbackFst_apply x.1).symm.trans (MonoidHom.mem_ker.mp x.property)
+    rw [MonoidHom.mem_ker, ← (P.mem_pullback _).mp x.1.property, hx, map_one]⟩
   left_inv _ := rfl
   right_inv x := Subtype.ext (Subtype.ext (Prod.ext x.property.symm rfl))
   map_mul' _ _ := by
@@ -96,16 +96,9 @@ theorem coe_pullbackGroupExtension_conjAct (x : P.pullback) (n : P.α.ker) :
     (P.pullbackGroupExtension.inl_conjAct_comm (e := x) (n := n))
   simpa only [map_mul, map_inv, pullbackSnd_apply, pullbackGroupExtension_inl] using h
 
-private theorem continuous_of_isOpen_ker {H : Type*} [Group H] [TopologicalSpace H]
-    [ContinuousMul H] (f : G →* H) (hf : IsOpen (f.ker : Set G)) : Continuous f := by
-  apply continuous_of_tendsto_nhds_one f
-  apply Filter.Tendsto.congr' _ tendsto_const_nhds
-  filter_upwards [hf.mem_nhds (f.ker.one_mem)] with g hg
-  exact hg.symm
-
-/-- The quotient map of an embedding problem is continuous for any group topology on `Q`. -/
-theorem continuous_π [TopologicalSpace P.Q] [ContinuousMul P.Q] : Continuous P.π :=
-  continuous_of_isOpen_ker P.π P.isOpen_ker_π
+/-- The quotient map of an embedding problem is continuous for any topology on `Q`. -/
+theorem continuous_π [TopologicalSpace P.Q] : Continuous P.π :=
+  P.π.continuous_of_isOpen_ker P.isOpen_ker_π
 
 section Topology
 
@@ -130,8 +123,7 @@ theorem isSolution_iff_continuous (β : G →* P.E) :
     P.IsSolution β ↔ Continuous β ∧ P.α.comp β = P.π := by
   rw [isSolution_iff]
   apply and_congr_left'
-  exact ⟨continuous_of_isOpen_ker β,
-    fun h ↦ h.isOpen_preimage {1} (isOpen_discrete _)⟩
+  exact ⟨β.continuous_of_isOpen_ker, fun h ↦ h.isOpen_preimage {1} (isOpen_discrete _)⟩
 
 /-- Continuous splittings of the pullback exist exactly when the embedding problem has a
 solution. The solution is not required to be surjective. -/
@@ -140,11 +132,11 @@ theorem exists_splitting_iff_hasSolution :
       ∃ β : G →* P.E, P.IsSolution β := by
   constructor
   · rintro ⟨s, hs⟩
-    refine ⟨P.pullbackSnd.comp s.toMonoidHom, (P.isSolution_iff_continuous _).mpr
+    refine ⟨P.pullbackSnd.comp (s : G →* P.pullback), (P.isSolution_iff_continuous _).mpr
       ⟨P.continuous_pullbackSnd.comp hs, ?_⟩⟩
     ext g
-    change P.α (s g).1.2 = P.π g
-    rw [← (P.mem_pullback _).mp (s g).property]
+    rw [MonoidHom.comp_apply, MonoidHom.comp_apply, MonoidHom.coe_coe, pullbackSnd_apply,
+      ← (P.mem_pullback _).mp (s g).property]
     congr 1
     simpa using s.rightHom_splitting g
   · rintro ⟨β, hβ⟩
@@ -198,7 +190,7 @@ theorem coe_kernelConj (e : P.E) (n : P.α.ker) :
   have he : S.rightHom (S.surjInvRightHom (P.α e)) = S.rightHom e := by
     simpa only [S, GroupExtension.ofSurjective_rightHom] using
       S.surjInvRightHom.rightHom_section (P.α e)
-  change (GroupExtension.conjActOfSection S.surjInvRightHom (P.α e) n : P.E) = _
+  unfold kernelConj
   rw [GroupExtension.conjActOfSection_apply,
     GroupExtension.conjAct_eq_of_rightHom_eq he]
   simpa only [S, GroupExtension.ofSurjective_inl, Subgroup.coe_subtype] using
@@ -224,8 +216,8 @@ theorem pullbackGroupExtension_inducesAction :
   let σ := P.pullbackGroupExtension.surjInvRightHom
   apply (GroupExtension.inducesAction_iff_conjActOfSection_eq σ).mpr
   ext g n
-  rw [GroupExtension.conjActOfSection_apply, coe_pullbackGroupExtension_conjAct]
-  change (σ g).1.2 * n * (σ g).1.2⁻¹ = (P.kernelConj hcomm (P.π g) n : P.E)
+  rw [GroupExtension.conjActOfSection_apply, coe_pullbackGroupExtension_conjAct,
+    MulDistribMulAction.toMulAut_apply, MulDistribMulAction.toMulEquiv_apply, kernelAction_smul]
   have hg : P.α (σ g).1.2 = P.π g := by
     rw [← (P.mem_pullback _).mp (σ g).property]
     congr 1
@@ -241,10 +233,10 @@ theorem continuousSMul_kernelAction :
     ContinuousSMul G P.α.ker := by
   let := P.kernelAction hcomm
   constructor
-  change Continuous fun x : G × P.α.ker ↦ P.kernelConj hcomm (P.π x.1) x.2
-  exact (continuous_of_discreteTopology :
+  refine ((continuous_of_discreteTopology :
     Continuous fun x : P.Q × P.α.ker ↦ P.kernelConj hcomm x.1 x.2).comp
-    ((P.continuous_π.comp continuous_fst).prodMk continuous_snd)
+    ((P.continuous_π.comp continuous_fst).prodMk continuous_snd)).congr fun x ↦ ?_
+  exact (P.kernelAction_smul hcomm x.1 x.2).symm
 
 variable [CompactSpace G] [TotallyDisconnectedSpace G]
 

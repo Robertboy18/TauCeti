@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-import TauCeti.Topology.Compactness.InverseSystem
+import TauCeti.Topology.Algebra.ContinuousMonoidHom
 
 public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Compatible
 public import TauCeti.Topology.Algebra.Group.Profinite.Limit
@@ -15,10 +15,8 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Limit
 
 A compatible family of `LevelSolution`s determines a continuous lift into the profinite
 group `A`, with precisely the supplied quotient maps. This assembly requires no finite
-generation or finite embedding-problem solvability assumption.
-
-Topological finite generation and `HasPGroupSolutions` supply such a family when `A` is
-pro-`p`, giving a continuous lift under those explicit hypotheses.
+generation or finite embedding-problem solvability assumption; `HasPGroupSolutions` supplies
+such a family in `TauCeti.HasPGroupSolutions.exists_compatible_levelSolutions`.
 -/
 
 public section
@@ -50,13 +48,14 @@ theorem exists_continuous_lift_of_compatible_levelSolutions
         congrArg (fun s : LevelSolution α hα f U ↦ s.1 g) (hβ hVU)
   obtain ⟨φ, hφ, _⟩ := existsUnique_monoidHom_mk'_comp_eq
     (fun U ↦ (β U).1.toMonoidHom) hmaps
-  have hcont : Continuous φ := continuous_iff_forall_continuous_mk.mpr fun U ↦ by
-    change Continuous ((QuotientGroup.mk' U.toSubgroup).comp φ)
-    rw [hφ U]
-    exact (β U).1.continuous
+  have hquot (U : OpenNormalSubgroup A) (g : G) : ((φ g : A) : A ⧸ U.toSubgroup) = (β U).1 g := by
+    simpa only [MonoidHom.comp_apply, QuotientGroup.mk'_apply,
+      ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_coe] using DFunLike.congr_fun (hφ U) g
+  have hcont : Continuous φ := continuous_iff_forall_continuous_mk.mpr fun U ↦
+    (β U).1.continuous.congr fun g ↦ (hquot U g).symm
   refine ⟨⟨φ, hcont⟩, ?_, hφ⟩
   ext g
-  change α (φ g) = f g
+  rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, ContinuousMonoidHom.coe_mk]
   obtain ⟨a, ha⟩ := hα (f g)
   -- The level equations put the discrepancy in every open-normal thickening of the closed kernel.
   have hker : IsClosed (α.toMonoidHom.ker : Set A) :=
@@ -64,12 +63,8 @@ theorem exists_continuous_lift_of_compatible_levelSolutions
   have hmem : (φ g)⁻¹ * a ∈ α.toMonoidHom.ker := by
     rw [α.toMonoidHom.ker.eq_iInf_sup_openNormalSubgroup hker]
     refine Subgroup.mem_iInf.mpr fun U ↦ ?_
-    have hquot : ((φ g : A) : A ⧸ U.toSubgroup) = (β U).1 g := by
-      simpa only [MonoidHom.comp_apply, QuotientGroup.mk'_apply,
-        ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_coe] using
-        DFunLike.congr_fun (hφ U) g
     have hlevel := (β U).2 g
-    rw [← hquot, levelMap_mk, ← ha] at hlevel
+    rw [← hquot U g, levelMap_mk, ← ha] at hlevel
     have himage : (φ g)⁻¹ * a ∈
         (U.toSubgroup.map α.toMonoidHom).comap α.toMonoidHom := by
       simpa only [Subgroup.mem_comap, map_mul, map_inv, levelImage_toSubgroup,
@@ -79,20 +74,5 @@ theorem exists_continuous_lift_of_compatible_levelSolutions
     simpa only [MonoidHom.mem_ker, map_mul, map_inv,
       ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_coe] using hmem
   exact (inv_mul_eq_one.mp heq).trans ha
-
-/-- A topologically finitely generated group with solutions to all finite `p`-kernel
-embedding problems lifts continuously through every surjection from a profinite pro-`p` group. -/
-theorem HasPGroupSolutions.exists_continuous_lift [IsTopologicalGroup G] {p : ℕ}
-    (hG : HasPGroupSolutions p G) (hfg : IsTopologicallyFinitelyGenerated G)
-    (hA : IsProP p A) (α : A →ₜ* B) (hα : Function.Surjective α) (f : G →ₜ* B) :
-    ∃ φ : G →ₜ* A, α.comp φ = f := by
-  have : ∀ U, Nonempty (LevelSolution α hα f U) :=
-    fun U ↦ nonempty_levelSolution hG hA α hα f U
-  have : ∀ U, Finite (LevelSolution α hα f U) :=
-    fun U ↦ hfg.finite_levelSolution α hα f U
-  obtain ⟨β, hβ⟩ := exists_forall_map_eq_of_codirected_of_finite
-    (fun _ _ hVU ↦ levelSolutionMap α hα f hVU)
-  obtain ⟨φ, hφ, _⟩ := exists_continuous_lift_of_compatible_levelSolutions α hα f β hβ
-  exact ⟨φ, hφ⟩
 
 end TauCeti

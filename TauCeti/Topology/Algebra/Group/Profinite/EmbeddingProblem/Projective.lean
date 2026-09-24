@@ -5,9 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-import Mathlib.Order.Zorn
 import Mathlib.Topology.Maps.Proper.Basic
 
+public import TauCeti.Topology.Algebra.Group.ClosedSubgroup
 public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Lift
 
 /-!
@@ -17,9 +17,10 @@ Closed subgroups of `A × G` that project onto `G` form lift relations. Compactn
 their fibers preserves surjectivity along decreasing chains. Finite `p`-kernel
 embedding problems refine a relation at any open-normal quotient of `A`.
 
-A minimal relation therefore supplies compatible finite-level solutions. The existing
-inverse-limit assembly gives `isProjective_of_hasPGroupSolutions`, without finite generation
-of `G`. Compactness is applied to fibers in `A`; the sets of level solutions need not be finite.
+A minimal relation (`Subgroup.exists_minimal_isClosed_le`) therefore supplies compatible
+finite-level solutions. The existing inverse-limit assembly gives
+`isProjective_of_hasPGroupSolutions`, without finite generation of `G`. Compactness is applied to
+fibers in `A`; the sets of level solutions need not be finite.
 -/
 
 public section
@@ -48,15 +49,22 @@ private theorem exists_quotient_map_in_relation {p : ℕ} (hG : HasPGroupSolutio
     ∃ δ : G →ₜ* A ⧸ U.toSubgroup,
       ∀ g : G, ∃ a : A, (a, g) ∈ H ∧ QuotientGroup.mk' U.toSubgroup a = δ g := by
   classical
+  -- Stage 1: the projection `s : H → G` is surjective and, as `A` is compact, a closed map,
+  -- hence a quotient map.
   let s : H →* G := (MonoidHom.snd A G).comp H.subtype
+  have hs_apply (x : H) : s x = (x : A × G).2 := by
+    simp only [s, MonoidHom.comp_apply, Subgroup.coe_subtype, MonoidHom.coe_snd]
   have hs : Function.Surjective s := by
     intro g
     obtain ⟨a, ha⟩ := hsurj g
-    exact ⟨⟨(a, g), ha⟩, rfl⟩
+    exact ⟨⟨(a, g), ha⟩, hs_apply _⟩
   have hscont : Continuous s := continuous_snd.comp continuous_subtype_val
   have hsquot : Topology.IsQuotientMap s :=
     (isClosedMap_snd_of_compactSpace.comp hclosed.isClosedMap_subtype_val).isQuotientMap
       hscont hs
+  -- Stage 2: reduce the first coordinate modulo `U`, giving `t : H → A ⧸ U` with range
+  -- `t.range`, and quotient `t.range` further by the image `K` of `ker s`; the composite
+  -- `π : H → t.range ⧸ K` is continuous into a finite discrete group.
   let t : H →* A ⧸ U.toSubgroup :=
     (QuotientGroup.mk' U.toSubgroup).comp ((MonoidHom.fst A G).comp H.subtype)
   let τ := t.rangeRestrict
@@ -67,6 +75,8 @@ private theorem exists_quotient_map_in_relation {p : ℕ} (hG : HasPGroupSolutio
   have hle : s.ker ≤ π.ker := by
     intro h hh
     exact (QuotientGroup.eq_one_iff (τ h)).mpr (Subgroup.mem_map.mpr ⟨h, hh, rfl⟩)
+  -- Stage 3: `π` kills `ker s`, so it descends along the quotient map `s` to a continuous
+  -- `β : G → t.range ⧸ K`.
   let β := s.liftOfSurjective hs ⟨π, hle⟩
   have hβ (h : H) : β (s h) = π h := by
     simp only [β, MonoidHom.liftOfSurjective, MonoidHom.liftOfRightInverse_comp_apply]
@@ -78,6 +88,8 @@ private theorem exists_quotient_map_in_relation {p : ℕ} (hG : HasPGroupSolutio
     have heq : (β : G → _) ∘ s = π := funext hβ
     rw [heq]
     exact hπcont
+  -- Stage 4: `K` is a `p`-group inside the `p`-group `A ⧸ U`, so `HasPGroupSolutions` lifts `β`
+  -- through `t.range ↠ t.range ⧸ K` to `γ : G → t.range`; `δ` is `γ` followed by the inclusion.
   obtain ⟨γ, hγ, hγβ⟩ := hG.exists_comp_eq (QuotientGroup.mk' K)
     (QuotientGroup.mk'_surjective K)
     (((isProP_iff.mp hA U).to_subgroup t.range).to_subgroup _) β
@@ -87,6 +99,9 @@ private theorem exists_quotient_map_in_relation {p : ℕ} (hG : HasPGroupSolutio
       continuous_subtype_val.comp (γ.continuous_iff_isOpen_ker.mpr hγ)⟩
   refine ⟨δ, ?_⟩
   intro g
+  -- Stage 5: over `g`, pick `h ∈ H` with `s h = g`; then `τ h` and `γ g` agree modulo
+  -- `K = τ (ker s)`, so correcting `h` by an element of `ker s` gives a point of `H` over `g`
+  -- whose first coordinate reduces to `δ g`.
   obtain ⟨h, hh⟩ := hs g
   have hquot : QuotientGroup.mk' K (τ h) = QuotientGroup.mk' K (γ g) := by
     calc
@@ -94,61 +109,14 @@ private theorem exists_quotient_map_in_relation {p : ℕ} (hG : HasPGroupSolutio
       _ = β g := congrArg β hh
       _ = QuotientGroup.mk' K (γ g) := (DFunLike.congr_fun hγβ g).symm
   obtain ⟨k, hk, hkτ⟩ := Subgroup.mem_map.mp (QuotientGroup.eq.mp hquot)
-  have hsg : (h * k).1.2 = g := by
-    change s (h * k) = g
-    rw [map_mul, hh, show s k = 1 from hk, mul_one]
+  have hsg : s (h * k) = g := by
+    rw [map_mul, hh, MonoidHom.mem_ker.mp hk, mul_one]
   refine ⟨(h * k).1.1, ?_, ?_⟩
   · have hm := (h * k).2
-    change ((h * k).1.1, (h * k).1.2) ∈ H at hm
-    rwa [hsg] at hm
+    rwa [← hsg, hs_apply, Prod.mk.eta]
   · have ht : τ (h * k) = γ g := by
       rw [map_mul, hkτ, mul_inv_cancel_left]
     exact congrArg Subtype.val ht
-
-omit [IsTopologicalGroup G] [IsTopologicalGroup A] in
-/-- Compact fibers preserve surjectivity along decreasing chains of closed relations. -/
-private theorem exists_minimal_closed_relation (R : Subgroup (A × G))
-    (hclosed : IsClosed (R : Set (A × G))) (hsurj : ∀ g : G, ∃ a : A, (a, g) ∈ R) :
-    ∃ H : Subgroup (A × G), H ≤ R ∧ IsClosed (H : Set (A × G)) ∧
-      (∀ g : G, ∃ a : A, (a, g) ∈ H) ∧
-      ∀ K : Subgroup (A × G), K ≤ H → IsClosed (K : Set (A × G)) →
-        (∀ g : G, ∃ a : A, (a, g) ∈ K) → H ≤ K := by
-  let S : Set (Subgroup (A × G)) :=
-    {H | H ≤ R ∧ IsClosed (H : Set (A × G)) ∧ ∀ g : G, ∃ a : A, (a, g) ∈ H}
-  have hbound : ∀ c : Set (Subgroup (A × G)), c ⊆ S → IsChain (· ≥ ·) c →
-      ∃ H ∈ S, ∀ K ∈ c, H ≤ K := by
-    intro c hcs hchain
-    rcases c.eq_empty_or_nonempty with rfl | hne
-    · exact ⟨R, ⟨le_rfl, hclosed, hsurj⟩, by simp⟩
-    · refine ⟨sInf c, ⟨?_, ?_, ?_⟩, fun K hK ↦ sInf_le hK⟩
-      · obtain ⟨K, hK⟩ := hne
-        exact (sInf_le hK).trans (hcs hK).1
-      · change IsClosed (⋂ K ∈ c, (K : Set (A × G)))
-        exact isClosed_biInter fun K hK ↦ (hcs hK).2.1
-      · intro g
-        let F : c → Set A := fun K ↦ {a | (a, g) ∈ K.1}
-        have : Nonempty c := hne.to_subtype
-        have hFclosed (K : c) : IsClosed (F K) :=
-          (hcs K.2).2.1.preimage (continuous_id.prodMk continuous_const)
-        have hdir : Directed (· ⊇ ·) F := by
-          intro K L
-          rcases eq_or_ne K.1 L.1 with h | h
-          · refine ⟨K, Set.Subset.rfl, ?_⟩
-            intro a ha
-            simpa only [F, h] using ha
-          · rcases hchain K.2 L.2 h with hLK | hKL
-            · exact ⟨L, fun _ ha ↦ hLK ha, Set.Subset.rfl⟩
-            · exact ⟨K, Set.Subset.rfl, fun _ ha ↦ hKL ha⟩
-        obtain ⟨a, ha⟩ :=
-          IsCompact.nonempty_iInter_of_directed_nonempty_isCompact_isClosed F hdir
-            (fun K ↦ (hcs K.2).2.2 g) (fun K ↦ (hFclosed K).isCompact) hFclosed
-        refine ⟨a, Subgroup.mem_sInf.mpr ?_⟩
-        intro K hK
-        exact Set.mem_iInter.mp ha ⟨K, hK⟩
-  obtain ⟨H, hH, hmin⟩ := zorn_le₀ (α := (Subgroup (A × G))ᵒᵈ) S hbound
-  refine ⟨H, hH.1, hH.2.1, hH.2.2, ?_⟩
-  intro K hKH hKclosed hKsurj
-  exact hmin ⟨hKH.trans hH.1, hKclosed, hKsurj⟩ hKH
 
 variable {B : Type w} [Group B] [TopologicalSpace B] [IsTopologicalGroup B] [T2Space B]
 
@@ -165,8 +133,8 @@ theorem HasPGroupSolutions.exists_compatible_levelSolutions {p : ℕ}
   have hRclosed : IsClosed (R : Set (A × G)) :=
     isClosed_eq (α.continuous.comp continuous_fst) (f.continuous.comp continuous_snd)
   have hRsurj : ∀ g : G, ∃ a : A, (a, g) ∈ R := fun g ↦ hα (f g)
-  obtain ⟨H, hHR, hHclosed, hHsurj, hmin⟩ :=
-    exists_minimal_closed_relation R hRclosed hRsurj
+  obtain ⟨H, hH⟩ := Subgroup.exists_minimal_isClosed_le R hRclosed hRsurj
+  obtain ⟨hHR, hHclosed, hHsurj⟩ := hH.prop
   have hlevels (U : OpenNormalSubgroup A) :
       ∃ δ : G →ₜ* A ⧸ U.toSubgroup,
         ∀ a g, (a, g) ∈ H → QuotientGroup.mk' U.toSubgroup a = δ g := by
@@ -180,7 +148,7 @@ theorem HasPGroupSolutions.exists_compatible_levelSolutions {p : ℕ}
       intro g
       obtain ⟨a, ha, hδa⟩ := hδ g
       exact ⟨a, ha, hδa⟩
-    exact ⟨δ, fun a g ha ↦ (hmin K inf_le_left hKclosed hKsurj ha).2⟩
+    exact ⟨δ, fun a g ha ↦ (hH.le_of_le ⟨inf_le_left.trans hHR, hKclosed, hKsurj⟩ inf_le_left ha).2⟩
   choose δ hδ using hlevels
   let β : ∀ U, LevelSolution α hα f U := fun U ↦ ⟨δ U, by
     intro g
@@ -191,8 +159,7 @@ theorem HasPGroupSolutions.exists_compatible_levelSolutions {p : ℕ}
   intro V U hVU
   apply Subtype.ext
   ext g
-  simp only [levelSolutionMap_apply]
-  change QuotientGroup.mapOfLE hVU (δ V g) = δ U g
+  simp only [levelSolutionMap_apply, β]
   obtain ⟨a, ha⟩ := hHsurj g
   rw [← hδ V a g ha, ← hδ U a g ha]
   exact DFunLike.congr_fun (QuotientGroup.mapOfLE_comp_mk' hVU) a

@@ -5,6 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+import TauCeti.Topology.Algebra.ContinuousMonoidHom
+
 public import Mathlib.Order.DirectedInverseSystem
 public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Level
 
@@ -28,12 +30,12 @@ variable {G : Type u} [Group G] [TopologicalSpace G]
 variable {A : Type v} [Group A] [TopologicalSpace A] [IsTopologicalGroup A] [CompactSpace A]
 variable {B : Type w} [Group B] [TopologicalSpace B] [IsTopologicalGroup B] [T2Space B]
 
+/-- The image of an open normal subgroup under `α` is monotone in the subgroup. -/
 theorem levelImage_mono (α : A →ₜ* B) (hα : Function.Surjective α) :
     Monotone (levelImage α hα) := by
   intro V U h
-  change (levelImage α hα V).toSubgroup ≤ (levelImage α hα U).toSubgroup
-  simpa only [levelImage_toSubgroup] using
-    (Subgroup.map_mono h : V.toSubgroup.map α.toMonoidHom ≤ U.toSubgroup.map α.toMonoidHom)
+  rw [← OpenNormalSubgroup.toSubgroup_le, levelImage_toSubgroup, levelImage_toSubgroup]
+  exact Subgroup.map_mono h
 
 /-- Restrict a solution at `V` to the coarser quotient at `U`. -/
 def levelSolutionMap (α : A →ₜ* B) (hα : Function.Surjective α) (f : G →ₜ* B)
@@ -42,12 +44,11 @@ def levelSolutionMap (α : A →ₜ* B) (hα : Function.Surjective α) (f : G �
   refine ⟨(⟨QuotientGroup.mapOfLE hVU, continuous_of_discreteTopology⟩ :
     A ⧸ V.toSubgroup →ₜ* A ⧸ U.toSubgroup).comp β.1, ?_⟩
   intro g
-  change levelMap α hα U (QuotientGroup.mapOfLE hVU (β.1 g)) =
-    QuotientGroup.mk' (levelImage α hα U).toSubgroup (f g)
   obtain ⟨a, ha⟩ := QuotientGroup.mk_surjective (β.1 g)
   have hβ := β.2 g
   rw [← ha, levelMap_mk] at hβ
-  rw [← ha, QuotientGroup.mapOfLE_mk, levelMap_mk]
+  rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, ContinuousMonoidHom.coe_mk, ← ha,
+    QuotientGroup.mapOfLE_mk, levelMap_mk]
   simpa only [QuotientGroup.mk'_apply, QuotientGroup.mapOfLE_mk] using
     congrArg (QuotientGroup.mapOfLE (levelImage_mono α hα hVU)) hβ
 
@@ -101,14 +102,14 @@ theorem levelSolutionMap_surjective {p : ℕ} (hG : HasPGroupSolutions p G)
       rw [← levelImage_toSubgroup α hα U]
       exact QuotientGroup.eq.mp hβ
     obtain ⟨t, ht, hat⟩ := Subgroup.mem_map.mp hm
-    change α t = (α a)⁻¹ * f g at hat
-    refine ⟨((a * t : A) : A ⧸ V.toSubgroup), Prod.ext ?_ ?_⟩
-    · change QuotientGroup.mapOfLE hVU ((a * t : A) : A ⧸ V.toSubgroup) = β.1 g
-      rw [QuotientGroup.mapOfLE_mk, ← ha, QuotientGroup.mk_mul,
+    rw [ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_coe] at hat
+    refine ⟨((a * t : A) : A ⧸ V.toSubgroup), ?_⟩
+    simp only [φ, γ, MonoidHom.prod_apply, MonoidHom.comp_apply,
+      ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_coe, Prod.mk.injEq]
+    refine ⟨?_, ?_⟩
+    · rw [QuotientGroup.mapOfLE_mk, ← ha, QuotientGroup.mk_mul,
         (QuotientGroup.eq_one_iff t).mpr ht, mul_one]
-    · change levelMap α hα V ((a * t : A) : A ⧸ V.toSubgroup) =
-        QuotientGroup.mk' (levelImage α hα V).toSubgroup (f g)
-      rw [levelMap_mk, map_mul, hat, mul_inv_cancel_left, QuotientGroup.mk'_apply]
+    · rw [levelMap_mk, map_mul, hat, mul_inv_cancel_left, QuotientGroup.mk'_apply]
   let γ' : G →* φ.range := γ.codRestrict _ hmem
   have hγ : IsOpen (γ'.ker : Set G) := (MonoidHom.continuous_iff_isOpen_ker _).mp
     ((β.1.continuous.prodMk (QuotientGroup.continuous_mk.comp f.continuous)).subtype_mk _)
