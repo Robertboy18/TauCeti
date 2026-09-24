@@ -6,35 +6,46 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.RingTheory.PowerSeries.Evaluation
-public import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
 
 /-!
-# Evaluation of power series and divisibility by `X - C c`
+# Evaluation of power series and division by `X - C c`
 
 Mathlib evaluates a power series over `R` at a topologically nilpotent point `a` of a complete,
 separated, linearly topologized `R`-algebra `S` through `PowerSeries.aeval`. This file records the
-values of that evaluation on the generators, `X ↦ a` and `C r ↦ algebraMap R S r`, and proves the
-divisibility criterion for a linear factor over a ring `A` that is adically complete for an ideal
-`I`: for `c ∈ I` at which power series can be evaluated,
+values of that evaluation on the generators, `X ↦ a` and `C r ↦ algebraMap R S r`, and performs
+division by a linear factor over a ring `A` in which power series can be evaluated at `c`:
 
 ```text
-(X - C c) ∣ f  ↔  f(c) = 0.
+f = (X - C c) * divXSubC hc f + C (f(c)),
 ```
 
-One direction is that `X - C c` evaluates to zero. The other is Weierstrass division
-(`PowerSeries.IsWeierstrassDivisorAt.isWeierstrassDivisionAt_div_mod`): the image of `X - C c`
-modulo `I` is `X`, of order one with unit coefficient, so `f = (X - C c) * q + r` with `r` a
-constant, and evaluating at `c` identifies that constant with `f(c)`. The case of interest is a
-complete local ring with `I` its maximal ideal, such as `ℤ_[p]` with `I = (p)`.
+where the quotient `PowerSeries.divXSubC hc f` is the explicit series whose `n`-th coefficient is
+the value at `c` of the tail `∑ₖ f_{n+1+k} X^k` of `f`, that is `∑ₖ f_{n+1+k} c^k`. The identity
+is checked coefficientwise from the recursion `tailₙ(c) = fₙ + c * tailₙ₊₁(c)`, which is
+`PowerSeries.aeval` applied to `tailₙ = X * tailₙ₊₁ + C fₙ`. The divisibility criterion
 
-The hypothesis `c ∈ I` is not decoration: for a unit `c` the series `X - C c` is a unit of
-`A⟦X⟧`, so it divides everything, while `f(c)` need not vanish; and a unit lies in no proper
-ideal.
+```text
+(X - C c) ∣ f  ↔  f(c) = 0
+```
+
+follows: one direction is that `X - C c` evaluates to zero, and the other reads off the
+factorization once the remainder `f(c)` vanishes. This is the special case of Weierstrass division
+by `X - C c` that a complete local ring such as `ℤ_[p]` uses at a point `c` of its maximal ideal;
+the explicit quotient makes the general division theorem unnecessary here.
+
+The evaluability hypothesis `HasEval c` is where the topology enters: it is what makes the tails
+of `f` evaluable at `c`, and it already excludes the units. For a unit `c` the series `X - C c`
+is a unit of `A⟦X⟧`, so it divides everything, while `f(c)` need not vanish; and a unit is
+topologically nilpotent only in the zero ring.
 
 ## Main results
 
 * `PowerSeries.aeval_X`, `PowerSeries.aeval_C`: the values of evaluation on the generators.
-* `PowerSeries.map_mk_X_sub_C`: modulo an ideal containing `c`, the series `X - C c` becomes `X`.
+* `PowerSeries.divXSubC`: the quotient of a power series on division by `X - C c`, with its
+  coefficients `PowerSeries.coeff_divXSubC` and their series expansion
+  `PowerSeries.hasSum_coeff_divXSubC`.
+* `PowerSeries.X_sub_C_mul_divXSubC_add_C_aeval`: the division `f = (X - C c) * q + C (f(c))`.
+* `PowerSeries.X_sub_C_mul_divXSubC`: the factorization `f = (X - C c) * q` when `f(c) = 0`.
 * `PowerSeries.X_sub_C_dvd_iff_aeval_eq_zero`: divisibility by `X - C c` is vanishing at `c`.
 
 ## References
@@ -67,49 +78,61 @@ end Aeval
 
 section LinearFactor
 
-variable {A : Type*} [CommRing A]
+variable {A : Type*} [CommRing A] [UniformSpace A] [IsUniformAddGroup A] [IsTopologicalRing A]
+  [T2Space A] [CompleteSpace A] [IsLinearTopology A A] {c : A}
 
-/-- Modulo an ideal containing `c`, the power series `X - C c` becomes `X`. -/
-theorem map_mk_X_sub_C {I : Ideal A} {c : A} (hc : c ∈ I) :
-    (X - C c : A⟦X⟧).map (Ideal.Quotient.mk I) = X := by
-  rw [map_sub, map_X, map_C, Ideal.Quotient.eq_zero_iff_mem.mpr hc, map_zero, sub_zero]
+/-- The quotient of a power series `f` on division by `X - C c`, at a point `c` where power series
+can be evaluated: its `n`-th coefficient is the value at `c` of the tail `∑ₖ f_{n+1+k} X^k` of `f`.
+The remainder is the constant `f(c)`; see `PowerSeries.X_sub_C_mul_divXSubC_add_C_aeval`. -/
+noncomputable def divXSubC (hc : HasEval c) (f : A⟦X⟧) : A⟦X⟧ :=
+  mk fun n ↦ aeval hc (mk fun k ↦ coeff (n + 1 + k) f)
 
-variable [UniformSpace A] [IsUniformAddGroup A] [IsTopologicalRing A] [T2Space A]
-  [CompleteSpace A] [IsLinearTopology A A] {I : Ideal A} [IsAdicComplete I A]
+@[simp]
+theorem coeff_divXSubC (hc : HasEval c) (f : A⟦X⟧) (n : ℕ) :
+    coeff n (divXSubC hc f) = aeval hc (mk fun k ↦ coeff (n + 1 + k) f) :=
+  coeff_mk _ _
 
-/-- **Divisibility by a linear factor is vanishing at its root.** Over a ring `A` that is adically
-complete for an ideal `I`, for `c ∈ I` at which power series can be evaluated, a power series is
-divisible by `X - C c` exactly when its value at `c` is zero. -/
-theorem X_sub_C_dvd_iff_aeval_eq_zero {c : A} (hc : c ∈ I) (hcev : HasEval c) (f : A⟦X⟧) :
-    (X - C c) ∣ f ↔ aeval hcev f = 0 := by
+/-- The coefficients of the quotient by `X - C c` are the explicit series
+`∑ₖ f_{n+1+k} c^k`. -/
+theorem hasSum_coeff_divXSubC (hc : HasEval c) (f : A⟦X⟧) (n : ℕ) :
+    HasSum (fun k ↦ coeff (n + 1 + k) f * c ^ k) (coeff n (divXSubC hc f)) := by
+  simpa [smul_eq_mul] using hasSum_aeval hc (mk fun k ↦ coeff (n + 1 + k) f)
+
+/-- The value at `c` of the tail `∑ₖ f_{n+k} X^k` of `f` is `fₙ + c * (∑ₖ f_{n+1+k} X^k)(c)`. -/
+theorem aeval_mk_coeff_add (hc : HasEval c) (f : A⟦X⟧) (n : ℕ) :
+    aeval hc (mk fun k ↦ coeff (n + k) f) =
+      coeff n f + c * aeval hc (mk fun k ↦ coeff (n + 1 + k) f) := by
+  have : (mk fun k ↦ coeff (n + k) f) = X * (mk fun k ↦ coeff (n + 1 + k) f) + C (coeff n f) := by
+    refine (eq_X_mul_shift_add_const _).trans ?_
+    simp [add_assoc, add_comm 1]
+  rw [this, map_add, map_mul, aeval_X, aeval_C, Algebra.algebraMap_self, RingHom.id_apply, add_comm]
+
+/-- **Division by `X - C c`.** At a point `c` where power series can be evaluated,
+`f = (X - C c) * q + C (f(c))` with `q = divXSubC hc f`. -/
+theorem X_sub_C_mul_divXSubC_add_C_aeval (hc : HasEval c) (f : A⟦X⟧) :
+    (X - C c) * divXSubC hc f + C (aeval hc f) = f := by
+  have hf : (mk fun k ↦ coeff (0 + k) f) = f := by ext; simp
+  ext (_ | n)
+  · have h := aeval_mk_coeff_add hc f 0
+    rw [hf] at h
+    rw [map_add, coeff_zero_C, h, sub_mul, map_sub, coeff_zero_X_mul, coeff_C_mul, coeff_divXSubC]
+    ring
+  · simp [sub_mul, aeval_mk_coeff_add hc f (n + 1)]
+
+/-- A power series vanishing at `c` factors as `f = (X - C c) * divXSubC hc f`. -/
+theorem X_sub_C_mul_divXSubC (hc : HasEval c) {f : A⟦X⟧} (hf : aeval hc f = 0) :
+    (X - C c) * divXSubC hc f = f := by
+  simpa [hf] using X_sub_C_mul_divXSubC_add_C_aeval hc f
+
+/-- **Divisibility by a linear factor is vanishing at its root.** At a point `c` where power
+series can be evaluated, a power series is divisible by `X - C c` exactly when its value at `c` is
+zero; the quotient is `PowerSeries.divXSubC hc f`. -/
+theorem X_sub_C_dvd_iff_aeval_eq_zero (hc : HasEval c) (f : A⟦X⟧) :
+    (X - C c) ∣ f ↔ aeval hc f = 0 := by
   constructor
   · rintro ⟨q, rfl⟩
     simp
-  · intro hf
-    -- If `I = ⊤`, adic completeness makes `A` a singleton and there is nothing to prove.
-    by_cases hI : I = ⊤
-    · subst hI
-      have := ‹IsAdicComplete ⊤ A›.subsingleton
-      exact ⟨0, PowerSeries.ext fun _ ↦ Subsingleton.elim _ _⟩
-    have := Ideal.Quotient.nontrivial_iff.mpr hI
-    -- Weierstrass division by `X - C c`: its image modulo `I` is `X`, of order one, with unit
-    -- leading coefficient.
-    have H : (X - C c : A⟦X⟧).IsWeierstrassDivisorAt I := by
-      rw [IsWeierstrassDivisorAt, map_mk_X_sub_C hc, order_X, ENat.toNat_one]
-      simp
-    obtain ⟨hdeg, heq⟩ := H.isWeierstrassDivisionAt_div_mod f
-    set q := H.div f
-    set r := H.mod f
-    rw [map_mk_X_sub_C hc, order_X, ENat.toNat_one, Nat.cast_one,
-      Nat.WithBot.lt_one_iff_le_zero] at hdeg
-    -- The remainder is the constant `f(c)`, which vanishes.
-    have hr : r = Polynomial.C (r.coeff 0) := Polynomial.eq_C_of_degree_le_zero hdeg
-    have h0 : r.coeff 0 = 0 := by
-      have h := congrArg (aeval hcev) heq
-      rw [hf, hr] at h
-      simpa using h.symm
-    refine ⟨q, ?_⟩
-    rw [heq, hr, h0, Polynomial.C_0, Polynomial.coe_zero, add_zero]
+  · exact fun hf ↦ ⟨_, (X_sub_C_mul_divXSubC hc hf).symm⟩
 
 end LinearFactor
 
