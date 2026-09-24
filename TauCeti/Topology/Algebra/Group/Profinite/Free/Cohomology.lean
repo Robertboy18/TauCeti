@@ -18,7 +18,7 @@ extension of topological groups with profinite total group `E` and pro-`p` kerne
 pro-`p`, so the universal property of `F` extends any choice of preimages of the generators to a
 continuous homomorphism `F → E`, which is a section of the projection because both composites agree
 on the generators. So the extension splits by a continuous homomorphic section
-(`TauCeti.freeProP.exists_splitting_continuous`).
+(`GroupExtension.exists_splitting_continuous_freeProP`).
 
 Read through the classification of profinite extensions by continuous `H²`, this is the vanishing of
 the second continuous cohomology of a free pro-`p` group with coefficients in any profinite pro-`p`
@@ -33,8 +33,8 @@ the argument uses nothing else about `F`.
 
 ## Main results
 
-* `TauCeti.freeProP.exists_splitting_continuous`: every profinite extension of a free pro-`p` group
-  by a pro-`p` group splits by a continuous homomorphic section.
+* `GroupExtension.exists_splitting_continuous_freeProP`: every profinite extension of a free
+  pro-`p` group by a pro-`p` group splits by a continuous homomorphic section.
 * `TauCeti.freeProP.subsingleton_H2`: **`H²(F, M) = 0`** for `F` free pro-`p` and `M` a profinite
   pro-`p` abelian `F`-module.
 * `TauCeti.freeProP.subsingleton_continuousCohomology_two`: the same in Mathlib's
@@ -69,8 +69,8 @@ variable {M : Type*} [Group M] [TopologicalSpace M]
 /-- **Extensions of a free pro-`p` group by a pro-`p` group split.** An extension
 `1 → M → E → freeProP p X → 1` of topological groups with profinite total group and pro-`p` kernel
 has a continuous homomorphic section. -/
-theorem exists_splitting_continuous (hinl : Continuous S.inl) (hrh : Continuous S.rightHom)
-    (hM : IsProP p M) : ∃ s : S.Splitting, Continuous ⇑s := by
+theorem _root_.GroupExtension.exists_splitting_continuous_freeProP (hinl : Continuous S.inl)
+    (hrh : Continuous S.rightHom) (hM : IsProP p M) : ∃ s : S.Splitting, Continuous ⇑s := by
   have hE : IsProP p E := S.isProP hinl hrh hM (isProP_freeProP p X)
   choose e he using fun x : X ↦ S.rightHom_surjective (of x)
   -- The projection, bundled with its continuity; it evaluates as `S.rightHom` by construction.
@@ -99,7 +99,8 @@ theorem subsingleton_H2 (hM : IsProP p M) : Subsingleton (H2 (freeProP p X) (Add
   obtain ⟨Y, rfl⟩ := ProfiniteGroupExtension.exists_contCohomologyClass_eq c
   rw [ProfiniteGroupExtension.contCohomologyClass_def,
     ← Y.toGroupExtension.exists_splitting_continuous_iff_contCohomologyClass_eq_zero]
-  exact exists_splitting_continuous Y.toGroupExtension Y.continuous_inl Y.continuous_rightHom hM
+  exact Y.toGroupExtension.exists_splitting_continuous_freeProP Y.continuous_inl
+    Y.continuous_rightHom hM
 
 end Cohomology
 
