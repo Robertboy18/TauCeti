@@ -6,31 +6,66 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Topology.Algebra.Group.Subgroup
+public import TauCeti.Topology.Algebra.ContinuousMonoidHom
 
 /-!
-# Topological closure of subgroups
+# Subgroups and topological closure
 
-Basic facts about the topological closure of a subgroup of a topological group.
+This file records how subgroup constructions interact with topological closure. It also provides
+normality of the closure of a normal closure, the kernel criterion for a closed normal closure,
+and compatibility of multiplicative and additive subgroup closures.
 
-Two theorems of Mathlib are registered as instances, so that the quotient of a topological group
-by the topological closure of a normal subgroup is found to be a Hausdorff topological group by
-instance search alone: the closure of a subgroup is closed, and the closure of a normal subgroup
-is normal.
+Mathlib's theorem that the topological closure of a subgroup is closed is registered as an
+instance, so that the quotient of a topological group by the topological closure of a normal
+subgroup is found to be a Hausdorff topological group by instance search alone.
 
 The **closed normal closure** of a set `s`, the topological closure of `Subgroup.normalClosure s`,
 is the least closed normal subgroup containing `s`
-(`Subgroup.topologicalClosure_normalClosure_le_iff`). In particular it lies in the kernel of
-every continuous homomorphism to a `T1` monoid that kills `s`
-(`Subgroup.topologicalClosure_normalClosure_le_ker`), which is the fact behind the universal
-property of a group presented by generators and relators inside a category of topological
-groups: the quotient by the closed normal closure of the relators receives a continuous
-homomorphism from every continuous homomorphism that kills the relators.
+(`Subgroup.topologicalClosure_normalClosure_le_iff`), and it is `N` itself when `s` is the carrier
+of a closed normal subgroup `N` (`Subgroup.topologicalClosure_normalClosure_eq_self`). This is the
+fact behind the universal property of a group presented by generators and relators inside a
+category of topological groups.
 
-Finally, converting a subgroup to an additive subgroup commutes with topological closure. This
-connects topological generation in a group with additive generation on its `Additive` type tag.
+## Main results
+
+* `Subgroup.instIsClosedTopologicalClosure`: the topological closure of a subgroup is closed.
+* `TauCeti.instNormal_topologicalClosure_normalClosure`: the closure of a normal closure is
+  normal.
+* `TauCeti.topologicalClosure_normalClosure_le_ker`: relators killed by a continuous map have
+  closed normal closure in its kernel.
+* `Subgroup.topologicalClosure_normalClosure_le_iff`: the closed normal closure is the least closed
+  normal subgroup containing the set.
+* `Subgroup.topologicalClosure_normalClosure_eq_self`: the closed normal closure of a closed normal
+  subgroup is that subgroup.
+* `Subgroup.toAddSubgroup_topologicalClosure`: converting to an additive subgroup commutes with
+  topological closure.
 -/
 
 public section
+
+namespace TauCeti
+
+/-- The closure of the normal closure of a set is a normal subgroup. -/
+instance instNormal_topologicalClosure_normalClosure {G : Type*} [Group G]
+    [TopologicalSpace G] [IsTopologicalGroup G] (s : Set G) :
+    ((Subgroup.normalClosure s).topologicalClosure).Normal := by
+  exact Subgroup.is_normal_topologicalClosure _
+
+end TauCeti
+
+namespace TauCeti
+
+/-- The closed normal closure of relators lies in the kernel of a continuous homomorphism that
+kills them. -/
+theorem topologicalClosure_normalClosure_le_ker {G H : Type*} [Group G] [Group H]
+    [TopologicalSpace G] [IsTopologicalGroup G] [TopologicalSpace H] [T1Space H] {s : Set G}
+    {f : G →ₜ* H} (hf : ∀ r ∈ s, f r = 1) :
+    (Subgroup.normalClosure s).topologicalClosure ≤ f.toMonoidHom.ker := by
+  exact Subgroup.topologicalClosure_minimal (Subgroup.normalClosure s)
+    (Subgroup.normalClosure_le_normal fun r hr ↦ MonoidHom.mem_ker.mpr (hf r hr))
+    (isClosed_singleton.preimage f.continuous)
+
+end TauCeti
 
 namespace Subgroup
 
@@ -40,10 +75,6 @@ variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 instance instIsClosedTopologicalClosure (s : Subgroup G) :
     IsClosed (s.topologicalClosure : Set G) :=
   s.isClosed_topologicalClosure
-
-/-- The topological closure of a normal subgroup is normal. -/
-instance instNormalTopologicalClosure (N : Subgroup G) [N.Normal] : N.topologicalClosure.Normal :=
-  N.is_normal_topologicalClosure
 
 /-- A closed normal subgroup contains the closed normal closure of `s` exactly when it contains
 `s`: the closed normal closure is the least closed normal subgroup containing `s`. -/
@@ -57,14 +88,6 @@ theorem topologicalClosure_normalClosure_eq_self (N : Subgroup G) [N.Normal]
     (hN : IsClosed (N : Set G)) : (normalClosure (N : Set G)).topologicalClosure = N :=
   le_antisymm ((topologicalClosure_normalClosure_le_iff hN).2 subset_rfl)
     (le_normalClosure.trans (normalClosure (N : Set G)).le_topologicalClosure)
-
-/-- A continuous homomorphism to a `T1` monoid that kills `s` kills the closed normal closure of
-`s`. -/
-theorem topologicalClosure_normalClosure_le_ker {M : Type*} [MulOneClass M] [TopologicalSpace M]
-    [T1Space M] {f : G →* M} (hf : Continuous f) {s : Set G} (h : ∀ r ∈ s, f r = 1) :
-    (normalClosure s).topologicalClosure ≤ f.ker :=
-  (topologicalClosure_normalClosure_le_iff (f.coe_ker ▸ isClosed_singleton.preimage hf)).2
-    fun r hr ↦ MonoidHom.mem_ker.mpr (h r hr)
 
 /-- Converting a subgroup to an additive subgroup commutes with topological closure. -/
 @[simp]
