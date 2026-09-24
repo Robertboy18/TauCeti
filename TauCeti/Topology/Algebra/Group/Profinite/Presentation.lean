@@ -103,12 +103,6 @@ theorem mk_eq_one_iff (r : freeProfiniteGroup X) :
   change (r : freeProfiniteGroup X ⧸ (Subgroup.normalClosure rels).topologicalClosure) = 1 ↔ _
   exact QuotientGroup.eq_one_iff r
 
-/-- The kernel of the canonical quotient map is the closed normal closure of the relators. -/
-@[simp]
-theorem ker_mk : (mk rels : freeProfiniteGroup X →* presentedProfiniteGroup X rels).ker =
-    (Subgroup.normalClosure rels).topologicalClosure :=
-  QuotientGroup.ker_mk' _
-
 /-- The canonical quotient map sends a free generator to the corresponding generator of the
 presented profinite group. -/
 @[simp]
@@ -364,12 +358,6 @@ theorem mk_eq_one_iff (r : freeProP p X) :
   -- Expose the quotient representation so Mathlib's general criterion applies.
   change (r : freeProP p X ⧸ (Subgroup.normalClosure rels).topologicalClosure) = 1 ↔ _
   exact QuotientGroup.eq_one_iff r
-
-/-- The kernel of the canonical quotient map is the closed normal closure of the relators. -/
-@[simp]
-theorem ker_mk : (mk p rels : freeProP p X →* presentedProP p X rels).ker =
-    (Subgroup.normalClosure rels).topologicalClosure :=
-  QuotientGroup.ker_mk' _
 
 /-- The canonical quotient map sends a free generator to the corresponding generator of the
 presented pro-`p` group. -/
