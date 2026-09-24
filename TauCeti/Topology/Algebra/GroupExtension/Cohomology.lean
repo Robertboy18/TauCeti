@@ -549,10 +549,10 @@ variable [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] [C
 are profinite: it is `M × G` as a space, `TauCeti.FactorSet.Extension.isTopologicalGroup` makes
 it a topological group, and its inclusion and projection are the coordinate maps. Compactness of
 `M` alone would not do: the twisted product of the trivial factor set over the trivial group is `M`
-itself. The definition is exposed so that the total group `(ofFactorSet α hα).E` unfolds to
-`α.Extension`, on which `TauCeti.ProfiniteGroupExtension.ofFactorSet_toGroupExtension` reads
-off the underlying extension. -/
-@[expose] def ofFactorSet : ProfiniteGroupExtension G M where
+itself. The realization is an abbreviation so that its total group and group structure remain
+definitionally those of `α.Extension`; the underlying extension is given by
+`TauCeti.ProfiniteGroupExtension.ofFactorSet_toGroupExtension`. -/
+abbrev ofFactorSet : ProfiniteGroupExtension G M where
   E := α.Extension
   instIsTopologicalGroup := FactorSet.Extension.isTopologicalGroup hα
   toGroupExtension := α.groupExtension
@@ -575,7 +575,8 @@ theorem contCohomologyClass_ofFactorSet :
     (ofFactorSet α hα).contCohomologyClass = α.contCohomologyClass hα := by
   have := FactorSet.Extension.isTopologicalGroup hα
   rw [contCohomologyClass_def]
-  simp only [ofFactorSet_toGroupExtension]
+  -- Rewriting the extension alone would ill-type its continuity and action witnesses.
+  -- The abbreviation keeps the witnesses definitionally equal across the projection.
   exact (α.groupExtension.contCohomologyClass_eq _ _ _ (FactorSet.continuous_canonicalSection α)
     α.canonicalSection_one).trans (FactorSet.contCohomologyClass_factorSet_canonicalSection α hα _)
 
