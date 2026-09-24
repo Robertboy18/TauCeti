@@ -18,14 +18,16 @@ import TauCeti.NumberTheory.Padics.RingHoms
 A topologically finitely generated abelian pro-`p` group `A` is topologically isomorphic to
 `ℤ_p ^ r × T`, where `T = ∏ i : Fin m, ℤ/p^(e i)` is a finite abelian `p`-group carrying the
 discrete topology and every exponent `e i` is positive, so that the finite factor has no trivial
-summand. The isomorphism is an isomorphism of topological groups; it is moreover `ℤ_[p]`-linear
-for the canonical `p`-adic exponentiation `TauCeti.IsProP.module`, since every continuous
-homomorphism between abelian pro-`p` groups is (`TauCeti.IsProP.map_padicPow`). This is the
-abelian case of the classification of finitely generated pro-`p` groups; it describes, for
-instance, the abelianisation of any topologically finitely generated pro-`p` group.
+summand. The isomorphism is an isomorphism of topological groups. This is the abelian case of
+the classification of finitely generated pro-`p` groups; it describes, for instance, the
+abelianisation of any topologically finitely generated pro-`p` group.
 
-The rank `r` and the exponents `e i` are the invariants of `A`; their uniqueness is not proved
-here. Nor is the identification of `T` with the torsion subgroup of `A`.
+The statement records only a topological group isomorphism, not a `ℤ_[p]`-linear equivalence
+for the canonical `p`-adic exponentiation `TauCeti.IsProP.module`. (Every continuous
+homomorphism between abelian pro-`p` groups commutes with `p`-adic exponentiation,
+`TauCeti.IsProP.map_padicPow`, so no information is lost, but no linear equivalence is packaged
+here.) The rank `r` and the exponents `e i` are the invariants of `A`; their uniqueness is not
+proved here. Nor is the identification of `T` with the torsion subgroup of `A`.
 
 ## Main result
 
