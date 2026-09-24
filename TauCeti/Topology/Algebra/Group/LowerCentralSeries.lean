@@ -30,8 +30,9 @@ The series is descending, each term is closed and normal, and its successive quo
 and killed by `p`: `⁅λ_k, G⁆ ≤ λ_{k+1}` and `x ^ p ∈ λ_{k+1}` for `x ∈ λ_k`. The main theorem is
 the **degree-raising law** `⁅λ_j, λ_k⁆ ≤ λ_{j+k+1}`, which lets the group commutator induce a
 bracket `λ_j ⧸ λ_{j+1} × λ_k ⧸ λ_{k+1} → λ_{j+k+1} ⧸ λ_{j+k+2}` on the graded pieces. Continuous
-homomorphisms carry `λ_k` into `λ_k`, continuous surjections from compact groups onto Hausdorff
-groups carry it onto `λ_k`, and continuous isomorphisms match the two series term by term.
+homomorphisms carry `λ_k` into `λ_k`, continuous closed surjections (for instance from a compact
+group onto a Hausdorff group) carry it onto `λ_k`, and continuous isomorphisms match the two series
+term by term.
 
 Nothing here assumes `p` prime or `G` profinite. For a profinite `G` and a prime `p`, `λ_1` is the
 pro-`p` Frattini subgroup and, when `G` is topologically finitely generated, every `λ_k` is open;
@@ -164,15 +165,16 @@ theorem _root_.MonoidHom.map_pLowerCentralStep_le (f : G →* H) (hf : Continuou
   · rw [← map_le_iff_le_comap, map_commutator]
     exact (commutator_mono_right le_top).trans (commutator_le_pLowerCentralStep _)
 
-/-- A continuous surjection from a compact group onto a Hausdorff group carries one step of the
-lower `p`-series of a subgroup onto the corresponding step for its image. -/
-theorem _root_.MonoidHom.map_pLowerCentralStep_eq_of_surjective [CompactSpace G] [T2Space H]
-    (f : G →* H) (hf : Continuous f) (hsurj : Function.Surjective f) (K : Subgroup G) :
+/-- A continuous closed surjection (for instance a continuous surjection from a compact group onto
+a Hausdorff group, by `Continuous.isClosedMap`) carries one step of the lower `p`-series of a
+subgroup onto the corresponding step for its image. -/
+theorem _root_.MonoidHom.map_pLowerCentralStep_eq_of_surjective (f : G →* H) (hf : Continuous f)
+    (hfc : IsClosedMap f) (hsurj : Function.Surjective f) (K : Subgroup G) :
     (pLowerCentralStep p K).map f = pLowerCentralStep p (K.map f) := by
   refine le_antisymm (f.map_pLowerCentralStep_le hf K) ?_
   have hclosed : IsClosed ((pLowerCentralStep p K).map f : Set H) := by
     rw [coe_map]
-    exact ((isClosed_pLowerCentralStep K).isCompact.image hf).isClosed
+    exact hfc _ (isClosed_pLowerCentralStep K)
   refine (pLowerCentralStep_le_iff hclosed).mpr ⟨fun y hy ↦ ?_, ?_⟩
   · obtain ⟨x, hx, rfl⟩ := mem_map.mp hy
     exact ⟨x ^ p, pow_mem_pLowerCentralStep hx, map_pow f x p⟩
@@ -318,10 +320,10 @@ theorem _root_.MonoidHom.map_pLowerCentralSeries_le (f : G →* H) (hf : Continu
     rw [pLowerCentralSeries_succ, pLowerCentralSeries_succ]
     exact (f.map_pLowerCentralStep_le hf _).trans (pLowerCentralStep_mono ih)
 
-/-- A continuous surjection from a compact group onto a Hausdorff group carries `λ_k` onto
-`λ_k`. -/
-theorem _root_.MonoidHom.map_pLowerCentralSeries_eq_of_surjective [CompactSpace G] [T2Space H]
-    (f : G →* H) (hf : Continuous f) (hsurj : Function.Surjective f) (k : ℕ) :
+/-- A continuous closed surjection (for instance a continuous surjection from a compact group onto
+a Hausdorff group, by `Continuous.isClosedMap`) carries `λ_k` onto `λ_k`. -/
+theorem _root_.MonoidHom.map_pLowerCentralSeries_eq_of_surjective (f : G →* H) (hf : Continuous f)
+    (hfc : IsClosedMap f) (hsurj : Function.Surjective f) (k : ℕ) :
     (pLowerCentralSeries p G k).map f = pLowerCentralSeries p H k := by
   induction k with
   | zero =>
@@ -329,7 +331,7 @@ theorem _root_.MonoidHom.map_pLowerCentralSeries_eq_of_surjective [CompactSpace 
     exact map_top_of_surjective f hsurj
   | succ k ih =>
     rw [pLowerCentralSeries_succ, pLowerCentralSeries_succ,
-      f.map_pLowerCentralStep_eq_of_surjective hf hsurj, ih]
+      f.map_pLowerCentralStep_eq_of_surjective hf hfc hsurj, ih]
 
 /-- A topological group isomorphism matches the lower `p`-series of its source and target term by
 term. In particular, every term of the lower `p`-series is stable under continuous
