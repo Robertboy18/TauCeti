@@ -26,21 +26,12 @@ namespace TauCeti
 
 variable {p : ℕ} {G : Type v} [Group G] [TopologicalSpace G]
 
-private abbrev invariantSubgroupAction {M : Type u} [AddCommGroup M]
-    [DistribMulAction G M] (N : AddSubgroup M)
-    (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) : DistribMulAction G N where
-  smul g x := ⟨g • (x : M), hN g x x.property⟩
-  one_smul x := Subtype.ext (one_smul G (x : M))
-  mul_smul g h x := Subtype.ext (mul_smul g h (x : M))
-  smul_zero g := Subtype.ext (smul_zero g)
-  smul_add g x y := Subtype.ext (smul_add g (x : M) (y : M))
-
-private theorem invariantSubgroupAction_continuous {M : Type u} [AddCommGroup M]
+private theorem restrictDistribMulAction_continuousSMul {M : Type u} [AddCommGroup M]
     [TopologicalSpace M] [DistribMulAction G M] [ContinuousSMul G M]
     (N : AddSubgroup M) (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) :
-    letI := invariantSubgroupAction N hN
+    letI := N.restrictDistribMulAction hN
     ContinuousSMul G N := by
-  let _ := invariantSubgroupAction N hN
+  let _ := N.restrictDistribMulAction hN
   exact ⟨(continuous_fst.smul (continuous_subtype_val.comp continuous_snd)).subtype_mk _⟩
 
 private theorem invariantSubgroup_torsion {M : Type u} [AddCommGroup M]
@@ -135,8 +126,8 @@ theorem invariant_eq_padicValNat_mul_of_isProP
     I M hM = (padicValNat p (Nat.card M) : ℤ) * I P hP := by
   obtain ⟨N, hN, h0, hmono, htop, _, hfactors⟩ :=
     exists_filtration_with_trivial_factors_of_isProP hG hM
-  let _ (i : ℕ) := invariantSubgroupAction (N i) (hN i)
-  let _ (i : ℕ) := invariantSubgroupAction_continuous (N i) (hN i)
+  let _ (i : ℕ) := (N i).restrictDistribMulAction (hN i)
+  let _ (i : ℕ) := restrictDistribMulAction_continuousSMul (N i) (hN i)
   have hprim := fun i ↦ invariantSubgroup_torsion hM (N i)
   let _ : Subsingleton (N 0) := by rw [h0]; infer_instance
   have hzero := invariant_eq_zero_of_subsingleton I hExact (hprim 0)
@@ -172,7 +163,8 @@ theorem invariant_eq_padicValNat_mul_of_isProP
       have hstep := hExact (hprim i) (hprim (i + 1)) hQ
         (AddSubgroup.inclusion (hmono (Nat.le_succ i)))
         (QuotientAddGroup.mk' ((N i).addSubgroupOf (N (i + 1))))
-        (by intro g x; rfl) (by intro g x; rfl)
+        (AddSubgroup.restrictDistribMulAction_inclusion_smul (hN i) (hN (i + 1)) _)
+        (fun g x ↦ (AddSubgroup.quotientDistribMulAction_smul_mk _ _ g x).symm)
         (AddSubgroup.inclusion_injective _) (QuotientAddGroup.mk'_surjective _)
         (by
           rw [QuotientAddGroup.ker_mk']
@@ -184,12 +176,20 @@ theorem invariant_eq_padicValNat_mul_of_isProP
             exact ⟨⟨x, hx⟩, Subtype.ext rfl⟩)
       rw [hprev, heq] at hstep
       simpa only [Nat.cast_succ, add_mul, one_mul] using hstep
-  let eM : N (padicValNat p (Nat.card M)) ≃+ M :=
-    AddEquiv.ofBijective (N (padicValNat p (Nat.card M))).subtype
-      ⟨Subtype.val_injective, fun m ↦
-        ⟨⟨m, by rw [htop _ le_rfl]; trivial⟩, rfl⟩⟩
-  have heM := invariant_eq_of_equiv I hExact (hprim _) hM (hprim 0) eM
-    (by intro g x; rfl)
-  exact heM.symm.trans (hind _ le_rfl)
+  -- the top term of the filtration is all of `M`, so its inclusion is an equivariant
+  -- isomorphism; feed it to `hExact` with a subsingleton quotient
+  have hsurj : Function.Surjective (N (padicValNat p (Nat.card M))).subtype := fun m ↦
+    ⟨⟨m, by rw [htop _ le_rfl]; exact AddSubgroup.mem_top m⟩,
+      (AddSubgroup.subtype_apply _).trans (AddSubgroup.coe_mk _ _ _)⟩
+  have htopStep := hExact (hprim _) hM (hprim 0) (N (padicValNat p (Nat.card M))).subtype
+    (0 : M →+ N 0)
+    (fun g x ↦ by
+      rw [AddSubgroup.subtype_apply, AddSubgroup.subtype_apply,
+        AddSubgroup.restrictDistribMulAction_coe_smul])
+    (by intro g m; simp) (N (padicValNat p (Nat.card M))).subtype_injective
+    (fun z ↦ ⟨0, Subsingleton.elim _ _⟩)
+    (by rw [AddMonoidHom.range_eq_top.mpr hsurj, AddMonoidHom.ker_zero])
+  rw [invariant_eq_zero_of_subsingleton I hExact (hprim 0), add_zero] at htopStep
+  exact htopStep.trans (hind _ le_rfl)
 
 end TauCeti

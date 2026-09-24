@@ -17,8 +17,9 @@ Mathlib's `IsPGroup` is stated for multiplicative groups. This file records the 
 some `k`, that the theory of pro-`p` actions on finite discrete coefficient modules needs, in
 additive notation: the order of a finite such group is a power of `p`, namely
 `p ^ padicValNat p (Nat.card A)`, and is divisible by `p` when the group is nontrivial; a nonzero
-element of `p`-power order has a nonzero multiple annihilated by `p`; and adjoining to a subgroup
-`N` an element `x ∉ N` with `p • x ∈ N` multiplies the order of `N` by `p`.
+element of `p`-power order has a nonzero multiple annihilated by `p`, a statement about natural
+multiples that holds in any additive monoid; and adjoining to a subgroup `N` an element `x ∉ N`
+with `p • x ∈ N` multiplies the order of `N` by `p`.
 
 ## Main results
 
@@ -38,11 +39,33 @@ public section
 
 namespace TauCeti
 
-variable {p : ℕ} [hp : Fact p.Prime]
+variable {p : ℕ}
+
+section AddMonoid
+
+variable {A : Type*} [AddMonoid A]
+
+/-- A nonzero element `a` with `p ^ k • a = 0` has a nonzero multiple `p ^ n • a` annihilated by
+`p`, that is, with `p • p ^ n • a = 0`. -/
+theorem exists_nsmul_pow_ne_zero_nsmul_nsmul_pow_eq_zero {a : A} (ha : a ≠ 0) {k : ℕ}
+    (hk : p ^ k • a = 0) : ∃ n : ℕ, p ^ n • a ≠ 0 ∧ p • p ^ n • a = 0 := by
+  classical
+  have h : ∃ k, p ^ k • a = 0 := ⟨k, hk⟩
+  have hfind : p ^ Nat.find h • a = 0 := Nat.find_spec h
+  have hpos : 0 < Nat.find h := by
+    rw [Nat.pos_iff_ne_zero]
+    intro h0
+    rw [h0, pow_zero, one_smul] at hfind
+    exact ha hfind
+  refine ⟨Nat.find h - 1, Nat.find_min h (Nat.sub_lt hpos one_pos), ?_⟩
+  have hk' : Nat.find h - 1 + 1 = Nat.find h := by omega
+  rwa [smul_smul, ← pow_succ', hk']
+
+end AddMonoid
 
 section AddGroup
 
-variable {A : Type*} [AddGroup A]
+variable [hp : Fact p.Prime] {A : Type*} [AddGroup A]
 
 /-- A nontrivial finite additive group in which every element has `p`-power order has order
 divisible by `p`. -/
@@ -66,28 +89,11 @@ theorem natCard_eq_pow_padicValNat_of_forall_exists_nsmul_eq_zero [Finite A]
   obtain ⟨n, hcard⟩ := IsPGroup.iff_card.mp hA
   rw [← Nat.card_congr (Multiplicative.toAdd (α := A)), hcard, padicValNat.prime_pow]
 
-omit hp in
-/-- A nonzero element `a` with `p ^ k • a = 0` has a nonzero multiple `p ^ n • a` annihilated by
-`p`, that is, with `p • p ^ n • a = 0`. -/
-theorem exists_nsmul_pow_ne_zero_nsmul_nsmul_pow_eq_zero {a : A} (ha : a ≠ 0) {k : ℕ}
-    (hk : p ^ k • a = 0) : ∃ n : ℕ, p ^ n • a ≠ 0 ∧ p • p ^ n • a = 0 := by
-  classical
-  have h : ∃ k, p ^ k • a = 0 := ⟨k, hk⟩
-  have hfind : p ^ Nat.find h • a = 0 := Nat.find_spec h
-  have hpos : 0 < Nat.find h := by
-    rw [Nat.pos_iff_ne_zero]
-    intro h0
-    rw [h0, pow_zero, one_smul] at hfind
-    exact ha hfind
-  refine ⟨Nat.find h - 1, Nat.find_min h (Nat.sub_lt hpos one_pos), ?_⟩
-  have hk' : Nat.find h - 1 + 1 = Nat.find h := by omega
-  rwa [smul_smul, ← pow_succ', hk']
-
 end AddGroup
 
 section AddCommGroup
 
-variable {M : Type*} [AddCommGroup M]
+variable [Fact p.Prime] {M : Type*} [AddCommGroup M]
 
 /-- If `K` is obtained from `N` by adjoining `x ∉ N` with `p • x ∈ N`, then `K ⧸ N`
 is additively equivalent to `ZMod p`. The equivalence sends the class of `x` to `1`. -/
