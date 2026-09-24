@@ -28,9 +28,11 @@ finite discrete `p`-primary coefficient modules that holds for `𝔽_p` with tri
 stable under extensions, such as the vanishing of a cohomological functor in a fixed degree,
 holds for every such module.
 
-The general algebraic facts the proofs rest on live upstream of this file: the order computations
-for `p`-primary additive groups in `TauCeti.GroupTheory.PGroup.Additive`, and the induced action
-on the quotient by a `G`-stable subgroup, `AddSubgroup.quotientDistribMulAction`, in
+The finite case, a `p`-group acting on a nonzero finite `p`-group fixes a nonzero element, is
+Mathlib's `IsPGroup.exists_fixed_point_of_prime_dvd_card_of_fixed_point`; this file extends it to
+pro-`p` groups. The order computations for `p`-primary additive groups are in
+`TauCeti.GroupTheory.PGroup.Additive`, and the induced action on the quotient by a `G`-stable
+subgroup, `AddSubgroup.quotientDistribMulAction`, is in
 `TauCeti.Algebra.GroupAction.QuotientAddGroup`.
 
 ## Main results
@@ -65,12 +67,9 @@ variable {G : Type u} [Group G] [TopologicalSpace G]
   {M : Type v} [AddGroup M] [DistribMulAction G M] [Finite M]
 
 /-- **Nonzero fixed points, open-kernel form.** A pro-`p` group acting on a nontrivial finite
-`p`-primary additive group through an open kernel fixes a nonzero element.
-
-The action factors through the open kernel `K`, so the finite `p`-group `G ⧸ K` acts on `M`; a
-`p`-group acting on a finite set of cardinality divisible by `p` with one fixed point has a
-second one, and `0` is a fixed point. The finite input is Mathlib's
-`IsPGroup.exists_fixed_point_of_prime_dvd_card_of_fixed_point`. -/
+`p`-primary additive group `M` with open kernel fixes a nonzero element. This form asks for no
+topology on `M`, only that the kernel of the action be open in `G`, and so applies to quotients
+`M ⧸ N` by `G`-stable subgroups. -/
 theorem exists_ne_zero_invariant_of_isProP_of_isOpen_ker (hG : IsProP p G) [Nontrivial M]
     (hK : IsOpen ((MulAction.toPermHom G M).ker : Set G))
     (htors : ∀ m : M, ∃ k : ℕ, p ^ k • m = 0) : ∃ m : M, m ≠ 0 ∧ ∀ g : G, g • m = m := by
@@ -136,11 +135,10 @@ variable {G : Type u} [Group G] [TopologicalSpace G]
   [DistribMulAction G M] [ContinuousSMul G M] [Finite M]
 
 /-- **The trivial-filtration theorem, relative form.** For a `G`-stable subgroup `N ≠ ⊤` of a
-finite discrete `p`-primary additive group with a continuous action of a pro-`p` group, there is
-`x ∉ N` with `p • x ∈ N` whose class modulo `N` is fixed by `G`: the quotient `M ⧸ N` contains a
-copy of `𝔽_p` with trivial action. The quotient carries the action
-`AddSubgroup.quotientDistribMulAction`, whose kernel is open because the stabilizer of the class
-of `x` is the preimage of the open set `N` under `g ↦ g • x - x`. -/
+finite discrete `p`-primary additive group `M` with a continuous action of a pro-`p` group `G`,
+there is `x ∉ N` with `p • x ∈ N` whose class modulo `N` is fixed by `G`: the quotient `M ⧸ N`,
+with the induced action `AddSubgroup.quotientDistribMulAction`, contains a copy of `𝔽_p` with
+trivial action. -/
 theorem exists_notMem_nsmul_mem_smul_sub_mem_of_isProP (hG : IsProP p G)
     (htors : ∀ m : M, ∃ k : ℕ, p ^ k • m = 0) {N : AddSubgroup M}
     (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) (hN' : N ≠ ⊤) :

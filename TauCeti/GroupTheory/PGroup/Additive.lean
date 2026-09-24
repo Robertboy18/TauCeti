@@ -19,9 +19,6 @@ additive notation: the order of a finite such group is a power of `p`, namely
 element of `p`-power order has a nonzero multiple of order exactly `p`; and adjoining to a
 subgroup `N` an element `x ∉ N` with `p • x ∈ N` multiplies the order of `N` by `p`.
 
-The first two statements transport Mathlib's `IsPGroup.nontrivial_iff_card` and
-`IsPGroup.iff_card` along `Multiplicative`.
-
 ## Main results
 
 * `TauCeti.prime_dvd_natCard_of_forall_exists_nsmul_eq_zero`: `p ∣ Nat.card A` for a nontrivial
@@ -67,8 +64,7 @@ theorem natCard_eq_pow_padicValNat_of_forall_exists_nsmul_eq_zero [Finite A]
   rw [← Nat.card_congr (Multiplicative.toAdd (α := A)), hcard, padicValNat.prime_pow]
 
 omit hp in
-/-- A nonzero element `a` with `p ^ k • a = 0` has a nonzero multiple `p ^ n • a` of order `p`:
-take `n + 1` to be the least exponent killing `a`. -/
+/-- A nonzero element `a` with `p ^ k • a = 0` has a nonzero multiple `p ^ n • a` of order `p`. -/
 theorem exists_nsmul_pow_ne_zero_nsmul_nsmul_pow_eq_zero {a : A} (ha : a ≠ 0) {k : ℕ}
     (hk : p ^ k • a = 0) : ∃ n : ℕ, p ^ n • a ≠ 0 ∧ p • p ^ n • a = 0 := by
   classical
