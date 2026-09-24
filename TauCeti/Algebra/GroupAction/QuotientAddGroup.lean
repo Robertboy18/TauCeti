@@ -77,8 +77,9 @@ abbrev _root_.AddSubgroup.subquotientDistribMulAction (N K : AddSubgroup M)
   (N.addSubgroupOf K).quotientDistribMulAction fun g x hx ↦
     AddSubgroup.mem_addSubgroupOf.mpr (hN g x (AddSubgroup.mem_addSubgroupOf.mp hx))
 
-/-- The induced action on a subquotient acts on representatives by the original action. -/
-@[simp]
+/-- The induced action on a subquotient acts on representatives by the original action. This is
+not a `simp` lemma: `AddSubgroup.subquotientDistribMulAction` is reducible, so `simp` already
+rewrites its left-hand side with `AddSubgroup.quotientDistribMulAction_smul_mk`. -/
 theorem _root_.AddSubgroup.subquotientDistribMulAction_smul_mk (N K : AddSubgroup M)
     (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) (hK : ∀ g : G, ∀ x ∈ K, g • x ∈ K)
     (g : G) (x : K) :
