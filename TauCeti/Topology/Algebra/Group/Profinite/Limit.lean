@@ -38,13 +38,14 @@ The unbundled workhorse of profinite group theory, phrased for the type-class st
 * The sequential forms of the limit description, along a sequence `N : ℕ → Subgroup G` of closed
   subgroups of a compact group with trivial intersection in place of all open normal subgroups:
   a compatible sequence of cosets comes from a unique element
-  (`existsUnique_forall_mk_eq_of_iInf_eq_bot`), a compatible sequence of homomorphisms into the
-  quotients `G ⧸ N k` from a unique homomorphism into `G`
-  (`existsUnique_monoidHom_mk'_comp_eq_of_iInf_eq_bot`), a map into `G` is continuous as soon as
-  its composites with the quotient maps are (`continuous_iff_forall_continuous_mk_of_iInf_eq_bot`),
-  and when the `N k` are open and decreasing they form a neighbourhood basis of `1`
-  (`hasAntitoneBasis_nhds_one_of_iInf_eq_bot`). The lower `p`-series of a pro-`p` group is such a
-  sequence.
+  (`existsUnique_forall_mk_eq_of_iInf_eq_bot`); when the `N k` are moreover normal and decreasing,
+  a compatible sequence of homomorphisms into the quotients `G ⧸ N k` comes from a unique
+  homomorphism into `G` (`existsUnique_monoidHom_mk'_comp_eq_of_iInf_eq_bot`); when they are
+  normal, a map into `G` is continuous as soon as its composites with the quotient maps are
+  (`continuous_iff_forall_continuous_mk_of_iInf_eq_bot`); and when they are open and decreasing
+  they form a neighbourhood basis of `1` (`hasAntitoneBasis_nhds_one_of_iInf_eq_bot`). The lower
+  `p`-series of a pro-`p` group is a decreasing sequence of closed normal subgroups with trivial
+  intersection, and its terms are open when the group is topologically finitely generated.
 -/
 
 public section
@@ -249,10 +250,12 @@ end LimitSubgroup
 The limit description of a profinite group runs over all of its open normal subgroups. When a
 sequence `N : ℕ → Subgroup G` of closed subgroups of a compact group `G` has trivial intersection,
 the same identifications hold along that sequence: a compatible sequence of cosets is realized by a
-unique element, and a compatible sequence of homomorphisms into the quotients `G ⧸ N k` is induced
-by a unique homomorphism into `G`, and continuity of a map into `G` can be tested one quotient at a
-time. When the `N k` are moreover open and decreasing, they are a neighbourhood basis of `1`. The
-lower `p`-series of a pro-`p` group is such a sequence. -/
+unique element; when the `N k` are moreover normal and decreasing, a compatible sequence of
+homomorphisms into the quotients `G ⧸ N k` is induced by a unique homomorphism into `G`; and when
+they are normal, continuity of a map into `G` can be tested one quotient at a time. When the `N k`
+are open and decreasing, they are a neighbourhood basis of `1`. The lower `p`-series of a pro-`p`
+group is a decreasing sequence of closed normal subgroups with trivial intersection, and its terms
+are open when the group is topologically finitely generated. -/
 
 section Sequential
 
