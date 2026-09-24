@@ -102,8 +102,8 @@ theorem isFiniteContinuousQuotient_iff_exists_continuous [IsTopologicalGroup G] 
   rw [isFiniteContinuousQuotient_iff, and_iff_right ‹Finite Q›]
   simp only [MonoidHom.continuous_iff_isOpen_ker]
 
-/-- A continuous finite quotient of a continuous surjective image of `G` is a continuous finite
-quotient of `G`. -/
+/-- If `G` is a continuous surjective image of `G'`, then every continuous finite quotient of `G`
+is also a continuous finite quotient of `G'`. -/
 theorem IsFiniteContinuousQuotient.comp {G' : Type*} [Group G'] [TopologicalSpace G']
     (h : IsFiniteContinuousQuotient G Q) {φ : G' →* G} (hφ : Continuous φ)
     (hsurj : Function.Surjective φ) : IsFiniteContinuousQuotient G' Q := by
