@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.RestrictedProduct.Congr.Basic
+public import TauCeti.Topology.Algebra.RestrictedProduct.TopologicalSpace
 
 /-!
 # Diagonal homomorphisms into restricted products
@@ -25,6 +26,12 @@ every `γ` is integral. Such a uniform set is what the restricted-product topolo
 subset `{x | ∀ i ∈ S, x i ∈ U i}`, which then contains the image of the diagonal, it coincides
 with the topology induced from `Π i, G i`, so continuity there is decided by the coordinates.
 
+The uniform integrality set cannot be dispensed with. For infinitely many nontrivial discrete
+groups with trivial reference subgroups, take for `Γ` the finitely supported elements of the full
+product, topologised as a subspace of it. Its coordinate maps are continuous and each of its
+elements is eventually integral, yet the diagonal into the restricted product, which is discrete,
+is not continuous (`continuous_eval_and_not_continuous_rationalDiagonal_range_coeMonoidHom`).
+
 ## References
 
 * A. Weil, *Basic Number Theory*.
@@ -34,7 +41,7 @@ public section
 
 namespace TauCeti
 
-open Filter
+open Filter Topology
 open scoped RestrictedProduct
 
 universe u v w z
@@ -165,5 +172,57 @@ theorem continuous_rationalDiagonal {Γ : Type w} [MulOneClass Γ] [TopologicalS
       RestrictedProduct.mk_apply]
   rw [hfactor]
   exact (RestrictedProduct.continuous_inclusion hS').comp hf
+
+/-- Each element of the range of the coercion from a restricted product to the full product is
+eventually integral, so evaluation at the coordinates makes that range a source for the diagonal
+back into the restricted product. -/
+theorem eventually_evalMonoidHom_comp_subtype_mem (U : ∀ i, Subgroup (G i))
+    (γ : (RestrictedProduct.coeMonoidHom :
+      Πʳ i, [G i, (U i : Set (G i))] →* ∀ i, G i).range) :
+    ∀ᶠ i in cofinite, (Pi.evalMonoidHom G i).comp (Subgroup.subtype _) γ ∈ U i :=
+  (mem_range_coeMonoidHom U γ).1 γ.2
+
+/-- The uniform integrality set in `continuous_rationalDiagonal` cannot be dropped. Take
+infinitely many nontrivial discrete groups with trivial reference subgroups, and for `Γ` the
+range of the coercion from the restricted product to the full product, that is, the finitely
+supported elements, with the topology induced from the full product. The coordinate maps are
+continuous and every element of `Γ` is eventually integral, but the diagonal is not continuous:
+it would make the restricted-product topology the one induced from the full product,
+contradicting `not_isInducing_coe_bot`. -/
+theorem continuous_eval_and_not_continuous_rationalDiagonal_range_coeMonoidHom [Infinite ι]
+    [∀ i, TopologicalSpace (G i)] [∀ i, DiscreteTopology (G i)] [∀ i, Nontrivial (G i)] :
+    (∀ i, Continuous ((Pi.evalMonoidHom G i).comp (Subgroup.subtype
+      (RestrictedProduct.coeMonoidHom :
+        Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).range))) ∧
+    ¬ Continuous (rationalDiagonal
+      (fun i ↦ (Pi.evalMonoidHom G i).comp (Subgroup.subtype (RestrictedProduct.coeMonoidHom :
+        Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).range))
+      (fun _ ↦ ⊥) (eventually_evalMonoidHom_comp_subtype_mem fun _ ↦ ⊥)) := by
+  refine ⟨fun i ↦ (continuous_apply i).comp continuous_subtype_val, fun hd ↦ ?_⟩
+  refine not_isInducing_coe_bot (G := G) ?_
+  -- The coercion is the range restriction of `coeMonoidHom` followed by the inclusion of the
+  -- range into the full product.
+  have hcomp : ((↑) : Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] → ∀ i, G i) =
+      Subtype.val ∘ ⇑(RestrictedProduct.coeMonoidHom :
+        Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).rangeRestrict := by
+    ext x i
+    simp
+  have hf : Continuous ⇑(RestrictedProduct.coeMonoidHom :
+      Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).rangeRestrict :=
+    continuous_induced_rng.2 (hcomp ▸ RestrictedProduct.continuous_coe)
+  -- The diagonal is a continuous left inverse of the range restriction, which is therefore an
+  -- embedding, and so the coercion is inducing.
+  have hid : ⇑(rationalDiagonal
+      (fun i ↦ (Pi.evalMonoidHom G i).comp (Subgroup.subtype (RestrictedProduct.coeMonoidHom :
+        Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).range))
+      (fun _ ↦ ⊥) (eventually_evalMonoidHom_comp_subtype_mem fun _ ↦ ⊥)) ∘
+        ⇑(RestrictedProduct.coeMonoidHom :
+          Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).rangeRestrict = id := by
+    ext x i
+    simp
+  rw [hcomp]
+  refine IsEmbedding.subtypeVal.isInducing.comp (IsEmbedding.of_comp hf hd ?_).isInducing
+  rw [hid]
+  exact IsEmbedding.id
 
 end TauCeti

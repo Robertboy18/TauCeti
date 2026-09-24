@@ -58,6 +58,23 @@ condition. -/
 abbrev RestrictedProductGroupWithFactor (H : Type w) (U : ∀ i, Subgroup (G i)) :=
   H × RestrictedProductGroup U
 
+/-- The coercion homomorphism from a restricted product to the full product acts as the
+coercion. -/
+@[simp]
+theorem coeMonoidHom_apply (U : ∀ i, Subgroup (G i)) (x : Πʳ i, [G i, (U i : Set (G i))]) :
+    RestrictedProduct.coeMonoidHom x = ⇑x := by
+  rfl
+
+/-- The range of the coercion from a restricted product to the full product consists of the
+elements whose coordinates lie in the reference subgroups at all but finitely many indices. -/
+@[simp]
+theorem mem_range_coeMonoidHom (U : ∀ i, Subgroup (G i)) (x : ∀ i, G i) :
+    x ∈ (RestrictedProduct.coeMonoidHom :
+        Πʳ i, [G i, (U i : Set (G i))] →* ∀ i, G i).range ↔
+      ∀ᶠ i in cofinite, x i ∈ U i := by
+  rw [← SetLike.mem_coe, MonoidHom.coe_range]
+  exact Set.ext_iff.1 (RestrictedProduct.range_coe G fun i ↦ (U i : Set (G i))) x
+
 /-- The subgroup of a restricted product cut out by a second family of subgroups. -/
 def integralSubgroupOf (U V : ∀ i, Subgroup (G i)) :
     Subgroup (Πʳ i, [G i, (U i : Set (G i))]) :=
