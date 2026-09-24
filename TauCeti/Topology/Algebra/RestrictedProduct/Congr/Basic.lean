@@ -121,10 +121,10 @@ theorem restrictedProductCongr_naturality {H : ι → Type w} [∀ i, Group (H i
     (φ : ∀ i, G i →* H i)
     (hφ : ∀ᶠ i in cofinite, Set.MapsTo (φ i) (U i) (V i))
     (h : ∀ᶠ i in cofinite, U i = U' i) (h' : ∀ᶠ i in cofinite, V i = V' i) :
-    (restrictedProductCongr V V' h').toMonoidHom.comp (restrictedProductMap U V φ hφ) =
+    (restrictedProductCongr V V' h' : _ →* _).comp (restrictedProductMap U V φ hφ) =
       (restrictedProductMap U' V' φ (by
         filter_upwards [hφ, h, h'] with i hi hU hV
-        rwa [← hU, ← hV])).comp (restrictedProductCongr U U' h).toMonoidHom := by
+        rwa [← hU, ← hV])).comp (restrictedProductCongr U U' h : _ →* _) := by
   ext x i
   simp
 
