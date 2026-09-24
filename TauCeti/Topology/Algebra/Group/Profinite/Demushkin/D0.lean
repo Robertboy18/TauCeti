@@ -67,6 +67,12 @@ noncomputable def d0Relator : freeProP 2 (Fin 3) :=
 three generators by the single relator `d0Relator`. -/
 noncomputable abbrev demushkinD0 : Type := presentedProP 2 (Fin 3) {d0Relator}
 
+/-- Closedness of the defining normal subgroup, for the quotient topology instances. -/
+instance isClosed_d0_definingSubgroup :
+    IsClosed ((Subgroup.normalClosure {d0Relator}).topologicalClosure :
+      Set (freeProP 2 (Fin 3))) :=
+  Subgroup.isClosed_topologicalClosure _
+
 /-- The marked generator `A` of `D₀`, the image of the first free pro-`2` generator. -/
 noncomputable def d0A : demushkinD0 := presentedProP.of 2 {d0Relator} 0
 
