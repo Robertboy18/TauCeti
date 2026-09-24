@@ -31,8 +31,8 @@ and killed by `p`: `⁅λ_k, G⁆ ≤ λ_{k+1}` and `x ^ p ∈ λ_{k+1}` for `x 
 the **degree-raising law** `⁅λ_j, λ_k⁆ ≤ λ_{j+k+1}`, proved by induction on `k` with the three
 subgroups lemma in the quotient `G ⧸ λ_{j+k+2}`; it is what lets the group commutator induce a
 bracket `λ_j ⧸ λ_{j+1} × λ_k ⧸ λ_{k+1} → λ_{j+k+1} ⧸ λ_{j+k+2}` on the graded pieces. Continuous
-homomorphisms carry `λ_k` into `λ_k`, continuous surjections of compact groups carry it onto
-`λ_k`, and continuous isomorphisms match the two series term by term.
+homomorphisms carry `λ_k` into `λ_k`, continuous surjections from compact groups onto Hausdorff
+groups carry it onto `λ_k`, and continuous isomorphisms match the two series term by term.
 
 Nothing here assumes `p` prime or `G` profinite. For a profinite `G` and a prime `p`, `λ_1` is the
 pro-`p` Frattini subgroup and, when `G` is topologically finitely generated, every `λ_k` is open;
