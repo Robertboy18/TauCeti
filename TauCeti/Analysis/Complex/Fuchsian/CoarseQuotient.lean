@@ -33,8 +33,9 @@ there.
 
 * `Subgroup.chartRadius`: a positive radius at which the chart at the orbit of `z` exists.
 * `Subgroup.instChartedSpaceOrbitRelQuotient`: the atlas of all charts
-  `Subgroup.stabilizerBallQuotientChart` on `Γ \ ℍ`, with `Subgroup.chartAt_eq` and
-  `Subgroup.stabilizerBallQuotientChart_mem_atlas` describing it.
+  `Subgroup.stabilizerBallQuotientChart` on `Γ \ ℍ`, with `Subgroup.chartAt_eq`,
+  `Subgroup.mem_atlas_orbitRelQuotient_iff` and `Subgroup.stabilizerBallQuotientChart_mem_atlas`
+  describing it.
 * `Subgroup.instIsManifoldOrbitRelQuotient`: this atlas is analytic, so `Γ \ ℍ` is a Riemann
   surface. It is Hausdorff and second countable by
   `t2Space_of_properlyDiscontinuousSMul_of_t2Space` and
@@ -101,10 +102,18 @@ theorem chartAt_eq (q : orbitRel.Quotient Γ ℍ) :
       (isOpenEmbedding_stabilizerBallQuotientToQuotient_chartRadius Γ q.out) :=
   (rfl)
 
+/-- A chart of `Γ \ ℍ` belongs to the atlas exactly when it is the chart
+`Subgroup.stabilizerBallQuotientChart` at some point and some admissible radius. -/
+theorem mem_atlas_orbitRelQuotient_iff (e : OpenPartialHomeomorph (orbitRel.Quotient Γ ℍ) ℂ) :
+    e ∈ atlas ℂ (orbitRel.Quotient Γ ℍ) ↔ ∃ (z : ℍ) (ε : ℝ) (hε : 0 < ε)
+      (hopen : IsOpenEmbedding (stabilizerBallQuotientToQuotient Γ z ε)),
+      stabilizerBallQuotientChart hε hopen = e :=
+  Iff.rfl
+
 theorem stabilizerBallQuotientChart_mem_atlas {z : ℍ} {ε : ℝ} (hε : 0 < ε)
     (hopen : IsOpenEmbedding (stabilizerBallQuotientToQuotient Γ z ε)) :
     stabilizerBallQuotientChart hε hopen ∈ atlas ℂ (orbitRel.Quotient Γ ℍ) :=
-  ⟨_, _, _, _, rfl⟩
+  (mem_atlas_orbitRelQuotient_iff Γ _).2 ⟨_, _, _, _, rfl⟩
 
 /-- Mathlib proves that the orbit space of a second countable space under a continuous action is
 second countable (`ContinuousConstSMul.secondCountableTopology`); this records it as an instance
@@ -120,8 +129,8 @@ example : T2Space (orbitRel.Quotient Γ ℍ) := inferInstance
 the charts of the atlas are holomorphic. -/
 instance instIsManifoldOrbitRelQuotient : IsManifold 𝓘(ℂ) ω (orbitRel.Quotient Γ ℍ) := by
   refine isManifold_of_contDiffOn 𝓘(ℂ) ω _ fun e e' he he' ↦ ?_
-  obtain ⟨z, ε, hε, hopen, rfl⟩ := he
-  obtain ⟨z', ε', hε', hopen', rfl⟩ := he'
+  obtain ⟨z, ε, hε, hopen, rfl⟩ := (mem_atlas_orbitRelQuotient_iff Γ e).1 he
+  obtain ⟨z', ε', hε', hopen', rfl⟩ := (mem_atlas_orbitRelQuotient_iff Γ e').1 he'
   simp only [mfld_simps]
   exact (differentiableOn_stabilizerBallQuotientChart_symm_trans hε hopen hε' hopen').contDiffOn
     (OpenPartialHomeomorph.open_source _)
