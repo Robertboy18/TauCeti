@@ -187,14 +187,6 @@ theorem relIndex_unitsPrincipal {f : ℕ} (hf : 0 < f) (k : ℕ) :
 
 /-! ### Lifting the exponent -/
 
-/-- In `ℤ_p`, `1 + x` is a unit whenever `p ∣ x`. -/
-theorem _root_.PadicInt.isUnit_one_add_of_dvd {x : ℤ_[p]} (hx : (p : ℤ_[p]) ∣ x) :
-    IsUnit (1 + x) := by
-  obtain ⟨c, rfl⟩ := hx
-  have := IsLocalRing.isUnit_one_sub_self_of_mem_nonunits (-(p * c))
-    (neg_mem (Ideal.mul_mem_right c _ ((IsLocalRing.mem_maximalIdeal _).mpr PadicInt.p_nonunit)))
-  rwa [sub_neg_eq_add] at this
-
 /-- For `u ≡ 1 mod p^f` with `f ≥ 1`, `u ^ (p ^ k) ≡ 1 mod p^(f+k)`. -/
 theorem pow_pow_mem_unitsPrincipal {f : ℕ} (hf : 0 < f) {u : ℤ_[p]ˣ}
     (hu : u ∈ unitsPrincipal p f) (k : ℕ) : u ^ p ^ k ∈ unitsPrincipal p (f + k) := by
