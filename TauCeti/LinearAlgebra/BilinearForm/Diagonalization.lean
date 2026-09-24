@@ -172,7 +172,7 @@ theorem IsSymm.equivalent_toBilin'_one (hsq : ∀ a : K, IsSquare a) (hB : B.IsS
     (hnd : B.Nondegenerate) (h : B.IsAlt → B = 0) :
     B.Equivalent (Matrix.toBilin' (1 : Matrix (Fin (finrank K V)) (Fin (finrank K V)) K)) := by
   obtain ⟨v, hv⟩ := hB.exists_basis_toMatrix_eq_one hsq hnd h
-  exact ⟨TauCeti.BilinForm.isometryEquivOfToMatrixEq v (Pi.basisFun K _)
+  exact ⟨v.isometryEquivOfToMatrixEq (Pi.basisFun K _)
     (by rw [hv, toMatrix_basisFun, toMatrix'_toBilin'])⟩
 
 /-- Over a field in which every element is a square, two nondegenerate symmetric forms that are
