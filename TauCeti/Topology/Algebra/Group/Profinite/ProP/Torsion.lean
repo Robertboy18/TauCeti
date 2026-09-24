@@ -109,13 +109,7 @@ theorem exists_continuousMulEquiv_pi_padicInt [IsMulTorsionFree A] (hA : IsProP 
   -- The finite factor is the torsion subgroup of `A`, hence trivial.
   have := subsingleton_of_mulEquiv isAddTorsion_of_finite f.toMulEquiv
   let _ : Unique ((i : Fin m) → ZMod (p ^ e i)) := uniqueOfSubsingleton 0
-  refine ⟨r, ⟨f.trans
-    { AddEquiv.toMultiplicative AddEquiv.prodUnique with
-      continuous_toFun := (continuous_ofAdd.comp (continuous_fst.comp continuous_toAdd)).congr
-        fun x ↦ by simp [AddEquiv.prodUnique_apply]
-      continuous_invFun := (continuous_ofAdd.comp (continuous_toAdd.prodMk
-        (continuous_const (y := (default : (i : Fin m) → ZMod (p ^ e i)))))).congr
-        fun v ↦ by simp [AddEquiv.prodUnique_symm_apply] }⟩⟩
+  exact ⟨r, ⟨f.trans (ContinuousMulEquiv.multiplicativeProdUnique _ _)⟩⟩
 
 /-- **The torsion-free quotient of a topologically finitely generated abelian pro-`p` group is
 `ℤ_p ^ r`.** The quotient by the torsion subgroup is topologically isomorphic to the free factor of
