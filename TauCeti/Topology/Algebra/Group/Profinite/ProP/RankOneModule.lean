@@ -59,7 +59,6 @@ theorem continuousLinearEquivPadicInt_apply (x : Additive (freeProP p X)) :
     (MulEquiv.toAdditiveLeft (equivPadicInt p X).toMulEquiv) _ _) x
 
 /-- The linear equivalence sends the free generator to `1`. -/
-@[simp]
 theorem continuousLinearEquivPadicInt_of (x : X) :
     letI := (isProP_freeProP p X).module
     continuousLinearEquivPadicInt p X (Additive.ofMul (of x)) = 1 := by
@@ -160,7 +159,6 @@ theorem maximalProPQuotientContinuousLinearEquivPadicInt_apply
     (MulEquiv.toAdditiveLeft (maximalProPQuotientEquivPadicInt p).toMulEquiv) _ _) x
 
 /-- The linear equivalence sends the class of the generator of the profinite integers to `1`. -/
-@[simp]
 theorem maximalProPQuotientContinuousLinearEquivPadicInt_gen :
     letI := (isProP_maximalProPQuotient (p := p) (G := zHat)).module
     maximalProPQuotientContinuousLinearEquivPadicInt p
