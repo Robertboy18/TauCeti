@@ -13,6 +13,7 @@ public import Mathlib.RingTheory.ZMod.UnitsCyclic
 public import Mathlib.Topology.Algebra.Group.Subgroup
 public import Mathlib.Topology.Algebra.Group.Units
 public import TauCeti.NumberTheory.Padics.RingHoms
+import TauCeti.NumberTheory.Padics.PadicIntegers
 
 /-!
 # The principal unit groups `1 + p^f ℤ_p` and the closed subgroups of `1 + p ℤ_p`
@@ -52,7 +53,8 @@ sorted by how they sit over `{±1}` inside `ℤ_2ˣ = {±1} × (1 + 4ℤ_2)`.
   topologically generates `U^(f)`; `TauCeti.exists_topologicalClosure_zpowers_eq_unitsPrincipal`:
   `U^(f)` is procyclic.
 * `TauCeti.exists_eq_unitsPrincipal_of_isClosed`: a nontrivial closed subgroup of `U^(f₀)` is
-  some `U^(f)` with `f ≥ f₀`; `TauCeti.unitsPrincipal_inj`: the level is unique.
+  some `U^(f)` with `f ≥ f₀`; `TauCeti.unitsPrincipal_inj`, `TauCeti.unitsPrincipal_injective`:
+  the level is unique, at every level when `p` is odd.
 
 ## References
 
@@ -307,6 +309,24 @@ theorem unitsPrincipal_inj {f g : ℕ} (hf : 0 < f) (hg : 0 < g) :
   have := Nat.pow_right_injective hp.out.two_le
     (mul_right_cancel₀ (Nat.sub_ne_zero_of_lt hp.out.one_lt) h)
   omega
+
+/-- For odd `p` the level is determined by the group at every level, including `0`: the index
+of `U^(f)` is `1` for `f = 0` and `p ^ (f - 1) * (p - 1) ≥ 2` for `f ≥ 1`. -/
+theorem unitsPrincipal_injective (hp₂ : p ≠ 2) : Function.Injective (unitsPrincipal p) := by
+  have key {f g : ℕ} (hfg : unitsPrincipal p f = unitsPrincipal p g) (hf : f = 0) : g = 0 := by
+    by_contra hg
+    have h := congrArg Subgroup.index hfg
+    rw [hf, unitsPrincipal_zero, Subgroup.index_top,
+      index_unitsPrincipal_of_pos p (Nat.pos_of_ne_zero hg)] at h
+    have := Nat.eq_one_of_mul_eq_one_left h.symm
+    have := hp.out.two_le
+    omega
+  intro f g hfg
+  rcases Nat.eq_zero_or_pos f with hf | hf
+  · rw [hf, key hfg hf]
+  rcases Nat.eq_zero_or_pos g with hg | hg
+  · rw [hg, key hfg.symm hg]
+  exact (unitsPrincipal_inj hf hg).mp hfg
 
 /-- Every nontrivial closed subgroup of `U^(f₀)` is a principal unit group `U^(f)` with
 `f ≥ f₀`, provided `f₀ ≥ 1`, and `f₀ ≥ 2` when `p = 2`. In particular the nontrivial closed

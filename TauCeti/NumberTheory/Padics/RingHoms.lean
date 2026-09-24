@@ -39,7 +39,6 @@ to a `p`-adic exponent: `g ^ x.appr n` does not change when `n` grows past the o
   `ZMod (p ^ n)`.
 * `PadicInt.surjective_units_map_toZModPow`: every unit of `ZMod (p ^ n)` lifts to a unit of
   `ℤ_[p]`.
-* `PadicInt.isUnit_one_add_of_dvd`: `1 + x` is a unit of `ℤ_[p]` whenever `p ∣ x`.
 -/
 
 public section
@@ -120,13 +119,6 @@ theorem surjective_units_map_toZModPow (n : ℕ) :
   · have : Fact (1 < p ^ n) := ⟨Nat.one_lt_pow hn.ne' hp.out.one_lt⟩
     exact IsLocalRing.surjective_units_map_of_local_ringHom _ (ZMod.ringHom_surjective _)
       (IsLocalHom.of_surjective _ (ZMod.ringHom_surjective _))
-
-/-- In `ℤ_p`, `1 + x` is a unit whenever `p ∣ x`. -/
-theorem isUnit_one_add_of_dvd {x : ℤ_[p]} (hx : (p : ℤ_[p]) ∣ x) : IsUnit (1 + x) := by
-  obtain ⟨c, rfl⟩ := hx
-  have := IsLocalRing.isUnit_one_sub_self_of_mem_nonunits (-(p * c))
-    (neg_mem (Ideal.mul_mem_right c _ ((IsLocalRing.mem_maximalIdeal _).mpr p_nonunit)))
-  rwa [sub_neg_eq_add] at this
 
 variable {M : Type*} [Monoid M] {g : M} {n : ℕ}
 

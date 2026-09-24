@@ -123,7 +123,7 @@ theorem mem_or_inv_mul_mem_of_mem_topologicalClosure_zpowers
       exact Or.inl (hpow k)
     · obtain ⟨k, rfl⟩ := hk
       right
-      change u⁻¹ * u ^ (2 * k + 1) ∈ H
+      simp only [Set.mem_preimage, SetLike.mem_coe]
       rw [add_comm (2 * k) 1, zpow_add, zpow_one, inv_mul_cancel_left]
       exact hpow k
   exact closure_minimal hsubset
