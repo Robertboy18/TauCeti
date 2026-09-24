@@ -34,7 +34,10 @@ The identification is stated at two levels.
 The statement shape and the pinning equation `… y (e j) = y j` follow the declarations
 `Equiv.restrictedProductCongrLeft` and `MulEquiv.restrictedProductCongrLeft` of the FLT project
 (`ImperialCollegeLondon/FLT`, file `FLT/Mathlib/Topology/Algebra/RestrictedProduct/Equiv.lean`,
-Apache 2.0), specialised to the cofinite filter on both sides.
+source commit `a9efe585de92be60be84ac1d14ced5a1b0944333`, Apache 2.0), by Kevin Buzzard and
+Salvatore Mercuri, specialised to the cofinite filter on both sides.  `restrictedProductReindex`
+and its coordinate lemmas follow FLT's `Equiv.restrictedProductCongrLeft'`, the same equivalence
+in the orientation `x ↦ (j ↦ x (e j))`.
 
 ## References
 
@@ -89,8 +92,9 @@ theorem restrictedProductCongrLeftEquiv_apply_apply (y : Πʳ j, [G (e j), A (e 
 /-- The inverse of the reindexing equivalence sends `x` to `j ↦ x (e j)`. -/
 @[simp]
 theorem restrictedProductCongrLeftEquiv_symm_apply (x : Πʳ i, [G i, A i]) (j : ι') :
-    (restrictedProductCongrLeftEquiv A e).symm x j = x (e j) := by
-  rfl
+    (restrictedProductCongrLeftEquiv A e).symm x j = x (e j) :=
+  RestrictedProduct.mapAlong_apply G (fun j ↦ G (e j)) e e.injective.tendsto_cofinite
+    (fun _ ↦ id) (.of_forall fun _ ↦ Set.mapsTo_id _) x j
 
 variable [∀ i, TopologicalSpace (G i)]
 
@@ -151,10 +155,9 @@ theorem restrictedProductCongrLeft_apply_apply (y : Πʳ j, [G (e j), U (e j)]) 
   rw [← MulEquiv.coe_toEquiv, restrictedProductCongrLeft_toEquiv,
     restrictedProductCongrLeftEquiv_apply_apply]
 
-/-- The inverse of `restrictedProductCongrLeft` sends `x` to `j ↦ x (e j)`.
-
-Not a `simp` lemma: `simp` proves it from `restrictedProductCongrLeft_symm` and
-`restrictedProductReindex_apply`. -/
+-- Not `@[simp]`: `simp` rewrites the left side by `restrictedProductCongrLeft_symm` and
+-- `restrictedProductReindex_apply`.
+/-- The inverse of `restrictedProductCongrLeft` sends `x` to `j ↦ x (e j)`. -/
 theorem restrictedProductCongrLeft_symm_apply (x : Πʳ i, [G i, U i]) (j : ι') :
     (restrictedProductCongrLeft U e).symm x j = x (e j) := by
   rw [← MulEquiv.coe_toEquiv, MulEquiv.toEquiv_symm, restrictedProductCongrLeft_toEquiv,
@@ -183,11 +186,10 @@ theorem restrictedProductReindex_apply (x : Πʳ i, [G i, U i]) (j : ι') :
     restrictedProductReindex U e x j = x (e j) :=
   restrictedProductCongrLeft_symm_apply U e x j
 
+-- Not `@[simp]`: `simp` rewrites the left side by `restrictedProductReindex_symm` and
+-- `restrictedProductCongrLeft_apply_apply`.
 /-- The inverse of `restrictedProductReindex` has coordinate `y j` at `e j`; as `e` is
-surjective, this pins it.
-
-Not a `simp` lemma: `simp` proves it from `restrictedProductReindex_symm` and
-`restrictedProductCongrLeft_apply_apply`. -/
+surjective, this pins it. -/
 theorem restrictedProductReindex_symm_apply (y : Πʳ j, [G (e j), U (e j)]) (j : ι') :
     (restrictedProductReindex U e).symm y (e j) = y j :=
   restrictedProductCongrLeft_apply_apply U e y j
