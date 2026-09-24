@@ -28,6 +28,7 @@ of the quotient identification is `TauCeti.quotientTorsionContinuousMulEquiv` in
 * `TauCeti.mem_torsion_iff_of_mulEquiv`: an element is torsion exactly when its `M`-coordinate
   vanishes.
 * `TauCeti.torsionMulEquiv`: the torsion subgroup of `A` is isomorphic to `T`.
+* `TauCeti.subsingleton_of_mulEquiv`: if `A` is torsion-free, the factor `T` is trivial.
 * `TauCeti.torsionFactorAddEquiv`: two decompositions of `A` have isomorphic torsion factors.
 * `TauCeti.quotientTorsionMulEquiv`: the quotient of `A` by its torsion subgroup is isomorphic to
   `M`.
@@ -46,10 +47,8 @@ variable {A M T : Type*} [CommGroup A] [AddCommGroup M] [IsAddTorsionFree M] [Ad
 element of `A` is torsion exactly when its `M`-coordinate vanishes. -/
 theorem mem_torsion_iff_of_mulEquiv (hT : IsAddTorsion T) (e : A ≃* Multiplicative (M × T))
     {x : A} : x ∈ torsion A ↔ (e x).toAdd.1 = 0 := by
-  have h : IsOfFinOrder (e x) ↔ IsOfFinAddOrder (e x).toAdd :=
-    isOfFinOrder_ofAdd_iff (x := (e x).toAdd)
   rw [CommGroup.mem_torsion, ← e.injective.isOfFinOrder_iff (f := e.toMonoidHom),
-    MulEquiv.coe_toMonoidHom, h]
+    MulEquiv.coe_toMonoidHom, ← ofAdd_toAdd (e x), isOfFinOrder_ofAdd_iff]
   simp [IsOfFinAddOrder.prod_iff, isOfFinAddOrder_iff_eq_zero, hT (e x).toAdd.2]
 
 /-- Under an isomorphism `A ≃* Multiplicative (M × T)` with `M` torsion-free and `T` torsion, the
@@ -59,7 +58,7 @@ def torsionMulEquiv (hT : IsAddTorsion T) (e : A ≃* Multiplicative (M × T)) :
   toFun x := ofAdd (e x).toAdd.2
   invFun t := ⟨e.symm (ofAdd (0, t.toAdd)), (mem_torsion_iff_of_mulEquiv hT e).2 (by simp)⟩
   left_inv x :=
-    Subtype.ext (e.symm_apply_eq.2 (congrArg ofAdd
+    Subtype.ext (e.symm_apply_eq.2 (Multiplicative.ext
       (Prod.ext ((mem_torsion_iff_of_mulEquiv hT e).1 x.2).symm rfl)))
   right_inv t := by simp
   map_mul' x y := by simp
@@ -73,6 +72,15 @@ theorem torsionMulEquiv_apply (hT : IsAddTorsion T) (e : A ≃* Multiplicative (
 theorem coe_torsionMulEquiv_symm_apply (hT : IsAddTorsion T) (e : A ≃* Multiplicative (M × T))
     (t : Multiplicative T) : ((torsionMulEquiv hT e).symm t : A) = e.symm (ofAdd (0, t.toAdd)) :=
   (rfl)
+
+/-- Under an isomorphism `A ≃* Multiplicative (M × T)` with `M` torsion-free and `T` torsion, if
+`A` is torsion-free then the factor `T` is trivial: it is the torsion subgroup of `A`. -/
+theorem subsingleton_of_mulEquiv [IsMulTorsionFree A] (hT : IsAddTorsion T)
+    (e : A ≃* Multiplicative (M × T)) : Subsingleton T :=
+  have : Subsingleton (torsion A) := by
+    rw [CommGroup.isMulTorsionFree_iff_torsion_eq_bot.1 ‹_›]
+    infer_instance
+  ((torsionMulEquiv hT e).toEquiv.trans toAdd).symm.subsingleton
 
 /-- Two decompositions of `A` as torsion-free times torsion have isomorphic torsion factors: both
 are the torsion subgroup of `A`. -/

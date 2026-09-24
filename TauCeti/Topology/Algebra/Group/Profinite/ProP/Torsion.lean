@@ -107,19 +107,15 @@ theorem exists_continuousMulEquiv_pi_padicInt [IsMulTorsionFree A] (hA : IsProP 
   obtain ⟨r, m, e, -, ⟨f⟩⟩ := hA.exists_continuousMulEquiv_pi_padicInt_prod_pi_zmod hfg
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- The finite factor is the torsion subgroup of `A`, hence trivial.
-  have ht : ∀ t : (i : Fin m) → ZMod (p ^ e i), t = 0 := fun t ↦ by
-    have hx : f.toMulEquiv.symm (ofAdd (0, t)) ∈ torsion A :=
-      (mem_torsion_iff_of_mulEquiv isAddTorsion_of_finite f.toMulEquiv).2 (by simp)
-    simpa using congrArg f.toMulEquiv ((CommGroup.mem_torsion _).1 hx).eq_one'
-  let _ : Unique ((i : Fin m) → ZMod (p ^ e i)) := ⟨⟨0⟩, ht⟩
+  have := subsingleton_of_mulEquiv isAddTorsion_of_finite f.toMulEquiv
+  let _ : Unique ((i : Fin m) → ZMod (p ^ e i)) := uniqueOfSubsingleton 0
   refine ⟨r, ⟨f.trans
     { AddEquiv.toMultiplicative AddEquiv.prodUnique with
-      continuous_toFun := by
-        change Continuous fun x : Multiplicative (_ × _) ↦ ofAdd (toAdd x).1
-        exact continuous_ofAdd.comp (continuous_fst.comp continuous_toAdd)
-      continuous_invFun := by
-        change Continuous fun v : Multiplicative (Fin r → ℤ_[p]) ↦ ofAdd (toAdd v, 0)
-        exact continuous_ofAdd.comp (continuous_toAdd.prodMk continuous_const) }⟩⟩
+      continuous_toFun := (continuous_ofAdd.comp (continuous_fst.comp continuous_toAdd)).congr
+        fun x ↦ by simp [AddEquiv.prodUnique_apply]
+      continuous_invFun := (continuous_ofAdd.comp (continuous_toAdd.prodMk
+        (continuous_const (y := (default : (i : Fin m) → ZMod (p ^ e i)))))).congr
+        fun v ↦ by simp [AddEquiv.prodUnique_symm_apply] }⟩⟩
 
 /-- **The torsion-free quotient of a topologically finitely generated abelian pro-`p` group is
 `ℤ_p ^ r`.** The quotient by the torsion subgroup is topologically isomorphic to the free factor of

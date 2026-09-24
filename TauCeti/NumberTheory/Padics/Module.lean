@@ -60,7 +60,7 @@ theorem TauCeti.map_padicInt_smul {G : Type*} [FunLike G E F] [AddMonoidHomClass
 `ℤ_[p]`-rank: the rank of a finite free `ℤ_[p]`-module is a topological invariant. -/
 theorem AddEquiv.finrank_padicInt_eq (e : E ≃+ F) (he : Continuous e) :
     Module.finrank ℤ_[p] E = Module.finrank ℤ_[p] F :=
-  LinearEquiv.finrank_eq { e with map_smul' := TauCeti.map_padicInt_smul e he }
+  LinearEquiv.finrank_eq (e.toLinearEquiv (TauCeti.map_padicInt_smul e he))
 
 /-- The rank of `ℤ_[p] ^ r` is a topological invariant: if the additive groups `ℤ_[p] ^ r` and
 `ℤ_[p] ^ r'`, written multiplicatively, are topologically isomorphic, then `r = r'`. -/
@@ -93,9 +93,9 @@ theorem AddMonoidHom.coe_toPadicIntLinearMap (f : E →+ F) (hf : Continuous f) 
 /-- Reinterpret a continuous additive equivalence between two topological `ℤ_[p]`-modules as a
 continuous `ℤ_[p]`-linear equivalence. The prime is explicit because the equivalence does not
 determine it. -/
-def AddEquiv.toPadicIntLinearEquiv (e : E ≃+ F) (h₁ : Continuous e) (h₂ : Continuous e.symm) :
-    E ≃L[ℤ_[p]] F :=
-  { e, e.toAddMonoidHom.toPadicIntLinearMap p h₁ with
+noncomputable def AddEquiv.toPadicIntLinearEquiv (e : E ≃+ F) (h₁ : Continuous e)
+    (h₂ : Continuous e.symm) : E ≃L[ℤ_[p]] F :=
+  { e.toLinearEquiv (TauCeti.map_padicInt_smul e h₁) with
     continuous_toFun := h₁
     continuous_invFun := h₂ }
 
