@@ -1,0 +1,358 @@
+/-
+Copyright (c) 2026 The Tau Ceti contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The Tau Ceti contributors
+-/
+module
+
+public import Mathlib.Algebra.Algebra.Pi
+public import Mathlib.Algebra.Algebra.Subalgebra.Basic
+public import Mathlib.Algebra.MonoidAlgebra.Basic
+public import Mathlib.Topology.Algebra.OpenSubgroup
+public import Mathlib.Topology.Algebra.Ring.Basic
+public import TauCeti.Algebra.MonoidAlgebra.Basic
+public import TauCeti.GroupTheory.QuotientGroup.Map
+
+/-!
+# The completed group algebra of a profinite group
+
+For a topological group `Γ` and a commutative ring `R`, the **completed group algebra**
+`R[[Γ]]` is the inverse limit of the group algebras `R[Γ ⧸ U]` of the finite quotients of `Γ`,
+over the open normal subgroups `U` of `Γ`: an element is a family of elements of the group
+algebras `R[Γ ⧸ U]`, compatible along the ring homomorphisms `R[Γ ⧸ U] → R[Γ ⧸ V]` induced by
+the quotient maps `Γ ⧸ U → Γ ⧸ V` for `U ≤ V`. The index set is the open *normal* subgroups,
+because `Γ ⧸ U` has to be a group for `R[Γ ⧸ U]` to be a group algebra. For `R = ℤ_[p]` and
+`Γ` a profinite group this is the Iwasawa algebra `ℤ_p[[Γ]]`, the ring over which the relation
+modules in Labute's classification of Demushkin groups are studied.
+
+It is an `R`-algebra; each group element `γ` gives an element `of R Γ γ`, the family of its
+classes, and each open normal subgroup `U` gives the projection `proj R Γ U` onto `R[Γ ⧸ U]`,
+which is surjective. Two elements with the same projections are equal, and these two facts are
+the inverse-limit description of the algebra.
+
+When `R` is a topological ring, the completed group algebra carries the inverse-limit topology:
+the coarsest topology making every coefficient of every projection continuous. It is a
+topological ring when `Γ` is compact (so that the finite quotients are finite), it is compact
+when `R` is compact Hausdorff, and totally disconnected when `R` is; the map from `Γ` is
+continuous. The completed group algebra is commutative exactly when `Γ` is, stated as the
+`IsMulCommutative` mixin so that no second ring structure is installed.
+
+## Main definitions
+
+* `TauCeti.completedGroupAlgebra R Γ`: the completed group algebra `R[[Γ]]`.
+* `TauCeti.completedGroupAlgebra.proj R Γ U`: the projection onto `R[Γ ⧸ U]`.
+* `TauCeti.completedGroupAlgebra.of R Γ`: the group elements inside `R[[Γ]]`.
+* `TauCeti.completedGroupAlgebra.mk`: an element from a compatible family of finite-level
+  elements.
+* `TauCeti.completedGroupAlgebra.coeffFamily R Γ`: all coefficients of all projections, the map
+  along which the topology is induced.
+
+## Main results
+
+* `TauCeti.completedGroupAlgebra.ext`, `TauCeti.completedGroupAlgebra.proj_surjective`: the
+  inverse-limit description.
+* `TauCeti.completedGroupAlgebra.proj_of`: a group element projects to the corresponding basis
+  element of the finite group algebra.
+* `TauCeti.completedGroupAlgebra.isEmbedding_coeffFamily`,
+  `TauCeti.completedGroupAlgebra.isClosedEmbedding_coeffFamily`: the topology is the
+  inverse-limit topology, and the compatible families form a closed subset of the product.
+* `TauCeti.completedGroupAlgebra.continuous_of`: the group elements depend continuously on the
+  group element.
+* The instances `IsTopologicalRing`, `CompactSpace`, `TotallyDisconnectedSpace` and `T2Space`,
+  and the `IsMulCommutative` instance for commutative `Γ`.
+
+## References
+
+* L. Ribes and P. Zalesskii, *Profinite Groups*, Section 5.3.
+* J. P. Labute, *Classification of Demushkin groups*, Canad. J. Math. 19 (1967), Section 1.5.
+-/
+
+public section
+
+namespace TauCeti
+
+open Topology
+
+universe u v
+
+variable (R : Type u) [CommRing R] (Γ : Type v) [Group Γ] [TopologicalSpace Γ]
+
+namespace completedGroupAlgebra
+
+/-- The families of elements of the group algebras `R[Γ ⧸ U]`, `U` ranging over the open normal
+subgroups of `Γ`, that are compatible along the maps induced by the quotient maps `Γ ⧸ U → Γ ⧸ V`
+for `U ≤ V`, as a subalgebra of the product of the `R[Γ ⧸ U]`. -/
+def subalgebra :
+    Subalgebra R (∀ U : OpenNormalSubgroup Γ, MonoidAlgebra R (Γ ⧸ U.toSubgroup)) where
+  carrier := {x | ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V),
+    MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (x U) = x V}
+  mul_mem' {x y} hx hy _ _ hUV := by
+    rw [Pi.mul_apply, Pi.mul_apply, MonoidAlgebra.mapDomain_mul, hx hUV, hy hUV]
+  one_mem' _ _ hUV := by
+    rw [Pi.one_apply, Pi.one_apply, MonoidAlgebra.mapDomain_one]
+  add_mem' {x y} hx hy _ _ hUV := by
+    rw [Pi.add_apply, Pi.add_apply, MonoidAlgebra.mapDomain_add, hx hUV, hy hUV]
+  zero_mem' _ _ hUV := by
+    rw [Pi.zero_apply, Pi.zero_apply, MonoidAlgebra.mapDomain_zero]
+  algebraMap_mem' r _ _ hUV := by
+    rw [Pi.algebraMap_apply, Pi.algebraMap_apply, Algebra.algebraMap_eq_smul_one,
+      Algebra.algebraMap_eq_smul_one, MonoidAlgebra.mapDomain_smul, MonoidAlgebra.mapDomain_one]
+
+end completedGroupAlgebra
+
+/-- The **completed group algebra** `R[[Γ]]` of a topological group `Γ` over a commutative
+ring `R`: the inverse limit of the group algebras `R[Γ ⧸ U]` over the open normal subgroups `U`
+of `Γ`, along the maps induced by the quotient maps. For `R = ℤ_[p]` and `Γ` profinite this is
+the Iwasawa algebra `ℤ_p[[Γ]]`.
+
+Its elements are accessed through the projections `completedGroupAlgebra.proj R Γ U` onto the
+finite levels, which determine them (`completedGroupAlgebra.ext`), and constructed from
+compatible families of finite-level elements by `completedGroupAlgebra.mk`. -/
+-- The ring and algebra structures are transported along the synonym, so the module system
+-- requires this definition to be `@[expose]`d for the instances below to compile.
+@[expose]
+def completedGroupAlgebra : Type (max u v) := completedGroupAlgebra.subalgebra R Γ
+
+namespace completedGroupAlgebra
+
+noncomputable instance : Ring (completedGroupAlgebra R Γ) :=
+  inferInstanceAs (Ring (subalgebra R Γ))
+
+noncomputable instance : Algebra R (completedGroupAlgebra R Γ) :=
+  inferInstanceAs (Algebra R (subalgebra R Γ))
+
+/-- The projection of the completed group algebra onto the group algebra `R[Γ ⧸ U]` of the
+finite quotient by the open normal subgroup `U`, as an `R`-algebra homomorphism. It is
+surjective (`proj_surjective`), and the projections jointly determine an element (`ext`). -/
+noncomputable def proj (U : OpenNormalSubgroup Γ) :
+    completedGroupAlgebra R Γ →ₐ[R] MonoidAlgebra R (Γ ⧸ U.toSubgroup) :=
+  (Pi.evalAlgHom R (fun U : OpenNormalSubgroup Γ ↦ MonoidAlgebra R (Γ ⧸ U.toSubgroup)) U).comp
+    (subalgebra R Γ).val
+
+variable {R Γ}
+
+/-- The projections onto two finite levels `U ≤ V` are compatible along the ring homomorphism
+`R[Γ ⧸ U] → R[Γ ⧸ V]` induced by the quotient map. -/
+@[simp]
+theorem mapDomain_mapOfLE_proj {U V : OpenNormalSubgroup Γ} (hUV : U ≤ V)
+    (x : completedGroupAlgebra R Γ) :
+    MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (proj R Γ U x) = proj R Γ V x :=
+  x.2 hUV
+
+/-- Two elements of the completed group algebra with the same projections onto every finite
+level are equal. -/
+@[ext]
+theorem ext {x y : completedGroupAlgebra R Γ} (h : ∀ U, proj R Γ U x = proj R Γ U y) : x = y :=
+  Subtype.ext (funext h)
+
+variable (R Γ)
+
+/-- The element of the completed group algebra with a prescribed compatible family of
+projections onto the finite levels. -/
+noncomputable def mk (x : ∀ U : OpenNormalSubgroup Γ, MonoidAlgebra R (Γ ⧸ U.toSubgroup))
+    (hx : ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V),
+      MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (x U) = x V) :
+    completedGroupAlgebra R Γ :=
+  ⟨x, hx⟩
+
+/-- The projections of `mk x hx` are the prescribed family `x`. -/
+@[simp]
+theorem proj_mk (x : ∀ U : OpenNormalSubgroup Γ, MonoidAlgebra R (Γ ⧸ U.toSubgroup))
+    (hx : ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V),
+      MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (x U) = x V)
+    (U : OpenNormalSubgroup Γ) :
+    proj R Γ U (mk R Γ x hx) = x U :=
+  (rfl)
+
+/-- The group elements inside the completed group algebra: `γ` goes to the family of the basis
+elements at its classes in the finite quotients. This is the analogue of `MonoidAlgebra.of`;
+its values are units, as it is a homomorphism from a group. -/
+noncomputable def of : Γ →* completedGroupAlgebra R Γ where
+  toFun γ := mk R Γ (fun U ↦ MonoidAlgebra.of R (Γ ⧸ U.toSubgroup) (γ : Γ ⧸ U.toSubgroup))
+    fun _ _ _ ↦ by simp
+  map_one' := ext fun U ↦ by simp [← MonoidAlgebra.one_def]
+  map_mul' γ δ := ext fun U ↦ by simp
+
+/-- A group element projects to the basis element of `R[Γ ⧸ U]` at its class. -/
+@[simp]
+theorem proj_of (U : OpenNormalSubgroup Γ) (γ : Γ) :
+    proj R Γ U (of R Γ γ) = MonoidAlgebra.single (γ : Γ ⧸ U.toSubgroup) 1 := by
+  simp [of]
+
+/-- Every projection onto a finite level is surjective. -/
+theorem proj_surjective (U : OpenNormalSubgroup Γ) : Function.Surjective (proj R Γ U) := by
+  intro y
+  induction y using MonoidAlgebra.induction_on with
+  | of m =>
+    obtain ⟨γ, rfl⟩ := QuotientGroup.mk_surjective m
+    exact ⟨of R Γ γ, by simp⟩
+  | add x y hx hy =>
+    obtain ⟨x', rfl⟩ := hx
+    obtain ⟨y', rfl⟩ := hy
+    exact ⟨x' + y', map_add _ _ _⟩
+  | smul r x hx =>
+    obtain ⟨x', rfl⟩ := hx
+    exact ⟨r • x', map_smul _ _ _⟩
+
+instance [Nontrivial R] : Nontrivial (completedGroupAlgebra R Γ) :=
+  (proj R Γ { toOpenSubgroup := ⟨⊤, isOpen_univ⟩ }).toRingHom.domain_nontrivial
+
+/-- The completed group algebra of a commutative group is commutative. -/
+instance [IsMulCommutative Γ] : IsMulCommutative (completedGroupAlgebra R Γ) where
+  is_comm.comm x y := ext fun U ↦ by
+    have : IsMulCommutative (Γ ⧸ U.toSubgroup) :=
+      (QuotientGroup.mk'_surjective U.toSubgroup).isMulCommutative inferInstance
+    rw [map_mul, map_mul, (isMulCommutative_iff.mp inferInstance) (proj R Γ U x)]
+
+/-- The coefficient of a product at a class `g` of a finite quotient is the sum, over the classes
+`h` of that quotient, of the products of the coefficients of the factors at `h` and `h⁻¹ * g`. -/
+theorem coeff_proj_mul (x y : completedGroupAlgebra R Γ) (U : OpenNormalSubgroup Γ)
+    [Fintype (Γ ⧸ U.toSubgroup)] (g : Γ ⧸ U.toSubgroup) :
+    (proj R Γ U (x * y)).coeff g =
+      ∑ h : Γ ⧸ U.toSubgroup, (proj R Γ U x).coeff h * (proj R Γ U y).coeff (h⁻¹ * g) := by
+  rw [map_mul, MonoidAlgebra.coeff_mul_apply_left, Finsupp.sum_fintype]
+  intro
+  simp
+
+/-! ### The inverse-limit topology -/
+
+/-- All coefficients of all finite-level projections, as one additive map into a product of
+copies of `R`. The topology of the completed group algebra is the one induced along this map:
+the coarsest topology making every coefficient of every projection continuous. -/
+noncomputable def coeffFamily :
+    completedGroupAlgebra R Γ →+ ∀ U : OpenNormalSubgroup Γ, Γ ⧸ U.toSubgroup → R where
+  toFun x U := ⇑(proj R Γ U x).coeff
+  map_zero' := funext fun U ↦ by simp
+  map_add' x y := funext fun U ↦ by
+    simp only [Pi.add_apply, map_add, MonoidAlgebra.coeff_add, Finsupp.coe_add]
+
+/-- The coefficients of an element at a finite level are those of its projection. -/
+theorem coeffFamily_apply (x : completedGroupAlgebra R Γ) (U : OpenNormalSubgroup Γ) :
+    coeffFamily R Γ x U = ⇑(proj R Γ U x).coeff :=
+  (rfl)
+
+/-- An element is determined by the coefficients of its projections. -/
+theorem coeffFamily_injective : Function.Injective (coeffFamily R Γ) := fun _ _ h ↦
+  ext fun U ↦ MonoidAlgebra.coeff_injective (DFunLike.coe_injective (congrFun h U))
+
+section TopologicalSpace
+
+variable [TopologicalSpace R]
+
+/-- The inverse-limit topology on the completed group algebra: the topology induced along the
+coefficient map `coeffFamily R Γ` into the product of copies of `R`. -/
+noncomputable instance : TopologicalSpace (completedGroupAlgebra R Γ) :=
+  .induced (coeffFamily R Γ) inferInstance
+
+/-- The topology of the completed group algebra is induced along the coefficient map. -/
+theorem isInducing_coeffFamily : IsInducing (coeffFamily R Γ) := ⟨rfl⟩
+
+/-- The completed group algebra embeds topologically into the product, over the finite levels
+`U` and the elements of `Γ ⧸ U`, of copies of `R`. -/
+theorem isEmbedding_coeffFamily : IsEmbedding (coeffFamily R Γ) :=
+  ⟨isInducing_coeffFamily R Γ, coeffFamily_injective R Γ⟩
+
+/-- Every coefficient of every finite-level projection is continuous. -/
+theorem continuous_coeff_proj (U : OpenNormalSubgroup Γ) (g : Γ ⧸ U.toSubgroup) :
+    Continuous fun x : completedGroupAlgebra R Γ ↦ (proj R Γ U x).coeff g :=
+  (continuous_apply g).comp ((continuous_apply U).comp (isInducing_coeffFamily R Γ).continuous)
+
+variable {R Γ} in
+/-- A map into the completed group algebra is continuous exactly when every coefficient of every
+finite-level projection of its values is. -/
+theorem continuous_iff {X : Type*} [TopologicalSpace X] {f : X → completedGroupAlgebra R Γ} :
+    Continuous f ↔ ∀ (U : OpenNormalSubgroup Γ) (g : Γ ⧸ U.toSubgroup),
+      Continuous fun x ↦ (proj R Γ U (f x)).coeff g :=
+  (isInducing_coeffFamily R Γ).continuous_iff.trans <| by
+    simp only [continuous_pi_iff]
+    exact Iff.rfl
+
+instance [T2Space R] : T2Space (completedGroupAlgebra R Γ) :=
+  (isEmbedding_coeffFamily R Γ).t2Space
+
+instance [TotallyDisconnectedSpace R] : TotallyDisconnectedSpace (completedGroupAlgebra R Γ) :=
+  ⟨(isEmbedding_coeffFamily R Γ).isTotallyDisconnected
+    (isTotallyDisconnected_of_totallyDisconnectedSpace _)⟩
+
+instance [IsTopologicalAddGroup R] : IsTopologicalAddGroup (completedGroupAlgebra R Γ) :=
+  (isInducing_coeffFamily R Γ).isTopologicalAddGroup (coeffFamily R Γ)
+
+/-- The group elements of the completed group algebra depend continuously on the group
+element. -/
+theorem continuous_of [SeparatelyContinuousMul Γ] : Continuous (of R Γ) := by
+  refine continuous_iff.mpr fun U g ↦ ?_
+  simp only [proj_of]
+  exact (continuous_of_discreteTopology
+    (f := fun q : Γ ⧸ U.toSubgroup ↦ (MonoidAlgebra.single q (1 : R)).coeff g)).comp
+    (QuotientGroup.continuous_mk (N := U.toSubgroup))
+
+section CompactGroup
+
+variable [SeparatelyContinuousMul Γ] [CompactSpace Γ]
+
+instance [IsTopologicalSemiring R] : ContinuousMul (completedGroupAlgebra R Γ) where
+  continuous_mul := by
+    refine continuous_iff.mpr fun U g ↦ ?_
+    let _ := Fintype.ofFinite (Γ ⧸ U.toSubgroup)
+    simp only [coeff_proj_mul]
+    exact continuous_finsetSum _ fun h _ ↦
+      ((continuous_coeff_proj R Γ U h).comp continuous_fst).mul
+        ((continuous_coeff_proj R Γ U _).comp continuous_snd)
+
+/-- The completed group algebra of a compact group over a topological ring is a topological
+ring. -/
+instance [IsTopologicalRing R] : IsTopologicalRing (completedGroupAlgebra R Γ) where
+
+/-- The compatible coefficient families form a closed subset of the product of copies of `R`,
+so the completed group algebra is a closed embedding into it. -/
+theorem isClosedEmbedding_coeffFamily [T2Space R] [ContinuousAdd R] :
+    IsClosedEmbedding (coeffFamily R Γ) := by
+  refine ⟨isEmbedding_coeffFamily R Γ, ?_⟩
+  classical
+  -- The range is the set of families whose level `V` is the image of their level `U` under the
+  -- map induced by the quotient map, for every `U ≤ V`.
+  have hrange : Set.range (coeffFamily R Γ) =
+      ⋂ (U : OpenNormalSubgroup Γ) (V : OpenNormalSubgroup Γ) (hUV : U ≤ V),
+        {f | ⇑(Finsupp.mapDomain (QuotientGroup.mapOfLE hUV)
+          (Finsupp.equivFunOnFinite.symm (f U))) = f V} := by
+    ext f
+    simp only [Set.mem_range, Set.mem_iInter, Set.mem_ofPred_eq]
+    constructor
+    · rintro ⟨x, rfl⟩ U V hUV
+      rw [coeffFamily_apply, coeffFamily_apply, Finsupp.equivFunOnFinite_symm_coe,
+        ← MonoidAlgebra.coeff_mapDomain, mapDomain_mapOfLE_proj]
+    · intro hf
+      refine ⟨mk R Γ (fun U ↦ .ofCoeff (Finsupp.equivFunOnFinite.symm (f U))) fun U V hUV ↦ ?_,
+        funext fun U ↦ ?_⟩
+      · apply MonoidAlgebra.coeff_injective
+        rw [MonoidAlgebra.coeff_mapDomain, MonoidAlgebra.coeff_ofCoeff,
+          MonoidAlgebra.coeff_ofCoeff]
+        exact DFunLike.coe_injective
+          ((hf U V hUV).trans (Finsupp.coe_equivFunOnFinite_symm _).symm)
+      · rw [coeffFamily_apply, proj_mk, MonoidAlgebra.coeff_ofCoeff,
+          Finsupp.coe_equivFunOnFinite_symm]
+  rw [hrange]
+  refine isClosed_iInter fun U ↦ isClosed_iInter fun V ↦ isClosed_iInter fun hUV ↦ ?_
+  let _ := Fintype.ofFinite (Γ ⧸ U.toSubgroup)
+  refine isClosed_eq (continuous_pi fun b ↦ ?_) (continuous_apply V)
+  -- Each coefficient of the image is the finite sum of the coefficients over the fibre.
+  simp only [Finsupp.equivFunOnFinite_symm_eq_sum, Finsupp.mapDomain_finsetSum,
+    Finsupp.mapDomain_single, Finsupp.finsetSum_apply, Finsupp.single_apply]
+  exact continuous_finsetSum _ fun a _ ↦ by
+    split_ifs
+    · exact (continuous_apply a).comp (continuous_apply U)
+    · exact continuous_const
+
+/-- The completed group algebra of a compact group over a compact Hausdorff ring with continuous
+addition is compact. -/
+instance [T2Space R] [CompactSpace R] [ContinuousAdd R] :
+    CompactSpace (completedGroupAlgebra R Γ) :=
+  (isClosedEmbedding_coeffFamily R Γ).compactSpace
+
+end CompactGroup
+
+end TopologicalSpace
+
+end completedGroupAlgebra
+
+end TauCeti
