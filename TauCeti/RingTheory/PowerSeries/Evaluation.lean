@@ -14,8 +14,8 @@ public import Mathlib.RingTheory.PowerSeries.WeierstrassPreparation
 Mathlib evaluates a power series over `R` at a topologically nilpotent point `a` of a complete,
 separated, linearly topologized `R`-algebra `S` through `PowerSeries.aeval`. This file records the
 values of that evaluation on the generators, `X ↦ a` and `C r ↦ algebraMap R S r`, and proves the
-divisibility criterion for a linear factor over a complete local ring `A`: for `c` in the maximal
-ideal at which power series can be evaluated,
+divisibility criterion for a linear factor over a ring `A` that is adically complete for an ideal
+`I`: for `c ∈ I` at which power series can be evaluated,
 
 ```text
 (X - C c) ∣ f  ↔  f(c) = 0.
@@ -23,11 +23,13 @@ ideal at which power series can be evaluated,
 
 One direction is that `X - C c` evaluates to zero. The other is Weierstrass division
 (`PowerSeries.IsWeierstrassDivisorAt.isWeierstrassDivisionAt_div_mod`): the image of `X - C c`
-modulo the maximal ideal is `X`, of order one with unit coefficient, so `f = (X - C c) * q + r`
-with `r` a constant, and evaluating at `c` identifies that constant with `f(c)`.
+modulo `I` is `X`, of order one with unit coefficient, so `f = (X - C c) * q + r` with `r` a
+constant, and evaluating at `c` identifies that constant with `f(c)`. The case of interest is a
+complete local ring with `I` its maximal ideal, such as `ℤ_[p]` with `I = (p)`.
 
-The hypothesis `c ∈ maximalIdeal A` is not decoration: for a unit `c` the series `X - C c` is a
-unit of `A⟦X⟧`, so it divides everything, while `f(c)` need not vanish.
+The hypothesis `c ∈ I` is not decoration: for a unit `c` the series `X - C c` is a unit of
+`A⟦X⟧`, so it divides everything, while `f(c)` need not vanish; and a unit lies in no proper
+ideal.
 
 ## Main results
 
@@ -65,8 +67,6 @@ end Aeval
 
 section LinearFactor
 
-open IsLocalRing
-
 variable {A : Type*} [CommRing A]
 
 /-- Modulo an ideal containing `c`, the power series `X - C c` becomes `X`. -/
@@ -75,20 +75,26 @@ theorem map_mk_X_sub_C {I : Ideal A} {c : A} (hc : c ∈ I) :
   rw [map_sub, map_X, map_C, Ideal.Quotient.eq_zero_iff_mem.mpr hc, map_zero, sub_zero]
 
 variable [UniformSpace A] [IsUniformAddGroup A] [IsTopologicalRing A] [T2Space A]
-  [CompleteSpace A] [IsLinearTopology A A] [IsLocalRing A] [IsAdicComplete (maximalIdeal A) A]
+  [CompleteSpace A] [IsLinearTopology A A] {I : Ideal A} [IsAdicComplete I A]
 
-/-- **Divisibility by a linear factor is vanishing at its root.** Over a complete local ring `A`,
-for `c` in the maximal ideal at which power series can be evaluated, a power series is divisible
-by `X - C c` exactly when its value at `c` is zero. -/
-theorem X_sub_C_dvd_iff_aeval_eq_zero {c : A} (hc : c ∈ maximalIdeal A) (hcev : HasEval c)
-    (f : A⟦X⟧) : (X - C c) ∣ f ↔ aeval hcev f = 0 := by
+/-- **Divisibility by a linear factor is vanishing at its root.** Over a ring `A` that is adically
+complete for an ideal `I`, for `c ∈ I` at which power series can be evaluated, a power series is
+divisible by `X - C c` exactly when its value at `c` is zero. -/
+theorem X_sub_C_dvd_iff_aeval_eq_zero {c : A} (hc : c ∈ I) (hcev : HasEval c) (f : A⟦X⟧) :
+    (X - C c) ∣ f ↔ aeval hcev f = 0 := by
   constructor
   · rintro ⟨q, rfl⟩
     simp
   · intro hf
-    -- Weierstrass division by `X - C c`: its image in the residue field is `X`, of order one,
-    -- with unit leading coefficient.
-    have H : (X - C c : A⟦X⟧).IsWeierstrassDivisorAt (maximalIdeal A) := by
+    -- If `I = ⊤`, adic completeness makes `A` a singleton and there is nothing to prove.
+    by_cases hI : I = ⊤
+    · subst hI
+      have := ‹IsAdicComplete ⊤ A›.subsingleton
+      exact ⟨0, PowerSeries.ext fun _ ↦ Subsingleton.elim _ _⟩
+    have := Ideal.Quotient.nontrivial_iff.mpr hI
+    -- Weierstrass division by `X - C c`: its image modulo `I` is `X`, of order one, with unit
+    -- leading coefficient.
+    have H : (X - C c : A⟦X⟧).IsWeierstrassDivisorAt I := by
       rw [IsWeierstrassDivisorAt, map_mk_X_sub_C hc, order_X, ENat.toNat_one]
       simp
     obtain ⟨hdeg, heq⟩ := H.isWeierstrassDivisionAt_div_mod f
