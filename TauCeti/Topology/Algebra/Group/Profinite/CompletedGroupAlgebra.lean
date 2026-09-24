@@ -12,6 +12,7 @@ public import Mathlib.Topology.Algebra.OpenSubgroup
 public import Mathlib.Topology.Algebra.Ring.Basic
 public import TauCeti.Algebra.MonoidAlgebra.Basic
 public import TauCeti.GroupTheory.QuotientGroup.Map
+public import TauCeti.Topology.Algebra.Group.Profinite.Basic
 
 /-!
 # The completed group algebra of a profinite group
@@ -37,6 +38,13 @@ same compactness assumption on `Γ`, it is compact when `R` is compact Hausdorff
 disconnected when `R` is, and the map from `Γ` is continuous. It is commutative when `Γ` is,
 stated as the `IsMulCommutative` mixin so that no second ring structure is installed.
 
+For a general topological group `Γ` the map `of R Γ` need not be injective and the algebra may be
+commutative without `Γ` being so (both happen for an indiscrete `Γ`, whose only open normal
+subgroup is `Γ` itself). When `Γ` is profinite its open normal subgroups separate the points, so
+over a nontrivial `R` the group elements are distinct in `R[[Γ]]` (`of_injective`), the map
+`of R Γ` is a closed embedding for Hausdorff `R` (`isClosedEmbedding_of`), and the algebra is
+commutative exactly when `Γ` is (`isMulCommutative_iff`).
+
 ## Main definitions
 
 * `TauCeti.completedGroupAlgebra R Γ`: the completed group algebra `R[[Γ]]`.
@@ -58,6 +66,11 @@ stated as the `IsMulCommutative` mixin so that no second ring structure is insta
   inverse-limit topology, and the compatible families form a closed subset of the product.
 * `TauCeti.completedGroupAlgebra.continuous_of`: the group elements depend continuously on the
   group element.
+* `TauCeti.completedGroupAlgebra.of_injective`,
+  `TauCeti.completedGroupAlgebra.isClosedEmbedding_of`,
+  `TauCeti.completedGroupAlgebra.isMulCommutative_iff`: for profinite `Γ` over a nontrivial `R`,
+  the group elements are distinct, form a closed copy of `Γ` when `R` is Hausdorff, and the
+  algebra is commutative exactly when `Γ` is.
 * The instances `IsTopologicalRing`, `CompactSpace`, `TotallyDisconnectedSpace` and `T2Space`,
   and the `IsMulCommutative` instance for commutative `Γ`.
 
@@ -203,6 +216,26 @@ instance [IsMulCommutative Γ] : IsMulCommutative (completedGroupAlgebra R Γ) w
     have : IsMulCommutative (Γ ⧸ U.toSubgroup) :=
       (QuotientGroup.mk'_surjective U.toSubgroup).isMulCommutative inferInstance
     rw [map_mul, map_mul, (isMulCommutative_iff.mp inferInstance) (proj R Γ U x)]
+
+section Profinite
+
+variable [IsTopologicalGroup Γ] [CompactSpace Γ] [TotallyDisconnectedSpace Γ] [Nontrivial R]
+
+/-- Over a nontrivial coefficient ring, distinct elements of a profinite group are distinct
+inside its completed group algebra: the open normal subgroups separate the points. -/
+theorem of_injective : Function.Injective (of R Γ) := fun γ δ h ↦ by
+  rw [← inv_mul_eq_one]
+  refine Subgroup.eq_one_of_mem_iInf_openNormalSubgroup fun U ↦ QuotientGroup.eq.mp ?_
+  have := congrArg (proj R Γ U) h
+  rwa [proj_of, proj_of, MonoidAlgebra.single_left_inj one_ne_zero] at this
+
+/-- Over a nontrivial coefficient ring, the completed group algebra of a profinite group is
+commutative exactly when the group is. -/
+theorem isMulCommutative_iff : IsMulCommutative (completedGroupAlgebra R Γ) ↔ IsMulCommutative Γ :=
+  ⟨fun h ↦ ⟨⟨fun γ δ ↦ of_injective R Γ (by rw [map_mul, map_mul, h.is_comm.comm])⟩⟩,
+    fun _ ↦ inferInstance⟩
+
+end Profinite
 
 /-- The coefficient of a product at a class `g` of a finite quotient is the sum, over the classes
 `h` of that quotient, of the products of the coefficients of the factors at `h` and `h⁻¹ * g`. -/
@@ -350,6 +383,12 @@ instance [T2Space R] [CompactSpace R] [ContinuousAdd R] :
   (isClosedEmbedding_coeffFamily R Γ).compactSpace
 
 end CompactGroup
+
+/-- Over a nontrivial Hausdorff coefficient ring, the group elements of a profinite group form a
+closed subset of the completed group algebra homeomorphic to the group. -/
+theorem isClosedEmbedding_of [IsTopologicalGroup Γ] [CompactSpace Γ] [TotallyDisconnectedSpace Γ]
+    [Nontrivial R] [T2Space R] : IsClosedEmbedding (of R Γ) :=
+  (continuous_of R Γ).isClosedEmbedding (of_injective R Γ)
 
 end TopologicalSpace
 
