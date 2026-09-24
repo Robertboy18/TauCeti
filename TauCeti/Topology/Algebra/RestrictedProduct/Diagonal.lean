@@ -173,20 +173,12 @@ theorem continuous_rationalDiagonal {Γ : Type w} [MulOneClass Γ] [TopologicalS
   rw [hfactor]
   exact (RestrictedProduct.continuous_inclusion hS').comp hf
 
-/-- Each element of the range of the coercion from a restricted product to the full product is
-eventually integral, so evaluation at the coordinates makes that range a source for the diagonal
-back into the restricted product. -/
-theorem eventually_evalMonoidHom_comp_subtype_mem (U : ∀ i, Subgroup (G i))
-    (γ : (RestrictedProduct.coeMonoidHom :
-      Πʳ i, [G i, (U i : Set (G i))] →* ∀ i, G i).range) :
-    ∀ᶠ i in cofinite, (Pi.evalMonoidHom G i).comp (Subgroup.subtype _) γ ∈ U i :=
-  (mem_range_coeMonoidHom U γ).1 γ.2
-
 /-- The uniform integrality set in `continuous_rationalDiagonal` cannot be dropped. Take
 infinitely many nontrivial discrete groups with trivial reference subgroups, and for `Γ` the
 range of the coercion from the restricted product to the full product, that is, the finitely
 supported elements, with the topology induced from the full product. The coordinate maps are
-continuous and every element of `Γ` is eventually integral, but the diagonal is not continuous:
+continuous and every element of `Γ` is eventually integral (it is the coercion of an element of
+the restricted product), but the diagonal is not continuous:
 it would make the restricted-product topology the one induced from the full product,
 contradicting `not_isInducing_coe_bot`. -/
 theorem continuous_eval_and_not_continuous_rationalDiagonal_range_coeMonoidHom [Infinite ι]
@@ -197,7 +189,7 @@ theorem continuous_eval_and_not_continuous_rationalDiagonal_range_coeMonoidHom [
     ¬ Continuous (rationalDiagonal
       (fun i ↦ (Pi.evalMonoidHom G i).comp (Subgroup.subtype (RestrictedProduct.coeMonoidHom :
         Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).range))
-      (fun _ ↦ ⊥) (eventually_evalMonoidHom_comp_subtype_mem fun _ ↦ ⊥)) := by
+      (fun _ ↦ ⊥) fun γ ↦ by obtain ⟨_, x, rfl⟩ := γ; exact x.2) := by
   refine ⟨fun i ↦ (continuous_apply i).comp continuous_subtype_val, fun hd ↦ ?_⟩
   refine not_isInducing_coe_bot (G := G) ?_
   -- The coercion is the range restriction of `coeMonoidHom` followed by the inclusion of the
@@ -215,7 +207,7 @@ theorem continuous_eval_and_not_continuous_rationalDiagonal_range_coeMonoidHom [
   have hid : ⇑(rationalDiagonal
       (fun i ↦ (Pi.evalMonoidHom G i).comp (Subgroup.subtype (RestrictedProduct.coeMonoidHom :
         Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).range))
-      (fun _ ↦ ⊥) (eventually_evalMonoidHom_comp_subtype_mem fun _ ↦ ⊥)) ∘
+      (fun _ ↦ ⊥) fun γ ↦ by obtain ⟨_, x, rfl⟩ := γ; exact x.2) ∘
         ⇑(RestrictedProduct.coeMonoidHom :
           Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] →* ∀ i, G i).rangeRestrict = id := by
     ext x i
