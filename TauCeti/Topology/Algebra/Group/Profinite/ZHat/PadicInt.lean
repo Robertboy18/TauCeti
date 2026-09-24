@@ -126,6 +126,7 @@ noncomputable def IsProPSylow.continuousMulEquivPadicInt {p : ℕ} [Fact p.Prime
 
 /-- The isomorphism from a `p`-Sylow subgroup of `ℤ̂` to `ℤ_p` is the composite of the quotient
 map to the maximal pro-`p` quotient with its identification with `ℤ_p`. -/
+@[simp]
 theorem IsProPSylow.continuousMulEquivPadicInt_apply {p : ℕ} [Fact p.Prime]
     {P : Subgroup zHat} (hP : IsProPSylow p P) (x : P) :
     hP.continuousMulEquivPadicInt x =

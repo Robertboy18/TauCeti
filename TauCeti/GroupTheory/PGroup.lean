@@ -93,6 +93,7 @@ theorem disjoint_of_not_dvd_natCard_of_isPGroup [Fact p.Prime] {C Q : Subgroup G
   · simpa [Subgroup.orderOf_mk] using hQ.dvd_orderOf (g := (⟨g, hgQ⟩ : Q)) (by simpa using hg1)
   · simpa [Subgroup.orderOf_mk] using orderOf_dvd_natCard (⟨g, hg⟩ : C)
 
+open scoped IsMulCommutative in
 /-- In a finite commutative group, a nontrivial element of `p`-power order survives in some
 `p`-group quotient: there is a subgroup `N` with `A ⧸ N` a `p`-group and `a ∉ N`. The subgroup
 is the kernel of raising to the power `ordCompl[p] (Nat.card A)`, the part of the group order
@@ -100,19 +101,18 @@ prime to `p`. -/
 theorem exists_isPGroup_quotient_notMem_of_pow_pow_eq_one {A : Type*} [Group A]
     [IsMulCommutative A] [Finite A] [hp : Fact p.Prime] {a : A} {k : ℕ} (ha : a ^ p ^ k = 1)
     (ha1 : a ≠ 1) : ∃ N : Subgroup A, IsPGroup p (A ⧸ N) ∧ a ∉ N := by
-  let f : A →* A := MonoidHom.mk' (fun b ↦ b ^ ordCompl[p] (Nat.card A))
-    fun b c ↦ Commute.mul_pow ((commute_iff_eq b c).mpr (mul_comm' b c)) _
+  let f : A →* A := powMonoidHom (ordCompl[p] (Nat.card A))
   refine ⟨f.ker, ?_, fun h ↦ ha1 ?_⟩
   · -- The quotient by the kernel is the range, whose elements are killed by `ordProj[p]`.
     refine IsPGroup.of_equiv ?_ (QuotientGroup.quotientKerEquivRange f).symm
     rintro ⟨_, b, rfl⟩
     refine ⟨(Nat.card A).factorization p, ?_⟩
     rw [Subtype.ext_iff, Subgroup.coe_pow, OneMemClass.coe_one]
-    simp only [f, MonoidHom.mk'_apply]
+    simp only [f, powMonoidHom_apply]
     rw [← pow_mul, mul_comm, Nat.ordProj_mul_ordCompl_eq_self, pow_card_eq_one']
   · -- An element of `p`-power order killed by a power prime to `p` is trivial.
     rw [MonoidHom.mem_ker] at h
-    simp only [f, MonoidHom.mk'_apply] at h
+    simp only [f, powMonoidHom_apply] at h
     exact orderOf_eq_one_iff.mp <| Nat.eq_one_of_dvd_coprimes
       ((Nat.coprime_ordCompl hp.out Nat.card_pos.ne').pow_left k)
       (orderOf_dvd_of_pow_eq_one ha) (orderOf_dvd_of_pow_eq_one h)
