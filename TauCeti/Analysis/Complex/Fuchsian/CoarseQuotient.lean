@@ -25,9 +25,10 @@ analytic, and the local formula for a chart along the orbit projection makes the
 `ℍ → Γ \ ℍ` holomorphic.
 
 On the free locus every chart is a disc coordinate pushed forward along the orbit projection. At
-an elliptic orbit of stabilizer order `m` the chart is the cyclic quotient model `u ↦ u ^ m`, so the
-orbit projection is a holomorphic map between Riemann surfaces that is not a local biholomorphism
-there.
+an elliptic orbit of stabilizer order `m` the chart is the cyclic quotient model `u ↦ u ^ m`: near a
+point of the disc about the elliptic point, the chart composed with the orbit projection is the
+`m`-th power of the disc coordinate
+(`Subgroup.exists_stabilizerBallQuotientChart_quotientMk_eventuallyEq`).
 
 ## Main declarations
 
@@ -115,9 +116,8 @@ theorem stabilizerBallQuotientChart_mem_atlas {z : ℍ} {ε : ℝ} (hε : 0 < ε
     stabilizerBallQuotientChart hε hopen ∈ atlas ℂ (orbitRel.Quotient Γ ℍ) :=
   (mem_atlas_orbitRelQuotient_iff Γ _).2 ⟨_, _, _, _, rfl⟩
 
-/-- Mathlib proves that the orbit space of a second countable space under a continuous action is
-second countable (`ContinuousConstSMul.secondCountableTopology`); this records it as an instance
-for the orbit space of a subgroup of `PSL(2, ℝ)` acting on the upper half-plane. -/
+/-- The coarse orbit quotient `Γ \ ℍ` is second countable, as the orbit space of a second
+countable space under a continuous group action. -/
 instance instSecondCountableTopologyOrbitRelQuotient :
     SecondCountableTopology (orbitRel.Quotient Γ ℍ) :=
   ContinuousConstSMul.secondCountableTopology
