@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.GroupTheory.SpecificGroups.Cyclic.ElementaryDivisors
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.StructureTheorem
 public import TauCeti.Topology.Algebra.Group.Torsion
 import TauCeti.NumberTheory.Padics.Module
@@ -14,7 +15,7 @@ import TauCeti.NumberTheory.Padics.Module
 
 The structure theorem identifies a topologically finitely generated abelian pro-`p` group `A`
 with `ℤ_p ^ r × T` for a finite abelian `p`-group `T`. This file describes the two factors of
-that decomposition and proves that the rank `r` is unique.
+that decomposition and proves uniqueness of the rank and elementary divisors.
 
 * The finite factor `T` is the torsion subgroup of `A`. Consequently the torsion subgroup is
   finite and closed, and it is open exactly when `A` is finite.
@@ -25,6 +26,8 @@ that decomposition and proves that the rank `r` is unique.
   subgroup and a continuous additive isomorphism `ℤ_p ^ r ≃ ℤ_p ^ r'` is `ℤ_p`-linear. The
   uniqueness of the torsion factor, `T ≅ T'`, needs no pro-`p` hypothesis and is
   `TauCeti.torsionFactorAddEquiv` in `TauCeti.GroupTheory.Torsion`.
+* When the finite factors are products of `ZMod (p ^ e i)` with positive exponents, that
+  torsion-factor equivalence determines the exponents up to a bijection of the index types.
 
 Finiteness of the torsion subgroup is what makes the torsion subgroup of the abelianisation of a
 topologically finitely generated pro-`p` group a finite invariant; the `q`-invariant of a Demushkin
@@ -40,6 +43,8 @@ group is read off from it.
 * `TauCeti.IsProP.exists_continuousMulEquiv_quotient_torsion_pi_padicInt`: the quotient by the
   torsion subgroup is topologically isomorphic to `ℤ_p ^ r`.
 * `TauCeti.eq_of_continuousMulEquiv_pi_padicInt_prod`: uniqueness of the rank `r`.
+* `TauCeti.exists_equiv_exponents_of_continuousMulEquiv_pi_padicInt_prod_pi_zmod`:
+  uniqueness of the positive elementary-divisor exponents up to reindexing.
 
 ## References
 
@@ -68,6 +73,20 @@ theorem eq_of_continuousMulEquiv_pi_padicInt_prod {r r' : ℕ} {T T' : Type*} [A
     (e' : A ≃ₜ* Multiplicative ((Fin r' → ℤ_[p]) × T')) : r = r' :=
   eq_of_continuousMulEquiv_pi_padicInt
     ((quotientTorsionContinuousMulEquiv hT e).symm.trans (quotientTorsionContinuousMulEquiv hT' e'))
+
+/-- Two decompositions into a finite power of `ℤ_p` and a finite product of nontrivial cyclic
+`p`-groups have the same elementary-divisor exponents up to reindexing. The decompositions
+themselves suffice; no compactness, finite-generation, or pro-`p` assumption on `A` is needed. -/
+theorem exists_equiv_exponents_of_continuousMulEquiv_pi_padicInt_prod_pi_zmod
+    {r r' : ℕ} {ι κ : Type*} [Finite ι] [Finite κ] (e : ι → ℕ) (e' : κ → ℕ)
+    (he : ∀ i, 0 < e i) (he' : ∀ j, 0 < e' j)
+    (f : A ≃ₜ* Multiplicative ((Fin r → ℤ_[p]) × ((i : ι) → ZMod (p ^ e i))))
+    (f' : A ≃ₜ* Multiplicative ((Fin r' → ℤ_[p]) × ((j : κ) → ZMod (p ^ e' j)))) :
+    ∃ σ : ι ≃ κ, ∀ i, e i = e' (σ i) := by
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  exact ZMod.exists_equiv_exponents_of_pi_pow_addEquiv (Fact.out : p.Prime).one_lt e e' he he'
+    (torsionFactorAddEquiv isAddTorsion_of_finite isAddTorsion_of_finite
+      f.toMulEquiv f'.toMulEquiv)
 
 end Uniqueness
 
