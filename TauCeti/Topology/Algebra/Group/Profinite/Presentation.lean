@@ -21,11 +21,13 @@ The profinite construction allows finite quotients of any order. The pro-`p` con
 with the free pro-`p` group and therefore retains only finite `p`-group quotients.
 Both universal properties are used to describe groups by finite sets of generators and relators.
 
-The generators generate a presented group topologically, so a pro-`p` group presented on a finite
-type is topologically finitely generated. With no relators the presented pro-`p` group is the free
-pro-`p` group (`presentedProP.equivFreeProP`). Every Hausdorff group that is a continuous image
-of `freeProP p X` is presented on `X`, with the kernel as its set of relators
-(`presentedProP.equivOfSurjective`). Combined with `IsProP.exists_surjective_freeProP`, a
+The generators generate a presented group topologically, so a group presented on a finite type is
+topologically finitely generated. With no relators the presented group is the free group of the
+same kind (`presentedProfiniteGroup.equivFreeProfiniteGroup`, `presentedProP.equivFreeProP`).
+Every Hausdorff group that is a continuous image of `freeProfiniteGroup X` or of `freeProP p X`
+is presented on `X`, with the kernel as its set of relators
+(`presentedProfiniteGroup.equivOfSurjective`, `presentedProP.equivOfSurjective`). Combined with
+`IsProP.exists_surjective_freeProP`, a
 topologically finitely generated pro-`p` group `G` has a presentation on any finite type with at
 least `topologicalGeneratorRankNat G` elements; a presentation on exactly that many generators is
 what is called a **minimal presentation** of `G`.
@@ -36,11 +38,13 @@ what is called a **minimal presentation** of `G`.
   the universal properties.
 * `TauCeti.presentedProfiniteGroup.dense_closure_range_of`,
   `TauCeti.presentedProP.dense_closure_range_of`: the generators generate topologically.
-* `TauCeti.presentedProP.isTopologicallyFinitelyGenerated`: a pro-`p` group presented on a finite
-  type is topologically finitely generated.
-* `TauCeti.presentedProP.equivFreeProP`: with no relators, the presented group is free.
-* `TauCeti.presentedProP.equivOfSurjective`: a continuous image of `freeProP p X` is presented on
-  `X` by the kernel.
+* `TauCeti.presentedProfiniteGroup.isTopologicallyFinitelyGenerated`,
+  `TauCeti.presentedProP.isTopologicallyFinitelyGenerated`: a group presented on a finite type is
+  topologically finitely generated.
+* `TauCeti.presentedProfiniteGroup.equivFreeProfiniteGroup`, `TauCeti.presentedProP.equivFreeProP`:
+  with no relators, the presented group is free.
+* `TauCeti.presentedProfiniteGroup.equivOfSurjective`, `TauCeti.presentedProP.equivOfSurjective`:
+  a continuous image of the free group is presented on `X` by the kernel.
 * `TauCeti.IsProP.exists_continuousMulEquiv_presentedProP`: a topologically finitely generated
   pro-`p` group has a presentation on any finite type with at least `topologicalGeneratorRankNat`
   elements.
@@ -81,6 +85,11 @@ noncomputable def of {X : Type u} (rels : Set (freeProfiniteGroup X)) (x : X) :
   mk rels (freeProfiniteGroup.of x)
 
 variable {X : Type u} {rels : Set (freeProfiniteGroup X)}
+
+/-- The canonical quotient map sends an element to its class. Not a simp lemma: `mk rels x` is
+the simp normal form of a class, so that `lift_mk` and its relatives fire. -/
+theorem mk_apply (x : freeProfiniteGroup X) : mk rels x = (x : presentedProfiniteGroup X rels) :=
+  (rfl)
 
 /-- The quotient map kills every relator. -/
 @[simp]
@@ -219,6 +228,108 @@ theorem lift_surjective {G : Type v} [Group G] [TopologicalSpace G] [T1Space G]
     Function.Surjective (lift ψ hψ) := by
   have hcomp : ⇑ψ = lift ψ hψ ∘ mk rels := funext fun x ↦ (lift_mk ψ hψ x).symm
   exact Function.Surjective.of_comp (hcomp ▸ hs)
+
+/-- A profinite group presented on a finite type is topologically finitely generated. -/
+theorem isTopologicallyFinitelyGenerated [Finite X] :
+    IsTopologicallyFinitelyGenerated (presentedProfiniteGroup X rels) :=
+  (Set.finite_range (of rels)).isTopologicallyFinitelyGenerated <|
+    SetLike.coe_injective <| by
+      rw [Subgroup.topologicalClosure_coe, dense_closure_range_of.closure_eq, Subgroup.coe_top]
+
+/-! ## The empty set of relators -/
+
+section Empty
+
+/-- With no relators, the presented profinite group is the free profinite group: the canonical
+quotient map is a topological isomorphism. -/
+noncomputable def equivFreeProfiniteGroup :
+    presentedProfiniteGroup X (∅ : Set (freeProfiniteGroup X)) ≃ₜ* freeProfiniteGroup X where
+  toFun := lift (ContinuousMonoidHom.id (freeProfiniteGroup X)) fun _ hr ↦ hr.elim
+  invFun := mk ∅
+  left_inv y := by
+    have h : (mk ∅).comp (lift (ContinuousMonoidHom.id (freeProfiniteGroup X)) fun _ hr ↦ hr.elim) =
+        ContinuousMonoidHom.id (presentedProfiniteGroup X ∅) :=
+      hom_ext <| ContinuousMonoidHom.ext fun x ↦ by
+        simp only [ContinuousMonoidHom.coe_comp, Function.comp_apply, lift_mk,
+          ContinuousMonoidHom.coe_id, id_eq]
+    exact DFunLike.congr_fun h y
+  right_inv y := DFunLike.congr_fun (lift_comp_mk _ _) y
+  map_mul' := map_mul _
+  continuous_toFun := map_continuous _
+  continuous_invFun := map_continuous _
+
+/-- The inverse of the isomorphism with the free profinite group is the canonical quotient map. -/
+@[simp]
+theorem equivFreeProfiniteGroup_symm_apply (x : freeProfiniteGroup X) :
+    equivFreeProfiniteGroup.symm x = mk (∅ : Set (freeProfiniteGroup X)) x :=
+  (rfl)
+
+/-- The isomorphism with the free profinite group sends the class of an element to that
+element. -/
+@[simp]
+theorem equivFreeProfiniteGroup_mk (x : freeProfiniteGroup X) :
+    equivFreeProfiniteGroup (mk (∅ : Set (freeProfiniteGroup X)) x) = x := by
+  rw [← equivFreeProfiniteGroup_symm_apply, ContinuousMulEquiv.apply_symm_apply]
+
+/-- The isomorphism with the free profinite group matches the generators. -/
+@[simp]
+theorem equivFreeProfiniteGroup_of (x : X) :
+    equivFreeProfiniteGroup (of (∅ : Set (freeProfiniteGroup X)) x) = freeProfiniteGroup.of x := by
+  rw [← mk_of, equivFreeProfiniteGroup_mk]
+
+end Empty
+
+/-! ## Continuous images of free profinite groups are presented -/
+
+section OfSurjective
+
+variable {G : Type v} [Group G] [TopologicalSpace G] [T2Space G]
+
+/-- The algebraic isomorphism underlying `equivOfSurjective`: the kernel of a continuous
+homomorphism to a Hausdorff group is closed and normal, so it is its own closed normal closure,
+and the first isomorphism theorem applies. -/
+private noncomputable def mulEquivOfSurjective (φ : freeProfiniteGroup X →ₜ* G)
+    (hφ : Function.Surjective φ) :
+    presentedProfiniteGroup X ((φ : freeProfiniteGroup X →* G).ker : Set (freeProfiniteGroup X))
+      ≃* G :=
+  (QuotientGroup.quotientMulEquivOfEq (Subgroup.topologicalClosure_normalClosure_eq_self _
+    (isClosed_singleton.preimage (map_continuous φ)))).trans
+    (QuotientGroup.quotientKerEquivOfSurjective (φ : freeProfiniteGroup X →* G) hφ)
+
+private theorem mulEquivOfSurjective_mk (φ : freeProfiniteGroup X →ₜ* G)
+    (hφ : Function.Surjective φ) (x : freeProfiniteGroup X) :
+    mulEquivOfSurjective φ hφ (mk _ x) = φ x := by
+  rw [mulEquivOfSurjective, mk_apply, MulEquiv.trans_apply, QuotientGroup.quotientMulEquivOfEq_mk]
+  exact TauCeti.QuotientGroup.quotientKerEquivOfSurjective_apply_mk
+    (φ : freeProfiniteGroup X →* G) hφ x
+
+/-- A Hausdorff group that is a continuous image of the free profinite group on `X` is presented
+on `X`, with the kernel as its set of relators. -/
+noncomputable def equivOfSurjective (φ : freeProfiniteGroup X →ₜ* G)
+    (hφ : Function.Surjective φ) :
+    presentedProfiniteGroup X ((φ : freeProfiniteGroup X →* G).ker : Set (freeProfiniteGroup X))
+      ≃ₜ* G :=
+  have hcont : Continuous (mulEquivOfSurjective φ hφ) :=
+    (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr <|
+      (funext (mulEquivOfSurjective_mk φ hφ) :
+        ⇑(mulEquivOfSurjective φ hφ) ∘ QuotientGroup.mk = ⇑φ) ▸ map_continuous φ
+  ContinuousMulEquiv.mk (mulEquivOfSurjective φ hφ) hcont
+    (hcont.continuous_symm_of_equiv_compact_to_t2 (f := (mulEquivOfSurjective φ hφ).toEquiv))
+
+/-- The presentation isomorphism of a continuous image sends the class of an element to its
+image. -/
+@[simp]
+theorem equivOfSurjective_mk (φ : freeProfiniteGroup X →ₜ* G) (hφ : Function.Surjective φ)
+    (x : freeProfiniteGroup X) : equivOfSurjective φ hφ (mk _ x) = φ x :=
+  mulEquivOfSurjective_mk φ hφ x
+
+/-- The presentation isomorphism of a continuous image matches the generators. -/
+@[simp]
+theorem equivOfSurjective_of (φ : freeProfiniteGroup X →ₜ* G) (hφ : Function.Surjective φ)
+    (x : X) : equivOfSurjective φ hφ (of _ x) = φ (freeProfiniteGroup.of x) := by
+  rw [← mk_of, equivOfSurjective_mk]
+
+end OfSurjective
 
 end presentedProfiniteGroup
 
