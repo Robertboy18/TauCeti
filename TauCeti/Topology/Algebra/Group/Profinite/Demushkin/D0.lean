@@ -30,12 +30,16 @@ continuous homomorphism out of `D₀` is determined by its values on `A`, `S` an
 * `TauCeti.d0Relator`: the relator `A²S⁴(S,Y)` in the free pro-`2` group on `Fin 3`.
 * `TauCeti.demushkinD0`: the presented pro-`2` group `D₀`.
 * `TauCeti.d0A`, `TauCeti.d0S`, `TauCeti.d0Y`: its marked generators.
+* `TauCeti.d0Lift`: the continuous homomorphism `D₀ → P` determined by three elements of a pro-`2`
+  group `P` satisfying the relation `a²s⁴(s,y) = 1`.
 * `TauCeti.d0FreeCharacter`: the character `A ↦ 0`, `S ↦ 1`, `Y ↦ 0` of the free pro-`2` group.
 * `TauCeti.d0Character`: the induced character `D₀ → ℤ/2`.
 
 ## Main results
 
 * `TauCeti.d0_relation`: the marked generators satisfy `A²S⁴(S,Y) = 1`.
+* `TauCeti.d0_hom_ext`: a continuous homomorphism out of `D₀` is determined by its values on
+  `A`, `S` and `Y`.
 * `TauCeti.d0FreeCharacter_d0Relator`: the character kills the relator.
 * `TauCeti.d0Character_surjective`: the induced character `D₀ → ℤ/2` is surjective.
 * `TauCeti.d0S_ne_one` and the `Nontrivial demushkinD0` instance: `D₀` is nontrivial.
@@ -108,6 +112,7 @@ theorem range_presentedProP_of_d0Relator :
     exacts [⟨0, by simp⟩, ⟨1, by simp⟩, ⟨2, by simp⟩]
 
 /-- The marked generators of `D₀` satisfy the defining relation `A²S⁴(S,Y) = 1`. -/
+@[simp]
 theorem d0_relation : d0A ^ 2 * d0S ^ 4 * (d0S⁻¹ * d0Y⁻¹ * d0S * d0Y) = 1 := by
   have h := presentedProP.mk_relator (rels := {d0Relator})
     (freeProP.of 0 ^ 2 * freeProP.of 1 ^ 4 *
@@ -115,6 +120,44 @@ theorem d0_relation : d0A ^ 2 * d0S ^ 4 * (d0S⁻¹ * d0Y⁻¹ * d0S * d0Y) = 1 
     (Set.mem_singleton_iff.mpr (by rw [d0Relator]))
   simpa only [map_mul, map_pow, map_inv, presentedProP.mk_of, presentedProP_of_d0Relator_zero,
     presentedProP_of_d0Relator_one, presentedProP_of_d0Relator_two] using h
+
+section Lift
+
+variable {P : Type} [Group P] [TopologicalSpace P] [IsTopologicalGroup P] [CompactSpace P]
+  [TotallyDisconnectedSpace P] (hP : IsProP 2 P) (a s y : P)
+  (h : a ^ 2 * s ^ 4 * (s⁻¹ * y⁻¹ * s * y) = 1)
+
+/-- **The universal property of `D₀`**: three elements `a, s, y` of a pro-`2` group `P` satisfying
+`a²s⁴(s,y) = 1` determine a continuous homomorphism `D₀ → P` with `A ↦ a`, `S ↦ s`, `Y ↦ y`. -/
+noncomputable def d0Lift : demushkinD0 →ₜ* P :=
+  presentedProP.lift (freeProP.lift hP ![a, s, y]) fun r hr ↦ by
+    rw [Set.mem_singleton_iff.mp hr]
+    simpa [d0Relator] using h
+
+/-- `d0Lift` sends `A` to `a`. -/
+@[simp]
+theorem d0Lift_d0A : d0Lift hP a s y h d0A = a :=
+  (presentedProP.lift_of _ _ 0).trans (freeProP.lift_of hP _ 0)
+
+/-- `d0Lift` sends `S` to `s`. -/
+@[simp]
+theorem d0Lift_d0S : d0Lift hP a s y h d0S = s :=
+  (presentedProP.lift_of _ _ 1).trans (freeProP.lift_of hP _ 1)
+
+/-- `d0Lift` sends `Y` to `y`. -/
+@[simp]
+theorem d0Lift_d0Y : d0Lift hP a s y h d0Y = y :=
+  (presentedProP.lift_of _ _ 2).trans (freeProP.lift_of hP _ 2)
+
+end Lift
+
+/-- Two continuous homomorphisms out of `D₀` into a Hausdorff group that agree on the marked
+generators `A`, `S`, `Y` are equal. -/
+@[ext]
+theorem d0_hom_ext {Q : Type*} [Group Q] [TopologicalSpace Q] [T2Space Q]
+    {φ ψ : demushkinD0 →ₜ* Q} (hA : φ d0A = ψ d0A) (hS : φ d0S = ψ d0S) (hY : φ d0Y = ψ d0Y) :
+    φ = ψ :=
+  presentedProP.hom_ext_of fun i ↦ by fin_cases i <;> assumption
 
 /-- The character of the free pro-`2` group on `A, S, Y` with values `A ↦ 0`, `S ↦ 1`, `Y ↦ 0`
 in `ℤ/2`, written multiplicatively. It is the map that exhibits `D₀` as nontrivial. -/
@@ -129,6 +172,7 @@ theorem d0FreeCharacter_of (i : Fin 3) :
 
 /-- `d0FreeCharacter` kills the relator `A²S⁴(S,Y)`: the commutator dies in the abelian group
 `ℤ/2`, and `2 · 0 + 4 · 1 = 0`. -/
+@[simp]
 theorem d0FreeCharacter_d0Relator : d0FreeCharacter d0Relator = 1 := by
   simp only [d0Relator, map_mul, map_pow, map_inv, d0FreeCharacter_of, Matrix.cons_val_zero,
     Matrix.cons_val_one, Matrix.cons_val_two]
