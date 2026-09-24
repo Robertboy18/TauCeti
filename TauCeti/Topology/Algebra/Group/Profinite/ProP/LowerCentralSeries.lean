@@ -59,9 +59,7 @@ theorem pLowerCentralSeries_one_eq_proPFrattini (hp : p.Prime) :
   rw [pLowerCentralSeries_one, proPFrattini_eq_topologicalClosure hp]
 
 /-- **Openness of the lower `p`-series.** For a prime `p`, in a topologically finitely generated
-profinite group every term of the lower `p`-series is open. Each `λ_k` is itself a topologically
-finitely generated profinite group, so its pro-`p` Frattini subgroup is open in it, and that
-subgroup lies in `λ_{k+1}`. -/
+profinite group every term of the lower `p`-series is open. -/
 theorem IsTopologicallyFinitelyGenerated.isOpen_pLowerCentralSeries
     (hG : IsTopologicallyFinitelyGenerated G) (hp : p.Prime) (k : ℕ) :
     IsOpen (pLowerCentralSeries p G k : Set G) := by
