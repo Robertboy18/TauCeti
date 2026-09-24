@@ -220,6 +220,7 @@ theorem proj_lift (f : ∀ U : OpenNormalSubgroup Γ, A →ₐ[R] MonoidAlgebra 
   (rfl)
 
 /-- The lift of a compatible family `f` composed with the projection at `U` is `f U`. -/
+@[simp]
 theorem proj_comp_lift
     (f : ∀ U : OpenNormalSubgroup Γ, A →ₐ[R] MonoidAlgebra R (Γ ⧸ U.toSubgroup))
     (hf : ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V) (a : A),
