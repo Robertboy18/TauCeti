@@ -21,9 +21,6 @@ topological isomorphism for the quotient topology.
 
 * `TauCeti.quotientTorsionContinuousMulEquiv`: the quotient of `A` by its torsion subgroup is
   topologically isomorphic to `M`.
-* `TauCeti.ContinuousMulEquiv.multiplicativeProdUnique`: when the factor `T` is trivial,
-  `Multiplicative (M × T)` is topologically isomorphic to `Multiplicative M`; this is the case of
-  a torsion-free `A`.
 -/
 
 public section
@@ -32,36 +29,6 @@ namespace TauCeti
 
 open CommGroup (torsion)
 open Multiplicative
-
-section ProdUnique
-
-variable (M T : Type*) [AddZeroClass M] [AddZeroClass T] [TopologicalSpace M] [TopologicalSpace T]
-  [Unique T]
-
-/-- Dropping a trivial factor: when `T` has a unique element, `Multiplicative (M × T)` is
-topologically isomorphic to `Multiplicative M`. This is `AddEquiv.prodUnique` as a
-`ContinuousMulEquiv` between the multiplicative type tags; it collapses a decomposition
-`A ≃ₜ* Multiplicative (M × T)` whose torsion factor `T` is trivial. -/
-def ContinuousMulEquiv.multiplicativeProdUnique : Multiplicative (M × T) ≃ₜ* Multiplicative M where
-  toMulEquiv := AddEquiv.toMultiplicative AddEquiv.prodUnique
-  continuous_toFun := (continuous_ofAdd.comp (continuous_fst.comp continuous_toAdd)).congr
-    fun x ↦ by simp [AddEquiv.prodUnique_apply]
-  continuous_invFun := (continuous_ofAdd.comp (continuous_toAdd.prodMk
-    (continuous_const (y := (default : T))))).congr fun v ↦ by simp [AddEquiv.prodUnique_symm_apply]
-
-variable {M T}
-
-@[simp]
-theorem ContinuousMulEquiv.multiplicativeProdUnique_apply (x : Multiplicative (M × T)) :
-    ContinuousMulEquiv.multiplicativeProdUnique M T x = ofAdd x.toAdd.1 :=
-  (rfl)
-
-@[simp]
-theorem ContinuousMulEquiv.multiplicativeProdUnique_symm_apply (v : Multiplicative M) :
-    (ContinuousMulEquiv.multiplicativeProdUnique M T).symm v = ofAdd (v.toAdd, default) :=
-  (rfl)
-
-end ProdUnique
 
 variable {A M T : Type*} [CommGroup A] [AddCommGroup M] [IsAddTorsionFree M] [AddCommGroup T]
   [TopologicalSpace A] [TopologicalSpace M] [TopologicalSpace T]

@@ -13,13 +13,13 @@ import Mathlib.Logic.Equiv.Fintype
 # Uniqueness of elementary divisors with a fixed base
 
 An additive equivalence between finite products of `ZMod (b ^ e i)`, with `b > 1` and positive
-exponents, determines the exponents up to reindexing. In particular, this gives elementary-divisor
-uniqueness for finite abelian `p`-groups.
+exponents, determines the exponents up to reindexing. For a prime `b = p` the exponents are the
+elementary divisors of a finite abelian `p`-group, so this is the uniqueness clause of the
+classification of finite abelian `p`-groups; it also identifies the finite factor of a topologically
+finitely generated abelian pro-`p` group up to reindexing of its cyclic summands.
 
-The proof counts elements killed by `b ^ k`, using
-`IsAddCyclic.card_nsmulAddMonoidHom_ker`. Their number is `b ^ (∑ i, min k (e i))`.
-The second differences of these sums recover the number of factors with each positive exponent.
-Positivity excludes the undetectable trivial factors `ZMod (b ^ 0)`.
+The exponents are required to be positive because a factor `ZMod (b ^ 0)` is trivial and leaves
+the product unchanged.
 
 ## Main results
 
@@ -44,8 +44,8 @@ private theorem card_nsmul_ker_pi_pow {b : ℕ} [NeZero b] {ι : Type*} [Fintype
         (nsmulAddMonoidHom (b ^ k) : ZMod (b ^ e i) →+ ZMod (b ^ e i)).ker) := by
       apply Nat.card_congr
       exact (Equiv.subtypeEquivRight fun x ↦ by
-        change (b ^ k) • x = 0 ↔ ∀ i, (b ^ k) • x i = 0
-        exact funext_iff).trans Equiv.subtypePiEquivPi
+        simp only [AddMonoidHom.mem_ker, nsmulAddMonoidHom_apply, funext_iff, Pi.smul_apply,
+          Pi.zero_apply]).trans Equiv.subtypePiEquivPi
     _ = ∏ i, Nat.card
         (nsmulAddMonoidHom (b ^ k) : ZMod (b ^ e i) →+ ZMod (b ^ e i)).ker := Nat.card_pi
     _ = ∏ i, b ^ min k (e i) := by
@@ -67,8 +67,8 @@ private theorem sum_min_eq_of_pi_pow_addEquiv {b : ℕ} (hb : 1 < b)
   rw [← card_nsmul_ker_pi_pow (b := b) e k, ← card_nsmul_ker_pi_pow (b := b) e' k]
   apply Nat.card_congr
   refine f.toEquiv.subtypeEquiv fun x ↦ ?_
-  change (b ^ k) • x = 0 ↔ (b ^ k) • f x = 0
-  rw [← map_nsmul f, map_eq_zero_iff f f.injective]
+  simp only [AddMonoidHom.mem_ker, nsmulAddMonoidHom_apply, AddEquiv.toEquiv_eq_coe,
+    EquivLike.coe_coe, ← map_nsmul f, map_eq_zero_iff f f.injective]
 
 private theorem sum_min_add_card_fiber {ι : Type*} [Fintype ι] (e : ι → ℕ) (k : ℕ) :
     (∑ i, min (k + 2) (e i)) + (∑ i, min k (e i)) +

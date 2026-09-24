@@ -16,13 +16,14 @@ import Mathlib.LinearAlgebra.Dimension.Constructions
 # Continuous additive maps between `ℤ_[p]`-modules are `ℤ_[p]`-linear
 
 A continuous additive map `f : E →+ F` between topological `ℤ_[p]`-modules is automatically
-`ℤ_[p]`-linear: it commutes with natural-number multiples, and `ℕ` is dense in `ℤ_[p]`.
+`ℤ_[p]`-linear. So the `ℤ_[p]`-module structure of a topological `ℤ_[p]`-module is determined by
+its topological group structure, and continuous additive maps and isomorphisms between such
+modules can be treated as continuous `ℤ_[p]`-linear ones.
 
 This file adapts `Mathlib/Topology/Instances/RealVectorSpace.lean` (Yury Kudryashov) from `ℝ` to
 `ℤ_[p]`: `TauCeti.map_padicInt_smul`, `AddMonoidHom.toPadicIntLinearMap`, and
-`AddEquiv.toPadicIntLinearEquiv` follow `map_real_smul`, `AddMonoidHom.toRealLinearMap`, and
-`AddEquiv.toRealLinearEquiv`, with the density of `ℕ` in `ℤ_[p]` (`PadicInt.denseRange_natCast`)
-replacing the density of `ℚ` in `ℝ` in the same `DenseRange.equalizer` argument.
+`AddEquiv.toPadicIntLinearEquiv` are the `ℤ_[p]` counterparts of `map_real_smul`,
+`AddMonoidHom.toRealLinearMap`, and `AddEquiv.toRealLinearEquiv`.
 
 In particular the rank of a finite free `ℤ_[p]`-module is a topological invariant: a continuous
 additive isomorphism between two such modules preserves `Module.finrank`, and `ℤ_[p] ^ r` and

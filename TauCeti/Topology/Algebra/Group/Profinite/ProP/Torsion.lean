@@ -9,6 +9,7 @@ public import TauCeti.GroupTheory.SpecificGroups.Cyclic.ElementaryDivisors
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.StructureTheorem
 public import TauCeti.Topology.Algebra.Group.Torsion
 import TauCeti.NumberTheory.Padics.Module
+import TauCeti.Topology.Algebra.ContinuousMulEquiv
 
 /-!
 # The torsion subgroup of a topologically finitely generated abelian pro-`p` group
