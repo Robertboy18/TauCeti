@@ -24,16 +24,12 @@ written additively as `TauCeti.gradedPiece p G k`. Each `gr_k(G)` is an abelian 
 degree shifts by one because the series is `0`-based. The `p`-th power induces the operator
 `π : gr_k(G) → gr_{k+1}(G)`. Away from degree zero the operator `π` is additive and commutes with
 the bracket, because the correction terms of the Hall–Petrescu formula land in higher degree; in
-degree zero its defect of additivity is a bracket, and for `p = 2` it is exactly
-`π (x + y) = π x + π y + [x, y]`. A continuous homomorphism induces maps on the graded pieces that
+degree zero its defect of additivity is `(p choose 2) • [y, x]`, which vanishes for odd `p` and is
+the bracket `[x, y]` for `p = 2`. A continuous homomorphism induces maps on the graded pieces that
 are compatible with the bracket and with `π`.
 
-Finiteness of the graded pieces of a topologically finitely generated profinite group is proved
-in `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCentralSeries`.
-
-The proofs all follow one pattern: an identity in `gr_m(G)` is an identity in `G ⧸ λ_{m+1}`
-between classes of elements of `λ_m`, and there the image of `λ_m` is central, so conjugation acts
-trivially on it and the classical commutator identities simplify.
+For a prime `p`, the graded pieces of a topologically finitely generated profinite group are
+finite; this is proved in `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCentralSeries`.
 
 ## Main definitions
 
@@ -51,7 +47,10 @@ trivially on it and the classical commutator identities simplify.
 * `TauCeti.gradedBracket_self`, `TauCeti.gradedBracket_jacobi`: the bracket is alternating and
   satisfies the Jacobi identity.
 * `TauCeti.gradedPow_add_of_one_le`: `π` is additive in every degree `k ≥ 1`.
-* `TauCeti.gradedPow_add_zero_of_two`: for `p = 2`, `π (x + y) = π x + π y + [x, y]` in degree zero.
+* `TauCeti.gradedPow_add_zero`, `TauCeti.gradedPow_add_zero_of_odd`,
+  `TauCeti.gradedPow_add_zero_of_two`: in degree zero
+  `π (x + y) = π x + π y + (p choose 2) • [y, x]`, so `π` is additive for odd `p`, and
+  `π (x + y) = π x + π y + [x, y]` for `p = 2`.
 * `TauCeti.gradedPow_gradedBracket_left`, `TauCeti.gradedPow_gradedBracket_right`:
   `π [x, y] = [π x, y] = [x, π y]` away from degree zero.
 * `TauCeti.gradedMap_gradedBracket`, `TauCeti.gradedMap_gradedPow`: naturality of the bracket and
@@ -158,8 +157,8 @@ theorem commutatorElement_jacobi_mem_pLowerCentralSeries {i j k : ℕ} {a b c : 
 
 variable (p G) in
 /-- **The graded piece** `gr_k(G) = λ_k ⧸ λ_{k+1}` of the lower `p`-series, written additively.
-It is an abelian group killed by `p`, hence a `ZMod p`-module; it is finite when `G` is a
-topologically finitely generated profinite group, and not in general. -/
+It is an abelian group killed by `p`, hence a `ZMod p`-module; for a prime `p` it is finite when
+`G` is a topologically finitely generated profinite group, and not in general. -/
 abbrev gradedPiece (k : ℕ) : Type u :=
   Additive (pLowerCentralSeries p G k ⧸
     (pLowerCentralSeries p G (k + 1)).subgroupOf (pLowerCentralSeries p G k))
@@ -178,6 +177,7 @@ theorem gradedMk_eq_gradedMk_iff {k : ℕ} {x y : pLowerCentralSeries p G k} :
       ((x : G) : G ⧸ pLowerCentralSeries p G (k + 1)) = ((y : G) : G ⧸ _) := by
   rw [gradedMk, gradedMk, Additive.ofMul.apply_eq_iff_eq, QuotientGroup.eq_subgroupOf]
 
+@[simp]
 theorem gradedMk_eq_zero_iff {k : ℕ} {x : pLowerCentralSeries p G k} :
     gradedMk p G k x = 0 ↔ (x : G) ∈ pLowerCentralSeries p G (k + 1) := by
   rw [gradedMk, ofMul_eq_zero, QuotientGroup.eq_one_iff, mem_subgroupOf]
@@ -453,9 +453,10 @@ section Pow
 variable (p G)
 
 /-- **The `p`-power operator** `π : gr_k(G) → gr_{k+1}(G)`, induced by `x ↦ x ^ p`. It is
-additive in every degree `k ≥ 1` (`TauCeti.gradedPow_add_of_one_le`) but not in degree zero,
-where for `p = 2` its defect is the bracket (`TauCeti.gradedPow_add_zero_of_two`). Its defining
-equation is `TauCeti.gradedPow_gradedMk`. -/
+additive in every degree `k ≥ 1` (`TauCeti.gradedPow_add_of_one_le`); in degree zero its defect of
+additivity is `(p choose 2) • [y, x]` (`TauCeti.gradedPow_add_zero`), which vanishes for odd `p`
+(`TauCeti.gradedPow_add_zero_of_odd`) and is the bracket `[x, y]` for `p = 2`
+(`TauCeti.gradedPow_add_zero_of_two`). Its defining equation is `TauCeti.gradedPow_gradedMk`. -/
 def gradedPow (k : ℕ) : gradedPiece p G k → gradedPiece p G (k + 1) := fun x =>
   Additive.ofMul (Quotient.map'
     (fun y : pLowerCentralSeries p G k =>
@@ -481,8 +482,15 @@ theorem gradedPow_gradedMk {k : ℕ} (x : pLowerCentralSeries p G k) :
   rw [gradedPow, gradedMk, toMul_ofMul, gradedMk]
   rfl
 
+@[simp]
+theorem gradedPow_zero (k : ℕ) : gradedPow p G k 0 = 0 := by
+  rw [← gradedMk_one k, gradedPow_gradedMk, gradedMk_eq_zero_iff, coe_mk, OneMemClass.coe_one,
+    one_pow]
+  exact one_mem _
+
 /-- **`π` is additive above degree zero**, for every `p`: for `k ≥ 1` the image of `λ_k` in
 `G ⧸ λ_{k+2}` is abelian, because `⁅λ_k, λ_k⁆ ≤ λ_{2k+1} ≤ λ_{k+2}`. -/
+@[simp]
 theorem gradedPow_add_of_one_le {k : ℕ} (hk : 1 ≤ k) (x y : gradedPiece p G k) :
     gradedPow p G k (x + y) = gradedPow p G k x + gradedPow p G k y := by
   obtain ⟨x, rfl⟩ := gradedMk_surjective k x
@@ -493,43 +501,47 @@ theorem gradedPow_add_of_one_le {k : ℕ} (hk : 1 ≤ k) (x y : gradedPiece p G 
   exact (QuotientGroup.commute_mk_iff.mpr (pLowerCentralSeries_antitone (by omega)
     (commutator_mem_pLowerCentralSeries x.2 y.2))).mul_pow p
 
+/-- **The defect of additivity in degree zero**: `π (x + y) = π x + π y + (p choose 2) • [y, x]`
+in `gr_1(G)`. This is the binomial formula `(x * y) ^ p = x ^ p * y ^ p * ⁅y, x⁆ ^ (p choose 2)` of
+nilpotency class two, read in `G ⧸ λ_2`, where the image of `λ_1` is central. -/
+theorem gradedPow_add_zero (x y : gradedPiece p G 0) :
+    gradedPow p G 0 (x + y) =
+      gradedPow p G 0 x + gradedPow p G 0 y + p.choose 2 • gradedBracket p G 0 0 y x := by
+  obtain ⟨x, rfl⟩ := gradedMk_surjective 0 x
+  obtain ⟨y, rfl⟩ := gradedMk_surjective 0 y
+  rw [← gradedMk_mul, gradedPow_gradedMk, gradedPow_gradedMk, gradedPow_gradedMk,
+    gradedBracket_gradedMk, ← gradedMk_pow, ← gradedMk_mul, ← gradedMk_mul,
+    gradedMk_eq_gradedMk_iff]
+  simp only [coe_mul, coe_pow, ← QuotientGroup.mk'_apply, map_mul, map_pow, map_commutatorElement]
+  exact Commute.mul_pow_eq_pow_mul_pow_mul_commutatorElement_pow_choose_two
+    (commute_mk_of_mem_pLowerCentralSeries (commutator_mem_pLowerCentralSeries_succ y.2 x) x)
+    (commute_mk_of_mem_pLowerCentralSeries (commutator_mem_pLowerCentralSeries_succ y.2 x) y) p
+
+/-- **`π` is additive in degree zero for odd `p`**: the defect `(p choose 2) • [y, x]` is a
+multiple of `p • [y, x] = 0`. -/
+@[simp]
+theorem gradedPow_add_zero_of_odd (hp : Odd p) (x y : gradedPiece p G 0) :
+    gradedPow p G 0 (x + y) = gradedPow p G 0 x + gradedPow p G 0 y := by
+  rw [gradedPow_add_zero, Nat.choose_two_right,
+    Nat.mul_div_assoc _ (Nat.Odd.sub_odd hp odd_one).two_dvd, mul_nsmul,
+    nsmul_gradedPiece_eq_zero, nsmul_zero, add_zero]
+
 /-- **The dyadic defect of additivity in degree zero.** For `p = 2`,
-`π (x + y) = π x + π y + [x, y]` in `gr_1(G)`: this is the `binom(2, 2)` term of the Hall–Petrescu
-expansion, and it is why `gr(G)` is not a Lie algebra over `𝔽₂[π]`. -/
+`π (x + y) = π x + π y + [x, y]` in `gr_1(G)`: the defect is the `binom(2, 2)` term of the
+Hall–Petrescu formula itself. Whenever some bracket `[x, y]` in degree zero is nonzero, `π` is
+therefore not additive on `gr_0(G)`, and `gr(G)` is not a module over `𝔽₂[π]`. -/
+@[simp]
 theorem gradedPow_add_zero_of_two (hp : p = 2) (x y : gradedPiece p G 0) :
     gradedPow p G 0 (x + y) =
       gradedPow p G 0 x + gradedPow p G 0 y + gradedBracket p G 0 0 x y := by
   subst hp
-  obtain ⟨x, rfl⟩ := gradedMk_surjective 0 x
-  obtain ⟨y, rfl⟩ := gradedMk_surjective 0 y
-  -- Since `gr_1(G)` is killed by `2`, `[x, y] = -[x, y] = [y, x]`.
-  have hswap : gradedBracket 2 G 0 0 (gradedMk 2 G 0 x) (gradedMk 2 G 0 y) =
-      gradedBracket 2 G 0 0 (gradedMk 2 G 0 y) (gradedMk 2 G 0 x) := by
-    have h := gradedCast_gradedBracket_swap (gradedMk 2 G 0 x) (gradedMk 2 G 0 y)
-    rw [gradedCast_rfl] at h
-    rw [h]
-    exact eq_neg_iff_add_eq_zero.mpr ((two_nsmul _).symm.trans (nsmul_gradedPiece_eq_zero _))
-  rw [hswap, ← gradedMk_mul, gradedPow_gradedMk, gradedPow_gradedMk, gradedPow_gradedMk,
-    gradedBracket_gradedMk, ← gradedMk_mul, ← gradedMk_mul, gradedMk_eq_gradedMk_iff]
-  simp only [coe_mul, QuotientGroup.mk_mul, QuotientGroup.mk_pow]
-  -- In `G ⧸ λ_1`, the class `c` of `⁅y, x⁆` is central and `y * x = c * x * y`.
-  set c : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1) :=
-    (QuotientGroup.mk ⁅(y : G), (x : G)⁆ : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) with hc
-  have hcen : ∀ g, Commute g c := fun g => by
-    obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective g
-    exact commute_mk_of_mem_pLowerCentralSeries (commutator_mem_pLowerCentralSeries_succ y.2 x) g
-  have hyx : ((y : G) : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) * (x : G) =
-      c * (x : G) * (y : G) := by
-    rw [hc, commutatorElement_def]; simp only [QuotientGroup.mk_mul, QuotientGroup.mk_inv]; group
-  calc (((x : G) : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) * (y : G)) ^ 2
-      = (x : G) * (((y : G) : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) * (x : G)) * (y : G) := by
-        simp only [sq, mul_assoc]
-    _ = (x : G) * (c * (x : G) * (y : G)) * (y : G) := by rw [hyx]
-    _ = c * (((x : G) : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) * (x : G) * (y : G) *
-          (y : G)) := by
-        rw [← mul_assoc, ← mul_assoc, (hcen _).eq]; group
-    _ = ((x : G) : G ⧸ pLowerCentralSeries 2 G (0 + 1 + 1)) ^ 2 * ((y : G) : G ⧸ _) ^ 2 * c := by
-        rw [(hcen _).eq]; simp only [sq, mul_assoc]
+  rw [gradedPow_add_zero, Nat.choose_self, one_nsmul]
+  congr 1
+  -- Since `gr_1(G)` is killed by `2`, `[y, x] = -[x, y] = [x, y]`.
+  have h := gradedCast_gradedBracket_swap x y
+  rw [gradedCast_rfl] at h
+  rw [h, neg_eq_iff_add_eq_zero]
+  exact (two_nsmul _).symm.trans (nsmul_gradedPiece_eq_zero _)
 
 /-- **`π` against the bracket on the left**, away from degree zero: `π [x, y] = [π x, y]` for
 `x ∈ gr_j(G)` with `j ≥ 1`. The correction term `⁅x, ⁅x, y⁆⁆` has degree `2j + k + 2`, which is
