@@ -31,10 +31,11 @@ a pro-`p` group.
 * `Subgroup.pLowerCentralSeries_succ_le_iff`: the successor term is the least subgroup containing
   the `p`-th powers of the current term and its commutators with `S`.
 * `Subgroup.pLowerCentralSeries_map`: the series is natural for group homomorphisms.
+* `Subgroup.pLowerCentralSeries_mono`: the series is monotone in the subgroup.
 * `Subgroup.normalizer_le_normalizer_pLowerCentralSeries`: whatever normalises `S` normalises every
   term; in particular the terms are normal when `S` is, and characteristic when `S` is.
 * `IsPGroup.exists_pLowerCentralSeries_eq_bot`: the series of a finite `p`-subgroup reaches `⊥`.
-* `TauCeti.exists_pLowerCentral_filtration_of_isPGroup`: the packaged filtration of a finite
+* `Subgroup.exists_pLowerCentral_filtration_of_isPGroup`: the packaged filtration of a finite
   normal `p`-subgroup by normal subgroups with elementary abelian factors.
 
 ## References
@@ -66,6 +67,7 @@ variable (p : ℕ) (S : Subgroup G)
 @[simp]
 theorem pLowerCentralSeries_zero : S.pLowerCentralSeries p 0 = S := (rfl)
 
+/-- The recursion defining the successor term of the lower `p`-central series. -/
 theorem pLowerCentralSeries_succ (n : ℕ) :
     S.pLowerCentralSeries p (n + 1) =
       closure ((fun x : G ↦ x ^ p) '' (S.pLowerCentralSeries p n : Set G)) ⊔
@@ -92,8 +94,18 @@ theorem pLowerCentralSeries_succ_le_iff {n : ℕ} {H : Subgroup G} :
   simp only [pLowerCentralSeries_succ, sup_le_iff, closure_le, commutator_le, Set.subset_def,
     Set.forall_mem_image, SetLike.mem_coe]
 
+/-- The lower `p`-central series is monotone in the subgroup: `S ≤ T` gives `λₙ(S) ≤ λₙ(T)`. -/
+theorem pLowerCentralSeries_mono (n : ℕ) :
+    Monotone fun S : Subgroup G ↦ S.pLowerCentralSeries p n := by
+  induction n with
+  | zero => exact fun _ _ h ↦ h
+  | succ n ih =>
+    intro S T h
+    exact sup_le_sup (closure_mono (Set.image_mono (ih h))) (commutator_mono (ih h) h)
+
 /-- The lower `p`-central series is natural: a homomorphism carries the series of `S` onto the
 series of the image of `S`. -/
+@[simp]
 theorem pLowerCentralSeries_map {G' : Type*} [Group G'] (f : G →* G') (n : ℕ) :
     (S.pLowerCentralSeries p n).map f = (S.map f).pLowerCentralSeries p n := by
   induction n with
@@ -110,18 +122,22 @@ theorem normalizer_le_normalizer_pLowerCentralSeries (n : ℕ) :
   rw [mem_normalizer_iff_map_conj_eq] at hg ⊢
   rw [pLowerCentralSeries_map, hg]
 
+/-- `S` normalises every term of its own lower `p`-central series. -/
 theorem self_le_normalizer_pLowerCentralSeries (n : ℕ) :
     S ≤ normalizer (S.pLowerCentralSeries p n : Set G) :=
   le_normalizer.trans (S.normalizer_le_normalizer_pLowerCentralSeries p n)
 
+/-- The lower `p`-central series is descending: `λₙ₊₁ ≤ λₙ`. -/
 theorem pLowerCentralSeries_succ_le (n : ℕ) :
     S.pLowerCentralSeries p (n + 1) ≤ S.pLowerCentralSeries p n :=
   sup_le ((closure_le _).2 <| by rintro _ ⟨x, hx, rfl⟩; exact pow_mem hx p)
     (le_normalizer_iff_commutator_le_left.1 (S.self_le_normalizer_pLowerCentralSeries p n))
 
+/-- The lower `p`-central series is antitone in the index. -/
 theorem pLowerCentralSeries_antitone : Antitone (S.pLowerCentralSeries p) :=
   antitone_nat_of_succ_le (S.pLowerCentralSeries_succ_le p)
 
+/-- Every term of the lower `p`-central series of `S` is contained in `S`. -/
 theorem pLowerCentralSeries_le (n : ℕ) : S.pLowerCentralSeries p n ≤ S := by
   simpa using S.pLowerCentralSeries_antitone p (Nat.zero_le n)
 
@@ -130,11 +146,13 @@ theorem commutator_pLowerCentralSeries_le_succ (n : ℕ) :
     ⁅S.pLowerCentralSeries p n, S.pLowerCentralSeries p n⁆ ≤ S.pLowerCentralSeries p (n + 1) :=
   (commutator_mono le_rfl (S.pLowerCentralSeries_le p n)).trans le_sup_right
 
+/-- The terms of the lower `p`-central series of a normal subgroup are normal. -/
 instance pLowerCentralSeries_normal [S.Normal] (n : ℕ) : (S.pLowerCentralSeries p n).Normal := by
   have h := S.normalizer_le_normalizer_pLowerCentralSeries p n
   rw [normalizer_eq_top] at h
   exact normalizer_eq_top_iff.1 (top_le_iff.1 h)
 
+/-- The terms of the lower `p`-central series of a characteristic subgroup are characteristic. -/
 instance pLowerCentralSeries_characteristic [S.Characteristic] (n : ℕ) :
     (S.pLowerCentralSeries p n).Characteristic :=
   characteristic_iff_map_eq.2 fun φ ↦ by
@@ -165,8 +183,8 @@ universe u
 
 variable {p : ℕ} [hp : Fact p.Prime]
 
-/-- The induction on the order of the group behind `IsPGroup.exists_pLowerCentralSeries_eq_bot`:
-quotient by a central subgroup of order `p` and lift the vanishing back one step. -/
+/-- The lower `p`-central series of a finite `p`-group `G` reaches `⊥`, stated with the order of
+`G` as an explicit parameter so that it can be proved by strong induction on that order. -/
 private theorem exists_pLowerCentralSeries_top_eq_bot_aux (m : ℕ) :
     ∀ (G : Type u) [Group G] [Finite G], Nat.card G = m → IsPGroup p G →
       ∃ n, (⊤ : Subgroup G).pLowerCentralSeries p n = ⊥ := by
@@ -222,7 +240,7 @@ theorem exists_pLowerCentralSeries_eq_bot {S : Subgroup G} [Finite S] (hS : IsPG
 
 end IsPGroup
 
-namespace TauCeti
+namespace Subgroup
 
 /-- **The lower `p`-central filtration of a finite normal `p`-subgroup.** A finite normal
 `p`-subgroup `N` of a group `E` carries a finite descending chain of subgroups of `E`, starting
@@ -240,4 +258,4 @@ theorem exists_pLowerCentral_filtration_of_isPGroup {p : ℕ} [Fact p.Prime] {E 
     fun _ ↦ inferInstance, fun _ _ hx ↦ N.pow_mem_pLowerCentralSeries_succ p hx,
     fun _ _ hx _ hy ↦ N.commutator_mem_pLowerCentralSeries_succ p hx hy⟩
 
-end TauCeti
+end Subgroup
