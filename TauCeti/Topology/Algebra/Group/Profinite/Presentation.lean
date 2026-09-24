@@ -85,11 +85,6 @@ noncomputable def of {X : Type u} (rels : Set (freeProfiniteGroup X)) (x : X) :
 
 variable {X : Type u} {rels : Set (freeProfiniteGroup X)}
 
-/-- The canonical quotient map sends an element to its class. Not a simp lemma: `mk rels x` is
-the simp normal form of a class, so that `lift_mk` and its relatives fire. -/
-theorem mk_apply (x : freeProfiniteGroup X) : mk rels x = (x : presentedProfiniteGroup X rels) :=
-  (rfl)
-
 /-- The quotient map kills every relator. -/
 @[simp]
 theorem mk_relator (r : freeProfiniteGroup X) (hr : r ∈ rels) : mk rels r = 1 := by
@@ -351,11 +346,6 @@ theorem isProP (p : ℕ) (X : Type u) (rels : Set (freeProP p X)) :
   (isProP_freeProP p X).quotient ((Subgroup.normalClosure rels).topologicalClosure)
 
 variable {p : ℕ} {X : Type u} {rels : Set (freeProP p X)}
-
-/-- The canonical quotient map sends an element to its class. Not a simp lemma: `mk p rels x` is
-the simp normal form of a class, so that `lift_mk` and its relatives fire. -/
-theorem mk_apply (x : freeProP p X) : mk p rels x = (x : presentedProP p X rels) :=
-  (rfl)
 
 /-- The quotient map kills every relator. -/
 @[simp]
