@@ -67,9 +67,10 @@ a profinite group computes with.
   continuous cohomology.**
 * `GroupExtension.contCohomologyClass`: the class of a profinite extension with compact kernel,
   in the root namespace so that it is available as `S.contCohomologyClass`.
-* `TauCeti.ProfiniteGroupExtension`: a profinite extension of `G` by `M` inducing the given
-  action, bundled with its total group, and `TauCeti.ProfiniteGroupExtension.ofFactorSet`, the
-  twisted product of a continuous factor set when `G` and `M` are profinite.
+* `TauCeti.ProfiniteGroupExtension`: an extension of `G` by `M` with profinite total group,
+  continuous inclusion and projection, inducing the given action, bundled with its total group,
+  and `TauCeti.ProfiniteGroupExtension.ofFactorSet`, the twisted product of a continuous factor
+  set when `G` and `M` are profinite.
 * `TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv`: **`H²(G, M)` classifies profinite
   extensions of `G` by `M` inducing the given action up to continuous equivalence**, as a
   bijection of sets.
@@ -474,11 +475,15 @@ end GroupExtension
 /-! ### The bijection -/
 
 variable (G M) in
-/-- **A profinite extension of `G` by `M` inducing the given action**: a profinite group `E`
-together with an extension `1 → M → E → G → 1` of topological groups — continuous inclusion,
-continuous projection — whose conjugation action on `M` is the given one. The total group is taken
-in the universe of `M × G`, where the twisted products of the factor sets live; up to continuous
-equivalence every profinite extension of `G` by `M` is one of those, and the classification
+/-- **An extension of `G` by `M` with profinite total group inducing the given action**: a
+profinite group `E` together with an extension `1 → M → E → G → 1` of abstract groups whose
+inclusion and projection are continuous and whose conjugation action on `M` is the given one.
+Only the total group is required to be profinite; `G` and `M` carry just their topologies and the
+action. The classification below adds what it needs: for the class and the equivalence criterion,
+`G` Hausdorff with continuous multiplication acting continuously on a compact `M`; for realizing
+every class, `G` and `M` both profinite. The total group is taken in the universe of `M × G`,
+where the twisted products of the factor sets live; under those hypotheses every such extension
+is, up to continuous equivalence, one of those, and the classification
 `TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv` is stated at this universe for that
 reason. -/
 structure ProfiniteGroupExtension where
