@@ -23,9 +23,11 @@ subgroup is found to be a Hausdorff topological group by instance search alone.
 The **closed normal closure** of a set `s`, the topological closure of `Subgroup.normalClosure s`,
 is the least closed normal subgroup containing `s`
 (`Subgroup.topologicalClosure_normalClosure_le_iff`), and it is `N` itself when `s` is the carrier
-of a closed normal subgroup `N` (`Subgroup.topologicalClosure_normalClosure_eq_self`). This is the
-fact behind the universal property of a group presented by generators and relators inside a
-category of topological groups.
+of a closed normal subgroup `N` (`Subgroup.topologicalClosure_normalClosure_eq_self`), for
+instance the kernel of a continuous homomorphism to a `T1` group
+(`ContinuousMonoidHom.topologicalClosure_normalClosure_ker`). This is the fact behind the
+universal property of a group presented by generators and relators inside a category of
+topological groups.
 
 A continuous homomorphism carries the topological closure of a subgroup into the topological
 closure of its image, and a closed subgroup containing the commutators `⁅A, B⁆` also contains the
@@ -44,6 +46,8 @@ series of a profinite group.
   normal subgroup containing the set.
 * `Subgroup.topologicalClosure_normalClosure_eq_self`: the closed normal closure of a closed normal
   subgroup is that subgroup.
+* `ContinuousMonoidHom.topologicalClosure_normalClosure_ker`: the kernel of a continuous
+  homomorphism to a `T1` group is its own closed normal closure.
 * `Subgroup.toAddSubgroup_topologicalClosure`: converting to an additive subgroup commutes with
   topological closure.
 * `MonoidHom.map_topologicalClosure_le`: a continuous homomorphism maps the topological closure of
@@ -89,6 +93,7 @@ instance instIsClosedTopologicalClosure (s : Subgroup G) :
 
 /-- A closed normal subgroup contains the closed normal closure of `s` exactly when it contains
 `s`: the closed normal closure is the least closed normal subgroup containing `s`. -/
+@[simp]
 theorem topologicalClosure_normalClosure_le_iff {s : Set G} {N : Subgroup G} [N.Normal]
     (hN : IsClosed (N : Set G)) : (normalClosure s).topologicalClosure ≤ N ↔ s ⊆ N :=
   ⟨fun h ↦ subset_normalClosure.trans ((normalClosure s).le_topologicalClosure.trans h),
@@ -99,6 +104,13 @@ theorem topologicalClosure_normalClosure_eq_self (N : Subgroup G) [N.Normal]
     (hN : IsClosed (N : Set G)) : (normalClosure (N : Set G)).topologicalClosure = N :=
   le_antisymm ((topologicalClosure_normalClosure_le_iff hN).2 subset_rfl)
     (le_normalClosure.trans (normalClosure (N : Set G)).le_topologicalClosure)
+
+/-- The kernel of a continuous homomorphism to a `T1` group is a closed normal subgroup, so it is
+its own closed normal closure. -/
+theorem _root_.ContinuousMonoidHom.topologicalClosure_normalClosure_ker {H : Type*} [Group H]
+    [TopologicalSpace H] [T1Space H] (φ : G →ₜ* H) :
+    (normalClosure ((φ : G →* H).ker : Set G)).topologicalClosure = (φ : G →* H).ker :=
+  topologicalClosure_normalClosure_eq_self _ (isClosed_singleton.preimage (map_continuous φ))
 
 /-- Converting a subgroup to an additive subgroup commutes with topological closure. -/
 @[simp]

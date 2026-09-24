@@ -113,18 +113,18 @@ theorem mk_of (x : X) : mk rels (freeProfiniteGroup.of x) = of rels x :=
 theorem dense_closure_range_of :
     Dense ((Subgroup.closure (Set.range (of rels)) : Subgroup (presentedProfiniteGroup X rels)) :
       Set (presentedProfiniteGroup X rels)) := by
-  have h : Set.range (of rels) =
-      mk rels '' Set.range (freeProfiniteGroup.of : X → freeProfiniteGroup X) := by
-    rw [← Set.range_comp]
-    rfl
-  have hmap : Subgroup.closure
-      (mk rels '' Set.range (freeProfiniteGroup.of : X → freeProfiniteGroup X)) =
-        (Subgroup.closure (Set.range (freeProfiniteGroup.of : X → freeProfiniteGroup X))).map
-          (mk rels).toMonoidHom :=
-    (MonoidHom.map_closure _ _).symm
-  rw [h, hmap, Subgroup.coe_map]
-  exact (mk_surjective rels).denseRange.dense_image (map_continuous (mk rels))
-    (freeProfiniteGroup.dense_closure_range_of X)
+  -- The generators are the image of the free generators under the continuous surjection `mk`.
+  have hfree : (Subgroup.closure
+      (Set.range (freeProfiniteGroup.of : X → freeProfiniteGroup X))).topologicalClosure = ⊤ := by
+    rw [← SetLike.coe_set_eq, Subgroup.topologicalClosure_coe, Subgroup.coe_top,
+      ← dense_iff_closure_eq]
+    exact freeProfiniteGroup.dense_closure_range_of X
+  have h := topologicalClosure_closure_image_eq_top hfree
+    (f := (mk rels : freeProfiniteGroup X →* presentedProfiniteGroup X rels))
+    (map_continuous (mk rels)) (mk_surjective rels).denseRange
+  rw [← Set.range_comp, ← SetLike.coe_set_eq, Subgroup.topologicalClosure_coe, Subgroup.coe_top,
+    ← dense_iff_closure_eq] at h
+  exact h
 
 /-- A continuous homomorphism from the free profinite group that kills the relators factors through
 the presented profinite group. -/
@@ -273,15 +273,6 @@ section OfSurjective
 
 variable {G : Type v} [Group G] [TopologicalSpace G] [T2Space G]
 
-/-- The kernel of a continuous homomorphism to a Hausdorff group is closed and normal, so it is
-its own closed normal closure. -/
-private theorem topologicalClosure_normalClosure_ker (φ : freeProfiniteGroup X →ₜ* G) :
-    (Subgroup.normalClosure
-      ((φ : freeProfiniteGroup X →* G).ker : Set (freeProfiniteGroup X))).topologicalClosure =
-      (φ : freeProfiniteGroup X →* G).ker :=
-  Subgroup.topologicalClosure_normalClosure_eq_self _
-    (isClosed_singleton.preimage (map_continuous φ))
-
 /-- A Hausdorff group that is a continuous image of the free profinite group on `X` is presented
 on `X`, with the kernel as its set of relators. Algebraically this is the first isomorphism
 theorem, `QuotientGroup.liftEquiv`. -/
@@ -289,18 +280,18 @@ noncomputable def equivOfSurjective (φ : freeProfiniteGroup X →ₜ* G)
     (hφ : Function.Surjective φ) :
     presentedProfiniteGroup X ((φ : freeProfiniteGroup X →* G).ker : Set (freeProfiniteGroup X))
       ≃ₜ* G :=
-  have hcont : Continuous (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ)) :=
+  have hcont : Continuous (QuotientGroup.liftEquiv _ hφ φ.topologicalClosure_normalClosure_ker) :=
     (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr (map_continuous φ)
-  ContinuousMulEquiv.mk (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ))
+  ContinuousMulEquiv.mk (QuotientGroup.liftEquiv _ hφ φ.topologicalClosure_normalClosure_ker)
     hcont (hcont.continuous_symm_of_equiv_compact_to_t2
-      (f := (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ)).toEquiv))
+      (f := (QuotientGroup.liftEquiv _ hφ φ.topologicalClosure_normalClosure_ker).toEquiv))
 
 /-- The presentation isomorphism of a continuous image sends the class of an element to its
 image. -/
 @[simp]
 theorem equivOfSurjective_mk (φ : freeProfiniteGroup X →ₜ* G) (hφ : Function.Surjective φ)
     (x : freeProfiniteGroup X) : equivOfSurjective φ hφ (mk _ x) = φ x :=
-  QuotientGroup.liftEquiv_mk _ hφ (topologicalClosure_normalClosure_ker φ) x
+  QuotientGroup.liftEquiv_mk _ hφ φ.topologicalClosure_normalClosure_ker x
 
 /-- The presentation isomorphism of a continuous image matches the generators. -/
 @[simp]
@@ -369,25 +360,14 @@ theorem mk_of (x : X) : mk p rels (freeProP.of x) = of p rels x :=
 theorem dense_closure_range_of :
     Dense ((Subgroup.closure (Set.range (of p rels)) : Subgroup (presentedProP p X rels)) :
       Set (presentedProP p X rels)) := by
-  -- The generators are the image of the free profinite generators under the continuous
-  -- surjection `freeProfiniteGroup X → freeProP p X → presentedProP p X rels`.
-  let q : freeProfiniteGroup X →ₜ* presentedProP p X rels :=
-    (mk p rels).comp (freeProP.fromFreeProfiniteGroup p X)
-  have hq : Function.Surjective q :=
-    (mk_surjective p rels).comp freeProP.fromFreeProfiniteGroup_surjective
-  have h : Set.range (of p rels) =
-      q '' Set.range (freeProfiniteGroup.of : X → freeProfiniteGroup X) := by
-    rw [← Set.range_comp]
-    congr 1
-    funext x
-    simp only [q, Function.comp_apply, ContinuousMonoidHom.coe_comp,
-      freeProP.fromFreeProfiniteGroup_of, mk_of]
-  have hmap : Subgroup.closure (q '' Set.range (freeProfiniteGroup.of : X → freeProfiniteGroup X)) =
-      (Subgroup.closure (Set.range (freeProfiniteGroup.of : X → freeProfiniteGroup X))).map
-        q.toMonoidHom :=
-    (MonoidHom.map_closure _ _).symm
-  rw [h, hmap, Subgroup.coe_map]
-  exact hq.denseRange.dense_image (map_continuous q) (freeProfiniteGroup.dense_closure_range_of X)
+  -- The generators are the image of the free generators under the continuous surjection `mk`.
+  have h := topologicalClosure_closure_image_eq_top
+    (freeProP.topologicalClosure_closure_range_of_eq_top p X)
+    (f := (mk p rels : freeProP p X →* presentedProP p X rels))
+    (map_continuous (mk p rels)) (mk_surjective p rels).denseRange
+  rw [← Set.range_comp, ← SetLike.coe_set_eq, Subgroup.topologicalClosure_coe, Subgroup.coe_top,
+    ← dense_iff_closure_eq] at h
+  exact h
 
 /-- A pro-`p` group presented on a finite type is topologically finitely generated. -/
 theorem isTopologicallyFinitelyGenerated [Finite X] :
@@ -533,31 +513,23 @@ section OfSurjective
 
 variable {G : Type v} [Group G] [TopologicalSpace G] [T2Space G]
 
-/-- The kernel of a continuous homomorphism to a Hausdorff group is closed and normal, so it is
-its own closed normal closure. -/
-private theorem topologicalClosure_normalClosure_ker (φ : freeProP p X →ₜ* G) :
-    (Subgroup.normalClosure ((φ : freeProP p X →* G).ker : Set (freeProP p X))).topologicalClosure
-      = (φ : freeProP p X →* G).ker :=
-  Subgroup.topologicalClosure_normalClosure_eq_self _
-    (isClosed_singleton.preimage (map_continuous φ))
-
 /-- A Hausdorff group that is a continuous image of the free pro-`p` group on `X` is presented on
 `X`, with the kernel as its set of relators. Algebraically this is the first isomorphism theorem,
 `QuotientGroup.liftEquiv`. -/
 noncomputable def equivOfSurjective (φ : freeProP p X →ₜ* G) (hφ : Function.Surjective φ) :
     presentedProP p X ((φ : freeProP p X →* G).ker : Set (freeProP p X)) ≃ₜ* G :=
-  have hcont : Continuous (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ)) :=
+  have hcont : Continuous (QuotientGroup.liftEquiv _ hφ φ.topologicalClosure_normalClosure_ker) :=
     (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr (map_continuous φ)
-  ContinuousMulEquiv.mk (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ))
+  ContinuousMulEquiv.mk (QuotientGroup.liftEquiv _ hφ φ.topologicalClosure_normalClosure_ker)
     hcont (hcont.continuous_symm_of_equiv_compact_to_t2
-      (f := (QuotientGroup.liftEquiv _ hφ (topologicalClosure_normalClosure_ker φ)).toEquiv))
+      (f := (QuotientGroup.liftEquiv _ hφ φ.topologicalClosure_normalClosure_ker).toEquiv))
 
 /-- The presentation isomorphism of a continuous image sends the class of an element to its
 image. -/
 @[simp]
 theorem equivOfSurjective_mk (φ : freeProP p X →ₜ* G) (hφ : Function.Surjective φ)
     (x : freeProP p X) : equivOfSurjective φ hφ (mk p _ x) = φ x :=
-  QuotientGroup.liftEquiv_mk _ hφ (topologicalClosure_normalClosure_ker φ) x
+  QuotientGroup.liftEquiv_mk _ hφ φ.topologicalClosure_normalClosure_ker x
 
 /-- The presentation isomorphism of a continuous image matches the generators. -/
 @[simp]
