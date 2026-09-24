@@ -7,7 +7,7 @@ module
 
 public import TauCeti.GroupTheory.PLowerCentralSeries
 public import TauCeti.GroupTheory.QuotientGroup.Map
-public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Basic
+public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.ElementaryAbelian
 
 /-!
 # Finite embedding problems with `p`-group kernel
@@ -75,27 +75,12 @@ universe u
 
 variable (p : ℕ) (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
-/-- **Solvability with elementary abelian kernel.** Every finite embedding problem for `G`, with
-groups in the universe of `G`, whose kernel `ker α` is elementary abelian, that is killed by `p` and
-commutative, has a solution. -/
-def HasElementaryAbelianSolutions : Prop :=
-  ∀ P : FiniteEmbeddingProblem.{u, u, u} G, (∀ x ∈ P.α.ker, x ^ p = 1) →
-    (∀ x ∈ P.α.ker, ∀ y ∈ P.α.ker, x * y = y * x) → ∃ β : G →* P.E, P.IsSolution β
-
 /-- **Solvability with `p`-group kernel.** Every finite embedding problem for `G`, with groups in
 the universe of `G`, whose kernel `ker α` is a `p`-group has a solution. -/
 def HasPGroupSolutions : Prop :=
   ∀ P : FiniteEmbeddingProblem.{u, u, u} G, IsPGroup p P.α.ker → ∃ β : G →* P.E, P.IsSolution β
 
 variable {p G}
-
-/-- The defining property of `HasElementaryAbelianSolutions`, as a lemma usable outside this
-module. -/
-theorem hasElementaryAbelianSolutions_iff :
-    HasElementaryAbelianSolutions p G ↔
-      ∀ P : FiniteEmbeddingProblem.{u, u, u} G, (∀ x ∈ P.α.ker, x ^ p = 1) →
-        (∀ x ∈ P.α.ker, ∀ y ∈ P.α.ker, x * y = y * x) → ∃ β : G →* P.E, P.IsSolution β :=
-  Iff.rfl
 
 /-- The defining property of `HasPGroupSolutions`, as a lemma usable outside this module. -/
 theorem hasPGroupSolutions_iff :
@@ -107,7 +92,7 @@ theorem hasPGroupSolutions_iff :
 /-- Solvability with `p`-group kernel gives solvability with elementary abelian kernel: a group
 killed by `p` is a `p`-group. -/
 theorem HasPGroupSolutions.hasElementaryAbelianSolutions (h : HasPGroupSolutions p G) :
-    HasElementaryAbelianSolutions p G := fun P hpow _ ↦
+    HasElementaryAbelianSolutions p G := hasElementaryAbelianSolutions_iff.mpr fun P hpow _ ↦
   h P fun x ↦ ⟨1, Subtype.ext <| by simpa using hpow x x.2⟩
 
 /-- **Lifting through an elementary abelian kernel.** If every finite embedding problem for `G`
@@ -128,7 +113,7 @@ theorem HasElementaryAbelianSolutions.exists_comp_eq (h : HasElementaryAbelianSo
     intro x hx y hy
     rw [FiniteEmbeddingProblem.ker_ofSurjective_α, mem_subgroupOf] at hx hy
     exact Subtype.ext <| by simpa using hcomm x hx y hy
-  obtain ⟨β', hβ'⟩ := h _ hpow' hcomm'
+  obtain ⟨β', hβ'⟩ := hasElementaryAbelianSolutions_iff.mp h _ hpow' hcomm'
   exact ⟨_, hβ'.isOpen_ker_subtype_comp, hβ'.comp_subtype_comp⟩
 
 /-- Under `HasElementaryAbelianSolutions p G`, every finite embedding problem `P` has, for every
