@@ -145,12 +145,14 @@ theorem coe_ofSurjective_π_apply (g : G) : ((ofSurjective φ hφ β hβ).π g :
   β.coe_rangeRestrict g
 
 /-- The kernel of the embedding problem cut out by `φ` and `β` is the kernel of `φ`. -/
+@[simp]
 theorem ker_ofSurjective_α :
     (ofSurjective φ hφ β hβ).α.ker = φ.ker.subgroupOf (β.range.comap φ) :=
   (MonoidHom.ker_codRestrict _ _ _).trans (MonoidHom.ker_domRestrict _ _)
 
 /-- A solution of the embedding problem cut out by `φ` and `β` is a lift of `β` through `φ` with
-open kernel. -/
+open kernel. This is a `rw` lemma rather than a `simp` lemma: the `simp` lemma `isSolution_iff`
+already rewrites its left-hand side, so it is not in simp normal form. -/
 theorem isSolution_ofSurjective_iff {β' : G →* β.range.comap φ} :
     (ofSurjective φ hφ β hβ).IsSolution β' ↔
       IsOpen (β'.ker : Set G) ∧ φ.comp ((β.range.comap φ).subtype.comp β') = β := by

@@ -94,6 +94,7 @@ theorem mapOfLE_surjective [U.Normal] [V.Normal] (hVU : V ≤ U) :
     _root_.QuotientGroup.mk_surjective _
 
 /-- The kernel of the quotient homomorphism `G ⧸ V →* G ⧸ U` is the image of `U` in `G ⧸ V`. -/
+@[simp]
 theorem ker_mapOfLE [U.Normal] [V.Normal] (hVU : V ≤ U) :
     (mapOfLE hVU).ker = U.map (_root_.QuotientGroup.mk' V) :=
   (_root_.QuotientGroup.ker_map V U (.id G) fun _ hv ↦ hVU hv).trans (by rw [Subgroup.comap_id])

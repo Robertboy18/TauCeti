@@ -34,10 +34,11 @@ stage is a solution of the original problem.
 The two predicates quantify over the finite embedding problems whose groups live in the universe
 of `G`. Every finite group is isomorphic to one in any universe, so this is no restriction on the
 finite groups that occur, and it keeps the predicates free of universe parameters that nothing
-else would determine. Only the elementary abelian case consumes cohomology: the class of the
-extension `1 → ker α → E → Q → 1` in `H²(G, ker α)` is the obstruction to solving the problem, so
-the vanishing of `H²(G, M)` for the finite elementary abelian `p`-primary `G`-modules `M` gives
-`HasElementaryAbelianSolutions p G`, and the theorem here extends it to `p`-group kernels.
+else would determine. Only the elementary abelian case consumes cohomology: the extension
+`1 → ker α → E → Q → 1` has a class in `H²(Q, ker α)`, and its pullback along `π` to `H²(G, ker α)`
+is the obstruction to solving the problem, so the vanishing of `H²(G, M)` for the finite elementary
+abelian `p`-primary `G`-modules `M` gives `HasElementaryAbelianSolutions p G`, and the theorem here
+extends it to `p`-group kernels.
 
 ## Main definitions
 
@@ -130,9 +131,11 @@ theorem HasElementaryAbelianSolutions.exists_comp_eq (h : HasElementaryAbelianSo
   obtain ⟨β', hβ'⟩ := h _ hpow' hcomm'
   exact ⟨_, hβ'.isOpen_ker_subtype_comp, hβ'.comp_subtype_comp⟩
 
-/-- The inductive step of `TauCeti.HasElementaryAbelianSolutions.hasPGroupSolutions`: a solution of
-`P` modulo the `k`-th term `λ_k` of the lower `p`-central series of its kernel, that is a
-homomorphism `β : G → E ⧸ λ_k` with open kernel lying over `π`. -/
+/-- Under `HasElementaryAbelianSolutions p G`, every finite embedding problem `P` has, for every
+`k`, a solution modulo the `k`-th term `λ_k` of the lower `p`-central series of its kernel: there is
+a homomorphism `β : G → E ⧸ λ_k` with open kernel whose composite with the map `E ⧸ λ_k → Q` induced
+by `α` is `π`. This is proved by induction on `k` and is the engine of
+`TauCeti.HasElementaryAbelianSolutions.hasPGroupSolutions`. -/
 private theorem HasElementaryAbelianSolutions.exists_comp_lift_pLowerCentralSeries_eq
     (h : HasElementaryAbelianSolutions p G) (P : FiniteEmbeddingProblem.{u, u, u} G) (k : ℕ) :
     ∃ β : G →* P.E ⧸ P.α.ker.pLowerCentralSeries p k, IsOpen (β.ker : Set G) ∧
@@ -176,9 +179,9 @@ private theorem HasElementaryAbelianSolutions.exists_comp_lift_pLowerCentralSeri
 
 /-- **Solvability with `p`-group kernel from solvability with elementary abelian kernel.** For a
 prime `p`, if every finite embedding problem for `G` with elementary abelian kernel has a solution,
-then so does every finite embedding problem for `G` with `p`-group kernel: the kernel is filtered
-by its lower `p`-central series, whose factors are elementary abelian, and a solution is lifted
-through the filtration one stage at a time. -/
+then every finite embedding problem for `G` whose kernel is a `p`-group has a solution. The proof
+filters the kernel by its lower `p`-central series, whose factors are elementary abelian, and lifts
+a solution through the filtration one stage at a time. -/
 theorem HasElementaryAbelianSolutions.hasPGroupSolutions [Fact p.Prime]
     (h : HasElementaryAbelianSolutions p G) : HasPGroupSolutions p G := by
   intro P hP
