@@ -64,16 +64,18 @@ theorem IsRefl.exists_orthogonal_basis_of_orthogonal_span_singleton (hB : B.IsRe
     (hx : B x x ≠ 0) {d : ℕ} {v : Basis (Fin d) K (B.orthogonal (K ∙ x))}
     (hv : (B.restrict (B.orthogonal (K ∙ x))).iIsOrtho v) :
     ∃ b : Basis (Fin (d + 1)) K V, B.iIsOrtho b := by
+  have hc := B.isCompl_span_singleton_orthogonal hx
   have hli : ∀ c : K, ∀ y ∈ B.orthogonal (K ∙ x), c • x + y = 0 → c = 0 := by
-    intro c y hy hc
-    have hxy : B x y = 0 := (mem_orthogonal_span_singleton_iff B).1 hy
-    have := congrArg (B x) hc
-    rw [map_add, map_smul, hxy, add_zero, map_zero, smul_eq_mul] at this
-    exact (mul_eq_zero.1 this).resolve_right hx
-  have hsp : ∀ z : V, ∃ c : K, z + c • x ∈ B.orthogonal (K ∙ x) := fun z =>
-    ⟨-(B x z / B x x), by
-      rw [mem_orthogonal_span_singleton_iff, map_add, map_smul, smul_eq_mul, neg_mul,
-        div_mul_cancel₀ _ hx, add_neg_cancel]⟩
+    intro c y hy hcy
+    have h0 : c • x = 0 := Submodule.disjoint_def.1 hc.disjoint _
+      (Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self x))
+      (eq_neg_of_add_eq_zero_left hcy ▸ Submodule.neg_mem _ hy)
+    exact (smul_eq_zero.1 h0).resolve_right (ne_zero_of_not_isOrtho_self x hx)
+  have hsp : ∀ z : V, ∃ c : K, z + c • x ∈ B.orthogonal (K ∙ x) := fun z => by
+    obtain ⟨y, hy, w, hw, rfl⟩ :=
+      Submodule.mem_sup.1 (hc.sup_eq_top ▸ Submodule.mem_top : z ∈ (K ∙ x) ⊔ B.orthogonal (K ∙ x))
+    obtain ⟨a, rfl⟩ := Submodule.mem_span_singleton.1 hy
+    exact ⟨-a, by simpa using hw⟩
   refine ⟨Basis.mkFinCons x v hli hsp, ?_⟩
   rw [iIsOrtho_def, Basis.coe_mkFinCons]
   intro i j

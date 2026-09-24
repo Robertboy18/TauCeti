@@ -246,9 +246,7 @@ noncomputable def isometryEquivOfToMatrixEq (v : Basis ι R M) (w : Basis ι R M
   map_app' x y := by
     have key : B'.comp (v.equiv w (Equiv.refl ι) : M →ₗ[R] M') (v.equiv w (Equiv.refl ι)) = B :=
       LinearMap.BilinForm.ext_basis v fun i j => by
-        rw [LinearMap.BilinForm.comp_apply, LinearEquiv.coe_coe, Basis.equiv_apply,
-          Basis.equiv_apply, Equiv.refl_apply, Equiv.refl_apply,
-          ← LinearMap.BilinForm.toMatrix_apply, ← LinearMap.BilinForm.toMatrix_apply, h]
+        simpa [LinearMap.BilinForm.toMatrix_apply] using (congrFun₂ h i j).symm
     simpa using LinearMap.congr_fun₂ key x y
 
 @[simp]

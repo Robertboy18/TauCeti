@@ -24,19 +24,13 @@ every basis pairing vanish, hence the whole form. This file shows that the alter
 the only obstruction, in every characteristic: a symmetric form has an orthogonal basis if and
 only if it is zero or not alternating (`LinearMap.BilinForm.IsSymm.exists_orthogonal_basis_iff`).
 
-The proof is the classical induction on the dimension, with one extra step. A non-isotropic vector
-`x` splits the space as `K x ⊕ x^⊥`, and the induction continues on `x^⊥` as long as the
-restriction of the form there is zero or not alternating. If instead it is alternating and
-nonzero, choose `u, w ∈ x^⊥` with `B u w ≠ 0` and replace `x` by `x + u`: its self-pairing is
-still `B x x`, and the vector `w`, corrected to lie in `(x + u)^⊥`, has nonzero self-pairing, so
-the restriction to the new complement is not alternating.
-
 For a nondegenerate form over a field in which every element is a square, for instance a finite
 field of characteristic two (`isSquare_of_charTwo'`), the orthogonal basis can be rescaled: a
 symmetric form that is not alternating has an **orthonormal basis**, one in which its matrix is
 the identity (`LinearMap.BilinForm.IsSymm.exists_basis_toMatrix_eq_one`). Hence it is equivalent
-to the standard form `Matrix.toBilin' 1`, and any two such forms of the same dimension are
-equivalent. Together with the symplectic normal form of
+to the standard form `Matrix.toBilin' 1`, which is itself such a form in every positive dimension
+(`Matrix.isAlt_toBilin'_one_iff` in `TauCeti.LinearAlgebra.Matrix.BilinearForm`), and any two such
+forms of the same dimension are equivalent. Together with the symplectic normal form of
 `TauCeti.LinearAlgebra.BilinearForm.SymplecticBasis` this gives the dichotomy for nondegenerate
 forms that are alternating or symmetric: a symplectic basis when the form is alternating, an
 orthonormal basis when it is not
@@ -56,7 +50,6 @@ bilinear forms, which is the input to the normal forms of one-relator pro-`2` gr
   form on `Fin n → K`, so any two of them of the same dimension are equivalent.
 * `LinearMap.BilinForm.Nondegenerate.exists_basis_toMatrix_eq_J_or_toMatrix_eq_one`: the
   symplectic-or-orthonormal dichotomy.
-* `Matrix.isAlt_toBilin'_one_iff`: the standard form is alternating only in dimension zero.
 
 ## References
 
@@ -91,18 +84,15 @@ private theorem IsSymm.exists_apply_self_ne_zero_and_not_isAlt_restrict_orthogon
   have huu : B u u = 0 := by simpa using halt u
   have hww : B w w = 0 := by simpa using halt w
   set z := x + u with hz
-  have hzz : B z z = B x x := by
-    rw [hz]
-    simp only [add_left, add_right, hxu, hB.eq u x, huu, add_zero]
-  have hzw : B z w = B u w := by rw [hz, add_left, hxw, zero_add]
+  have hzz : B z z = B x x := by simp [hz, hxu, hB.eq u x, huu]
+  have hzw : B z w = B u w := by simp [hz, hxw]
   refine ⟨z, hzz ▸ hx, fun halt' => huw ?_⟩
   obtain ⟨c, hc⟩ : ∃ c, c * B z z = B z w := ⟨B z w / B z z, div_mul_cancel₀ _ (hzz ▸ hx)⟩
-  have hw' : w - c • z ∈ B.orthogonal (K ∙ z) := by
-    rw [mem_orthogonal_span_singleton_iff, sub_right, smul_right, hc, sub_self]
-  have h0 : B (w - c • z) (w - c • z) = 0 := by simpa using halt' ⟨w - c • z, hw'⟩
-  rw [sub_left, sub_right, sub_right, smul_left, smul_left, smul_right, smul_right, hww,
-    hB.eq w z] at h0
-  have hcb : c * B z w = 0 := by linear_combination -h0 + c * hc
+  have hw' : w - c • z ∈ B.orthogonal (K ∙ z) :=
+    (mem_orthogonal_span_singleton_iff B).2 (by simp [hc])
+  have h0 : B w w - c * B z w - c * (B z w - c * B z z) = 0 := by
+    simpa [hB.eq w z] using halt' ⟨w - c • z, hw'⟩
+  have hcb : c * B z w = 0 := by linear_combination -h0 + c * hc + hww
   rw [← hzw]
   rcases mul_eq_zero.1 hcb with hc0 | hb0
   · rw [← hc, hc0, zero_mul]
@@ -171,12 +161,9 @@ theorem IsSymm.exists_basis_toMatrix_eq_one (hsq : ∀ a : K, IsSquare a) (hB : 
   have hs0 : ∀ i, s i ≠ 0 := fun i h0 => hvv i (by rw [hs i, h0, mul_zero])
   refine ⟨v.isUnitSMul (w := fun i => (s i)⁻¹) fun i => (inv_ne_zero (hs0 i)).isUnit, ?_⟩
   ext i j
-  rw [toMatrix_apply, Basis.isUnitSMul_apply, Basis.isUnitSMul_apply, smul_left, smul_right,
-    Matrix.one_apply]
-  split_ifs with hij
-  · subst hij
-    rw [hs i, inv_mul_cancel_left₀ (hs0 i), inv_mul_cancel₀ (hs0 i)]
-  · rw [iIsOrtho_def.1 hv i j hij, mul_zero, mul_zero]
+  obtain rfl | hij := eq_or_ne i j
+  · simp [toMatrix_apply, Basis.isUnitSMul_apply, hs i, hs0 i]
+  · simp [toMatrix_apply, Basis.isUnitSMul_apply, iIsOrtho_def.1 hv i j hij, hij]
 
 /-- Over a field in which every element is a square, a nondegenerate symmetric form that is not
 alternating is equivalent to the standard form `∑ i, x i * y i` on `Fin n → K`, for `n` the
@@ -215,18 +202,3 @@ theorem Nondegenerate.exists_basis_toMatrix_eq_J_or_toMatrix_eq_one (hsq : ∀ a
 end Field
 
 end LinearMap.BilinForm
-
-namespace Matrix
-
-/-- The standard form `∑ i, x i * y i` on `n → R` is alternating only when `n` is empty: it takes
-the value `1` on every standard basis vector. -/
-@[simp]
-theorem isAlt_toBilin'_one_iff {n R : Type*} [Fintype n] [DecidableEq n] [CommSemiring R]
-    [Nontrivial R] : (toBilin' (1 : Matrix n n R)).IsAlt ↔ IsEmpty n := by
-  refine ⟨fun h => ⟨fun i => ?_⟩, fun hn x => ?_⟩
-  · have := h (Pi.single i 1)
-    rw [toBilin'_single, one_apply_eq] at this
-    exact one_ne_zero this
-  · simp [Subsingleton.elim x 0]
-
-end Matrix
