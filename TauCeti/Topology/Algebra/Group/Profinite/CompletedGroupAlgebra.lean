@@ -32,9 +32,10 @@ which is surjective. Two elements with the same projections are equal, and these
 the inverse-limit description of the algebra.
 
 When `R` is a topological ring, the completed group algebra carries the inverse-limit topology:
-the coarsest topology making every coefficient of every projection continuous. If `Γ` is compact,
-its open normal quotients are finite and the completed algebra is a topological ring. Under the
-same compactness assumption on `Γ`, it is compact when `R` is compact Hausdorff. It is totally
+the coarsest topology making every coefficient of every projection continuous. Scalar
+multiplication by `R` is continuous when multiplication in `R` is. If `Γ` is compact, its open
+normal quotients are finite and the completed algebra is a topological ring. Under the same
+compactness assumption on `Γ`, it is compact when `R` is compact Hausdorff. It is totally
 disconnected when `R` is, and the map from `Γ` is continuous. It is commutative when `Γ` is,
 stated as the `IsMulCommutative` mixin so that no second ring structure is installed.
 
@@ -71,8 +72,9 @@ commutative exactly when `Γ` is (`isMulCommutative_iff`).
   `TauCeti.completedGroupAlgebra.isMulCommutative_iff`: for profinite `Γ` over a nontrivial `R`,
   the group elements are distinct, form a closed copy of `Γ` when `R` is Hausdorff, and the
   algebra is commutative exactly when `Γ` is.
-* The instances `IsTopologicalRing`, `CompactSpace`, `TotallyDisconnectedSpace` and `T2Space`,
-  and the `IsMulCommutative` instance for commutative `Γ`.
+* The instances `IsTopologicalRing`, `ContinuousSMul R`, `CompactSpace`,
+  `TotallyDisconnectedSpace` and `T2Space`, and the `IsMulCommutative` instance for
+  commutative `Γ`.
 
 ## References
 
@@ -119,11 +121,9 @@ of `Γ`, along the maps induced by the quotient maps. For `R = ℤ_[p]` and `Γ`
 the Iwasawa algebra `ℤ_p[[Γ]]`.
 
 Its elements are accessed through the projections `completedGroupAlgebra.proj R Γ U` onto the
-finite levels, which determine them (`completedGroupAlgebra.ext`), and constructed from
-compatible families of finite-level elements by `completedGroupAlgebra.mk`. -/
--- The ring and algebra structures are transported along the synonym, so the module system
--- requires this definition to be `@[expose]`d for the instances below to compile.
-@[expose]
+levels `R[Γ ⧸ U]`, which determine them (`completedGroupAlgebra.ext`), and constructed from
+compatible families of elements of the levels by `completedGroupAlgebra.mk`. The representation
+as a subalgebra of the product of the levels is not exposed. -/
 def completedGroupAlgebra : Type (max u v) := completedGroupAlgebra.subalgebra R Γ
 
 namespace completedGroupAlgebra
@@ -135,7 +135,7 @@ noncomputable instance : Algebra R (completedGroupAlgebra R Γ) :=
   inferInstanceAs (Algebra R (subalgebra R Γ))
 
 /-- The projection of the completed group algebra onto the group algebra `R[Γ ⧸ U]` of the
-finite quotient by the open normal subgroup `U`, as an `R`-algebra homomorphism. It is
+quotient by the open normal subgroup `U`, as an `R`-algebra homomorphism. It is
 surjective (`proj_surjective`), and the projections jointly determine an element (`ext`). -/
 noncomputable def proj (U : OpenNormalSubgroup Γ) :
     completedGroupAlgebra R Γ →ₐ[R] MonoidAlgebra R (Γ ⧸ U.toSubgroup) :=
@@ -161,7 +161,7 @@ theorem ext {x y : completedGroupAlgebra R Γ} (h : ∀ U, proj R Γ U x = proj 
 variable (R Γ)
 
 /-- The element of the completed group algebra with a prescribed compatible family of
-projections onto the finite levels. -/
+projections onto the levels `R[Γ ⧸ U]`. -/
 noncomputable def mk (x : ∀ U : OpenNormalSubgroup Γ, MonoidAlgebra R (Γ ⧸ U.toSubgroup))
     (hx : ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V),
       MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (x U) = x V) :
@@ -178,7 +178,7 @@ theorem proj_mk (x : ∀ U : OpenNormalSubgroup Γ, MonoidAlgebra R (Γ ⧸ U.to
   (rfl)
 
 /-- The group elements inside the completed group algebra: `γ` goes to the family of the basis
-elements at its classes in the finite quotients. This is the analogue of `MonoidAlgebra.of`;
+elements at its classes in the quotients `Γ ⧸ U`. This is the analogue of `MonoidAlgebra.of`;
 its values are units, as it is a homomorphism from a group. -/
 noncomputable def of : Γ →* completedGroupAlgebra R Γ where
   toFun γ := mk R Γ (fun U ↦ MonoidAlgebra.of R (Γ ⧸ U.toSubgroup) (γ : Γ ⧸ U.toSubgroup))
@@ -309,6 +309,14 @@ instance [TotallyDisconnectedSpace R] : TotallyDisconnectedSpace (completedGroup
 
 instance [IsTopologicalAddGroup R] : IsTopologicalAddGroup (completedGroupAlgebra R Γ) :=
   (isInducing_coeffFamily R Γ).isTopologicalAddGroup (coeffFamily R Γ)
+
+/-- Scalar multiplication by the coefficient ring is continuous: it multiplies every coefficient
+of every projection by the scalar. -/
+instance [ContinuousMul R] : ContinuousSMul R (completedGroupAlgebra R Γ) where
+  continuous_smul := by
+    refine continuous_iff.mpr fun U g ↦ ?_
+    simp only [map_smul, MonoidAlgebra.coeff_smul_apply, smul_eq_mul]
+    exact continuous_fst.mul ((continuous_coeff_proj R Γ U g).comp continuous_snd)
 
 /-- The group elements of the completed group algebra depend continuously on the group
 element. -/
