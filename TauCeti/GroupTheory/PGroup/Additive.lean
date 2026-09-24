@@ -16,8 +16,8 @@ Mathlib's `IsPGroup` is stated for multiplicative groups. This file records the 
 some `k`, that the theory of pro-`p` actions on finite discrete coefficient modules needs, in
 additive notation: the order of a finite such group is a power of `p`, namely
 `p ^ padicValNat p (Nat.card A)`, and is divisible by `p` when the group is nontrivial; a nonzero
-element of `p`-power order has a nonzero multiple of order exactly `p`; and adjoining to a
-subgroup `N` an element `x ∉ N` with `p • x ∈ N` multiplies the order of `N` by `p`.
+element of `p`-power order has a nonzero multiple annihilated by `p`; and adjoining to a subgroup
+`N` an element `x ∉ N` with `p • x ∈ N` multiplies the order of `N` by `p`.
 
 ## Main results
 
@@ -64,7 +64,8 @@ theorem natCard_eq_pow_padicValNat_of_forall_exists_nsmul_eq_zero [Finite A]
   rw [← Nat.card_congr (Multiplicative.toAdd (α := A)), hcard, padicValNat.prime_pow]
 
 omit hp in
-/-- A nonzero element `a` with `p ^ k • a = 0` has a nonzero multiple `p ^ n • a` of order `p`. -/
+/-- A nonzero element `a` with `p ^ k • a = 0` has a nonzero multiple `p ^ n • a` annihilated by
+`p`, that is, with `p • p ^ n • a = 0`. -/
 theorem exists_nsmul_pow_ne_zero_nsmul_nsmul_pow_eq_zero {a : A} (ha : a ≠ 0) {k : ℕ}
     (hk : p ^ k • a = 0) : ∃ n : ℕ, p ^ n • a ≠ 0 ∧ p • p ^ n • a = 0 := by
   classical
