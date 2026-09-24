@@ -13,11 +13,10 @@ public import TauCeti.GroupTheory.DoubleCoset.Map
 
 The change-of-family isomorphism `restrictedProductCongr` identifies the ambient restricted
 products only.  It need not carry the everywhere-integral subgroup of one family onto that of the
-other, because the coordinate condition can change at the finitely many indices where the
-families differ: `exists_map_integralSubgroup_ne` is a counterexample to the general preservation
-claim, using a family of copies of `Multiplicative ℤ` where the two subgroups differ.  For this
-reason the induced bijection of double-coset spaces, `doubleCosetCongr`, is stated along the
-transported subgroups rather than along the integral subgroup of the new family.
+other; the counterexample `exists_map_integralSubgroup_ne` is recorded alongside the isomorphism
+in `TauCeti.Topology.Algebra.RestrictedProduct.Congr.Basic`.  For this reason the induced
+bijection of double-coset spaces, `doubleCosetCongr`, is stated along the transported subgroups
+rather than along the integral subgroup of the new family.
 
 ## References
 
@@ -88,27 +87,5 @@ theorem doubleCosetCongr_symm_apply_mk (U U' : ∀ i, Subgroup (G i))
           y) =
       DoubleCoset.mk Γ K ((restrictedProductCongr U U' h).symm y) :=
   DoubleCoset.quotientCongr_symm_apply_mk Γ K _ rfl rfl y
-
-/-- The change-of-family equivalence need not carry the everywhere-integral subgroup onto the
-everywhere-integral subgroup of the new family. The witness uses copies of `Multiplicative ℤ`
-indexed by `ℕ`, with the first family everywhere `⊤` and the second family equal to `⊥` at zero
-and `⊤` elsewhere. -/
-theorem exists_map_integralSubgroup_ne :
-    ∃ (U U' : ℕ → Subgroup (Multiplicative ℤ)) (h : ∀ᶠ i in cofinite, U i = U' i),
-      (integralSubgroup U).map (restrictedProductCongr U U' h) ≠ integralSubgroup U' := by
-  let U : ℕ → Subgroup (Multiplicative ℤ) := fun _ ↦ ⊤
-  let U' : ℕ → Subgroup (Multiplicative ℤ) := fun i ↦ if i = 0 then ⊥ else ⊤
-  have h : ∀ᶠ i in cofinite, U i = U' i := by
-    filter_upwards [eventually_cofinite_ne 0] with i hi
-    simp [U, U', hi]
-  refine ⟨U, U', h, fun heq ↦ ?_⟩
-  let x : Πʳ i, [Multiplicative ℤ, (U i : Set (Multiplicative ℤ))] :=
-    ⟨fun _ ↦ Multiplicative.ofAdd 1, .of_forall fun i ↦ by simp [U]⟩
-  have hx : restrictedProductCongr U U' h x ∈ integralSubgroup U' := by
-    rw [← heq]
-    exact Subgroup.mem_map_of_mem _ ((mem_integralSubgroup U x).mpr fun i ↦ by simp [U])
-  have h0 := (mem_integralSubgroup U' _).mp hx 0
-  rw [restrictedProductCongr_apply] at h0
-  simp [U', x] at h0
 
 end TauCeti

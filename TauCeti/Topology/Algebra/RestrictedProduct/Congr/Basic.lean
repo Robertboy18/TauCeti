@@ -13,14 +13,17 @@ public import TauCeti.Topology.Algebra.RestrictedProduct.Congr.Right
 Two families of reference subgroups that agree at all but finitely many indices define the same
 restricted product up to a coordinatewise-identity isomorphism, which is a homeomorphism for
 every pair of families.  This file records that isomorphism, its coordinate formulas in both
-directions, its continuity, its coherence laws, and its naturality with respect to componentwise
-maps.  It is the case of `restrictedProductCongrRight` in which every coordinate equivalence is
-the identity.
+directions, its continuity, its coherence laws, its naturality with respect to componentwise
+maps, and its identification with the componentwise map induced by the identity homomorphisms.
+It is the case of `restrictedProductCongrRight` in which every coordinate equivalence is the
+identity.
 
 The isomorphism identifies the ambient restricted products only; it need not carry the
-everywhere-integral subgroup of one family onto that of the other.  The resulting transport of
-double-coset spaces, and the witness that the integral subgroup is not preserved in general, are
-in `TauCeti.Topology.Algebra.RestrictedProduct.Congr.DoubleCoset`.
+everywhere-integral subgroup of one family onto that of the other, because the coordinate
+condition can change at the finitely many indices where the families differ.  The witness
+`exists_map_integralSubgroup_ne` records a counterexample to the general preservation claim.
+The resulting transport of double-coset spaces is in
+`TauCeti.Topology.Algebra.RestrictedProduct.Congr.DoubleCoset`.
 
 ## References
 
@@ -124,5 +127,26 @@ theorem restrictedProductCongr_naturality {H : ι → Type w} [∀ i, Group (H i
         rwa [← hU, ← hV])).comp (restrictedProductCongr U U' h).toMonoidHom := by
   ext x i
   simp
+
+/-- As a monoid homomorphism, the change-of-family equivalence is the componentwise map induced
+by the identity homomorphisms. -/
+theorem coe_monoidHom_restrictedProductCongr (U U' : ∀ i, Subgroup (G i))
+    (h : ∀ᶠ i in cofinite, U i = U' i) :
+    (restrictedProductCongr U U' h :
+        (Πʳ i, [G i, (U i : Set (G i))]) →* Πʳ i, [G i, (U' i : Set (G i))]) =
+      restrictedProductMap U U' (fun _ ↦ MonoidHom.id _) (h.mono fun _ hi _ hx ↦ hi ▸ hx) := by
+  ext x i
+  simp
+
+/-- The change-of-family equivalence need not carry the everywhere-integral subgroup onto the
+everywhere-integral subgroup of the new family. The witness is that of
+`exists_not_map_integralSubgroup_le`: copies of `Multiplicative ℤ` indexed by `ℕ`, with the first
+family everywhere `⊤` and the second family equal to `⊥` at zero and `⊤` elsewhere. -/
+theorem exists_map_integralSubgroup_ne :
+    ∃ (U U' : ℕ → Subgroup (Multiplicative ℤ)) (h : ∀ᶠ i in cofinite, U i = U' i),
+      (integralSubgroup U).map (restrictedProductCongr U U' h) ≠ integralSubgroup U' := by
+  obtain ⟨U, U', h, hne⟩ := exists_not_map_integralSubgroup_le
+  refine ⟨U, U', h, fun heq ↦ hne ?_⟩
+  rw [← coe_monoidHom_restrictedProductCongr U U' h, heq]
 
 end TauCeti
