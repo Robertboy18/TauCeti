@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Topology.Algebra.RestrictedProduct.TopologicalSpace
+public import TauCeti.Topology.Algebra.RestrictedProduct.ContinuousRng
 
 /-!
 # Reindexing a restricted product along an equivalence of index types
@@ -60,7 +60,8 @@ variable (A : ∀ i, Set (G i)) (e : ι' ≃ ι)
 /-- Reindexing a restricted product along an equivalence `e : ι' ≃ ι` of index types, in the
 orientation of `Equiv.piCongrLeft`: from the restricted product of the pulled-back family over
 `ι'` to the restricted product over `ι`.  The image of `y` has coordinate `y j` at `e j`, and the
-inverse sends `x` to `j ↦ x (e j)`. -/
+inverse sends `x` to `j ↦ x (e j)`; it is Mathlib's `RestrictedProduct.mapAlong` along `e` with
+identity coordinate maps. -/
 def restrictedProductCongrLeftEquiv :
     (Πʳ j, [G (e j), A (e j)]) ≃ (Πʳ i, [G i, A i]) where
   toFun y := RestrictedProduct.mk (Equiv.piCongrLeft G e y) <| by
@@ -93,37 +94,25 @@ theorem restrictedProductCongrLeftEquiv_symm_apply (x : Πʳ i, [G i, A i]) (j :
 
 variable [∀ i, TopologicalSpace (G i)]
 
-/-- Reindexing is continuous for every reference family: on each principal stage it is the
-homeomorphism `Homeomorph.piCongrLeft` of the ambient products, landing in the corresponding
-stage of the target. -/
+/-- Reindexing is continuous for every reference family. -/
 theorem continuous_restrictedProductCongrLeftEquiv :
     Continuous (restrictedProductCongrLeftEquiv A e) := by
   rw [RestrictedProduct.continuous_dom]
   intro S hS
+  -- On the principal stage `𝓟 S` the map lands in the stage `𝓟 (e.symm ⁻¹' S)` of the target,
+  -- and into the ambient product it is the homeomorphism `Homeomorph.piCongrLeft`.
   have hT : (cofinite : Filter ι) ≤ 𝓟 (e.symm ⁻¹' S) := by
     rw [← comap_principal, ← e.symm.injective.comap_cofinite_eq]
     exact comap_mono hS
-  -- The coordinatewise map into the stage `𝓟 (e.symm ⁻¹' S)`, through which the composite
-  -- factors.
-  let g : (Πʳ j, [G (e j), A (e j)]_[𝓟 S]) → Πʳ i, [G i, A i]_[𝓟 (e.symm ⁻¹' S)] := fun y ↦
-    RestrictedProduct.mk (Equiv.piCongrLeft G e y) <| by
-      rw [eventually_principal]
-      intro i hi
-      obtain ⟨j, rfl⟩ := e.surjective i
-      rw [Equiv.piCongrLeft_apply_apply]
-      exact eventually_principal.mp y.2 j (by simpa using hi)
-  have key : restrictedProductCongrLeftEquiv A e ∘ RestrictedProduct.inclusion _ _ hS =
-      RestrictedProduct.inclusion _ _ hT ∘ g := by
-    ext y i
+  rw [continuous_restrictedProduct_iff_of_forall_mem hT]
+  · exact (Homeomorph.piCongrLeft e).continuous.comp RestrictedProduct.continuous_coe
+  · intro y i hi
     obtain ⟨j, rfl⟩ := e.surjective i
-    simp [g]
-  rw [key]
-  refine (RestrictedProduct.continuous_inclusion hT).comp ?_
-  exact RestrictedProduct.continuous_rng_of_principal.mpr
-    ((Homeomorph.piCongrLeft e).continuous.comp RestrictedProduct.continuous_coe)
+    simp only [Function.comp_apply, restrictedProductCongrLeftEquiv_apply_apply,
+      RestrictedProduct.inclusion_apply]
+    exact eventually_principal.mp y.2 j (by simpa using hi)
 
-/-- The inverse of the reindexing equivalence is continuous for every reference family: it is
-Mathlib's `RestrictedProduct.mapAlong` along `e` with identity coordinate maps. -/
+/-- The inverse of the reindexing equivalence is continuous for every reference family. -/
 theorem continuous_restrictedProductCongrLeftEquiv_symm :
     Continuous (restrictedProductCongrLeftEquiv A e).symm :=
   RestrictedProduct.mapAlong_continuous G (fun j ↦ G (e j)) e e.injective.tendsto_cofinite
@@ -162,8 +151,10 @@ theorem restrictedProductCongrLeft_apply_apply (y : Πʳ j, [G (e j), U (e j)]) 
   rw [← MulEquiv.coe_toEquiv, restrictedProductCongrLeft_toEquiv,
     restrictedProductCongrLeftEquiv_apply_apply]
 
-/-- The inverse of `restrictedProductCongrLeft` sends `x` to `j ↦ x (e j)`. -/
-@[simp]
+/-- The inverse of `restrictedProductCongrLeft` sends `x` to `j ↦ x (e j)`.
+
+Not a `simp` lemma: `simp` proves it from `restrictedProductCongrLeft_symm` and
+`restrictedProductReindex_apply`. -/
 theorem restrictedProductCongrLeft_symm_apply (x : Πʳ i, [G i, U i]) (j : ι') :
     (restrictedProductCongrLeft U e).symm x j = x (e j) := by
   rw [← MulEquiv.coe_toEquiv, MulEquiv.toEquiv_symm, restrictedProductCongrLeft_toEquiv,
@@ -174,6 +165,18 @@ orientation `x ↦ (j ↦ x (e j))`: the inverse of `restrictedProductCongrLeft`
 def restrictedProductReindex : (Πʳ i, [G i, U i]) ≃* (Πʳ j, [G (e j), U (e j)]) :=
   (restrictedProductCongrLeft U e).symm
 
+/-- The inverse of `restrictedProductCongrLeft` is `restrictedProductReindex`. -/
+@[simp]
+theorem restrictedProductCongrLeft_symm :
+    (restrictedProductCongrLeft U e).symm = restrictedProductReindex U e :=
+  (rfl)
+
+/-- The inverse of `restrictedProductReindex` is `restrictedProductCongrLeft`. -/
+@[simp]
+theorem restrictedProductReindex_symm :
+    (restrictedProductReindex U e).symm = restrictedProductCongrLeft U e :=
+  (rfl)
+
 /-- `restrictedProductReindex` sends `x` to `j ↦ x (e j)`. -/
 @[simp]
 theorem restrictedProductReindex_apply (x : Πʳ i, [G i, U i]) (j : ι') :
@@ -181,8 +184,10 @@ theorem restrictedProductReindex_apply (x : Πʳ i, [G i, U i]) (j : ι') :
   restrictedProductCongrLeft_symm_apply U e x j
 
 /-- The inverse of `restrictedProductReindex` has coordinate `y j` at `e j`; as `e` is
-surjective, this pins it. -/
-@[simp]
+surjective, this pins it.
+
+Not a `simp` lemma: `simp` proves it from `restrictedProductReindex_symm` and
+`restrictedProductCongrLeft_apply_apply`. -/
 theorem restrictedProductReindex_symm_apply (y : Πʳ j, [G (e j), U (e j)]) (j : ι') :
     (restrictedProductReindex U e).symm y (e j) = y j :=
   restrictedProductCongrLeft_apply_apply U e y j
