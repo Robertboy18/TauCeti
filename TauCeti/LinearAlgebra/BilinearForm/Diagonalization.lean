@@ -12,6 +12,7 @@ import Mathlib.LinearAlgebra.Basis.Fin
 import Mathlib.LinearAlgebra.Basis.SMul
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.Tactic.LinearCombination
+import TauCeti.LinearAlgebra.BilinearForm.Isometry
 import TauCeti.LinearAlgebra.BilinearForm.Orthogonal
 
 /-!
@@ -46,8 +47,6 @@ bilinear forms, which is the input to the normal forms of one-relator pro-`2` gr
 
 ## Main results
 
-* `LinearMap.BilinForm.isometryEquivOfToMatrixEq`: two bilinear forms with the same matrix in
-  some bases are isometric.
 * `LinearMap.BilinForm.IsSymm.exists_orthogonal_basis_of_isAlt_imp_eq_zero`: a symmetric form
   that is zero or not alternating has an orthogonal basis, in every characteristic.
 * `LinearMap.BilinForm.IsSymm.exists_orthogonal_basis_iff`: this condition is also necessary.
@@ -72,25 +71,6 @@ namespace LinearMap.BilinForm
 
 open LinearMap (BilinForm)
 open Module
-
-section IsometryEquiv
-
-variable {R M M' ι : Type*} [CommSemiring R] [AddCommMonoid M] [Module R M] [AddCommMonoid M']
-  [Module R M'] [Fintype ι] [DecidableEq ι] {B : BilinForm R M} {B' : BilinForm R M'}
-
-/-- Two bilinear forms with the same matrix in bases `v` and `w` are isometric, through the
-linear equivalence carrying `v` to `w`. -/
-noncomputable def isometryEquivOfToMatrixEq (v : Basis ι R M) (w : Basis ι R M')
-    (h : BilinForm.toMatrix v B = BilinForm.toMatrix w B') : B.IsometryEquiv B' where
-  __ := v.equiv w (Equiv.refl ι)
-  map_app' x y := by
-    have key : B'.comp (v.equiv w (Equiv.refl ι) : M →ₗ[R] M') (v.equiv w (Equiv.refl ι)) = B :=
-      ext_basis v fun i j => by
-        rw [comp_apply, LinearEquiv.coe_coe, Basis.equiv_apply, Basis.equiv_apply,
-          Equiv.refl_apply, Equiv.refl_apply, ← toMatrix_apply, ← toMatrix_apply, h]
-    simpa using LinearMap.congr_fun₂ key x y
-
-end IsometryEquiv
 
 section Field
 
@@ -232,7 +212,7 @@ theorem IsSymm.equivalent_toBilin'_one (hsq : ∀ a : K, IsSquare a) (hB : B.IsS
     (hnd : B.Nondegenerate) (h : B.IsAlt → B = 0) :
     B.Equivalent (Matrix.toBilin' (1 : Matrix (Fin (finrank K V)) (Fin (finrank K V)) K)) := by
   obtain ⟨v, hv⟩ := hB.exists_basis_toMatrix_eq_one hsq hnd h
-  exact ⟨isometryEquivOfToMatrixEq v (Pi.basisFun K _)
+  exact ⟨TauCeti.BilinForm.isometryEquivOfToMatrixEq v (Pi.basisFun K _)
     (by rw [hv, toMatrix_basisFun, toMatrix'_toBilin'])⟩
 
 /-- Over a field in which every element is a square, two nondegenerate symmetric forms that are
