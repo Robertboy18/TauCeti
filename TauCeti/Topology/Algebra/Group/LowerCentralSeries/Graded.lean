@@ -58,9 +58,6 @@ finite; this is proved in `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCe
 
 ## References
 
-* Tau Ceti, `TauCetiRoadmap/ProfiniteProPGroups/README.md`, Layer 8, “Notation, fixed for
-  Layers 8 and 9”, and `TauCetiRoadmap/ProfiniteProPGroups/Suggested.lean`: the blueprint for
-  the graded-piece API.
 * J. Labute, *Classification of Demushkin groups*, Canadian J. Math. 19 (1967), §1,
   Propositions 1 and 2.
 * J. D. Dixon, M. P. F. du Sautoy, A. Mann and D. Segal, *Analytic pro-`p` groups*, Section 1.2.
@@ -175,11 +172,15 @@ theorem gradedMk_surjective (k : ℕ) : Function.Surjective (gradedMk p G k) := 
   obtain ⟨y, hy⟩ := QuotientGroup.mk_surjective x.toMul
   exact ⟨y, (congrArg Additive.ofMul hy).trans (ofMul_toMul x)⟩
 
+/-- Two elements of `λ_k` have the same class in `gr_k(G)` if and only if they have the same class
+in `G ⧸ λ_{k+1}`. -/
 theorem gradedMk_eq_gradedMk_iff {k : ℕ} {x y : pLowerCentralSeries p G k} :
     gradedMk p G k x = gradedMk p G k y ↔
       ((x : G) : G ⧸ pLowerCentralSeries p G (k + 1)) = ((y : G) : G ⧸ _) := by
   rw [gradedMk, gradedMk, Additive.ofMul.apply_eq_iff_eq, QuotientGroup.eq_subgroupOf]
 
+/-- The class of an element of `λ_k` in `gr_k(G)` vanishes if and only if the element lies in
+`λ_{k+1}`. -/
 @[simp]
 theorem gradedMk_eq_zero_iff {k : ℕ} {x : pLowerCentralSeries p G k} :
     gradedMk p G k x = 0 ↔ (x : G) ∈ pLowerCentralSeries p G (k + 1) := by
@@ -532,7 +533,8 @@ theorem gradedPow_add_zero_of_odd (hp : Odd p) (x y : gradedPiece p G 0) :
 /-- **The dyadic defect of additivity in degree zero.** For `p = 2`,
 `π (x + y) = π x + π y + [x, y]` in `gr_1(G)`: the defect is the `binom(2, 2)` term of the
 Hall–Petrescu formula itself. Whenever some bracket `[x, y]` in degree zero is nonzero, `π` is
-therefore not additive on `gr_0(G)`, and `gr(G)` is not a module over `𝔽₂[π]`. -/
+therefore not additive on `gr_0(G)`, so `gr(G)` carries no `𝔽₂[π]`-module structure in which `π`
+acts by `TauCeti.gradedPow`. -/
 @[simp]
 theorem gradedPow_add_zero_of_two (hp : p = 2) (x y : gradedPiece p G 0) :
     gradedPow p G 0 (x + y) =
@@ -606,6 +608,7 @@ theorem gradedMap_gradedMk (f : G →* H) (hf : Continuous f) {k : ℕ}
     QuotientGroup.map_mk, gradedMk]
   rfl
 
+/-- The identity of `G` induces the identity on every graded piece. -/
 @[simp]
 theorem gradedMap_id (k : ℕ) :
     gradedMap p (MonoidHom.id G) continuous_id k = AddMonoidHom.id (gradedPiece p G k) := by
@@ -614,6 +617,8 @@ theorem gradedMap_id (k : ℕ) :
   rw [gradedMap_gradedMk, AddMonoidHom.id_apply]
   rfl
 
+/-- The graded map induced by a composite is the composite of the graded maps: `gr_k` is a
+functor. -/
 theorem gradedMap_comp (g : H →* K) (hg : Continuous g) (f : G →* H) (hf : Continuous f) (k : ℕ) :
     gradedMap p (g.comp f) (hg.comp hf) k = (gradedMap p g hg k).comp (gradedMap p f hf k) := by
   refine AddMonoidHom.ext fun x => ?_
