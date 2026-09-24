@@ -183,8 +183,7 @@ universe u
 
 variable {p : ℕ} [hp : Fact p.Prime]
 
-/-- The lower `p`-central series of a finite `p`-group `G` reaches `⊥`, stated with the order of
-`G` as an explicit parameter so that it can be proved by strong induction on that order. -/
+/-- The lower `p`-central series of every finite `p`-group `G` of order `m` reaches `⊥`. -/
 private theorem exists_pLowerCentralSeries_top_eq_bot_aux (m : ℕ) :
     ∀ (G : Type u) [Group G] [Finite G], Nat.card G = m → IsPGroup p G →
       ∃ n, (⊤ : Subgroup G).pLowerCentralSeries p n = ⊥ := by
