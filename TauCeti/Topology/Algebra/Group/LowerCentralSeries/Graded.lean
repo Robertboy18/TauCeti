@@ -58,6 +58,9 @@ finite; this is proved in `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCe
 
 ## References
 
+* Tau Ceti, `TauCetiRoadmap/ProfiniteProPGroups/README.md`, Layer 8, “Notation, fixed for
+  Layers 8 and 9”, and `TauCetiRoadmap/ProfiniteProPGroups/Suggested.lean`: the blueprint for
+  the graded-piece API.
 * J. Labute, *Classification of Demushkin groups*, Canadian J. Math. 19 (1967), §1,
   Propositions 1 and 2.
 * J. D. Dixon, M. P. F. du Sautoy, A. Mann and D. Segal, *Analytic pro-`p` groups*, Section 1.2.
