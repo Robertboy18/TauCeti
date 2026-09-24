@@ -18,13 +18,13 @@ of `continuous_mulSingle` for `Pi` types.
 
 The restricted-product topology is finer than the topology induced from the full product
 `Π i, R i`, and in general strictly finer. The clearest instance is a family of discrete spaces
-with reference sets of at most one element: every principal stage, and hence the restricted
-product itself, is discrete (`discreteTopology_restrictedProduct`), whereas the full product of
-infinitely many nontrivial discrete groups is not. So for infinitely many nontrivial discrete
-groups with trivial reference subgroups the coercion to the full product is not inducing
-(`not_isInducing_coe_bot`): the restricted-product topology is not the induced one. This is the
-reason continuity of a map *into* a restricted product does not follow from continuity of its
-coordinates.
+with reference sets of at most one element: every principal stage indexed by a cofinite set, and
+hence the restricted product itself, is discrete (`discreteTopology_restrictedProduct`), whereas
+the full product of discrete groups with infinitely many nontrivial factors is not. So for
+discrete groups with trivial reference subgroups, infinitely many of them nontrivial, the coercion
+to the full product is not inducing (`not_isInducing_coe_bot`): the restricted-product topology is
+not the induced one. This is the reason continuity of a map *into* a restricted product does not
+follow from continuity of its coordinates.
 
 ## References
 
@@ -75,35 +75,40 @@ end
 
 section Discrete
 
-variable [∀ i, DiscreteTopology (R i)]
-
-/-- A principal stage `Πʳ i, [R i, A i]_[𝓟 S]` with `S` cofinite is discrete when every `R i` is
-discrete and every reference set `A i` has at most one element: on the stage the coordinates in
-`S` are determined by the reference sets, and only finitely many coordinates remain free. -/
-theorem discreteTopology_restrictedProduct_principal (hA : ∀ i, (A i).Subsingleton) {S : Set ι}
-    (hS : Sᶜ.Finite) : DiscreteTopology (Πʳ i, [R i, A i]_[𝓟 S]) := by
+/-- A principal stage `Πʳ i, [R i, A i]_[𝓟 S]` with `S` cofinite is discrete when the reference
+sets `A i` for `i ∈ S` have at most one element and the spaces `R i` for `i ∉ S` are discrete: on
+the stage the coordinates in `S` are determined by the reference sets, and only finitely many
+coordinates remain free. -/
+theorem discreteTopology_restrictedProduct_principal {S : Set ι} (hS : Sᶜ.Finite)
+    (hA : ∀ i ∈ S, (A i).Subsingleton) (hR : ∀ i ∉ S, DiscreteTopology (R i)) :
+    DiscreteTopology (Πʳ i, [R i, A i]_[𝓟 S]) := by
   refine discreteTopology_iff_isOpen_singleton.2 fun x ↦ ?_
   rw [RestrictedProduct.isEmbedding_coe_of_principal.isOpen_iff]
-  refine ⟨Set.pi Sᶜ fun i ↦ {x i}, isOpen_set_pi hS fun i _ ↦ isOpen_discrete _, ?_⟩
+  refine ⟨Set.pi Sᶜ fun i ↦ {x i}, isOpen_set_pi hS fun i hi ↦ ?_, ?_⟩
+  · have := hR i hi
+    exact isOpen_discrete _
   ext y
   simp only [Set.mem_preimage, Set.mem_pi, Set.mem_compl_iff, Set.mem_singleton_iff]
   constructor
   · intro h
     ext i
     by_cases hi : i ∈ S
-    · exact hA i (eventually_principal.1 y.2 i hi) (eventually_principal.1 x.2 i hi)
+    · exact hA i hi (eventually_principal.1 y.2 i hi) (eventually_principal.1 x.2 i hi)
     · exact h i hi
   · rintro rfl i _
     rfl
 
+variable [∀ i, DiscreteTopology (R i)]
+
 /-- A restricted product of discrete spaces relative to reference sets with at most one element
-is discrete: every principal stage is, and the restricted-product topology is the final topology
-over the stages. -/
+is discrete: every principal stage indexed by a cofinite set is, and the restricted-product
+topology is the final topology over these stages. -/
 theorem discreteTopology_restrictedProduct (hA : ∀ i, (A i).Subsingleton) :
     DiscreteTopology (Πʳ i, [R i, A i]) := by
   refine discreteTopology_iff_isOpen_singleton.2 fun x ↦
     isOpen_restrictedProduct_iff.2 fun S hS ↦ ?_
-  have := discreteTopology_restrictedProduct_principal hA (mem_cofinite.1 (le_principal_iff.1 hS))
+  have := discreteTopology_restrictedProduct_principal (mem_cofinite.1 (le_principal_iff.1 hS))
+    (fun i _ ↦ hA i) fun i _ ↦ inferInstance
   exact isOpen_discrete _
 
 variable {G : ι → Type v} [∀ i, Group (G i)] [∀ i, TopologicalSpace (G i)]
@@ -116,27 +121,28 @@ instance discreteTopology_restrictedProduct_bot [∀ i, DiscreteTopology (G i)] 
     rw [Subgroup.coe_bot]
     exact Set.subsingleton_singleton
 
-/-- For infinitely many nontrivial discrete groups with trivial reference subgroups, the
+/-- For discrete groups with trivial reference subgroups, infinitely many of them nontrivial, the
 restricted product does not carry the topology induced from the full product: the restricted
 product is discrete, but every neighbourhood of `1` in the full product contains an element
-supported at a single index. The restricted-product topology is therefore strictly finer than the
-induced one in general, and continuity of a map into a restricted product does not follow from
-continuity of its coordinates. -/
-theorem not_isInducing_coe_bot [Infinite ι] [∀ i, DiscreteTopology (G i)]
-    [∀ i, Nontrivial (G i)] :
+supported at a single index with nontrivial group. The restricted-product topology is therefore
+strictly finer than the induced one in general, and continuity of a map into a restricted product
+does not follow from continuity of its coordinates. -/
+theorem not_isInducing_coe_bot [∀ i, DiscreteTopology (G i)]
+    (hG : {i | Nontrivial (G i)}.Infinite) :
     ¬ IsInducing ((↑) : Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))] → ∀ i, G i) := by
   classical
   intro h
   obtain ⟨t, ht, hts⟩ := h.isOpen_iff.1
     (isOpen_discrete {(1 : Πʳ i, [G i, ((⊥ : Subgroup (G i)) : Set (G i))])})
   obtain ⟨I, u, hu, hIt⟩ := isOpen_pi_iff.1 ht _ (by rw [← Set.mem_preimage, hts]; rfl)
-  obtain ⟨j, hj⟩ := Infinite.exists_notMem_finset I
+  obtain ⟨j, hj, hjI⟩ := hG.exists_notMem_finset I
+  have : Nontrivial (G j) := hj
   obtain ⟨g, hg⟩ := exists_ne (1 : G j)
   -- The element supported at `j` lies in the basic neighbourhood `I.pi u` of `1`, hence in `t`,
   -- but is not `1`.
   have hmem : RestrictedProduct.mulSingle (fun i ↦ (⊥ : Subgroup (G i))) j g ∈ (↑) ⁻¹' t :=
     hIt fun a ha ↦ by
-      have haj : a ≠ j := fun hab ↦ hj (hab ▸ ha)
+      have haj : a ≠ j := fun hab ↦ hjI (hab ▸ ha)
       rw [RestrictedProduct.coe_mulSingle_apply, Pi.mulSingle_eq_of_ne haj]
       exact (hu a ha).2
   rw [hts, Set.mem_singleton_iff, RestrictedProduct.mulSingle_eq_one_iff] at hmem
