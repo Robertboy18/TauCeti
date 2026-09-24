@@ -109,11 +109,10 @@ theorem equivSum_symm_inl (p : orbitRel.Quotient Γ ℍ) :
 theorem equivSum_symm_inr (C : Γ.CuspOrbit) : (equivSum Γ).symm (Sum.inr C) = ofCusp C :=
   (rfl)
 
+/-- Injectivity of the coarse-quotient inclusion, in the form consumed by the open-embedding API
+(compare `Sum.inl_injective`). -/
 theorem ofQuotient_injective : Function.Injective (ofQuotient (Γ := Γ)) :=
   fun _ _ h ↦ ofQuotient.inj h
-
-theorem ofCusp_injective : Function.Injective (ofCusp (Γ := Γ)) :=
-  fun _ _ h ↦ ofCusp.inj h
 
 /-- The cusp orbits are exactly the points outside the coarse orbit space. -/
 theorem compl_range_ofQuotient : (range (ofQuotient (Γ := Γ)))ᶜ = range ofCusp := by
@@ -132,11 +131,11 @@ variable (D : Γ.CuspDatum) (A : ℝ)
 @[simp]
 theorem ofQuotient_mem_cuspNhd_iff {p : orbitRel.Quotient Γ ℍ} :
     ofQuotient p ∈ cuspNhd D A ↔ p ∈ Quotient.mk (orbitRel Γ ℍ) '' horodisc D A := by
-  simp [cuspNhd, ofQuotient_injective.eq_iff]
+  simp [cuspNhd]
 
 @[simp]
 theorem ofCusp_mem_cuspNhd_iff {C : Γ.CuspOrbit} : ofCusp C ∈ cuspNhd D A ↔ C = D.cuspOrbit := by
-  simp [cuspNhd, ofCusp_injective.eq_iff]
+  simp [cuspNhd]
 
 theorem ofCusp_mem_cuspNhd : ofCusp D.cuspOrbit ∈ cuspNhd D A :=
   (ofCusp_mem_cuspNhd_iff D A).mpr rfl
