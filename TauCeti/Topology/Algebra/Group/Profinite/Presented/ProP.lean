@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
-public import TauCeti.Topology.Algebra.Group.Profinite.Rank
 public import TauCeti.Topology.Algebra.Group.Subgroup
 import TauCeti.GroupTheory.QuotientGroup.KerEquiv
 
