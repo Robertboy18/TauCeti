@@ -86,8 +86,8 @@ presents. -/
 noncomputable def mk : freeProP p X →ₜ* presentedProP p X rels :=
   ⟨QuotientGroup.mk' _, QuotientGroup.continuous_mk⟩
 
-/-- The canonical projection sends an element to its class. -/
-@[simp low]
+/-- The canonical projection sends an element to its class. Not a simp lemma: `mk rels x` is the
+simp normal form of a class, so that `lift_mk` and its relatives fire. -/
 theorem mk_apply (x : freeProP p X) : mk rels x = (x : presentedProP p X rels) :=
   (rfl)
 
@@ -297,22 +297,22 @@ homomorphism to a Hausdorff group is closed and normal, so it is its own closed 
 and the first isomorphism theorem applies. -/
 private noncomputable def mulEquivOfSurjective (φ : freeProP p X →ₜ* G)
     (hφ : Function.Surjective φ) :
-    presentedProP p X (φ.toMonoidHom.ker : Set (freeProP p X)) ≃* G :=
+    presentedProP p X ((φ : freeProP p X →* G).ker : Set (freeProP p X)) ≃* G :=
   (QuotientGroup.quotientMulEquivOfEq (Subgroup.topologicalClosure_normalClosure_eq_self _
     (isClosed_singleton.preimage (map_continuous φ)))).trans
-    (QuotientGroup.quotientKerEquivOfSurjective φ.toMonoidHom hφ)
+    (QuotientGroup.quotientKerEquivOfSurjective (φ : freeProP p X →* G) hφ)
 
 private theorem mulEquivOfSurjective_mk (φ : freeProP p X →ₜ* G) (hφ : Function.Surjective φ)
     (x : freeProP p X) : mulEquivOfSurjective φ hφ (mk _ x) = φ x := by
-  rw [mulEquivOfSurjective, mk_apply, MulEquiv.trans_apply, QuotientGroup.quotientMulEquivOfEq_mk,
-    QuotientGroup.quotientKerEquivOfSurjective, QuotientGroup.quotientKerEquivOfRightInverse_apply,
-    QuotientGroup.kerLift_mk]
+  rw [mulEquivOfSurjective, mk_apply, MulEquiv.trans_apply, QuotientGroup.quotientMulEquivOfEq_mk]
+  unfold QuotientGroup.quotientKerEquivOfSurjective
+  rw [QuotientGroup.quotientKerEquivOfRightInverse_apply]
   rfl
 
 /-- A Hausdorff group that is a continuous image of the free pro-`p` group on `X` is presented on
 `X`, with the kernel as its set of relators. -/
 noncomputable def equivOfSurjective (φ : freeProP p X →ₜ* G) (hφ : Function.Surjective φ) :
-    presentedProP p X (φ.toMonoidHom.ker : Set (freeProP p X)) ≃ₜ* G :=
+    presentedProP p X ((φ : freeProP p X →* G).ker : Set (freeProP p X)) ≃ₜ* G :=
   have hcont : Continuous (mulEquivOfSurjective φ hφ) :=
     (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr <|
       (funext (mulEquivOfSurjective_mk φ hφ) :

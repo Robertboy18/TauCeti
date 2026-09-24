@@ -69,8 +69,8 @@ presents. -/
 noncomputable def mk : freeProfiniteGroup X →ₜ* presentedProfiniteGroup X rels :=
   ⟨QuotientGroup.mk' _, QuotientGroup.continuous_mk⟩
 
-/-- The canonical projection sends an element to its class. -/
-@[simp low]
+/-- The canonical projection sends an element to its class. Not a simp lemma: `mk rels x` is the
+simp normal form of a class, so that `lift_mk` and its relatives fire. -/
 theorem mk_apply (x : freeProfiniteGroup X) : mk rels x = (x : presentedProfiniteGroup X rels) :=
   (rfl)
 
