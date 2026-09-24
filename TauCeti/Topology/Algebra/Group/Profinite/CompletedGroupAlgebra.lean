@@ -96,8 +96,9 @@ namespace completedGroupAlgebra
 
 /-- The families of elements of the group algebras `R[Γ ⧸ U]`, `U` ranging over the open normal
 subgroups of `Γ`, that are compatible along the maps induced by the quotient maps `Γ ⧸ U → Γ ⧸ V`
-for `U ≤ V`, as a subalgebra of the product of the `R[Γ ⧸ U]`. -/
-def subalgebra :
+for `U ≤ V`, as a subalgebra of the product of the `R[Γ ⧸ U]`. This is the implementation of
+`completedGroupAlgebra`; it is private, and the public interface is `proj`, `mk` and `ext`. -/
+private def subalgebra :
     Subalgebra R (∀ U : OpenNormalSubgroup Γ, MonoidAlgebra R (Γ ⧸ U.toSubgroup)) where
   carrier := {x | ∀ ⦃U V : OpenNormalSubgroup Γ⦄ (hUV : U ≤ V),
     MonoidAlgebra.mapDomain (QuotientGroup.mapOfLE hUV) (x U) = x V}
@@ -123,15 +124,19 @@ the Iwasawa algebra `ℤ_p[[Γ]]`.
 Its elements are accessed through the projections `completedGroupAlgebra.proj R Γ U` onto the
 levels `R[Γ ⧸ U]`, which determine them (`completedGroupAlgebra.ext`), and constructed from
 compatible families of elements of the levels by `completedGroupAlgebra.mk`. The representation
-as a subalgebra of the product of the levels is not exposed. -/
+as a subalgebra of the product of the levels is private to this file and is not part of the
+public interface. -/
 def completedGroupAlgebra : Type (max u v) := completedGroupAlgebra.subalgebra R Γ
 
 namespace completedGroupAlgebra
 
-noncomputable instance : Ring (completedGroupAlgebra R Γ) :=
+/-! The ring and algebra structures are transported from the private subalgebra; the instances
+are `@[no_expose]`, which is what lets their bodies name the private constant. -/
+
+@[no_expose] noncomputable instance : Ring (completedGroupAlgebra R Γ) :=
   inferInstanceAs (Ring (subalgebra R Γ))
 
-noncomputable instance : Algebra R (completedGroupAlgebra R Γ) :=
+@[no_expose] noncomputable instance : Algebra R (completedGroupAlgebra R Γ) :=
   inferInstanceAs (Algebra R (subalgebra R Γ))
 
 /-- The projection of the completed group algebra onto the group algebra `R[Γ ⧸ U]` of the
@@ -260,6 +265,7 @@ noncomputable def coeffFamily :
     simp only [Pi.add_apply, map_add, MonoidAlgebra.coeff_add, Finsupp.coe_add]
 
 /-- The coefficients of an element at a quotient are those of its projection. -/
+@[simp]
 theorem coeffFamily_apply (x : completedGroupAlgebra R Γ) (U : OpenNormalSubgroup Γ) :
     coeffFamily R Γ x U = ⇑(proj R Γ U x).coeff :=
   (rfl)
