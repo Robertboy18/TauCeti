@@ -24,7 +24,9 @@ property with parameters passes from the stages to the restricted products when 
 subgroups are open: over both summands (`continuous_restrictedProductSum_symm`, the openness
 hypothesis under which `RestrictedProduct.isTopologicalGroup` holds), or over the right summand
 alone when the left summand is finite (`continuous_restrictedProductSum_symm_of_finite_left`).
-Under either hypothesis `restrictedProductSum` is a homeomorphism.
+Under either hypothesis `restrictedProductSum` is a homeomorphism.  Openness cannot be dropped
+altogether: `not_continuous_restrictedProductSum_symm` exhibits a family with trivial reference
+subgroups for which the inverse is discontinuous.
 
 ## References
 
