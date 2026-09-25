@@ -19,25 +19,25 @@ Let `F = freeProP p X` be the free pro-`p` group on a finite linearly ordered ty
 canonical generators `x_i = freeProP.of i`. The degree-one graded piece
 `gr_1(F) = λ_1(F) ⧸ λ_2(F)` of the lower `p`-series is an `𝔽_p`-vector space with basis
 
-  `π x̄_i` for `i ∈ X`, and `[x̄_i, x̄_j]` for `i < j`,
+  `π x'_i` for `i ∈ X`, and `[x'_i, x'_j]` for `i < j`,
 
-the `p`-power classes and the brackets of the generator classes `x̄_i ∈ gr_0(F)`. So
+the `p`-power classes and the brackets of the generator classes `x'_i ∈ gr_0(F)`. So
 `gr_1(F) ≅ 𝔽_p^X ⊕ Λ²(𝔽_p^X)` has dimension `#X + (#X choose 2)`.
 
 Spanning is the general statement `TauCeti.span_range_degreeOneFamily_eq_top`, which needs only
 that `λ_2(F)` is open. Linear independence is detected on two finite `p`-groups of `p`-class two,
 through the universal property of `F`: the cyclic group `ℤ/p²`, whose generator has a nonzero
-`p`-power class, isolates the coefficient of `π x̄_i`; and the Heisenberg group over `𝔽_p`, whose
+`p`-power class, isolates the coefficient of `π x'_i`; and the Heisenberg group over `𝔽_p`, whose
 two standard generators have trivial `p`-th powers and a nontrivial commutator, isolates the
-coefficient of `[x̄_i, x̄_j]`. Both groups are lifted to the universe of `X`.
+coefficient of `[x'_i, x'_j]`. Both groups are lifted to the universe of `X`.
 
-At `p = 2` the bracket `[x̄_0, x̄_1]` in `gr_1(freeProP 2 (Fin 2))` is therefore nonzero, and the
+At `p = 2` the bracket `[x'_0, x'_1]` in `gr_1(freeProP 2 (Fin 2))` is therefore nonzero, and the
 degree-zero power-defect formula shows that the `2`-power operator on this free pro-`2` group is
 not additive.
 
 ## Main definitions
 
-* `TauCeti.freeProP.degreeOneBasis`: the basis `π x̄_i`, `[x̄_i, x̄_j]` (`i < j`) of `gr_1(F)`.
+* `TauCeti.freeProP.degreeOneBasis`: the basis `π x'_i`, `[x'_i, x'_j]` (`i < j`) of `gr_1(F)`.
 
 ## Main results
 
@@ -188,9 +188,9 @@ private theorem eq_zero_of_sum_smul_eq_zero {ι M : Type*} [Fintype ι]
     (fun hk ↦ (hk (Finset.mem_univ _)).elim)] at h
   exact (smul_eq_zero.mp h).resolve_right hk₀
 
-/-- **Linear independence**: the `p`-power classes `π x̄_i` and the brackets `[x̄_i, x̄_j]` for
+/-- **Linear independence**: the `p`-power classes `π x'_i` and the brackets `[x'_i, x'_j]` for
 `i < j` of the generator classes are linearly independent in `gr_1(freeProP p X)`. The
-coefficient of `π x̄_i` is read off in `ℤ/p²`, and the coefficient of `[x̄_i, x̄_j]` in the
+coefficient of `π x'_i` is read off in `ℤ/p²`, and the coefficient of `[x'_i, x'_j]` in the
 Heisenberg group over `𝔽_p`. -/
 theorem linearIndependent_degreeOneFamily_of :
     LinearIndependent (ZMod p) (degreeOneFamily p (of : X → freeProP p X)) := by
@@ -199,7 +199,7 @@ theorem linearIndependent_degreeOneFamily_of :
   rw [Fintype.linearIndependent_iff]
   intro c hc
   rintro (i | ⟨⟨i, j⟩, hij⟩)
-  · -- The coefficient of `π x̄_i`: send `x_i` to the generator of `ℤ/p²` and the others to `1`.
+  · -- The coefficient of `π x'_i`: send `x_i` to the generator of `ℤ/p²` and the others to `1`.
     let e : ULift.{u} (Multiplicative (ZMod (p ^ 2))) ≃* Multiplicative (ZMod (p ^ 2)) :=
       MulEquiv.ulift
     have hP : IsProP p (ULift.{u} (Multiplicative (ZMod (p ^ 2)))) :=
@@ -215,7 +215,7 @@ theorem linearIndependent_degreeOneFamily_of :
       · rw [degreeOneFamily_inr, gradedBracket_gradedMkZero, gradedMk_eq_zero_iff, Subgroup.coe_mk,
           commutatorElement_eq_one_iff_mul_comm.mpr (mul_comm _ _)]
         exact one_mem _
-  · -- The coefficient of `[x̄_i, x̄_j]`: send `x_i, x_j` to the standard generators of the
+  · -- The coefficient of `[x'_i, x'_j]`: send `x_i, x_j` to the standard generators of the
     -- Heisenberg group over `𝔽_p` and the others to `1`.
     let : TopologicalSpace (ULift.{u} (HeisenbergGroup (ZMod p))) := ⊥
     have : DiscreteTopology (ULift.{u} (HeisenbergGroup (ZMod p))) := ⟨rfl⟩
@@ -256,7 +256,7 @@ theorem linearIndependent_degreeOneFamily_of :
         · rw [h, gradedMkZero_one, map_zero]
 
 /-- **The standard basis of `gr_1` of a free pro-`p` group of finite rank**: the `p`-power classes
-`π x̄_i` for `i ∈ X` and the brackets `[x̄_i, x̄_j]` for `i < j` of the generator classes,
+`π x'_i` for `i ∈ X` and the brackets `[x'_i, x'_j]` for `i < j` of the generator classes,
 indexed by `X ⊕ {ij : X × X // ij.1 < ij.2}`. -/
 noncomputable def degreeOneBasis :
     Module.Basis (X ⊕ {ij : X × X // ij.1 < ij.2}) (ZMod p) (gradedPiece p (freeProP p X) 1) :=
