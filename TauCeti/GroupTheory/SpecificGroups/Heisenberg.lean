@@ -182,7 +182,7 @@ theorem pLowerCentralSeries_top_two_eq_bot :
 end CharP
 
 /-- The Heisenberg group over `ZMod p` is a `p`-group, of order `p ^ 3`. -/
-theorem isPGroup_zmod (p : ℕ) [Fact p.Prime] : IsPGroup p (HeisenbergGroup (ZMod p)) :=
+theorem isPGroup_zmod (p : ℕ) : IsPGroup p (HeisenbergGroup (ZMod p)) :=
   IsPGroup.of_card (n := 3) (by rw [card_eq, Nat.card_zmod])
 
 end HeisenbergGroup
