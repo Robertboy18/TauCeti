@@ -110,12 +110,6 @@ theorem mk_eq_one_iff (r : freeProfiniteGroup X) :
   change (r : freeProfiniteGroup X ⧸ (Subgroup.normalClosure rels).topologicalClosure) = 1 ↔ _
   exact QuotientGroup.eq_one_iff r
 
-/-- The canonical quotient map sends a free generator to the corresponding generator of the
-presented profinite group. -/
-@[simp]
-theorem mk_of (x : X) : mk rels (freeProfiniteGroup.of x) = of rels x :=
-  (rfl)
-
 /-- The generators generate the presented profinite group topologically. -/
 theorem dense_closure_range_of :
     Dense ((Subgroup.closure (Set.range (of rels)) : Subgroup (presentedProfiniteGroup X rels)) :
@@ -363,12 +357,6 @@ theorem mk_eq_one_iff (r : freeProP p X) :
   -- Expose the quotient representation so Mathlib's general criterion applies.
   change (r : freeProP p X ⧸ (Subgroup.normalClosure rels).topologicalClosure) = 1 ↔ _
   exact QuotientGroup.eq_one_iff r
-
-/-- The canonical quotient map sends a free generator to the corresponding generator of the
-presented pro-`p` group. -/
-@[simp]
-theorem mk_of (x : X) : mk p rels (freeProP.of x) = of p rels x :=
-  (rfl)
 
 /-- The generators generate the presented pro-`p` group topologically. -/
 theorem dense_closure_range_of :
