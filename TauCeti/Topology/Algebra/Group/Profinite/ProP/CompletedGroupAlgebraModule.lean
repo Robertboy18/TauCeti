@@ -7,8 +7,7 @@ module
 
 public import Mathlib.NumberTheory.Padics.ProperSpace
 public import TauCeti.Topology.Algebra.Group.Profinite.CompletedGroupAlgebra.Module
-public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicPow
-public import TauCeti.Topology.Algebra.GroupAction.TypeTags
+public import TauCeti.Topology.Algebra.Group.Profinite.ProP.CompactModule
 
 /-!
 # Abelian pro-`p` groups with a continuous action as modules over `ℤ_p[[Γ]]`
@@ -35,9 +34,6 @@ one constructed here (Labute, §4, p. 121).
 
 ## Main results
 
-* `TauCeti.IsProP.isCompactModule`: an abelian pro-`p` group is a compact `ℤ_p`-module.
-* `TauCeti.IsProP.smul_padicPow`, `TauCeti.IsProP.smulCommClass_module`: a continuous action by
-  group automorphisms commutes with `p`-adic powers, so it is `ℤ_p`-linear.
 * `TauCeti.IsProP.completedGroupAlgebraModule_of_smul`,
   `TauCeti.IsProP.isScalarTower_completedGroupAlgebraModule`,
   `TauCeti.IsProP.continuousSMul_completedGroupAlgebraModule`: the group elements act as `Γ`
@@ -55,34 +51,6 @@ namespace TauCeti.IsProP
 
 variable {p : ℕ} [Fact p.Prime] {A : Type*} [CommGroup A] [TopologicalSpace A]
   [IsTopologicalGroup A] [CompactSpace A] [TotallyDisconnectedSpace A]
-
-/-- **An abelian pro-`p` group is a compact `ℤ_p`-module**, for the module structure
-`TauCeti.IsProP.module`. -/
-theorem isCompactModule (hA : IsProP p A) :
-    letI := hA.module
-    IsCompactModule ℤ_[p] (Additive A) :=
-  letI := hA.module
-  ⟨inferInstance, hA.continuousSMul_module, inferInstance, inferInstance⟩
-
-section Linear
-
-variable {Γ : Type*} [Group Γ] [MulDistribMulAction Γ A] [ContinuousConstSMul Γ A]
-
-/-- A continuous automorphism of an abelian pro-`p` group commutes with `p`-adic powers. -/
-theorem smul_padicPow (hA : IsProP p A) (γ : Γ) (a : A) (l : ℤ_[p]) :
-    γ • hA.padicPow a l = hA.padicPow (γ • a) l :=
-  hA.map_padicPow hA (MulDistribMulAction.toMonoidHom A γ) (continuous_const_smul γ) a l
-
-/-- **A continuous action by group automorphisms is `ℤ_p`-linear**: it commutes with the scalar
-action of `TauCeti.IsProP.module`. -/
-theorem smulCommClass_module (hA : IsProP p A) :
-    letI := hA.module
-    SMulCommClass Γ ℤ_[p] (Additive A) :=
-  letI := hA.module
-  ⟨fun γ l x ↦ by
-    simp only [hA.module_smul, ← Additive.ofMul_smul, Additive.toMul_smul, hA.smul_padicPow]⟩
-
-end Linear
 
 section Module
 

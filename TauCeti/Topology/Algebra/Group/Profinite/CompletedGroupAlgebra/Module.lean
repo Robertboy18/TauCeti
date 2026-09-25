@@ -138,7 +138,9 @@ and `M ⧸ V'` commute with the factor map `M ⧸ V → M ⧸ V'`. -/
 theorem factor_toQuotientEnd (hV' : ∀ γ : Γ, ∀ x ∈ V', γ • x ∈ V') (h : V ≤ V')
     (x : completedGroupAlgebra R Γ) (y : M ⧸ V) :
     Submodule.factor h (toQuotientEnd hV U hU x y) =
-      toQuotientEnd hV' U (hU.trans (Submodule.ker_quotientToModuleEnd_mono hV hV' h)) x
+      toQuotientEnd hV' U (hU.trans (by
+        simpa only [← MonoidHom.ker_toSubmonoid, Subgroup.toSubmonoid_le] using
+          Submodule.mker_quotientToModuleEnd_mono hV hV' h)) x
         (Submodule.factor h y) := by
   rw [toQuotientEnd_apply, toQuotientEnd_apply]
   generalize proj R Γ U x = f

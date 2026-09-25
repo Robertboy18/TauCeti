@@ -11,9 +11,9 @@ public import TauCeti.Algebra.Module.Submodule.GroupAction
 public import TauCeti.Topology.Algebra.Module.Compact
 
 /-!
-# Continuous actions of a compact group on a topological module
+# Continuous actions on a topological module
 
-Let a topological group `Γ` act continuously and `R`-linearly on a topological `R`-module `M`.
+Let a monoid `Γ` act continuously and `R`-linearly on a topological `R`-module `M`.
 Two compactness arguments, both instances of the tube lemma, control the interaction of the
 action with the open submodules of `M`.
 
@@ -23,10 +23,10 @@ action with the open submodules of `M`.
   among the open submodules; in a linearly topologized module they form a basis of neighbourhoods
   of zero, so continuity into `M` and equality in a Hausdorff `M` can both be tested modulo the
   invariant open submodules.
-* When `M` is compact, the action of `Γ` on the quotient `M ⧸ V` by an invariant open submodule
-  `V` has open kernel: the set of pairs `(γ, x)` with `γ • x - x ∈ V` is an open neighbourhood of
-  `{1} × M`, so it contains a tube `U × M`, and `U` lies in the kernel. The kernel is recorded as
-  the open normal subgroup `Submodule.quotientActionKernel hV hVo`.
+* When `Γ` is a group and `M` is compact, the action on the quotient `M ⧸ V` by an invariant open
+  submodule `V` has open kernel: the set of pairs `(γ, x)` with `γ • x - x ∈ V` is an open
+  neighbourhood of `{1} × M`, so it contains a tube `U × M`, and `U` lies in the kernel. The kernel
+  is recorded as the open normal subgroup `Submodule.quotientActionKernel hV hVo`.
 
 These are the two facts that turn a compact module with a continuous action of a profinite
 group `Γ` into a module over the completed group algebra of `Γ`: the action on each finite
@@ -56,11 +56,13 @@ open Topology
 
 namespace Submodule
 
-variable {Γ R M : Type*} [Group Γ] [TopologicalSpace Γ] [Ring R] [AddCommGroup M] [Module R M]
+section Monoid
+
+variable {Γ R M : Type*} [Monoid Γ] [TopologicalSpace Γ] [Ring R] [AddCommGroup M] [Module R M]
   [TopologicalSpace M] [DistribMulAction Γ M] [SMulCommClass Γ R M] [ContinuousSMul Γ M]
 
 variable (Γ) in
-/-- **Invariant cores of open submodules are open** when the acting group is compact: by the
+/-- **Invariant cores of open submodules are open** when the acting monoid is compact: by the
 tube lemma, a neighbourhood of `0` is carried into `V` by the whole of `Γ`. -/
 theorem isOpen_invariantCore [CompactSpace Γ] [ContinuousAdd M] (V : Submodule R M)
     (hV : IsOpen (V : Set M)) : IsOpen (V.invariantCore Γ : Set M) := by
@@ -73,8 +75,13 @@ theorem isOpen_invariantCore [CompactSpace Γ] [ContinuousAdd M] (V : Submodule 
     (Filter.mem_of_superset (hw.mem_nhds (h0w rfl)) fun x hx ↦ ?_)
   simpa [mem_invariantCore] using fun γ ↦ huw (Set.mk_mem_prod (hu (Set.mem_univ γ)) hx)
 
-variable [SeparatelyContinuousMul Γ] [CompactSpace M] [IsTopologicalAddGroup M]
-  {V : Submodule R M}
+end Monoid
+
+section Group
+
+variable {Γ R M : Type*} [Group Γ] [TopologicalSpace Γ] [Ring R] [AddCommGroup M] [Module R M]
+  [TopologicalSpace M] [DistribMulAction Γ M] [SMulCommClass Γ R M] [ContinuousSMul Γ M]
+  [SeparatelyContinuousMul Γ] [CompactSpace M] [IsTopologicalAddGroup M] {V : Submodule R M}
 
 /-- **The action on an open quotient has open kernel** when the module is compact: by the tube
 lemma, a neighbourhood of `1` moves every element of `M` by an element of `V`. -/
@@ -88,7 +95,7 @@ theorem isOpen_ker_quotientToModuleEnd (hV : ∀ γ : Γ, ∀ x ∈ V, γ • x 
       simp [hq.1]
   refine (quotientToModuleEnd hV).ker.isOpen_of_mem_nhds (g := 1)
     (Filter.mem_of_superset (hu.mem_nhds (h1u rfl)) fun γ hγ ↦ ?_)
-  rw [SetLike.mem_coe, mem_ker_quotientToModuleEnd]
+  rw [SetLike.mem_coe, MonoidHom.mem_ker, ← MonoidHom.mem_mker, mem_mker_quotientToModuleEnd]
   exact fun x ↦ huw (Set.mk_mem_prod hγ (hw (Set.mem_univ x)))
 
 /-- The kernel of the action of `Γ` on the quotient of a compact module by an invariant open
@@ -104,16 +111,18 @@ theorem quotientActionKernel_toSubgroup (hV : ∀ γ : Γ, ∀ x ∈ V, γ • x
     (quotientActionKernel hV hVo).toSubgroup = (quotientToModuleEnd hV).ker :=
   (rfl)
 
+end Group
+
 end Submodule
 
 namespace TauCeti
 
-variable {Γ R M : Type*} [Group Γ] [TopologicalSpace Γ] [CompactSpace Γ] [Ring R]
+variable {Γ R M : Type*} [Monoid Γ] [TopologicalSpace Γ] [CompactSpace Γ] [Ring R]
   [AddCommGroup M] [Module R M] [TopologicalSpace M] [DistribMulAction Γ M] [SMulCommClass Γ R M]
   [ContinuousSMul Γ M] [IsLinearTopology R M]
 
 variable (Γ R) in
-/-- **Continuity modulo the invariant open submodules.** For a compact group acting continuously
+/-- **Continuity modulo the invariant open submodules.** For a compact monoid acting continuously
 on a linearly topologized topological module `M`, a map into `M` is continuous exactly when it is
 continuous modulo every `Γ`-invariant open submodule. -/
 theorem IsLinearTopology.continuous_iff_forall_invariant_continuous_mkQ [IsTopologicalAddGroup M]
@@ -130,7 +139,7 @@ theorem IsLinearTopology.continuous_iff_forall_invariant_continuous_mkQ [IsTopol
     (h _ (N.isOpen_invariantCore Γ hN) fun γ _ hx ↦ Submodule.smul_mem_invariantCore γ hx)
 
 variable (Γ) in
-/-- **Separation by the invariant open submodules.** For a compact group acting continuously on
+/-- **Separation by the invariant open submodules.** For a compact monoid acting continuously on
 a `T1` linearly topologized topological module, two elements that agree modulo every
 `Γ`-invariant open submodule are equal. -/
 theorem IsLinearTopology.eq_of_forall_invariant_mkQ_eq [ContinuousAdd M] [T1Space M] {m m' : M}
