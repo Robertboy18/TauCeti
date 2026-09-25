@@ -34,7 +34,8 @@ basis-modification maps of the theory of Demushkin groups acquire an extra brack
 
 The motivating case is a free pro-`p` group `F` on generators `x_i` and the endomorphism
 `x_i ↦ x_i * w_i` with `w_i ∈ λ_m(F)`, which moves a relator `r ∈ λ_1(F)` inside its coset by an
-element of `λ_{m+1}(F)` whose class is `D_1 r̄`. That case is developed in
+element of `λ_{m+1}(F)` whose class is `D_1 ρ`, for `ρ ∈ gr_1(F)` the class of `r`. That case is
+developed in
 `TauCeti.Topology.Algebra.Group.Profinite.Free.BasisModification`.
 
 ## Main definitions
