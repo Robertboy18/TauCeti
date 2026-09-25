@@ -47,9 +47,8 @@ Ported from the AINTLIB `LeanModularForms` project
   positive.
 * `HeckeRing.GL2.doubleCoset_out_diagCosetGamma0_const_eq_iUnion_rightCosets`: a scalar
   double coset is a single right coset.
-* `HeckeRing.GL2.coprimeDetCoset_diagCosetGamma0_of_coprime`,
-  `HeckeRing.GL2.coprimeDetCoset_diagCosetGamma0`: the coset of `diag(a)` has determinant prime
-  to `m` when `a₀ a₁` is, in particular prime to `N`.
+* `HeckeRing.GL2.coprimeDetCoset_diagCosetGamma0_of_coprime`: the coset of `diag(a)` has
+  determinant prime to `m` when `a₀ a₁` is.
 
 ## References
 
@@ -178,7 +177,7 @@ theorem degree_diagCosetGamma0_const (c : ℕ)
 /-- **A diagonal double coset has determinant prime to `m`** as soon as `a₀ a₁` is: the
 determinant of `diag(a₀, a₁)` is `a₀ a₁`. At `m = Q` for an exact divisor `Q` of the level this is
 the hypothesis `CoprimeDetCoset N Q` under which the Hecke operator `T(a₀, a₁)` commutes with the
-Atkin–Lehner operator `W_Q`. -/
+Atkin–Lehner operator `W_Q`; at `m = N` it is the one for the Fricke operator. -/
 theorem coprimeDetCoset_diagCosetGamma0_of_coprime {m : ℕ} {a : Fin 2 → ℕ} (ha : ∀ i, 0 < a i)
     (hgcd : (∀ i, 0 < a i) → Nat.Coprime (a 0) N) (h : Nat.Coprime (a 0 * a 1) m) :
     CoprimeDetCoset N m (diagCosetGamma0 N a hgcd) := by
@@ -191,14 +190,5 @@ theorem coprimeDetCoset_diagCosetGamma0_of_coprime {m : ℕ} {a : Fin 2 → ℕ}
     Matrix.diagonal_apply_ne _ (by decide : (1 : Fin 2) ≠ 0), mul_zero, sub_zero]
   rw [← Nat.cast_mul, Int.gcd_natCast_natCast]
   exact h
-
-/-- **A diagonal double coset has determinant prime to the level** as soon as `a₀ a₁` is. This is
-the hypothesis `CoprimeDetCoset N N` under which the good Hecke operators `T(a₀, a₁)` commute with
-the Fricke operator. -/
-theorem coprimeDetCoset_diagCosetGamma0 {a : Fin 2 → ℕ} (ha : ∀ i, 0 < a i)
-    (h : Nat.Coprime (a 0 * a 1) N) :
-    CoprimeDetCoset N N
-      (diagCosetGamma0 N a fun _ ↦ (Nat.coprime_mul_iff_left.mp h).1) :=
-  coprimeDetCoset_diagCosetGamma0_of_coprime N ha _ h
 
 end HeckeRing.GL2

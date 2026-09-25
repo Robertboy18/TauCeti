@@ -97,16 +97,14 @@ namespace Nat.IsExactDivisor
 
 /-- **The normalized Atkin–Lehner operator preserves the new subspace at trivial nebentypus.**
 For a cusp form `f` on `Γ₀(N)` whose restriction to `Γ₁(N)` is new, the restriction of `𝒲_Q f`
-is again new, for every exact divisor `Q ∥ N`.
-
-Newness of a form of trivial nebentypus is orthogonality to the old forms of trivial nebentypus,
-which are the restrictions of forms `g` on `Γ₀(N)`; there the `Γ₁(N)`-Petersson product is a
-multiple of the `Γ₀(N)`-one, for which `𝒲_Q` is self-adjoint and preserves oldness. -/
+is again new, for every exact divisor `Q ∥ N`. -/
 theorem ofLe_normalizedAtkinLehnerOperatorCusp_mem_cuspFormsNew (h : Q ∥ N)
     {f : CuspForm ((Gamma0 N).map (mapGL ℝ)) k}
     (hf : CuspForm.ofLe (Gamma1_map_le_Gamma0_map N) f ∈ cuspFormsNew N k) :
     CuspForm.ofLe (Gamma1_map_le_Gamma0_map N) (h.normalizedAtkinLehnerOperatorCusp k f) ∈
       cuspFormsNew N k := by
+  -- newness of a form of trivial nebentypus is orthogonality to the old forms of trivial
+  -- nebentypus
   rw [mem_cuspFormsNew_iff_of_mem_cuspFormCharSpace (ofLe_mem_cuspFormCharSpace_one _),
     CuspForm.mem_peterssonOrthogonal_iff]
   rintro G ⟨hGold, hG⟩
@@ -114,6 +112,8 @@ theorem ofLe_normalizedAtkinLehnerOperatorCusp_mem_cuspFormsNew (h : Q ∥ N)
   rw [cuspFormCharSpace_one_eq_range] at hG
   obtain ⟨g, rfl⟩ := LinearMap.mem_range.mp hG
   rw [CuspForm.ofLeₗ_apply] at hGold ⊢
+  -- the `Γ₁(N)`-Petersson product of two such restrictions is a multiple of the `Γ₀(N)`-one, for
+  -- which `𝒲_Q` is self-adjoint and preserves oldness
   rw [CuspForm.peterssonInnerCosets_ofLe_ofLe,
     ← h.peterssonInnerCosets_normalizedAtkinLehnerOperatorCusp_left,
     ← CuspForm.peterssonInnerCosets_ofLe_ofLe (Gamma1_map_le_Gamma0_map N)]
@@ -363,6 +363,7 @@ theorem atkinLehnerSign_mul (f : Newform N k) (hχ : f.χ = 1) (hQ : Q ∥ N) (h
 
 /-- **The sign at `Q = N` is the Fricke sign**: `𝒲_N` is the normalized Fricke operator, read
 on `Γ₀(N)`. -/
+@[simp]
 theorem atkinLehnerSign_self (f : Newform N k) (hχ : f.χ = 1) (h : N ∥ N) :
     f.atkinLehnerSign hχ h = f.frickeSign hχ := by
   refine f.atkinLehnerSign_eq_of_normalizedAtkinLehnerOperatorCusp_eq_smul hχ h
@@ -372,9 +373,9 @@ theorem atkinLehnerSign_self (f : Newform N k) (hχ : f.χ = 1) (h : N ∥ N) :
   simp
 
 /-- **The sign at an exact divisor is the product of the signs at its maximal prime powers**:
-for `s ⊆ N.primeFactors`, `ε_{∏ p ∈ s, p ^ v_p(N)}(f) = ∏ p ∈ s, ε_{p ^ v_p(N)}(f)`. -/
-theorem atkinLehnerSign_prodPrimePow (f : Newform N k) (hχ : f.χ = 1) {s : Finset ℕ}
-    (hs : s ⊆ N.primeFactors) :
+`ε_{∏ p ∈ s, p ^ v_p(N)}(f) = ∏ p ∈ s, ε_{p ^ v_p(N)}(f)` for every finite set `s` of naturals;
+an index outside `N.primeFactors` has exponent `0` and contributes `ε_1(f) = 1`. -/
+theorem atkinLehnerSign_prodPrimePow (f : Newform N k) (hχ : f.χ = 1) (s : Finset ℕ) :
     f.atkinLehnerSign hχ (TauCeti.Nat.isExactDivisor_prodPrimePow (s := s)) =
       ∏ p ∈ s, f.atkinLehnerSign hχ (TauCeti.Nat.isExactDivisor_primePow (p := p)) := by
   induction s using Finset.induction_on with
@@ -382,16 +383,9 @@ theorem atkinLehnerSign_prodPrimePow (f : Newform N k) (hχ : f.χ = 1) {s : Fin
     rw [Finset.prod_empty, f.atkinLehnerSign_congr hχ _ TauCeti.Nat.isExactDivisor_one
       TauCeti.Nat.prodPrimePow_empty, atkinLehnerSign_one]
   | insert p s hps ih =>
-    have hp : p.Prime := Nat.prime_of_mem_primeFactors (hs (Finset.mem_insert_self p s))
-    have hs' : s ⊆ N.primeFactors := (Finset.subset_insert p s).trans hs
-    -- `p ^ v_p(N)` is coprime to the product over `s`, whose primes are those of `s`
-    have hcop : Nat.Coprime (p ^ N.factorization p) (TauCeti.Nat.prodPrimePow N s) := by
-      refine Nat.Coprime.pow_left _ ((Nat.Prime.coprime_iff_not_dvd hp).2 fun hdvd ↦ hps ?_)
-      rw [← TauCeti.Nat.primeFactors_prodPrimePow hs']
-      exact Nat.mem_primeFactors.2 ⟨hp, hdvd, TauCeti.Nat.isExactDivisor_prodPrimePow.ne_zero⟩
-    rw [Finset.prod_insert hps, ← ih hs',
+    rw [Finset.prod_insert hps, ← ih,
       ← f.atkinLehnerSign_mul hχ (TauCeti.Nat.isExactDivisor_primePow (p := p))
-        TauCeti.Nat.isExactDivisor_prodPrimePow hcop]
+        TauCeti.Nat.isExactDivisor_prodPrimePow (TauCeti.Nat.coprime_primePow_prodPrimePow hps)]
     exact f.atkinLehnerSign_congr hχ _ _ (TauCeti.Nat.prodPrimePow_insert hps)
 
 /-- **The Atkin–Lehner signs multiply to the Fricke sign**:
@@ -399,7 +393,7 @@ theorem atkinLehnerSign_prodPrimePow (f : Newform N k) (hχ : f.χ = 1) {s : Fin
 theorem prod_atkinLehnerSign_primePow_eq_frickeSign (f : Newform N k) (hχ : f.χ = 1) :
     ∏ p ∈ N.primeFactors, f.atkinLehnerSign hχ (TauCeti.Nat.isExactDivisor_primePow (p := p)) =
       f.frickeSign hχ := by
-  rw [← f.atkinLehnerSign_prodPrimePow hχ subset_rfl,
+  rw [← f.atkinLehnerSign_prodPrimePow hχ N.primeFactors,
     f.atkinLehnerSign_congr hχ _ (TauCeti.Nat.isExactDivisor_self (NeZero.ne N))
       (TauCeti.Nat.isExactDivisor_self (NeZero.ne N)).prodPrimePow_primeFactors,
     f.atkinLehnerSign_self]

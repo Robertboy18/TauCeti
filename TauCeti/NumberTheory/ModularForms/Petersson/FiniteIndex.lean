@@ -309,11 +309,7 @@ theorem peterssonInnerCosets_self_eq_zero (f : CuspForm (Γ.map (mapGL ℝ)) k) 
 `Γ' ≤ Γ` of finite index in `SL₂(ℤ)` and cusp forms `f`, `g` for `Γ`, read as cusp forms for
 `Γ'`,
 
-`⟪f, g⟫_Γ' = [Γ·{±I} : Γ'·{±I}] · ⟪f, g⟫_Γ`.
-
-The cosets of `Γ'·{±I}` in `SL₂(ℤ)` are the pairs of a coset of `Γ·{±I}` and a coset of
-`Γ'·{±I}` in `Γ·{±I}`, and the summand of the defining sum depends only on the former: the
-`Γ·{±I}` part of the representative is invisible to the pairing of two forms for `Γ`. -/
+`⟪f, g⟫_Γ' = [Γ·{±I} : Γ'·{±I}] · ⟪f, g⟫_Γ`. -/
 theorem peterssonInnerCosets_ofLe_ofLe {Γ' : Subgroup SL(2, ℤ)} [Γ'.FiniteIndex]
     (hle : Γ'.map (mapGL ℝ) ≤ Γ.map (mapGL ℝ)) (f g : CuspForm (Γ.map (mapGL ℝ)) k) :
     peterssonInnerCosets (CuspForm.ofLe hle f) (CuspForm.ofLe hle g) =
@@ -322,7 +318,9 @@ theorem peterssonInnerCosets_ofLe_ofLe {Γ' : Subgroup SL(2, ℤ)} [Γ'.FiniteIn
   have hwc : Γ'.withCenter ≤ Γ.withCenter :=
     Subgroup.withCenter_le_iff.mpr ⟨hle'.trans Γ.le_withCenter, Γ.center_le_withCenter⟩
   let : Fintype (Γ.withCenter ⧸ Γ'.withCenter.subgroupOf Γ.withCenter) := Fintype.ofFinite _
-  -- the summand at the pair `(p, i)` is the summand of `⟪f, g⟫_Γ` at `p`
+  -- the cosets of `Γ'·{±I}` in `SL₂(ℤ)` are the pairs of a coset `p` of `Γ·{±I}` and a coset `i`
+  -- of `Γ'·{±I}` in `Γ·{±I}`; the summand at `(p, i)` is the summand of `⟪f, g⟫_Γ` at `p`, the
+  -- `Γ·{±I}` part of the representative being invisible to the pairing of two forms for `Γ`
   have key : ∀ (p : SL(2, ℤ) ⧸ Γ.withCenter)
       (i : Γ.withCenter ⧸ Γ'.withCenter.subgroupOf Γ.withCenter),
       UpperHalfPlane.peterssonInner k fd
