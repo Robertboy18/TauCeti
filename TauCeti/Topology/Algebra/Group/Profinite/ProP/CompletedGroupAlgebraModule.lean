@@ -104,8 +104,9 @@ noncomputable def completedGroupAlgebraModule (hA : IsProP p A) :
 
 variable {Γ}
 
-/-- **A group element acts as itself**: `of ℤ_[p] Γ γ • x = γ • x`. -/
-@[simp]
+/-- **A group element acts as itself**: `of ℤ_[p] Γ γ • x = γ • x`. Not a simp lemma: `simp`
+already proves it through `TauCeti.IsCompactModule.completedGroupAlgebraModule_smul` and
+`TauCeti.IsCompactModule.completedSMul_of`, since the module structure is instance-reducible. -/
 theorem completedGroupAlgebraModule_of_smul (hA : IsProP p A) (γ : Γ) (x : Additive A) :
     letI := hA.completedGroupAlgebraModule Γ
     completedGroupAlgebra.of ℤ_[p] Γ γ • x = γ • x :=
