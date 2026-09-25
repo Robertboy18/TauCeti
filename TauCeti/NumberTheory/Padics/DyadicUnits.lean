@@ -393,6 +393,7 @@ theorem not_exists_topologicalClosure_zpowers_eq_unitsPlusMinus {f : ℕ} (hf : 
 /-! ### The subgroup of squares and the index `(A : A²)` -/
 
 /-- `(V^(f))² = U^(f+1)` for `f ≥ 2`: the squares of `{±1} × U^(f)` are the squares of `U^(f)`. -/
+@[simp]
 theorem map_powMonoidHom_two_unitsPlusMinus {f : ℕ} (hf : 2 ≤ f) :
     (unitsPlusMinus f).map (powMonoidHom 2) = unitsPrincipal 2 (f + 1) := by
   rw [unitsPlusMinus_def, Subgroup.map_sup, map_powMonoidHom_unitsPrincipal (by omega) fun _ ↦ hf,

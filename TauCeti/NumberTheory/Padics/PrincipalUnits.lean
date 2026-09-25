@@ -387,11 +387,13 @@ theorem exists_topologicalClosure_zpowers_eq_unitsPrincipal {f : ℕ} (hf : 0 < 
 
 /-- `(U^(f))^p = U^(f+1)`: the `p`-th powers of the principal units of level `f` are exactly the
 principal units of level `f + 1`, for `f ≥ 1`, and `f ≥ 2` when `p = 2`. -/
+@[simp]
 theorem map_powMonoidHom_unitsPrincipal {f : ℕ} (hf : 0 < f) (hf₂ : p = 2 → 2 ≤ f) :
     (unitsPrincipal p f).map (powMonoidHom p) = unitsPrincipal p (f + 1) := by
   obtain ⟨u, hu, hu'⟩ := exists_mem_unitsPrincipal_and_notMem_succ_of_pos p hf
   rw [← topologicalClosure_zpowers_eq_unitsPrincipal hf hf₂ hu hu',
-    MonoidHom.map_topologicalClosure (powMonoidHom p : ℤ_[p]ˣ →* ℤ_[p]ˣ) (continuous_pow p),
+    MonoidHom.map_topologicalClosure (powMonoidHom p : ℤ_[p]ˣ →* ℤ_[p]ˣ) (continuous_pow p)
+      (Subgroup.zpowers u) (Subgroup.isClosed_topologicalClosure _).isCompact,
     MonoidHom.map_zpowers, powMonoidHom_apply]
   exact topologicalClosure_zpowers_eq_unitsPrincipal (by omega) (fun _ ↦ by omega)
     (by simpa only [pow_one] using pow_pow_mem_unitsPrincipal hf hu 1)
