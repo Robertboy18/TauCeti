@@ -53,8 +53,7 @@ theorem monoidAlgebraRatPadicCyclicTwoEquiv_apply
     monoidAlgebraRatPadicCyclicTwoEquiv x =
       (x.coeff 1 + x.coeff (Multiplicative.ofAdd 1),
         x.coeff 1 - x.coeff (Multiplicative.ofAdd 1)) := by
-  let : Invertible (2 : ℚ_[2]) := invertibleOfNonzero two_ne_zero
-  change MonoidAlgebra.cyclicTwoEquivProd ℚ_[2] x = _
+  unfold monoidAlgebraRatPadicCyclicTwoEquiv
   rw [MonoidAlgebra.cyclicTwoEquivProd_apply]
   simpa only [MonoidAlgebra.cyclicTwoToProd_single_one_add_single_ofAdd_one] using
     congrArg (MonoidAlgebra.cyclicTwoToProd ℚ_[2])
@@ -66,10 +65,9 @@ theorem monoidAlgebraRatPadicCyclicTwoEquiv_symm_apply (z : ℚ_[2] × ℚ_[2]) 
     monoidAlgebraRatPadicCyclicTwoEquiv.symm z =
       MonoidAlgebra.single 1 ((z.1 + z.2) / 2) +
         MonoidAlgebra.single (Multiplicative.ofAdd 1) ((z.1 - z.2) / 2) := by
-  let : Invertible (2 : ℚ_[2]) := invertibleOfNonzero two_ne_zero
-  change (MonoidAlgebra.cyclicTwoEquivProd ℚ_[2]).symm z = _
-  simpa only [invOf_eq_inv, div_eq_mul_inv, mul_comm] using
-    MonoidAlgebra.cyclicTwoEquivProd_symm_apply ℚ_[2] z
+  unfold monoidAlgebraRatPadicCyclicTwoEquiv
+  rw [MonoidAlgebra.cyclicTwoEquivProd_symm_apply]
+  simp only [invOf_eq_inv, div_eq_mul_inv, mul_comm]
 
 /-- There is no integral splitting of `ℤ₂[C₂]`: since `2` is not a unit of `ℤ₂`, the idempotents
 `(1 ± σ)/2` are not available, and the only idempotents of `ℤ₂[C₂]` are `0` and `1`. -/
