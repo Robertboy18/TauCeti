@@ -31,8 +31,8 @@ topologically generate `ℤ_2ˣ = {±1} × (1 + 4ℤ_2)`. The marked generators 
 
 ## Main results
 
-* `TauCeti.standardD0Orientation_relator`: any character of the free pro-`2` group with these
-  values on the generators kills the relator `A²S⁴(S,Y)`.
+* `TauCeti.standardD0Orientation_relator`: any character of the free pro-`2` group with values
+  `-1` on `A` and `1` on `S` kills the relator `A²S⁴(S,Y)`, regardless of its value on `Y`.
 * `TauCeti.standardD0Orientation_surjective`: the standard orientation is surjective.
 * `TauCeti.standardD0Orientation_unique`: it is the only continuous character of `D₀` with these
   values on the marked generators.
@@ -52,6 +52,7 @@ namespace TauCeti
 /-- `-3` is a `2`-adic unit: `-3 = 1 + (-4)` with `2 ∣ -4`. -/
 theorem isUnit_neg_three : IsUnit (-3 : ℤ_[2]) := by
   have := PadicInt.isUnit_one_add_of_dvd (p := 2) (x := -4) ⟨-2, by norm_num⟩
+  -- Normalize `1 + (-4)` to `-3` in the conclusion of the unit criterion.
   rwa [show (1 : ℤ_[2]) + -4 = -3 by norm_num] at this
 
 /-- The `2`-adic unit with value `-3`, whose inverse is the value of the standard orientation
@@ -67,15 +68,15 @@ theorem negThreeUnit_coe : (negThreeUnit : ℤ_[2]) = -3 :=
 `(-3)⁻¹ · (1 - 2²) = 1`. -/
 theorem negThreeUnit_inv_mul_one_sub_two_pow_two :
     ((negThreeUnit⁻¹ : ℤ_[2]ˣ) : ℤ_[2]) * (1 - (2 : ℤ_[2]) ^ 2) = 1 := by
+  -- Identify the second factor with the coerced unit so that `Units.inv_mul` applies.
   rw [show (1 : ℤ_[2]) - 2 ^ 2 = negThreeUnit by rw [negThreeUnit_coe]; norm_num, Units.inv_mul]
 
-/-- Any character of the free pro-`2` group on `A, S, Y` with values `-1`, `1`, `(-3)⁻¹` kills the
-relator `A²S⁴(S,Y)`: `(-1)² · 1⁴ · 1 = 1`, the commutator dying in the abelian group `ℤ_2ˣ`. -/
+/-- Any character of the free pro-`2` group on `A, S, Y` with values `-1` on `A` and `1` on `S`
+kills the relator `A²S⁴(S,Y)`, regardless of its value on `Y`: `(-1)² · 1⁴ · 1 = 1`. -/
 theorem standardD0Orientation_relator (φ : freeProP 2 (Fin 3) →* ℤ_[2]ˣ)
-    (hA : φ (freeProP.of 0) = -1) (hS : φ (freeProP.of 1) = 1)
-    (hY : φ (freeProP.of 2) = negThreeUnit⁻¹) : φ d0Relator = 1 := by
+    (hA : φ (freeProP.of 0) = -1) (hS : φ (freeProP.of 1) = 1) : φ d0Relator = 1 := by
   rw [d0Relator_def]
-  simp [hA, hS, hY]
+  simp [hA, hS]
 
 /-- **The standard orientation of `D₀`**: the continuous character `D₀ →ₜ* ℤ_2ˣ` with values
 `-1`, `1`, `(-3)⁻¹` on the marked generators `A`, `S`, `Y`. -/
