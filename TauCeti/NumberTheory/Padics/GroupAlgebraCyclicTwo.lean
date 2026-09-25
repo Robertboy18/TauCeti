@@ -38,7 +38,7 @@ public section
 namespace TauCeti
 
 /-- Over `ℚ₂`, the idempotents `(1 ± σ)/2` split the group ring of `C₂` into the two eigenspaces
-of `σ`: `ℚ₂[C₂] ≃ₐ[ℚ₂] ℚ₂ × ℚ₂`. This is `TauCeti.MonoidAlgebra.cyclicTwoEquivProd` for the
+of `σ`: `ℚ₂[C₂] ≃ₐ[ℚ₂] ℚ₂ × ℚ₂`. This is `MonoidAlgebra.cyclicTwoEquivProd` for the
 field `ℚ₂`, in which `2` is invertible. -/
 noncomputable def monoidAlgebraRatPadicCyclicTwoEquiv :
     MonoidAlgebra ℚ_[2] (Multiplicative (ZMod 2)) ≃ₐ[ℚ_[2]] ℚ_[2] × ℚ_[2] :=

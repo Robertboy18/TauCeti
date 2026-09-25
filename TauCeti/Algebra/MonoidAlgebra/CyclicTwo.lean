@@ -31,10 +31,10 @@ homomorphism `R[C₂] → R × R`, `a + bσ ↦ (a + b, a - b)`.
 ## Main declarations
 
 * `TauCeti.cyclicTwoSign`: the sign character `Multiplicative (ZMod 2) →* R`.
-* `TauCeti.MonoidAlgebra.cyclicTwoToProd`: the algebra homomorphism `R[C₂] →ₐ[R] R × R`.
-* `TauCeti.MonoidAlgebra.cyclicTwoEquivProd`: the isomorphism `R[C₂] ≃ₐ[R] R × R` when `2` is
+* `MonoidAlgebra.cyclicTwoToProd`: the algebra homomorphism `R[C₂] →ₐ[R] R × R`.
+* `MonoidAlgebra.cyclicTwoEquivProd`: the isomorphism `R[C₂] ≃ₐ[R] R × R` when `2` is
   invertible in `R`.
-* `TauCeti.MonoidAlgebra.isIdempotentElem_cyclicTwo_iff`: over a ring without zero divisors in
+* `MonoidAlgebra.isIdempotentElem_cyclicTwo_iff`: over a ring without zero divisors in
   which `2` is not a unit, an element of `R[C₂]` is idempotent if and only if it is `0` or `1`.
 
 ## References
@@ -76,7 +76,11 @@ theorem one_ne_ofAdd_one : (1 : Multiplicative (ZMod 2)) ≠ Multiplicative.ofAd
 theorem ofAdd_one_mul_ofAdd_one :
     (Multiplicative.ofAdd (1 : ZMod 2)) * Multiplicative.ofAdd 1 = 1 := by decide
 
+end TauCeti
+
 namespace MonoidAlgebra
+
+open TauCeti
 
 section Semiring
 
@@ -209,5 +213,3 @@ theorem isIdempotentElem_cyclicTwo_iff [NoZeroDivisors R] (h₂ : ¬ IsUnit (2 :
 end CommRing
 
 end MonoidAlgebra
-
-end TauCeti
