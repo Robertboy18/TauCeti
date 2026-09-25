@@ -22,17 +22,17 @@ on the class `ρ ∈ gr_1(F)` of `r`.
 For `m ≥ 1` that class is given by the **basis-modification map**
 `δ = TauCeti.freeProP.basisModificationDelta`: writing `ρ` in the standard basis
 `TauCeti.freeProP.degreeOneBasis` as `ρ = Σ_i c_i π ξ_i + Σ_{i<k} a_{ik} [ξ_i, ξ_k]`, where
-`ξ_i ∈ gr_1(F)` is the class of `x_i`, and writing `ω_i ∈ gr_m(F)` for the class of `w_i`, the
+`ξ_i ∈ gr_0(F)` is the class of `x_i`, and writing `ω_i ∈ gr_m(F)` for the class of `w_i`, the
 class of `r⁻¹ * θ_w r` in `gr_{m+1}(F)` is
 
   `δ(ω) = Σ_i c_i (π ω_i + (p choose 2) • [ω_i, ξ_i])
           + Σ_{i<k} a_{ik} ([ω_i, ξ_k] - [ω_k, ξ_i])`,
 
-an `𝔽_p`-linear function of the classes `ω_i` alone. The bracket part is the derivative of the
-commutator part of `ρ` in the direction `ω`, and for odd `p` the `p`-power part contributes
-`Σ_i c_i π ω_i`. For `p = 2` the `p`-power part contributes in addition the brackets
-`Σ_i c_i [ω_i, ξ_i]`: the square of `x_i * w_i` is `x_i ^ 2 * w_i ^ 2 * ⁅w_i, x_i⁆` up
-to `λ_{m+2}(F)`, and the commutator `⁅w_i, x_i⁆` lies in `λ_{m+1}(F)` and not in `λ_{m+2}(F)`.
+an `𝔽_p`-linear function of the classes `ω_i` alone, and `𝔽_p`-linear in `ρ` as well. The bracket
+part is the derivative of the commutator part of `ρ` in the direction `ω`, and for odd `p` the
+`p`-power part contributes `Σ_i c_i π ω_i`. For `p = 2` the `p`-power part contributes in addition
+the brackets `Σ_i c_i [ω_i, ξ_i]`: the square of `x_i * w_i` is `x_i ^ 2 * w_i ^ 2 * ⁅w_i, x_i⁆`
+up to `λ_{m+2}(F)`, and the commutator `⁅w_i, x_i⁆` lies in `λ_{m+1}(F)` and not in `λ_{m+2}(F)`.
 That term is the trace, in every degree, of the failure of additivity of `π` on `gr_0(F)` at
 `p = 2`.
 
@@ -43,8 +43,8 @@ the normal-form congruence, and the classes `ω_i` are the level-`m` basis corre
 ## Main definitions
 
 * `TauCeti.freeProP.basisModification`: the endomorphism `θ_w : F → F`, `x_i ↦ x_i * w_i`.
-* `TauCeti.freeProP.basisModificationDelta`: for `ρ ∈ gr_1(F)` and `m ≥ 1`, the `𝔽_p`-linear map
-  `δ : gr_m(F)^X → gr_{m+1}(F)`.
+* `TauCeti.freeProP.basisModificationDelta`: for `m ≥ 1`, the `𝔽_p`-bilinear map
+  `δ : gr_1(F) → gr_m(F)^X → gr_{m+1}(F)`, `(ρ, ω) ↦ δ_ρ(ω)`.
 
 ## Main results
 
@@ -85,32 +85,27 @@ theorem basisModification_of (w : X → pLowerCentralSeries p (freeProP p X) m) 
     basisModification w (of i) = of i * (w i : freeProP p X) :=
   lift_of _ _ i
 
-/-- **The basis modification is congruent to the identity modulo `λ_m(F)`**: the elements on
-which it agrees with the identity modulo `λ_m(F)` form a closed subgroup containing the
-generators. -/
+/-- **The basis modification is congruent to the identity modulo `λ_m(F)`.** -/
 theorem inv_mul_basisModification_mem (w : X → pLowerCentralSeries p (freeProP p X) m)
     (g : freeProP p X) :
     g⁻¹ * basisModification w g ∈ pLowerCentralSeries p (freeProP p X) m := by
-  have hN : IsClosed ((pLowerCentralSeries p (freeProP p X) m : Subgroup (freeProP p X)) :
+  -- The quotient by the closed subgroup `λ_m(F)` is Hausdorff, so two continuous homomorphisms
+  -- into it agreeing on the generators are equal.
+  have : IsClosed ((pLowerCentralSeries p (freeProP p X) m : Subgroup (freeProP p X)) :
       Set (freeProP p X)) :=
     isClosed_pLowerCentralSeries m
-  -- `K` is the closed subgroup on which `θ_w` agrees with the identity modulo `λ_m(F)`.
-  let K : Subgroup (freeProP p X) :=
-    (QuotientGroup.mk' (pLowerCentralSeries p (freeProP p X) m)).eqLocus
-      ((QuotientGroup.mk' _).comp (basisModification w).toMonoidHom)
-  have hmem : ∀ x, x ∈ K ↔
-      ((x : freeProP p X) : freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) m) =
-        basisModification w x :=
-    fun x ↦ Iff.rfl
-  have hKc : IsClosed (K : Set (freeProP p X)) :=
-    isClosed_eq QuotientGroup.continuous_mk
-      (QuotientGroup.continuous_mk.comp (basisModification w).continuous)
-  have hle : (Subgroup.closure (Set.range (of : X → freeProP p X))).topologicalClosure ≤ K := by
-    refine topologicalClosure_minimal _ ((Subgroup.closure_le _).mpr ?_) hKc
-    rintro _ ⟨i, rfl⟩
-    rw [SetLike.mem_coe, hmem, basisModification_of, QuotientGroup.mk_mul_of_mem _ (w i).2]
-  rw [topologicalClosure_closure_range_of_eq_top] at hle
-  exact QuotientGroup.eq.mp ((hmem g).mp (hle (Subgroup.mem_top g)))
+  have h : (⟨QuotientGroup.mk' (pLowerCentralSeries p (freeProP p X) m),
+        QuotientGroup.continuous_mk⟩ : freeProP p X →ₜ* _).comp (basisModification w) =
+      ⟨QuotientGroup.mk' _, QuotientGroup.continuous_mk⟩ :=
+    hom_ext fun i ↦ by
+      change ((basisModification w (of i) : freeProP p X) :
+        freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) m) = (of i : freeProP p X)
+      rw [basisModification_of]
+      exact QuotientGroup.mk_mul_of_mem _ (w i).2
+  have hg : ((basisModification w g : freeProP p X) :
+      freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) m) = g :=
+    DFunLike.congr_fun h g
+  exact QuotientGroup.eq.mp hg.symm
 
 /-- **The deviation of the basis modification on a generator class** is the class of the
 modification: `D_0 ξ_i = ω_i` in `gr_m(F)`, where `ξ_i` and `ω_i` are the classes of `x_i` and
@@ -126,47 +121,63 @@ theorem gradedDeviation_basisModification_gradedMkZero_of
 
 /-! ### The maps `δ` -/
 
-/-- The bracket with a fixed degree-zero class on the right, `v ↦ [v, z]`, as an `𝔽_p`-linear map
-`gr_m(F) → gr_{m+1}(F)`. -/
-private noncomputable def bracketLinear (z : gradedPiece p (freeProP p X) 0) :
-    gradedPiece p (freeProP p X) m →ₗ[ZMod p] gradedPiece p (freeProP p X) (m + 1) :=
-  ((gradedBracket p (freeProP p X) m 0).flip z).toZModLinearMap p
-
-private theorem bracketLinear_apply (z : gradedPiece p (freeProP p X) 0)
-    (v : gradedPiece p (freeProP p X) m) :
-    bracketLinear z v = gradedBracket p (freeProP p X) m 0 v z :=
-  rfl
-
 section Delta
 
 variable [Fact p.Prime] [Fintype X] [LinearOrder X]
 
 variable (p X) in
-/-- **The basis-modification map `δ`** of a class `ρ ∈ gr_1(F)`, for `m ≥ 1`: the `𝔽_p`-linear
-map `gr_m(F)^X → gr_{m+1}(F)`,
+/-- **The basis-modification map `δ`**, for `m ≥ 1`: the `𝔽_p`-bilinear map
+`gr_1(F) → gr_m(F)^X → gr_{m+1}(F)` sending a class `ρ ∈ gr_1(F)` and a family `v` to
 
-  `δ(v) = Σ_i c_i (π v_i + (p choose 2) • [v_i, ξ_i]) + Σ_{i<k} a_{ik} ([v_i, ξ_k] - [v_k, ξ_i])`
+  `δ_ρ(v) = Σ_i c_i (π v_i + (p choose 2) • [v_i, ξ_i]) + Σ_{i<k} a_{ik} ([v_i, ξ_k] - [v_k, ξ_i])`
 
 where `c_i` and `a_{ik}` are the coordinates of `ρ` in the standard basis
 `TauCeti.freeProP.degreeOneBasis` of `gr_1(F)`, that is
-`ρ = Σ_i c_i π ξ_i + Σ_{i<k} a_{ik} [ξ_i, ξ_k]` with `ξ_i ∈ gr_1(F)` the class of `x_i`. For a
-relator `r ∈ λ_1(F)` with class `ρ`, and `w : X → λ_m(F)` with classes `v_i = ω_i`, `δ(v)` is the
-class in `gr_{m+1}(F)` of `r⁻¹ * θ_w r`,
-the amount by which the basis modification `θ_w` moves `r`
-(`TauCeti.freeProP.gradedMk_inv_mul_basisModification`). Its value is
-`TauCeti.freeProP.basisModificationDelta_apply`. -/
-noncomputable def basisModificationDelta (hm : 1 ≤ m) (ρ : gradedPiece p (freeProP p X) 1) :
-    (X → gradedPiece p (freeProP p X) m) →ₗ[ZMod p] gradedPiece p (freeProP p X) (m + 1) :=
-  ∑ i, (degreeOneBasis p X).repr ρ (Sum.inl i) •
-      (((gradedPowAddMonoidHom p (freeProP p X) hm).toZModLinearMap p +
-        p.choose 2 • bracketLinear (gradedMkZero p (freeProP p X) (of i))) ∘ₗ
-          LinearMap.proj i) +
-    ∑ ij : {ij : X × X // ij.1 < ij.2}, (degreeOneBasis p X).repr ρ (Sum.inr ij) •
-      (bracketLinear (gradedMkZero p (freeProP p X) (of ij.1.2)) ∘ₗ LinearMap.proj ij.1.1 -
-        bracketLinear (gradedMkZero p (freeProP p X) (of ij.1.1)) ∘ₗ LinearMap.proj ij.1.2)
+`ρ = Σ_i c_i π ξ_i + Σ_{i<k} a_{ik} [ξ_i, ξ_k]` with `ξ_i ∈ gr_0(F)` the class of `x_i`. It is
+defined by its values on that basis
+(`TauCeti.freeProP.basisModificationDelta_degreeOneBasis_inl`,
+`TauCeti.freeProP.basisModificationDelta_degreeOneBasis_inr`), and its value at a general `ρ` is
+`TauCeti.freeProP.basisModificationDelta_apply`. For a relator `r ∈ λ_1(F)` with class `ρ`, and
+`w : X → λ_m(F)` with classes `v_i = ω_i`, `δ_ρ(v)` is the class in `gr_{m+1}(F)` of
+`r⁻¹ * θ_w r`, the amount by which the basis modification `θ_w` moves `r`
+(`TauCeti.freeProP.gradedMk_inv_mul_basisModification`). -/
+noncomputable def basisModificationDelta (hm : 1 ≤ m) :
+    gradedPiece p (freeProP p X) 1 →ₗ[ZMod p]
+      (X → gradedPiece p (freeProP p X) m) →ₗ[ZMod p] gradedPiece p (freeProP p X) (m + 1) :=
+  (degreeOneBasis p X).constr (ZMod p) <| Sum.elim
+    (fun i ↦ ((gradedPowAddMonoidHom p (freeProP p X) hm).toZModLinearMap p +
+        p.choose 2 • (gradedBracketLinear p (freeProP p X) m 0).flip
+          (gradedMkZero p (freeProP p X) (of i))) ∘ₗ
+      LinearMap.proj i)
+    fun ij ↦ (gradedBracketLinear p (freeProP p X) m 0).flip
+        (gradedMkZero p (freeProP p X) (of ij.1.2)) ∘ₗ LinearMap.proj ij.1.1 -
+      (gradedBracketLinear p (freeProP p X) m 0).flip
+        (gradedMkZero p (freeProP p X) (of ij.1.1)) ∘ₗ LinearMap.proj ij.1.2
+
+/-- **The value of `δ` on a `p`-power basis vector**:
+`δ_{π ξ_i}(v) = π v_i + (p choose 2) • [v_i, ξ_i]`. -/
+theorem basisModificationDelta_degreeOneBasis_inl (hm : 1 ≤ m) (i : X)
+    (v : X → gradedPiece p (freeProP p X) m) :
+    basisModificationDelta p X hm (degreeOneBasis p X (Sum.inl i)) v =
+      gradedPow p (freeProP p X) m (v i) +
+        p.choose 2 • gradedBracket p (freeProP p X) m 0 (v i)
+          (gradedMkZero p (freeProP p X) (of i)) := by
+  rw [basisModificationDelta, Module.Basis.constr_basis]
+  simp
+
+/-- **The value of `δ` on a bracket basis vector**:
+`δ_{[ξ_i, ξ_k]}(v) = [v_i, ξ_k] - [v_k, ξ_i]`. -/
+theorem basisModificationDelta_degreeOneBasis_inr (hm : 1 ≤ m)
+    (ij : {ij : X × X // ij.1 < ij.2}) (v : X → gradedPiece p (freeProP p X) m) :
+    basisModificationDelta p X hm (degreeOneBasis p X (Sum.inr ij)) v =
+      gradedBracket p (freeProP p X) m 0 (v ij.1.1) (gradedMkZero p (freeProP p X) (of ij.1.2)) -
+        gradedBracket p (freeProP p X) m 0 (v ij.1.2)
+          (gradedMkZero p (freeProP p X) (of ij.1.1)) := by
+  rw [basisModificationDelta, Module.Basis.constr_basis]
+  simp
 
 /-- **The value of `δ`**: with `ρ = Σ_i c_i π ξ_i + Σ_{i<k} a_{ik} [ξ_i, ξ_k]`,
-`δ(v) = Σ_i c_i (π v_i + (p choose 2) • [v_i, ξ_i]) + Σ_{i<k} a_{ik} ([v_i, ξ_k] - [v_k, ξ_i])`.
+`δ_ρ(v) = Σ_i c_i (π v_i + (p choose 2) • [v_i, ξ_i]) + Σ_{i<k} a_{ik} ([v_i, ξ_k] - [v_k, ξ_i])`.
 -/
 theorem basisModificationDelta_apply (hm : 1 ≤ m) (ρ : gradedPiece p (freeProP p X) 1)
     (v : X → gradedPiece p (freeProP p X) m) :
@@ -180,46 +191,34 @@ theorem basisModificationDelta_apply (hm : 1 ≤ m) (ρ : gradedPiece p (freePro
               (gradedMkZero p (freeProP p X) (of ij.1.2)) -
             gradedBracket p (freeProP p X) m 0 (v ij.1.2)
               (gradedMkZero p (freeProP p X) (of ij.1.1))) := by
-  simp only [basisModificationDelta, LinearMap.add_apply, LinearMap.sum_apply,
-    LinearMap.smul_apply, LinearMap.comp_apply, LinearMap.proj_apply, LinearMap.sub_apply,
-    AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply, bracketLinear_apply]
+  conv_lhs => rw [← (degreeOneBasis p X).sum_repr ρ]
+  simp only [Fintype.sum_sum_type, map_add, LinearMap.add_apply, map_sum, LinearMap.sum_apply,
+    map_smul, LinearMap.smul_apply, basisModificationDelta_degreeOneBasis_inl,
+    basisModificationDelta_degreeOneBasis_inr]
 
-/-- **The class of the moved relator is `δ(ω)`.** For `m ≥ 1`, `w : X → λ_m(F)` and
+/-- **The class of the moved relator is `δ_ρ(ω)`.** For `m ≥ 1`, `w : X → λ_m(F)` and
 `ρ ∈ gr_1(F)`, the graded deviation of the basis modification `θ_w` on `ρ` is `δ_ρ(ω)`, where
-`ω_i ∈ gr_m(F)` is the class of `w_i`. Both sides are linear in `ρ`, and they agree on the
-standard basis of `gr_1(F)` by the Leibniz rule and the `π`-compatibility of the deviation. -/
+`ω_i ∈ gr_m(F)` is the class of `w_i`. -/
 theorem gradedDeviation_basisModification (hm : 1 ≤ m)
     (w : X → pLowerCentralSeries p (freeProP p X) m) (ρ : gradedPiece p (freeProP p X) 1) :
     gradedDeviation (basisModification w).toMonoidHom (basisModification w).continuous
         (inv_mul_basisModification_mem w) 1 ρ =
       basisModificationDelta p X hm ρ fun i ↦ gradedMk p (freeProP p X) m (w i) := by
-  set v : X ⊕ {ij : X × X // ij.1 < ij.2} → gradedPiece p (freeProP p X) (m + 1) :=
-    Sum.elim
-      (fun i ↦ gradedPow p (freeProP p X) m (gradedMk p (freeProP p X) m (w i)) +
-        p.choose 2 • gradedBracket p (freeProP p X) m 0 (gradedMk p (freeProP p X) m (w i))
-          (gradedMkZero p (freeProP p X) (of i)))
-      fun ij ↦ gradedBracket p (freeProP p X) m 0 (gradedMk p (freeProP p X) m (w ij.1.1))
-          (gradedMkZero p (freeProP p X) (of ij.1.2)) -
-        gradedBracket p (freeProP p X) m 0 (gradedMk p (freeProP p X) m (w ij.1.2))
-          (gradedMkZero p (freeProP p X) (of ij.1.1)) with hv
+  -- Both sides are linear in `ρ`, and they agree on the standard basis of `gr_1(F)` by the
+  -- Leibniz rule and the `π`-compatibility of the deviation.
   have key : (gradedDeviation (basisModification w).toMonoidHom (basisModification w).continuous
       (inv_mul_basisModification_mem w) 1).toZModLinearMap p =
-        (degreeOneBasis p X).constr (ZMod p) v := by
+        (basisModificationDelta p X hm).flip fun i ↦ gradedMk p (freeProP p X) m (w i) := by
     refine (degreeOneBasis p X).ext fun b ↦ ?_
-    rw [Module.Basis.constr_basis, AddMonoidHom.coe_toZModLinearMap, degreeOneBasis_apply]
+    rw [LinearMap.flip_apply, AddMonoidHom.coe_toZModLinearMap]
     rcases b with i | ij
-    · rw [degreeOneFamily_inl, gradedDeviation_gradedPow_zero,
-        gradedDeviation_basisModification_gradedMkZero_of]
-      rfl
-    · rw [degreeOneFamily_inr, gradedDeviation_gradedBracket_zero _ _ _ hm,
+    · rw [basisModificationDelta_degreeOneBasis_inl, degreeOneBasis_apply, degreeOneFamily_inl,
+        gradedDeviation_gradedPow_zero, gradedDeviation_basisModification_gradedMkZero_of]
+    · rw [basisModificationDelta_degreeOneBasis_inr, degreeOneBasis_apply, degreeOneFamily_inr,
+        gradedDeviation_gradedBracket_zero _ _ _ hm,
         gradedDeviation_basisModification_gradedMkZero_of,
         gradedDeviation_basisModification_gradedMkZero_of]
-      rfl
-  have h := LinearMap.congr_fun key ρ
-  rw [AddMonoidHom.coe_toZModLinearMap, Module.Basis.constr_apply_fintype,
-    Fintype.sum_sum_type] at h
-  rw [h, basisModificationDelta_apply]
-  simp only [Module.Basis.equivFun_apply, hv, Sum.elim_inl, Sum.elim_inr]
+  exact LinearMap.congr_fun key ρ
 
 /-- **The basis modification `θ_w` moves a relator `r ∈ λ_1(F)` by `δ_ρ(ω)`**: the class in
 `gr_{m+1}(F)` of `r⁻¹ * θ_w r` is `δ_ρ(ω)`, for `m ≥ 1`, where `ρ ∈ gr_1(F)` is the class of `r`

@@ -70,31 +70,6 @@ universe u
 
 variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
-/-! ### Congruences with a flexible modulus
-
-The lemmas of `TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded.Basic` are stated modulo
-the term `λ_{n+1}` determined by the degrees involved. The computations below combine congruences
-of different degrees, so they need the same statements modulo an arbitrary coarser term. -/
-
-/-- A congruence `mk a = mk b * mk c` modulo `λ_n` holds modulo every `λ_{n'}` with `n' ≤ n`. -/
-private theorem mk_eq_mul_mk_of_le {a b c : G} {n : ℕ} (n' : ℕ) (h : n' ≤ n)
-    (habc : ((a : G) : G ⧸ pLowerCentralSeries p G n) = (b : G ⧸ _) * (c : G ⧸ _)) :
-    ((a : G) : G ⧸ pLowerCentralSeries p G n') = (b : G ⧸ _) * (c : G ⧸ _) := by
-  rw [← QuotientGroup.mk_mul] at habc ⊢
-  exact QuotientGroup.eq.mpr (pLowerCentralSeries_antitone h (QuotientGroup.eq.mp habc))
-
-/-- The class in `G ⧸ λ_{n'}` of an element of `λ_n` is trivial as soon as `n' ≤ n`. -/
-private theorem mk_eq_one_of_mem_of_le {n : ℕ} (n' : ℕ) {c : G} (hc : c ∈ pLowerCentralSeries p G n)
-    (h : n' ≤ n) : ((c : G) : G ⧸ pLowerCentralSeries p G n') = 1 :=
-  (QuotientGroup.eq_one_iff c).mpr (pLowerCentralSeries_antitone h hc)
-
-/-- The class of an element of `λ_n` in `G ⧸ λ_{n'}` is central as soon as `n' ≤ n + 1`. -/
-private theorem commute_mk_of_mem_of_le {n : ℕ} (n' : ℕ) {c : G}
-    (hc : c ∈ pLowerCentralSeries p G n) (h : n' ≤ n + 1) (g : G) :
-    Commute (g : G ⧸ pLowerCentralSeries p G n') (c : G ⧸ _) :=
-  QuotientGroup.commute_mk_iff.mpr <| commutatorElement_inv c g ▸
-    inv_mem (pLowerCentralSeries_antitone h (commutator_mem_pLowerCentralSeries_succ hc g))
-
 /-! ### The deviation of an endomorphism congruent to the identity -/
 
 section Deviation
@@ -104,18 +79,18 @@ variable (θ : G →* G) (hθc : Continuous θ) {m : ℕ}
 
 include hθc hθ in
 /-- **An endomorphism congruent to the identity modulo `λ_m` is congruent to the identity modulo
-`λ_{m+k}` on `λ_k`.** The elements on which `θ` agrees with the identity modulo `λ_{m+k+1}` form a
-closed subgroup, which contains the `p`-th powers and the commutators generating `λ_{k+1}` by the
-induction hypothesis on `λ_k`. -/
+`λ_{m+k}` on `λ_k`.** -/
 theorem inv_mul_apply_mem_pLowerCentralSeries {k : ℕ} {g : G} (hg : g ∈ pLowerCentralSeries p G k) :
     g⁻¹ * θ g ∈ pLowerCentralSeries p G (m + k) := by
   induction k generalizing g with
   | zero => exact hθ g
   | succ k ih =>
-    set N := pLowerCentralSeries p G (m + k + 1) with hN
+    -- The elements on which `θ` agrees with the identity modulo `N = λ_{m+k+1}` form a closed
+    -- subgroup `K`, which contains the `p`-th powers and the commutators generating `λ_{k+1}` by
+    -- the induction hypothesis on `λ_k`.
+    set N := pLowerCentralSeries p G (m + k + 1)
     have : IsClosed (N : Set G) := isClosed_pLowerCentralSeries _
-    -- `K` is the closed subgroup on which `θ` agrees with the identity modulo `N`.
-    set K : Subgroup G := (QuotientGroup.mk' N).eqLocus ((QuotientGroup.mk' N).comp θ) with hK
+    set K : Subgroup G := (QuotientGroup.mk' N).eqLocus ((QuotientGroup.mk' N).comp θ)
     have hmem : ∀ x, x ∈ K ↔ ((x : G) : G ⧸ N) = θ x := fun x ↦ Iff.rfl
     have hKc : IsClosed (K : Set G) :=
       isClosed_eq QuotientGroup.continuous_mk (QuotientGroup.continuous_mk.comp hθc)
@@ -125,26 +100,27 @@ theorem inv_mul_apply_mem_pLowerCentralSeries {k : ℕ} {g : G} (hg : g ∈ pLow
     refine ⟨fun x hx ↦ ?_, Subgroup.commutator_le.mpr fun x hx y _ ↦ ?_⟩
     · -- `θ (x ^ p) = (x * u) ^ p` with `u ∈ λ_{m+k}` central modulo `N`, and `u ^ p ∈ N`.
       have hu := ih hx
-      set u := x⁻¹ * θ x with hu_def
+      set u := x⁻¹ * θ x
       have hθx : θ x = x * u := (mul_inv_cancel_left x (θ x)).symm
       rw [hmem, map_pow, hθx, QuotientGroup.mk_pow, QuotientGroup.mk_pow, QuotientGroup.mk_mul,
         (commute_mk_of_mem_pLowerCentralSeries hu x).mul_pow, ← QuotientGroup.mk_pow _ u,
-        mk_eq_one_of_mem_of_le (m + k + 1) (pow_mem_pLowerCentralSeries hu) le_rfl, mul_one]
+        mk_eq_one_of_mem_pLowerCentralSeries_of_le (m + k + 1) (pow_mem_pLowerCentralSeries hu)
+          le_rfl, mul_one]
     · -- `θ ⁅x, y⁆ = ⁅x * u, y * v⁆` with `⁅u, y * v⁆ ∈ N` and `⁅x, v⁆ ∈ N`.
       have hu := ih hx
       have hv := hθ y
-      set u := x⁻¹ * θ x with hu_def
-      set v := y⁻¹ * θ y with hv_def
+      set u := x⁻¹ * θ x
+      set v := y⁻¹ * θ y
       have hθx : θ x = x * u := (mul_inv_cancel_left x (θ x)).symm
       have hθy : θ y = y * v := (mul_inv_cancel_left y (θ y)).symm
       rw [hmem, map_commutatorElement, hθx, hθy,
         mk_eq_mul_mk_of_le (m + k + 1) (by omega) (mk_commutatorElement_mul_left hu
           (mem_pLowerCentralSeries_zero p (y * v)) x),
-        mk_eq_one_of_mem_of_le (m + k + 1) (commutator_mem_pLowerCentralSeries_succ hu (y * v))
-          le_rfl, mul_one,
+        mk_eq_one_of_mem_pLowerCentralSeries_of_le (m + k + 1)
+          (commutator_mem_pLowerCentralSeries_succ hu (y * v)) le_rfl, mul_one,
         mk_eq_mul_mk_of_le (m + k + 1) (by omega) (mk_commutatorElement_mul_right hx hv y),
-        mk_eq_one_of_mem_of_le (m + k + 1) (commutator_mem_pLowerCentralSeries hx hv) (by omega),
-        mul_one]
+        mk_eq_one_of_mem_pLowerCentralSeries_of_le (m + k + 1)
+          (commutator_mem_pLowerCentralSeries hx hv) (by omega), mul_one]
 
 /-- The deviation `x ↦ x⁻¹ * θ x` on `λ_k`, with values in `λ_{m+k} ⧸ λ_{m+k+1}`, before passing
 to the quotient by `λ_{k+1}`. -/
@@ -241,8 +217,8 @@ theorem gradedDeviation_gradedBracket (hm : 1 ≤ m) {j k : ℕ} (x : gradedPiec
     gradedDeviation_gradedMk, gradedBracket_gradedMk, gradedBracket_gradedMk, gradedCast_gradedMk,
     gradedCast_gradedMk, ← gradedMk_mul, gradedMk_eq_gradedMk_iff]
   simp only [coe_mul]
-  set u := (x : G)⁻¹ * θ x with hu_def
-  set v := (y : G)⁻¹ * θ y with hv_def
+  set u := (x : G)⁻¹ * θ x
+  set v := (y : G)⁻¹ * θ y
   have hθx : θ x = x * u := (mul_inv_cancel_left (x : G) (θ x)).symm
   have hθy : θ y = y * v := (mul_inv_cancel_left (y : G) (θ y)).symm
   -- `⁅x * u, y * v⁆ ≡ ⁅x, y⁆ * ⁅x, v⁆ * ⁅u, y⁆` modulo `λ_{m+j+k+2}`, by bimultiplicativity of the
@@ -254,10 +230,12 @@ theorem gradedDeviation_gradedBracket (hm : 1 ≤ m) {j k : ℕ} (x : gradedPiec
         (mul_mem y.2 (pLowerCentralSeries_antitone (Nat.le_add_left k m) hv)) x),
       mk_eq_mul_mk_of_le _ (by omega) (mk_commutatorElement_mul_right x.2 hv y),
       mk_eq_mul_mk_of_le _ (by omega) (mk_commutatorElement_mul_right hu hv y),
-      mk_eq_one_of_mem_of_le _ (commutator_mem_pLowerCentralSeries hu hv) (by omega), mul_one]
+      mk_eq_one_of_mem_pLowerCentralSeries_of_le _ (commutator_mem_pLowerCentralSeries hu hv)
+        (by omega), mul_one]
   rw [map_commutatorElement, hθx, hθy, QuotientGroup.mk_mul, QuotientGroup.mk_inv, h,
     QuotientGroup.mk_mul, mul_assoc, inv_mul_cancel_left,
-    (commute_mk_of_mem_of_le _ (commutator_mem_pLowerCentralSeries x.2 hv) (by omega) _).eq]
+    (commute_mk_of_mem_pLowerCentralSeries_of_le _ (commutator_mem_pLowerCentralSeries x.2 hv)
+      (by omega) _).eq]
 
 /-- **The Leibniz rule in degree zero**, in the cast-free form
 `D [x, y] = [D x, y] - [D y, x]` for `x, y ∈ gr_0(G)` and `m ≥ 1`, using skew-symmetry of the
@@ -270,6 +248,18 @@ theorem gradedDeviation_gradedBracket_zero (hm : 1 ≤ m) (x y : gradedPiece p G
   obtain ⟨y, rfl⟩ := gradedMk_surjective 0 y
   have hu : (x : G)⁻¹ * θ x ∈ pLowerCentralSeries p G m := hθ x
   have hv : (y : G)⁻¹ * θ y ∈ pLowerCentralSeries p G m := hθ y
+  -- The general Leibniz rule at `j = k = 0`, with the casts pushed through the classes and the
+  -- degrees `m + (0 + 0 + 1)`, `m + 0 + 0 + 1` and `0 + (m + 0) + 1` all read as `m + 1`.
+  have h : gradedMk p G (m + 1) ⟨⁅(x : G), (y : G)⁆⁻¹ * θ ⁅(x : G), (y : G)⁆,
+        inv_mul_apply_mem_pLowerCentralSeries θ hθc hθ
+          (commutator_mem_pLowerCentralSeries x.2 y.2)⟩ =
+      gradedMk p G (m + 1) ⟨⁅(x : G)⁻¹ * θ x, (y : G)⁆,
+          commutator_mem_pLowerCentralSeries_succ hu y⟩ +
+        gradedMk p G (m + 1) ⟨⁅(x : G), (y : G)⁻¹ * θ y⁆,
+          commutatorElement_inv ((y : G)⁻¹ * θ y) x ▸
+            inv_mem (commutator_mem_pLowerCentralSeries_succ hv x)⟩ := by
+    simpa only [gradedDeviation_gradedMk, gradedBracket_gradedMk, gradedCast_gradedMk] using
+      gradedDeviation_gradedBracket θ hθc hθ hm (gradedMk p G 0 x) (gradedMk p G 0 y)
   -- The degree-zero deviations live in `gr_{m+0} = gr_m`, the brackets in `gr_{m+0+1} = gr_{m+1}`.
   have ex : gradedDeviation θ hθc hθ 0 (gradedMk p G 0 x) = gradedMk p G m ⟨(x : G)⁻¹ * θ x, hu⟩ :=
     gradedDeviation_gradedMk θ hθc hθ x
@@ -283,28 +273,13 @@ theorem gradedDeviation_gradedBracket_zero (hm : 1 ≤ m) (x y : gradedPiece p G
       gradedMk p G (m + 1) ⟨⁅(y : G)⁻¹ * θ y, (x : G)⁆,
         commutator_mem_pLowerCentralSeries_succ hv x⟩ :=
     gradedBracket_gradedMk _ _
-  rw [gradedBracket_gradedMk, gradedDeviation_gradedMk, ex, ey, hbx, hby, sub_eq_add_neg,
-    ← gradedMk_inv, ← gradedMk_mul, gradedMk_eq_gradedMk_iff]
-  simp only [coe_mul, coe_inv]
-  set u := (x : G)⁻¹ * θ x with hu_def
-  set v := (y : G)⁻¹ * θ y with hv_def
-  have hθx : θ x = x * u := (mul_inv_cancel_left (x : G) (θ x)).symm
-  have hθy : θ y = y * v := (mul_inv_cancel_left (y : G) (θ y)).symm
-  -- `⁅x * u, y * v⁆ ≡ ⁅x, y⁆ * ⁅x, v⁆ * ⁅u, y⁆` modulo `λ_{m+2}`, since `⁅u, v⁆ ∈ λ_{2m+1}`.
-  have h : ((⁅(x : G) * u, (y : G) * v⁆ : G) : G ⧸ pLowerCentralSeries p G (m + 1 + 1)) =
-      ((⁅(x : G), (y : G)⁆ : G) : G ⧸ _) * ((⁅(x : G), v⁆ : G) : G ⧸ _) *
-        ((⁅u, (y : G)⁆ : G) : G ⧸ _) := by
-    rw [mk_eq_mul_mk_of_le _ (by omega) (mk_commutatorElement_mul_left hu
-        (mem_pLowerCentralSeries_zero p ((y : G) * v)) x),
-      mk_eq_mul_mk_of_le _ (by omega) (mk_commutatorElement_mul_right x.2 hv y),
-      mk_eq_mul_mk_of_le _ (by omega) (mk_commutatorElement_mul_right hu hv y),
-      mk_eq_one_of_mem_of_le _ (commutator_mem_pLowerCentralSeries hu hv) (by omega), mul_one]
-  rw [map_commutatorElement, hθx, hθy, QuotientGroup.mk_mul, QuotientGroup.mk_inv, h,
-    QuotientGroup.mk_mul, commutatorElement_inv v (x : G), mul_assoc, inv_mul_cancel_left,
-    (commute_mk_of_mem_of_le _ (commutator_mem_pLowerCentralSeries x.2 hv) (by omega) _).eq]
+  rw [gradedBracket_gradedMk, gradedDeviation_gradedMk, h, ex, ey, hbx, hby, sub_eq_add_neg,
+    ← gradedMk_inv, add_right_inj, gradedMk_eq_gradedMk_iff, coe_inv, coe_mk, coe_mk,
+    commutatorElement_inv]
 
 /-- **The graded deviation commutes with `π` above degree zero**, for every `m`: for `k ≥ 1`,
 `D (π x) = π (D x)`, because `⁅x, x⁻¹ * θ x⁆` has degree `m + 2k + 1 ≥ m + k + 2`. -/
+@[simp]
 theorem gradedDeviation_gradedPow_of_one_le {k : ℕ} (hk : 1 ≤ k) (x : gradedPiece p G k) :
     gradedDeviation θ hθc hθ (k + 1) (gradedPow p G k x) =
       gradedPow p G (m + k) (gradedDeviation θ hθc hθ k x) := by
@@ -319,7 +294,7 @@ theorem gradedDeviation_gradedPow_of_one_le {k : ℕ} (hk : 1 ≤ k) (x : graded
     gradedDeviation_gradedMk θ hθc hθ _
   rw [gradedPow_gradedMk, e, gradedDeviation_gradedMk, gradedPow_gradedMk, gradedMk_eq_gradedMk_iff]
   dsimp only
-  set u := (x : G)⁻¹ * θ x with hu_def
+  set u := (x : G)⁻¹ * θ x
   have hθx : θ x = x * u := (mul_inv_cancel_left (x : G) (θ x)).symm
   rw [map_pow, hθx, QuotientGroup.mk_mul, QuotientGroup.mk_inv, QuotientGroup.mk_pow,
     QuotientGroup.mk_pow, QuotientGroup.mk_mul _ (x : G) u,
@@ -347,13 +322,13 @@ theorem gradedDeviation_gradedPow_zero (x : gradedPiece p G 0) :
   rw [gradedPow_gradedMk, gradedDeviation_gradedMk, e, gradedPow_gradedMk, hb, ← gradedMk_pow,
     ← gradedMk_mul, gradedMk_eq_gradedMk_iff]
   simp only [coe_mul, coe_pow]
-  set u := (x : G)⁻¹ * θ x with hu_def
+  set u := (x : G)⁻¹ * θ x
   have hθx : θ x = x * u := (mul_inv_cancel_left (x : G) (θ x)).symm
-  set N := pLowerCentralSeries p G (m + 1 + 1) with hN
+  set N := pLowerCentralSeries p G (m + 1 + 1)
   have hcomm : (⁅(u : G ⧸ N), ((x : G) : G ⧸ N)⁆ : G ⧸ N) = ((⁅u, (x : G)⁆ : G) : G ⧸ N) :=
     (map_commutatorElement (QuotientGroup.mk' N) u x).symm
-  have hc := commute_mk_of_mem_of_le (m + 1 + 1) (commutator_mem_pLowerCentralSeries_succ hu x)
-    le_rfl
+  have hc := commute_mk_of_mem_pLowerCentralSeries_of_le (m + 1 + 1)
+    (commutator_mem_pLowerCentralSeries_succ hu x) le_rfl
   rw [map_pow, hθx, QuotientGroup.mk_mul, QuotientGroup.mk_inv, QuotientGroup.mk_pow,
     QuotientGroup.mk_pow, QuotientGroup.mk_mul _ (x : G) u,
     Commute.mul_pow_eq_pow_mul_pow_mul_commutatorElement_pow_choose_two
@@ -363,6 +338,7 @@ theorem gradedDeviation_gradedPow_zero (x : gradedPiece p G 0) :
 
 /-- **The graded deviation commutes with `π` in degree zero for odd `p`**: the defect
 `(p choose 2) • [D x, x]` is a multiple of `p • [D x, x] = 0`. -/
+@[simp]
 theorem gradedDeviation_gradedPow_zero_of_odd (hp : Odd p) (x : gradedPiece p G 0) :
     gradedDeviation θ hθc hθ 1 (gradedPow p G 0 x) =
       gradedPow p G m (gradedDeviation θ hθc hθ 0 x) := by
@@ -373,6 +349,7 @@ theorem gradedDeviation_gradedPow_zero_of_odd (hp : Odd p) (x : gradedPiece p G 
 /-- **The dyadic defect of the graded deviation against `π` in degree zero.** For `p = 2`,
 `D (π x) = π (D x) + [D x, x]` in `gr_{m+1}(G)`: the square of `x * u` is `x ^ 2 * u ^ 2 * ⁅u, x⁆`
 up to `λ_{m+2}`, and the commutator does not vanish in `gr_{m+1}(G)` in general. -/
+@[simp]
 theorem gradedDeviation_gradedPow_zero_of_two (hp : p = 2) (x : gradedPiece p G 0) :
     gradedDeviation θ hθc hθ 1 (gradedPow p G 0 x) =
       gradedPow p G m (gradedDeviation θ hθc hθ 0 x) +

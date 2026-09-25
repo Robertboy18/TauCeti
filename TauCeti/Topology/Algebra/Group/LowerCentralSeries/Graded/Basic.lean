@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.Module.ZMod
+public import Mathlib.LinearAlgebra.BilinearMap
 public import TauCeti.GroupTheory.QuotientGroup.Basic
 public import TauCeti.Topology.Algebra.Group.LowerCentralSeries
 
@@ -38,7 +39,8 @@ finite; this is proved in `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCe
 * `TauCeti.gradedMk`: the class in `gr_k(G)` of an element of `λ_k`.
 * `TauCeti.gradedPieceInclusion`: the injection of `gr_k(G)` into `G ⧸ λ_{k+1}`, an isomorphism in
   degree zero (`TauCeti.gradedPieceZeroEquiv`).
-* `TauCeti.gradedBracket`: the bracket `gr_j(G) →+ gr_k(G) →+ gr_{j+k+1}(G)`.
+* `TauCeti.gradedBracket`: the bracket `gr_j(G) →+ gr_k(G) →+ gr_{j+k+1}(G)`, and its
+  `ZMod p`-bilinear form `TauCeti.gradedBracketLinear`.
 * `TauCeti.gradedPow`: the `p`-power operator `π : gr_k(G) → gr_{k+1}(G)`.
 * `TauCeti.gradedMap`: the map on graded pieces induced by a continuous homomorphism.
 
@@ -77,13 +79,33 @@ variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGro
 /-! ### Congruences modulo the next term
 
 The image of `λ_k` in `G ⧸ λ_{k+1}` is central, so conjugation acts trivially on it and the
-commutator is bimultiplicative modulo `λ_{j+k+2}`. -/
+commutator is bimultiplicative modulo `λ_{j+k+2}`. Computations combining congruences of different
+degrees need these statements modulo an arbitrary coarser term `λ_{n'}`, `n' ≤ n`, as well. -/
+
+/-- A congruence `mk a = mk b * mk c` modulo `λ_n` holds modulo every `λ_{n'}` with `n' ≤ n`. -/
+theorem mk_eq_mul_mk_of_le {a b c : G} {n : ℕ} (n' : ℕ) (h : n' ≤ n)
+    (habc : ((a : G) : G ⧸ pLowerCentralSeries p G n) = (b : G ⧸ _) * (c : G ⧸ _)) :
+    ((a : G) : G ⧸ pLowerCentralSeries p G n') = (b : G ⧸ _) * (c : G ⧸ _) := by
+  rw [← QuotientGroup.mk_mul] at habc ⊢
+  exact QuotientGroup.eq.mpr (pLowerCentralSeries_antitone h (QuotientGroup.eq.mp habc))
+
+/-- The class in `G ⧸ λ_{n'}` of an element of `λ_n` is trivial as soon as `n' ≤ n`. -/
+theorem mk_eq_one_of_mem_pLowerCentralSeries_of_le {n : ℕ} (n' : ℕ) {c : G}
+    (hc : c ∈ pLowerCentralSeries p G n) (h : n' ≤ n) :
+    ((c : G) : G ⧸ pLowerCentralSeries p G n') = 1 :=
+  (QuotientGroup.eq_one_iff c).mpr (pLowerCentralSeries_antitone h hc)
+
+/-- The class of an element of `λ_n` in `G ⧸ λ_{n'}` is central as soon as `n' ≤ n + 1`. -/
+theorem commute_mk_of_mem_pLowerCentralSeries_of_le {n : ℕ} (n' : ℕ) {c : G}
+    (hc : c ∈ pLowerCentralSeries p G n) (h : n' ≤ n + 1) (g : G) :
+    Commute (g : G ⧸ pLowerCentralSeries p G n') (c : G ⧸ _) :=
+  QuotientGroup.commute_mk_iff.mpr <| commutatorElement_inv c g ▸
+    inv_mem (pLowerCentralSeries_antitone h (commutator_mem_pLowerCentralSeries_succ hc g))
 
 /-- The class of an element of `λ_k` in `G ⧸ λ_{k+1}` commutes with every class. -/
 theorem commute_mk_of_mem_pLowerCentralSeries {k : ℕ} {c : G} (hc : c ∈ pLowerCentralSeries p G k)
     (g : G) : Commute (g : G ⧸ pLowerCentralSeries p G (k + 1)) (c : G ⧸ _) :=
-  QuotientGroup.commute_mk_iff.mpr <|
-    commutatorElement_inv c g ▸ inv_mem (commutator_mem_pLowerCentralSeries_succ hc g)
+  commute_mk_of_mem_pLowerCentralSeries_of_le _ hc le_rfl g
 
 /-- Conjugation acts trivially on the image of `λ_k` in `G ⧸ λ_{k+1}`. -/
 theorem mk_conj_of_mem_pLowerCentralSeries {k : ℕ} {c : G} (hc : c ∈ pLowerCentralSeries p G k)
@@ -169,8 +191,8 @@ def gradedMk (k : ℕ) (x : pLowerCentralSeries p G k) : gradedPiece p G k :=
   Additive.ofMul (QuotientGroup.mk x)
 
 /-- The class of `x ∈ λ_k` in `gr_k(G)` is its class in the quotient `λ_k ⧸ λ_{k+1}`, read
-additively. This is the equation to use when defining a map out of `gr_k(G)` by
-`QuotientGroup.lift`. -/
+additively. Outside this module the definition `gradedMk` does not unfold, so this is the equation
+to use when defining a map out of `gr_k(G)` by `QuotientGroup.lift`. -/
 theorem gradedMk_def (k : ℕ) (x : pLowerCentralSeries p G k) :
     gradedMk p G k x = Additive.ofMul (QuotientGroup.mk x) :=
   (rfl)
@@ -491,6 +513,22 @@ theorem gradedBracket_gradedMkZero (g h : G) :
       gradedMk p G 1 ⟨⁅g, h⁆, commutator_mem_pLowerCentralSeries (mem_pLowerCentralSeries_zero p g)
         (mem_pLowerCentralSeries_zero p h)⟩ := by
   rw [gradedMkZero, gradedMkZero, gradedBracket_gradedMk]
+
+variable (p G) in
+/-- **The bracket as an `𝔽_p`-bilinear map** `gr_j(G) →ₗ[ZMod p] gr_k(G) →ₗ[ZMod p] gr_{j+k+1}(G)`:
+the biadditive bracket `TauCeti.gradedBracket` is automatically `ZMod p`-bilinear. -/
+def gradedBracketLinear (j k : ℕ) :
+    gradedPiece p G j →ₗ[ZMod p] gradedPiece p G k →ₗ[ZMod p] gradedPiece p G (j + k + 1) :=
+  LinearMap.mk₂ (ZMod p) (fun x y => gradedBracket p G j k x y)
+    (fun x₁ x₂ y => by rw [map_add, AddMonoidHom.add_apply])
+    (fun c x y => map_smul (((gradedBracket p G j k).flip y).toZModLinearMap p) c x)
+    (fun x y₁ y₂ => map_add _ y₁ y₂)
+    (fun c x y => map_smul ((gradedBracket p G j k x).toZModLinearMap p) c y)
+
+@[simp]
+theorem gradedBracketLinear_apply {j k : ℕ} (x : gradedPiece p G j) (y : gradedPiece p G k) :
+    gradedBracketLinear p G j k x y = gradedBracket p G j k x y :=
+  (rfl)
 
 /-- **The bracket is alternating**: `[x, x] = 0` in every degree. -/
 @[simp]
