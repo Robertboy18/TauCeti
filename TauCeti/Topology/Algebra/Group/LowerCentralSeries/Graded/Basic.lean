@@ -168,6 +168,13 @@ variable (p G) in
 def gradedMk (k : ℕ) (x : pLowerCentralSeries p G k) : gradedPiece p G k :=
   Additive.ofMul (QuotientGroup.mk x)
 
+/-- The class of `x ∈ λ_k` in `gr_k(G)` is its class in the quotient `λ_k ⧸ λ_{k+1}`, read
+additively. This is the equation to use when defining a map out of `gr_k(G)` by
+`QuotientGroup.lift`. -/
+theorem gradedMk_def (k : ℕ) (x : pLowerCentralSeries p G k) :
+    gradedMk p G k x = Additive.ofMul (QuotientGroup.mk x) :=
+  (rfl)
+
 theorem gradedMk_surjective (k : ℕ) : Function.Surjective (gradedMk p G k) := fun x => by
   obtain ⟨y, hy⟩ := QuotientGroup.mk_surjective x.toMul
   exact ⟨y, (congrArg Additive.ofMul hy).trans (ofMul_toMul x)⟩
@@ -581,6 +588,17 @@ theorem gradedPow_add_of_one_le {k : ℕ} (hk : 1 ≤ k) (x y : gradedPiece p G 
   simp only [coe_mul, QuotientGroup.mk_pow, QuotientGroup.mk_mul]
   exact (QuotientGroup.commute_mk_iff.mpr (pLowerCentralSeries_antitone (by omega)
     (commutator_mem_pLowerCentralSeries x.2 y.2))).mul_pow p
+
+variable (p G) in
+/-- **The `p`-power operator above degree zero, as an additive map** `gr_k(G) →+ gr_{k+1}(G)`, for
+`k ≥ 1`, where `π` is additive (`TauCeti.gradedPow_add_of_one_le`). -/
+def gradedPowAddMonoidHom {k : ℕ} (hk : 1 ≤ k) : gradedPiece p G k →+ gradedPiece p G (k + 1) :=
+  AddMonoidHom.mk' (gradedPow p G k) (gradedPow_add_of_one_le hk)
+
+@[simp]
+theorem gradedPowAddMonoidHom_apply {k : ℕ} (hk : 1 ≤ k) (x : gradedPiece p G k) :
+    gradedPowAddMonoidHom p G hk x = gradedPow p G k x :=
+  (rfl)
 
 /-- **The defect of additivity in degree zero**: `π (x + y) = π x + π y + (p choose 2) • [y, x]`
 in `gr_1(G)`. This is the binomial formula `(x * y) ^ p = x ^ p * y ^ p * ⁅y, x⁆ ^ (p choose 2)` of
