@@ -70,19 +70,6 @@ private theorem sum_min_eq_of_pi_pow_addEquiv {b : ℕ} (hb : 1 < b)
   simp only [AddMonoidHom.mem_ker, nsmulAddMonoidHom_apply, AddEquiv.toEquiv_eq_coe,
     EquivLike.coe_coe, ← map_nsmul f, map_eq_zero_iff f f.injective]
 
-private theorem sum_min_add_card_fiber {ι : Type*} [Fintype ι] (e : ι → ℕ) (k : ℕ) :
-    (∑ i, min (k + 2) (e i)) + (∑ i, min k (e i)) +
-        Fintype.card {i // e i = k + 1} =
-      (∑ i, min (k + 1) (e i)) + (∑ i, min (k + 1) (e i)) := by
-  classical
-  have hcount : Fintype.card {i // e i = k + 1} =
-      ∑ i, if e i = k + 1 then 1 else 0 := by
-    simp only [sum_boole, Nat.cast_id, Fintype.card_subtype]
-  rw [hcount, ← sum_add_distrib, ← sum_add_distrib, ← sum_add_distrib]
-  apply sum_congr rfl
-  intro i _
-  split_ifs <;> omega
-
 /-- Finite products of nontrivial cyclic groups with orders powers of the same base `b > 1`
 have uniquely determined exponents up to reindexing. Primality of the base is not needed. -/
 theorem exists_equiv_exponents_of_pi_pow_addEquiv {b : ℕ} (hb : 1 < b)
@@ -101,8 +88,21 @@ theorem exists_equiv_exponents_of_pi_pow_addEquiv {b : ℕ} (hb : 1 < b)
       have : IsEmpty {j // e' j = 0} := ⟨fun j ↦ (he' j.1).ne' j.2⟩
       simp
     | succ k =>
-      have h := sum_min_add_card_fiber e k
-      have h' := sum_min_add_card_fiber e' k
+      -- The multiplicity of the exponent `k + 1` is a second difference of `k ↦ ∑ i, min k (e i)`.
+      have hmin (n : ℕ) : min (k + 2) n + min k n + (if n = k + 1 then 1 else 0) =
+          min (k + 1) n + min (k + 1) n := by
+        split_ifs <;> omega
+      have h : (∑ i, min (k + 2) (e i)) + (∑ i, min k (e i)) + Fintype.card {i // e i = k + 1} =
+          (∑ i, min (k + 1) (e i)) + (∑ i, min (k + 1) (e i)) := by
+        rw [Fintype.card_subtype, card_filter, ← sum_add_distrib, ← sum_add_distrib,
+          ← sum_add_distrib]
+        exact sum_congr rfl fun i _ ↦ hmin (e i)
+      have h' : (∑ j, min (k + 2) (e' j)) + (∑ j, min k (e' j)) +
+            Fintype.card {j // e' j = k + 1} =
+          (∑ j, min (k + 1) (e' j)) + (∑ j, min (k + 1) (e' j)) := by
+        rw [Fintype.card_subtype, card_filter, ← sum_add_distrib, ← sum_add_distrib,
+          ← sum_add_distrib]
+        exact sum_congr rfl fun j _ ↦ hmin (e' j)
       have h₀ := hsum k
       have h₁ := hsum (k + 1)
       have h₂ := hsum (k + 2)

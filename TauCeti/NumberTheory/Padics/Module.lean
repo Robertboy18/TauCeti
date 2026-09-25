@@ -45,8 +45,8 @@ additive isomorphism between two such modules preserves `Module.finrank`, and `�
 
 public section
 
-variable {E : Type*} [AddCommGroup E] [TopologicalSpace E]
-  {F : Type*} [AddCommGroup F] [TopologicalSpace F] [T2Space F]
+variable {E : Type*} [AddCommMonoid E] [TopologicalSpace E]
+  {F : Type*} [AddCommMonoid F] [TopologicalSpace F] [T2Space F]
 
 section
 
@@ -110,6 +110,11 @@ def AddEquiv.toPadicIntLinearEquiv (e : E ≃+ F) (h₁ : Continuous e)
 @[simp]
 theorem AddEquiv.coe_toPadicIntLinearEquiv (e : E ≃+ F) (h₁ : Continuous e)
     (h₂ : Continuous e.symm) : ⇑(e.toPadicIntLinearEquiv p h₁ h₂) = e :=
+  (rfl)
+
+@[simp]
+theorem AddEquiv.coe_toPadicIntLinearEquiv_symm (e : E ≃+ F) (h₁ : Continuous e)
+    (h₂ : Continuous e.symm) : ⇑(e.toPadicIntLinearEquiv p h₁ h₂).symm = e.symm :=
   (rfl)
 
 end
