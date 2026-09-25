@@ -62,8 +62,10 @@ and Labute's action is recovered by precomposing with the inversion of the actin
 * The instances `ContinuousConstSMul (ConjAct G) (TopologicalAbelianization N)` and
   `ContinuousSMul (G ⧸ N) (TopologicalAbelianization N)`.
 * `TopologicalAbelianization.map_inclusion_smul`,
+  `TopologicalAbelianization.map_inclusion_quotient_smul`,
   `TopologicalAbelianization.map_inclusion_mk_smul`: for normal `R ≤ N`, the map
-  `R^{ab} →* N^{ab}` induced by the inclusion is equivariant for conjugation.
+  `R^{ab} →* N^{ab}` induced by the inclusion is equivariant for conjugation by `G`, and
+  intertwines the actions of `G ⧸ R` and `G ⧸ N` along the canonical map `G ⧸ R →* G ⧸ N`.
 
 ## References
 
@@ -97,11 +99,13 @@ def map (f : G →* H) (hf : Continuous f) :
     TopologicalAbelianization G →* TopologicalAbelianization H :=
   QuotientGroup.map _ _ f (topologicalClosure_commutator_le_comap f hf)
 
+/-- `map f hf` sends the class of `x : G` to the class of `f x`. -/
 @[simp]
 theorem map_mk (f : G →* H) (hf : Continuous f) (x : G) :
     map f hf (x : TopologicalAbelianization G) = (f x : TopologicalAbelianization H) :=
   QuotientGroup.map_mk _ _ _ _ x
 
+/-- The homomorphism `G^{ab} →* H^{ab}` induced by a continuous homomorphism is continuous. -/
 theorem continuous_map (f : G →* H) (hf : Continuous f) : Continuous (map f hf) := by
   refine (QuotientGroup.isQuotientMap_mk _).continuous_iff.2 ?_
   have h : map f hf ∘ (QuotientGroup.mk : G → TopologicalAbelianization G) =
@@ -109,10 +113,13 @@ theorem continuous_map (f : G →* H) (hf : Continuous f) : Continuous (map f hf
   rw [h]
   exact QuotientGroup.continuous_mk.comp hf
 
+/-- The identity of `G` induces the identity of `G^{ab}`. -/
 @[simp]
 theorem map_id : map (MonoidHom.id G) continuous_id = MonoidHom.id (TopologicalAbelianization G) :=
   QuotientGroup.monoidHom_ext _ (MonoidHom.ext fun x => map_mk (MonoidHom.id G) continuous_id x)
 
+/-- The topological abelianization is functorial: the map induced by a composite is the
+composite of the induced maps. -/
 theorem map_comp (g : H →* K) (hg : Continuous g) (f : G →* H) (hf : Continuous f) :
     (map g hg).comp (map f hf) = map (g.comp f) (hg.comp hf) :=
   QuotientGroup.monoidHom_ext _ (MonoidHom.ext fun x => by simp)
@@ -165,6 +172,8 @@ instance instMulDistribMulActionConjAct :
 
 /-- Conjugation by `g : G` on `N^{ab}`, on the class of `n : N`: it is the class of the conjugate
 `MulAut.conjNormal g n = g * n * g⁻¹`. -/
+-- Not `@[simp]`: Mathlib's `@[simp] MulAction.Quotient.smul_mk` already rewrites the left-hand
+-- side to `↑(ConjAct.toConjAct g • n)`, so simpNF rejects this lemma as a simp lemma.
 theorem toConjAct_smul_mk (g : G) (n : N) :
     ConjAct.toConjAct g • (n : TopologicalAbelianization N) =
       (MulAut.conjNormal g n : TopologicalAbelianization N) :=
@@ -196,6 +205,8 @@ def conjAut : G ⧸ N →* MulAut (TopologicalAbelianization N) :=
       ConjAct.toConjAct.toMonoidHom)
     fun _ hg => MonoidHom.mem_ker.2 (MulEquiv.ext (toConjAct_smul_eq_self_of_mem N hg))
 
+/-- `conjAut N` sends the class of `g : G` to conjugation by `g` on `N^{ab}`, as an element of
+`MulAut (TopologicalAbelianization N)`. -/
 theorem conjAut_mk (g : G) :
     conjAut N (g : G ⧸ N) =
       MulDistribMulAction.toMulAut (ConjAct G) (TopologicalAbelianization N)
@@ -215,12 +226,14 @@ instance instMulDistribMulActionQuotient :
   smul_mul _ _ _ := map_mul _ _ _
   smul_one _ := map_one _
 
+/-- Applying the automorphism `conjAut N γ` is the action of `γ : G ⧸ N` on `N^{ab}`. -/
 @[simp]
 theorem conjAut_apply (γ : G ⧸ N) (x : TopologicalAbelianization N) : conjAut N γ x = γ • x :=
   rfl
 
 /-- The class of `g : G` in `G ⧸ N` acts on `N^{ab}` as conjugation by `g`. -/
-@[simp]
+-- Not `@[simp]`: the class-level equations `mk_smul_mk` and `mk_inv_smul_mk` are the simp normal
+-- form of the action; with this lemma in the simp set they would fail simpNF.
 theorem mk_smul (g : G) (x : TopologicalAbelianization N) :
     (g : G ⧸ N) • x = ConjAct.toConjAct g • x := by
   rw [← conjAut_apply, conjAut_mk]
@@ -229,6 +242,7 @@ theorem mk_smul (g : G) (x : TopologicalAbelianization N) :
 
 /-- **The defining equation of the action of `G ⧸ N` on `N^{ab}`**: the class of `g` sends the
 class of `n` to the class of `g * n * g⁻¹`. -/
+@[simp]
 theorem mk_smul_mk (g : G) (n : N) :
     (g : G ⧸ N) • (n : TopologicalAbelianization N) =
       (MulAut.conjNormal g n : TopologicalAbelianization N) := by
@@ -238,6 +252,7 @@ theorem mk_smul_mk (g : G) (n : N) :
 sends the class of `x` to the class of `y⁻¹ * x * y`. Labute's `[y] · [x] = y⁻¹ x y` is thus
 `(y : G ⧸ N)⁻¹ • [x]` in the convention of `mk_smul_mk`; the two agree up to the inversion of
 the acting group, and Labute's formula is itself a left action when `G ⧸ N` is abelian. -/
+@[simp]
 theorem mk_inv_smul_mk (g : G) (n : N) :
     (g : G ⧸ N)⁻¹ • (n : TopologicalAbelianization N) =
       ((⟨g⁻¹ * n * g, ‹N.Normal›.conj_mem' n n.2 g⟩ : N) : TopologicalAbelianization N) := by
@@ -267,17 +282,24 @@ theorem map_inclusion_smul (h : R ≤ N) (g : ConjAct G) (x : TopologicalAbelian
     map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) (g • x) =
       g • map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) x := by
   induction x using QuotientGroup.induction_on with | H x => ?_
-  rw [MulAction.Quotient.smul_mk, map_mk, map_mk, MulAction.Quotient.smul_mk]
-  -- Both sides are the class of `g * x * g⁻¹` in `N`; the inclusion only changes the membership
-  -- proof, which is irrelevant.
-  rfl
+  rw [MulAction.Quotient.smul_mk, map_mk, map_mk, MulAction.Quotient.smul_mk,
+    Subgroup.inclusion_conj_smul]
 
 /-- For normal subgroups `R ≤ N`, the map `R^{ab} →* N^{ab}` induced by the inclusion
-intertwines the actions of `G ⧸ R` and `G ⧸ N`. -/
+intertwines the actions of `G ⧸ R` and `G ⧸ N` along the canonical map `G ⧸ R →* G ⧸ N`. -/
+theorem map_inclusion_quotient_smul (h : R ≤ N) (γ : G ⧸ R) (x : TopologicalAbelianization R) :
+    map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) (γ • x) =
+      QuotientGroup.map R N (MonoidHom.id G) (h.trans (Subgroup.comap_id N).ge) γ •
+        map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) x := by
+  induction γ using QuotientGroup.induction_on with | H g => ?_
+  rw [QuotientGroup.map_mk, MonoidHom.id_apply, mk_smul, mk_smul, map_inclusion_smul]
+
+/-- For normal subgroups `R ≤ N`, the map `R^{ab} →* N^{ab}` induced by the inclusion
+intertwines the actions of `G ⧸ R` and `G ⧸ N`, on the class of `g : G`. -/
 theorem map_inclusion_mk_smul (h : R ≤ N) (g : G) (x : TopologicalAbelianization R) :
     map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) ((g : G ⧸ R) • x) =
       (g : G ⧸ N) • map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) x := by
-  rw [mk_smul, mk_smul, map_inclusion_smul]
+  rw [map_inclusion_quotient_smul, QuotientGroup.map_mk, MonoidHom.id_apply]
 
 end Conjugation
 
