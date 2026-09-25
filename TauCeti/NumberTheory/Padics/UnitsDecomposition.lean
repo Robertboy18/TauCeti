@@ -63,6 +63,39 @@ theorem isComplement'_rootsOfUnity_unitsPrincipal_one :
   rwa [PadicInt.card_residueField, ← unitsPrincipal_one_eq_ker_unitsMap_residue] at h
 
 variable (p) in
+/-- The Henselian multiplication map transported to roots of unity and principal units. -/
+private noncomputable def padicIntUnitsProdMulEquiv :
+    rootsOfUnity (p - 1) ℤ_[p] × unitsPrincipal p 1 ≃* ℤ_[p]ˣ :=
+  have h₁ : rootsOfUnity (p - 1) ℤ_[p] =
+      rootsOfUnity (Nat.card (ResidueField ℤ_[p]) - 1) ℤ_[p] := by
+    rw [PadicInt.card_residueField]
+  (MulEquiv.prodCongr (MulEquiv.subgroupCongr h₁)
+    (MulEquiv.subgroupCongr (unitsPrincipal_one_eq_ker_unitsMap_residue p))).trans
+    (unitsMulEquivRootsOfUnityProdKerResidue ℤ_[p]).symm
+
+/-- Transport changes the membership proofs, leaving the underlying units unchanged. -/
+private theorem padicIntUnitsProdMulEquiv_apply
+    (x : rootsOfUnity (p - 1) ℤ_[p] × unitsPrincipal p 1) :
+    padicIntUnitsProdMulEquiv p x = x.1 * x.2 := by
+  simp only [padicIntUnitsProdMulEquiv, MulEquiv.trans_apply,
+    unitsMulEquivRootsOfUnityProdKerResidue_symm_apply]
+  rfl
+
+/-- The inverse has the same underlying components as the Henselian splitting. -/
+private theorem padicIntUnitsProdMulEquiv_symm_apply (u : ℤ_[p]ˣ) :
+    (padicIntUnitsProdMulEquiv p).symm u =
+      (⟨(unitsMulEquivRootsOfUnityProdKerResidue ℤ_[p] u).1, by
+          simpa only [PadicInt.card_residueField] using
+            (unitsMulEquivRootsOfUnityProdKerResidue ℤ_[p] u).1.2⟩,
+        ⟨(unitsMulEquivRootsOfUnityProdKerResidue ℤ_[p] u).2, by
+          rw [unitsPrincipal_one_eq_ker_unitsMap_residue]
+          exact (unitsMulEquivRootsOfUnityProdKerResidue ℤ_[p] u).2.2⟩) := by
+  apply (padicIntUnitsProdMulEquiv p).injective
+  rw [MulEquiv.apply_symm_apply, padicIntUnitsProdMulEquiv_apply]
+  simpa only [unitsMulEquivRootsOfUnityProdKerResidue_symm_apply] using
+    ((unitsMulEquivRootsOfUnityProdKerResidue ℤ_[p]).symm_apply_apply u).symm
+
+variable (p) in
 /-- **The Teichmüller splitting of `ℤ_pˣ`**, `ℤ_pˣ ≃ₜ* μ_{p-1} × (1 + pℤ_p)`: a unit `u` goes to
 the unique `(p - 1)`-st root of unity congruent to `u` modulo `p` together with `u` divided by it,
 and the inverse is multiplication. This is the Teichmüller splitting
@@ -74,45 +107,41 @@ noncomputable def padicIntUnitsEquivProd :
   have : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
   have : CompactSpace (unitsPrincipal p 1) :=
     isCompact_iff_compactSpace.mp (isClosed_unitsPrincipal p 1).isCompact
-  have h₁ : rootsOfUnity (p - 1) ℤ_[p] =
-      rootsOfUnity (Nat.card (ResidueField ℤ_[p]) - 1) ℤ_[p] := by
-    rw [PadicInt.card_residueField]
-  let e : rootsOfUnity (p - 1) ℤ_[p] × unitsPrincipal p 1 ≃* ℤ_[p]ˣ :=
-    (MulEquiv.prodCongr (MulEquiv.subgroupCongr h₁)
-      (MulEquiv.subgroupCongr (unitsPrincipal_one_eq_ker_unitsMap_residue p))).trans
-      (unitsMulEquivRootsOfUnityProdKerResidue ℤ_[p]).symm
+  let e := padicIntUnitsProdMulEquiv p
   -- Multiplication is continuous, and a continuous bijection from a compact space to a Hausdorff
   -- space is a homeomorphism.
   have he : Continuous e :=
     ((continuous_subtype_val.comp continuous_fst).mul
-      (continuous_subtype_val.comp continuous_snd)).congr fun x ↦ by
-        simp only [e, MulEquiv.trans_apply, unitsMulEquivRootsOfUnityProdKerResidue_symm_apply]
-        rfl
+      (continuous_subtype_val.comp continuous_snd)).congr fun x ↦
+        (padicIntUnitsProdMulEquiv_apply x).symm
   (ContinuousMulEquiv.mk e he (he.continuous_symm_of_equiv_compact_to_t2 (f := e.toEquiv))).symm
 
 /-- The inverse of the Teichmüller splitting of `ℤ_pˣ` is multiplication, `(ζ, v) ↦ ζ * v`. -/
 @[simp]
 theorem padicIntUnitsEquivProd_symm_apply (x : rootsOfUnity (p - 1) ℤ_[p] × unitsPrincipal p 1) :
     (padicIntUnitsEquivProd p).symm x = x.1 * x.2 := by
-  simp only [padicIntUnitsEquivProd, ContinuousMulEquiv.symm_symm, ContinuousMulEquiv.coe_mk,
-    MulEquiv.trans_apply, unitsMulEquivRootsOfUnityProdKerResidue_symm_apply]
-  rfl
+  simpa only [padicIntUnitsEquivProd, ContinuousMulEquiv.symm_symm,
+    ContinuousMulEquiv.coe_mk] using padicIntUnitsProdMulEquiv_apply x
 
 /-- The root-of-unity component of a unit `u` is the Teichmüller representative of its residue
 class modulo `p`. -/
 @[simp]
 theorem coe_padicIntUnitsEquivProd_apply_fst (u : ℤ_[p]ˣ) :
     ((padicIntUnitsEquivProd p u).1 : ℤ_[p]ˣ) =
-      teichmuller ℤ_[p] (Units.map (residue ℤ_[p] : ℤ_[p] →* ResidueField ℤ_[p]) u) :=
-  coe_unitsMulEquivRootsOfUnityProdKerResidue_apply_fst ℤ_[p] u
+      teichmuller ℤ_[p] (Units.map (residue ℤ_[p] : ℤ_[p] →* ResidueField ℤ_[p]) u) := by
+  change (((padicIntUnitsProdMulEquiv p).symm u).1 : ℤ_[p]ˣ) = _
+  rw [padicIntUnitsProdMulEquiv_symm_apply]
+  exact coe_unitsMulEquivRootsOfUnityProdKerResidue_apply_fst ℤ_[p] u
 
 /-- The principal-unit component of a unit `u` is `u` divided by the Teichmüller representative
 of its residue class modulo `p`. -/
 @[simp]
 theorem coe_padicIntUnitsEquivProd_apply_snd (u : ℤ_[p]ˣ) :
     ((padicIntUnitsEquivProd p u).2 : ℤ_[p]ˣ) =
-      (teichmuller ℤ_[p] (Units.map (residue ℤ_[p] : ℤ_[p] →* ResidueField ℤ_[p]) u))⁻¹ * u :=
-  coe_unitsMulEquivRootsOfUnityProdKerResidue_apply_snd ℤ_[p] u
+      (teichmuller ℤ_[p] (Units.map (residue ℤ_[p] : ℤ_[p] →* ResidueField ℤ_[p]) u))⁻¹ * u := by
+  change (((padicIntUnitsProdMulEquiv p).symm u).2 : ℤ_[p]ˣ) = _
+  rw [padicIntUnitsProdMulEquiv_symm_apply]
+  exact coe_unitsMulEquivRootsOfUnityProdKerResidue_apply_snd ℤ_[p] u
 
 /-- The root-of-unity component of a unit `u` is congruent to `u` modulo `p`. -/
 -- Not a `simp` lemma: `coe_padicIntUnitsEquivProd_apply_fst` rewrites its left-hand side.
