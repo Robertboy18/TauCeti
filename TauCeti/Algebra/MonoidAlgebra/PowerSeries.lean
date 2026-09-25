@@ -109,10 +109,15 @@ theorem toPowerSeries_single_one_X :
   rw [toPowerSeries_single, PowerSeries.mapAlgHom_apply, PowerSeries.map_X, ← MonoidAlgebra.one_def,
     map_one, mul_one]
 
+/-- The map `A⟦X⟧[M] → A[M]⟦X⟧` is injective, for every monoid `M`: it determines all the
+coefficients of its argument (`coeff_coeff_toPowerSeries`). -/
 theorem toPowerSeries_injective : Function.Injective (toPowerSeries R A M) := fun x y h ↦ by
   refine MonoidAlgebra.coeff_injective (Finsupp.ext fun m ↦ PowerSeries.ext fun n ↦ ?_)
   rw [← coeff_coeff_toPowerSeries R A M x, ← coeff_coeff_toPowerSeries R A M y, h]
 
+/-- The map `A⟦X⟧[M] → A[M]⟦X⟧` is surjective when `M` is finite: a power series over `A[M]` is
+the image of the monoid algebra element whose coefficient at `m` is the power series of the
+coefficients at `m`, which is finitely supported in `m` because `M` is finite. -/
 theorem toPowerSeries_surjective [Finite M] : Function.Surjective (toPowerSeries R A M) :=
   fun ψ ↦ ⟨ofCoeff (Finsupp.equivFunOnFinite.symm fun m ↦
     PowerSeries.mk fun n ↦ (PowerSeries.coeff n ψ).coeff m), PowerSeries.ext fun n ↦
