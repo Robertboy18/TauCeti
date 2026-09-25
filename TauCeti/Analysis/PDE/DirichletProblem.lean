@@ -45,8 +45,13 @@ file supplies exactly such diagonal lower bounds without packaging them.
 that file are instantiated here: a domain trapped between two hyperplanes and a domain contained
 in a ball, whose Poincaré constants are the slab width `t - s` and the diameter bound `2R`. In
 both cases the drift smallness condition `βP < λ` is what makes the resulting constant positive,
-and with no drift it is vacuous. This is *not* a claim that coercivity fails otherwise: when it
-is genuinely unavailable the Fredholm alternative (Lane D, item 18) replaces Lax--Milgram.
+and with no drift it is vacuous.
+
+A mass floor `δ > β²/(2λ)` gives another route: coercivity with constant
+`min (λ/2) (δ - β²/(2λ))`, on any open domain, including all of Euclidean space. The theorem
+`TauCeti.PDE.UniformlyEllipticOn.existsUnique_isWeakSolutionDirichlet_of_mass_lower_bound`
+therefore needs no geometric or Poincaré hypothesis. These are sufficient conditions; when
+coercivity is unavailable the Fredholm alternative (Lane D, item 18) replaces Lax--Milgram.
 
 ## The `-Δ` payoff
 
@@ -77,6 +82,8 @@ the constructed one, so it is available before, and independently of, uniqueness
   `TauCeti.PDE.existsUnique_isWeakSolutionDirichlet`: the Lax--Milgram solution and the
   existence-and-uniqueness theorem.
 * `TauCeti.PDE.norm_le_of_isWeakSolutionDirichlet`: the energy estimate `‖u‖ ≤ ‖f‖/C`.
+* `TauCeti.PDE.UniformlyEllipticOn.existsUnique_isWeakSolutionDirichlet_of_mass_lower_bound`:
+  existence and uniqueness on an arbitrary open domain when the potential absorbs the drift.
 * `TauCeti.PDE.existsUnique_isWeakSolutionDirichlet_of_subset_slab` and
   `TauCeti.PDE.existsUnique_isWeakSolutionDirichlet_of_subset_ball`: existence and uniqueness
   under the geometric hypotheses that make the energy form coercive.
@@ -299,6 +306,28 @@ theorem existsUnique_isWeakSolutionDirichlet_of_mul_norm_sq_le
     (f : Lp ℝ 2 (mu.restrict Omega)) :
     ∃! u : W1p0 mu Omega 2, IsWeakSolutionDirichlet a b c f u :=
   existsUnique_isWeakSolutionDirichlet hcoeff (isCoercive_energyFormH1L0 hcoeff hC hlower) f
+
+/-- Existence and uniqueness on an arbitrary open domain when the mass floor `δ` exceeds
+`β²/(2λ)`. The positive potential absorbs the drift, giving the coercivity constant
+`min (λ/2) (δ - β²/(2λ))` without a boundedness assumption on the domain or a Poincaré
+inequality. No symmetry of the principal coefficient is required. -/
+theorem UniformlyEllipticOn.existsUnique_isWeakSolutionDirichlet_of_mass_lower_bound
+    [DecidableEq ι] {lam Lam beta gamma delta : ℝ}
+    (h : UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ ι)) a lam Lam)
+    (ha : AEStronglyMeasurable a (mu.restrict Omega))
+    (hb : AEStronglyMeasurable b (mu.restrict Omega))
+    (hc : AEStronglyMeasurable c (mu.restrict Omega))
+    (hb_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖b x‖ ≤ beta)
+    (hc_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖c x‖ ≤ gamma)
+    (hc_lower : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), delta ≤ c x)
+    (hdelta : beta ^ 2 / (2 * lam) < delta) (f : Lp ℝ 2 (mu.restrict Omega)) :
+    ∃! u : W1p0 mu Omega 2, IsWeakSolutionDirichlet a b c f u :=
+  existsUnique_isWeakSolutionDirichlet_of_mul_norm_sq_le
+    (memLp_energyIntegrand_of_bounds h.upper_nonneg ha hb hc
+      (fun _x hx eta xi => h.upper_bound hx eta xi) hb_bound hc_bound)
+    (lt_min (div_pos h.pos (by norm_num)) (sub_pos.mpr hdelta))
+    (fun w => h.min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound ha hb hc
+      hb_bound hc_bound hc_lower w) f
 
 /-! ### The Laplacian model -/
 

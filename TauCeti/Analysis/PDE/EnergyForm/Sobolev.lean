@@ -50,7 +50,7 @@ coercivity, and under the hypotheses assumed here the negative `L²` term cannot
 `H¹(Ω)` with zero gradient, so no lower bound by a positive multiple of `‖u‖²_{H¹}` holds. It
 is the weakness of `c ≥ 0` that is responsible, not `H¹(Ω)` itself: a mass coefficient bounded
 below by a constant `μ > β²/2λ` controls constants too, and the mass-floor bound
-`TauCeti.PDE.UniformlyEllipticOn.garding_energyFormIntegral_self_of_mass_lower_bound_on` then
+`TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self_of_mass_lower_bound` then
 has no negative term left to remove.
 
 A **Poincaré inequality** `‖u‖_{L²} ≤ P‖∇u‖_{L²}` closes the gap, and
@@ -75,12 +75,10 @@ form as a bundled continuous bilinear map on `H¹(Ω)`
 (`TauCeti.PDE.energyFormH1L`), by restricting the existing
 `TauCeti.PDE.energyFormLpVariable` along the Sobolev jet inclusion. Restricting further along the
 closed-subspace inclusion gives `TauCeti.PDE.energyFormH1L0` on `H¹₀(Ω)`. These forms have the
-shape required by Lax--Milgram; coercivity is a further step, and the route supplied here is the
-Poincaré one: a Poincaré inequality on `H¹₀(Ω)` together with positivity of the resulting
-constant, such as the sufficient condition `βP < λ`. That route is not the only one — the mass
-floor `μ > β²/2λ` recorded above already gives a lower bound with no negative term, hence
-coercivity on all of `H¹(Ω)` and no Poincaré inequality anywhere. Either way, this file supplies
-the lower bounds and does not package an `IsCoercive` proof.
+shape required by Lax--Milgram. The Poincaré route gives coercivity on `H¹₀(Ω)` when `βP < λ`.
+The mass floor `δ > β²/(2λ)` instead gives coercivity on all of `H¹(Ω)`, with explicit
+constant `min (λ/2) (δ - β²/(2λ))`, independently of the domain. This file supplies both lower
+bounds; `TauCeti.PDE.isCoercive_energyFormH1L0` packages them as an `IsCoercive` proof.
 
 Everything is stated with explicit constants `λ, Λ, β, γ, P`, as the roadmap's standing
 hypotheses require, and coefficient bounds are inline hypotheses `∀ x ∈ Ω, ‖b x‖ ≤ β` rather
@@ -107,6 +105,10 @@ hypothesis is carried explicitly, and the interior estimates do not see the boun
 * `TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self`: Gårding's inequality on `H¹(Ω)`.
 * `TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self_norm`: the equivalent roadmap form
   with an `H¹` norm and a negative `L²` term.
+* `TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self_of_mass_lower_bound`: the bound
+  retaining an arbitrary mass floor `δ`.
+* `TauCeti.PDE.UniformlyEllipticOn.min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound`:
+  the `H¹`-norm lower bound with constant `min (λ/2) (δ - β²/(2λ))`.
 * `TauCeti.PDE.UniformlyEllipticOn.mul_norm_sq_le_energyFormH1_self_of_poincare`: the lower bound
   by `‖u‖²_{H¹}` obtained from a Poincaré inequality, and
   `TauCeti.PDE.energyFormH1_poincare_constant_pos`,
@@ -644,6 +646,35 @@ theorem norm_energyFormH1_le
     hbeta hgamma
     hb_bound hc_bound u v
 
+/-- Gårding's inequality with a lower bound `δ` for the mass coefficient. The gradient
+coefficient is `λ/2` and the value coefficient is `δ - β²/(2λ)`. The estimate holds for
+arbitrary `δ`, including negative lower bounds. -/
+theorem garding_energyFormH1_self_of_mass_lower_bound {delta : ℝ}
+    (h : UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ ι)) a lam Lam)
+    (ha : AEStronglyMeasurable a (mu.restrict Omega))
+    (hb : AEStronglyMeasurable b (mu.restrict Omega))
+    (hc : AEStronglyMeasurable c (mu.restrict Omega))
+    (hb_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖b x‖ ≤ beta)
+    (hc_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖c x‖ ≤ gamma)
+    (hc_lower : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), delta ≤ c x)
+    (u : W1p mu Omega 2) :
+    lam / 2 * ‖W1p.gradient u‖ ^ 2 +
+        (delta - beta ^ 2 / (2 * lam)) * ‖W1p.value u‖ ^ 2 ≤ energyFormH1 a b c u u := by
+  have hmem : ∀ᵐ x ∂mu.restrict (Omega : Set (EuclideanSpace ℝ ι)),
+      x ∈ (Omega : Set (EuclideanSpace ℝ ι)) := ae_restrict_mem Omega.isOpen.measurableSet
+  have hgrad := integrable_norm_jetField_snd_sq u
+  have hval := integrable_jetField_fst_sq u
+  have hlower := (hgrad.const_mul (lam / 2)).add
+    (hval.const_mul (delta - beta ^ 2 / (2 * lam)))
+  have key := garding_energyFormIntegral_self_of_mass_lower_bound_on
+    (μ := mu.restrict Omega) h.withClassicalDecEq hmem
+    (hmem.mono hb_bound) (hmem.mono hc_lower) hlower
+    (integrable_energyIntegrand_jetField h ha hb hc hb_bound hc_bound u u)
+  refine le_trans (le_of_eq ?_) key
+  rw [integral_add (hgrad.const_mul _) (hval.const_mul _), integral_const_mul, integral_const_mul,
+    integral_norm_jetField_snd_sq_eq_norm_gradient_sq,
+    integral_jetField_fst_sq_eq_norm_value_sq]
+
 /-- **Gårding's inequality on `H¹(Ω)`.** For a uniformly elliptic principal coefficient with
 lower constant `λ`, a drift bounded by `β` and a nonnegative mass coefficient,
 
@@ -663,24 +694,8 @@ theorem garding_energyFormH1_self
     (hc_nonneg : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), 0 ≤ c x) (u : W1p mu Omega 2) :
     lam / 2 * ‖W1p.gradient u‖ ^ 2 - beta ^ 2 / (2 * lam) * ‖W1p.value u‖ ^ 2
       ≤ energyFormH1 a b c u u := by
-  have hmem : ∀ᵐ x ∂mu.restrict (Omega : Set (EuclideanSpace ℝ ι)),
-      x ∈ (Omega : Set (EuclideanSpace ℝ ι)) := ae_restrict_mem Omega.isOpen.measurableSet
-  have hgrad : Integrable (fun x => ‖(jetField u x).2‖ ^ 2) (mu.restrict Omega) :=
-    (memLp_two_iff_integrable_sq_norm ((memLp_jetField u).aestronglyMeasurable.snd)).1
-      (memLp_jetField u).snd
-  have hval : Integrable (fun x => (jetField u x).1 ^ 2) (mu.restrict Omega) :=
-    (memLp_jetField u).fst.integrable_sq
-  have hlower : Integrable (fun x => lam / 2 * ‖(jetField u x).2‖ ^ 2
-      - beta ^ 2 / (2 * lam) * (jetField u x).1 ^ 2) (mu.restrict Omega) :=
-    (hgrad.const_mul _).sub (hval.const_mul _)
-  have key := garding_energyFormIntegral_self_on (μ := mu.restrict Omega) h.withClassicalDecEq hmem
-    (hmem.mono hb_bound)
-    (hmem.mono hc_nonneg) hlower
-    (integrable_energyIntegrand_jetField h ha hb hc hb_bound hc_bound u u)
-  refine le_trans (le_of_eq ?_) key
-  rw [integral_sub (hgrad.const_mul _) (hval.const_mul _), integral_const_mul, integral_const_mul,
-    integral_norm_jetField_snd_sq_eq_norm_gradient_sq,
-    integral_jetField_fst_sq_eq_norm_value_sq]
+  simpa only [sub_eq_add_neg, zero_add, neg_mul] using
+    garding_energyFormH1_self_of_mass_lower_bound h ha hb hc hb_bound hc_bound hc_nonneg u
 
 /-- **Gårding's inequality in the roadmap's `H¹`-norm form.** This is the equivalent
 restatement
@@ -700,6 +715,25 @@ theorem garding_energyFormH1_self_norm
   rw [W1p.norm_sq_eq_norm_value_sq_add_norm_gradient_sq]
   convert garding_energyFormH1_self h ha hb hc hb_bound hc_bound hc_nonneg u using 1
   ring
+
+/-- A lower bound for the energy form in the full `H¹` norm, with constant
+`min (λ/2) (δ - β²/(2λ))`. This gives coercivity on all of `H¹(Ω)` when `δ > β²/(2λ)`,
+without a Poincaré inequality or a boundary condition. -/
+theorem min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound {delta : ℝ}
+    (h : UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ ι)) a lam Lam)
+    (ha : AEStronglyMeasurable a (mu.restrict Omega))
+    (hb : AEStronglyMeasurable b (mu.restrict Omega))
+    (hc : AEStronglyMeasurable c (mu.restrict Omega))
+    (hb_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖b x‖ ≤ beta)
+    (hc_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖c x‖ ≤ gamma)
+    (hc_lower : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), delta ≤ c x)
+    (u : W1p mu Omega 2) :
+    min (lam / 2) (delta - beta ^ 2 / (2 * lam)) * ‖u‖ ^ 2 ≤ energyFormH1 a b c u u := by
+  refine le_trans ?_ (garding_energyFormH1_self_of_mass_lower_bound h ha hb hc
+    hb_bound hc_bound hc_lower u)
+  rw [W1p.norm_sq_eq_norm_value_sq_add_norm_gradient_sq, mul_add, add_comm]
+  exact add_le_add (mul_le_mul_of_nonneg_right (min_le_left _ _) (sq_nonneg _))
+    (mul_le_mul_of_nonneg_right (min_le_right _ _) (sq_nonneg _))
 
 /-- **An energy-form lower bound from a Poincaré inequality.** If `u ∈ H¹(Ω)` satisfies
 `‖u‖_{L²} ≤ P‖∇u‖_{L²}` then
