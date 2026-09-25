@@ -37,7 +37,7 @@ form to a coercive form by adding a sufficiently large constant.
 * `TauCeti.PDE.finiteDimensional_ker_one_sub_smul_dirichletMassOperator`: finite dimensionality
   of its homogeneous solution space.
 * `TauCeti.PDE.fredholmAlternative_isWeakSolutionDirichlet_sub_const`: the Fredholm dichotomy
-  for the operator with potential `c - κ`.
+  for the operator with mass coefficient `c - κ`.
 
 ## References
 
@@ -134,14 +134,14 @@ theorem isWeakSolutionDirichletMassShift_zero_iff (f : Lp ℝ 2 (mu.restrict Ome
   simp only [zero_mul, sub_zero]
 
 /-- For essentially bounded energy coefficients, the mass-shifted equation is the usual weak
-Dirichlet equation with potential `c - κ`. -/
-theorem isWeakSolutionDirichletMassShift_iff_isWeakSolutionDirichlet
+Dirichlet equation with mass coefficient `c - κ`. -/
+theorem isWeakSolutionDirichletMassShift_iff_isWeakSolutionDirichlet_sub_const
     (hcoeff : MemLp (fun x ↦ energyIntegrand (a x) (b x) (c x)) ⊤ (mu.restrict Omega))
     (kappa : ℝ) (f : Lp ℝ 2 (mu.restrict Omega)) (u : W1p0 mu Omega 2) :
     IsWeakSolutionDirichletMassShift a b c kappa f u ↔
       IsWeakSolutionDirichlet a b (fun x ↦ c x - kappa) f u := by
   simp only [isWeakSolutionDirichletMassShift_iff, isWeakSolutionDirichlet_iff,
-    energyFormH1_sub_const hcoeff]
+    energyFormH1_mass_sub_const hcoeff]
 
 /-- The mass-shifted weak equation written as an operator equation on `H¹₀(Ω)`. -/
 theorem isWeakSolutionDirichletMassShift_iff_operator_eq
@@ -188,8 +188,8 @@ theorem finiteDimensional_ker_one_sub_smul_dirichletMassOperator
     (W1p0.isCompactOperator_valueL (by simp) hOmega) kappa
 
 /-- **The Fredholm alternative for the mass-shifted Dirichlet problem.** On a bounded domain,
-the operator with potential `c - κ` either has a nonzero homogeneous weak solution, or admits a
-unique weak solution for every `L²` forcing. -/
+the operator with mass coefficient `c - κ` either has a nonzero homogeneous weak solution, or
+admits a unique weak solution for every `L²` forcing. -/
 theorem fredholmAlternative_isWeakSolutionDirichlet_sub_const
     (hcoeff : MemLp (fun x => energyIntegrand (a x) (b x) (c x)) ⊤ (mu.restrict Omega))
     (hcoercive : IsCoercive (energyFormH1L0 hcoeff))
@@ -200,7 +200,7 @@ theorem fredholmAlternative_isWeakSolutionDirichlet_sub_const
       ∀ f : Lp ℝ 2 (mu.restrict Omega),
         ∃! u : W1p0 mu Omega 2,
           IsWeakSolutionDirichlet a b (fun x ↦ c x - kappa) f u := by
-  simp only [← isWeakSolutionDirichletMassShift_iff_isWeakSolutionDirichlet hcoeff]
+  simp only [← isWeakSolutionDirichletMassShift_iff_isWeakSolutionDirichlet_sub_const hcoeff]
   rcases hcoercive.fredholmAlternative_formPerturbation
       (W1p0.isCompactOperator_valueL (by simp) hOmega) kappa with hkernel | hunique
   · left

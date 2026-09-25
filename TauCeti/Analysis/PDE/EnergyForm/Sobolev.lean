@@ -479,11 +479,33 @@ theorem integrable_energyIntegrand_jetField
   filter_upwards [jetLpL_apply_ae u, jetLpL_apply_ae v] with x hu hv
   rw [hu, hv]
 
+omit [mu.IsAddHaarMeasure] [DecidableEq ι] in
+/-- Subtracting a constant from the mass coefficient preserves essential boundedness of the
+pointwise energy forms. -/
+theorem memLp_energyIntegrand_mass_sub_const
+    (hcoeff : MemLp (fun x ↦ energyIntegrand (a x) (b x) (c x)) ⊤ (mu.restrict Omega))
+    (kappa : ℝ) :
+    MemLp (fun x ↦ energyIntegrand (a x) (b x) (c x - kappa)) ⊤ (mu.restrict Omega) := by
+  let : NormedAddCommGroup
+      ((ℝ × EuclideanSpace ℝ ι) →L[ℝ] (ℝ × EuclideanSpace ℝ ι) →L[ℝ] ℝ) := inferInstance
+  have hconst :
+      MemLp (fun _ : EuclideanSpace ℝ ι ↦ energyIntegrand (0 : Matrix ι ι ℝ) 0 kappa)
+        ⊤ (mu.restrict Omega) :=
+    memLp_top_const
+      (E := (ℝ × EuclideanSpace ℝ ι) →L[ℝ] (ℝ × EuclideanSpace ℝ ι) →L[ℝ] ℝ)
+      (μ := mu.restrict Omega) (energyIntegrand (0 : Matrix ι ι ℝ) 0 kappa)
+  have hsub := hcoeff.sub hconst
+  apply MemLp.ae_eq (hf_Lp := hsub)
+  filter_upwards with x
+  simp only [Pi.sub_apply]
+  simpa only [sub_zero] using
+    (energyIntegrand_sub (a x) 0 (b x) 0 (c x) kappa).symm
+
 open scoped InnerProductSpace in
 omit [DecidableEq ι] in
-/-- Subtracting a constant from the potential subtracts the corresponding `L²` mass pairing
+/-- Subtracting a constant from the mass coefficient subtracts the corresponding `L²` mass pairing
 from the Sobolev energy form. No boundary or coercivity assumption is needed. -/
-theorem energyFormH1_sub_const
+theorem energyFormH1_mass_sub_const
     (hcoeff : MemLp (fun x ↦ energyIntegrand (a x) (b x) (c x)) ⊤ (mu.restrict Omega))
     (kappa : ℝ) (u v : W1p mu Omega 2) :
     energyFormH1 a b (fun x ↦ c x - kappa) u v =
