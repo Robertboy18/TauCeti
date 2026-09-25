@@ -79,8 +79,8 @@ closed-subspace inclusion gives `TauCeti.PDE.energyFormH1L0` on `H¹₀(Ω)`. Th
 shape required by Lax--Milgram. The Poincaré route gives coercivity on `H¹₀(Ω)` when `βP < λ`.
 The mass condition `β² < 4λδ` instead gives coercivity on all of `H¹(Ω)`, with explicit
 constant `min (λ - ε) (δ - β²/(4ε))` for a suitable `ε`, independently of the domain. This file
-supplies both lower
-bounds; `TauCeti.PDE.isCoercive_energyFormH1L0` packages them as an `IsCoercive` proof.
+supplies both lower bounds and does not package an `IsCoercive` proof; that packaging is
+`TauCeti.PDE.isCoercive_energyFormH1L0` in `TauCeti/Analysis/PDE/DirichletProblem.lean`.
 
 Everything is stated with explicit constants `λ, Λ, β, γ, P`, as the roadmap's standing
 hypotheses require, and coefficient bounds are inline hypotheses `∀ x ∈ Ω, ‖b x‖ ≤ β` rather
