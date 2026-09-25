@@ -26,8 +26,9 @@ completed group algebra `ℤ_p[[Γ]]` of a procyclic pro-`p` group `Γ`: at a le
 
 ## Main results
 
-* `TauCeti.Polynomial.monic_one_add_X_pow_sub_one`,
-  `TauCeti.Polynomial.natDegree_one_add_X_pow_sub_one`: `(1 + X) ^ n - 1` is monic of degree `n`.
+* `TauCeti.Polynomial.monic_one_add_X_pow_sub_one`: `(1 + X) ^ n - 1` is monic for `n ≠ 0`.
+* `TauCeti.Polynomial.natDegree_one_add_X_pow_sub_one`: `(1 + X) ^ n - 1` has `natDegree` equal
+  to `n` (at `n = 0` the polynomial is `0`, whose `natDegree` is `0` by convention).
 * `TauCeti.Polynomial.isDistinguishedAt_one_add_X_pow_sub_one`: `(1 + X) ^ (p ^ m) - 1` is
   distinguished at `(p)`.
 -/
@@ -42,7 +43,8 @@ namespace Polynomial
 
 variable {R : Type*} [CommRing R]
 
-/-- The polynomial `(1 + X) ^ n - 1` has degree `n`. -/
+/-- The polynomial `(1 + X) ^ n - 1` has `natDegree` equal to `n`. For `n ≠ 0` this is its
+degree; at `n = 0` the polynomial is `0`, whose `natDegree` is `0` by convention. -/
 @[simp]
 theorem natDegree_one_add_X_pow_sub_one [Nontrivial R] (n : ℕ) :
     ((1 + X) ^ n - 1 : R[X]).natDegree = n := by
