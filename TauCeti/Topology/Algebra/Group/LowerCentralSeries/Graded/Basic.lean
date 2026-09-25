@@ -271,7 +271,8 @@ noncomputable def gradedPieceZeroEquiv :
   AddEquiv.ofBijective (gradedPieceInclusion p G 0)
     ⟨gradedPieceInclusion_injective 0, gradedPieceInclusion_zero_surjective⟩
 
-@[simp]
+-- Not `@[simp]`: `gradedMk_zero` rewrites the argument to a `gradedMkZero`, after which
+-- `gradedPieceZeroEquiv_gradedMkZero` applies, so `simp` proves this lemma.
 theorem gradedPieceZeroEquiv_gradedMk (x : pLowerCentralSeries p G 0) :
     gradedPieceZeroEquiv p G (gradedMk p G 0 x) =
       Additive.ofMul ((x : G) : G ⧸ pLowerCentralSeries p G 1) :=
@@ -286,6 +287,7 @@ def gradedMkZero (g : G) : gradedPiece p G 0 :=
   gradedMk p G 0 ⟨g, mem_pLowerCentralSeries_zero p g⟩
 
 /-- The class in degree zero of an element of `λ_0` is the class of the underlying element. -/
+@[simp]
 theorem gradedMk_zero (x : pLowerCentralSeries p G 0) :
     gradedMk p G 0 x = gradedMkZero p G x := by
   rw [gradedMkZero]

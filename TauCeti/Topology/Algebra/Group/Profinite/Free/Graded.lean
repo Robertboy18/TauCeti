@@ -178,16 +178,6 @@ private theorem sum_smul_degreeOneFamily_eq_zero [Fintype X] {H : Type u} [Group
   simpa only [map_sum, map_smul, map_zero, AddMonoidHom.coe_toZModLinearMap,
     gradedMap_degreeOneFamily, hcomp] using h
 
-/-- If all but one vector of a finite family vanish and that vector is nonzero, its coefficient
-in any linear relation vanishes. -/
-private theorem eq_zero_of_sum_smul_eq_zero {ι M : Type*} [Fintype ι]
-    [AddCommGroup M] [Module (ZMod p) M] {c : ι → ZMod p} {v : ι → M}
-    (h : ∑ k, c k • v k = 0) (k₀ : ι) (hk₀ : v k₀ ≠ 0) (hv : ∀ k ≠ k₀, v k = 0) : c k₀ = 0 := by
-  classical
-  rw [Finset.sum_eq_single k₀ (fun k _ hk ↦ by rw [hv k hk, smul_zero])
-    (fun hk ↦ (hk (Finset.mem_univ _)).elim)] at h
-  exact (smul_eq_zero.mp h).resolve_right hk₀
-
 /-- **Linear independence**: the `p`-power classes `π x'_i` and the brackets `[x'_i, x'_j]` for
 `i < j` of the generator classes are linearly independent in `gr_1(freeProP p X)`. The
 coefficient of `π x'_i` is read off in `ℤ/p²`, and the coefficient of `[x'_i, x'_j]` in the
@@ -204,11 +194,15 @@ theorem linearIndependent_degreeOneFamily_of :
       MulEquiv.ulift
     have hP : IsProP p (ULift.{u} (Multiplicative (ZMod (p ^ 2)))) :=
       ((isProP_iff_isPGroup.mp (isProP_multiplicative_zmod_pow p 2)).of_equiv e.symm).isProP
-    refine eq_zero_of_sum_smul_eq_zero p (sum_smul_degreeOneFamily_eq_zero p X hP
-      (fun k ↦ if k = i then e.symm (Multiplicative.ofAdd 1) else 1) hc) (Sum.inl i) ?_ ?_
-    · rw [degreeOneFamily_inl]
+    have h := sum_smul_degreeOneFamily_eq_zero p X hP
+      (fun k ↦ if k = i then e.symm (Multiplicative.ofAdd 1) else 1) hc
+    rw [Fintype.sum_eq_single (Sum.inl i)] at h
+    · refine (smul_eq_zero_iff_left ?_).mp h
+      rw [degreeOneFamily_inl]
       simpa using e.gradedPow_gradedMkZero_ne_zero_multiplicative_zmod_sq
-    · rintro (k | ⟨⟨k, l⟩, hkl⟩) hk
+    · intro k hk
+      refine smul_eq_zero_of_right _ ?_
+      rcases k with k | ⟨⟨k, l⟩, hkl⟩
       · have hki : k ≠ i := fun h ↦ hk (by rw [h])
         rw [degreeOneFamily_inl]
         simp [hki]
@@ -230,11 +224,14 @@ theorem linearIndependent_degreeOneFamily_of :
       · exact e.gradedPow_gradedMkZero_eq_zero_heisenbergGroup rfl (mul_zero _)
       · exact e.gradedPow_gradedMkZero_eq_zero_heisenbergGroup rfl (zero_mul _)
       · rw [gradedMkZero_one, gradedPow_zero]
-    refine eq_zero_of_sum_smul_eq_zero p (sum_smul_degreeOneFamily_eq_zero p X hP y hc)
-      (Sum.inr ⟨(i, j), hij⟩) ?_ ?_
-    · rw [degreeOneFamily_inr]
+    have h := sum_smul_degreeOneFamily_eq_zero p X hP y hc
+    rw [Fintype.sum_eq_single (Sum.inr ⟨(i, j), hij⟩)] at h
+    · refine (smul_eq_zero_iff_left ?_).mp h
+      rw [degreeOneFamily_inr]
       simpa [y, hij.ne'] using e.gradedBracket_gradedMkZero_ne_zero_heisenbergGroup
-    · rintro (k | ⟨⟨k, l⟩, hkl⟩) hk
+    · intro k hk
+      refine smul_eq_zero_of_right _ ?_
+      rcases k with k | ⟨⟨k, l⟩, hkl⟩
       · rw [degreeOneFamily_inl, hpow]
       · rw [degreeOneFamily_inr]
         -- Unless `(k, l) = (i, j)`, one of `y k`, `y l` is `1` and its class is `0`.
