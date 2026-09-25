@@ -82,6 +82,7 @@ noncomputable def presentationLimitPlusSubring (V : Opens ↥(spa Aplus)) :
 
 /-- **Membership in `𝒪_X⁺(V)`**: a section over `V` lies in the plus subring exactly when its germ
 at every point `x ∈ V` is sub-unit for the stalk valuation at `x`. -/
+@[simp]
 theorem mem_presentationLimitPlusSubring_iff {V : Opens ↥(spa Aplus)}
     {f : (presentationLimitPresheafInCommRingCat P Aplus).obj (Opposite.op V)} :
     f ∈ presentationLimitPlusSubring hAplus hP V ↔
