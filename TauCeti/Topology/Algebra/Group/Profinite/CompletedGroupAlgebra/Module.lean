@@ -278,34 +278,36 @@ theorem completedSMul_algebraMap (r : R) (m : M) :
     obtain ⟨U, hU⟩ := hM.exists_le_ker_quotientToModuleEnd hV hVo
     rw [hM.mkQ_completedSMul hV hVo U hU, AlgHom.commutes, Module.algebraMap_end_apply, map_smul]
 
-/-! The module axioms for the scalar action, each proved modulo the invariant open submodules,
-where the action is an algebra homomorphism into the endomorphisms of the quotient. -/
-
 variable (Γ) in
+/-- The unit of `R[[Γ]]` acts as the identity on `M`. -/
 @[simp]
 theorem one_completedSMul (m : M) : hM.completedSMul (1 : completedGroupAlgebra R Γ) m = m :=
   hM.eq_of_forall_invariant_mkQ_eq Γ fun V hVo hV ↦ by
     obtain ⟨U, hU⟩ := hM.exists_le_ker_quotientToModuleEnd hV hVo
     rw [hM.mkQ_completedSMul hV hVo U hU, map_one, Module.End.one_apply]
 
+/-- Multiplication in `R[[Γ]]` acts by successive scalar actions. -/
 theorem mul_completedSMul (x y : completedGroupAlgebra R Γ) (m : M) :
     hM.completedSMul (x * y) m = hM.completedSMul x (hM.completedSMul y m) :=
   hM.eq_of_forall_invariant_mkQ_eq Γ fun V hVo hV ↦ by
     obtain ⟨U, hU⟩ := hM.exists_le_ker_quotientToModuleEnd hV hVo
     simp only [hM.mkQ_completedSMul hV hVo U hU, map_mul, Module.End.mul_apply]
 
+/-- Every element of `R[[Γ]]` sends the zero element of `M` to zero. -/
 @[simp]
 theorem completedSMul_zero (x : completedGroupAlgebra R Γ) : hM.completedSMul x 0 = 0 :=
   hM.eq_of_forall_invariant_mkQ_eq Γ fun V hVo hV ↦ by
     obtain ⟨U, hU⟩ := hM.exists_le_ker_quotientToModuleEnd hV hVo
     rw [hM.mkQ_completedSMul hV hVo U hU, map_zero, map_zero]
 
+/-- The action of `R[[Γ]]` distributes over addition in `M`. -/
 theorem completedSMul_add (x : completedGroupAlgebra R Γ) (m m' : M) :
     hM.completedSMul x (m + m') = hM.completedSMul x m + hM.completedSMul x m' :=
   hM.eq_of_forall_invariant_mkQ_eq Γ fun V hVo hV ↦ by
     obtain ⟨U, hU⟩ := hM.exists_le_ker_quotientToModuleEnd hV hVo
     simp only [hM.mkQ_completedSMul hV hVo U hU, map_add]
 
+/-- The sum of two elements of `R[[Γ]]` acts as the sum of their actions. -/
 theorem add_completedSMul (x y : completedGroupAlgebra R Γ) (m : M) :
     hM.completedSMul (x + y) m = hM.completedSMul x m + hM.completedSMul y m :=
   hM.eq_of_forall_invariant_mkQ_eq Γ fun V hVo hV ↦ by
@@ -313,12 +315,14 @@ theorem add_completedSMul (x y : completedGroupAlgebra R Γ) (m : M) :
     simp only [hM.mkQ_completedSMul hV hVo U hU, map_add, LinearMap.add_apply]
 
 variable (Γ) in
+/-- The zero element of `R[[Γ]]` acts as zero on `M`. -/
 @[simp]
 theorem zero_completedSMul (m : M) : hM.completedSMul (0 : completedGroupAlgebra R Γ) m = 0 :=
   hM.eq_of_forall_invariant_mkQ_eq Γ fun V hVo hV ↦ by
     obtain ⟨U, hU⟩ := hM.exists_le_ker_quotientToModuleEnd hV hVo
     rw [hM.mkQ_completedSMul hV hVo U hU, map_zero, LinearMap.zero_apply, map_zero]
 
+/-- Scaling an element of `R[[Γ]]` by `r : R` scales its action on `M` by `r`. -/
 theorem smul_completedSMul (r : R) (x : completedGroupAlgebra R Γ) (m : M) :
     hM.completedSMul (r • x) m = r • hM.completedSMul x m :=
   hM.eq_of_forall_invariant_mkQ_eq Γ fun V hVo hV ↦ by
