@@ -156,8 +156,8 @@ noncomputable def cohomologicalDimension : ℕ∞ :=
 
 variable {p G}
 
-/-- The defining property of `CohomologicalDimensionLE`, available to modules that only see the
-declaration and not its body. -/
+/-- `CohomologicalDimensionLE p G n` holds exactly when continuous cohomology vanishes above
+degree `n` for every discrete `p`-primary torsion `G`-module with continuous action. -/
 theorem cohomologicalDimensionLE_iff {n : ℕ} :
     CohomologicalDimensionLE.{v} p G n ↔
       ∀ (M : Type (max u v)) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
@@ -165,8 +165,9 @@ theorem cohomologicalDimensionLE_iff {n : ℕ} :
         ∀ i : ℕ, n < i → Subsingleton (continuousCohomology i (ofDiscreteModule ℤ G M)) :=
   Iff.rfl
 
-/-- The defining property of `StrictCohomologicalDimensionLE`, available to modules that only see
-the declaration and not its body. -/
+/-- `StrictCohomologicalDimensionLE p G n` holds exactly when the `p`-primary component of
+continuous cohomology vanishes above degree `n` for every discrete `G`-module with continuous
+action. -/
 theorem strictCohomologicalDimensionLE_iff {n : ℕ} :
     StrictCohomologicalDimensionLE.{v} p G n ↔
       ∀ (M : Type (max u v)) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
