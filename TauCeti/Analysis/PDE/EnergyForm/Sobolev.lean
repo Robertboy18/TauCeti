@@ -49,9 +49,10 @@ coercivity, and under the hypotheses assumed here the negative `L²` term cannot
 `c ≥ 0` allows `c = 0`, and then on a domain of finite measure a nonzero constant lies in
 `H¹(Ω)` with zero gradient, so no lower bound by a positive multiple of `‖u‖²_{H¹}` holds. It
 is the weakness of `c ≥ 0` that is responsible, not `H¹(Ω)` itself: a mass coefficient bounded
-below by a constant `μ > β²/2λ` controls constants too, and the mass-floor bound
-`TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self_of_mass_lower_bound` then
-has no negative term left to remove.
+below by a constant `δ` satisfying `β² < 4λδ` controls constants too. A positive Young
+parameter `ε` between `β²/(4δ)` and `λ` makes both coefficients in
+`TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self_of_mass_lower_bound_with_parameter`
+positive.
 
 A **Poincaré inequality** `‖u‖_{L²} ≤ P‖∇u‖_{L²}` closes the gap, and
 `TauCeti.W1p.norm_value_le_mul_norm_gradient_of_subset_slab` supplies one on `H¹₀(Ω)` for a
@@ -76,8 +77,9 @@ form as a bundled continuous bilinear map on `H¹(Ω)`
 `TauCeti.PDE.energyFormLpVariable` along the Sobolev jet inclusion. Restricting further along the
 closed-subspace inclusion gives `TauCeti.PDE.energyFormH1L0` on `H¹₀(Ω)`. These forms have the
 shape required by Lax--Milgram. The Poincaré route gives coercivity on `H¹₀(Ω)` when `βP < λ`.
-The mass floor `δ > β²/(2λ)` instead gives coercivity on all of `H¹(Ω)`, with explicit
-constant `min (λ/2) (δ - β²/(2λ))`, independently of the domain. This file supplies both lower
+The mass condition `β² < 4λδ` instead gives coercivity on all of `H¹(Ω)`, with explicit
+constant `min (λ - ε) (δ - β²/(4ε))` for a suitable `ε`, independently of the domain. This file
+supplies both lower
 bounds; `TauCeti.PDE.isCoercive_energyFormH1L0` packages them as an `IsCoercive` proof.
 
 Everything is stated with explicit constants `λ, Λ, β, γ, P`, as the roadmap's standing
@@ -106,7 +108,9 @@ hypothesis is carried explicitly, and the interior estimates do not see the boun
 * `TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self_norm`: the equivalent roadmap form
   with an `H¹` norm and a negative `L²` term.
 * `TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self_of_mass_lower_bound`: the bound
-  retaining an arbitrary mass floor `δ`.
+  retaining an arbitrary mass floor `δ` with the half split.
+* `TauCeti.PDE.UniformlyEllipticOn.garding_energyFormH1_self_of_mass_lower_bound_with_parameter`:
+  the mass-floor bound with any positive Young parameter.
 * `TauCeti.PDE.UniformlyEllipticOn.min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound`:
   the `H¹`-norm lower bound with constant `min (λ/2) (δ - β²/(2λ))`.
 * `TauCeti.PDE.UniformlyEllipticOn.mul_norm_sq_le_energyFormH1_self_of_poincare`: the lower bound
@@ -646,6 +650,39 @@ theorem norm_energyFormH1_le
     hbeta hgamma
     hb_bound hc_bound u v
 
+/-- Gårding's inequality with a mass floor and any positive Young parameter `ε`. The
+coefficients `λ - ε` and `δ - β²/(4ε)` can both be positive exactly when `β² < 4λδ`.
+The estimate itself also holds when either coefficient is nonpositive. -/
+theorem garding_energyFormH1_self_of_mass_lower_bound_with_parameter {delta eps : ℝ}
+    (h : UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ ι)) a lam Lam)
+    (ha : AEStronglyMeasurable a (mu.restrict Omega))
+    (hb : AEStronglyMeasurable b (mu.restrict Omega))
+    (hc : AEStronglyMeasurable c (mu.restrict Omega))
+    (hb_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖b x‖ ≤ beta)
+    (hc_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖c x‖ ≤ gamma)
+    (hc_lower : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), delta ≤ c x)
+    (heps : 0 < eps) (u : W1p mu Omega 2) :
+    (lam - eps) * ‖W1p.gradient u‖ ^ 2 +
+        (delta - beta ^ 2 / (4 * eps)) * ‖W1p.value u‖ ^ 2 ≤ energyFormH1 a b c u u := by
+  have hmem : ∀ᵐ x ∂mu.restrict (Omega : Set (EuclideanSpace ℝ ι)),
+      x ∈ (Omega : Set (EuclideanSpace ℝ ι)) := ae_restrict_mem Omega.isOpen.measurableSet
+  have hgrad := integrable_norm_jetField_snd_sq u
+  have hval := integrable_jetField_fst_sq u
+  have hlower := (hgrad.const_mul (lam - eps)).add
+    (hval.const_mul (delta - beta ^ 2 / (4 * eps)))
+  have hprincipal : ∀ᵐ x ∂mu.restrict (Omega : Set (EuclideanSpace ℝ ι)),
+      ∀ ξ : EuclideanSpace ℝ ι, lam * ‖ξ‖ ^ 2 ≤ dotProduct ξ (Matrix.mulVec (a x) ξ) :=
+    hmem.mono fun x hx ξ => by
+      simpa only [Matrix.toQuadraticForm'_apply] using h.lower_bound hx ξ
+  have key := garding_energyFormIntegral_self_of_mass_lower_bound_of_bounds_with_parameter
+    (μ := mu.restrict Omega) (a := a) (b := b) (c := c) (U := jetField u) heps hprincipal
+    (hmem.mono hb_bound) (hmem.mono hc_lower) hlower
+    (integrable_energyIntegrand_jetField h ha hb hc hb_bound hc_bound u u)
+  refine le_trans (le_of_eq ?_) key
+  rw [integral_add (hgrad.const_mul _) (hval.const_mul _), integral_const_mul, integral_const_mul,
+    integral_norm_jetField_snd_sq_eq_norm_gradient_sq,
+    integral_jetField_fst_sq_eq_norm_value_sq]
+
 /-- Gårding's inequality with a lower bound `δ` for the mass coefficient. The gradient
 coefficient is `λ/2` and the value coefficient is `δ - β²/(2λ)`. The estimate holds for
 arbitrary `δ`, including negative lower bounds. -/
@@ -660,20 +697,9 @@ theorem garding_energyFormH1_self_of_mass_lower_bound {delta : ℝ}
     (u : W1p mu Omega 2) :
     lam / 2 * ‖W1p.gradient u‖ ^ 2 +
         (delta - beta ^ 2 / (2 * lam)) * ‖W1p.value u‖ ^ 2 ≤ energyFormH1 a b c u u := by
-  have hmem : ∀ᵐ x ∂mu.restrict (Omega : Set (EuclideanSpace ℝ ι)),
-      x ∈ (Omega : Set (EuclideanSpace ℝ ι)) := ae_restrict_mem Omega.isOpen.measurableSet
-  have hgrad := integrable_norm_jetField_snd_sq u
-  have hval := integrable_jetField_fst_sq u
-  have hlower := (hgrad.const_mul (lam / 2)).add
-    (hval.const_mul (delta - beta ^ 2 / (2 * lam)))
-  have key := garding_energyFormIntegral_self_of_mass_lower_bound_on
-    (μ := mu.restrict Omega) h.withClassicalDecEq hmem
-    (hmem.mono hb_bound) (hmem.mono hc_lower) hlower
-    (integrable_energyIntegrand_jetField h ha hb hc hb_bound hc_bound u u)
-  refine le_trans (le_of_eq ?_) key
-  rw [integral_add (hgrad.const_mul _) (hval.const_mul _), integral_const_mul, integral_const_mul,
-    integral_norm_jetField_snd_sq_eq_norm_gradient_sq,
-    integral_jetField_fst_sq_eq_norm_value_sq]
+  convert h.garding_energyFormH1_self_of_mass_lower_bound_with_parameter ha hb hc
+    hb_bound hc_bound hc_lower (half_pos h.pos) u using 1
+  ring
 
 /-- **Gårding's inequality on `H¹(Ω)`.** For a uniformly elliptic principal coefficient with
 lower constant `λ`, a drift bounded by `β` and a nonnegative mass coefficient,
@@ -716,6 +742,24 @@ theorem garding_energyFormH1_self_norm
   convert garding_energyFormH1_self h ha hb hc hb_bound hc_bound hc_nonneg u using 1
   ring
 
+/-- A lower bound in the full Sobolev norm with constant `min (λ - ε) (δ - β²/(4ε))`.
+Positive coefficients give coercivity on all of `H¹(Ω)`, independently of the domain. -/
+theorem min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound_with_parameter {delta eps : ℝ}
+    (h : UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ ι)) a lam Lam)
+    (ha : AEStronglyMeasurable a (mu.restrict Omega))
+    (hb : AEStronglyMeasurable b (mu.restrict Omega))
+    (hc : AEStronglyMeasurable c (mu.restrict Omega))
+    (hb_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖b x‖ ≤ beta)
+    (hc_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖c x‖ ≤ gamma)
+    (hc_lower : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), delta ≤ c x)
+    (heps : 0 < eps) (u : W1p mu Omega 2) :
+    min (lam - eps) (delta - beta ^ 2 / (4 * eps)) * ‖u‖ ^ 2 ≤ energyFormH1 a b c u u := by
+  refine le_trans ?_ (garding_energyFormH1_self_of_mass_lower_bound_with_parameter h ha hb hc
+    hb_bound hc_bound hc_lower heps u)
+  rw [W1p.norm_sq_eq_norm_value_sq_add_norm_gradient_sq, mul_add, add_comm]
+  exact add_le_add (mul_le_mul_of_nonneg_right (min_le_left _ _) (sq_nonneg _))
+    (mul_le_mul_of_nonneg_right (min_le_right _ _) (sq_nonneg _))
+
 /-- A lower bound for the energy form in the full `H¹` norm, with constant
 `min (λ/2) (δ - β²/(2λ))`. This gives coercivity on all of `H¹(Ω)` when `δ > β²/(2λ)`,
 without a Poincaré inequality or a boundary condition. -/
@@ -729,11 +773,11 @@ theorem min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound {delta : ℝ}
     (hc_lower : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), delta ≤ c x)
     (u : W1p mu Omega 2) :
     min (lam / 2) (delta - beta ^ 2 / (2 * lam)) * ‖u‖ ^ 2 ≤ energyFormH1 a b c u u := by
-  refine le_trans ?_ (garding_energyFormH1_self_of_mass_lower_bound h ha hb hc
-    hb_bound hc_bound hc_lower u)
-  rw [W1p.norm_sq_eq_norm_value_sq_add_norm_gradient_sq, mul_add, add_comm]
-  exact add_le_add (mul_le_mul_of_nonneg_right (min_le_left _ _) (sq_nonneg _))
-    (mul_le_mul_of_nonneg_right (min_le_right _ _) (sq_nonneg _))
+  have hgrad : lam - lam / 2 = lam / 2 := by ring
+  have hden : 4 * (lam / 2) = 2 * lam := by ring
+  simpa only [hgrad, hden] using
+    h.min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound_with_parameter ha hb hc
+      hb_bound hc_bound hc_lower (half_pos h.pos) u
 
 /-- **An energy-form lower bound from a Poincaré inequality.** If `u ∈ H¹(Ω)` satisfies
 `‖u‖_{L²} ≤ P‖∇u‖_{L²}` then

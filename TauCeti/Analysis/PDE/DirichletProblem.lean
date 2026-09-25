@@ -307,10 +307,10 @@ theorem existsUnique_isWeakSolutionDirichlet_of_mul_norm_sq_le
     ∃! u : W1p0 mu Omega 2, IsWeakSolutionDirichlet a b c f u :=
   existsUnique_isWeakSolutionDirichlet hcoeff (isCoercive_energyFormH1L0 hcoeff hC hlower) f
 
-/-- Existence and uniqueness on an arbitrary open domain when the mass floor `δ` exceeds
-`β²/(2λ)`. The positive potential absorbs the drift, giving the coercivity constant
-`min (λ/2) (δ - β²/(2λ))` without a boundedness assumption on the domain or a Poincaré
-inequality. No symmetry of the principal coefficient is required. -/
+/-- Existence and uniqueness on an arbitrary open domain under the mass-floor condition
+`β² < 4λδ`. A Young parameter between `β²/(4δ)` and `λ` makes the gradient and value
+coefficients positive. No domain boundedness, Poincaré inequality, or symmetry of the
+principal coefficient is required. -/
 theorem UniformlyEllipticOn.existsUnique_isWeakSolutionDirichlet_of_mass_lower_bound
     [DecidableEq ι] {lam Lam beta gamma delta : ℝ}
     (h : UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ ι)) a lam Lam)
@@ -320,14 +320,26 @@ theorem UniformlyEllipticOn.existsUnique_isWeakSolutionDirichlet_of_mass_lower_b
     (hb_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖b x‖ ≤ beta)
     (hc_bound : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), ‖c x‖ ≤ gamma)
     (hc_lower : ∀ x ∈ (Omega : Set (EuclideanSpace ℝ ι)), delta ≤ c x)
-    (hdelta : beta ^ 2 / (2 * lam) < delta) (f : Lp ℝ 2 (mu.restrict Omega)) :
-    ∃! u : W1p0 mu Omega 2, IsWeakSolutionDirichlet a b c f u :=
-  existsUnique_isWeakSolutionDirichlet_of_mul_norm_sq_le
+    (hmass : beta ^ 2 < 4 * lam * delta) (f : Lp ℝ 2 (mu.restrict Omega)) :
+    ∃! u : W1p0 mu Omega 2, IsWeakSolutionDirichlet a b c f u := by
+  have hdelta : 0 < delta := by
+    have : 0 < 4 * lam * delta := lt_of_le_of_lt (sq_nonneg beta) hmass
+    exact (mul_pos_iff_of_pos_left (mul_pos (by norm_num) h.pos)).mp this
+  have hquot : beta ^ 2 / (4 * delta) < lam := by
+    apply (div_lt_iff₀ (mul_pos (by norm_num) hdelta)).mpr
+    nlinarith [hmass]
+  obtain ⟨eps, hlo, hhi⟩ := exists_between hquot
+  have heps : 0 < eps := lt_of_le_of_lt (by positivity) hlo
+  have hdefect : beta ^ 2 / (4 * eps) < delta := by
+    apply (div_lt_iff₀ (mul_pos (by norm_num) heps)).mpr
+    have hmul := (div_lt_iff₀ (mul_pos (by norm_num) hdelta)).mp hlo
+    nlinarith [hmul]
+  exact existsUnique_isWeakSolutionDirichlet_of_mul_norm_sq_le
     (memLp_energyIntegrand_of_bounds h.upper_nonneg ha hb hc
       (fun _x hx eta xi => h.upper_bound hx eta xi) hb_bound hc_bound)
-    (lt_min (div_pos h.pos (by norm_num)) (sub_pos.mpr hdelta))
-    (fun w => h.min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound ha hb hc
-      hb_bound hc_bound hc_lower w) f
+    (lt_min (sub_pos.mpr hhi) (sub_pos.mpr hdefect))
+    (fun w => h.min_mul_norm_sq_le_energyFormH1_self_of_mass_lower_bound_with_parameter ha hb hc
+      hb_bound hc_bound hc_lower heps w) f
 
 /-! ### The Laplacian model -/
 
