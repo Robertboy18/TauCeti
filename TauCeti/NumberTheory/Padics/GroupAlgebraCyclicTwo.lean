@@ -54,10 +54,7 @@ theorem monoidAlgebraRatPadicCyclicTwoEquiv_apply
       (x.coeff 1 + x.coeff (Multiplicative.ofAdd 1),
         x.coeff 1 - x.coeff (Multiplicative.ofAdd 1)) := by
   unfold monoidAlgebraRatPadicCyclicTwoEquiv
-  rw [MonoidAlgebra.cyclicTwoEquivProd_apply]
-  simpa only [MonoidAlgebra.cyclicTwoToProd_single_one_add_single_ofAdd_one] using
-    congrArg (MonoidAlgebra.cyclicTwoToProd ℚ_[2])
-      (MonoidAlgebra.eq_single_one_add_single_ofAdd_one x)
+  rw [MonoidAlgebra.cyclicTwoEquivProd_apply, MonoidAlgebra.cyclicTwoToProd_apply]
 
 /-- The inverse dyadic splitting sends `(x, y)` to `(x + y)/2 + ((x - y)/2) σ`. -/
 @[simp]

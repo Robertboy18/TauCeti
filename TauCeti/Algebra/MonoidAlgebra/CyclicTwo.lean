@@ -130,6 +130,15 @@ theorem cyclicTwoToProd_single_one_add_single_ofAdd_one (a b : R) :
       (a + b, a - b) := by
   simp [sub_eq_add_neg]
 
+/-- The trivial and sign characters send an element of `R[C₂]` to the sum and difference
+of its coefficients at `1` and at the generator `σ = Multiplicative.ofAdd 1`. -/
+theorem cyclicTwoToProd_apply (x : MonoidAlgebra R (Multiplicative (ZMod 2))) :
+    cyclicTwoToProd R x =
+      (x.coeff 1 + x.coeff (Multiplicative.ofAdd 1),
+        x.coeff 1 - x.coeff (Multiplicative.ofAdd 1)) := by
+  simpa only [cyclicTwoToProd_single_one_add_single_ofAdd_one] using
+    congrArg (cyclicTwoToProd R) (eq_single_one_add_single_ofAdd_one x)
+
 section Invertible
 
 variable [Invertible (2 : R)]
