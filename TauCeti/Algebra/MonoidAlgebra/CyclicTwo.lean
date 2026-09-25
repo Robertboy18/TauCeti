@@ -119,7 +119,8 @@ noncomputable def cyclicTwoToProd : MonoidAlgebra R (Multiplicative (ZMod 2)) �
   MonoidAlgebra.lift R (R × R) (Multiplicative (ZMod 2))
     ((1 : Multiplicative (ZMod 2) →* R).prod (cyclicTwoSign R))
 
-@[simp]
+/-- The trivial and sign characters send the monomial `r·g` to `(r, r · sign g)`. This is not a
+simp lemma: `cyclicTwoToProd_apply` already rewrites its left-hand side. -/
 theorem cyclicTwoToProd_single (g : Multiplicative (ZMod 2)) (r : R) :
     cyclicTwoToProd R (single g r) = (r, r * cyclicTwoSign R g) := by
   simp [cyclicTwoToProd]
@@ -129,7 +130,7 @@ theorem cyclicTwoToProd_single (g : Multiplicative (ZMod 2)) (r : R) :
 theorem cyclicTwoToProd_single_one_add_single_ofAdd_one (a b : R) :
     cyclicTwoToProd R (single (1 : Multiplicative (ZMod 2)) a + single (Multiplicative.ofAdd 1) b) =
       (a + b, a - b) := by
-  simp [sub_eq_add_neg]
+  simp [map_add, cyclicTwoToProd_single, sub_eq_add_neg]
 
 /-- The trivial and sign characters send an element of `R[C₂]` to the sum and difference
 of its coefficients at `1` and at the generator `σ = Multiplicative.ofAdd 1`. -/
