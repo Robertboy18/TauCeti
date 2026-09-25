@@ -123,14 +123,20 @@ theorem padicIntUnitsEquivProd_symm_apply (x : rootsOfUnity (p - 1) ℤ_[p] × u
   simpa only [padicIntUnitsEquivProd, ContinuousMulEquiv.symm_symm,
     ContinuousMulEquiv.coe_mk] using padicIntUnitsProdMulEquiv_apply x
 
+/-- The Teichmüller splitting is the inverse of the transported multiplication map. -/
+private theorem padicIntUnitsEquivProd_apply (u : ℤ_[p]ˣ) :
+    padicIntUnitsEquivProd p u = (padicIntUnitsProdMulEquiv p).symm u := by
+  apply (padicIntUnitsProdMulEquiv p).injective
+  rw [MulEquiv.apply_symm_apply, padicIntUnitsProdMulEquiv_apply,
+    ← padicIntUnitsEquivProd_symm_apply, ContinuousMulEquiv.symm_apply_apply]
+
 /-- The root-of-unity component of a unit `u` is the Teichmüller representative of its residue
 class modulo `p`. -/
 @[simp]
 theorem coe_padicIntUnitsEquivProd_apply_fst (u : ℤ_[p]ˣ) :
     ((padicIntUnitsEquivProd p u).1 : ℤ_[p]ˣ) =
       teichmuller ℤ_[p] (Units.map (residue ℤ_[p] : ℤ_[p] →* ResidueField ℤ_[p]) u) := by
-  change (((padicIntUnitsProdMulEquiv p).symm u).1 : ℤ_[p]ˣ) = _
-  rw [padicIntUnitsProdMulEquiv_symm_apply]
+  rw [padicIntUnitsEquivProd_apply, padicIntUnitsProdMulEquiv_symm_apply]
   exact coe_unitsMulEquivRootsOfUnityProdKerResidue_apply_fst ℤ_[p] u
 
 /-- The principal-unit component of a unit `u` is `u` divided by the Teichmüller representative
@@ -139,8 +145,7 @@ of its residue class modulo `p`. -/
 theorem coe_padicIntUnitsEquivProd_apply_snd (u : ℤ_[p]ˣ) :
     ((padicIntUnitsEquivProd p u).2 : ℤ_[p]ˣ) =
       (teichmuller ℤ_[p] (Units.map (residue ℤ_[p] : ℤ_[p] →* ResidueField ℤ_[p]) u))⁻¹ * u := by
-  change (((padicIntUnitsProdMulEquiv p).symm u).2 : ℤ_[p]ˣ) = _
-  rw [padicIntUnitsProdMulEquiv_symm_apply]
+  rw [padicIntUnitsEquivProd_apply, padicIntUnitsProdMulEquiv_symm_apply]
   exact coe_unitsMulEquivRootsOfUnityProdKerResidue_apply_snd ℤ_[p] u
 
 /-- The root-of-unity component of a unit `u` is congruent to `u` modulo `p`. -/
