@@ -36,11 +36,11 @@ operators live on.
   it commutes with the action of every double coset of determinant prime to `Q`
   (`TauCeti.commute_atkinLehnerOperatorCusp_heckeSlashGamma0CuspFormEnd`), and those `Tₙ` lie in
   the subring such cosets generate
-  (`HeckeRing.GL2.heckeTCompositeGamma0_mem_closure_coprimeDetCoset`).
-* Multiplicity one
-  (`HeckeRing.GL2.exists_eq_smul_of_forall_prime_heckeRingHomCusp_of_mem_cuspFormsNew`): `𝒲_Q f`
-  is a good Hecke eigenvector in the new part with the eigenvalues of `f`, hence a multiple
-  `ε • f`, and `𝒲_Q ∘ 𝒲_Q = 1` forces `ε ^ 2 = 1`.
+  (`HeckeRing.GL2.commute_map_heckeTCompositeGamma0_of_forall_coprimeDetCoset`).
+* Multiplicity one, in the form
+  `HeckeRing.GL2.exists_eq_smul_of_commute_heckeRingHomCusp_of_mem_cuspFormsNew` for a
+  commuting involution: `𝒲_Q f` is a good Hecke eigenvector in the new part with the eigenvalues
+  of `f`, hence a multiple `ε • f`, and `𝒲_Q ∘ 𝒲_Q = 1` forces `ε ^ 2 = 1`.
 
 For general nebentypus `χ`, the operator `W_Q` conjugates only the `Q`-part of the character,
 so it need not preserve `S_k(N, χ)`. The sign statement proved here treats trivial nebentypus.
@@ -84,7 +84,7 @@ public section
 open Matrix Matrix.SpecialLinearGroup UpperHalfPlane CongruenceSubgroup HeckeRing.GLn
   HeckeRing.GL2
 
-open scoped MatrixGroups ModularForm HeckeCosetModule TauCeti.ExactDivisor
+open scoped MatrixGroups ModularForm TauCeti.ExactDivisor
 
 namespace TauCeti
 
@@ -137,6 +137,7 @@ theorem normalizedAtkinLehnerCharCuspOneEnd_def (h : Q ∥ N) (k : ℤ) :
 
 /-- `normalizedAtkinLehnerCharCuspOneEnd` moves a form to `S_k(Γ₀(N))`, applies `𝒲_Q` and moves
 back. -/
+@[simp]
 theorem normalizedAtkinLehnerCharCuspOneEnd_apply (h : Q ∥ N) (k : ℤ)
     (f : cuspFormCharSpace k (1 : (ZMod N)ˣ →* ℂˣ)) :
     h.normalizedAtkinLehnerCharCuspOneEnd k f = (cuspFormCharSpaceOneEquiv N k).symm
@@ -144,8 +145,8 @@ theorem normalizedAtkinLehnerCharCuspOneEnd_apply (h : Q ∥ N) (k : ℤ)
   rw [normalizedAtkinLehnerCharCuspOneEnd_def, LinearEquiv.conj_apply_apply,
     LinearEquiv.symm_symm]
 
-/-- Read on `S_k(Γ₀(N))`, `normalizedAtkinLehnerCharCuspOneEnd` is `𝒲_Q`. -/
-@[simp]
+/-- Read on `S_k(Γ₀(N))`, `normalizedAtkinLehnerCharCuspOneEnd` is `𝒲_Q`. Not a simp lemma:
+`simp` derives it from `normalizedAtkinLehnerCharCuspOneEnd_apply`. -/
 theorem cuspFormCharSpaceOneEquiv_normalizedAtkinLehnerCharCuspOneEnd_apply (h : Q ∥ N) (k : ℤ)
     (f : cuspFormCharSpace k (1 : (ZMod N)ˣ →* ℂˣ)) :
     cuspFormCharSpaceOneEquiv N k (h.normalizedAtkinLehnerCharCuspOneEnd k f) =
@@ -153,8 +154,8 @@ theorem cuspFormCharSpaceOneEquiv_normalizedAtkinLehnerCharCuspOneEnd_apply (h :
   rw [normalizedAtkinLehnerCharCuspOneEnd_apply, LinearEquiv.apply_symm_apply]
 
 /-- On underlying cusp forms of level `Γ₁(N)`, `normalizedAtkinLehnerCharCuspOneEnd` is the
-restriction of `𝒲_Q` applied on `S_k(Γ₀(N))`. -/
-@[simp]
+restriction of `𝒲_Q` applied on `S_k(Γ₀(N))`. Not a simp lemma: `simp` derives it from
+`normalizedAtkinLehnerCharCuspOneEnd_apply`. -/
 theorem coe_normalizedAtkinLehnerCharCuspOneEnd_apply (h : Q ∥ N) (k : ℤ)
     (f : cuspFormCharSpace k (1 : (ZMod N)ˣ →* ℂˣ)) :
     ((h.normalizedAtkinLehnerCharCuspOneEnd k f : cuspFormCharSpace k 1) :
@@ -193,17 +194,9 @@ particular `𝒲_Q` commutes with every good Hecke operator, `n` prime to `N`. -
 theorem commute_normalizedAtkinLehnerCharCuspOneEnd_heckeRingHomCuspCharSpace (h : Q ∥ N)
     {n : ℕ} (hn : Nat.Coprime n Q) :
     Commute (h.normalizedAtkinLehnerCharCuspOneEnd k)
-      (heckeRingHomCuspCharSpace k 1 (heckeTCompositeGamma0 N n)) := by
-  have hS : Subring.closure {x : 𝕋 (Delta0 N) ((Gamma0 N).map (mapGL ℚ)) ℤ |
-      ∃ D, CoprimeDetCoset N Q D ∧ x = HeckeCosetModule.single ℤ D 1} ≤
-        (Subring.centralizer {h.normalizedAtkinLehnerCharCuspOneEnd (N := N) k}).comap
-          (heckeRingHomCuspCharSpace k 1) := by
-    refine Subring.closure_le.mpr ?_
-    rintro x ⟨D, hD, rfl⟩
-    simpa [Subring.mem_centralizer_iff, Set.mem_centralizer_iff, Commute, SemiconjBy] using
-      h.commute_normalizedAtkinLehnerCharCuspOneEnd_single hD 1
-  simpa [Subring.mem_centralizer_iff, Set.mem_centralizer_iff, Commute, SemiconjBy] using
-    hS (heckeTCompositeGamma0_mem_closure_coprimeDetCoset N hn)
+      (heckeRingHomCuspCharSpace k 1 (heckeTCompositeGamma0 N n)) :=
+  commute_map_heckeTCompositeGamma0_of_forall_coprimeDetCoset N _ hn fun _ hD ↦
+    h.commute_normalizedAtkinLehnerCharCuspOneEnd_single hD 1
 
 /-! ### The Atkin–Lehner sign -/
 
@@ -219,39 +212,29 @@ theorem exists_normalizedAtkinLehnerOperatorCusp_eq_smul_of_mem_cuspFormsNew (h 
     ∃ ε : ℂ, (ε = 1 ∨ ε = -1) ∧
       h.normalizedAtkinLehnerOperatorCusp k (cuspFormCharSpaceOneEquiv N k f) =
         ε • cuspFormCharSpaceOneEquiv N k f := by
-  set g := cuspFormCharSpaceOneEquiv N k f with hg
-  have hofLe : CuspForm.ofLe (Gamma1_map_le_Gamma0_map N) g =
-      (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) := by
-    rw [← coe_cuspFormCharSpaceOneEquiv_symm_apply, hg, LinearEquiv.symm_apply_apply]
-  -- `𝒲_Q f` has the good Hecke eigenvalues of `f`, and lies in the new part
-  have heig (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N) : ∃ c : ℂ,
-      heckeRingHomCuspCharSpace k 1 (heckeTCompositeGamma0 N p) f = c • f ∧
-        heckeRingHomCuspCharSpace k 1 (heckeTCompositeGamma0 N p)
-          (h.normalizedAtkinLehnerCharCuspOneEnd k f) =
-            c • h.normalizedAtkinLehnerCharCuspOneEnd k f := by
-    obtain ⟨c, hc⟩ := ha p hp hpN
-    refine ⟨c, hc, ?_⟩
-    rw [← Module.End.mul_apply,
-      ← (h.commute_normalizedAtkinLehnerCharCuspOneEnd_heckeRingHomCuspCharSpace
-        (hpN.coprime_dvd_right h.dvd)).eq,
-      Module.End.mul_apply, hc, map_smul]
-  have hnew : ((h.normalizedAtkinLehnerCharCuspOneEnd k f : cuspFormCharSpace k 1) :
-      CuspForm ((Gamma1 N).map (mapGL ℝ)) k) ∈ cuspFormsNew N k := by
+  -- `𝒲_Q ∘ 𝒲_Q = 1`, read on `S_k(N, 1)`
+  have hWW : h.normalizedAtkinLehnerCharCuspOneEnd k (h.normalizedAtkinLehnerCharCuspOneEnd k f) =
+      f := by
+    rw [normalizedAtkinLehnerCharCuspOneEnd_apply, normalizedAtkinLehnerCharCuspOneEnd_apply,
+      LinearEquiv.apply_symm_apply,
+      h.normalizedAtkinLehnerOperatorCusp_normalizedAtkinLehnerOperatorCusp_self k,
+      LinearEquiv.symm_apply_apply]
+  -- `𝒲_Q` preserves the new part of `S_k(N, 1)`, since restriction to `Γ₁(N)` inverts the
+  -- identification `S_k(N, 1) ≃ S_k(Γ₀(N))` on underlying forms
+  have hnew (g : cuspFormCharSpace k (1 : (ZMod N)ˣ →* ℂˣ))
+      (hg : (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) ∈ cuspFormsNew N k) :
+      ((h.normalizedAtkinLehnerCharCuspOneEnd k g : cuspFormCharSpace k 1) :
+        CuspForm ((Gamma1 N).map (mapGL ℝ)) k) ∈ cuspFormsNew N k := by
     rw [coe_normalizedAtkinLehnerCharCuspOneEnd_apply]
-    exact h.ofLe_normalizedAtkinLehnerOperatorCusp_mem_cuspFormsNew (hofLe ▸ hf)
-  -- so multiplicity one makes it a multiple of `f`
-  obtain ⟨ε, hε⟩ :=
-    exists_eq_smul_of_forall_prime_heckeRingHomCusp_of_mem_cuspFormsNew heig hf hnew hf0
-  have hε' : h.normalizedAtkinLehnerOperatorCusp k g = ε • g := by
-    rw [hg, ← cuspFormCharSpaceOneEquiv_normalizedAtkinLehnerCharCuspOneEnd_apply, ← map_smul]
-    exact congrArg _ (Subtype.ext hε)
-  refine ⟨ε, ?_, hε'⟩
-  -- and `𝒲_Q ∘ 𝒲_Q = 1` forces `ε * ε = 1`
-  have hg0 : g ≠ 0 := fun h0 ↦
-    hf0 (by simpa using congrArg Subtype.val ((LinearEquiv.map_eq_zero_iff _).mp h0))
-  have h2 := h.normalizedAtkinLehnerOperatorCusp_normalizedAtkinLehnerOperatorCusp_self k g
-  rw [hε', map_smul, hε', smul_smul] at h2
-  exact mul_self_eq_one_iff.1 (smul_left_injective ℂ hg0 (h2.trans (one_smul ℂ g).symm))
+    refine h.ofLe_normalizedAtkinLehnerOperatorCusp_mem_cuspFormsNew ?_
+    rwa [← coe_cuspFormCharSpaceOneEquiv_symm_apply, LinearEquiv.symm_apply_apply]
+  -- so the multiplicity-one step for a commuting involution applies to `𝒲_Q` on `S_k(N, 1)`
+  obtain ⟨ε, hε, hWf⟩ := exists_eq_smul_of_commute_heckeRingHomCusp_of_mem_cuspFormsNew
+    (fun _ _ hpN ↦ h.commute_normalizedAtkinLehnerCharCuspOneEnd_heckeRingHomCuspCharSpace
+      (hpN.coprime_dvd_right h.dvd))
+    hnew ha hf hf0 hWW
+  refine ⟨ε, hε, ?_⟩
+  rw [← cuspFormCharSpaceOneEquiv_normalizedAtkinLehnerCharCuspOneEnd_apply, hWf, map_smul]
 
 end Nat.IsExactDivisor
 
