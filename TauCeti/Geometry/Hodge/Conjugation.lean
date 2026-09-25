@@ -30,6 +30,8 @@ models.
 * `TauCeti.Hodge.Conjugation`: a conjugate-linear involution of a complex vector space.
 * `TauCeti.Hodge.complexificationConjugation`: the canonical conjugation on the complexification
   of a real vector space, bundled as a Hodge conjugation.
+* `TauCeti.Hodge.complexificationRealPointsEquiv`: a real vector space is the real form of its
+  complexification, the real points of that conjugation.
 * `LinearMap.map_eigenspace_baseChange`: canonical conjugation carries each eigenspace of a
   complexified real-linear endomorphism to the eigenspace of the conjugate eigenvalue.
 * `TauCeti.Hodge.Conjugation.tensorProduct`: the tensor product of two conjugations.
@@ -99,6 +101,36 @@ theorem complexificationConjugation_toEquiv_tmul (z : ℂ) (v : V) :
     (complexificationConjugation V).toEquiv (z ⊗ₜ[ℝ] v) =
       (starRingEnd ℂ) z ⊗ₜ[ℝ] v := by
   rw [complexificationConjugation_toEquiv_apply, tmulConj_tmul]
+
+/-- The real points of the bundled canonical conjugation are those of tensor conjugation, bridging
+the bundled spelling used by `HodgeStructureOn` and the bare spelling of `TauCeti.tmulConj`. -/
+theorem realPoints_complexificationConjugation :
+    realPoints (complexificationConjugation V).toEquiv.toLinearMap = realPoints (tmulConj V) := by
+  ext x
+  rw [mem_realPoints, mem_realPoints, LinearEquiv.coe_coe,
+    complexificationConjugation_toEquiv_apply]
+
+/-- **A real vector space is the real form of its complexification**: `v ↦ 1 ⊗ₜ v` is a real-linear
+isomorphism onto the real points of the canonical conjugation. This is
+`TauCeti.tmulConjRealPointsEquiv` read on the bundled conjugation. -/
+noncomputable def complexificationRealPointsEquiv :
+    V ≃ₗ[ℝ] realPoints (complexificationConjugation V).toEquiv.toLinearMap :=
+  (tmulConjRealPointsEquiv V).trans
+    (LinearEquiv.ofEq _ _ (realPoints_complexificationConjugation V).symm)
+
+/-- The real form comparison sends a vector to its pure tensor in the complexification. -/
+@[simp]
+theorem coe_complexificationRealPointsEquiv_apply (v : V) :
+    (complexificationRealPointsEquiv V v : ℂ ⊗[ℝ] V) = 1 ⊗ₜ[ℝ] v := by
+  rw [complexificationRealPointsEquiv, LinearEquiv.trans_apply, LinearEquiv.coe_ofEq_apply,
+    coe_tmulConjRealPointsEquiv_apply]
+
+/-- The inverse real form comparison is characterized by the pure tensor of its value. -/
+@[simp]
+theorem one_tmul_complexificationRealPointsEquiv_symm
+    (y : realPoints (complexificationConjugation V).toEquiv.toLinearMap) :
+    (1 : ℂ) ⊗ₜ[ℝ] (complexificationRealPointsEquiv V).symm y = (y : ℂ ⊗[ℝ] V) := by
+  rw [← coe_complexificationRealPointsEquiv_apply, LinearEquiv.apply_symm_apply]
 
 end TauCeti.Hodge
 

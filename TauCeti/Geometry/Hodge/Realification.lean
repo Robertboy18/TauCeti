@@ -33,6 +33,8 @@ them the values of its real scalar extension.
   conjugation.
 * `TauCeti.Hodge.exists_eq_realificationComplexEquiv_one_tmul`: every real point of the abstract
   complexification comes from the realification.
+* `TauCeti.Hodge.realificationRealPointsEquiv`: the realification is the real form of the abstract
+  complexification, the real points of the lattice conjugation.
 * `TauCeti.Hodge.integralFormBaseChange_realificationComplexEquiv_one_tmul`: on such points a
   complexified integral form is the real scalar extension of that form.
 -/
@@ -151,6 +153,31 @@ theorem exists_eq_realificationComplexEquiv_one_tmul (hℂ : IsBaseChange ℂ ι
     rw [← realificationComplexEquiv_symm_conj, mem_realPoints.mp hy]
   obtain ⟨x, hx⟩ := (tmulConj_eq_self_iff _ _).mp hfix
   exact ⟨x, by rw [← hx, LinearEquiv.apply_symm_apply]⟩
+
+/-- The realification of an integral module is the real form of its abstract complexification:
+`x ↦ 1 ⊗ₜ x`, composed with the realification comparison, is a real-linear isomorphism onto the
+real points of the lattice conjugation. It is `TauCeti.Hodge.complexificationRealPointsEquiv` of
+the realification carried across the comparison, which intertwines the two conjugations. -/
+noncomputable def realificationRealPointsEquiv (hℂ : IsBaseChange ℂ ιℂ) :
+    Realification V ≃ₗ[ℝ] realPoints (latticeConjugation hℂ).toEquiv.toLinearMap :=
+  (complexificationRealPointsEquiv (Realification V)).trans
+    (realPointsCongr (realificationComplexEquiv hℂ) fun x ↦ by
+      simp only [LinearEquiv.coe_coe, complexificationConjugation_toEquiv_apply,
+        latticeConjugation_toEquiv_apply, realificationComplexEquiv_conj])
+
+/-- The real form comparison sends a real vector to its pure tensor in the complexification. -/
+@[simp]
+theorem coe_realificationRealPointsEquiv_apply (hℂ : IsBaseChange ℂ ιℂ) (x : Realification V) :
+    (realificationRealPointsEquiv hℂ x : Vℂ) = realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] x) := by
+  rw [realificationRealPointsEquiv, LinearEquiv.trans_apply, coe_realPointsCongr_apply,
+    coe_complexificationRealPointsEquiv_apply]
+
+/-- The inverse real form comparison is characterized by the pure tensor of its value. -/
+@[simp]
+theorem realificationComplexEquiv_one_tmul_realificationRealPointsEquiv_symm
+    (hℂ : IsBaseChange ℂ ιℂ) (y : realPoints (latticeConjugation hℂ).toEquiv.toLinearMap) :
+    realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] (realificationRealPointsEquiv hℂ).symm y) = y := by
+  rw [← coe_realificationRealPointsEquiv_apply, LinearEquiv.apply_symm_apply]
 
 /-- **On real points a complexified integral form is the real scalar extension of the form.**
 The complexification of an integral bilinear form, evaluated on the images of two real vectors
