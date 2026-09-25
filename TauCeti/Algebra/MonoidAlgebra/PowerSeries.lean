@@ -23,9 +23,9 @@ This is an `R`-algebra homomorphism `MonoidAlgebra.toPowerSeries`, characterised
 `coeff_coeff_toPowerSeries`: the coefficient at `m` of the coefficient of `Xⁿ` of the image is
 the coefficient of `Xⁿ` of the coefficient at `m` of the argument. It is always injective, and
 for a finite monoid `M` it is an isomorphism `MonoidAlgebra.powerSeriesAlgEquiv`. For an
-infinite `M` it is not surjective: a power series whose coefficients are supported on infinitely
-many elements of `M` altogether is not in the image, since an element of `A⟦X⟧[M]` involves only
-finitely many elements of `M`.
+infinite `M` and a nontrivial `A` it is not surjective: a power series whose coefficients are
+supported on infinitely many elements of `M` altogether is not in the image, since an element of
+`A⟦X⟧[M]` involves only finitely many elements of `M`.
 
 The finite case writes the ring `ℤ_p⟦X⟧[C]` attached to a finite group `C` as the power-series
 ring `ℤ_p[C]⟦X⟧` over the group ring `ℤ_p[C]`; this is how the completed group algebra of a
