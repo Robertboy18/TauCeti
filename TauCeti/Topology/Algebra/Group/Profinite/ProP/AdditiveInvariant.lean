@@ -5,8 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Algebra.Module.PUnit
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Filtration
+public import TauCeti.Topology.Algebra.GroupAction.AdditiveInvariant
 public import TauCeti.Topology.Algebra.GroupAction.QuotientAddGroup
 
 /-!
@@ -19,15 +19,8 @@ of order `p`. The coefficient group need not be killed by `p`.
 The trivial module is supplied in the same universe as the coefficient groups, together with
 an additive equivalence to `ZMod p`. In particular, it can be `ULift (ZMod p)`.
 
-Additivity alone forces two general properties of such an invariant, recorded first: it vanishes
-on a subsingleton module, and it takes the same value on equivariantly isomorphic modules.
-
 ## Main results
 
-* `TauCeti.invariant_eq_zero_of_subsingleton`: an additive invariant vanishes on a subsingleton
-  module.
-* `TauCeti.invariant_eq_of_equiv`: an additive invariant is constant on equivariant additive
-  equivalence classes.
 * `TauCeti.invariant_eq_padicValNat_mul_of_isProP`: for a pro-`p` group, an additive invariant
   of a finite `p`-primary module is `padicValNat p (Nat.card M)` times its value on the trivial
   module of order `p`.
@@ -60,54 +53,6 @@ variable
     (∀ (g : G) (b : B), q (g • b) = g • q b) →
     Function.Injective f → Function.Surjective q →
     f.range = q.ker → I B hB = I A hA + I C hC)
-
-include hExact in
-/-- An invariant additive on equivariant short exact sequences vanishes on a subsingleton
-module: the zero maps make `A → A → A` short exact, so `I A = I A + I A`. -/
-theorem invariant_eq_zero_of_subsingleton {A : Type u}
-    [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
-    [DistribMulAction G A] [ContinuousSMul G A] [Finite A] [Subsingleton A]
-    (hA : ∀ a : A, ∃ k : ℕ, p ^ k • a = 0) : I A hA = 0 := by
-  have h := hExact hA hA hA 0 0
-    (by intro g a; simp) (by intro g a; simp)
-    (fun _ _ _ ↦ Subsingleton.elim _ _)
-    (fun a ↦ ⟨0, Subsingleton.elim _ _⟩)
-    (by
-      ext a
-      constructor
-      · intro _
-        rfl
-      · intro _
-        exact ⟨0, Subsingleton.elim _ _⟩)
-  omega
-
-include hExact in
-/-- An invariant additive on equivariant short exact sequences takes the same value on
-equivariantly isomorphic modules: an equivariant additive equivalence `A ≃+ B` followed by the
-zero map to `PUnit` is short exact. -/
-theorem invariant_eq_of_equiv {A B : Type u}
-    [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
-    [DistribMulAction G A] [ContinuousSMul G A] [Finite A]
-    [AddCommGroup B] [TopologicalSpace B] [DiscreteTopology B]
-    [DistribMulAction G B] [ContinuousSMul G B] [Finite B]
-    (hA : ∀ a : A, ∃ k : ℕ, p ^ k • a = 0)
-    (hB : ∀ b : B, ∃ k : ℕ, p ^ k • b = 0)
-    (e : A ≃+ B) (he : ∀ (g : G) (a : A), e (g • a) = g • e a) :
-    I A hA = I B hB := by
-  have _ : ContinuousSMul G PUnit.{u + 1} := ⟨continuous_of_const fun _ _ ↦ rfl⟩
-  have hZ : ∀ z : PUnit.{u + 1}, ∃ k : ℕ, p ^ k • z = 0 := fun _ ↦ ⟨0, rfl⟩
-  have h := hExact hA hB hZ e.toAddMonoidHom 0 he
-    (by intro g b; simp) e.injective
-    (fun z ↦ ⟨0, Subsingleton.elim _ _⟩)
-    (by
-      ext b
-      constructor
-      · intro _
-        rfl
-      · intro _
-        exact e.surjective b)
-  rw [invariant_eq_zero_of_subsingleton I hExact hZ, add_zero] at h
-  exact h.symm
 
 variable [Fact p.Prime]
   {M P : Type u}

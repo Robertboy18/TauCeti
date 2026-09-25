@@ -31,8 +31,6 @@ by `G` modulo `N`, which is what lets a `G`-stable subgroup be enlarged one elem
 * `AddSubgroup.quotientDistribMulAction_smul_mk`: its defining equation `g • ↑x = ↑(g • x)`.
 * `AddSubgroup.subquotientDistribMulAction`: the induced action on `K ⧸ N.addSubgroupOf K`
   for two stable subgroups `N` and `K`, the quotient action for the restricted action on `K`.
-* `AddSubgroup.subquotientDistribMulAction_smul_mk`: its defining equation on the class of an
-  element `x` of `K`, namely `g • ↑x = ↑⟨g • ↑x, _⟩`.
 * `TauCeti.smul_mem_sup_zmultiples`: if `N` is `G`-stable and `g • x - x ∈ N` for every `g`,
   then `N ⊔ zmultiples x` is `G`-stable.
 * `TauCeti.subquotient_smul_eq_self_of_eq_sup_zmultiples`: adjoining a generator fixed modulo
@@ -93,26 +91,15 @@ theorem _root_.AddSubgroup.quotientDistribMulAction_smul_mk (N : AddSubgroup M)
 
 /-- The induced action on `K ⧸ N.addSubgroupOf K` for two `G`-stable additive subgroups: the
 quotient action `AddSubgroup.quotientDistribMulAction` for the restricted action
-`AddSubgroup.restrictDistribMulAction` on `K`. Its value on the class of an element of `K` is
-`AddSubgroup.subquotientDistribMulAction_smul_mk`. See note [reducible non-instances]. -/
+`AddSubgroup.restrictDistribMulAction` on `K`. The equation
+`AddSubgroup.quotientDistribMulAction_smul_mk`, applied to that restricted action, computes its
+value on quotient classes. See note [reducible non-instances]. -/
 abbrev _root_.AddSubgroup.subquotientDistribMulAction (N K : AddSubgroup M)
     (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) (hK : ∀ g : G, ∀ x ∈ K, g • x ∈ K) :
     DistribMulAction G (K ⧸ N.addSubgroupOf K) :=
   letI := K.restrictDistribMulAction hK
   (N.addSubgroupOf K).quotientDistribMulAction fun g x hx ↦
     AddSubgroup.mem_addSubgroupOf.mpr (hN g x (AddSubgroup.mem_addSubgroupOf.mp hx))
-
-/-- The defining equation of `AddSubgroup.subquotientDistribMulAction` on the class of an element
-`x` of `K`: `g • ↑x` is the class of `g • ↑x`, an element of `K` by stability. It is not a `simp`
-lemma: since the action is reducible, `AddSubgroup.quotientDistribMulAction_smul_mk` already
-rewrites the left-hand side to the class of `g • x` for the restricted action on `K`, so the
-`simpNF` linter rejects it. -/
-theorem _root_.AddSubgroup.subquotientDistribMulAction_smul_mk (N K : AddSubgroup M)
-    (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) (hK : ∀ g : G, ∀ x ∈ K, g • x ∈ K) (g : G) (x : K) :
-    letI := N.subquotientDistribMulAction K hN hK
-    g • ((x : K) : K ⧸ N.addSubgroupOf K) =
-      ((⟨g • (x : M), hK g x x.property⟩ : K) : K ⧸ N.addSubgroupOf K) :=
-  rfl
 
 /-- If `N` is `G`-stable and `g • x - x ∈ N` for every `g`, then `N ⊔ zmultiples x` is
 `G`-stable. The element is explicit so that the partial application to `hN` and `hx` has the
