@@ -16,17 +16,15 @@ public import Mathlib.RingTheory.FiniteType
 
 Let `C` be a finite cyclic group with generator `σ`, and let `R` be a commutative ring. The
 powers `(σ - 1) ^ i` for `0 ≤ i < |C|` form an `R`-basis of the group algebra `R[C]`
-(`TauCeti.MonoidAlgebra.basisSubOnePow`): they span, because every group element is a power
-`σ ^ j = (1 + (σ - 1)) ^ j` with `j < |C|`, which the binomial theorem expands into them, and
-there are as many of them as the rank `|C|` of the free `R`-module `R[C]`.
+(`TauCeti.MonoidAlgebra.basisSubOnePow`). In this basis, the coordinates of the value
+`f(σ - 1) ∈ R[C]` of a polynomial `f` of degree `< |C|` are the coefficients of `f`
+(`basisSubOnePow_repr_aeval`), so such an `f` is determined by `f(σ - 1)`; in particular, if
+`f(σ - 1)` is a scalar multiple `r • y`, then `r` divides every coefficient of `f`
+(`dvd_coeff_of_aeval_of_sub_one_eq_smul`).
 
-Consequently a polynomial `f` of degree `< |C|` is determined by its value `f(σ - 1) ∈ R[C]`, whose
-coordinates in this basis are the coefficients of `f` (`basisSubOnePow_repr_aeval`); in
-particular, if `f(σ - 1)` is a scalar multiple `r • y`, then `r` divides every coefficient of `f`
-(`dvd_coeff_of_aeval_of_sub_one_eq_smul`). This is the finite-level linear algebra behind the
-power-series coordinate `ℤ_p⟦X⟧ ≅ ℤ_p[[Γ]]` on the completed group algebra of a procyclic pro-`p`
-group `Γ`: at a finite level `C = Γ ⧸ U` the truncation of a power series below `|C|` is read off
-from its image in `ℤ_p[C]`.
+This is the finite-level linear algebra behind the power-series coordinate `ℤ_p⟦X⟧ ≅ ℤ_p[[Γ]]` on
+the completed group algebra of a procyclic pro-`p` group `Γ`: at a finite level `C = Γ ⧸ U` the
+truncation of a power series below `|C|` is read off from its image in `ℤ_p[C]`.
 
 ## Main declarations
 

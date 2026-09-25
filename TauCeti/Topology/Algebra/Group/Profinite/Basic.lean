@@ -131,14 +131,13 @@ theorem _root_.Subgroup.iInf_openNormalSubgroup_eq_bot :
     isClosed_singleton).symm
 
 /-- **An infinite profinite group has arbitrarily large finite quotients.** For every `n` there
-is an open normal subgroup `U` with `n < |G ⧸ U|`: any `n + 1` distinct elements are separated by
-an open normal subgroup avoiding the finitely many quotients `x⁻¹ * y` of distinct ones among
-them. -/
+is an open normal subgroup `U` with `n < |G ⧸ U|`. -/
 theorem exists_openNormalSubgroup_lt_card_quotient [Infinite G] (n : ℕ) :
     ∃ U : OpenNormalSubgroup G, n < Nat.card (G ⧸ U.toSubgroup) := by
   classical
+  -- Any `n + 1` distinct elements are separated by an open normal subgroup avoiding the finitely
+  -- many quotients `x⁻¹ * y` of distinct ones among them, which do not include `1`.
   obtain ⟨s, hs⟩ := Infinite.exists_subset_card_eq G (n + 1)
-  -- The finite set of the quotients `x⁻¹ * y` of distinct elements of `s` does not contain `1`.
   set t : Finset G := ((s ×ˢ s).filter fun q ↦ q.1 ≠ q.2).image fun q ↦ q.1⁻¹ * q.2
   have hopen : IsOpen ((t : Set G)ᶜ) := t.finite_toSet.isClosed.isOpen_compl
   have hone : (1 : G) ∈ (t : Set G)ᶜ := by
