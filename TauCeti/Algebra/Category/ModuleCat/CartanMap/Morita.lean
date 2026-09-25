@@ -34,7 +34,9 @@ The special case of the equivalence induced by a ring isomorphism is
 described through restriction of scalars.
 
 The API is dot notation on the equivalence: use `e.finiteModulesK0Equiv`,
-`e.finiteProjectiveModulesK0Equiv` and `e.cartanMap_bijective_iff`.
+`e.finiteProjectiveModulesK0Equiv` and `e.cartanMap_bijective_iff`. The two rings may live in
+different universes; only the Morita corollaries put them in one, as Mathlib's
+`MoritaEquivalence` does.
 
 ## Main definitions
 
@@ -73,14 +75,15 @@ namespace CategoryTheory.Equivalence
 
 open CategoryTheory.ObjectProperty TauCeti
 
-universe u
+universe u u'
 
-variable {A B : Type u} [Ring A] [Ring B] (e : ModuleCat.{u} A ≌ ModuleCat.{u} B)
+variable {A : Type u} [Ring A] {B : Type u'} [Ring B] (e : ModuleCat.{u} A ≌ ModuleCat.{u'} B)
 
 /-! ### The two object properties -/
 
 /-- An equivalence of module categories pulls the finitely generated projective `B`-modules back
 to the finitely generated projective `A`-modules. -/
+@[simp]
 theorem finiteProjectiveModules_inverseImage :
     (finiteProjectiveModules B).inverseImage e.functor = finiteProjectiveModules A := by
   funext M
@@ -92,7 +95,7 @@ theorem finiteProjectiveModules_inverseImage :
 /-- **Finitely generated modules along an equivalence of module categories.** An equivalence
 `e : ModuleCat A ≌ ModuleCat B` restricts to an equivalence from the finitely generated
 `A`-modules to the finitely generated `B`-modules. -/
-noncomputable def finiteModulesEquivalence : FGModuleCat.{u} A ≌ FGModuleCat.{u} B :=
+noncomputable def finiteModulesEquivalence : FGModuleCat.{u} A ≌ FGModuleCat.{u'} B :=
   e.congrFullSubcategory e.isFG_inverseImage
 
 /-- **Finitely generated projective modules along an equivalence of module categories.** An
@@ -112,71 +115,55 @@ instance : e.finiteProjectiveModulesEquivalence.functor.Additive := by
 
 @[simp]
 theorem finiteModulesEquivalence_functor_obj_obj (M : FGModuleCat.{u} A) :
-    (e.finiteModulesEquivalence.functor.obj M).obj = e.functor.obj M.obj := by
-  simp only [finiteModulesEquivalence, congrFullSubcategory_functor_eq_lift, lift_obj_obj,
-    Functor.comp_obj, ι_obj]
+    (e.finiteModulesEquivalence.functor.obj M).obj = e.functor.obj M.obj :=
+  e.congrFullSubcategory_functor_obj_obj _ M
 
 @[simp]
 theorem finiteModulesEquivalence_functor_map_hom {M N : FGModuleCat.{u} A} (f : M ⟶ N) :
     (e.finiteModulesEquivalence.functor.map f).hom =
       eqToHom (e.finiteModulesEquivalence_functor_obj_obj M) ≫ e.functor.map f.hom ≫
-        eqToHom (e.finiteModulesEquivalence_functor_obj_obj N).symm := by
-  have h : e.finiteModulesEquivalence.functor ⋙ (ModuleCat.isFG B).ι =
-      (ModuleCat.isFG A).ι ⋙ e.functor := by
-    rw [finiteModulesEquivalence, congrFullSubcategory_functor_comp_ι]
-  simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
+        eqToHom (e.finiteModulesEquivalence_functor_obj_obj N).symm :=
+  e.congrFullSubcategory_functor_map_hom _ f
 
 @[simp]
-theorem finiteModulesEquivalence_inverse_obj_obj (M : FGModuleCat.{u} B) :
-    (e.finiteModulesEquivalence.inverse.obj M).obj = e.inverse.obj M.obj := by
-  simp only [finiteModulesEquivalence, congrFullSubcategory_inverse_eq_lift, lift_obj_obj,
-    Functor.comp_obj, ι_obj]
+theorem finiteModulesEquivalence_inverse_obj_obj (M : FGModuleCat.{u'} B) :
+    (e.finiteModulesEquivalence.inverse.obj M).obj = e.inverse.obj M.obj :=
+  e.congrFullSubcategory_inverse_obj_obj _ M
 
 @[simp]
-theorem finiteModulesEquivalence_inverse_map_hom {M N : FGModuleCat.{u} B} (f : M ⟶ N) :
+theorem finiteModulesEquivalence_inverse_map_hom {M N : FGModuleCat.{u'} B} (f : M ⟶ N) :
     (e.finiteModulesEquivalence.inverse.map f).hom =
       eqToHom (e.finiteModulesEquivalence_inverse_obj_obj M) ≫ e.inverse.map f.hom ≫
-        eqToHom (e.finiteModulesEquivalence_inverse_obj_obj N).symm := by
-  have h : e.finiteModulesEquivalence.inverse ⋙ (ModuleCat.isFG A).ι =
-      (ModuleCat.isFG B).ι ⋙ e.inverse := by
-    rw [finiteModulesEquivalence, congrFullSubcategory_inverse_comp_ι]
-  simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
+        eqToHom (e.finiteModulesEquivalence_inverse_obj_obj N).symm :=
+  e.congrFullSubcategory_inverse_map_hom _ f
 
 @[simp]
 theorem finiteProjectiveModulesEquivalence_functor_obj_obj
     (M : (finiteProjectiveModules A).FullSubcategory) :
-    (e.finiteProjectiveModulesEquivalence.functor.obj M).obj = e.functor.obj M.obj := by
-  simp only [finiteProjectiveModulesEquivalence, congrFullSubcategory_functor_eq_lift,
-    lift_obj_obj, Functor.comp_obj, ι_obj]
+    (e.finiteProjectiveModulesEquivalence.functor.obj M).obj = e.functor.obj M.obj :=
+  e.congrFullSubcategory_functor_obj_obj _ M
 
 @[simp]
 theorem finiteProjectiveModulesEquivalence_functor_map_hom
     {M N : (finiteProjectiveModules A).FullSubcategory} (f : M ⟶ N) :
     (e.finiteProjectiveModulesEquivalence.functor.map f).hom =
       eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj M) ≫ e.functor.map f.hom ≫
-        eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj N).symm := by
-  have h : e.finiteProjectiveModulesEquivalence.functor ⋙ (finiteProjectiveModules B).ι =
-      (finiteProjectiveModules A).ι ⋙ e.functor := by
-    rw [finiteProjectiveModulesEquivalence, congrFullSubcategory_functor_comp_ι]
-  simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
+        eqToHom (e.finiteProjectiveModulesEquivalence_functor_obj_obj N).symm :=
+  e.congrFullSubcategory_functor_map_hom _ f
 
 @[simp]
 theorem finiteProjectiveModulesEquivalence_inverse_obj_obj
     (M : (finiteProjectiveModules B).FullSubcategory) :
-    (e.finiteProjectiveModulesEquivalence.inverse.obj M).obj = e.inverse.obj M.obj := by
-  simp only [finiteProjectiveModulesEquivalence, congrFullSubcategory_inverse_eq_lift,
-    lift_obj_obj, Functor.comp_obj, ι_obj]
+    (e.finiteProjectiveModulesEquivalence.inverse.obj M).obj = e.inverse.obj M.obj :=
+  e.congrFullSubcategory_inverse_obj_obj _ M
 
 @[simp]
 theorem finiteProjectiveModulesEquivalence_inverse_map_hom
     {M N : (finiteProjectiveModules B).FullSubcategory} (f : M ⟶ N) :
     (e.finiteProjectiveModulesEquivalence.inverse.map f).hom =
       eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj M) ≫ e.inverse.map f.hom ≫
-        eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj N).symm := by
-  have h : e.finiteProjectiveModulesEquivalence.inverse ⋙ (finiteProjectiveModules A).ι =
-      (finiteProjectiveModules B).ι ⋙ e.inverse := by
-    rw [finiteProjectiveModulesEquivalence, congrFullSubcategory_inverse_comp_ι]
-  simpa only [Functor.comp_map, ι_map] using Functor.congr_hom h f
+        eqToHom (e.finiteProjectiveModulesEquivalence_inverse_obj_obj N).symm :=
+  e.congrFullSubcategory_inverse_map_hom _ f
 
 /-! ### Exactness of the restricted equivalences -/
 
@@ -218,7 +205,7 @@ theorem isConflationExact_finiteProjectiveModulesEquivalence_inverse :
 `G₀(mod A) ≃+ G₀(mod B)`, sending the class of a finitely generated `A`-module `M` to the class
 of `e.functor.obj M`. -/
 noncomputable def finiteModulesK0Equiv :
-    ExactK0.{u} (finiteModulesExactStructure A) ≃+ ExactK0.{u} (finiteModulesExactStructure B) :=
+    ExactK0.{u} (finiteModulesExactStructure A) ≃+ ExactK0.{u'} (finiteModulesExactStructure B) :=
   ExactK0.mapEquiv e.finiteModulesEquivalence e.isConflationExact_finiteModulesEquivalence_functor
     e.isConflationExact_finiteModulesEquivalence_inverse
 
@@ -227,7 +214,7 @@ noncomputable def finiteModulesK0Equiv :
 to the class of `e.functor.obj M`. -/
 noncomputable def finiteProjectiveModulesK0Equiv :
     ExactK0.{u} (finiteProjectiveModulesExactStructure A) ≃+
-      ExactK0.{u} (finiteProjectiveModulesExactStructure B) :=
+      ExactK0.{u'} (finiteProjectiveModulesExactStructure B) :=
   ExactK0.mapEquiv e.finiteProjectiveModulesEquivalence
     e.isConflationExact_finiteProjectiveModulesEquivalence_functor
     e.isConflationExact_finiteProjectiveModulesEquivalence_inverse
@@ -235,26 +222,26 @@ noncomputable def finiteProjectiveModulesK0Equiv :
 @[simp]
 theorem finiteModulesK0Equiv_of (M : FGModuleCat.{u} A) :
     e.finiteModulesK0Equiv (ExactK0.of M) = ExactK0.of (e.finiteModulesEquivalence.functor.obj M) :=
-  ExactK0.mapEquiv_of.{u, u} _ _ _ M
+  ExactK0.mapEquiv_of.{u, u'} _ _ _ M
 
 @[simp]
-theorem finiteModulesK0Equiv_symm_of (M : FGModuleCat.{u} B) :
+theorem finiteModulesK0Equiv_symm_of (M : FGModuleCat.{u'} B) :
     e.finiteModulesK0Equiv.symm (ExactK0.of M) =
       ExactK0.of (e.finiteModulesEquivalence.inverse.obj M) :=
-  ExactK0.mapEquiv_symm_of.{u, u} _ _ _ M
+  ExactK0.mapEquiv_symm_of.{u, u'} _ _ _ M
 
 @[simp]
 theorem finiteProjectiveModulesK0Equiv_of (M : (finiteProjectiveModules A).FullSubcategory) :
     e.finiteProjectiveModulesK0Equiv (ExactK0.of.{u} M) =
-      ExactK0.of.{u} (e.finiteProjectiveModulesEquivalence.functor.obj M) :=
-  ExactK0.mapEquiv_of.{u, u} _ _ _ M
+      ExactK0.of.{u'} (e.finiteProjectiveModulesEquivalence.functor.obj M) :=
+  ExactK0.mapEquiv_of.{u, u'} _ _ _ M
 
 @[simp]
 theorem finiteProjectiveModulesK0Equiv_symm_of
     (M : (finiteProjectiveModules B).FullSubcategory) :
-    e.finiteProjectiveModulesK0Equiv.symm (ExactK0.of.{u} M) =
+    e.finiteProjectiveModulesK0Equiv.symm (ExactK0.of.{u'} M) =
       ExactK0.of.{u} (e.finiteProjectiveModulesEquivalence.inverse.obj M) :=
-  ExactK0.mapEquiv_symm_of.{u, u} _ _ _ M
+  ExactK0.mapEquiv_symm_of.{u, u'} _ _ _ M
 
 /-! ### Compatibility with the Cartan map -/
 

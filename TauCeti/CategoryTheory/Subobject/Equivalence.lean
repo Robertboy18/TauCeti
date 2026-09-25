@@ -41,6 +41,16 @@ isomorphism from the subobjects of `X` to the subobjects of `e.functor.obj X`. -
 noncomputable def subobjectOrderIso : Subobject X ≃o Subobject (e.functor.obj X) :=
   (Subobject.lowerEquivalence (MonoOver.congr X e)).toOrderIso
 
+/-- The induced order isomorphism sends the subobject represented by a monomorphism `f` to the
+subobject represented by `e.functor.map f`.
+
+The proof is definitional, and no lemma-based proof is available: `Subobject.mk` and
+`Subobject.lower` are definitional wrappers around `toThinSkeleton` and `ThinSkeleton.map`, whose
+commutation `ThinSkeleton.comp_toThinSkeleton` is itself `rfl`, and Mathlib has no evaluation
+lemma for `MonoOver.congr` on `MonoOver.mk`. The functor equation `MonoOver.congr_functor` cannot
+be rewritten under `MonoOver.arrow` either, because the source of that arrow depends on the
+functor. Both sides reduce to `Subobject.mk` of the same `Over.post` image, which is why `rfl`
+closes the goal. -/
 @[simp]
 theorem subobjectOrderIso_mk {Y : C} (f : Y ⟶ X) [Mono f] :
     e.subobjectOrderIso X (Subobject.mk f) = Subobject.mk (e.functor.map f) :=

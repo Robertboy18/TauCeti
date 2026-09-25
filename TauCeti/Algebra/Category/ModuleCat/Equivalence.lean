@@ -74,6 +74,7 @@ theorem submoduleOrderIso_apply (M : ModuleCat.{v} A) (N : Submodule A M) :
     LinearMap.range_comp_of_range_eq_top _ (ModuleCat.range_eq_top_of_epi _)]
 
 /-- An equivalence of module categories preserves and reflects finite generation. -/
+@[simp]
 theorem finite_functor_obj_iff (M : ModuleCat.{v} A) :
     Module.Finite B (e.functor.obj M) ↔ Module.Finite A M := by
   rw [Module.finite_def, Module.finite_def, Submodule.fg_iff_compact, Submodule.fg_iff_compact,
@@ -81,10 +82,12 @@ theorem finite_functor_obj_iff (M : ModuleCat.{v} A) :
 
 /-- An equivalence of module categories pulls the finitely generated `B`-modules back to the
 finitely generated `A`-modules. -/
+@[simp]
 theorem isFG_inverseImage : (ModuleCat.isFG.{v'} B).inverseImage e.functor = ModuleCat.isFG.{v} A :=
   funext fun M ↦ propext (e.finite_functor_obj_iff M)
 
 /-- An equivalence of module categories preserves and reflects projectivity. -/
+@[simp]
 theorem projective_functor_obj_iff [Small.{v} A] [Small.{v'} B] (M : ModuleCat.{v} A) :
     Module.Projective B (e.functor.obj M) ↔ Module.Projective A M := by
   constructor
