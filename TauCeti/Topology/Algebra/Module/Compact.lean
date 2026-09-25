@@ -38,6 +38,9 @@ carried as a single hypothesis on a module whose topology is given by hand; its 
 two facts above for it, shows that it passes to quotients by closed submodules, and records the
 witness that a compact totally disconnected topological ring is a compact module over itself.
 
+The compact-module predicate and its basic API follow the `IsCompactModule` blueprint in
+`TauCetiRoadmap/ProfiniteProPGroups/Suggested.lean`, section `CompactModules`.
+
 ## Main definitions
 
 * `TauCeti.IsCompactModule R M`: `M` is a compact totally disconnected topological `R`-module.
@@ -51,8 +54,10 @@ witness that a compact totally disconnected topological ring is a compact module
 * `TauCeti.IsLinearTopology.eq_zero_of_forall_mem_of_isOpen`,
   `TauCeti.IsLinearTopology.sInf_isOpen_eq_bot`: in a `T1` linearly topologized module the open
   submodules intersect in zero.
-* `TauCeti.exists_forall_mkQ_eq`, `TauCeti.existsUnique_forall_mkQ_eq`: a compact topological
-  module is the inverse limit of its quotients by the open submodules.
+* `TauCeti.exists_forall_mkQ_eq`: for a compact topological module, the map to compatible
+  families in its quotients by open submodules is surjective.
+* `TauCeti.existsUnique_forall_mkQ_eq`: a compact `T1` linearly topologized module is the
+  inverse limit of its quotients by open submodules.
 * `TauCeti.IsCompactModule.isLinearTopology`,
   `TauCeti.IsCompactModule.eq_zero_of_forall_mem_of_isOpen`,
   `TauCeti.IsCompactModule.existsUnique_forall_mkQ_eq`, `TauCeti.IsCompactModule.quotient`,
@@ -158,10 +163,10 @@ section Compact
 
 variable [ContinuousAdd M] [CompactSpace M]
 
-/-- **A compact topological module is the inverse limit of its quotients by open submodules**: a
-family of elements of the quotients `M ⧸ N`, `N` ranging over the open submodules, that is
-compatible along the factor maps `M ⧸ N → M ⧸ N'` for `N ≤ N'` comes from an element of `M`. The
-element is unique when `M` is moreover `T1` and linearly topologized
+/-- **Surjectivity onto compatible families of open quotients.** Every family of elements of
+`M ⧸ N`, with `N` ranging over the open submodules, that is compatible along the factor maps
+`M ⧸ N → M ⧸ N'` for `N ≤ N'` comes from an element of the compact topological module `M`.
+The element is unique when `M` is moreover `T1` and linearly topologized
 (`TauCeti.existsUnique_forall_mkQ_eq`). -/
 theorem exists_forall_mkQ_eq (x : ∀ N : {N : Submodule R M // IsOpen (N : Set M)}, M ⧸ N.1)
     (hx : ∀ ⦃N N' : {N : Submodule R M // IsOpen (N : Set M)}⦄ (h : N.1 ≤ N'.1),
