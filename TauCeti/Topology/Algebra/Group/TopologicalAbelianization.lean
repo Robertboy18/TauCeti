@@ -35,8 +35,8 @@ the convention of `MulAut.conjNormal`.
 This is the structure of Labute's relation module in the classification of Demushkin groups: for
 a continuous character `χ` of a free pro-`p` group `F`, its kernel `X` is normal, and Labute's
 `E = X ⧸ (X, X)` is `TopologicalAbelianization X` with `Γ = F ⧸ X` acting by conjugation
-(Labute, §4, p. 121). Labute writes the action as `ȳ · x̄ = y⁻¹ x y`; since `Γ` is abelian in
-that setting, the two conventions differ by the inversion `ȳ ↦ ȳ⁻¹` of the acting group.
+(Labute, §4, p. 121). Labute writes the action as `[y] · [x] = y⁻¹ x y`; since `Γ` is abelian in
+that setting, the two conventions differ by the inversion `[y] ↦ [y]⁻¹` of the acting group.
 
 ## Main definitions
 
