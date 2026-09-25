@@ -22,7 +22,7 @@ ring over the group ring `ℤ_p[C]`:
 ```
 
 This is `TauCeti.completedGroupAlgebra.prodPowerSeriesCoordinate`, the composite of three
-isomorphisms: `ℤ_p[C]⟦X⟧ ≅ ℤ_p⟦X⟧[C]` (`TauCeti.MonoidAlgebra.powerSeriesAlgEquiv`, `C` finite),
+isomorphisms: `ℤ_p[C]⟦X⟧ ≅ ℤ_p⟦X⟧[C]` (`MonoidAlgebra.powerSeriesAlgEquiv`, `C` finite),
 the power-series coordinate `ℤ_p⟦X⟧ ≅ ℤ_p[[Γ]]` of the Iwasawa algebra applied to the
 coefficients (`TauCeti.completedGroupAlgebra.powerSeriesCoordinate`), and
 `ℤ_p[[Γ]][C] ≅ ℤ_p[[C × Γ]]` (`TauCeti.completedGroupAlgebra.monoidAlgebraProdEquiv`). As for

@@ -19,10 +19,10 @@ collecting, for each `n`, the coefficients of `Xⁿ` of the monomial coefficient
 ∑ₘ φₘ · m  ↦  ∑ₙ (∑ₘ (coeff n φₘ) · m) Xⁿ.
 ```
 
-This is an `R`-algebra homomorphism `TauCeti.MonoidAlgebra.toPowerSeries`, characterised by
+This is an `R`-algebra homomorphism `MonoidAlgebra.toPowerSeries`, characterised by
 `coeff_coeff_toPowerSeries`: the coefficient at `m` of the coefficient of `Xⁿ` of the image is
 the coefficient of `Xⁿ` of the coefficient at `m` of the argument. It is always injective, and
-for a finite monoid `M` it is an isomorphism `TauCeti.MonoidAlgebra.powerSeriesAlgEquiv`. For an
+for a finite monoid `M` it is an isomorphism `MonoidAlgebra.powerSeriesAlgEquiv`. For an
 infinite `M` it is not surjective: a power series whose coefficients are supported on infinitely
 many elements of `M` altogether is not in the image, since an element of `A⟦X⟧[M]` involves only
 finitely many elements of `M`.
@@ -33,17 +33,17 @@ product `C × ℤ_p` becomes a power-series ring over `ℤ_p[C]`.
 
 ## Main declarations
 
-* `TauCeti.MonoidAlgebra.toPowerSeries R A M`: the `R`-algebra homomorphism
+* `MonoidAlgebra.toPowerSeries R A M`: the `R`-algebra homomorphism
   `A⟦X⟧[M] →ₐ[R] A[M]⟦X⟧`, with `coeff_coeff_toPowerSeries` and `toPowerSeries_injective`.
-* `TauCeti.MonoidAlgebra.powerSeriesAlgEquiv R A M`: the isomorphism `A⟦X⟧[M] ≃ₐ[R] A[M]⟦X⟧`
+* `MonoidAlgebra.powerSeriesAlgEquiv R A M`: the isomorphism `A⟦X⟧[M] ≃ₐ[R] A[M]⟦X⟧`
   for finite `M`.
 -/
 
 public section
 
-namespace TauCeti.MonoidAlgebra
+namespace MonoidAlgebra
 
-open _root_.MonoidAlgebra PowerSeries
+open PowerSeries
 
 variable (R : Type*) [CommSemiring R] (A : Type*) [Semiring A] [Algebra R A]
   (M : Type*) [Monoid M]
@@ -154,4 +154,4 @@ theorem powerSeriesAlgEquiv_symm_X :
     (powerSeriesAlgEquiv R A M).symm PowerSeries.X = single 1 PowerSeries.X :=
   (powerSeriesAlgEquiv R A M).symm_apply_eq.mpr (toPowerSeries_single_one_X R A M).symm
 
-end TauCeti.MonoidAlgebra
+end MonoidAlgebra
