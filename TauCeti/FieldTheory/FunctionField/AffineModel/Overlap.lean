@@ -45,6 +45,8 @@ sufficiently high power of `x` clears them.
   `TauCeti.coe_ofField_powers_integralClosure_adjoin_eq_coe_ofField_powers_inv`: the two charts
   `R_x` and `R_{x⁻¹}` localize to one and the same subring of `F`, the holomorphy ring of the
   places at which `x` is a unit.
+* `TauCeti.valuation_integralClosureAdjoinHeightOneSpectrumEquiv_eq_valuation_inv`: at a place
+  of the overlap, the primes of `R_x` and of `R_{x⁻¹}` below it induce the same valuation on `F`.
 
 ## References
 
@@ -192,13 +194,7 @@ end Localization
 
 section IntegralClosureAdjoin
 
-variable (x : F)
-
-/-- `x` lies in its own affine model `R_x`, the integral closure of `k[x]` in `F`. -/
-theorem self_mem_integralClosure_adjoin : x ∈ integralClosure (Algebra.adjoin k {x}) F :=
-  isIntegral_algebraMap (x := (⟨x, Algebra.self_mem_adjoin_singleton k x⟩ : Algebra.adjoin k {x}))
-
-variable [IsFractionRing (integralClosure (Algebra.adjoin k {x}) F) F]
+variable (x : F) [IsFractionRing (integralClosure (Algebra.adjoin k {x}) F) F]
 
 /-- **`R_x[1/x]` is the holomorphy ring of the overlap of the two charts**: the places at which
 `x` is a unit, the intersection of the finite chart of `R_x` with that of `R_{x⁻¹}`. -/
@@ -235,6 +231,21 @@ theorem coe_ofField_powers_integralClosure_adjoin_eq_coe_ofField_powers_inv
   rw [coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing x hF hx,
     coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing x⁻¹ hF hx', inv_inv,
     Set.inter_comm]
+
+/-- **The two normalized valuations agree on the overlap**: at a place `P` at which `x` is a unit,
+the height one prime of `R_x` below `P` and the height one prime of `R_{x⁻¹}` below `P` induce
+one and the same valuation on `F`, namely the valuation of `P`
+(`TauCeti.Place.valuation_center` on each chart). -/
+theorem valuation_integralClosureAdjoinHeightOneSpectrumEquiv_eq_valuation_inv
+    [IsDedekindDomain (integralClosure (Algebra.adjoin k {x}) F)]
+    [IsDedekindDomain (integralClosure (Algebra.adjoin k {x⁻¹}) F)]
+    [IsFractionRing (integralClosure (Algebra.adjoin k {x⁻¹}) F) F]
+    {P : Place k F} (hx : x ∈ P.integers) (hx' : x⁻¹ ∈ P.integers) :
+    (integralClosureAdjoinHeightOneSpectrumEquiv x ⟨P, hx⟩).valuation F =
+      (integralClosureAdjoinHeightOneSpectrumEquiv x⁻¹ ⟨P, hx'⟩).valuation F := by
+  rw [integralClosureAdjoinHeightOneSpectrumEquiv_apply,
+    integralClosureAdjoinHeightOneSpectrumEquiv_apply, Place.valuation_center,
+    Place.valuation_center]
 
 end IntegralClosureAdjoin
 

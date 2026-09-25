@@ -63,6 +63,10 @@ universe u v
 
 variable {k : Type u} {F : Type v} [Field k] [Field F] [Algebra k F]
 
+/-- `x` lies in its own affine model `R_x`, the integral closure of `k[x]` in `F`. -/
+theorem self_mem_integralClosure_adjoin (x : F) : x ∈ integralClosure (Algebra.adjoin k {x}) F :=
+  isIntegral_algebraMap (x := (⟨x, Algebra.self_mem_adjoin_singleton k x⟩ : Algebra.adjoin k {x}))
+
 /-! ### The finite chart of `R_x` -/
 
 namespace Place
@@ -75,8 +79,7 @@ theorem forall_algebraMap_mem_integers_integralClosure_adjoin_iff (P : Place k F
       x ∈ P.integers :=
   ⟨fun h ↦ by
       rw [P.mem_integers_iff]
-      exact h x ((integralClosure (Algebra.adjoin k {x}) F).algebraMap_mem
-        ⟨x, Algebra.self_mem_adjoin_singleton k x⟩),
+      exact h x (self_mem_integralClosure_adjoin x),
     fun hx a ha ↦ by
       rw [← P.mem_integers_iff]
       exact P.mem_integers_of_isIntegral_adjoin hx ha⟩
