@@ -10,13 +10,13 @@ public import Mathlib.Algebra.Group.TypeTags.Finite
 public import Mathlib.NumberTheory.Padics.MahlerBasis
 public import Mathlib.NumberTheory.Padics.ProperSpace
 public import Mathlib.RingTheory.Filtration
+public import Mathlib.RingTheory.PowerSeries.Binomial
 public import Mathlib.RingTheory.PowerSeries.Inverse
 public import Mathlib.RingTheory.PowerSeries.Trunc
 public import TauCeti.Algebra.MonoidAlgebra.Cyclic
 public import TauCeti.NumberTheory.Padics.MonoidAlgebra
 public import TauCeti.RingTheory.MvPowerSeries.Substitution
 public import TauCeti.RingTheory.PowerSeries.Evaluation
-public import TauCeti.RingTheory.PowerSeries.Substitution
 public import TauCeti.Topology.Algebra.Group.Profinite.CompletedGroupAlgebra.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicInt
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Procyclic
@@ -376,21 +376,13 @@ theorem powerSeriesCoordinate_padicPow_apply (u : ℤ_[p])
       ((powerSeriesCoordinate hΓ hγ).toAlgHom (PowerSeries.binomialSeries ℤ_[p] u - 1)) :=
     hX ▸ isTopologicallyNilpotent_of_sub_one hΓ (hΓ.padicPow γ u)
   have h := PowerSeries.aeval_subst (ε := (powerSeriesCoordinate hΓ hγ).toAlgHom)
-    (PowerSeries.hasSubst_binomialSeries_sub_one u) (continuous_powerSeriesCoordinate hΓ hγ) hb ψ
+    (PowerSeries.HasSubst.of_constantCoeff_zero' (by simp))
+    (continuous_powerSeriesCoordinate hΓ hγ) hb ψ
   -- Both sides are evaluations of `ψ`, at points identified by `hX`.
   rw [coe_powerSeriesCoordinate]
   refine Eq.trans ?_ h.symm
   rw [congrFun (PowerSeries.coe_aeval (isTopologicallyNilpotent_of_sub_one hΓ _)) ψ,
     congrFun (PowerSeries.coe_aeval hb) ψ, hX]
-
-/-- The composite of the inverse of one power-series coordinate with another is the substitution
-`X ↦ (1 + X) ^ u - 1` relating the two generators. -/
-theorem powerSeriesCoordinate_symm_powerSeriesCoordinate_padicPow (u : ℤ_[p])
-    (hγu : (Subgroup.closure ({hΓ.padicPow γ u} : Set Γ)).topologicalClosure = ⊤)
-    (ψ : PowerSeries ℤ_[p]) :
-    (powerSeriesCoordinate hΓ hγ).symm (powerSeriesCoordinate hΓ hγu ψ) =
-      ψ.subst (PowerSeries.binomialSeries ℤ_[p] u - 1) := by
-  rw [powerSeriesCoordinate_padicPow_apply hΓ hγ u hγu, AlgEquiv.symm_apply_apply]
 
 /-- **Any two power-series coordinates differ by a substitution `X ↦ (1 + X) ^ u - 1` with `u` a
 unit of `ℤ_p`.** For a second topological generator `γ'` of `Γ`, there is a unit `u` with
