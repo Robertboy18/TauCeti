@@ -181,9 +181,8 @@ theorem W1p.continuous_posPartAbove (hp : p ≠ ∞) {k : ℝ} (hk : 0 ≤ k) :
 /-- Taking the positive part is continuous in the Sobolev norm for finite exponents. -/
 theorem W1p.continuous_posPart (hp : p ≠ ∞) :
     Continuous (W1p.posPart (mu := mu) (Omega := Omega) hp) := by
-  simpa only [W1p.posPartAbove_zero] using
-    (show Continuous (fun u : W1p mu Omega p ↦ W1p.posPartAbove hp (le_refl 0) u) from
-      W1p.continuous_posPartAbove hp (le_refl 0))
+  exact (W1p.continuous_posPartAbove (mu := mu) (Omega := Omega) hp (le_refl 0)).congr
+    (W1p.posPartAbove_zero hp)
 
 /-- Truncation above a nonnegative level preserves the homogeneous Dirichlet boundary
 condition. -/
