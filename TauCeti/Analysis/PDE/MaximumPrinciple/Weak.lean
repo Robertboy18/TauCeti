@@ -20,8 +20,9 @@ by `(u - k)⁺ ∈ W^{1,2}_0(Ω)` and implies `u ≤ k` almost everywhere.
 
 For `-div(a ∇u) + c u` on a domain contained in a ball, uniform ellipticity, bounded measurable
 coefficients, and `c ≥ 0` suffice. The ball may have any centre; its radius does not impose a
-smallness condition. The weak Dirichlet-solution corollary says that nonpositive forcing gives
-a nonpositive solution whenever the energy form has a positive quadratic lower bound.
+smallness condition. For weak Dirichlet solutions, nonpositive forcing gives a nonpositive
+solution, and ordered forcing terms give ordered solutions, whenever the energy form has a
+positive quadratic lower bound.
 
 These are weak Sobolev maximum and comparison principles for Lane C, target 13 of
 `TauCetiRoadmap/PDE/README.md`.
@@ -32,6 +33,7 @@ These are weak Sobolev maximum and comparison principles for Lane C, target 13 o
 * `TauCeti.PDE.value_le_of_energyFormH1_nonpos`: the maximum principle with boundary bound `k ≥ 0`.
 * `TauCeti.PDE.value_le_of_energyFormH1_le`: the coercive weak comparison principle.
 * `TauCeti.PDE.IsWeakSolutionDirichlet.value_nonpos_of_energy_bound`: the sign of a weak solution.
+* `TauCeti.PDE.IsWeakSolutionDirichlet.value_le_of_energy_bound`: comparison for ordered forcing.
 * `TauCeti.PDE.UniformlyEllipticOn.value_nonpos_of_zero_drift_of_subset_ball`: the bounded-domain
   maximum principle without drift.
 * `TauCeti.PDE.UniformlyEllipticOn.value_le_const_of_zero_drift_of_subset_ball`: the corresponding
@@ -219,6 +221,28 @@ theorem IsWeakSolutionDirichlet.value_nonpos_of_energy_bound
   rw [(isWeakSolutionDirichlet_iff f u).mp hu v]
   exact integral_nonpos_of_ae (hf.and hv |>.mono fun x hx ↦
     mul_nonpos_of_nonpos_of_nonneg hx.1 hx.2)
+
+/-- Homogeneous weak Dirichlet solutions with ordered forcing are ordered almost everywhere
+when the energy form is bounded and has a positive quadratic lower bound on `W^{1,2}_0(Ω)`. -/
+theorem IsWeakSolutionDirichlet.value_le_of_energy_bound
+    {f g : Lp ℝ 2 (mu.restrict Omega)} {u v : W1p0 mu Omega 2}
+    (hu : IsWeakSolutionDirichlet a b c f u) (hv : IsWeakSolutionDirichlet a b c g v)
+    (hcoeff : MemLp (fun x ↦ energyIntegrand (a x) (b x) (c x)) ⊤ (mu.restrict Omega))
+    {C : ℝ} (hC : 0 < C)
+    (hlower : ∀ w : W1p0 mu Omega 2,
+      C * ‖w‖ ^ 2 ≤ energyFormH1 a b c (w : W1p mu Omega 2) (w : W1p mu Omega 2))
+    (hfg : ∀ᵐ x ∂mu.restrict Omega, f x ≤ g x) :
+    ∀ᵐ x ∂mu.restrict Omega,
+      W1p.value (u : W1p mu Omega 2) x ≤ W1p.value (v : W1p mu Omega 2) x := by
+  refine value_le_of_energyFormH1_le hcoeff
+    (W1p.posPart_mem_w1p0Submodule (by norm_num)
+      ((w1p0Submodule mu Omega 2).sub_mem u.property v.property)) hC hlower ?_
+  intro w hw
+  rw [(isWeakSolutionDirichlet_iff f u).mp hu w, (isWeakSolutionDirichlet_iff g v).mp hv w]
+  exact integral_mono_ae
+    ((Lp.memLp f).integrable_mul (Lp.memLp (W1p.value (w : W1p mu Omega 2))))
+    ((Lp.memLp g).integrable_mul (Lp.memLp (W1p.value (w : W1p mu Omega 2))))
+    (hfg.and hw |>.mono fun x hx ↦ mul_le_mul_of_nonneg_right hx.1 hx.2)
 
 section Euclidean
 
