@@ -24,11 +24,10 @@ smallness condition. For weak Dirichlet solutions, nonpositive forcing gives a n
 solution, and ordered forcing terms give ordered solutions, whenever the energy form has a
 positive quadratic lower bound.
 
-These are weak Sobolev maximum and comparison principles for Lane C, target 13 of
-`TauCetiRoadmap/PDE/README.md`.
-
 ## Main declarations
 
+* `TauCeti.PDE.value_eq_zero_of_energyFormH1_self_nonpos`: coercivity forces a zero-boundary
+  function with nonpositive energy to vanish.
 * `TauCeti.PDE.value_nonpos_of_energyFormH1_nonpos`: the coercive weak maximum principle.
 * `TauCeti.PDE.value_le_of_energyFormH1_nonpos`: the maximum principle with boundary bound `k ≥ 0`.
 * `TauCeti.PDE.value_le_of_energyFormH1_le`: the coercive weak comparison principle.
@@ -56,6 +55,7 @@ variable {ι : Type*} [Fintype ι] {mu : Measure (EuclideanSpace ℝ ι)}
 
 /-- Testing the energy form against the positive part of `u` gives the energy of that positive
 part. This identity holds for all coefficients, without integrability assumptions. -/
+@[simp]
 theorem energyFormH1_posPart_right (u : W1p mu Omega 2) :
     energyFormH1 a b c u (W1p.posPart (by norm_num) u) =
       energyFormH1 a b c (W1p.posPart (by norm_num) u) (W1p.posPart (by norm_num) u) := by
@@ -109,6 +109,25 @@ theorem energyFormH1_posPartAbove_self_le
       rfl
     simp only [hjet, map_zero, le_refl]
 
+/-- A zero-boundary Sobolev function with nonpositive energy vanishes almost everywhere when
+the energy form has a positive quadratic lower bound on `W^{1,2}_0(Ω)`. -/
+theorem value_eq_zero_of_energyFormH1_self_nonpos {C : ℝ} (hC : 0 < C)
+    (hlower : ∀ w : W1p0 mu Omega 2,
+      C * ‖w‖ ^ 2 ≤ energyFormH1 a b c (w : W1p mu Omega 2) (w : W1p mu Omega 2))
+    {w : W1p0 mu Omega 2}
+    (hw : energyFormH1 a b c (w : W1p mu Omega 2) (w : W1p mu Omega 2) ≤ 0) :
+    ∀ᵐ x ∂mu.restrict Omega, W1p.value (w : W1p mu Omega 2) x = 0 := by
+  have hnorm : ‖w‖ = 0 := by
+    have hbound := (hlower w).trans hw
+    apply le_antisymm ?_ (norm_nonneg w)
+    exact le_of_not_gt fun hpos ↦ (not_lt_of_ge hbound) (mul_pos hC (pow_pos hpos 2))
+  have hw : (w : W1p mu Omega 2) = 0 :=
+    congrArg (fun v : W1p0 mu Omega 2 ↦ (v : W1p mu Omega 2)) (norm_eq_zero.mp hnorm)
+  have hzero : W1p.value (w : W1p mu Omega 2) = 0 := by
+    rw [hw, ← W1p.valueL_apply, map_zero]
+  rw [hzero]
+  exact Lp.coeFn_zero (E := ℝ) (p := 2) (μ := mu.restrict Omega)
+
 /-- A weak subsolution of a coercive divergence-form operator is nonpositive almost everywhere
 if its positive part belongs to `W^{1,2}_0(Ω)`. The quadratic lower bound is required only on
 the zero-boundary Sobolev space. -/
@@ -132,17 +151,9 @@ theorem value_nonpos_of_energyFormH1_nonpos {u : W1p mu Omega 2}
   have henergy := hu w hnonneg
   dsimp only [w] at henergy
   rw [energyFormH1_posPart_right] at henergy
-  have hnorm : ‖w‖ = 0 := by
-    have hbound := (hlower w).trans henergy
-    apply le_antisymm ?_ (norm_nonneg w)
-    exact le_of_not_gt fun hpos ↦ (not_lt_of_ge hbound) (mul_pos hC (pow_pos hpos 2))
-  have hw : (w : W1p mu Omega 2) = 0 :=
-    congrArg (fun v : W1p0 mu Omega 2 ↦ (v : W1p mu Omega 2)) (norm_eq_zero.mp hnorm)
-  have hzero : W1p.value (w : W1p mu Omega 2) = 0 := by
-    rw [hw, ← W1p.valueL_apply, map_zero]
-  filter_upwards [hvalue, Lp.coeFn_zero (E := ℝ) (p := 2) (μ := mu.restrict Omega)]
+  filter_upwards [hvalue, value_eq_zero_of_energyFormH1_self_nonpos (w := w) hC hlower henergy]
     with x hx hz
-  rw [hzero, hz] at hx
+  rw [hz] at hx
   exact (le_max_left _ _).trans hx.symm.le
 
 /-- A weak subsolution with boundary values at most `k ≥ 0` is at most `k` almost everywhere
@@ -168,17 +179,9 @@ theorem value_le_of_energyFormH1_nonpos
   have hnonneg : ∀ᵐ x ∂mu.restrict Omega, 0 ≤ W1p.value (w : W1p mu Omega 2) x :=
     hvalue.mono fun x hx ↦ hx.symm ▸ le_max_right _ _
   have henergy := (energyFormH1_posPartAbove_self_le hcoeff hc hk u).trans (hu w hnonneg)
-  have hnorm : ‖w‖ = 0 := by
-    have hbound := (hlower w).trans henergy
-    apply le_antisymm ?_ (norm_nonneg w)
-    exact le_of_not_gt fun hpos ↦ (not_lt_of_ge hbound) (mul_pos hC (pow_pos hpos 2))
-  have hw : (w : W1p mu Omega 2) = 0 :=
-    congrArg (fun v : W1p0 mu Omega 2 ↦ (v : W1p mu Omega 2)) (norm_eq_zero.mp hnorm)
-  have hzero : W1p.value (w : W1p mu Omega 2) = 0 := by
-    rw [hw, ← W1p.valueL_apply, map_zero]
-  filter_upwards [hvalue, Lp.coeFn_zero (E := ℝ) (p := 2) (μ := mu.restrict Omega)]
+  filter_upwards [hvalue, value_eq_zero_of_energyFormH1_self_nonpos (w := w) hC hlower henergy]
     with x hx hz
-  rw [hzero, hz] at hx
+  rw [hz] at hx
   exact sub_nonpos.mp ((le_max_left _ _).trans hx.symm.le)
 
 /-- Weak comparison for a coercive energy form: ordered weak operator values and
