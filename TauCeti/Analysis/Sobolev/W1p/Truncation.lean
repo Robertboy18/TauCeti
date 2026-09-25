@@ -16,10 +16,9 @@ import Mathlib.MeasureTheory.Function.UnifTight
 For `1 ≤ p < ∞`, taking the positive part is continuous in `W^{1,p}(Ω)` and preserves
 `W^{1,p}_0(Ω)`. Neither assertion requires boundedness or boundary regularity of `Ω`.
 
-The gradient formula contains the discontinuous factor `1_{u > 0}`. On the level set
-`{u = 0}`, however, the weak gradient is zero almost everywhere. This makes truncation
-continuous at almost every value-gradient pair of a Sobolev function. Vitali convergence
-then gives convergence in the Sobolev norm.
+Positive parts of functions with zero boundary values are therefore admissible Sobolev test
+functions. In particular, this applies to the difference of two functions with the same
+Dirichlet boundary data, as needed in weak comparison arguments.
 
 * `TauCeti.W1p.continuous_posPart`: continuity in the full Sobolev norm.
 * `TauCeti.W1p.posPart_mem_w1p0Submodule`: preservation of the homogeneous Dirichlet condition.

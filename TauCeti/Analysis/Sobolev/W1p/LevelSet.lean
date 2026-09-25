@@ -16,14 +16,10 @@ For `1 ≤ p < ∞`, the weak gradient of a Sobolev function vanishes almost eve
 each of its level sets. Consequently, the weak gradients of two Sobolev functions agree
 almost everywhere on the set where their values agree.
 
-The proof uses the positive-part chain rule twice, in the identity
-`u - k = (u - k)⁺ - (k - u)⁺`. Both truncation gradients vanish on `{u = k}`, and
-uniqueness of weak derivatives identifies their difference with `∇u`. The level `k` is
-arbitrary: the argument uses locally integrable weak derivatives, so neither a finite-measure
-domain nor global integrability of the shifted truncations is needed.
-
-These locality statements apply to measurable level sets, which need not contain any open
-set, and are used in Sobolev truncation arguments.
+The level may be any real number, including on domains of infinite measure. These locality
+statements apply to measurable level sets, which need not contain any open set. They remove
+the ambiguity of truncation gradients at a threshold and support continuity of positive
+truncation in the Sobolev norm.
 -/
 
 public section
@@ -58,8 +54,13 @@ theorem W1p.gradient_ae_eq_zero_on_level_set (hp : p ≠ ∞) (u : W1p mu Omega 
   have hderiv := ((W1p.hasWeakFDerivOn u).sub hconst).ae_eq (hsplit.congr_ae hvalue)
   filter_upwards [hneg, hderiv] with x hnegx hx
   intro hlevel
+  have hpos : {y | k < W1p.value u y}.indicator (⇑(W1p.gradient u)) x = 0 :=
+    indicator_of_notMem (by simpa only [mem_ofPred_eq, hlevel] using lt_irrefl k) _
+  have hneg : {y | -k < W1p.value (-u) y}.indicator (⇑(W1p.gradient (-u))) x = 0 :=
+    indicator_of_notMem
+      (by simpa only [mem_ofPred_eq, hnegx, Pi.neg_apply, hlevel] using lt_irrefl (-k)) _
   have hz : innerSL ℝ (W1p.gradient u x) = 0 := by
-    simpa [hlevel, hnegx] using hx
+    simpa only [Pi.sub_apply, Pi.zero_apply, sub_zero, hpos, hneg, map_zero] using hx
   exact innerSL_inj.mp (hz.trans (map_zero _).symm)
 
 /-- Weak gradients agree almost everywhere wherever the values agree, even if their
