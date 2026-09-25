@@ -120,7 +120,12 @@ section AddCommGroup
 variable [Fact p.Prime] {M : Type*} [AddCommGroup M]
 
 /-- If `K` is obtained from `N` by adjoining `x ∉ N` with `p • x ∈ N`, then `K ⧸ N`
-is additively equivalent to `ZMod p`. The equivalence sends the class of `x` to `1`. -/
+is additively equivalent to `ZMod p`. The equivalence sends the class of `x` to `1`.
+
+For the generator equation, apply the public lemma
+`zmodAddEquivOfGenerator_symm_apply_generator`. Its proof term
+`zmodAddEquivOfGenerator_symm_apply_generator _ _` applies to this equivalence by definitional
+equality. -/
 noncomputable def subquotientEquivZModOfEqSupZmultiples {N K : AddSubgroup M} {x : M}
     (hgen : K = N ⊔ AddSubgroup.zmultiples x) (hx : x ∉ N) (hpx : p • x ∈ N) :
     (K ⧸ N.addSubgroupOf K) ≃+ ZMod p := by

@@ -11,8 +11,8 @@ public import TauCeti.Algebra.GroupAction.QuotientAddGroup
 /-!
 # Continuity of the action on a stable additive subgroup
 
-Let a monoid `G` act continuously and distributively on a topological additive commutative group
-`M`, and let `N` be a `G`-stable additive subgroup of `M`. The restricted action
+Let a monoid `G` act continuously and distributively on a topological additive group `M`, and
+let `N` be a `G`-stable additive subgroup of `M`. The restricted action
 `AddSubgroup.restrictDistribMulAction` of `G` on `N` is continuous for the subspace topology,
 because the inclusion of `N` in `M` is an equivariant topological embedding. Mathlib records this
 as the instance `SMulMemClass.continuousSMul` when the stability is part of a `SMulMemClass`
@@ -29,7 +29,7 @@ public section
 
 namespace TauCeti
 
-variable {G : Type*} [Monoid G] [TopologicalSpace G] {M : Type*} [AddCommGroup M]
+variable {G : Type*} [Monoid G] [TopologicalSpace G] {M : Type*} [AddGroup M]
   [TopologicalSpace M] [DistribMulAction G M] [ContinuousSMul G M]
 
 /-- The restricted action `AddSubgroup.restrictDistribMulAction` of `G` on a `G`-stable additive

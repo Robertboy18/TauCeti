@@ -12,10 +12,10 @@ public import Mathlib.GroupTheory.QuotientGroup.Defs
 /-!
 # Distributive actions on the quotient by a stable additive subgroup
 
-Let a monoid `G` act distributively on an additive commutative group `M`, and let `N` be an
-additive subgroup of `M` that is `G`-stable, in the sense that `g • x ∈ N` for every `g : G` and
-`x ∈ N`. Then `G` acts distributively on `N` by restriction and on the quotient `M ⧸ N` by
-`g • ↑x = ↑(g • x)`. Mathlib provides these actions for submodules
+Let a monoid `G` act distributively on an additive group `M`, and let `N` be a `G`-stable
+additive subgroup: `g • x ∈ N` for every `g : G` and `x ∈ N`. Then `G` acts distributively on
+`N` by restriction. When `M` is commutative, the action also descends to the quotient `M ⧸ N`,
+with `g • ↑x = ↑(g • x)`. Mathlib provides these actions for submodules
 (`Submodule.Quotient.distribMulAction`) but not for a bare `G`-stable additive subgroup, where
 the stability is a hypothesis rather than an instance, so the actions are definitions rather than
 instances.
@@ -41,7 +41,11 @@ public section
 
 namespace TauCeti
 
-variable {G : Type*} [Monoid G] {M : Type*} [AddCommGroup M] [DistribMulAction G M]
+variable {G : Type*} [Monoid G] {M : Type*}
+
+section AddGroup
+
+variable [AddGroup M] [DistribMulAction G M]
 
 /-- The action of `G` on a `G`-stable additive subgroup `N` of `M`, by restriction. It is a
 definition rather than an instance because it depends on the stability hypothesis. See note
@@ -70,6 +74,10 @@ theorem _root_.AddSubgroup.restrictDistribMulAction_inclusion_smul {N K : AddSub
     AddSubgroup.inclusion h (g • x) = g • AddSubgroup.inclusion h x :=
   Subtype.ext (by
     simp only [AddSubgroup.coe_inclusion, AddSubgroup.restrictDistribMulAction_coe_smul])
+
+end AddGroup
+
+variable [AddCommGroup M] [DistribMulAction G M]
 
 /-- The action of `G` on the quotient of `M` by a `G`-stable additive subgroup `N`, with
 `g • ↑x = ↑(g • x)`. It is a definition rather than an instance because it depends on the
