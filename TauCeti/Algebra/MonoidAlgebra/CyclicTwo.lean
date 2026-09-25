@@ -123,6 +123,8 @@ theorem cyclicTwoToProd_single (g : Multiplicative (ZMod 2)) (r : R) :
     cyclicTwoToProd R (single g r) = (r, r * cyclicTwoSign R g) := by
   simp [cyclicTwoToProd]
 
+/-- The trivial and sign characters send `a + bσ` to `(a + b, a - b)`, computing
+`cyclicTwoToProd` from the coefficients in the basis `(1, σ)`. -/
 theorem cyclicTwoToProd_single_one_add_single_ofAdd_one (a b : R) :
     cyclicTwoToProd R (single (1 : Multiplicative (ZMod 2)) a + single (Multiplicative.ofAdd 1) b) =
       (a + b, a - b) := by
@@ -137,10 +139,14 @@ private theorem cyclicTwoToProd_invOf_two_aux (z : R × R) :
     (⅟(2 : R) * (z.1 + z.2) + ⅟(2 : R) * (z.1 - z.2),
       ⅟(2 : R) * (z.1 + z.2) - ⅟(2 : R) * (z.1 - z.2)) = z := by
   refine Prod.ext ?_ ?_ <;> dsimp only
-  · rw [show ⅟(2 : R) * (z.1 + z.2) + ⅟(2 : R) * (z.1 - z.2) = ⅟(2 : R) * (2 * z.1) by ring,
-      invOf_mul_cancel_left]
-  · rw [show ⅟(2 : R) * (z.1 + z.2) - ⅟(2 : R) * (z.1 - z.2) = ⅟(2 : R) * (2 * z.2) by ring,
-      invOf_mul_cancel_left]
+  · calc
+      ⅟(2 : R) * (z.1 + z.2) + ⅟(2 : R) * (z.1 - z.2) =
+          ⅟(2 : R) * (2 * z.1) := by ring
+      _ = z.1 := invOf_mul_cancel_left _ _
+  · calc
+      ⅟(2 : R) * (z.1 + z.2) - ⅟(2 : R) * (z.1 - z.2) =
+          ⅟(2 : R) * (2 * z.2) := by ring
+      _ = z.2 := invOf_mul_cancel_left _ _
 
 private theorem cyclicTwoToProd_bijective : Function.Bijective (cyclicTwoToProd R) := by
   refine ⟨(injective_iff_map_eq_zero _).mpr fun x hx => ?_, fun z => ?_⟩
@@ -148,9 +154,11 @@ private theorem cyclicTwoToProd_bijective : Function.Bijective (cyclicTwoToProd 
       cyclicTwoToProd_single_one_add_single_ofAdd_one, Prod.mk_eq_zero] at hx
     obtain ⟨h₁, h₂⟩ := hx
     have ha : x.coeff 1 = 0 := by
-      have h : x.coeff 1 = ⅟(2 : R) * (2 * x.coeff 1) := (invOf_mul_cancel_left _ _).symm
-      rw [h, show (2 : R) * x.coeff 1 = (x.coeff 1 + x.coeff (Multiplicative.ofAdd 1)) +
-        (x.coeff 1 - x.coeff (Multiplicative.ofAdd 1)) by ring, h₁, h₂, add_zero, mul_zero]
+      calc
+        x.coeff 1 = ⅟(2 : R) * (2 * x.coeff 1) := (invOf_mul_cancel_left _ _).symm
+        _ = ⅟(2 : R) * ((x.coeff 1 + x.coeff (Multiplicative.ofAdd 1)) +
+            (x.coeff 1 - x.coeff (Multiplicative.ofAdd 1))) := by ring
+        _ = 0 := by rw [h₁, h₂, add_zero, mul_zero]
     have hb : x.coeff (Multiplicative.ofAdd 1) = 0 := by linear_combination h₁ - ha
     rw [eq_single_one_add_single_ofAdd_one x, ha, hb, single_zero, single_zero, add_zero]
   · refine ⟨single 1 (⅟2 * (z.1 + z.2)) + single (Multiplicative.ofAdd 1) (⅟2 * (z.1 - z.2)), ?_⟩
@@ -167,6 +175,8 @@ noncomputable def cyclicTwoEquivProd : MonoidAlgebra R (Multiplicative (ZMod 2))
 theorem cyclicTwoEquivProd_apply (x : MonoidAlgebra R (Multiplicative (ZMod 2))) :
     cyclicTwoEquivProd R x = cyclicTwoToProd R x := (rfl)
 
+/-- The inverse sends `(x, y)` to `⅟2 (x + y) + ⅟2 (x - y) σ`, recovering the two
+coefficients from the trivial and sign character values. -/
 @[simp]
 theorem cyclicTwoEquivProd_symm_apply (z : R × R) :
     (cyclicTwoEquivProd R).symm z =
