@@ -21,7 +21,7 @@ the normalized Atkin–Lehner operator `𝒲_Q` on `S_k(Γ₀(N))` satisfies `�
 sign `ε_Q(f) ∈ {1, -1}`, the **Atkin–Lehner sign** (or Atkin–Lehner eigenvalue) of `f` at `Q`.
 The signs are multiplicative on coprime exact divisors, `ε_1(f) = 1`, and `ε_N(f)` is the Fricke
 sign of `f`, so that the signs at the maximal prime powers `p ^ v_p(N)` of `N` multiply to the
-Fricke sign, the sign entering the functional equation of `L(s, f)`.
+Fricke eigenvalue. The functional-equation sign of `L(s, f)` is `i^k · ε_N(f)`.
 
 The argument is the one that gives the Fricke sign, run on the `Γ₀(N)` carrier the Atkin–Lehner
 operators live on.
@@ -42,9 +42,8 @@ operators live on.
   is a good Hecke eigenvector in the new part with the eigenvalues of `f`, hence a multiple
   `ε • f`, and `𝒲_Q ∘ 𝒲_Q = 1` forces `ε ^ 2 = 1`.
 
-For a nontrivial nebentypus `χ` the operator `W_Q` conjugates the `Q`-part of the character, so
-it does not preserve `S_k(N, χ)` and a newform is carried to a multiple of a different newform;
-the sign statement is specific to trivial nebentypus.
+For general nebentypus `χ`, the operator `W_Q` conjugates only the `Q`-part of the character,
+so it need not preserve `S_k(N, χ)`. The sign statement proved here treats trivial nebentypus.
 
 ## Main definitions
 
