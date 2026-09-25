@@ -31,17 +31,18 @@ public section
 /-- If `x ^ p ^ k = 1` in a ring, for a prime `p`, then `p` divides `(x - 1) ^ p ^ k`. -/
 theorem Nat.Prime.dvd_sub_one_pow_of_pow_eq_one {A : Type*} [Ring A] {p : ℕ} (hp : p.Prime)
     {x : A} {k : ℕ} (hx : x ^ p ^ k = 1) : (p : A) ∣ (x - 1) ^ p ^ k := by
-  obtain ⟨N, hN⟩ : ∃ N, p ^ k = N + 1 := Nat.exists_eq_succ_of_ne_zero (pow_ne_zero k hp.ne_zero)
-  -- Expand `1 = ((x - 1) + 1) ^ p ^ k` and isolate the top and bottom terms.
-  have h := (Commute.one_right (x - 1)).add_pow (p ^ k)
-  simp only [one_pow, mul_one] at h
-  rw [sub_add_cancel, hx, Finset.sum_range_succ, Nat.choose_self, Nat.cast_one, mul_one, hN,
-    Finset.sum_range_succ', pow_zero, Nat.choose_zero_right, Nat.cast_one, one_mul,
-    add_right_comm] at h
-  have h' := add_right_cancel (h.symm.trans (zero_add 1).symm)
-  rw [hN, eq_neg_of_add_eq_zero_right h', dvd_neg]
+  -- Expand `1 = ((x - 1) + 1) ^ p ^ k` by the binomial theorem.
+  have h : (1 : A) = ∑ m ∈ Finset.range (p ^ k + 1), (x - 1) ^ m * ((p ^ k).choose m : A) := by
+    simpa [hx] using (Commute.one_right (x - 1)).add_pow (p ^ k)
+  -- Split off the extreme terms `m = 0` and `m = p ^ k`, which are `1` and `(x - 1) ^ p ^ k`;
+  -- what remains is `(x - 1) ^ p ^ k + S = 0` for the sum `S` of the middle terms.
+  rw [Finset.sum_range_succ, Finset.range_eq_Ico,
+    Finset.sum_eq_sum_Ico_succ_bot (pow_pos hp.pos k)] at h
+  simp only [pow_zero, Nat.choose_zero_right, Nat.choose_self, Nat.cast_one, mul_one,
+    zero_add, add_assoc, left_eq_add] at h
+  -- Every middle term is divisible by `p`, through its binomial coefficient.
+  rw [eq_neg_of_add_eq_zero_right h, dvd_neg]
   refine Finset.dvd_sum fun m hm ↦ ?_
-  rw [← (Nat.cast_commute _ _).eq, ← hN]
-  refine Dvd.dvd.mul_right (Nat.cast_dvd_cast (hp.dvd_choose_pow m.succ_ne_zero ?_)) _
-  rw [hN]
-  exact Nat.ne_of_lt (Nat.succ_lt_succ (Finset.mem_range.mp hm))
+  rw [Finset.mem_Ico] at hm
+  rw [← (Nat.cast_commute _ _).eq]
+  exact (Nat.cast_dvd_cast (hp.dvd_choose_pow (by omega) hm.2.ne)).mul_right _

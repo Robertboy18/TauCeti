@@ -21,9 +21,10 @@ Let `Γ` be a pro-`p` group and `Λ = ℤ_p[[Γ]]` its completed group algebra o
 integers, a compact totally disconnected topological ring. For every `γ ∈ Γ` the element
 `γ - 1` of `Λ` is topologically nilpotent: at each finite level `ℤ_p[Γ ⧸ U]` the class of `γ` has
 `p`-power order, so the coefficients of `(γ - 1) ^ n` tend to zero
-(`TauCeti.PadicInt.tendsto_coeff_single_sub_one_pow`). Since `Λ` is complete and linearly
-topologized, Mathlib's `PowerSeries.aeval` therefore evaluates every power series `ψ ∈ ℤ_p⟦X⟧` at
-`γ - 1`, giving the continuous `ℤ_p`-algebra homomorphism
+(`TauCeti.PadicInt.tendsto_coeff_single_sub_one_pow`). When `Γ` is moreover compact and
+commutative, `Λ` is a complete linearly topologized commutative ring, and Mathlib's
+`PowerSeries.aeval` evaluates every power series `ψ ∈ ℤ_p⟦X⟧` at `γ - 1`, giving the continuous
+`ℤ_p`-algebra homomorphism
 
   `ℤ_p⟦X⟧ → ℤ_p[[Γ]]`, `X ↦ γ - 1`, `1 + X ↦ γ`.
 
@@ -33,7 +34,8 @@ which is all of `Γ`, and the span of the group elements is dense
 (`TauCeti.completedGroupAlgebra.dense_span_range_of`). So the completed group algebra of a
 procyclic pro-`p` group is a quotient of the power-series ring; for `Γ ≅ ℤ_p` this is the
 classical description `ℤ_p[[Γ]] ≅ ℤ_p⟦T⟧` of the Iwasawa algebra, whose injectivity half is the
-remaining step. The concrete instance `Γ = Multiplicative ℤ_[p]` with `γ = 1` is recorded.
+remaining step. The concrete instance `Γ = Multiplicative ℤ_[p]` with
+`γ = Multiplicative.ofAdd (1 : ℤ_[p])` is recorded.
 
 ## Main results
 
@@ -61,10 +63,9 @@ namespace TauCeti.completedGroupAlgebra
 variable {p : ℕ} [Fact p.Prime] {Γ : Type*} [Group Γ] [TopologicalSpace Γ]
 
 /-- **`γ - 1` is topologically nilpotent** in the completed group algebra `ℤ_p[[Γ]]` of a pro-`p`
-group `Γ`: at each finite level `ℤ_p[Γ ⧸ U]` the class of `γ` has `p`-power order, so the
-coefficients of `(γ - 1) ^ n` tend to zero. As `PowerSeries.HasEval` is this predicate, power
-series over `ℤ_[p]` can be evaluated at `γ - 1` by `PowerSeries.aeval` once `ℤ_p[[Γ]]` is a
-complete linearly topologized commutative ring, which it is for `Γ` compact and commutative. -/
+group `Γ`. As `PowerSeries.HasEval` is this predicate, power series over `ℤ_[p]` can be evaluated
+at `γ - 1` by `PowerSeries.aeval` once `ℤ_p[[Γ]]` is a complete linearly topologized commutative
+ring, which it is for `Γ` compact and commutative. -/
 theorem isTopologicallyNilpotent_of_sub_one (hΓ : IsProP p Γ) (γ : Γ) :
     IsTopologicallyNilpotent (of ℤ_[p] Γ γ - 1) := by
   refine (isInducing_coeffFamily ℤ_[p] Γ).tendsto_nhds_iff.mpr
@@ -79,6 +80,7 @@ section
 variable [SeparatelyContinuousMul Γ] [CompactSpace Γ] [IsMulCommutative Γ]
 
 /-- Evaluation of power series at `γ - 1` sends `1 + X` to the group element `γ`. -/
+@[simp]
 theorem aeval_one_add_X (hΓ : IsProP p Γ) (γ : Γ) :
     PowerSeries.aeval (isTopologicallyNilpotent_of_sub_one hΓ γ)
       (1 + PowerSeries.X : PowerSeries ℤ_[p]) = of ℤ_[p] Γ γ := by
@@ -90,8 +92,7 @@ variable [IsTopologicalGroup Γ] [CompactSpace Γ] [IsMulCommutative Γ]
 
 /-- **The completed group algebra of a procyclic pro-`p` group is a quotient of `ℤ_p⟦X⟧`.** If `γ`
 topologically generates the commutative pro-`p` group `Γ`, evaluation of power series at `γ - 1`
-is a surjection `ℤ_p⟦X⟧ → ℤ_p[[Γ]]`: its range is compact, hence closed, contains `γ` and `γ⁻¹`
-and so every group element, and the span of the group elements is dense. -/
+is a surjection `ℤ_p⟦X⟧ → ℤ_p[[Γ]]`. -/
 theorem aeval_surjective (hΓ : IsProP p Γ) {γ : Γ}
     (hγ : (Subgroup.closure ({γ} : Set Γ)).topologicalClosure = ⊤) :
     Function.Surjective
@@ -142,7 +143,7 @@ theorem aeval_surjective (hΓ : IsProP p Γ) {γ : Γ}
   exact hx
 
 /-- **The Iwasawa algebra `ℤ_p[[ℤ_p]]` is a quotient of `ℤ_p⟦X⟧`**: evaluation at `γ - 1`, for
-`γ = 1 ∈ ℤ_p` the topological generator of the additive group of the `p`-adic integers, is
+`γ = Multiplicative.ofAdd (1 : ℤ_[p])` the topological generator of `Multiplicative ℤ_[p]`, is
 surjective. -/
 theorem aeval_surjective_multiplicative_padicInt (p : ℕ) [Fact p.Prime] :
     Function.Surjective (PowerSeries.aeval (R := ℤ_[p]) (isTopologicallyNilpotent_of_sub_one

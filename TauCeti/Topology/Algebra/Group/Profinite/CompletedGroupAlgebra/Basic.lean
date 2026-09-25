@@ -276,8 +276,7 @@ theorem proj_surjective (U : OpenNormalSubgroup Γ) : Function.Surjective (proj 
     exact ⟨r • x', map_smul _ _ _⟩
 
 /-- Every element of the completed group algebra agrees at any given level `V` with a finite
-`R`-linear combination of group elements: lift each class occurring in its projection to `R[Γ ⧸ V]`
-to an element of `Γ`. -/
+`R`-linear combination of group elements. -/
 theorem exists_mem_span_range_of_proj_eq (x : completedGroupAlgebra R Γ)
     (V : OpenNormalSubgroup Γ) :
     ∃ y ∈ Submodule.span R (Set.range (of R Γ)), proj R Γ V y = proj R Γ V x := by
@@ -417,9 +416,7 @@ theorem continuous_of [SeparatelyContinuousMul Γ] : Continuous (of R Γ) := by
 /-! ### Density of the group elements -/
 
 /-- **The group elements span a dense subspace.** The `R`-span of the group elements is dense in
-the completed group algebra: a neighbourhood of an element constrains finitely many levels, and
-`exists_mem_span_range_of_proj_eq` at a level below them produces a linear combination of group
-elements agreeing with the element at all of them. -/
+the completed group algebra. -/
 theorem dense_span_range_of :
     Dense (Submodule.span R (Set.range (of R Γ)) : Set (completedGroupAlgebra R Γ)) := by
   classical
