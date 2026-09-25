@@ -5,9 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.GroupAction.TypeTags
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
-public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Extension
+public import TauCeti.Topology.Algebra.Group.Profinite.Free.Extension
+public import TauCeti.Topology.Algebra.GroupAction.TypeTags
 public import TauCeti.Topology.Algebra.GroupExtension.FactorSet
 
 /-!
@@ -17,9 +16,10 @@ Let `F = freeProP p X` be the free pro-`p` group on a type `X`, and let `M` be a
 pro-`p` group with a continuous action of `F`. A continuous `1`-cocycle `c : F → M`, that is a
 continuous crossed homomorphism `c (g * h) = g • c h + c g`, is the same thing as a continuous
 homomorphic section `g ↦ ⟨c g, g⟩` of the semidirect product `M ⋊ F → F`. The semidirect product is
-the extension attached to the trivial factor set, it is profinite and pro-`p`, and the universal
-property of `F` produces the section with any prescribed values on the generators. Since a cocycle
-is determined by its values on a topological generating set, this identifies the continuous
+the extension attached to the trivial factor set, it is profinite and pro-`p`, and such an
+extension of `F` has a continuous homomorphic section with any prescribed values on the generators
+(`GroupExtension.exists_splitting_continuous_freeProP_forall_apply_of_eq`). Since a cocycle is
+determined by its values on a topological generating set, this identifies the continuous
 `1`-cocycles of `F` with the functions on the generators:
 
 `Z¹(F, M) ≃+ (X → M)`, by evaluation at the generators (`TauCeti.freeProP.Z1Equiv`).
@@ -84,43 +84,27 @@ which the universal property of `F` supplies with the prescribed values. -/
 theorem exists_mem_Z1_forall_apply_of_eq (hM : IsProP p (Multiplicative M)) (v : X → M) :
     ∃ c ∈ Z1 (freeProP p X) M, ∀ x : X, c (of x) = v x := by
   -- The semidirect product `M ⋊ F` is the extension attached to the trivial factor set. It is
-  -- profinite, and pro-`p` because `M` and `F` are.
-  have _ : ContinuousSMul (freeProP p X) (Multiplicative M) :=
-    ⟨continuous_ofAdd.comp
-      (continuous_smul.comp (continuous_fst.prodMk (continuous_toAdd.comp continuous_snd)))⟩
+  -- profinite, and it has a continuous homomorphic section with the prescribed values on the
+  -- generators because `M` and `F` are pro-`p`.
   have _ : IsTopologicalGroup (FactorSet.trivial (freeProP p X) (Multiplicative M)).Extension :=
     FactorSet.Extension.isTopologicalGroup FactorSet.continuous_trivial
-  have hE : IsProP p (FactorSet.trivial (freeProP p X) (Multiplicative M)).Extension :=
-    (FactorSet.trivial (freeProP p X) (Multiplicative M)).groupExtension.isProP
+  obtain ⟨s, hs, hsv⟩ :=
+    GroupExtension.exists_splitting_continuous_freeProP_forall_apply_of_eq
+      (FactorSet.trivial (freeProP p X) (Multiplicative M)).groupExtension
       (by rw [FactorSet.groupExtension_inl]; exact FactorSet.continuous_inl _)
       (by rw [FactorSet.groupExtension_rightHom]; exact FactorSet.continuous_rightHom _) hM
-      (isProP_freeProP p X)
-  -- The projection, bundled with its continuity, and the section prescribed on the generators.
-  let π : (FactorSet.trivial (freeProP p X) (Multiplicative M)).Extension →ₜ* freeProP p X :=
-    ⟨FactorSet.rightHom _, FactorSet.continuous_rightHom _⟩
-  have hπ : ∀ z, π z = z.right := fun z ↦ FactorSet.rightHom_apply _ z
-  let s := lift hE fun x : X ↦
-    (⟨Multiplicative.ofAdd (v x), of x⟩ :
-      (FactorSet.trivial (freeProP p X) (Multiplicative M)).Extension)
-  have hs : π.comp s = ContinuousMonoidHom.id (freeProP p X) :=
-    hom_ext fun x ↦ by simp [hπ, s]
+      (fun x ↦ ⟨Multiplicative.ofAdd (v x), of x⟩) fun x ↦ by
+        rw [FactorSet.groupExtension_rightHom, FactorSet.rightHom_apply]
   have hright : ∀ g, (s g).right = g := fun g ↦ by
-    simpa [hπ] using DFunLike.congr_fun hs g
+    have h := s.rightHom_splitting g
+    rwa [FactorSet.groupExtension_rightHom, FactorSet.rightHom_apply] at h
   refine ⟨fun g ↦ Multiplicative.toAdd (s g).left, mem_Z1_iff.2 ⟨?_, fun g h ↦ ?_⟩, fun x ↦ ?_⟩
-  · exact continuous_toAdd.comp (FactorSet.Extension.continuous_left.comp s.continuous)
+  · exact continuous_toAdd.comp (FactorSet.Extension.continuous_left.comp hs)
   · -- The cocycle identity is the `M`-component of `s (g * h) = s g * s h`.
-    beta_reduce
-    rw [map_mul, FactorSet.Extension.mul_left, hright, FactorSet.trivial_apply, mul_one, toAdd_mul,
-      Multiplicative.toAdd_smul, add_comm]
-  · simp [s]
-
-/-- **Continuous `1`-cocycles on a free pro-`p` group are free on the generators**: every function
-on the generators is the restriction of exactly one continuous `1`-cocycle. -/
-theorem existsUnique_mem_Z1_forall_apply_of_eq (hM : IsProP p (Multiplicative M)) (v : X → M) :
-    ∃! c : Z1 (freeProP p X) M, ∀ x : X, (c : freeProP p X → M) (of x) = v x := by
-  obtain ⟨c, hc, hcv⟩ := exists_mem_Z1_forall_apply_of_eq hM v
-  exact ⟨⟨c, hc⟩, hcv, fun c' hc' ↦
-    Subtype.ext (eq_of_mem_Z1_of_forall_of c'.2 hc fun x ↦ (hc' x).trans (hcv x).symm)⟩
+    simp only [map_mul, FactorSet.Extension.mul_left, hright, FactorSet.trivial_apply, mul_one,
+      toAdd_mul, Multiplicative.toAdd_smul]
+    exact add_comm _ _
+  · exact congrArg (fun z ↦ Multiplicative.toAdd z.left) (hsv x)
 
 variable (hM : IsProP p (Multiplicative M))
 
