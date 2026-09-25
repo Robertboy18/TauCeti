@@ -33,7 +33,7 @@ an abelian profinite group given by its universal property.
 * `TopologicalAbelianization.lift_mk`, `TopologicalAbelianization.lift_unique`:
   the factorisation and its uniqueness.
 * `TopologicalAbelianization.hom_ext`: a continuous homomorphism out of the topological
-  abelianization is determined by its composite with the projection.
+  abelianization is determined by its values on the classes of elements of `G`.
 -/
 
 public section
@@ -79,14 +79,14 @@ theorem lift_unique (f : G →ₜ* A) (g : TopologicalAbelianization G →ₜ* A
 
 end Lift
 
-/-- Two continuous homomorphisms out of the topological abelianization that agree after the
-projection are equal. -/
+/-- Two continuous homomorphisms out of the topological abelianization that agree on the classes
+of elements of `G` are equal. -/
+@[ext]
 theorem hom_ext {B : Type*} [Monoid B] [TopologicalSpace B]
     {g g' : TopologicalAbelianization G →ₜ* B}
-    (h : g.comp (ContinuousMonoidHom.quotientMk (commutator G).topologicalClosure) =
-      g'.comp (ContinuousMonoidHom.quotientMk (commutator G).topologicalClosure)) : g = g' :=
+    (h : ∀ x : G, g (x : TopologicalAbelianization G) = g' x) : g = g' :=
   ContinuousMonoidHom.ext fun q ↦ by
     obtain ⟨x, rfl⟩ := QuotientGroup.mk_surjective q
-    exact DFunLike.congr_fun h x
+    exact h x
 
 end TopologicalAbelianization

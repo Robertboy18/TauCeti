@@ -115,6 +115,7 @@ noncomputable def d0AbelianizationTorsionGenerator : TopologicalAbelianization d
   ((d0A * d0S ^ 2 : demushkinD0) : TopologicalAbelianization demushkinD0)
 
 /-- The class of `AS²` in `D₀^{ab}` squares to `1`: `(AS²)² = A²S⁴ = (S,Y)⁻¹ = 1`. -/
+@[simp]
 theorem d0AbelianizationTorsionGenerator_sq : d0AbelianizationTorsionGenerator ^ 2 = 1 := by
   have h := congrArg (QuotientGroup.mk : demushkinD0 → TopologicalAbelianization demushkinD0)
     d0_relation
@@ -205,9 +206,11 @@ private theorem lift_d0AbelianizationInv (t : Multiplicative ((ℤ_[2] × ℤ_[2
 private theorem d0AbelianizationInv_comp_lift :
     d0AbelianizationInv.comp (TopologicalAbelianization.lift d0AbelianizationHom) =
       ContinuousMonoidHom.id _ := by
-  refine TopologicalAbelianization.hom_ext (d0_hom_ext ?_ ?_ ?_) <;>
-    simp only [ContinuousMonoidHom.coe_comp, Function.comp_apply, ContinuousMonoidHom.coe_id,
-      id_eq, ContinuousMonoidHom.quotientMk_apply, TopologicalAbelianization.lift_mk,
+  refine TopologicalAbelianization.hom_ext (DFunLike.congr_fun (d0_hom_ext ?_ ?_ ?_ :
+    (d0AbelianizationInv.comp (TopologicalAbelianization.lift d0AbelianizationHom)).comp
+      (ContinuousMonoidHom.quotientMk _) = ContinuousMonoidHom.quotientMk _)) <;>
+    simp only [ContinuousMonoidHom.coe_comp, Function.comp_apply,
+      ContinuousMonoidHom.quotientMk_apply, TopologicalAbelianization.lift_mk,
       d0AbelianizationHom_d0A, d0AbelianizationHom_d0S, d0AbelianizationHom_d0Y,
       d0AbelianizationInv_ofAdd]
   · rw [d0AbelianizationTorsionHom_ofAdd_one, d0AbelianizationTorsionGenerator,
