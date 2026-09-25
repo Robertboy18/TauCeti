@@ -39,7 +39,7 @@ which is all of `Γ`, and the span of the group elements is dense
 (`TauCeti.completedGroupAlgebra.dense_span_range_of`). So the completed group algebra of a
 procyclic pro-`p` group is a quotient of the power-series ring.
 
-When `Γ` is moreover infinite, so that `Γ ≅ ℤ_p`, the homomorphism is also injective
+When `Γ` is moreover infinite and totally disconnected, the homomorphism is also injective
 (`TauCeti.completedGroupAlgebra.aeval_injective`, Washington, *Introduction to Cyclotomic Fields*,
 Theorem 7.1), and `X ↦ γ - 1` is the **power-series coordinate** `ℤ_p⟦X⟧ ≃ₐ[ℤ_p] ℤ_p[[Γ]]`
 (`TauCeti.completedGroupAlgebra.powerSeriesCoordinate`), the classical description of the Iwasawa
@@ -167,8 +167,8 @@ section Injective
 variable [TotallyDisconnectedSpace Γ] [Infinite Γ]
 
 /-- Every coefficient of a power series killed by evaluation at `γ - 1` is divisible by `p`, when
-`γ` topologically generates the infinite pro-`p` group `Γ`. This is the finite-level step of
-Washington, *Introduction to Cyclotomic Fields*, Theorem 7.1. -/
+`γ` topologically generates the infinite pro-`p` group `Γ`. This is the finite-level step in
+the injectivity proof below. -/
 private theorem dvd_coeff_of_aeval_eq_zero (hΓ : IsProP p Γ) {γ : Γ}
     (hγ : (Subgroup.closure ({γ} : Set Γ)).topologicalClosure = ⊤) {ψ : PowerSeries ℤ_[p]}
     (hψ : PowerSeries.aeval (isTopologicallyNilpotent_of_sub_one hΓ γ) ψ = 0) (i : ℕ) :
@@ -217,9 +217,9 @@ theorem aeval_injective (hΓ : IsProP p Γ) {γ : Γ}
     (hγ : (Subgroup.closure ({γ} : Set Γ)).topologicalClosure = ⊤) :
     Function.Injective
       (PowerSeries.aeval (R := ℤ_[p]) (isTopologicallyNilpotent_of_sub_one hΓ γ)) := by
-  -- Washington, Theorem 7.1, without Weierstrass division: the finite-level step
-  -- `dvd_coeff_of_aeval_eq_zero` shows that every coefficient of an element of the kernel is
-  -- divisible by `p`, and since `ℤ_p[[Γ]]` is torsion-free the kernel is then `p` times itself.
+  -- The finite-level lemma `dvd_coeff_of_aeval_eq_zero` shows that every coefficient of an
+  -- element of the kernel is divisible by `p`. Since `ℤ_p[[Γ]]` is torsion-free, the kernel
+  -- is then `p` times itself.
   set ε := PowerSeries.aeval (R := ℤ_[p]) (isTopologicallyNilpotent_of_sub_one hΓ γ)
   refine (injective_iff_map_eq_zero ε).mpr fun ψ hψ ↦ ?_
   -- Every coefficient of an element of the kernel is divisible by every power of `p`.

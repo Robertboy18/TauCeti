@@ -22,9 +22,8 @@ powers `(σ - 1) ^ i` for `0 ≤ i < |C|` form an `R`-basis of the group algebra
 `f(σ - 1)` is a scalar multiple `r • y`, then `r` divides every coefficient of `f`
 (`dvd_coeff_of_aeval_of_sub_one_eq_smul`).
 
-This is the finite-level linear algebra behind the power-series coordinate `ℤ_p⟦X⟧ ≅ ℤ_p[[Γ]]` on
-the completed group algebra of a procyclic pro-`p` group `Γ`: at a finite level `C = Γ ⧸ U` the
-truncation of a power series below `|C|` is read off from its image in `ℤ_p[C]`.
+These coefficient and divisibility formulas supply the finite-level linear algebra used for the
+power-series coordinate `ℤ_p⟦X⟧ ≅ ℤ_p[[Γ]]` of an infinite procyclic profinite pro-`p` group `Γ`.
 
 ## Main declarations
 
