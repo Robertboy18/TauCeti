@@ -146,12 +146,14 @@ theorem W1p.continuous_posPartAbove (hp : p ≠ ∞) {k : ℝ} (hk : 0 ≤ k) :
     rw [hx]
     exact norm_posPartAboveJet_le hk _
   have hui : UnifIntegrable (fun n x ↦ g n x) p (mu.restrict Omega) :=
-    hvitali.2.1.ae_mono fun n ↦ (hnorm n).mono fun x hx ↦ by
-      simpa only [ofReal_norm] using ENNReal.ofReal_le_ofReal hx
+    hvitali.2.1.ae_mono (fun n ↦ (Lp.memLp (g n)).aestronglyMeasurable) fun n ↦
+      (hnorm n).mono fun x hx ↦ by
+        simpa only [ofReal_norm] using ENNReal.ofReal_le_ofReal hx
   have hut : UnifTight (fun n x ↦ g n x) p (mu.restrict Omega) := by
     intro ε hε
-    obtain ⟨s, hs, hbound⟩ := hvitali.2.2 ε hε
-    refine ⟨s, hs, fun n ↦ (eLpNorm_mono_ae ?_).trans (hbound n)⟩
+    obtain ⟨s, hs, hfinite, hbound⟩ := hvitali.2.2.exists_measurableSet_indicator hε.ne'
+    refine ⟨s, hfinite.ne, fun n ↦ (eLpNorm_mono_ae
+      ((Lp.memLp (g n)).aestronglyMeasurable.indicator hs.compl) ?_).trans (hbound n)⟩
     filter_upwards [hnorm n] with x hx
     by_cases hxs : x ∈ sᶜ
     · simpa only [Set.indicator_of_mem hxs] using hx
