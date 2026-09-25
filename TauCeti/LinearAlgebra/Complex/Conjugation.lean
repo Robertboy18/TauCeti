@@ -9,7 +9,6 @@ public import Mathlib.LinearAlgebra.Basis.VectorSpace
 public import Mathlib.LinearAlgebra.Complex.Module
 public import Mathlib.LinearAlgebra.Dimension.Constructions
 public import Mathlib.LinearAlgebra.TensorProduct.Basis
-public import Mathlib.RingTheory.Flat.Basic
 public import Mathlib.RingTheory.TensorProduct.Basic
 
 /-!
@@ -23,13 +22,12 @@ theorem of this file is that `V` is the complexification of that subspace: the c
 `ℂ ⊗[ℝ] realPoints K → V`, `c ⊗ₜ w ↦ c • w`
 
 is a `ℂ`-linear isomorphism.  Conversely a complexification `ℂ ⊗[ℝ] W` carries the conjugation
-`c ⊗ₜ w ↦ conj c ⊗ₜ w` (`TauCeti.tmulConj`), whose real points are the image of `W`, so that
-`w ↦ 1 ⊗ₜ w` is a real-linear isomorphism `W ≃ₗ[ℝ] realPoints (tmulConj W)`
-(`TauCeti.tmulConjRealPointsEquiv`).  So each of the two constructions produces the other: a
-conjugation on `V` presents `V` as a complexification, and a complexification carries a
-conjugation.  That is what makes conjugations the tool for realizing an object over `ℝ`.
+`c ⊗ₜ w ↦ conj c ⊗ₜ w` (`TauCeti.tmulConj`), whose real points are the image of `W`.  So each of
+the two constructions produces the other: a conjugation on `V` presents `V` as a complexification,
+and a complexification carries a conjugation.  That is what makes conjugations the tool for
+realizing an object over `ℝ`.
 
-Of the two round trips only the second is set up here, and nothing here transports
+The two constructions are not set up here as mutually inverse, and nothing here transports
 `TauCeti.tmulConj` along an isomorphism `ℂ ⊗[ℝ] W ≃ₗ[ℂ] V`: a presentation of `V` as a
 complexification carries a noncanonical choice of real carrier and isomorphism, which a conjugation
 does not.  The equivariant form of that transport is
@@ -45,11 +43,8 @@ Everything is stated for an arbitrary `V`; no finite-dimensionality is used anyw
   into; `TauCeti.conjRealPart_def` and `TauCeti.conjImaginaryPart_def` are their defining formulas.
 * `TauCeti.realPointsLift`: the canonical `ℂ`-linear map `ℂ ⊗[ℝ] realPoints K →ₗ[ℂ] V`.
 * `TauCeti.realPointsEquiv`: that map as a `ℂ`-linear isomorphism, for involutive `K`.
-* `TauCeti.realPointsCongr`: a `ℂ`-linear isomorphism intertwining two conjugations restricts to
-  an `ℝ`-linear isomorphism of their real points.
 * `TauCeti.tmulConj`: the conjugation `c ⊗ₜ w ↦ conj c ⊗ₜ w` of a complexification `ℂ ⊗[ℝ] W`.
-* `TauCeti.tmulConjRealPointsEquiv`: **a real vector space is the real form of its
-  complexification**, the isomorphism `W ≃ₗ[ℝ] realPoints (tmulConj W)`, `w ↦ 1 ⊗ₜ w`.
+* `TauCeti.realPart`: the real-linear retraction from a complexification to its real module.
 
 ## Main statements
 
@@ -92,8 +87,8 @@ over as a field rather than as an instance.
 
 No definition here exposes its body: `TauCeti.mem_realPoints`, `TauCeti.conjRealPart_def`,
 `TauCeti.conjImaginaryPart_def`, `TauCeti.realPointsLift_tmul`, `TauCeti.realPointsEquiv_tmul`,
-`TauCeti.realPointsEquiv_symm_apply`, `TauCeti.tmulConj_tmul` and
-`TauCeti.coe_tmulConjRealPointsEquiv_apply` are the characterizations a consumer works from.
+`TauCeti.realPointsEquiv_symm_apply` and `TauCeti.tmulConj_tmul` are the characterizations a
+consumer works from.
 
 The real scalar structure on `V` is Mathlib's `Module.complexToReal`, the one `Module ℂ V` induces,
 so `r • v` and `(r : ℂ) • v` are definitionally equal and no scalar tower hypothesis is carried.
@@ -302,40 +297,6 @@ theorem finrank_realPoints (hK : Function.Involutive K) :
     finrank ℝ (realPoints K) = finrank ℂ V := by
   rw [← (realPointsEquiv hK).finrank_eq, Module.finrank_baseChange]
 
-/-! ### Transport of real points -/
-
-section Congr
-
-variable {V' : Type*} [AddCommGroup V'] [Module ℂ V'] {K' : V' →ₛₗ[starRingEnd ℂ] V'}
-
-/-- A complex-linear isomorphism intertwining two conjugate-linear maps restricts to a real-linear
-isomorphism between their real points. -/
-noncomputable def realPointsCongr (e : V ≃ₗ[ℂ] V') (he : ∀ v, e (K v) = K' (e v)) :
-    realPoints K ≃ₗ[ℝ] realPoints K' :=
-  LinearEquiv.ofSubmodules (e.restrictScalars ℝ) _ _ <| Submodule.ext fun w ↦ by
-    rw [Submodule.mem_map]
-    constructor
-    · rintro ⟨v, hv, rfl⟩
-      rw [mem_realPoints, LinearEquiv.coe_coe, LinearEquiv.restrictScalars_apply, ← he,
-        mem_realPoints.mp hv]
-    · intro hw
-      refine ⟨e.symm w, ?_, e.apply_symm_apply w⟩
-      rw [mem_realPoints, ← e.injective.eq_iff, he, e.apply_symm_apply, mem_realPoints.mp hw]
-
-/-- The transported real point is the image of the original one. -/
-@[simp]
-theorem coe_realPointsCongr_apply (e : V ≃ₗ[ℂ] V') (he : ∀ v, e (K v) = K' (e v))
-    (v : realPoints K) : (realPointsCongr e he v : V') = e v :=
-  (rfl)
-
-/-- The inverse transport is the inverse image. -/
-@[simp]
-theorem coe_realPointsCongr_symm_apply (e : V ≃ₗ[ℂ] V') (he : ∀ v, e (K v) = K' (e v))
-    (w : realPoints K') : ((realPointsCongr e he).symm w : V) = e.symm w :=
-  (rfl)
-
-end Congr
-
 /-! ### The conjugation of a complexification -/
 
 section Complexification
@@ -352,7 +313,6 @@ noncomputable def tmulConj : (ℂ ⊗[ℝ] W) →ₛₗ[starRingEnd ℂ] (ℂ �
   map_add' := map_add _
   map_smul' c u := by
     induction u with
-    | zero => simp
     | tmul c' w =>
       rw [TensorProduct.smul_tmul', smul_eq_mul, LinearMap.rTensor_tmul, LinearMap.rTensor_tmul,
         TensorProduct.smul_tmul', smul_eq_mul]
@@ -371,7 +331,6 @@ unexposed body. -/
 @[simp]
 theorem tmulConj_tmulConj (u : ℂ ⊗[ℝ] W) : tmulConj W (tmulConj W u) = u := by
   induction u with
-  | zero => simp
   | tmul c w => simp
   | add u₁ u₂ h₁ h₂ => rw [map_add, map_add, h₁, h₂]
 
@@ -403,31 +362,19 @@ theorem tmulConj_eq_self_iff (u : ℂ ⊗[ℝ] W) :
   · rintro ⟨w, rfl⟩
     rw [tmulConj_tmul, map_one]
 
-/-- **A real vector space is the real form of its complexification**: `w ↦ 1 ⊗ₜ w` is a real-linear
-isomorphism onto the real points of the conjugation `TauCeti.tmulConj W`.  Surjectivity is
-`TauCeti.tmulConj_eq_self_iff`, and injectivity is flatness of `ℂ` over `ℝ`.  This is the converse
-of `TauCeti.realPointsEquiv`: that presents a complex vector space as the complexification of its
-real points, this presents a real vector space as the real points of its complexification. -/
-noncomputable def tmulConjRealPointsEquiv : W ≃ₗ[ℝ] realPoints (tmulConj W) :=
-  LinearEquiv.ofBijective
-    (LinearMap.codRestrict _ (TensorProduct.mk ℝ ℂ W 1) fun w ↦
-      mem_realPoints.mpr (by rw [TensorProduct.mk_apply, tmulConj_tmul, map_one]))
-    ⟨fun x y hxy ↦ Module.Flat.tensorProduct_mk_injective ℝ W ℂ (congrArg Subtype.val hxy),
-      fun y ↦ by
-        obtain ⟨w, hw⟩ := (tmulConj_eq_self_iff W y).mp (mem_realPoints.mp y.2)
-        exact ⟨w, Subtype.ext hw.symm⟩⟩
+/-- The real-linear retraction `c ⊗ₜ w ↦ (re c) • w` of `w ↦ 1 ⊗ₜ w`. -/
+noncomputable def realPart (W : Type*) [AddCommGroup W] [Module ℝ W] :
+    ℂ ⊗[ℝ] W →ₗ[ℝ] W :=
+  TensorProduct.lid ℝ W ∘ₗ Complex.reLm.rTensor W
 
-/-- The real form comparison sends a vector to its pure tensor in the complexification. -/
+/-- The real part of a pure tensor is its real scalar part acting on the vector. -/
 @[simp]
-theorem coe_tmulConjRealPointsEquiv_apply (w : W) :
-    (tmulConjRealPointsEquiv W w : ℂ ⊗[ℝ] W) = 1 ⊗ₜ[ℝ] w :=
-  (rfl)
+theorem realPart_tmul (c : ℂ) (w : W) : realPart W (c ⊗ₜ[ℝ] w) = c.re • w := by
+  simp [realPart]
 
-/-- The inverse real form comparison is characterized by the pure tensor of its value. -/
-@[simp]
-theorem one_tmul_tmulConjRealPointsEquiv_symm (y : realPoints (tmulConj W)) :
-    (1 : ℂ) ⊗ₜ[ℝ] (tmulConjRealPointsEquiv W).symm y = (y : ℂ ⊗[ℝ] W) := by
-  rw [← coe_tmulConjRealPointsEquiv_apply, LinearEquiv.apply_symm_apply]
+/-- The real part of a real vector embedded in its complexification is that vector. -/
+theorem realPart_one_tmul (w : W) : realPart W (1 ⊗ₜ[ℝ] w) = w := by
+  simp
 
 end Complexification
 
@@ -437,7 +384,6 @@ theorem tmulConj_baseChange {W W' : Type*} [AddCommGroup W] [Module ℝ W] [AddC
     [Module ℝ W'] (f : W →ₗ[ℝ] W') (u : ℂ ⊗[ℝ] W) :
     tmulConj W' (f.baseChange ℂ u) = f.baseChange ℂ (tmulConj W u) := by
   induction u with
-  | zero => simp
   | tmul c w => simp
   | add u₁ u₂ h₁ h₂ => rw [map_add, map_add, map_add, map_add, h₁, h₂]
 

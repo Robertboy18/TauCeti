@@ -30,8 +30,6 @@ models.
 * `TauCeti.Hodge.Conjugation`: a conjugate-linear involution of a complex vector space.
 * `TauCeti.Hodge.complexificationConjugation`: the canonical conjugation on the complexification
   of a real vector space, bundled as a Hodge conjugation.
-* `TauCeti.Hodge.complexificationRealPointsEquiv`: a real vector space is the real form of its
-  complexification, the real points of that conjugation.
 * `LinearMap.map_eigenspace_baseChange`: canonical conjugation carries each eigenspace of a
   complexified real-linear endomorphism to the eigenspace of the conjugate eigenvalue.
 * `TauCeti.Hodge.Conjugation.tensorProduct`: the tensor product of two conjugations.
@@ -101,36 +99,6 @@ theorem complexificationConjugation_toEquiv_tmul (z : ℂ) (v : V) :
     (complexificationConjugation V).toEquiv (z ⊗ₜ[ℝ] v) =
       (starRingEnd ℂ) z ⊗ₜ[ℝ] v := by
   rw [complexificationConjugation_toEquiv_apply, tmulConj_tmul]
-
-/-- The real points of the bundled canonical conjugation are those of tensor conjugation, bridging
-the bundled spelling used by `HodgeStructureOn` and the bare spelling of `TauCeti.tmulConj`. -/
-theorem realPoints_complexificationConjugation :
-    realPoints (complexificationConjugation V).toEquiv.toLinearMap = realPoints (tmulConj V) := by
-  ext x
-  rw [mem_realPoints, mem_realPoints, LinearEquiv.coe_coe,
-    complexificationConjugation_toEquiv_apply]
-
-/-- **A real vector space is the real form of its complexification**: `v ↦ 1 ⊗ₜ v` is a real-linear
-isomorphism onto the real points of the canonical conjugation. This is
-`TauCeti.tmulConjRealPointsEquiv` read on the bundled conjugation. -/
-noncomputable def complexificationRealPointsEquiv :
-    V ≃ₗ[ℝ] realPoints (complexificationConjugation V).toEquiv.toLinearMap :=
-  (tmulConjRealPointsEquiv V).trans
-    (LinearEquiv.ofEq _ _ (realPoints_complexificationConjugation V).symm)
-
-/-- The real form comparison sends a vector to its pure tensor in the complexification. -/
-@[simp]
-theorem coe_complexificationRealPointsEquiv_apply (v : V) :
-    (complexificationRealPointsEquiv V v : ℂ ⊗[ℝ] V) = 1 ⊗ₜ[ℝ] v := by
-  rw [complexificationRealPointsEquiv, LinearEquiv.trans_apply, LinearEquiv.coe_ofEq_apply,
-    coe_tmulConjRealPointsEquiv_apply]
-
-/-- The inverse real form comparison is characterized by the pure tensor of its value. -/
-@[simp]
-theorem one_tmul_complexificationRealPointsEquiv_symm
-    (y : realPoints (complexificationConjugation V).toEquiv.toLinearMap) :
-    (1 : ℂ) ⊗ₜ[ℝ] (complexificationRealPointsEquiv V).symm y = (y : ℂ ⊗[ℝ] V) := by
-  rw [← coe_complexificationRealPointsEquiv_apply, LinearEquiv.apply_symm_apply]
 
 end TauCeti.Hodge
 
@@ -497,8 +465,7 @@ noncomputable def concreteLatticeConj :
   toFun := concreteLatticeConjIntLinear
   map_add' := concreteLatticeConjIntLinear.map_add
   map_smul' c x := by
-    refine TensorProduct.induction_on x ?_ ?_ ?_
-    · simp
+    refine TensorProduct.inductionOn x ?_ ?_
     · intro z v
       simp only [TensorProduct.smul_tmul']
       unfold concreteLatticeConjIntLinear
@@ -593,7 +560,6 @@ theorem latticeConj_unique (hℂ : IsBaseChange ℂ ιℂ)
     c = latticeConj hℂ := by
   ext x
   induction x using hℂ.inductionOn with
-  | zero => simp
   | tmul v => simp [hc]
   | smul z x hx => simp [hx]
   | add x y hx hy => simp [hx, hy]
@@ -732,7 +698,6 @@ theorem integralMapToComplex_commutes_conj (h₁ : IsBaseChange ℂ ι₁)
     integralMapToComplex h₁ ι₂ f (latticeConj h₁ x) =
       latticeConj h₂ (integralMapToComplex h₁ ι₂ f x) := by
   induction x using h₁.inductionOn with
-  | zero => simp
   | tmul x => simp
   | smul z x hx => simp [hx]
   | add x y hx hy => simp [hx, hy]
@@ -770,7 +735,6 @@ theorem latticeConj_prodMap (x : Vℂ × V'ℂ) :
     latticeConj (IsBaseChange.prodMap ιℂ ι'ℂ hℂ h'ℂ) x =
       (latticeConj hℂ x.1, latticeConj h'ℂ x.2) := by
   induction x using (IsBaseChange.prodMap ιℂ ι'ℂ hℂ h'ℂ).inductionOn with
-  | zero => simp only [map_zero, Prod.fst_zero, Prod.snd_zero]; rfl
   | tmul x => rw [latticeConj_ι]; simp
   | smul z x hx => simp [hx]
   | add x y hx hy => simp [hx, hy]
