@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.Ring.Invertible
-public import Mathlib.Algebra.Ring.Prod
 public import Mathlib.Tactic.Ring
 
 /-!

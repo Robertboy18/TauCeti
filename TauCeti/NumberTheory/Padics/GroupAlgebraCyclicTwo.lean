@@ -16,11 +16,13 @@ For `C₂ = Multiplicative (ZMod 2)` with generator `σ`, the group ring `ℚ₂
 `ℤ₂` those idempotents are not available, because `2` is not a unit of `ℤ₂`, and there is no
 integral splitting: the only idempotents of `ℤ₂[C₂]` are `0` and `1`.
 
-These are the two facts about the coefficient ring `ℤ₂[C₂]` of the completed group algebra
-`ℤ₂[[C₂ × ℤ₂]] ≅ ℤ₂[C₂][[T]]` that Labute's treatment of the even-rank Demushkin groups with
-`q = 2` and orientation image `{±1} × U^(f)` relies on: basis corrections are read in the two
-`ℚ₂`-eigenspaces and then cleared of denominators, and no direct-product decomposition over
-`ℤ₂` is available.
+The ring `ℤ₂[C₂]` is the coefficient ring of the completed group algebra
+`ℤ₂[[C₂ × ℤ₂]] ≅ ℤ₂[C₂][[T]]` of the orientation image `{±1} × U^(f)`, the setting of Labute's
+treatment of the even-rank Demushkin groups with `q = 2`. Labute works integrally, over `ℤ₂`;
+the two facts recorded here describe that coefficient ring: it decomposes as a direct product
+only after `2` is inverted, so an argument that reads `ℤ₂[C₂]`-coefficients in the two
+`ℚ₂`-eigenspaces must clear the resulting denominators afterwards, and no direct-product
+decomposition is available over `ℤ₂` itself.
 
 ## Main declarations
 

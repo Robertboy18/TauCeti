@@ -40,8 +40,12 @@ homomorphism `R[C₂] → R × R`, `a + bσ ↦ (a + b, a - b)`.
 
 ## References
 
-The splitting of `ℚ₂[C₂]` and the absence of an integral splitting of `ℤ₂[C₂]` are used by
-J. Labute, *Classification of Demushkin groups*, Canad. J. Math. 19 (1967), §4, p. 122.
+The ring `ℤ₂[C₂]` is the coefficient ring of the completed group algebra
+`ℤ₂[[C₂ × ℤ₂]] ≅ ℤ₂[C₂][[T]]` in which J. Labute, *Classification of Demushkin groups*,
+Canad. J. Math. 19 (1967), §4, p. 122, treats the even-rank Demushkin groups with `q = 2`.
+Labute works integrally over `ℤ₂`; the splitting after inverting `2` and the absence of an
+integral splitting recorded here are related facts about that coefficient ring, specialised to
+`ℚ₂` and `ℤ₂` in `TauCeti.NumberTheory.Padics.GroupAlgebraCyclicTwo`.
 -/
 
 public section
