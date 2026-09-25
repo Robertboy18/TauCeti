@@ -27,8 +27,9 @@ datum and every height at least its width. Every chart of this atlas is holomorp
 back to the coarse quotient (`Subgroup.CompactifiedQuotient.mdifferentiableAt_comp_ofQuotient`):
 for a cusp chart this is holomorphic descent at a free orbit, since high horodiscs lie in the free
 locus. Consequently the transition map out of a transported chart is holomorphic by the chain rule,
-and the transition map out of a cusp chart is, on the punctured q-disc, Mathlib's periodic cusp
-function of a holomorphic `w`-periodic function, hence holomorphic there
+and the transition map out of a cusp chart agrees, near every nonzero point of its source, with
+Mathlib's periodic cusp function of a `w`-periodic function that is holomorphic at the logarithmic
+lift of that point, hence is holomorphic there
 (`Function.Periodic.differentiableAt_cuspFunction`); at `q = 0` the singularity is removable
 because a transition map is continuous.
 
@@ -192,10 +193,12 @@ private theorem differentiableAt_cuspChart_symm_trans_of_ne_zero (D : Γ.CuspDat
     (hc' : c' ∈ atlas ℂ Γ.CompactifiedQuotient) {u : ℂ}
     (hu : u ∈ ((cuspChart D hA).symm ≫ₕ c').source) (hu0 : u ≠ 0) :
     DifferentiableAt ℂ ((cuspChart D hA).symm ≫ₕ c') u := by
-  rw [OpenPartialHomeomorph.trans_source, OpenPartialHomeomorph.symm_source, cuspChart_target,
-    mem_inter_iff, mem_preimage, mem_ball_zero_iff] at hu
+  rw [OpenPartialHomeomorph.trans_source, OpenPartialHomeomorph.symm_source, mem_inter_iff,
+    mem_preimage] at hu
   obtain ⟨hu1, hu2⟩ := hu
-  have hu1' : ‖u‖ < 1 := hu1.trans (cuspRadius_lt_one D (D.width_pos.trans_le hA))
+  have hu1' : ‖u‖ < 1 := by
+    rw [cuspChart_target, mem_ball_zero_iff] at hu1
+    exact hu1.trans (cuspRadius_lt_one D (D.width_pos.trans_le hA))
   -- The second chart, pulled back to the upper half-plane: invariant under the cusp stabilizer.
   set f : ℍ → ℂ := fun τ ↦ c' (ofQuotient (Quotient.mk _ τ)) with hf
   have hfinv : ∀ (g : stabilizer Γ D.cusp) (τ : ℍ), f (g • τ) = f τ := fun g τ ↦
@@ -204,8 +207,8 @@ private theorem differentiableAt_cuspChart_symm_trans_of_ne_zero (D : Γ.CuspDat
   -- On the punctured disc, the transition map is Mathlib's cusp function of the scaled pullback.
   have heq : ⇑((cuspChart D hA).symm ≫ₕ c') =ᶠ[𝓝 u]
       Periodic.cuspFunction D.width ((fun z : ℍ ↦ f (D.scaling⁻¹ • z)) ∘ ofComplex) := by
-    filter_upwards [isOpen_ne.mem_nhds hu0] with v hv
-    rw [OpenPartialHomeomorph.trans_apply, cuspChart_symm_apply, cuspChartInv_of_ne_zero D hv,
+    filter_upwards [isOpen_ne.mem_nhds hu0, (cuspChart D hA).open_target.mem_nhds hu1] with v hv hv'
+    rw [OpenPartialHomeomorph.trans_apply, cuspChart_symm_of_ne_zero D hA hv' hv,
       Periodic.cuspFunction_eq_of_nonzero _ _ hv]
     rfl
   -- The logarithmic lift of `u`, at which the scaled pullback is holomorphic.
@@ -213,7 +216,7 @@ private theorem differentiableAt_cuspChart_symm_trans_of_ne_zero (D : Γ.CuspDat
     Periodic.im_invQParam_pos_of_norm_lt_one D.width_pos hu1' hu0⟩
   have hτ₀ : ofComplex (Periodic.invQParam D.width u) = τ₀ := ofComplex_apply τ₀
   have hτ₀mem : ofQuotient (Quotient.mk _ (D.scaling⁻¹ • τ₀)) ∈ c'.source := by
-    rwa [cuspChart_symm_apply, cuspChartInv_of_ne_zero D hu0, hτ₀] at hu2
+    rwa [cuspChart_symm_of_ne_zero D hA hu1 hu0, hτ₀] at hu2
   have hdiff : DifferentiableAt ℂ ((fun z : ℍ ↦ f (D.scaling⁻¹ • z)) ∘ ofComplex)
       (Periodic.invQParam D.width u) := by
     have hm : MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) (fun z : ℍ ↦ f (D.scaling⁻¹ • z)) τ₀ :=
