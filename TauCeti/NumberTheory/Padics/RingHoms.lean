@@ -109,8 +109,9 @@ theorem quotientSpanPowEquivZMod_mk (n : ℕ) (x : ℤ_[p]) :
     quotientSpanPowEquivZMod n (Ideal.Quotient.mk _ x) = toZModPow n x := by
   simp [quotientSpanPowEquivZMod]
 
-/-- Every unit of `ZMod (p ^ n)` lifts to a unit of `ℤ_[p]`: truncation is a surjective local
-homomorphism out of the local ring `ℤ_[p]`. -/
+/-- Every unit of `ZMod (p ^ n)` lifts to a unit of `ℤ_[p]`. For `n > 0` this holds because
+truncation is a surjective local homomorphism out of the local ring `ℤ_[p]`; for `n = 0` the
+target `ZMod 1` is the trivial ring, so there is nothing to lift. -/
 theorem surjective_units_map_toZModPow (n : ℕ) :
     Function.Surjective (Units.map (toZModPow n : ℤ_[p] →+* ZMod (p ^ n)).toMonoidHom) := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
