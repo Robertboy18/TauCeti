@@ -35,8 +35,11 @@ the convention of `MulAut.conjNormal`.
 This is the structure of Labute's relation module in the classification of Demushkin groups: for
 a continuous character `χ` of a free pro-`p` group `F`, its kernel `X` is normal, and Labute's
 `E = X ⧸ (X, X)` is `TopologicalAbelianization X` with `Γ = F ⧸ X` acting by conjugation
-(Labute, §4, p. 121). Labute writes the action as `[y] · [x] = y⁻¹ x y`; since `Γ` is abelian in
-that setting, the two conventions differ by the inversion `[y] ↦ [y]⁻¹` of the acting group.
+(Labute, §4, p. 121). Labute writes the action as `[y] · [x] = y⁻¹ x y`, which is the *inverse*
+of the convention above: his `[y] · [x]` is `[y]⁻¹ • [x]` here (`mk_inv_smul_mk`). His formula
+defines a left action only when `Γ` is abelian, as it is in his setting (`Γ ≅ Im χ ≤ ℤ_pˣ`); for a
+general normal subgroup it is a right action, which is why the instance uses Mathlib's convention
+and Labute's action is recovered by precomposing with the inversion of the acting group.
 
 ## Main definitions
 
@@ -52,7 +55,8 @@ that setting, the two conventions differ by the inversion `[y] ↦ [y]⁻¹` of 
   `TopologicalAbelianization.map_id`, `TopologicalAbelianization.map_comp`: the characteristic
   properties of `map`.
 * `TopologicalAbelianization.mk_smul_mk`: the class of `g : G` acts on the class of `n : N` by
-  the class of `g * n * g⁻¹`.
+  the class of `g * n * g⁻¹`; `TopologicalAbelianization.mk_inv_smul_mk` is Labute's form of
+  the same action, the inverse of the class of `g` acting by the class of `g⁻¹ * n * g`.
 * `TopologicalAbelianization.toConjAct_smul_eq_self_of_mem`: elements of `N` act trivially on
   `N^{ab}`.
 * The instances `ContinuousConstSMul (ConjAct G) (TopologicalAbelianization N)` and
@@ -229,6 +233,16 @@ theorem mk_smul_mk (g : G) (n : N) :
     (g : G ⧸ N) • (n : TopologicalAbelianization N) =
       (MulAut.conjNormal g n : TopologicalAbelianization N) := by
   rw [mk_smul, toConjAct_smul_mk]
+
+/-- **Labute's form of the action** (§4 Definition, p. 121): the inverse of the class of `y`
+sends the class of `x` to the class of `y⁻¹ * x * y`. Labute's `[y] · [x] = y⁻¹ x y` is thus
+`(y : G ⧸ N)⁻¹ • [x]` in the convention of `mk_smul_mk`; the two agree up to the inversion of
+the acting group, and Labute's formula is itself a left action only when `G ⧸ N` is abelian. -/
+theorem mk_inv_smul_mk (g : G) (n : N) :
+    (g : G ⧸ N)⁻¹ • (n : TopologicalAbelianization N) =
+      ((⟨g⁻¹ * n * g, ‹N.Normal›.conj_mem' n n.2 g⟩ : N) : TopologicalAbelianization N) := by
+  rw [← QuotientGroup.mk_inv, mk_smul_mk]
+  exact congrArg _ (Subtype.ext (by simp))
 
 /-- The conjugation action of `G ⧸ N` on `N^{ab}` is jointly continuous. -/
 instance : ContinuousSMul (G ⧸ N) (TopologicalAbelianization N) where
