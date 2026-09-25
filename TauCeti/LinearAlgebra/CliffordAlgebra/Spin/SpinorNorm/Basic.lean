@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.LinearAlgebra.CliffordAlgebra.Lipschitz.Norm
+public import TauCeti.LinearAlgebra.CliffordAlgebra.Pin.Norm
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Lipschitz.Kernel
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.SpecialOrthogonal
 public import TauCeti.LinearAlgebra.QuadraticForm.DetSquareClass
@@ -64,15 +64,6 @@ private theorem lipschitzToOrthogonal_surjective_of_invertible
     exact Subsingleton.elim _ _
   rw [hf]
   exact lipschitzToOrthogonal_surjective Q hQ
-
-omit [FiniteDimensional K V] in
-private theorem pinToOrthogonal_eq_lipschitzToOrthogonal
-    (Q : QuadraticForm K V) (p : pinGroup Q) :
-    pinToOrthogonal Q p = lipschitzToOrthogonal Q (pinToLipschitz Q p) := by
-  apply Subtype.ext
-  apply LinearEquiv.ext
-  intro v
-  simp only [coe_pinToOrthogonal_apply, coe_lipschitzToOrthogonal_apply]
 
 /-- The Clifford norm of an element acting trivially on the quadratic space is a square. -/
 theorem isSquare_lipschitzNorm_of_mem_ker (Q : QuadraticForm K V) (hQ : Q.Nondegenerate)

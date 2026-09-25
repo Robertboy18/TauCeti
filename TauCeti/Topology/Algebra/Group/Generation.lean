@@ -12,6 +12,7 @@ public import Mathlib.Topology.Algebra.Group.Quotient
 public import Mathlib.Topology.Algebra.OpenSubgroup
 import Mathlib.GroupTheory.Schreier
 public import TauCeti.Topology.Algebra.Group.OpenSubgroup.FiniteIndex
+import TauCeti.Topology.Algebra.ContinuousMonoidHom
 
 /-!
 # Topological generation of a topological group
@@ -199,19 +200,6 @@ theorem isTopologicallyFinitelyGenerated_congr (e : G ≃ₜ* H) :
     fun hH ↦ hH.of_surjective (f := (e.symm : H →* G)) e.symm.continuous e.symm.surjective⟩
 
 section OpenKernel
-
-/-- A homomorphism with open kernel out of a topological group is continuous for every topology
-on the target: it is constant on the open coset `x * ker f` of each point `x`. -/
-theorem _root_.MonoidHom.continuous_of_isOpen_ker {F : Type*} [MulOneClass F] [TopologicalSpace F]
-    (f : G →* F) (hf : IsOpen (f.ker : Set G)) : Continuous f := by
-  refine continuous_iff_continuousAt.mpr fun x ↦ tendsto_const_nhds.congr' ?_
-  have hcoset : ∀ᶠ y in nhds x, x⁻¹ * y ∈ f.ker := by
-    have hmul : Filter.Tendsto (fun y ↦ x⁻¹ * y) (nhds x) (nhds 1) := by
-      simpa using (continuous_const_mul x⁻¹).tendsto x
-    exact hmul.eventually (Filter.eventually_mem_set.mpr (hf.mem_nhds (one_mem f.ker)))
-  filter_upwards [hcoset] with y hy
-  calc f x = f x * f (x⁻¹ * y) := by rw [MonoidHom.mem_ker.mp hy, mul_one]
-    _ = f y := by rw [← map_mul, mul_inv_cancel_left]
 
 /-- A homomorphism from a topological group into a monoid carrying the discrete topology is
 continuous exactly when its kernel is open. -/
