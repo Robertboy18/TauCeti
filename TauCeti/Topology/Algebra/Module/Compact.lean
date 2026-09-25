@@ -38,9 +38,6 @@ carried as a single hypothesis on a module whose topology is given by hand; its 
 two facts above for it, shows that it passes to quotients by closed submodules, and records the
 witness that a compact totally disconnected topological ring is a compact module over itself.
 
-The compact-module predicate and its basic API follow the `IsCompactModule` blueprint in
-`TauCetiRoadmap/ProfiniteProPGroups/Suggested.lean`, section `CompactModules`.
-
 ## Main definitions
 
 * `TauCeti.IsCompactModule R M`: `M` is a compact totally disconnected topological `R`-module.

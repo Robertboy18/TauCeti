@@ -28,10 +28,6 @@ Sylow subgroups of those quotients — and a compatible family is then exactly a
 inverse limit, so these are the statements a construction of such a point applies directly. The
 mathematics is Mathlib's Kőnig lemma for cofiltered systems and is not reproved here.
 
-The tower lifting theorem is adapted from the `compactModule_limit_surjective` blueprint in
-`TauCetiRoadmap/ProfiniteProPGroups/Suggested.lean`, with compact Hausdorff source spaces and
-`T1` target spaces.
-
 ## Main statements
 
 * `TauCeti.exists_forall_map_eq_of_compact_t2`: an inverse system of nonempty compact Hausdorff
@@ -186,9 +182,8 @@ variable {A B : ℕ → Type*} [∀ k, TopologicalSpace (A k)] [∀ k, CompactSp
 be a tower of compact Hausdorff spaces with continuous maps, `β k : B (k + 1) → B k` a tower of
 `T1` spaces, and `g k : A k → B k` continuous surjections commuting with the towers. Then every
 compatible family `b` in the tower `B` is the image of a compatible family `a` in the tower `A`.
-In other words the induced map on sequential inverse limits is surjective. Compactness of the
-nonempty closed fibres `g k ⁻¹' {b k}` yields a compatible lift; the transition maps `α k` need
-not be surjective. -/
+In other words the induced map on sequential inverse limits is surjective. The transition maps
+`α k` need not be surjective. -/
 theorem exists_forall_map_succ_eq_and_forall_eq_of_surjective (α : ∀ k, A (k + 1) → A k)
     (β : ∀ k, B (k + 1) → B k) (g : ∀ k, A k → B k) (hα : ∀ k, Continuous (α k))
     (hg : ∀ k, Continuous (g k)) (hsq : ∀ k (a : A (k + 1)), g k (α k a) = β k (g (k + 1) a))
