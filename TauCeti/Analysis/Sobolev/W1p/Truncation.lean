@@ -47,8 +47,7 @@ private theorem continuousAt_posPartJet {z : Sobolev1Jet E}
   rcases lt_trichotomy 0 z.fst with hpos | heq | hneg
   · have he : ∀ᶠ w in 𝓝 z, 0 < w.fst :=
       ((WithLp.continuous_fst 2 ℝ E).tendsto z).eventually (eventually_gt_nhds hpos)
-    change Tendsto posPartJet (𝓝 z) (𝓝 (posPartJet z))
-    rw [show posPartJet z = z by simp [posPartJet, hpos]]
+    rw [ContinuousAt, posPartJet, ite_eq_left hpos]
     exact tendsto_id.congr' (he.mono fun w hw ↦ by simp [posPartJet, hw])
   · have hz := hzero heq.symm
     subst z
@@ -56,8 +55,7 @@ private theorem continuousAt_posPartJet {z : Sobolev1Jet E}
       ite_false] using squeeze_zero_norm norm_posPartJet_le tendsto_norm_zero
   · have he : ∀ᶠ w in 𝓝 z, w.fst < 0 :=
       ((WithLp.continuous_fst 2 ℝ E).tendsto z).eventually (eventually_lt_nhds hneg)
-    change Tendsto posPartJet (𝓝 z) (𝓝 (posPartJet z))
-    rw [show posPartJet z = 0 by simp [posPartJet, not_lt_of_gt hneg]]
+    rw [ContinuousAt, posPartJet, ite_eq_right (not_lt_of_gt hneg)]
     exact tendsto_const_nhds.congr' (he.mono fun w hw ↦ by
       simp [posPartJet, not_lt_of_gt hw])
 
@@ -74,12 +72,12 @@ private theorem posPart_coe_ae (hp : p ≠ ∞) (u : W1p mu Omega p) :
   rw [W1p.value_posPart] at hv
   apply WithLp.ofLp_injective 2
   apply Prod.ext
-  · change WithLp.fst _ = WithLp.fst _
+  · simp only [WithLp.ofLp_fst]
     rw [← hv, hvp]
     by_cases hx : 0 < W1p.value u x
     · simp [posPartJet, ← huv, hx, max_eq_left hx.le]
     · simp [posPartJet, ← huv, hx, max_eq_right (le_of_not_gt hx)]
-  · change WithLp.snd _ = WithLp.snd _
+  · simp only [WithLp.ofLp_snd]
     rw [← hg, hgp]
     by_cases hx : 0 < W1p.value u x <;> simp [posPartJet, ← huv, ← hug, hx]
 
@@ -105,7 +103,7 @@ theorem W1p.continuous_posPart (hp : p ≠ ∞) :
       ((Lp.tendsto_Lp_iff_tendsto_eLpNorm' _ _).mp hf)
   have hnorm (n : ℕ) : ∀ᵐ x ∂mu.restrict Omega, ‖g n x‖ ≤ ‖f n x‖ := by
     filter_upwards [posPart_coe_ae hp (a (ns (ms n)))] with x hx
-    change ‖(W1p.posPart hp (a (ns (ms n))) : Sobolev1JetLp mu Omega p) x‖ ≤ _
+    dsimp only [g, f]
     rw [hx]
     exact norm_posPartJet_le _
   have hui : UnifIntegrable (fun n x ↦ g n x) p (mu.restrict Omega) :=
@@ -128,8 +126,8 @@ theorem W1p.continuous_posPart (hp : p ≠ ∞) :
     intro hx
     apply WithLp.ofLp_injective 2
     apply Prod.ext
-    · exact hx
-    · change ((u : Sobolev1JetLp mu Omega p) x).snd = 0
+    · simpa only [WithLp.ofLp_fst, WithLp.zero_fst] using hx
+    · simp only [WithLp.ofLp_snd, WithLp.zero_snd]
       rw [← hg]
       exact hz (hv.trans hx)
   apply (Lp.tendsto_Lp_iff_tendsto_eLpNorm' _ _).mpr
