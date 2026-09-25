@@ -571,56 +571,6 @@ theorem exists_isWeakSolutionDirichlet_top_ae_eq_on_of_isCompact
     rw [hx, indicator_of_mem (hSΩ hxS)]
     simp [localizedForcing, (hψ_S x hxS).1, (hψ_S x hxS).2, hdiv_S x hxS]
 
-private theorem exists_forcing_energyFormH1_zero_eq
-    {b : EuclideanSpace ℝ ι → EuclideanSpace ℝ ι} {c : EuclideanSpace ℝ ι → ℝ}
-    (hb : MemLp b ⊤ (mu.restrict Omega)) (hc : MemLp c ⊤ (mu.restrict Omega))
-    {f : Lp ℝ 2 (mu.restrict Omega)} {u : W1p mu Omega 2}
-    (hu : ∀ v : W1p0 mu Omega 2,
-      energyFormH1 (fun _ => A) b c u (v : W1p mu Omega 2) =
-        ∫ x in Omega, f x * W1p.value (v : W1p mu Omega 2) x ∂mu) :
-    ∃ g : Lp ℝ 2 (mu.restrict Omega), ∀ v : W1p0 mu Omega 2,
-      energyFormH1 (fun _ => A) 0 0 u (v : W1p mu Omega 2) =
-        ∫ x in Omega, g x * W1p.value (v : W1p mu Omega 2) x ∂mu := by
-  have hB : MemLp (fun x => ⟪b x, W1p.gradient u x⟫_ℝ) 2 (mu.restrict Omega) :=
-    MemLp.of_bilin (inner ℝ) 1 hb (Lp.memLp _) continuous_inner
-      (.of_forall fun x => by simpa using nnnorm_inner_le_nnnorm (b x) (W1p.gradient u x))
-  have hC : MemLp (fun x => c x * W1p.value u x) 2 (mu.restrict Omega) :=
-    hc.fun_mul (Lp.memLp _)
-  let G := fun x => f x - ⟪b x, W1p.gradient u x⟫_ℝ - c x * W1p.value u x
-  have hG : MemLp G 2 (mu.restrict Omega) := ((Lp.memLp f).sub hB).sub hC
-  refine ⟨hG.toLp G, fun v => ?_⟩
-  have hv := Lp.memLp (W1p.value (v : W1p mu Omega 2))
-  have hF : Integrable (fun x => f x * W1p.value (v : W1p mu Omega 2) x)
-      (mu.restrict Omega) := (Lp.memLp f).integrable_mul hv
-  have hBv : Integrable (fun x => ⟪b x, W1p.gradient u x⟫_ℝ *
-      W1p.value (v : W1p mu Omega 2) x) (mu.restrict Omega) := hB.integrable_mul hv
-  have hCv : Integrable (fun x => (c x * W1p.value u x) *
-      W1p.value (v : W1p mu Omega 2) x) (mu.restrict Omega) := hC.integrable_mul hv
-  have hprincipal : Integrable (fun x =>
-      matrixBilinearForm A (W1p.gradient (v : W1p mu Omega 2) x) (W1p.gradient u x))
-      (mu.restrict Omega) := by
-    simpa using integrable_energyIntegrand_jetField
-      (a := fun _ => A) (b := 0) (c := 0) (memLp_top_const (energyIntegrand A 0 0))
-      u (v : W1p mu Omega 2)
-  have h := hu v
-  rw [energyFormH1_def] at h
-  simp only [energyIntegrand_apply, jetField_apply, driftForm_apply, massForm_apply] at h
-  rw [integral_add (hprincipal.fun_add hBv) hCv, integral_add hprincipal hBv] at h
-  rw [energyFormH1_const_eq_setIntegral]
-  calc
-    _ = ∫ x in Omega, f x * W1p.value (v : W1p mu Omega 2) x ∂mu -
-        ∫ x in Omega, ⟪b x, W1p.gradient u x⟫_ℝ *
-          W1p.value (v : W1p mu Omega 2) x ∂mu -
-        ∫ x in Omega, (c x * W1p.value u x) *
-          W1p.value (v : W1p mu Omega 2) x ∂mu := by linarith
-    _ = ∫ x in Omega, G x * W1p.value (v : W1p mu Omega 2) x ∂mu := by
-      simp only [G, sub_mul]
-      rw [integral_sub (hF.sub' hBv) hCv, integral_sub hF hBv]
-    _ = ∫ x in Omega, (hG.toLp G) x * W1p.value (v : W1p mu Omega 2) x ∂mu := by
-      apply integral_congr_ae
-      filter_upwards [hG.coeFn_toLp] with x hx
-      rw [hx]
-
 /-- **Interior `H²` regularity for a constant principal coefficient.** Let `A` be a constant,
 uniformly elliptic matrix, let `b, c ∈ L∞(Ω)`, and let `u ∈ H¹(Ω)` be a weak solution of
 
@@ -631,10 +581,7 @@ in the sense that `∫_Ω (⟨∇v, A ∇u⟩ + ⟨b, ∇u⟩ v + c u v) = ∫_�
 whose closure is compact and contained in `Ω`, the restriction of `u` is the first-order part
 of an element of `W^{2,2}(V)`.
 
-No regularity of `∂Ω`, sign of `c`, or smallness of the lower-order terms is assumed. The proof
-absorbs `⟨b, ∇u⟩ + c u` into the `L²` forcing, localizes `u` by a cutoff
-(`TauCeti.PDE.exists_isWeakSolutionDirichlet_top_ae_eq_on_of_isCompact`) and applies the
-whole-space theorem `TauCeti.PDE.UniformlyEllipticOn.exists_norm_le_hasWeakLineDerivOn_gradient`. -/
+No regularity of `∂Ω`, sign of `c`, or smallness of the lower-order terms is assumed. -/
 theorem UniformlyEllipticOn.exists_lowerOrder_eq_restrictL {lam : ℝ} (hlam : 0 < lam)
     (hA : ∀ ξ : EuclideanSpace ℝ ι, lam * ‖ξ‖ ^ 2 ≤ dotProduct ξ (Matrix.mulVec A ξ))
     {b : EuclideanSpace ℝ ι → EuclideanSpace ℝ ι} {c : EuclideanSpace ℝ ι → ℝ}
@@ -646,7 +593,7 @@ theorem UniformlyEllipticOn.exists_lowerOrder_eq_restrictL {lam : ℝ} (hlam : 0
     (hVΩ : closure (V : Set (EuclideanSpace ℝ ι)) ⊆ Omega) :
     ∃ U : Wkp mu V 2 2, Wkp.lowerOrder 1 U =
       W1p.restrictL (SetLike.coe_subset_coe.mp (subset_closure.trans hVΩ)) u := by
-  obtain ⟨g, hg⟩ := exists_forcing_energyFormH1_zero_eq hb hc hu
+  obtain ⟨g, hg⟩ := exists_forcing_energyFormH1_const_zero_zero_eq hb hc hu
   obtain ⟨w, f', hw, -, hgrad, -⟩ :=
     exists_isWeakSolutionDirichlet_top_ae_eq_on_of_isCompact hg hV hVΩ
   have htop : mu.restrict ((⊤ : Opens (EuclideanSpace ℝ ι)) : Set (EuclideanSpace ℝ ι)) = mu := by
