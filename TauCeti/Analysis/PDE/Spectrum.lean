@@ -59,8 +59,8 @@ closure of `C_c^∞(Ω)`.  The hypotheses are carried separately and named at ea
 
 Reading the Fredholm alternative for a scalar mass shift through this vocabulary gives the
 familiar statement: if `κ` is *not* a Dirichlet eigenvalue, then `L u - κ u = f` has exactly one
-weak solution for every `f ∈ L²(Ω)`
-(`TauCeti.PDE.existsUnique_isWeakSolutionDirichletMassShift_of_not_isDirichletEigenvalue`).
+weak solution for every `f ∈ L²(Ω)`, with potential written explicitly as `c - κ` in
+`TauCeti.PDE.existsUnique_isWeakSolutionDirichlet_sub_const_of_not_isDirichletEigenvalue`.
 
 ## The variational characterization
 
@@ -567,16 +567,19 @@ theorem exists_hilbertBasis_forall_isDirichletEigenvalue
 /-- **The Fredholm alternative in eigenvalue language.**  On a bounded domain, if `κ` is not a
 Dirichlet eigenvalue then `L u - κ u = f` in `Ω`, `u = 0` on `∂Ω`, has exactly one weak solution
 for every `f ∈ L²(Ω)`. -/
-theorem existsUnique_isWeakSolutionDirichletMassShift_of_not_isDirichletEigenvalue
+theorem existsUnique_isWeakSolutionDirichlet_sub_const_of_not_isDirichletEigenvalue
     (hcoeff : MemLp (fun x ↦ energyIntegrand (a x) (b x) (c x)) ⊤ (mu.restrict Omega))
     (hcoercive : IsCoercive (energyFormH1L0 hcoeff))
     (hOmega : IsBounded (Omega : Set (EuclideanSpace ℝ ι))) {kappa : ℝ}
     (hkappa : ¬ IsDirichletEigenvalue mu Omega a b c kappa) (f : Lp ℝ 2 (mu.restrict Omega)) :
-    ∃! u : W1p0 mu Omega 2, IsWeakSolutionDirichletMassShift a b c kappa f u := by
-  rcases fredholmAlternative_isWeakSolutionDirichletMassShift hcoeff hcoercive hOmega kappa with
+    ∃! u : W1p0 mu Omega 2, IsWeakSolutionDirichlet a b (fun x ↦ c x - kappa) f u := by
+  rcases fredholmAlternative_isWeakSolutionDirichlet_sub_const hcoeff hcoercive hOmega kappa with
     hker | hsolve
-  · exact absurd
-      ((isDirichletEigenvalue_iff_exists_isWeakSolutionDirichletMassShift kappa).mpr hker) hkappa
+  · obtain ⟨u, hune, hu⟩ := hker
+    exact absurd
+      ((isDirichletEigenvalue_iff_exists_isWeakSolutionDirichletMassShift kappa).mpr
+        ⟨u, hune, (isWeakSolutionDirichletMassShift_iff_isWeakSolutionDirichlet
+          hcoeff kappa 0 u).mpr hu⟩) hkappa
   · exact hsolve f
 
 end Domain
