@@ -18,10 +18,16 @@ isomorphic to the product of the multiplicative type tags, and when `T` has a un
 `MulEquiv.prodMultiplicative` and `AddEquiv.prodUnique` between the multiplicative type tags,
 upgraded to `ContinuousMulEquiv`s: the first transports properties of topological groups, such as
 being pro-`p`, between the two shapes of a product, and the second collapses a product
-decomposition of a topological group whose second factor turns out to be trivial.
+decomposition of a topological group whose second factor turns out to be trivial. Also recorded:
+the monoid homomorphism underlying a topological isomorphism is continuous
+(`ContinuousMulEquiv.continuous_toMonoidHom`), in the form needed to feed a topological
+isomorphism to a construction that takes a monoid homomorphism together with a proof of its
+continuity.
 
 ## Main definitions
 
+* `ContinuousMulEquiv.continuous_toMonoidHom`: the underlying monoid homomorphism of a
+  topological isomorphism is continuous.
 * `TauCeti.ContinuousMulEquiv.prodMultiplicative`: the topological isomorphism
   `Multiplicative (M × N) ≃ₜ* Multiplicative M × Multiplicative N`, with its evaluation lemmas
   `prodMultiplicative_apply` and `prodMultiplicative_symm_apply`.
@@ -31,6 +37,12 @@ decomposition of a topological group whose second factor turns out to be trivial
 -/
 
 public section
+
+/-- The monoid homomorphism underlying a topological isomorphism is continuous. -/
+theorem ContinuousMulEquiv.continuous_toMonoidHom {M N : Type*} [MulOneClass M] [MulOneClass N]
+    [TopologicalSpace M] [TopologicalSpace N] (e : M ≃ₜ* N) : Continuous (e : M →* N) := by
+  rw [MonoidHom.coe_coe]
+  exact map_continuous e
 
 namespace TauCeti
 
