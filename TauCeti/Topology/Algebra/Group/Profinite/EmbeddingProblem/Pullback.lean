@@ -24,6 +24,8 @@ along `π` gives the coefficient action of `G` induced by the pullback extension
 
 public section
 
+open scoped IsMulCommutative
+
 namespace TauCeti.FiniteEmbeddingProblem
 
 universe u v w
@@ -165,12 +167,11 @@ theorem compactSpace_pullback [CompactSpace G] : CompactSpace P.pullback :=
 
 end Topology
 
-/-- The commutative group structure on an abelian kernel, preserving its subgroup operations. -/
-@[expose, instance_reducible]
-def kernelCommGroup
-    (hcomm : ∀ x ∈ P.α.ker, ∀ y ∈ P.α.ker, x * y = y * x) : CommGroup P.α.ker where
-  toGroup := inferInstanceAs (Group P.α.ker)
-  mul_comm := fun x y ↦ Subtype.ext (hcomm x x.property y y.property)
+/-- An abelian kernel is a commutative subgroup, so the scoped `IsMulCommutative` instances
+equip it with its bundled commutative group structure. -/
+theorem isMulCommutative_ker
+    (hcomm : ∀ x ∈ P.α.ker, ∀ y ∈ P.α.ker, x * y = y * x) : IsMulCommutative P.α.ker :=
+  ⟨⟨fun x y ↦ Subtype.ext (hcomm x x.property y y.property)⟩⟩
 
 section Abelian
 
@@ -178,14 +179,14 @@ variable (hcomm : ∀ x ∈ P.α.ker, ∀ y ∈ P.α.ker, x * y = y * x)
 
 /-- Conjugation on the abelian kernel descends to the finite quotient `Q`. -/
 noncomputable def kernelConj : P.Q →* MulAut P.α.ker := by
-  letI := P.kernelCommGroup hcomm
+  haveI := P.isMulCommutative_ker hcomm
   exact GroupExtension.conjActOfSection
     (GroupExtension.ofSurjective P.α_surjective).surjInvRightHom
 
 /-- The action of the image of `e` is conjugation by `e`. -/
 theorem coe_kernelConj (e : P.E) (n : P.α.ker) :
     (P.kernelConj hcomm (P.α e) n : P.E) = e * n * e⁻¹ := by
-  let := P.kernelCommGroup hcomm
+  have := P.isMulCommutative_ker hcomm
   let S := GroupExtension.ofSurjective P.α_surjective
   have he : S.rightHom (S.surjInvRightHom (P.α e)) = S.rightHom e := by
     simpa only [S, GroupExtension.ofSurjective_rightHom] using
@@ -211,7 +212,7 @@ theorem kernelAction_smul (g : G) (n : P.α.ker) :
 theorem pullbackGroupExtension_inducesAction :
     letI := P.kernelAction hcomm
     GroupExtension.InducesAction P.pullbackGroupExtension := by
-  let := P.kernelCommGroup hcomm
+  have := P.isMulCommutative_ker hcomm
   let := P.kernelAction hcomm
   let σ := P.pullbackGroupExtension.surjInvRightHom
   apply (GroupExtension.inducesAction_iff_conjActOfSection_eq σ).mpr
@@ -243,10 +244,10 @@ variable [CompactSpace G] [TotallyDisconnectedSpace G]
 /-- The profinite pullback extension of an embedding problem with abelian kernel, equipped with
 the conjugation action restricted along `π`. -/
 noncomputable abbrev pullbackExtension :
-    letI := P.kernelCommGroup hcomm
+    haveI := P.isMulCommutative_ker hcomm
     letI := P.kernelAction hcomm
     ProfiniteGroupExtension G P.α.ker := by
-  letI := P.kernelCommGroup hcomm
+  haveI := P.isMulCommutative_ker hcomm
   letI := P.kernelAction hcomm
   letI := P.compactSpace_pullback
   exact

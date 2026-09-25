@@ -24,6 +24,8 @@ input for solvability of embedding problems with finite `p`-group kernel.
 
 public section
 
+open scoped IsMulCommutative
+
 namespace TauCeti
 
 universe u v
@@ -41,10 +43,10 @@ variable (P : FiniteEmbeddingProblem.{u, v, u} G)
 /-- The class of the pullback extension in canonical continuous `H²(G, ker α)`, with the
 conjugation action restricted along `π`. -/
 noncomputable def obstruction :
-    letI := P.kernelCommGroup hcomm
+    haveI := P.isMulCommutative_ker hcomm
     letI := P.kernelAction hcomm
     continuousCohomology 2 (ofDiscreteModule ℤ G (Additive P.α.ker)) := by
-  letI := P.kernelCommGroup hcomm
+  haveI := P.isMulCommutative_ker hcomm
   letI := P.kernelAction hcomm
   letI := P.continuousSMul_kernelAction hcomm
   exact ContCohomology.explicitH2AddEquivContinuousCohomology G (Additive P.α.ker)
@@ -54,7 +56,7 @@ noncomputable def obstruction :
 continuous cohomology obstruction vanishes. -/
 theorem exists_isSolution_iff_obstruction_eq_zero :
     (∃ β : G →* P.E, P.IsSolution β) ↔ P.obstruction hcomm = 0 := by
-  let := P.kernelCommGroup hcomm
+  have := P.isMulCommutative_ker hcomm
   let := P.kernelAction hcomm
   let := P.continuousSMul_kernelAction hcomm
   let X := P.pullbackExtension hcomm
@@ -75,7 +77,7 @@ theorem exists_isSolution_iff_obstruction_eq_zero :
 /-- Vanishing of canonical continuous `H²` for the actual kernel module solves the embedding
 problem. -/
 theorem exists_isSolution_of_subsingleton_continuousCohomology_two
-    (h : letI := P.kernelCommGroup hcomm
+    (h : haveI := P.isMulCommutative_ker hcomm
       letI := P.kernelAction hcomm
       Subsingleton (continuousCohomology 2 (ofDiscreteModule ℤ G (Additive P.α.ker)))) :
     ∃ β : G →* P.E, P.IsSolution β := by
@@ -99,7 +101,7 @@ theorem hasElementaryAbelianSolutions_of_subsingleton_continuousCohomology_two {
   let : DiscreteTopology P.E := ⟨rfl⟩
   let : TopologicalSpace P.Q := ⊥
   let : DiscreteTopology P.Q := ⟨rfl⟩
-  let := P.kernelCommGroup hcomm
+  have := P.isMulCommutative_ker hcomm
   let := P.kernelAction hcomm
   let := P.continuousSMul_kernelAction hcomm
   apply P.exists_isSolution_of_subsingleton_continuousCohomology_two hcomm

@@ -19,8 +19,8 @@ not be surjective. Accordingly `levelProblem` restricts the quotient map to the
 preimage of that map's range.
 
 `LevelSolution` records the equivalent lift into `A/U`. Solvability follows
-from `HasPGroupSolutions`; finiteness additionally requires topological finite
-generation of `G`.
+from `HasPGroupSolutions`, and topological finite generation of `G` makes each
+level's solution set finite.
 -/
 
 public section
@@ -114,6 +114,26 @@ def levelSolutionEquiv (α : A →ₜ* B) (hα : Function.Surjective α) (f : G 
     apply Subtype.ext
     ext g
     rfl
+
+/-- The lift into `A/U` associated with a solution has the same underlying map.
+
+This is a `rw` lemma rather than a `simp` lemma: the `simpNF` linter rewrites the coercions
+inside the domain type of `levelSolutionEquiv`, so its left-hand side is not in simp-normal
+form. -/
+theorem levelSolutionEquiv_apply_coe (α : A →ₜ* B) (hα : Function.Surjective α) (f : G →ₜ* B)
+    (U : OpenNormalSubgroup A)
+    (β : {β : G →* (levelProblem α hα f U).E // (levelProblem α hα f U).IsSolution β}) (g : G) :
+    (levelSolutionEquiv α hα f U β).1 g = (β.1 g : A ⧸ U.toSubgroup) :=
+  (rfl)
+
+/-- The solution associated with a lift into `A/U` has the same underlying map.
+
+This is a `rw` lemma rather than a `simp` lemma for the same reason as
+`levelSolutionEquiv_apply_coe`. -/
+theorem levelSolutionEquiv_symm_apply_coe (α : A →ₜ* B) (hα : Function.Surjective α)
+    (f : G →ₜ* B) (U : OpenNormalSubgroup A) (β : LevelSolution α hα f U) (g : G) :
+    (((levelSolutionEquiv α hα f U).symm β).1 g : A ⧸ U.toSubgroup) = β.1 g :=
+  (rfl)
 
 /-- Every finite level has a solution when all finite `p`-kernel embedding problems do. -/
 theorem nonempty_isSolution_levelProblem {p : ℕ} (hG : HasPGroupSolutions p G)
