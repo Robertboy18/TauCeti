@@ -25,7 +25,7 @@ character with the prescription property, its canonical character (Labute, Thm 4
 property is defined, against the explicit model of continuous cohomology, and proved for every
 continuous character of a free pro-`p` group: on `F = freeProP p X` a continuous `1`-cocycle is
 determined by its values on the generators and takes any prescribed values there, so lifting a
-cocycle is lifting finitely many residues.
+cocycle is lifting its values on the generators.
 
 The coefficient module is placed in the universe of `G`, as a structure wrapping `ZMod (p ^ i)`,
 because the universal property of a free pro-`p` group lifts maps into groups of the universe of
