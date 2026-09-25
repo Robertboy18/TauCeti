@@ -116,14 +116,16 @@ include hExact in
 /-- An integer-valued invariant additive on equivariant short exact sequences of finite
 discrete `p`-primary modules is its value on a trivial module of order `p`, multiplied by
 the `p`-adic valuation of the cardinality. The trivial model `P` lies in the same universe
-as `M`; no exponent-`p` assumption on `M` is needed. -/
+as `M`, and is `p`-primary because it is additively equivalent to `ZMod p`; no exponent-`p`
+assumption on `M` is needed. -/
 theorem invariant_eq_padicValNat_mul_of_isProP
     (hG : IsProP p G)
     (hM : ∀ m : M, ∃ k : ℕ, p ^ k • m = 0)
-    (hP : ∀ x : P, ∃ k : ℕ, p ^ k • x = 0)
     (eP : P ≃+ ZMod p)
     (hPsmul : ∀ (g : G) (x : P), g • x = x) :
-    I M hM = (padicValNat p (Nat.card M) : ℤ) * I P hP := by
+    I M hM = (padicValNat p (Nat.card M) : ℤ) *
+      I P (forall_exists_nsmul_eq_zero_of_addEquiv_zmod eP) := by
+  have hP := forall_exists_nsmul_eq_zero_of_addEquiv_zmod eP
   obtain ⟨N, hN, h0, hmono, htop, _, hfactors⟩ :=
     exists_filtration_with_trivial_factors_of_isProP hG hM
   let _ (i : ℕ) := (N i).restrictDistribMulAction (hN i)
