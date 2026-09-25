@@ -69,14 +69,13 @@ theorem bruhatCell_mul_eq_or_eq_union_of_mem_simple_right (w : T.WeylGroup)
     {s : T.WeylGroup} (hs : s ∈ T.simple) :
     T.bruhatCell w * T.bruhatCell s = T.bruhatCell (w * s) ∨
       T.bruhatCell w * T.bruhatCell s = T.bruhatCell (w * s) ∪ T.bruhatCell w := by
-  have hs_inv : s⁻¹ = s := inv_eq_of_mul_eq_one_right (T.simple_sq_eq_one hs)
   rcases T.bruhatCell_mul_eq_or_eq_union_of_mem_simple hs w⁻¹ with h | h
   · left
     have h' := congrArg Inv.inv h
-    simpa only [mul_inv_rev, inv_bruhatCell, inv_inv, hs_inv] using h'
+    simpa only [mul_inv_rev, inv_bruhatCell, inv_inv, T.inv_simple hs] using h'
   · right
     have h' := congrArg Inv.inv h
-    simpa only [mul_inv_rev, inv_bruhatCell, inv_inv, hs_inv, Set.union_inv] using h'
+    simpa only [mul_inv_rev, inv_bruhatCell, inv_inv, T.inv_simple hs, Set.union_inv] using h'
 
 /-- The product of simple Bruhat cells is contained in the union of the cells indexed by
 subwords. Explicitly, every element of that product lies in the cell indexed by the product of
