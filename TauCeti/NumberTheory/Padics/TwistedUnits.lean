@@ -141,7 +141,6 @@ theorem index_topologicalClosure_zpowers_two {f : ℕ} (hf : 2 ≤ f) {u : ℤ_[
 
 /-- `(U^[f])² = U^(f+1)`: the squares of the twisted subgroup are the principal units of level
 `f + 1`, for `f ≥ 2` and `-u` of exact level `f`. -/
-@[simp]
 theorem map_powMonoidHom_two_topologicalClosure_zpowers_two {f : ℕ} (hf : 2 ≤ f) {u : ℤ_[2]ˣ}
     (hneg : -u ∈ unitsPrincipal 2 f) (hneg' : -u ∉ unitsPrincipal 2 (f + 1)) :
     (Subgroup.zpowers u).topologicalClosure.map (powMonoidHom 2) = unitsPrincipal 2 (f + 1) := by
