@@ -37,7 +37,7 @@ a continuous character `χ` of a free pro-`p` group `F`, its kernel `X` is norma
 `E = X ⧸ (X, X)` is `TopologicalAbelianization X` with `Γ = F ⧸ X` acting by conjugation
 (Labute, §4, p. 121). Labute writes the action as `[y] · [x] = y⁻¹ x y`, which is the *inverse*
 of the convention above: his `[y] · [x]` is `[y]⁻¹ • [x]` here (`mk_inv_smul_mk`). His formula
-defines a left action only when `Γ` is abelian, as it is in his setting (`Γ ≅ Im χ ≤ ℤ_pˣ`); for a
+defines a left action when `Γ` is abelian, as it is in his setting (`Γ ≅ Im χ ≤ ℤ_pˣ`); for a
 general normal subgroup it is a right action, which is why the instance uses Mathlib's convention
 and Labute's action is recovered by precomposing with the inversion of the acting group.
 
@@ -237,7 +237,7 @@ theorem mk_smul_mk (g : G) (n : N) :
 /-- **Labute's form of the action** (§4 Definition, p. 121): the inverse of the class of `y`
 sends the class of `x` to the class of `y⁻¹ * x * y`. Labute's `[y] · [x] = y⁻¹ x y` is thus
 `(y : G ⧸ N)⁻¹ • [x]` in the convention of `mk_smul_mk`; the two agree up to the inversion of
-the acting group, and Labute's formula is itself a left action only when `G ⧸ N` is abelian. -/
+the acting group, and Labute's formula is itself a left action when `G ⧸ N` is abelian. -/
 theorem mk_inv_smul_mk (g : G) (n : N) :
     (g : G ⧸ N)⁻¹ • (n : TopologicalAbelianization N) =
       ((⟨g⁻¹ * n * g, ‹N.Normal›.conj_mem' n n.2 g⟩ : N) : TopologicalAbelianization N) := by
@@ -264,8 +264,8 @@ variable {R : Subgroup G} [R.Normal] {N}
 /-- For normal subgroups `R ≤ N`, the map `R^{ab} →* N^{ab}` induced by the inclusion is
 equivariant for conjugation by `G`. -/
 theorem map_inclusion_smul (h : R ≤ N) (g : ConjAct G) (x : TopologicalAbelianization R) :
-    map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) (g • x) =
-      g • map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) x := by
+    map (Subgroup.inclusion h) (continuous_inclusion h) (g • x) =
+      g • map (Subgroup.inclusion h) (continuous_inclusion h) x := by
   induction x using QuotientGroup.induction_on with | H x => ?_
   rw [MulAction.Quotient.smul_mk, map_mk, map_mk, MulAction.Quotient.smul_mk]
   -- Both sides are the class of `g * x * g⁻¹` in `N`; the inclusion only changes the membership
@@ -275,8 +275,8 @@ theorem map_inclusion_smul (h : R ≤ N) (g : ConjAct G) (x : TopologicalAbelian
 /-- For normal subgroups `R ≤ N`, the map `R^{ab} →* N^{ab}` induced by the inclusion
 intertwines the actions of `G ⧸ R` and `G ⧸ N`. -/
 theorem map_inclusion_mk_smul (h : R ≤ N) (g : G) (x : TopologicalAbelianization R) :
-    map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) ((g : G ⧸ R) • x) =
-      (g : G ⧸ N) • map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) x := by
+    map (Subgroup.inclusion h) (continuous_inclusion h) ((g : G ⧸ R) • x) =
+      (g : G ⧸ N) • map (Subgroup.inclusion h) (continuous_inclusion h) x := by
   rw [mk_smul, mk_smul, map_inclusion_smul]
 
 end Conjugation
