@@ -36,6 +36,9 @@ original complex vector space. The almost-complex structure reuses
 * `TauCeti.Hodge.HodgeStructureOn.eigenspace_weilOperator_I` and
   `TauCeti.Hodge.HodgeStructureOn.eigenspace_weilOperator_neg_I`: for an effective structure, the
   two eigenspaces of the Weil operator are the two Hodge components.
+* `TauCeti.Hodge.HodgeStructureOn.IsEffective.F_eq_ite_eigenspace_weilOperator`: an effective
+  weight-one filtration is determined by its single nontrivial step, the `i`-eigenspace of the
+  Weil operator.
 * `TauCeti.Hodge.HodgeStructureOn.eigenspace_baseChange_realAlmostComplexStructure_I` and
   `TauCeti.Hodge.HodgeStructureOn.eigenspace_baseChange_realAlmostComplexStructure_neg_I`: the same
   comparison on the literal complexification of the real form.
@@ -121,6 +124,19 @@ theorem eigenspace_weilOperator_neg_I (hs : HodgeStructureOn W ω 1) (heff : hs.
     (fun x hx ↦ by simpa only [neg_smul] using hs.weilOperator_apply_of_mem_piece_zero hx)
     (fun x hx ↦ hs.weilOperator_apply_of_mem_piece_one hx) ?_
   exact (neg_ne_self.mpr Complex.I_ne_zero).symm
+
+/-- **An effective weight-one filtration is determined by the `i`-eigenspace of its Weil
+operator.** It is top in nonpositive degrees, `F¹ = H^{1,0}` is that eigenspace, and it is bottom
+above degree one. -/
+theorem IsEffective.F_eq_ite_eigenspace_weilOperator {hs : HodgeStructureOn W ω 1}
+    (heff : hs.IsEffective) (p : ℤ) :
+    hs.F p = if p ≤ 0 then ⊤ else if p = 1 then
+      Module.End.eigenspace hs.weilOperator Complex.I else ⊥ := by
+  split_ifs with hp hpone
+  · exact heff.F_eq_top_of_nonpos hp
+  · subst hpone
+    rw [hs.eigenspace_weilOperator_I heff, heff.piece_weight_eq_F]
+  · exact heff.F_eq_bot_of_weight_lt (by omega)
 
 /-- On the literal complexification `ℂ ⊗[ℝ] V_ℝ`, the `i`-eigenspace of the scalar extension of
 the real almost complex structure corresponds to `H^{1,0}` under `realPointsEquiv`. -/

@@ -21,6 +21,11 @@ This file carries the construction on a real vector space through the base-chang
 Weil operator are described directly in the chosen ambient complexification, so geometric models
 need no transport isomorphism in their public statements.
 
+In the other direction, the Weil operator of any odd-weight integral Hodge structure restricts to
+the real points of the lattice conjugation, which `TauCeti.Hodge.realificationRealPointsEquiv`
+identifies with the realification; read there it is an almost complex structure on `Vℝ` whose
+transported complexification is the Weil operator again.
+
 ## Main declarations
 
 * `TauCeti.AlmostComplexStructure.latticeComplexification`: the complex-linear extension of `J`
@@ -33,6 +38,10 @@ need no transport isomorphism in their public statements.
   degree-zero pieces.
 * `TauCeti.AlmostComplexStructure.latticeHodgeStructure_weilOperator`: the Weil operator recovers
   the transported complex structure.
+* `TauCeti.Hodge.HodgeStructureOn.realificationAlmostComplexStructure`: the Weil operator of an
+  odd-weight integral Hodge structure as an almost complex structure on the realification, with
+  `TauCeti.Hodge.HodgeStructureOn.latticeComplexification_realificationAlmostComplexStructure`
+  recovering the Weil operator as its transported complexification.
 
 The construction follows Voisin, *Hodge Theory and Complex Algebraic Geometry I*, §6, and
 Peters--Steenbrink, *Mixed Hodge Structures*, §2.
@@ -182,3 +191,56 @@ theorem latticeHodgeStructure_weilOperator
   simp
 
 end TauCeti.AlmostComplexStructure
+
+namespace TauCeti.Hodge.HodgeStructureOn
+
+open scoped TensorProduct
+
+universe u v
+
+variable {V : Type u} {Vℂ : Type v}
+variable [AddCommGroup V] [AddCommGroup Vℂ] [Module ℂ Vℂ]
+variable {ιℂ : V →ₗ[ℤ] Vℂ} {hℂ : IsBaseChange ℂ ιℂ} {n : ℤ}
+
+/-! ### The Weil operator as a complex structure on the realification -/
+
+/-- The Weil operator of an odd-weight integral Hodge structure, restricted to the real form and
+read on the realification: an almost complex structure on `ℝ ⊗[ℤ] V`. -/
+noncomputable def realificationAlmostComplexStructure (hs : HodgeStructure hℂ n) (hn : Odd n) :
+    AlmostComplexStructure (Realification V) :=
+  (hs.realAlmostComplexStructure hn).transport (realificationRealPointsEquiv hℂ).symm
+
+/-- The real form comparison intertwines the complex structure on the realification with the
+complex structure on the real points. -/
+@[simp]
+theorem realificationRealPointsEquiv_realificationAlmostComplexStructure
+    (hs : HodgeStructure hℂ n) (hn : Odd n) (x : Realification V) :
+    realificationRealPointsEquiv hℂ (hs.realificationAlmostComplexStructure hn x) =
+      hs.realAlmostComplexStructure hn (realificationRealPointsEquiv hℂ x) := by
+  rw [realificationAlmostComplexStructure, AlmostComplexStructure.transport_apply,
+    LinearEquiv.symm_symm, LinearEquiv.apply_symm_apply]
+
+/-- On real vectors, the complex structure of an odd-weight Hodge structure acts by its Weil
+operator. -/
+@[simp]
+theorem realificationComplexEquiv_one_tmul_realificationAlmostComplexStructure
+    (hs : HodgeStructure hℂ n) (hn : Odd n) (x : Realification V) :
+    realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] hs.realificationAlmostComplexStructure hn x) =
+      hs.weilOperator (realificationComplexEquiv hℂ (1 ⊗ₜ[ℝ] x)) := by
+  rw [← coe_realificationRealPointsEquiv_apply,
+    realificationRealPointsEquiv_realificationAlmostComplexStructure,
+    coe_realAlmostComplexStructure_apply, coe_realificationRealPointsEquiv_apply]
+
+/-- **The complexification of the real complex structure is the Weil operator.** Transporting the
+complex structure of an odd-weight Hodge structure back to the abstract complexification recovers
+the Weil operator, since both are complex-linear and agree on the integral vectors. -/
+@[simp]
+theorem latticeComplexification_realificationAlmostComplexStructure
+    (hs : HodgeStructure hℂ n) (hn : Odd n) :
+    (hs.realificationAlmostComplexStructure hn).latticeComplexification hℂ = hs.weilOperator := by
+  refine hℂ.algHom_ext _ _ fun v ↦ ?_
+  rw [← realificationComplexEquiv_one_tmul_realificationMap hℂ v,
+    AlmostComplexStructure.latticeComplexification_realificationComplexEquiv_one_tmul,
+    realificationComplexEquiv_one_tmul_realificationAlmostComplexStructure]
+
+end TauCeti.Hodge.HodgeStructureOn

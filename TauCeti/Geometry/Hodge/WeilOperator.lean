@@ -9,6 +9,7 @@ public import TauCeti.Geometry.Hodge.Decomposition
 public import TauCeti.Geometry.Hodge.Morphism
 public import TauCeti.Geometry.Hodge.Tate.Basic
 public import TauCeti.Geometry.Symplectic.AlmostComplex
+public import TauCeti.Geometry.Symplectic.Transport
 public import TauCeti.LinearAlgebra.Complex.Conjugation
 
 /-!
@@ -38,6 +39,11 @@ of the ambient space, rather than only on homogeneous vectors where `i^{p-q}` ma
 * `TauCeti.Hodge.HodgeStructureOn.conj_weilOperator`: `C` commutes with the conjugation.
 * `TauCeti.Hodge.HodgeStructureOn.realAlmostComplexStructure`: in odd weight, `C` restricted to the
   real form as an almost complex structure, together with its scalar-extension comparison.
+* `TauCeti.Hodge.HodgeStructureOn.almostComplexStructure`: for a Hodge structure on the
+  complexification `ℂ ⊗[ℝ] V` of a real vector space with its canonical conjugation, the same
+  almost complex structure read on `V` itself;
+  `TauCeti.Hodge.HodgeStructureOn.baseChange_almostComplexStructure` recovers `C` as its
+  complexification.
 * `TauCeti.Hodge.IsPolarization.isOrthogonal_weilOperator`: `C` is an isometry of a complexified
   polarizing form.
 * `TauCeti.Hodge.HodgeStructure.Hom.commutes_weilOperator`: morphisms commute with `C`.
@@ -276,6 +282,53 @@ theorem realPointsEquiv_comp_baseChange_realAlmostComplexStructure
         LinearMap.baseChange ℂ (hs.realAlmostComplexStructure hn).toLinearMap =
       hs.weilOperator ∘ₗ (realPointsEquiv ω.involutive).toLinearMap :=
   LinearMap.ext (hs.realPointsEquiv_baseChange_realAlmostComplexStructure_apply hn)
+
+/-! ### The Weil operator as a complex structure on a real vector space -/
+
+section Complexification
+
+open scoped TensorProduct
+
+variable {V : Type u} [AddCommGroup V] [Module ℝ V]
+
+/-- The Weil operator of an odd-weight Hodge structure on the complexification of a real vector
+space, restricted to the real form and read on the space itself: an almost complex structure on
+`V`. -/
+noncomputable def almostComplexStructure
+    (hs : HodgeStructureOn (ℂ ⊗[ℝ] V) (complexificationConjugation V) n) (hn : Odd n) :
+    AlmostComplexStructure V :=
+  (hs.realAlmostComplexStructure hn).transport (complexificationRealPointsEquiv V).symm
+
+/-- The real form comparison intertwines the complex structure on `V` with the complex structure
+on the real points. -/
+@[simp]
+theorem complexificationRealPointsEquiv_almostComplexStructure
+    (hs : HodgeStructureOn (ℂ ⊗[ℝ] V) (complexificationConjugation V) n) (hn : Odd n) (v : V) :
+    complexificationRealPointsEquiv V (hs.almostComplexStructure hn v) =
+      hs.realAlmostComplexStructure hn (complexificationRealPointsEquiv V v) := by
+  rw [almostComplexStructure, AlmostComplexStructure.transport_apply, LinearEquiv.symm_symm,
+    LinearEquiv.apply_symm_apply]
+
+/-- On real vectors, the complex structure of an odd-weight Hodge structure acts by its Weil
+operator. -/
+@[simp]
+theorem one_tmul_almostComplexStructure
+    (hs : HodgeStructureOn (ℂ ⊗[ℝ] V) (complexificationConjugation V) n) (hn : Odd n) (v : V) :
+    (1 : ℂ) ⊗ₜ[ℝ] hs.almostComplexStructure hn v = hs.weilOperator (1 ⊗ₜ[ℝ] v) := by
+  rw [← coe_complexificationRealPointsEquiv_apply,
+    complexificationRealPointsEquiv_almostComplexStructure, coe_realAlmostComplexStructure_apply,
+    coe_complexificationRealPointsEquiv_apply]
+
+/-- **The complexification of the complex structure is the Weil operator.** Both are complex-linear
+and agree on real vectors. -/
+@[simp]
+theorem baseChange_almostComplexStructure
+    (hs : HodgeStructureOn (ℂ ⊗[ℝ] V) (complexificationConjugation V) n) (hn : Odd n) :
+    (hs.almostComplexStructure hn).toLinearMap.baseChange ℂ = hs.weilOperator := by
+  refine (TensorProduct.isBaseChange ℝ V ℂ).algHom_ext _ _ fun v ↦ ?_
+  rw [TensorProduct.mk_apply, LinearMap.baseChange_tmul, one_tmul_almostComplexStructure]
+
+end Complexification
 
 end HodgeStructureOn
 
