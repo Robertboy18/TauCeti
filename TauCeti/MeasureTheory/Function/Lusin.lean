@@ -116,14 +116,7 @@ theorem exists_isClosed_measure_diff_lt_continuousOn_of_aemeasurable (hf : AEMea
     (hs.diff (measurableSet_toMeasurable μ _)) (ne_top_of_le_ne_top hμs (measure_mono sdiff_subset))
     hε
   refine ⟨F, hFs.trans sdiff_subset, hF, ?_, ?_⟩
-  · have hsub : s \ F ⊆ ((s \ N) \ F) ∪ N := fun x hx ↦ by
-      by_cases hxN : x ∈ N
-      · exact Or.inr hxN
-      · exact Or.inl ⟨⟨hx.1, hxN⟩, hx.2⟩
-    calc μ (s \ F)
-        ≤ μ ((s \ N) \ F) + μ N := (measure_mono hsub).trans (measure_union_le _ _)
-      _ = μ ((s \ N) \ F) := by rw [hNμ, add_zero]
-      _ < ε := hFμ
+  · rwa [Set.sdiff_sdiff_comm, measure_sdiff_null hNμ] at hFμ
   · refine hFf.congr fun x hx ↦ ?_
     have hxN : x ∉ N := (hFs hx).2
     by_contra hne
