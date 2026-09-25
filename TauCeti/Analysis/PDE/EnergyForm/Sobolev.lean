@@ -100,9 +100,8 @@ hypothesis is carried explicitly, and the interior estimates do not see the boun
   `TauCeti.PDE.energyFormLpVariable`.
 * `TauCeti.PDE.energyFormH1L0_comm`: symmetry of the bundled `H¹₀` energy form, from symmetry of
   the energy form at the functions of `H¹₀(Ω)`.
-* `TauCeti.PDE.exists_forcing_energyFormH1_principal_eq` and
-  `TauCeti.PDE.exists_forcing_energyFormH1_const_eq`: a weak equation with bounded lower-order
-  coefficients gives a weak equation for its principal part with an `L²` forcing.
+* `TauCeti.PDE.exists_forcing_energyFormH1_principal_eq`: a weak equation with bounded
+  lower-order coefficients gives a weak equation for its principal part with an `L²` forcing.
 * `TauCeti.PDE.UniformlyEllipticOn.integrable_energyIntegrand_jetField`: the energy density of
   two Sobolev functions is integrable.
 * `TauCeti.PDE.UniformlyEllipticOn.norm_energyFormH1_le`: boundedness of the energy form, with
@@ -665,21 +664,6 @@ theorem exists_forcing_energyFormH1_principal_eq {a : EuclideanSpace ℝ ι → 
       apply integral_congr_ae
       filter_upwards [hG.coeFn_toLp] with x hx
       rw [hx]
-
-omit [DecidableEq ι] in
-/-- The constant principal coefficient case of
-`TauCeti.PDE.exists_forcing_energyFormH1_principal_eq`. -/
-theorem exists_forcing_energyFormH1_const_eq {A : Matrix ι ι ℝ}
-    {b : EuclideanSpace ℝ ι → EuclideanSpace ℝ ι} {c : EuclideanSpace ℝ ι → ℝ}
-    (hb : MemLp b ⊤ (mu.restrict Omega)) (hc : MemLp c ⊤ (mu.restrict Omega))
-    {f : Lp ℝ 2 (mu.restrict Omega)} {u : W1p mu Omega 2}
-    (hu : ∀ v : W1p0 mu Omega 2,
-      energyFormH1 (fun _ => A) b c u (v : W1p mu Omega 2) =
-        ∫ x in Omega, f x * W1p.value (v : W1p mu Omega 2) x ∂mu) :
-    ∃ g : Lp ℝ 2 (mu.restrict Omega), ∀ v : W1p0 mu Omega 2,
-      energyFormH1 (fun _ => A) 0 0 u (v : W1p mu Omega 2) =
-        ∫ x in Omega, g x * W1p.value (v : W1p mu Omega 2) x ∂mu :=
-  exists_forcing_energyFormH1_principal_eq (memLp_top_const (energyIntegrand A 0 0)) hb hc hu
 
 namespace UniformlyEllipticOn
 
