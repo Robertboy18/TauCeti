@@ -44,9 +44,10 @@ with measurable singletons.
 * `TauCeti.graphPlan T μ` — the graph plan, or Monge plan, of `T`: the pushforward of `μ` along
   `x ↦ (x, T x)`;
 * `TauCeti.Coupling.graph` — the graph plan of a transport map between two probability
-  measures, bundled as an element of `TauCeti.Coupling`; `TauCeti.toMeasure_map_prodMk_self`
-  identifies the bundled pushforward `MeasureTheory.ProbabilityMeasure.map` along `x ↦ (x, T x)`
-  with the graph plan.
+  measures, bundled as an element of `TauCeti.Coupling`; `TauCeti.Coupling.coe_graph` identifies
+  its underlying probability measure with the bundled pushforward
+  `MeasureTheory.ProbabilityMeasure.map` along `x ↦ (x, T x)`, which
+  `TauCeti.toMeasure_map_prodMk_self` identifies with the graph plan.
 
 ## Main statements
 
@@ -394,11 +395,17 @@ def graph (hT : HasLaw T ν.toMeasure μ.toMeasure) : Coupling μ ν :=
     rw [toMeasure_map_prodMk_self]
     exact isCoupling_graphPlan hT⟩
 
-/-- The underlying measure of a bundled graph plan is the graph plan. -/
+/-- The underlying probability measure of a bundled graph plan is the pushforward of `μ` along
+the graph map `x ↦ (x, T x)`. -/
 @[simp]
 theorem coe_graph (hT : HasLaw T ν.toMeasure μ.toMeasure) :
-    ((graph hT : ProbabilityMeasure (X × Y)) : Measure (X × Y)) = graphPlan T μ.toMeasure :=
+    (graph hT : ProbabilityMeasure (X × Y)) = μ.map fun x ↦ (x, T x) :=
   (rfl)
+
+/-- The underlying measure of a bundled graph plan is the graph plan. -/
+theorem toMeasure_graph (hT : HasLaw T ν.toMeasure μ.toMeasure) :
+    ((graph hT : ProbabilityMeasure (X × Y)) : Measure (X × Y)) = graphPlan T μ.toMeasure := by
+  rw [coe_graph, toMeasure_map_prodMk_self]
 
 end Coupling
 
