@@ -148,14 +148,6 @@ theorem ker_proj_comp_aeval :
     rw [RingHom.mem_ker, AlgHom.comp_apply, proj_aeval_eq_zero_iff hΓ hγ U,
       Ideal.mem_span_singleton]
 
-/-- Evaluation at `γ - 1` followed by projection to the level `U` is a surjection
-`ℤ_p⟦X⟧ → ℤ_p[Γ ⧸ U]`, for a topological generator `γ` of the commutative pro-`p` group `Γ`. -/
-theorem proj_comp_aeval_surjective :
-    Function.Surjective ((proj ℤ_[p] Γ U).comp
-      (PowerSeries.aeval (R := ℤ_[p]) (isTopologicallyNilpotent_of_sub_one hΓ γ))) := by
-  rw [AlgHom.coe_comp]
-  exact (proj_surjective ℤ_[p] Γ U).comp (aeval_surjective hΓ hγ)
-
 /-- **A finite level of `ℤ_p[[Γ]]` as a quotient of the power-series ring.** For a topological
 generator `γ` of the commutative pro-`p` group `Γ` and an open normal subgroup `U`, evaluation at
 `γ - 1` followed by projection to the level `U` induces an isomorphism of `ℤ_p`-algebras
@@ -166,7 +158,9 @@ noncomputable def powerSeriesLevelEquiv :
       Ideal.span {((1 + PowerSeries.X) ^ Nat.card (Γ ⧸ U.toSubgroup) - 1 : PowerSeries ℤ_[p])})
         ≃ₐ[ℤ_[p]] MonoidAlgebra ℤ_[p] (Γ ⧸ U.toSubgroup) :=
   (Ideal.quotientEquivAlgOfEq ℤ_[p] (ker_proj_comp_aeval hΓ hγ U).symm).trans
-    (Ideal.quotientKerAlgEquivOfSurjective (proj_comp_aeval_surjective hΓ hγ U))
+    (Ideal.quotientKerAlgEquivOfSurjective (by
+      rw [AlgHom.coe_comp]
+      exact (proj_surjective ℤ_[p] Γ U).comp (aeval_surjective hΓ hγ)))
 
 /-- The level isomorphism sends the class of a power series to the projection of its value at
 `γ - 1`. -/
