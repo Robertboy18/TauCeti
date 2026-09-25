@@ -45,9 +45,18 @@ noncomputable def monoidAlgebraRatPadicCyclicTwoEquiv :
   letI : Invertible (2 : ℚ_[2]) := invertibleOfNonzero two_ne_zero
   MonoidAlgebra.cyclicTwoEquivProd ℚ_[2]
 
+/-- The dyadic splitting sends the monomial `r·g` to `(r, r · sign g)`. -/
+@[simp]
+theorem monoidAlgebraRatPadicCyclicTwoEquiv_single (g : Multiplicative (ZMod 2)) (r : ℚ_[2]) :
+    monoidAlgebraRatPadicCyclicTwoEquiv (MonoidAlgebra.single g r) =
+      (r, r * cyclicTwoSign ℚ_[2] g) := by
+  unfold monoidAlgebraRatPadicCyclicTwoEquiv
+  rw [MonoidAlgebra.cyclicTwoEquivProd_apply, MonoidAlgebra.cyclicTwoToProd_single]
+
 /-- The dyadic splitting sends `a + bσ` to `(a + b, a - b)`, where `a` and `b` are the
 coefficients at `1` and at the generator `σ`. -/
-@[simp]
+-- Not a simp lemma: it would rewrite the left-hand side of the simp rule
+-- `monoidAlgebraRatPadicCyclicTwoEquiv_single` into conditional coefficients of `single`.
 theorem monoidAlgebraRatPadicCyclicTwoEquiv_apply
     (x : MonoidAlgebra ℚ_[2] (Multiplicative (ZMod 2))) :
     monoidAlgebraRatPadicCyclicTwoEquiv x =
