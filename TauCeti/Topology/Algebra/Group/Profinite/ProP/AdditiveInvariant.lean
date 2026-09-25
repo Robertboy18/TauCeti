@@ -109,22 +109,26 @@ variable [Fact p.Prime]
   {M P : Type u}
   [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
   [DistribMulAction G M] [ContinuousSMul G M] [Finite M]
-  [AddCommGroup P] [TopologicalSpace P] [DiscreteTopology P]
-  [DistribMulAction G P] [ContinuousSMul G P] [Finite P]
+  [AddCommGroup P] [TopologicalSpace P] [DiscreteTopology P] [DistribMulAction G P]
 
 include hExact in
 /-- An integer-valued invariant additive on equivariant short exact sequences of finite
 discrete `p`-primary modules is its value on a trivial module of order `p`, multiplied by
 the `p`-adic valuation of the cardinality. The trivial model `P` lies in the same universe
-as `M`, and is `p`-primary because it is additively equivalent to `ZMod p`; no exponent-`p`
-assumption on `M` is needed. -/
+as `M`; it is finite and `p`-primary because it is additively equivalent to `ZMod p`, and its
+trivial action is continuous, so neither is assumed. No exponent-`p` assumption on `M` is
+needed. -/
 theorem invariant_eq_padicValNat_mul_of_isProP
     (hG : IsProP p G)
     (hM : ∀ m : M, ∃ k : ℕ, p ^ k • m = 0)
     (eP : P ≃+ ZMod p)
     (hPsmul : ∀ (g : G) (x : P), g • x = x) :
+    haveI : Finite P := Finite.of_equiv _ eP.symm.toEquiv
+    haveI : ContinuousSMul G P := ⟨continuous_snd.congr fun z ↦ (hPsmul z.1 z.2).symm⟩
     I M hM = (padicValNat p (Nat.card M) : ℤ) *
       I P (forall_exists_nsmul_eq_zero_of_addEquiv_zmod eP) := by
+  have _ : Finite P := Finite.of_equiv _ eP.symm.toEquiv
+  have _ : ContinuousSMul G P := ⟨continuous_snd.congr fun z ↦ (hPsmul z.1 z.2).symm⟩
   have hP := forall_exists_nsmul_eq_zero_of_addEquiv_zmod eP
   obtain ⟨N, hN, h0, hmono, htop, _, hfactors⟩ :=
     exists_filtration_with_trivial_factors_of_isProP hG hM
