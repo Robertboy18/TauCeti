@@ -52,6 +52,17 @@ noncomputable def obstruction :
   exact ContCohomology.explicitH2AddEquivContinuousCohomology G (Additive P.α.ker)
     (P.pullbackExtension hcomm).contCohomologyClass
 
+/-- The obstruction is the image of the pullback extension's cohomology class under the
+comparison isomorphism from explicit continuous `H²` to canonical continuous `H²`. -/
+theorem obstruction_def :
+    P.obstruction hcomm =
+      haveI := P.isMulCommutative_ker hcomm
+      letI := P.kernelAction hcomm
+      letI := P.continuousSMul_kernelAction hcomm
+      ContCohomology.explicitH2AddEquivContinuousCohomology G (Additive P.α.ker)
+        (P.pullbackExtension hcomm).contCohomologyClass :=
+  (rfl)
+
 /-- An embedding problem with abelian kernel has a solution exactly when its canonical
 continuous cohomology obstruction vanishes. -/
 theorem exists_isSolution_iff_obstruction_eq_zero :
@@ -71,7 +82,7 @@ theorem exists_isSolution_iff_obstruction_eq_zero :
       exact X.toGroupExtension.exists_splitting_continuous_iff_contCohomologyClass_eq_zero
         X.continuous_inl X.continuous_rightHom X.inducesAction
     _ ↔ P.obstruction hcomm = 0 := by
-      unfold obstruction
+      rw [obstruction_def]
       exact (AddEquiv.map_eq_zero_iff e).symm
 
 /-- Vanishing of canonical continuous `H²` for the actual kernel module solves the embedding
