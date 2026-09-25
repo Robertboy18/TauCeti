@@ -37,17 +37,11 @@ open scoped nonZeroDivisors
 variable {A K : Type*} [CommRing A] [Field K] [Algebra A K] [IsFractionRing A K]
   (S : Submonoid A) (hS : S ≤ A⁰)
 
-/-- Membership in `A[S⁻¹] ⊆ K`, by definition: the quotients `a / s` with `s ∈ S`. -/
-theorem mem_ofField_iff {z : K} :
-    z ∈ ofField K S hS ↔
-      ∃ (a s : A) (_ : s ∈ S), z = algebraMap A K a * (algebraMap A K s)⁻¹ :=
-  Iff.rfl
-
 /-- **Membership in `A[S⁻¹] ⊆ K` by clearing denominators**: `z` lies in the localization exactly
 when some `s ∈ S` has `s * z ∈ A`. -/
 theorem mem_ofField_iff_exists_mul_mem_range {z : K} :
     z ∈ ofField K S hS ↔ ∃ s ∈ S, algebraMap A K s * z ∈ (algebraMap A K).range := by
-  rw [mem_ofField_iff]
+  rw [ofField, Subalgebra.copy_eq, mem_range_mapToFractionRing_iff_ofField]
   constructor
   · rintro ⟨a, s, hs, rfl⟩
     have hs0 : algebraMap A K s ≠ 0 := (map_isUnit_of_le K S hS ⟨s, hs⟩).ne_zero
