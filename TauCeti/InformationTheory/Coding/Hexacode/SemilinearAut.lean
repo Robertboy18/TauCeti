@@ -15,8 +15,8 @@ Coordinatewise Frobenius carries the hexacode `H` with root `ω` onto the conjug
 root `ω²`, and the coordinate ordering `(1,2,4,6,3,5)` carries the conjugate code back to `H`.
 The composite is therefore a semilinear automorphism of `H`. It is not a monomial automorphism:
 no `F`-linear automorphism of the word space induces it, because Frobenius moves `ω`. So the
-semilinear automorphism group of the hexacode is strictly larger than its monomial automorphism
-group, which is the general situation for codes over a field with a nontrivial automorphism.
+semilinear automorphism group of the hexacode is strictly larger than the image of its monomial
+automorphism group (`TauCeti.Hexacode.map_monomialAut_code_lt_semilinearAut_code`).
 
 The construction follows Huffman and Pless, *Fundamentals of Error-Correcting Codes*, §1.7 and
 Example 1.3.4.

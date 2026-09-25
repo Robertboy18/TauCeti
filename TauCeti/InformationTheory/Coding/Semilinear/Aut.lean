@@ -15,12 +15,13 @@ public import TauCeti.InformationTheory.Coding.Semilinear.Basic
 
 A semilinear monomial transformation of the word space `ι → R` applies a ring automorphism of
 the alphabet to every coordinate, rescales by coordinate units, and relabels the coordinates.
-Unless the alphabet automorphism is the identity, such a transformation is not `R`-linear, so
-the semilinear transformations do not form a subgroup of the `R`-linear automorphisms of the
-word space, as the monomial and permutation transformations do. They are all bijections of the
-word space, so this file collects them as a subgroup of its permutation group, and defines the
-semilinear automorphism group of a code as the stabilizer of the code inside it. Its elements
-are additive and preserve all Hamming data, and the group acts on codewords.
+When there is at least one coordinate and the alphabet automorphism is not the identity, such a
+transformation is not `R`-linear, so the semilinear transformations do not in general form a
+subgroup of the `R`-linear automorphisms of the word space, as the monomial and permutation
+transformations do. They are all bijections of the word space, so this file collects them as a
+subgroup of its permutation group, and defines the semilinear automorphism group of a code as the
+stabilizer of the code inside it. Its elements are additive and preserve all Hamming data, and
+the group acts on codewords.
 
 ## Main definitions
 
@@ -36,9 +37,10 @@ are additive and preserve all Hamming data, and the group acts on codewords.
   is `C`, the condition appearing in `TauCeti.IsSemilinearEquivalent`.
 * `TauCeti.map_monomialAut_le_semilinearAut`: monomial automorphisms of a code are semilinear
   automorphisms, through the permutation of the word space underlying a linear automorphism.
-* `TauCeti.semilinearMonomialEquiv_toEquiv_not_mem_map_of_ne_refl`: a semilinear monomial
-  transformation with a nontrivial alphabet automorphism is not induced by any `R`-linear
-  automorphism, so the semilinear automorphism group is in general strictly larger.
+* `TauCeti.semilinearMonomialEquiv_toEquiv_not_mem_map_of_ne_refl`: when the coordinate set is
+  nonempty, a semilinear monomial transformation with a nontrivial alphabet automorphism is not
+  induced by any `R`-linear automorphism, so the semilinear groups can be strictly larger than
+  the images of the monomial ones.
 * `TauCeti.semilinearGroup_eq_map_monomialGroup`, `TauCeti.semilinearAut_eq_map_monomialAut`:
   when the identity is the only ring automorphism of the alphabet, as for `ZMod n`, the
   semilinear groups are the images of the monomial ones.
@@ -230,7 +232,7 @@ variable [CommSemiring R] {C : Submodule R (ι → R)}
 
 /-- The permutation of the word space underlying a linear automorphism moves the set of codewords
 to the image of the code. -/
-theorem toPermHom_smul_coe (g : (ι → R) ≃ₗ[R] (ι → R)) :
+theorem _root_.LinearEquiv.toPermHom_smul_coe (g : (ι → R) ≃ₗ[R] (ι → R)) :
     MulAction.toPermHom ((ι → R) ≃ₗ[R] (ι → R)) (ι → R) g • (C : Set (ι → R)) =
       (C.map (g : (ι → R) →ₗ[R] (ι → R)) : Set (ι → R)) := by
   rw [Submodule.map_coe, ← Set.image_smul]
@@ -262,7 +264,7 @@ theorem map_monomialAut_le_semilinearAut :
   rintro f ⟨g, hg, rfl⟩
   obtain ⟨hg, hgC⟩ := mem_monomialAut.mp hg
   exact mem_semilinearAut.mpr ⟨map_monomialGroup_le_semilinearGroup (Subgroup.mem_map_of_mem _ hg),
-    by rw [toPermHom_smul_coe, hgC]⟩
+    by rw [LinearEquiv.toPermHom_smul_coe, hgC]⟩
 
 /-- A semilinear monomial transformation whose alphabet automorphism is not the identity is not
 the permutation underlying any `R`-linear automorphism of the word space. -/
@@ -316,7 +318,7 @@ theorem semilinearAut_eq_map_monomialAut :
   refine Subgroup.mem_map.mpr ⟨monomialEquiv u e,
     mem_monomialAut.mpr ⟨monomialEquiv_mem_monomialGroup u e, SetLike.coe_injective ?_⟩,
     toPermHom_monomialEquiv u e⟩
-  rw [← toPermHom_smul_coe, toPermHom_monomialEquiv]
+  rw [← LinearEquiv.toPermHom_smul_coe, toPermHom_monomialEquiv]
   exact hfC
 
 end TrivialAutomorphisms
