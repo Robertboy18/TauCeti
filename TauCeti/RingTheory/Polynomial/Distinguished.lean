@@ -42,27 +42,24 @@ namespace Polynomial
 
 variable {R : Type*} [CommRing R]
 
-/-- The polynomial `1 + X` is monic. -/
-theorem monic_one_add_X : (1 + X : R[X]).Monic := by
-  rw [add_comm, ← C_1]
-  exact monic_X_add_C 1
-
 /-- The polynomial `(1 + X) ^ n - 1` has degree `n`. -/
 @[simp]
 theorem natDegree_one_add_X_pow_sub_one [Nontrivial R] (n : ℕ) :
     ((1 + X) ^ n - 1 : R[X]).natDegree = n := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp
+  have h1 : (1 + X : R[X]).Monic := by rw [add_comm, ← C_1]; exact monic_X_add_C 1
   have h : ((1 + X : R[X]) ^ n).natDegree = n := by
-    rw [monic_one_add_X.natDegree_pow, natDegree_one_add, natDegree_X, mul_one]
+    rw [h1.natDegree_pow, natDegree_one_add, natDegree_X, mul_one]
   rw [natDegree_sub_eq_left_of_natDegree_lt (by rw [natDegree_one, h]; exact hn), h]
 
 /-- The polynomial `(1 + X) ^ n - 1` is monic for `n ≠ 0`. -/
 theorem monic_one_add_X_pow_sub_one {n : ℕ} (hn : n ≠ 0) : ((1 + X) ^ n - 1 : R[X]).Monic := by
   nontriviality R
-  refine (monic_one_add_X.pow n).sub_of_left ?_
-  rw [degree_one, degree_eq_natDegree (monic_one_add_X.pow n).ne_zero,
-    monic_one_add_X.natDegree_pow, natDegree_one_add, natDegree_X, mul_one]
+  have h1 : (1 + X : R[X]).Monic := by rw [add_comm, ← C_1]; exact monic_X_add_C 1
+  refine (h1.pow n).sub_of_left ?_
+  rw [degree_one, degree_eq_natDegree (h1.pow n).ne_zero, h1.natDegree_pow, natDegree_one_add,
+    natDegree_X, mul_one]
   exact_mod_cast Nat.pos_of_ne_zero hn
 
 /-- **`(1 + X) ^ (p ^ m) - 1` is a distinguished polynomial at `(p)`**, for a prime `p`: it is
