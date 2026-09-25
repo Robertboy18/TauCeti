@@ -5,7 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.Algebra.Module.PUnit
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Filtration
+public import TauCeti.Topology.Algebra.GroupAction.QuotientAddGroup
 
 /-!
 # Additive invariants of finite primary modules
@@ -16,6 +18,19 @@ of order `p`. The coefficient group need not be killed by `p`.
 
 The trivial module is supplied in the same universe as the coefficient groups, together with
 an additive equivalence to `ZMod p`. In particular, it can be `ULift (ZMod p)`.
+
+Additivity alone forces two general properties of such an invariant, recorded first: it vanishes
+on a subsingleton module, and it takes the same value on equivariantly isomorphic modules.
+
+## Main results
+
+* `TauCeti.invariant_eq_zero_of_subsingleton`: an additive invariant vanishes on a subsingleton
+  module.
+* `TauCeti.invariant_eq_of_equiv`: an additive invariant is constant on equivariant additive
+  equivalence classes.
+* `TauCeti.invariant_eq_padicValNat_mul_of_isProP`: for a pro-`p` group, an additive invariant
+  of a finite `p`-primary module is `padicValNat p (Nat.card M)` times its value on the trivial
+  module of order `p`.
 -/
 
 public section
@@ -25,21 +40,6 @@ universe u v
 namespace TauCeti
 
 variable {p : ℕ} {G : Type v} [Group G] [TopologicalSpace G]
-
-private theorem restrictDistribMulAction_continuousSMul {M : Type u} [AddCommGroup M]
-    [TopologicalSpace M] [DistribMulAction G M] [ContinuousSMul G M]
-    (N : AddSubgroup M) (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) :
-    letI := N.restrictDistribMulAction hN
-    ContinuousSMul G N := by
-  let _ := N.restrictDistribMulAction hN
-  exact ⟨(continuous_fst.smul (continuous_subtype_val.comp continuous_snd)).subtype_mk _⟩
-
-private theorem invariantSubgroup_torsion {M : Type u} [AddCommGroup M]
-    (hM : ∀ m : M, ∃ k : ℕ, p ^ k • m = 0) (N : AddSubgroup M) :
-    ∀ x : N, ∃ k : ℕ, p ^ k • x = 0 := by
-  intro x
-  obtain ⟨k, hk⟩ := hM x
-  exact ⟨k, Subtype.ext hk⟩
 
 variable
   (I : ∀ (A : Type u) [AddCommGroup A] [TopologicalSpace A]
@@ -62,7 +62,9 @@ variable
     f.range = q.ker → I B hB = I A hA + I C hC)
 
 include hExact in
-private theorem invariant_eq_zero_of_subsingleton {A : Type u}
+/-- An invariant additive on equivariant short exact sequences vanishes on a subsingleton
+module: the zero maps make `A → A → A` short exact, so `I A = I A + I A`. -/
+theorem invariant_eq_zero_of_subsingleton {A : Type u}
     [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
     [DistribMulAction G A] [ContinuousSMul G A] [Finite A] [Subsingleton A]
     (hA : ∀ a : A, ∃ k : ℕ, p ^ k • a = 0) : I A hA = 0 := by
@@ -80,18 +82,20 @@ private theorem invariant_eq_zero_of_subsingleton {A : Type u}
   omega
 
 include hExact in
-private theorem invariant_eq_of_equiv {A B Z : Type u}
+/-- An invariant additive on equivariant short exact sequences takes the same value on
+equivariantly isomorphic modules: an equivariant additive equivalence `A ≃+ B` followed by the
+zero map to `PUnit` is short exact. -/
+theorem invariant_eq_of_equiv {A B : Type u}
     [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
     [DistribMulAction G A] [ContinuousSMul G A] [Finite A]
     [AddCommGroup B] [TopologicalSpace B] [DiscreteTopology B]
     [DistribMulAction G B] [ContinuousSMul G B] [Finite B]
-    [AddCommGroup Z] [TopologicalSpace Z] [DiscreteTopology Z]
-    [DistribMulAction G Z] [ContinuousSMul G Z] [Finite Z] [Subsingleton Z]
     (hA : ∀ a : A, ∃ k : ℕ, p ^ k • a = 0)
     (hB : ∀ b : B, ∃ k : ℕ, p ^ k • b = 0)
-    (hZ : ∀ z : Z, ∃ k : ℕ, p ^ k • z = 0)
     (e : A ≃+ B) (he : ∀ (g : G) (a : A), e (g • a) = g • e a) :
     I A hA = I B hB := by
+  have _ : ContinuousSMul G PUnit.{u + 1} := ⟨continuous_of_const fun _ _ ↦ rfl⟩
+  have hZ : ∀ z : PUnit.{u + 1}, ∃ k : ℕ, p ^ k • z = 0 := fun _ ↦ ⟨0, rfl⟩
   have h := hExact hA hB hZ e.toAddMonoidHom 0 he
     (by intro g b; simp) e.injective
     (fun z ↦ ⟨0, Subsingleton.elim _ _⟩)
@@ -133,8 +137,8 @@ theorem invariant_eq_padicValNat_mul_of_isProP
   obtain ⟨N, hN, h0, hmono, htop, _, hfactors⟩ :=
     exists_filtration_with_trivial_factors_of_isProP hG hM
   let _ (i : ℕ) := (N i).restrictDistribMulAction (hN i)
-  let _ (i : ℕ) := restrictDistribMulAction_continuousSMul (N i) (hN i)
-  have hprim := fun i ↦ invariantSubgroup_torsion hM (N i)
+  let _ (i : ℕ) := (N i).restrictDistribMulAction_continuousSMul (hN i)
+  have hprim := fun i ↦ (N i).forall_exists_nsmul_eq_zero hM
   let _ : Subsingleton (N 0) := by rw [h0]; infer_instance
   have hzero := invariant_eq_zero_of_subsingleton I hExact (hprim 0)
   have hind : ∀ i, i ≤ padicValNat p (Nat.card M) →
@@ -164,7 +168,7 @@ theorem invariant_eq_padicValNat_mul_of_isProP
         refine ⟨k, e.injective ?_⟩
         simpa only [map_nsmul, map_zero] using hk
       have heq : I Q hQ = I P hP :=
-        invariant_eq_of_equiv I hExact hQ hP (hprim 0) e
+        invariant_eq_of_equiv I hExact hQ hP e
           (by intro g y; rw [htriv, hPsmul])
       have hstep := hExact (hprim i) (hprim (i + 1)) hQ
         (AddSubgroup.inclusion (hmono (Nat.le_succ i)))

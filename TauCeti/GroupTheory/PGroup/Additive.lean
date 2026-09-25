@@ -19,8 +19,8 @@ additive notation: the order of a finite such group is a power of `p`, namely
 `p ^ padicValNat p (Nat.card A)`, and is divisible by `p` when the group is nontrivial; a nonzero
 element of `p`-power order has a nonzero multiple annihilated by `p`, a statement about natural
 multiples that holds in any additive monoid; a monoid additively equivalent to `ZMod p` is
-`p`-primary; and adjoining to a subgroup `N` an element `x ∉ N` with `p • x ∈ N` multiplies the
-order of `N` by `p`.
+`p`-primary; a subgroup of a `p`-primary group is `p`-primary; and adjoining to a subgroup `N` an
+element `x ∉ N` with `p • x ∈ N` multiplies the order of `N` by `p`.
 
 ## Main results
 
@@ -32,6 +32,8 @@ order of `N` by `p`.
   has a nonzero multiple `p ^ n • a` with `p • p ^ n • a = 0`.
 * `TauCeti.forall_exists_nsmul_eq_zero_of_addEquiv_zmod`: an additive monoid additively
   equivalent to `ZMod p` is `p`-primary.
+* `AddSubgroup.forall_exists_nsmul_eq_zero`: an additive subgroup of a `p`-primary additive group
+  is `p`-primary.
 * `TauCeti.subquotientEquivZModOfEqSupZmultiples`: adjoining `x ∉ N` with `p • x ∈ N`
   gives a quotient additively equivalent to `ZMod p`, sending the class of `x` to `1`.
 * `TauCeti.natCard_sup_zmultiples_of_nsmul_mem`: `|N ⊔ zmultiples x| = p * |N|` when `x ∉ N` and
@@ -71,6 +73,19 @@ theorem forall_exists_nsmul_eq_zero_of_addEquiv_zmod (e : A ≃+ ZMod p) :
   fun _ ↦ ⟨1, e.injective (by simp)⟩
 
 end AddMonoid
+
+section AddSubgroup
+
+variable {A : Type*} [AddGroup A]
+
+/-- An additive subgroup of a `p`-primary additive group is `p`-primary: every element of `N` has
+`p`-power order when every element of the ambient group `A` does. -/
+theorem _root_.AddSubgroup.forall_exists_nsmul_eq_zero (N : AddSubgroup A)
+    (h : ∀ a : A, ∃ k : ℕ, p ^ k • a = 0) : ∀ x : N, ∃ k : ℕ, p ^ k • x = 0 := fun x ↦
+  let ⟨k, hk⟩ := h x
+  ⟨k, Subtype.ext hk⟩
+
+end AddSubgroup
 
 section AddGroup
 
