@@ -60,9 +60,13 @@ noncomputable def charScalar (χ : G →ₜ* ℤ_[p]ˣ) (i : ℕ) : G →* ZMod 
 
 variable (χ : G →ₜ* ℤ_[p]ˣ) (i : ℕ)
 
+/-- The scalar of the action of `g` is the truncation of `χ g` modulo `pⁱ`. -/
+@[simp]
 theorem charScalar_apply (g : G) : charScalar χ i g = PadicInt.toZModPow i (χ g : ℤ_[p]) :=
   (rfl)
 
+/-- The scalar of the action depends continuously on the group element, because `χ` and the
+truncation modulo `pⁱ` are continuous. -/
 theorem continuous_charScalar : Continuous (charScalar χ i) :=
   (PadicInt.continuous_toZModPow i).comp (Units.continuous_val.comp χ.continuous)
 
@@ -72,9 +76,10 @@ theorem isUnit_charScalar (g : G) : IsUnit (charScalar χ i g) :=
 
 variable {i}
 
-/-- The scalars at different levels are compatible under reduction. -/
 -- Not `@[simp]`: Mathlib's simp lemma `ZMod.castHom_apply` rewrites the left-hand side to
 -- `(charScalar χ i g).cast` first, so the tagged lemma fails the `simpNF` linter.
+/-- The scalars at different levels are compatible under reduction: the scalar at level `i`
+reduces modulo `pʲ` to the scalar at level `j ≤ i`. -/
 theorem castHom_charScalar {j : ℕ} (h : j ≤ i) (g : G) :
     ZMod.castHom (pow_dvd_pow p h) (ZMod (p ^ j)) (charScalar χ i g) = charScalar χ j g :=
   RingHom.congr_fun (PadicInt.zmod_cast_comp_toZModPow j i h) _
@@ -178,6 +183,8 @@ theorem reduce_reduce {j k : ℕ} (h₁ : j ≤ i) (h₂ : k ≤ j) (x : ZModTwi
     reduce χ h₂ (reduce χ h₁ x) = reduce χ (h₂.trans h₁) x :=
   ZModTwist.ext (RingHom.congr_fun (ZMod.castHom_comp (pow_dvd_pow p h₂) (pow_dvd_pow p h₁)) _)
 
+/-- The reduction `I(χ)/pⁱ → I(χ)/pʲ` is surjective: every residue class modulo `pʲ` lifts to a
+residue class modulo `pⁱ`. -/
 theorem reduce_surjective {j : ℕ} (h : j ≤ i) : Function.Surjective (reduce χ h) := fun y ↦ by
   obtain ⟨x, hx⟩ := ZMod.castHom_surjective (pow_dvd_pow p h) y.val
   exact ⟨⟨x⟩, ZModTwist.ext hx⟩

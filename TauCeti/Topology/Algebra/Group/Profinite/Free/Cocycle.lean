@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.ExplicitFunctoriality
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Extension
 public import TauCeti.Topology.Algebra.GroupAction.TypeTags
 public import TauCeti.Topology.Algebra.GroupExtension.FactorSet
@@ -24,6 +25,10 @@ determined by its values on a topological generating set, this identifies the co
 
 `Z¹(F, M) ≃+ (X → M)`, by evaluation at the generators (`TauCeti.freeProP.Z1Equiv`).
 
+Consequently a surjective continuous equivariant map `M → N` of coefficient modules induces a
+surjection `Z¹(F, M) → Z¹(F, N)`, hence `H¹(F, M) → H¹(F, N)`: a cocycle into `N` lifts to a
+cocycle into `M` by lifting its values on the generators.
+
 No finiteness of `X` is needed, and `M` need not be discrete: any profinite abelian pro-`p`
 coefficient module with a continuous action is allowed, exactly as for the vanishing of `H²` in
 `TauCeti.Topology.Algebra.Group.Profinite.Free.Cohomology`. The coefficient module is written
@@ -37,6 +42,8 @@ additively; the pro-`p` hypothesis is on `Multiplicative M`.
   a continuous `1`-cocycle on `F`.
 * `TauCeti.freeProP.Z1Equiv`: evaluation at the generators is an additive equivalence
   `Z¹(F, M) ≃+ (X → M)`.
+* `TauCeti.freeProP.cocyclesMap1_surjective`, `TauCeti.freeProP.explicitCoeff1_surjective`: a
+  surjective coefficient map induces surjections on `Z¹` and `H¹` of `F`.
 
 ## References
 
@@ -129,6 +136,46 @@ theorem Z1Equiv_apply (c : Z1 (freeProP p X) M) (x : X) :
 theorem Z1Equiv_symm_apply_of (v : X → M) (x : X) :
     ((Z1Equiv hM).symm v : freeProP p X → M) (of x) = v x :=
   (exists_mem_Z1_forall_apply_of_eq hM v).choose_spec.2 x
+
+section Surjective
+
+variable {N : Type u} [AddCommGroup N] [TopologicalSpace N] [IsTopologicalAddGroup N]
+  [DistribMulAction (freeProP p X) N] [ContinuousSMul (freeProP p X) N] [T1Space N]
+
+include hM in
+omit [ContinuousSMul (freeProP p X) N] in
+/-- **A surjective coefficient map induces a surjection on the continuous `1`-cocycles of a free
+pro-`p` group.** For `f : M → N` continuous, equivariant and surjective, every continuous
+`1`-cocycle `c : F → N` is `f ∘ c'` for a continuous `1`-cocycle `c' : F → M`: lift the values of
+`c` on the generators through `f`, take the cocycle `c'` with those values, and compare `f ∘ c'`
+with `c` on the generators. -/
+theorem cocyclesMap1_surjective (f : M →+ N) (hf : Continuous f)
+    (hequiv : ∀ (g : freeProP p X) (m : M), f (ContinuousMonoidHom.id (freeProP p X) g • m) =
+      g • f m) (hsurj : Function.Surjective f) :
+    Function.Surjective (cocyclesMap1 (freeProP p X) M (freeProP p X) N
+      (ContinuousMonoidHom.id (freeProP p X)) f hf hequiv) := by
+  intro c
+  choose v hv using fun x : X ↦ hsurj ((c : freeProP p X → N) (of x))
+  obtain ⟨c', hc', hc'v⟩ := exists_mem_Z1_forall_apply_of_eq hM v
+  refine ⟨⟨c', hc'⟩, Subtype.ext (eq_of_mem_Z1_of_forall_of (Subtype.property _) c.2 fun x ↦ ?_)⟩
+  simp [cocyclesMap1_apply, hc'v, hv]
+
+include hM in
+/-- **A surjective coefficient map induces a surjection on `H¹` of a free pro-`p` group**: the
+coefficient map `H¹(F, M) → H¹(F, N)` induced by a continuous surjective equivariant
+homomorphism `f : M →+[F] N` is surjective, because it already is on cocycles
+(`TauCeti.freeProP.cocyclesMap1_surjective`). -/
+theorem explicitCoeff1_surjective (f : M →+[freeProP p X] N) (hf : Continuous f)
+    (hsurj : Function.Surjective f) :
+    Function.Surjective (explicitCoeff1 (freeProP p X) M f hf) := by
+  intro y
+  induction y using QuotientAddGroup.induction_on with
+  | H c =>
+    obtain ⟨c', hc'⟩ := cocyclesMap1_surjective hM (f : M →+ N) hf (fun g m ↦ f.map_smul g m)
+      hsurj c
+    exact ⟨c', by rw [explicitCoeff1_mk, hc']⟩
+
+end Surjective
 
 end Existence
 
