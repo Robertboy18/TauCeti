@@ -7,7 +7,6 @@ module
 
 public import Mathlib.Topology.Compactness.Compact
 public import TauCeti.Algebra.MonoidAlgebra.MapDomain
-public import TauCeti.Topology.Algebra.ContinuousMulEquiv
 public import TauCeti.Topology.Algebra.Group.OpenNormalSubgroup
 public import TauCeti.Topology.Algebra.Group.Profinite.CompletedGroupAlgebra.Basic
 
@@ -156,24 +155,24 @@ theorem map_comp {E : Type*} [Group E] [TopologicalSpace E] (g : Δ →* E) (hg 
     exact (QuotientGroup.map_comp_map _ _ _ f g _ _ h).symm
 
 /-- The `R`-algebra isomorphism `R[[Γ]] ≃ₐ[R] R[[Δ]]` induced by a topological isomorphism
-`e : Γ ≃ₜ* Δ`; its underlying map is `map R e e.continuous_toMonoidHom`, and its inverse is
+`e : Γ ≃ₜ* Δ`; its underlying map is `map R e (map_continuous e)`, and its inverse is
 induced by `e.symm`. -/
 noncomputable def domCongr (e : Γ ≃ₜ* Δ) :
     completedGroupAlgebra R Γ ≃ₐ[R] completedGroupAlgebra R Δ :=
-  AlgEquiv.ofAlgHom (map R (e : Γ →* Δ) e.continuous_toMonoidHom)
-    (map R (e.symm : Δ →* Γ) e.symm.continuous_toMonoidHom)
-    (by
-      rw [← map_comp]
+  AlgEquiv.ofAlgHom (map R (e : Γ →* Δ) (map_continuous e))
+    (map R (e.symm : Δ →* Γ) (map_continuous e.symm))
+    ((map_comp R (e.symm : Δ →* Γ) (map_continuous e.symm) (e : Γ →* Δ)
+      (map_continuous e)).symm.trans <| by
       convert map_id R using 2
       exact MonoidHom.ext fun x ↦ by simp)
-    (by
-      rw [← map_comp]
+    ((map_comp R (e : Γ →* Δ) (map_continuous e) (e.symm : Δ →* Γ)
+      (map_continuous e.symm)).symm.trans <| by
       convert map_id R using 2
       exact MonoidHom.ext fun x ↦ by simp)
 
 @[simp]
 theorem coe_domCongr (e : Γ ≃ₜ* Δ) :
-    ⇑(domCongr R e) = map R (e : Γ →* Δ) e.continuous_toMonoidHom :=
+    ⇑(domCongr R e) = map R (e : Γ →* Δ) (map_continuous e) :=
   (rfl)
 
 @[simp]
@@ -182,8 +181,8 @@ theorem domCongr_symm (e : Γ ≃ₜ* Δ) : (domCongr R e).symm = domCongr R e.s
 
 /-- The isomorphism induced by `e` sends the group element `γ` to the group element `e γ`. -/
 @[simp]
-theorem domCongr_of (e : Γ ≃ₜ* Δ) (γ : Γ) : domCongr R e (of R Γ γ) = of R Δ (e γ) := by
-  rw [coe_domCongr, map_of, MonoidHom.coe_coe]
+theorem domCongr_of (e : Γ ≃ₜ* Δ) (γ : Γ) : domCongr R e (of R Γ γ) = of R Δ (e γ) :=
+  map_of R (e : Γ →* Δ) (map_continuous e) γ
 
 section TopologicalSpace
 
