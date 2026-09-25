@@ -59,7 +59,7 @@ theorem isManifold_symChartedSpace :
   rw [hs, hs']
   simp only [mfld_simps]
   exact contDiffOn_symOpenPartialHomeomorph_trans _ _ V m hm W p hp hVo hVsub hVdisj hWo hWsub
-    hWdisj e e' hq hr fun i j z hz =>
+    hWdisj e e' hq hr fun _ _ i j z hz _ =>
       analyticAt_chartAt_comp_chartAt_symm (hVsub i hz.1) (hWsub j hz.2)
 
 end TauCeti

@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Data.Fintype.BigOperators
-public import Mathlib.Data.Multiset.Filter
 public import TauCeti.Data.Multiset.Filter
 public import TauCeti.Data.Sym.Basic
 

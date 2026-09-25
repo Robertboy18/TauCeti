@@ -26,9 +26,9 @@ roots of a monic polynomial lying in a region depend analytically on the coeffic
 roots included. Applied to the power sums of the points of one target block, and combined with
 Newton's identities, it shows that each target block of coordinates is analytic in the source
 coordinates. Repeated points are included throughout. The regularity claims assume that, for every
-point `z` of the surface lying in a source patch `V i` and a target patch `W j`, the change of
-surface coordinate `fun w : ℂ => ψ j ((φ i).symm w)` is analytic at `φ i z`; on a complex curve this
-holds for any two charts of the atlas.
+point `z` of a tuple lying in both chart sources, and for every source patch `V i` and target
+patch `W j` containing `z`, the change of surface coordinate `fun w : ℂ => ψ j ((φ i).symm w)` is
+analytic at `φ i z`; on a complex curve this holds for any two charts of the atlas.
 
 For background on the symmetric-power setting, see Ozsváth–Szabó, *Holomorphic disks and
 topological invariants for closed three-manifolds*
@@ -294,7 +294,8 @@ theorem analyticAt_symOpenPartialHomeomorph_transition
 /-- **The transition partial homeomorphism between two elementary-symmetric charts is analytic on
 its source.** This is the source-and-target form consumed by `isManifold_of_contDiffOn`. Here
 `hφψ` requires the change of surface coordinate `ψ j ∘ (φ i).symm` to be analytic at `φ i z` for
-every point `z` of `V i ∩ W j`. -/
+every point `z` of `V i ∩ W j` belonging to some tuple `t` in both chart sources; no condition is
+imposed at points of `V i ∩ W j` outside every such tuple. -/
 theorem contDiffOn_symOpenPartialHomeomorph_trans
     (φ : ι → OpenPartialHomeomorph α ℂ) (ψ : κ → OpenPartialHomeomorph α ℂ)
     (V : ι → Set α) (m : ι → ℕ) (hm : ∑ i, m i = n)
@@ -305,8 +306,10 @@ theorem contDiffOn_symOpenPartialHomeomorph_trans
     (hWdisj : Pairwise (Function.onFun Disjoint W))
     (e : (Σ i, Fin (m i)) ≃ Fin n) (e' : (Σ j, Fin (p j)) ≃ Fin n)
     (hq : Nonempty (∀ i, Sym ↥(V i) (m i))) (hr : Nonempty (∀ j, Sym ↥(W j) (p j)))
-    (hφψ : ∀ i j, ∀ z ∈ V i ∩ W j,
-      AnalyticAt ℂ (fun w : ℂ => ψ j ((φ i).symm w)) (φ i z)) :
+    (hφψ : ∀ t ∈ (symOpenPartialHomeomorph φ V m hm hVo hVsub hVdisj e hq).source ∩
+        (symOpenPartialHomeomorph ψ W p hp hWo hWsub hWdisj e' hr).source,
+      ∀ i j, ∀ z ∈ V i ∩ W j, z ∈ t →
+        AnalyticAt ℂ (fun w : ℂ => ψ j ((φ i).symm w)) (φ i z)) :
     ContDiffOn ℂ ω
       ((symOpenPartialHomeomorph φ V m hm hVo hVsub hVdisj e hq).symm.trans
         (symOpenPartialHomeomorph ψ W p hp hWo hWsub hWdisj e' hr))
@@ -320,7 +323,7 @@ theorem contDiffOn_symOpenPartialHomeomorph_trans
     Set.mem_inter_iff, Set.mem_preimage] at hc'
   obtain ⟨hcC, hcD⟩ := hc'
   have hA := analyticAt_symOpenPartialHomeomorph_transition φ ψ V m hm W p hp hVo hVsub hVdisj
-    hWo hWsub hWdisj e e' hq hr (C.map_target hcC) hcD fun i j z hz _ => hφψ i j z hz
+    hWo hWsub hWdisj e e' hq hr (C.map_target hcC) hcD (hφψ _ ⟨C.map_target hcC, hcD⟩)
   rw [C.right_inv hcC] at hA
   rw [OpenPartialHomeomorph.coe_trans, Function.comp_def]
   exact hA.contDiffAt.contDiffWithinAt

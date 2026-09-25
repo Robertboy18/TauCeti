@@ -14,6 +14,7 @@ import Mathlib.Analysis.Analytic.Linear
 import Mathlib.Topology.ContinuousMap.Compact
 import Mathlib.Topology.ContinuousMap.Polynomial
 import Mathlib.Topology.ContinuousMap.Units
+import TauCeti.Topology.MetricSpace.SeparatedBalls
 
 /-!
 # Holomorphic functions summed over the roots of a polynomial
@@ -231,25 +232,6 @@ namespace Sym
 section Separated
 
 variable {T : Finset ℂ} {r : ℝ}
-
-/-- Around finitely many points, discs of a small enough radius lie in prescribed neighbourhoods
-of their centres and are pairwise far apart. -/
-private theorem exists_pos_closedBall_subset_and_lt_dist {U : ℂ → Set ℂ}
-    (hU : ∀ w ∈ T, U w ∈ 𝓝 w) :
-    ∃ r > 0, (∀ w ∈ T, closedBall w r ⊆ U w) ∧ ∀ w ∈ T, ∀ w' ∈ T, w ≠ w' → 2 * r < dist w w' := by
-  have h1 : ∀ᶠ r in 𝓝 (0 : ℝ), ∀ w ∈ T, closedBall w r ⊆ U w :=
-    (eventually_all_finset T).2 fun w hw => eventually_closedBall_subset (hU w hw)
-  have h2 : ∀ᶠ r in 𝓝 (0 : ℝ), ∀ w ∈ T, ∀ w' ∈ T, w ≠ w' → 2 * r < dist w w' := by
-    refine (eventually_all_finset T).2 fun w _ => (eventually_all_finset T).2 fun w' _ => ?_
-    have hlim : Tendsto (fun r : ℝ => 2 * r) (𝓝 0) (𝓝 0) :=
-      (by fun_prop : Continuous fun r : ℝ => 2 * r).tendsto' 0 0 (mul_zero 2)
-    by_cases hww : w = w'
-    · exact Eventually.of_forall fun _ h => absurd hww h
-    · exact (hlim.eventually (gt_mem_nhds (dist_pos.2 hww))).mono fun _ h _ => h
-  obtain ⟨r, ⟨h1r, h2r⟩, hr⟩ :=
-    (((h1.and h2).filter_mono nhdsWithin_le_nhds).and self_mem_nhdsWithin).exists
-      (f := 𝓝[>] (0 : ℝ))
-  exact ⟨r, hr, h1r, h2r⟩
 
 variable (hsep : ∀ w ∈ T, ∀ w' ∈ T, w ≠ w' → 2 * r < dist w w')
 include hsep

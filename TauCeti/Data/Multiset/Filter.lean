@@ -24,6 +24,7 @@ namespace Multiset
 variable {α ι : Type*} (p : α → Prop) [DecidablePred p]
 
 /-- Filtering distributes over a finite sum of multisets. -/
+@[simp]
 theorem filter_sum (s : Finset ι) (f : ι → Multiset α) :
     filter p (∑ i ∈ s, f i) = ∑ i ∈ s, filter p (f i) := by
   classical
