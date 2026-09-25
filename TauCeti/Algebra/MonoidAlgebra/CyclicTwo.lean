@@ -13,6 +13,7 @@ public import Mathlib.Data.ZMod.Basic
 public import Mathlib.Tactic.Abel
 public import Mathlib.Tactic.LinearCombination
 public import Mathlib.Tactic.Ring
+public import TauCeti.Algebra.Ring.Prod
 
 /-!
 # The group algebra of the cyclic group of order two
@@ -132,6 +133,7 @@ theorem cyclicTwoToProd_single_one_add_single_ofAdd_one (a b : R) :
 
 /-- The trivial and sign characters send an element of `R[C₂]` to the sum and difference
 of its coefficients at `1` and at the generator `σ = Multiplicative.ofAdd 1`. -/
+@[simp]
 theorem cyclicTwoToProd_apply (x : MonoidAlgebra R (Multiplicative (ZMod 2))) :
     cyclicTwoToProd R x =
       (x.coeff 1 + x.coeff (Multiplicative.ofAdd 1),
@@ -142,20 +144,6 @@ theorem cyclicTwoToProd_apply (x : MonoidAlgebra R (Multiplicative (ZMod 2))) :
 section Invertible
 
 variable [Invertible (2 : R)]
-
-/-- The pair `(⅟2 (x + y), ⅟2 (x - y))` is sent back to `(x, y)` by `(a, b) ↦ (a + b, a - b)`. -/
-private theorem cyclicTwoToProd_invOf_two_aux (z : R × R) :
-    (⅟(2 : R) * (z.1 + z.2) + ⅟(2 : R) * (z.1 - z.2),
-      ⅟(2 : R) * (z.1 + z.2) - ⅟(2 : R) * (z.1 - z.2)) = z := by
-  refine Prod.ext ?_ ?_ <;> dsimp only
-  · calc
-      ⅟(2 : R) * (z.1 + z.2) + ⅟(2 : R) * (z.1 - z.2) =
-          ⅟(2 : R) * (2 * z.1) := by ring
-      _ = z.1 := invOf_mul_cancel_left _ _
-  · calc
-      ⅟(2 : R) * (z.1 + z.2) - ⅟(2 : R) * (z.1 - z.2) =
-          ⅟(2 : R) * (2 * z.2) := by ring
-      _ = z.2 := invOf_mul_cancel_left _ _
 
 private theorem cyclicTwoToProd_bijective : Function.Bijective (cyclicTwoToProd R) := by
   refine ⟨(injective_iff_map_eq_zero _).mpr fun x hx => ?_, fun z => ?_⟩
@@ -172,7 +160,7 @@ private theorem cyclicTwoToProd_bijective : Function.Bijective (cyclicTwoToProd 
     rw [eq_single_one_add_single_ofAdd_one x, ha, hb, single_zero, single_zero, add_zero]
   · refine ⟨single 1 (⅟2 * (z.1 + z.2)) + single (Multiplicative.ofAdd 1) (⅟2 * (z.1 - z.2)), ?_⟩
     rw [cyclicTwoToProd_single_one_add_single_ofAdd_one]
-    exact cyclicTwoToProd_invOf_two_aux R z
+    exact Prod.invOf_two_mul_add_sub z
 
 /-- When `2` is invertible in `R`, the trivial and the sign character identify `R[C₂]` with
 `R × R`. The inverse sends `(x, y)` to `⅟2 (x + y) + ⅟2 (x - y) σ`; in particular the two
@@ -192,7 +180,7 @@ theorem cyclicTwoEquivProd_symm_apply (z : R × R) :
       single 1 (⅟2 * (z.1 + z.2)) + single (Multiplicative.ofAdd 1) (⅟2 * (z.1 - z.2)) := by
   rw [AlgEquiv.symm_apply_eq, cyclicTwoEquivProd_apply,
     cyclicTwoToProd_single_one_add_single_ofAdd_one]
-  exact (cyclicTwoToProd_invOf_two_aux R z).symm
+  exact (Prod.invOf_two_mul_add_sub z).symm
 
 end Invertible
 
