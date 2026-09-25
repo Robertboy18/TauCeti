@@ -216,9 +216,10 @@ theorem unitsPrincipal_two_one : unitsPrincipal 2 1 = ⊤ :=
 /-- `-1 ∈ U^(f)` in `ℤ_2ˣ` iff `f ≤ 1`: `-1 ≡ 1 mod 2 ^ f` iff `2 ^ f ∣ 2`. -/
 theorem neg_one_mem_unitsPrincipal_two_iff {f : ℕ} :
     (-1 : ℤ_[2]ˣ) ∈ unitsPrincipal 2 f ↔ f ≤ 1 := by
-  rw [mem_unitsPrincipal_iff, Units.val_neg, Units.val_one,
-    show (-1 : ℤ_[2]) - 1 = -(2 : ℤ_[2]) ^ 1 by norm_num, dvd_neg, Nat.cast_ofNat,
-    pow_dvd_pow_iff (by norm_num : (2 : ℤ_[2]) ≠ 0) PadicInt.p_nonunit]
+  rw [mem_unitsPrincipal_iff, Units.val_neg, Units.val_one, Nat.cast_ofNat, ← neg_add',
+    one_add_one_eq_two, dvd_neg,
+    ← pow_dvd_pow_iff (by norm_num : (2 : ℤ_[2]) ≠ 0) PadicInt.p_nonunit (n := f) (m := 1),
+    pow_one]
 
 /-- `U^(2) = 1 + 4ℤ_2` has index `2` in `ℤ_2ˣ` and does not contain `-1`, so a dyadic unit `u`
 lies outside `1 + 4ℤ_2` iff `-u` lies inside: `u ≡ 1` or `u ≡ -1 mod 4`, and not both. -/

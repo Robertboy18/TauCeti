@@ -120,8 +120,10 @@ theorem index_topologicalClosure_zpowers_two {f : ℕ} (hf : 2 ≤ f) {u : ℤ_[
         (unitsPrincipal_antitone 2 (Nat.le_succ f) ((Subgroup.inv_mem_iff _).mp h))
     · exact ((mem_topologicalClosure_zpowers_two_iff hf hneg hneg').mp hb).symm
   have := Subgroup.relIndex_mul_index hle
-  rw [h2, index_unitsPrincipal_two, show f + 1 - 1 = f - 1 + 1 by omega, pow_succ'] at this
-  exact Nat.eq_of_mul_eq_mul_left two_pos this
+  rw [h2, index_unitsPrincipal_two, Nat.add_sub_cancel] at this
+  -- `2 * [ℤ_2ˣ : U^[f]] = 2 ^ f = 2 * 2 ^ (f - 1)`
+  refine Nat.eq_of_mul_eq_mul_left two_pos (this.trans ?_)
+  rw [← pow_succ', Nat.sub_add_cancel (by omega : 1 ≤ f)]
 
 /-- Two twisted subgroups agree iff their levels agree: `U^[f]` depends only on `f`, not on the
 choice of generator `u` with `-u` of exact level `f`. -/
@@ -162,9 +164,9 @@ theorem neg_mem_unitsPrincipal_two_of_val_eq {f : ℕ} {u : ℤ_[2]ˣ}
 has exact level `f`. -/
 theorem neg_notMem_unitsPrincipal_two_succ_of_val_eq {f : ℕ} {u : ℤ_[2]ˣ}
     (hu : (u : ℤ_[2]) = -1 + (2 : ℤ_[2]) ^ f) : -u ∉ unitsPrincipal 2 (f + 1) := by
-  rw [mem_unitsPrincipal_iff, Units.val_neg, hu, Nat.cast_ofNat,
-    show -(-1 + (2 : ℤ_[2]) ^ f) - 1 = -(2 : ℤ_[2]) ^ f by ring, dvd_neg,
-    pow_dvd_pow_iff (by norm_num : (2 : ℤ_[2]) ≠ 0) PadicInt.p_nonunit]
+  rw [mem_unitsPrincipal_iff, Units.val_neg, hu, Nat.cast_ofNat, neg_add, neg_neg,
+    add_sub_cancel_left, dvd_neg, pow_dvd_pow_iff (by norm_num : (2 : ℤ_[2]) ≠ 0)
+    PadicInt.p_nonunit]
   omega
 
 /-- For `f ≥ 1`, `-1 + 2 ^ f` is a unit of `ℤ_2`, the model generator of `U^[f]`. -/
