@@ -670,10 +670,11 @@ theorem garding_energyFormH1_self_of_mass_lower_bound_with_parameter {delta eps 
   have hval := integrable_jetField_fst_sq u
   have hlower := (hgrad.const_mul (lam - eps)).add
     (hval.const_mul (delta - beta ^ 2 / (4 * eps)))
-  have key := h.garding_energyFormIntegral_self_of_mass_lower_bound_with_parameter_on
-    (μ := mu.restrict Omega) (b := b) (c := c) (U := jetField u) hmem
-    (hmem.mono hb_bound) (hmem.mono hc_lower) heps hlower
-    (integrable_energyIntegrand_jetField h ha hb hc hb_bound hc_bound u u)
+  have key :=
+    h.withClassicalDecEq.garding_energyFormIntegral_self_of_mass_lower_bound_with_parameter_on
+      (μ := mu.restrict Omega) (b := b) (c := c) (U := jetField u) hmem
+      (hmem.mono hb_bound) (hmem.mono hc_lower) heps hlower
+      (integrable_energyIntegrand_jetField h ha hb hc hb_bound hc_bound u u)
   refine le_trans (le_of_eq ?_) key
   rw [integral_add (hgrad.const_mul _) (hval.const_mul _), integral_const_mul, integral_const_mul,
     integral_norm_jetField_snd_sq_eq_norm_gradient_sq,

@@ -526,7 +526,6 @@ lemma garding_energyFormIntegral_self_on (h : UniformlyEllipticOn Ω a lam Lam)
 /-- The integrated mass-floor Gårding bound with uniform ellipticity and any positive
 Young parameter. The drift bound and mass floor are required only almost everywhere. -/
 lemma garding_energyFormIntegral_self_of_mass_lower_bound_with_parameter_on
-    [DecidableEq n]
     (h : UniformlyEllipticOn Ω a lam Lam) (hΩ : ∀ᵐ x ∂μ, x ∈ Ω)
     (hb : ∀ᵐ x ∂μ, ‖b x‖ ≤ beta) (hc : ∀ᵐ x ∂μ, mu ≤ c x) {eps : ℝ}
     (heps : 0 < eps)
