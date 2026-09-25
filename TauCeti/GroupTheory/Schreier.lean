@@ -20,19 +20,13 @@ sharpens the count to `1 + [G : H] * (|S| - 1)`, the classical Schreier index fo
 
 The saving comes from the choice of transversal. A **Schreier transversal** is a right
 transversal `R` of `H` that contains `1` and is closed under prefixes: every `r ≠ 1` in `R` is
-`r' * s` for some `r' ∈ R` and `s ∈ S`. For such a transversal the Schreier generator attached to
-a pair `(r', s)` with `r' * s ∈ R` is trivial, because `r' * s` is its own representative; the
-prefix condition supplies `|R| - 1` such pairs, one for each `r ≠ 1` in `R`, which leaves at
-most `|R| * |S| - (|R| - 1) = 1 + [G : H] * (|S| - 1)` nontrivial generators.
+`r' * s` for some `r' ∈ R` and `s ∈ S`. Along such a transversal the Schreier generators at the
+pairs `(r', s)` with `r' * s ∈ R` are trivial, and there are `|R| - 1` such pairs. Every subgroup
+of finite index has a finite Schreier transversal with respect to every generating set.
 
-A Schreier transversal exists whenever `H` has finite index. Starting from `{1}`, a prefix-closed
-finite set of representatives of pairwise distinct cosets that misses some coset can always be
-enlarged by an element of the form `r * s`. This is where finiteness enters: if every `r * s`
-stayed in the cosets already represented, right multiplication by each `s ∈ S` would permute
-those finitely many cosets, so they would also be stable under `s⁻¹`, hence under the whole of
-`G = ⟨S⟩`, and no coset would be missing. Prefixes are taken with respect to `S` alone, without
-inverses, which the finite index makes possible; the usual definition allows letters from `S⁻¹`
-as well, and a transversal in the sense used here is one in the usual sense.
+Prefixes are taken with respect to `S` alone, without inverses, which the finite index makes
+possible; the usual definition allows letters from `S⁻¹` as well, and a transversal in the sense
+used here is one in the usual sense.
 
 ## Main results
 
@@ -60,6 +54,7 @@ open Subgroup
 variable {G : Type*} [Group G]
 
 /-- The representative of an element of a right transversal is that element. -/
+@[simp]
 theorem _root_.Subgroup.IsComplement.coe_toRightFun_of_mem {H : Subgroup G} {R : Set G}
     (hR : IsComplement (H : Set G) R) {r : G} (hr : r ∈ R) : (hR.toRightFun r : G) = r := by
   have h := (isComplement_iff_existsUnique_mul_inv_mem.mp hR r).unique
@@ -102,12 +97,13 @@ private theorem IsPartialSchreierTransversal.card_le_index [H.FiniteIndex] {R : 
   exact Subtype.ext (hR.eq_of_mul_inv_mem r r.2 r' r'.2 h)
 
 /-- If `S` generates `G` and some right coset of `H` is not represented by `R`, then some product
-`r * s` with `r ∈ R` and `s ∈ S` represents a coset that `R` misses. The proof is where finiteness
-is used: otherwise right multiplication by each `s ∈ S` would permute the finitely many cosets
-represented by `R`, so those cosets would be stable under `S` and `S⁻¹`, hence under `G`. -/
+`r * s` with `r ∈ R` and `s ∈ S` represents a coset that `R` misses. -/
 private theorem IsPartialSchreierTransversal.exists_mul_mem_forall_mul_inv_notMem
     (hS : closure S = ⊤) {R : Finset G} (hR : IsPartialSchreierTransversal H S R) {g : G}
     (hg : ∀ r ∈ R, g * r⁻¹ ∉ H) : ∃ r ∈ R, ∃ s ∈ S, ∀ r' ∈ R, r * s * r'⁻¹ ∉ H := by
+  -- This is where finiteness is used: if every `r * s` stayed in a coset represented by `R`,
+  -- right multiplication by each `s ∈ S` would permute the finitely many cosets represented by
+  -- `R`, so those cosets would be stable under `S` and `S⁻¹`, hence under `G = ⟨S⟩`.
   by_contra hcon
   push Not at hcon
   -- Right multiplication by `s` induces an injective, hence bijective, self-map of the finite
@@ -119,14 +115,11 @@ private theorem IsPartialSchreierTransversal.exists_mul_mem_forall_mul_inv_notMe
       intro r₁ r₂ h
       have h' : σ r₁ = σ r₂ := congrArg Subtype.val h
       refine Subtype.ext (hR.eq_of_mul_inv_mem r₁ r₁.2 r₂ r₂.2 ?_)
-      have := H.mul_mem (hσ r₁) (H.inv_mem (hσ r₂))
-      rwa [h', show (r₁ : G) * s * (σ r₂)⁻¹ * ((r₂ : G) * s * (σ r₂)⁻¹)⁻¹
-        = (r₁ : G) * (r₂ : G)⁻¹ by group] at this
+      simpa [h', mul_assoc] using H.mul_mem (hσ r₁) (H.inv_mem (hσ r₂))
     intro r' hr'
     obtain ⟨r, hr⟩ := Finite.injective_iff_surjective.mp hτ ⟨r', hr'⟩
-    refine ⟨r, r.2, ?_⟩
-    have := hσ r
-    rwa [show σ r = r' from congrArg Subtype.val hr] at this
+    have hr' : σ r = r' := congrArg Subtype.val hr
+    exact ⟨r, r.2, hr' ▸ hσ r⟩
   -- Every element of `G = ⟨S⟩` lies in a coset represented by `R`.
   have key : ∀ x ∈ closure S, ∃ r ∈ R, x * r⁻¹ ∈ H := by
     intro x hx
@@ -135,15 +128,11 @@ private theorem IsPartialSchreierTransversal.exists_mul_mem_forall_mul_inv_notMe
     | mul_right x _ s hs ih =>
       obtain ⟨r, hr, hxr⟩ := ih
       obtain ⟨r', hr', hrs⟩ := hcon r hr s hs
-      refine ⟨r', hr', ?_⟩
-      have := H.mul_mem hxr hrs
-      rwa [show x * r⁻¹ * (r * s * r'⁻¹) = x * s * r'⁻¹ by group] at this
+      exact ⟨r', hr', by simpa [mul_assoc] using H.mul_mem hxr hrs⟩
     | mul_inv_cancel x _ s hs ih =>
       obtain ⟨r', hr', hxr'⟩ := ih
       obtain ⟨r, hr, hrs⟩ := hinv s hs r' hr'
-      refine ⟨r, hr, ?_⟩
-      have := H.mul_mem hxr' (H.inv_mem hrs)
-      rwa [show x * r'⁻¹ * (r * s * r'⁻¹)⁻¹ = x * s⁻¹ * r⁻¹ by group] at this
+      exact ⟨r, hr, by simpa [mul_assoc] using H.mul_mem hxr' (H.inv_mem hrs)⟩
   obtain ⟨r, hr, hgr⟩ := key g (hS ▸ mem_top g)
   exact hg r hr hgr
 
@@ -174,9 +163,8 @@ private theorem IsPartialSchreierTransversal.isSchreierTransversal {R : Finset G
     refine isComplement_iff_existsUnique_mul_inv_mem.mpr fun g ↦ ?_
     obtain ⟨r, hr, hgr⟩ := hcomp g
     refine ⟨⟨r, Finset.mem_coe.mpr hr⟩, hgr, fun t ht ↦ Subtype.ext ?_⟩
-    refine hR.eq_of_mul_inv_mem t (Finset.mem_coe.mp t.2) r hr ?_
-    have := H.mul_mem (H.inv_mem ht) hgr
-    rwa [show (g * (t : G)⁻¹)⁻¹ * (g * r⁻¹) = t * r⁻¹ by group] at this
+    exact hR.eq_of_mul_inv_mem t (Finset.mem_coe.mp t.2) r hr
+      (by simpa [mul_assoc] using H.mul_mem (H.inv_mem ht) hgr)
   one_mem := Finset.mem_coe.mpr hR.one_mem
   exists_mul_eq r hr := hR.exists_mul_eq r (Finset.mem_coe.mp hr)
 
@@ -225,12 +213,13 @@ variable {H : Subgroup G}
 
 /-- **Schreier's index formula.** If `H` has finite index `n` in a group generated by a finite set
 `S` of `d` elements, then `H` is generated by at most `1 + n * (d - 1)` elements. This sharpens
-Mathlib's `Subgroup.exists_finset_card_le_mul`, which gives `n * d`: the Schreier generators are
-taken along a Schreier transversal, where `n - 1` of them are trivial. -/
+Mathlib's `Subgroup.exists_finset_card_le_mul`, which gives `n * d`. -/
 theorem _root_.Subgroup.exists_finset_card_le_one_add_index_mul (H : Subgroup G) [H.FiniteIndex]
     {S : Finset G} (hS : closure (S : Set G) = ⊤) :
     ∃ T : Finset H, T.card ≤ 1 + H.index * (S.card - 1) ∧ closure (T : Set H) = ⊤ := by
   classical
+  -- Take the Schreier generators of `Subgroup.closure_mul_image_eq_top'` along a Schreier
+  -- transversal `R`: the `n - 1` of them at pairs `(r', s)` with `r' * s ∈ R` are trivial.
   obtain ⟨R, hR⟩ := H.exists_finset_isSchreierTransversal hS
   have hRcard : R.card = H.index := by
     rw [← hR.isComplement.card_right, ← Nat.card_eq_finsetCard, Finset.coe_sort_coe]
