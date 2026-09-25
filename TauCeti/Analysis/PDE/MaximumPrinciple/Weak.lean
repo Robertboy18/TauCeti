@@ -15,7 +15,8 @@ For a coercive divergence-form energy form, a weak subsolution with nonpositive 
 is nonpositive almost everywhere. The boundary condition is expressed by membership of the
 positive part in `W^{1,2}_0(Ω)`. It is meaningful on arbitrary open domains and requires no trace
 operator or regularity of the boundary. The corresponding condition on `(u - v)⁺` gives the
-weak comparison principle.
+weak comparison principle. For nonnegative potential, a boundary bound `k ≥ 0` is expressed
+by `(u - k)⁺ ∈ W^{1,2}_0(Ω)` and implies `u ≤ k` almost everywhere.
 
 For `-div(a ∇u) + c u` on a domain contained in a ball, uniform ellipticity, bounded measurable
 coefficients, and `c ≥ 0` suffice. The ball may have any centre; its radius does not impose a
@@ -28,10 +29,13 @@ These are weak Sobolev maximum and comparison principles for Lane C, target 13 o
 ## Main declarations
 
 * `TauCeti.PDE.value_nonpos_of_energyFormH1_nonpos`: the coercive weak maximum principle.
+* `TauCeti.PDE.value_le_of_energyFormH1_nonpos`: the maximum principle with boundary bound `k ≥ 0`.
 * `TauCeti.PDE.value_le_of_energyFormH1_le`: the coercive weak comparison principle.
 * `TauCeti.PDE.IsWeakSolutionDirichlet.value_nonpos_of_energy_bound`: the sign of a weak solution.
 * `TauCeti.PDE.UniformlyEllipticOn.value_nonpos_of_zero_drift_of_subset_ball`: the bounded-domain
   maximum principle without drift.
+* `TauCeti.PDE.UniformlyEllipticOn.value_le_const_of_zero_drift_of_subset_ball`: the corresponding
+  principle with boundary bound `k ≥ 0`.
 * `TauCeti.PDE.UniformlyEllipticOn.value_le_of_zero_drift_of_subset_ball`: its comparison theorem.
 -/
 
@@ -74,6 +78,35 @@ theorem energyFormH1_posPart_right (u : W1p mu Omega 2) :
     rw [hjet]
     simp only [map_zero]
 
+/-- The energy of `(u - k)⁺` is bounded by the energy obtained by testing `u` against it,
+provided the potential and the truncation level `k` are nonnegative. -/
+theorem energyFormH1_posPartAbove_self_le
+    (hcoeff : MemLp (fun x ↦ energyIntegrand (a x) (b x) (c x)) ⊤ (mu.restrict Omega))
+    (hc : ∀ᵐ x ∂mu.restrict Omega, 0 ≤ c x) {k : ℝ} (hk : 0 ≤ k)
+    (u : W1p mu Omega 2) :
+    energyFormH1 a b c (W1p.posPartAbove (by norm_num) hk u)
+        (W1p.posPartAbove (by norm_num) hk u) ≤
+      energyFormH1 a b c u (W1p.posPartAbove (by norm_num) hk u) := by
+  classical
+  simp only [energyFormH1_def]
+  apply integral_mono_ae (integrable_energyIntegrand_jetField hcoeff _ _)
+    (integrable_energyIntegrand_jetField hcoeff _ _)
+  filter_upwards [W1p.value_posPartAbove_ae (by norm_num) hk u,
+    W1p.gradient_posPartAbove_ae (by norm_num) hk u, hc] with x hv hg hcx
+  -- Above the level, the gradients agree and only the potential term decreases.
+  by_cases hx : k < W1p.value u x
+  · rw [indicator_of_mem (show x ∈ {y | k < W1p.value u y} from hx)] at hg
+    simp only [energyIntegrand_apply, jetField_apply, hv, hg,
+      max_eq_left (sub_nonneg.mpr hx.le), massForm_apply]
+    exact add_le_add_right
+      (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left (sub_le_self _ hk) hcx)
+        (sub_nonneg.mpr hx.le)) _
+  · have hjet : jetField (W1p.posPartAbove (by norm_num) hk u) x = 0 := by
+      rw [jetField_apply, hv, hg, max_eq_right (sub_nonpos.mpr (le_of_not_gt hx)),
+        indicator_of_notMem (show x ∉ {y | k < W1p.value u y} from hx)]
+      rfl
+    simp only [hjet, map_zero, le_refl]
+
 /-- A weak subsolution of a coercive divergence-form operator is nonpositive almost everywhere
 if its positive part belongs to `W^{1,2}_0(Ω)`. The quadratic lower bound is required only on
 the zero-boundary Sobolev space. -/
@@ -109,6 +142,42 @@ theorem value_nonpos_of_energyFormH1_nonpos {u : W1p mu Omega 2}
     with x hx hz
   rw [hzero, hz] at hx
   exact (le_max_left _ _).trans hx.symm.le
+
+/-- A weak subsolution with boundary values at most `k ≥ 0` is at most `k` almost everywhere
+when the potential is nonnegative and the energy is coercive on `W^{1,2}_0(Ω)`. The boundary
+condition is expressed by `(u - k)⁺ ∈ W^{1,2}_0(Ω)`. -/
+theorem value_le_of_energyFormH1_nonpos
+    (hcoeff : MemLp (fun x ↦ energyIntegrand (a x) (b x) (c x)) ⊤ (mu.restrict Omega))
+    (hc : ∀ᵐ x ∂mu.restrict Omega, 0 ≤ c x) {k : ℝ} (hk : 0 ≤ k)
+    {u : W1p mu Omega 2}
+    (hboundary : W1p.posPartAbove (by norm_num) hk u ∈ w1p0Submodule mu Omega 2)
+    {C : ℝ} (hC : 0 < C)
+    (hlower : ∀ w : W1p0 mu Omega 2,
+      C * ‖w‖ ^ 2 ≤ energyFormH1 a b c (w : W1p mu Omega 2) (w : W1p mu Omega 2))
+    (hu : ∀ v : W1p0 mu Omega 2,
+      (∀ᵐ x ∂mu.restrict Omega, 0 ≤ W1p.value (v : W1p mu Omega 2) x) →
+        energyFormH1 a b c u (v : W1p mu Omega 2) ≤ 0) :
+    ∀ᵐ x ∂mu.restrict Omega, W1p.value u x ≤ k := by
+  let w : W1p0 mu Omega 2 := ⟨W1p.posPartAbove (by norm_num) hk u, hboundary⟩
+  have hvalue : ∀ᵐ x ∂mu.restrict Omega,
+      W1p.value (w : W1p mu Omega 2) x = max (W1p.value u x - k) 0 := by
+    dsimp only [w]
+    exact W1p.value_posPartAbove_ae (by norm_num) hk u
+  have hnonneg : ∀ᵐ x ∂mu.restrict Omega, 0 ≤ W1p.value (w : W1p mu Omega 2) x :=
+    hvalue.mono fun x hx ↦ hx.symm ▸ le_max_right _ _
+  have henergy := (energyFormH1_posPartAbove_self_le hcoeff hc hk u).trans (hu w hnonneg)
+  have hnorm : ‖w‖ = 0 := by
+    have hbound := (hlower w).trans henergy
+    apply le_antisymm ?_ (norm_nonneg w)
+    exact le_of_not_gt fun hpos ↦ (not_lt_of_ge hbound) (mul_pos hC (pow_pos hpos 2))
+  have hw : (w : W1p mu Omega 2) = 0 :=
+    congrArg (fun v : W1p0 mu Omega 2 ↦ (v : W1p mu Omega 2)) (norm_eq_zero.mp hnorm)
+  have hzero : W1p.value (w : W1p mu Omega 2) = 0 := by
+    rw [hw, ← W1p.valueL_apply, map_zero]
+  filter_upwards [hvalue, Lp.coeFn_zero (E := ℝ) (p := 2) (μ := mu.restrict Omega)]
+    with x hx hz
+  rw [hzero, hz] at hx
+  exact sub_nonpos.mp ((le_max_left _ _).trans hx.symm.le)
 
 /-- Weak comparison for a coercive energy form: ordered weak operator values and
 `(u - v)⁺ ∈ W^{1,2}_0(Ω)` imply `u ≤ v` almost everywhere. -/
@@ -176,6 +245,34 @@ theorem UniformlyEllipticOn.value_nonpos_of_zero_drift_of_subset_ball
     ∀ᵐ x ∂volume.restrict Omega, W1p.value u x ≤ 0 := by
   refine value_nonpos_of_energyFormH1_nonpos hboundary
     (div_pos h.pos (by positivity : 0 < (2 * R) ^ 2 + 1)) ?_ hu
+  intro w
+  exact h.div_mul_norm_sq_le_energyFormH1_self_of_zero_drift ha hc (by simp) hc_bound hc_nonneg
+    (W1p.norm_value_le_mul_norm_gradient_of_subset_ball (by norm_num) hOmega w.property)
+
+/-- The weak maximum principle with a nonnegative boundary bound for `-div(a ∇u) + c u`.
+On a ball-contained domain, uniformly elliptic bounded measurable coefficients and a bounded
+nonnegative potential imply `u ≤ k` almost everywhere whenever `(u - k)⁺ ∈ W^{1,2}_0(Ω)` and
+`u` is a weak subsolution. -/
+theorem UniformlyEllipticOn.value_le_const_of_zero_drift_of_subset_ball
+    (h : UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ (Fin (n + 1)))) a lam Lam)
+    (ha : AEStronglyMeasurable a (volume.restrict Omega))
+    (hc : AEStronglyMeasurable c (volume.restrict Omega))
+    (hc_bound : ∀ x ∈ Omega, ‖c x‖ ≤ gamma)
+    (hc_nonneg : ∀ x ∈ Omega, 0 ≤ c x)
+    {z : EuclideanSpace ℝ (Fin (n + 1))} {R : ℝ}
+    (hOmega : (Omega : Set (EuclideanSpace ℝ (Fin (n + 1)))) ⊆ Metric.ball z R)
+    {k : ℝ} (hk : 0 ≤ k) {u : W1p volume Omega 2}
+    (hboundary : W1p.posPartAbove (by norm_num) hk u ∈ w1p0Submodule volume Omega 2)
+    (hu : ∀ v : W1p0 volume Omega 2,
+      (∀ᵐ x ∂volume.restrict Omega, 0 ≤ W1p.value (v : W1p volume Omega 2) x) →
+        energyFormH1 a 0 c u (v : W1p volume Omega 2) ≤ 0) :
+    ∀ᵐ x ∂volume.restrict Omega, W1p.value u x ≤ k := by
+  have hcoeff := memLp_energyIntegrand_of_bounds (b := 0) (beta := 0) h.upper_nonneg ha
+    aestronglyMeasurable_const hc (fun x hx eta xi ↦ h.upper_bound hx eta xi)
+    (by simp) hc_bound
+  refine value_le_of_energyFormH1_nonpos hcoeff
+    ((ae_restrict_mem Omega.isOpen.measurableSet).mono fun x hx ↦ hc_nonneg x hx)
+    hk hboundary (div_pos h.pos (by positivity : 0 < (2 * R) ^ 2 + 1)) ?_ hu
   intro w
   exact h.div_mul_norm_sq_le_energyFormH1_self_of_zero_drift ha hc (by simp) hc_bound hc_nonneg
     (W1p.norm_value_le_mul_norm_gradient_of_subset_ball (by norm_num) hOmega w.property)
