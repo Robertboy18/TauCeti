@@ -72,6 +72,7 @@ section Generator
 variable (γ : Γ) (U : OpenNormalSubgroup Γ)
 
 /-- Evaluation at `γ - 1` sends the polynomial `(1 + X) ^ |Γ ⧸ U| - 1` to `γ ^ |Γ ⧸ U| - 1`. -/
+@[simp]
 theorem aeval_one_add_X_pow_card_sub_one :
     PowerSeries.aeval (isTopologicallyNilpotent_of_sub_one hΓ γ)
       ((1 + PowerSeries.X) ^ Nat.card (Γ ⧸ U.toSubgroup) - 1 : PowerSeries ℤ_[p]) =
@@ -80,7 +81,7 @@ theorem aeval_one_add_X_pow_card_sub_one :
 
 /-- The polynomial `(1 + X) ^ |Γ ⧸ U| - 1`, evaluated at `γ - 1`, projects to zero at the level
 `U`: its image is `σ ^ |Γ ⧸ U| - 1` for the class `σ` of `γ` in the finite group `Γ ⧸ U`. -/
-theorem proj_aeval_one_add_X_pow_card_sub_one :
+theorem proj_aeval_one_add_X_pow_card_sub_one_eq_zero :
     proj ℤ_[p] Γ U (PowerSeries.aeval (isTopologicallyNilpotent_of_sub_one hΓ γ)
       ((1 + PowerSeries.X) ^ Nat.card (Γ ⧸ U.toSubgroup) - 1 : PowerSeries ℤ_[p])) = 0 := by
   rw [aeval_one_add_X_pow_card_sub_one hΓ γ U, map_sub, map_pow, proj_of,
@@ -100,7 +101,7 @@ theorem proj_aeval_eq_zero_iff (ψ : PowerSeries ℤ_[p]) :
     proj ℤ_[p] Γ U (PowerSeries.aeval (isTopologicallyNilpotent_of_sub_one hΓ γ) ψ) = 0 ↔
       (1 + PowerSeries.X) ^ Nat.card (Γ ⧸ U.toSubgroup) - 1 ∣ ψ := by
   refine ⟨fun h ↦ ?_, fun ⟨q, hq⟩ ↦ by
-    rw [hq, map_mul, map_mul, proj_aeval_one_add_X_pow_card_sub_one hΓ γ U, zero_mul]⟩
+    rw [hq, map_mul, map_mul, proj_aeval_one_add_X_pow_card_sub_one_eq_zero hΓ γ U, zero_mul]⟩
   -- The level polynomial `ω = (1 + X) ^ |Γ ⧸ U| - 1` is distinguished at the maximal ideal `(p)`
   -- of `ℤ_p`, because `|Γ ⧸ U|` is a power of `p`.
   obtain ⟨n, hn⟩ := IsPGroup.iff_card.mp ((isProP_iff.mp hΓ) U)
@@ -115,7 +116,7 @@ theorem proj_aeval_eq_zero_iff (ψ : PowerSeries ℤ_[p]) :
       (((1 + Polynomial.X) ^ Nat.card (Γ ⧸ U.toSubgroup) - 1 : Polynomial ℤ_[p]) :
         PowerSeries ℤ_[p])) = 0 := by
     rw [hcoe]
-    exact proj_aeval_one_add_X_pow_card_sub_one hΓ γ U
+    exact proj_aeval_one_add_X_pow_card_sub_one_eq_zero hΓ γ U
   -- Weierstrass division: `ψ = ω * q + r` with `r` a polynomial of degree `< |Γ ⧸ U|`.
   obtain ⟨hdeg, heq⟩ := hdist.isWeierstrassDivisorAt'.isWeierstrassDivisionAt_div_mod ψ
   have hord : ((((1 + Polynomial.X) ^ Nat.card (Γ ⧸ U.toSubgroup) - 1 : Polynomial ℤ_[p]) :
@@ -153,7 +154,7 @@ theorem ker_proj_comp_aeval :
 
 /-- Evaluation at `γ - 1` followed by projection to the level `U` is a surjection
 `ℤ_p⟦X⟧ → ℤ_p[Γ ⧸ U]`, for a topological generator `γ` of the commutative pro-`p` group `Γ`. -/
-theorem surjective_proj_comp_aeval :
+theorem proj_comp_aeval_surjective :
     Function.Surjective ((proj ℤ_[p] Γ U).comp
       (PowerSeries.aeval (R := ℤ_[p]) (isTopologicallyNilpotent_of_sub_one hΓ γ))) := by
   rw [AlgHom.coe_comp]
@@ -169,7 +170,7 @@ noncomputable def powerSeriesLevelEquiv :
       Ideal.span {((1 + PowerSeries.X) ^ Nat.card (Γ ⧸ U.toSubgroup) - 1 : PowerSeries ℤ_[p])})
         ≃ₐ[ℤ_[p]] MonoidAlgebra ℤ_[p] (Γ ⧸ U.toSubgroup) :=
   (Ideal.quotientEquivAlgOfEq ℤ_[p] (ker_proj_comp_aeval hΓ hγ U).symm).trans
-    (Ideal.quotientKerAlgEquivOfSurjective (surjective_proj_comp_aeval hΓ hγ U))
+    (Ideal.quotientKerAlgEquivOfSurjective (proj_comp_aeval_surjective hΓ hγ U))
 
 /-- The level isomorphism sends the class of a power series to the projection of its value at
 `γ - 1`. -/
@@ -198,7 +199,7 @@ theorem ker_proj :
   rw [RingHom.mem_ker, proj_aeval_eq_zero_iff hΓ hγ U, Ideal.mem_span_singleton,
     ← aeval_one_add_X_pow_card_sub_one hΓ γ U]
   refine ⟨fun h ↦ map_dvd _ h, fun ⟨y, hy⟩ ↦ (proj_aeval_eq_zero_iff hΓ hγ U ψ).mp ?_⟩
-  rw [hy, map_mul, proj_aeval_one_add_X_pow_card_sub_one hΓ γ U, zero_mul]
+  rw [hy, map_mul, proj_aeval_one_add_X_pow_card_sub_one_eq_zero hΓ γ U, zero_mul]
 
 section Coordinate
 

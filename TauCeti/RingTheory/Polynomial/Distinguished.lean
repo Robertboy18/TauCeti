@@ -47,16 +47,6 @@ theorem monic_one_add_X : (1 + X : R[X]).Monic := by
   rw [add_comm, ← C_1]
   exact monic_X_add_C 1
 
-/-- The constant coefficient of `(1 + X) ^ n - 1` vanishes. -/
-theorem coeff_one_add_X_pow_sub_one_zero (n : ℕ) : ((1 + X) ^ n - 1 : R[X]).coeff 0 = 0 := by
-  simp [coeff_one_add_X_pow]
-
-/-- The `k`-th coefficient of `(1 + X) ^ n - 1`, for `k ≠ 0`, is the binomial coefficient
-`n.choose k`. -/
-theorem coeff_one_add_X_pow_sub_one (n : ℕ) {k : ℕ} (hk : k ≠ 0) :
-    ((1 + X) ^ n - 1 : R[X]).coeff k = (n.choose k : R) := by
-  simp [coeff_one_add_X_pow, coeff_one, hk]
-
 /-- The polynomial `(1 + X) ^ n - 1` has degree `n`. -/
 @[simp]
 theorem natDegree_one_add_X_pow_sub_one [Nontrivial R] (n : ℕ) :
@@ -85,9 +75,9 @@ theorem isDistinguishedAt_one_add_X_pow_sub_one {p : ℕ} (hp : p.Prime) (m : �
   refine ⟨⟨fun {k} hk ↦ ?_⟩, monic_one_add_X_pow_sub_one (pow_ne_zero m hp.ne_zero)⟩
   rw [natDegree_one_add_X_pow_sub_one] at hk
   rcases Nat.eq_zero_or_pos k with rfl | hk0
-  · rw [coeff_one_add_X_pow_sub_one_zero]
-    exact Ideal.zero_mem _
-  · rw [coeff_one_add_X_pow_sub_one _ hk0.ne', Ideal.mem_span_singleton]
+  · simp [coeff_one_add_X_pow]
+  · rw [coeff_sub, coeff_one_add_X_pow, coeff_one, ite_eq_right hk0.ne', sub_zero,
+      Ideal.mem_span_singleton]
     exact Nat.cast_dvd_cast (hp.dvd_choose_pow hk0.ne' hk.ne)
 
 end Polynomial
