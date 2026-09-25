@@ -67,15 +67,16 @@ theorem energyFormH1_posPart_right (u : W1p mu Omega 2) :
   have hvalue : W1p.value (W1p.posPart (by norm_num) u) x = max (W1p.value u x) 0 := by
     rw [W1p.value_posPart]
     exact hv
-  -- Membership in each indicator set below is exactly the positivity test on the value.
+  -- The indicator set is passed explicitly: `hx` is stated as an inequality, and the
+  -- indicator lemmas cannot infer the set `{y | 0 < W1p.value u y}` from it alone.
   by_cases hx : 0 < W1p.value u x
   · have hjet : jetField (W1p.posPart (by norm_num) u) x = jetField u x := by
       rw [jetField_apply, hvalue, hg, max_eq_left hx.le,
-        indicator_of_mem (show x ∈ {y | 0 < W1p.value u y} from hx), jetField_apply]
+        indicator_of_mem (s := {y | 0 < W1p.value u y}) hx, jetField_apply]
     rw [hjet]
   · have hjet : jetField (W1p.posPart (by norm_num) u) x = 0 := by
       rw [jetField_apply, hvalue, hg, max_eq_right (le_of_not_gt hx),
-        indicator_of_notMem (show x ∉ {y | 0 < W1p.value u y} from hx)]
+        indicator_of_notMem (s := {y | 0 < W1p.value u y}) hx]
       rfl
     rw [hjet]
     simp only [map_zero]
@@ -95,9 +96,11 @@ theorem energyFormH1_posPartAbove_self_le
     (integrable_energyIntegrand_jetField hcoeff _ _)
   filter_upwards [W1p.value_posPartAbove_ae (by norm_num) hk u,
     W1p.gradient_posPartAbove_ae (by norm_num) hk u, hc] with x hv hg hcx
-  -- Above the level, the gradients agree and only the potential term decreases.
+  -- Above the level, the gradients agree and only the potential term decreases. As in
+  -- `energyFormH1_posPart_right`, the indicator set is passed explicitly because `hx` is an
+  -- inequality rather than a membership proof.
   by_cases hx : k < W1p.value u x
-  · rw [indicator_of_mem (show x ∈ {y | k < W1p.value u y} from hx)] at hg
+  · rw [indicator_of_mem (s := {y | k < W1p.value u y}) hx] at hg
     simp only [energyIntegrand_apply, jetField_apply, hv, hg,
       max_eq_left (sub_nonneg.mpr hx.le), massForm_apply]
     exact add_le_add_right
@@ -105,7 +108,7 @@ theorem energyFormH1_posPartAbove_self_le
         (sub_nonneg.mpr hx.le)) _
   · have hjet : jetField (W1p.posPartAbove (by norm_num) hk u) x = 0 := by
       rw [jetField_apply, hv, hg, max_eq_right (sub_nonpos.mpr (le_of_not_gt hx)),
-        indicator_of_notMem (show x ∉ {y | k < W1p.value u y} from hx)]
+        indicator_of_notMem (s := {y | k < W1p.value u y}) hx]
       rfl
     simp only [hjet, map_zero, le_refl]
 
