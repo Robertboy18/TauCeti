@@ -55,7 +55,7 @@ variable
 
 include hExact in
 /-- An invariant additive on equivariant short exact sequences vanishes on a subsingleton
-module: the zero maps make `A → A → A` short exact, so `I A = I A + I A`. -/
+module. -/
 theorem invariant_eq_zero_of_subsingleton {A : Type u}
     [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
     [DistribMulAction G A] [ContinuousSMul G A] [Finite A] [Subsingleton A]
@@ -75,8 +75,7 @@ theorem invariant_eq_zero_of_subsingleton {A : Type u}
 
 include hExact in
 /-- An invariant additive on equivariant short exact sequences takes the same value on
-equivariantly isomorphic modules: an equivariant additive equivalence `A ≃+ B` followed by the
-zero map to `PUnit` is short exact. -/
+equivariantly isomorphic modules. -/
 theorem invariant_eq_of_equiv {A B : Type u}
     [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
     [DistribMulAction G A] [ContinuousSMul G A] [Finite A]
