@@ -148,7 +148,7 @@ theorem neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one {a : ℤ_[2]} {
     -v ∈ unitsPrincipal 2 k ↔ 2 ^ k ∣ a := by
   have hinv : (((-v)⁻¹ : ℤ_[2]ˣ) : ℤ_[2]) = 1 + a :=
     Units.inv_eq_of_mul_eq_one_right (by rw [Units.val_neg, neg_mul, hv, neg_neg])
-  rw [← Subgroup.inv_mem_iff, mem_unitsPrincipal_iff, hinv, add_sub_cancel_left]
+  rw [← Subgroup.inv_mem_iff, mem_unitsPrincipal_iff, hinv, add_sub_cancel_left, Nat.cast_ofNat]
 
 /-- In `ℤ_2ˣ`, the units `-(1 + a)⁻¹` and `(1 - 2 ^ f)⁻¹` topologically generate `V^(f)` when
 `2 ^ f ∣ a`, for `f ≥ 2`: the image of the orientation character of a Demushkin group of even
@@ -188,7 +188,8 @@ theorem exists_topologicalClosure_zpowers_sup_zpowers_eq_of_not_dvd {f : ℕ} {a
     exact hvf (unitsPrincipal_antitone 2 (by omega) hvg)
   have hv2 : -v ∈ unitsPrincipal 2 2 := by
     rw [neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv]
-    norm_num <;> exact ha₄
+    norm_num
+    exact ha₄
   have hg2 : 2 ≤ g := by
     by_contra h
     exact hvg' (unitsPrincipal_antitone 2 (by omega) hv2)
@@ -197,7 +198,7 @@ theorem exists_topologicalClosure_zpowers_sup_zpowers_eq_of_not_dvd {f : ℕ} {a
     (neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv).mp hvg,
     fun h ↦ hvg' ((neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv).mpr h), hw, ?_⟩
   rw [topologicalClosure_zpowers_sup_zpowers_eq_of_mem_unitsPrincipal_succ hg2 hvg hvg'
-    (unitsPrincipal_antitone 2 (by omega)
+    (unitsPrincipal_antitone 2 (show g + 1 ≤ f by omega)
       ((mem_unitsPrincipal_iff_of_val_mul_one_sub_pow_eq_one (by exact_mod_cast hu)).mpr le_rfl))]
   exact (topologicalClosure_zpowers_two_eq_iff hg2 hg2 hvg hvg'
     (neg_mem_unitsPrincipal_two_of_val_eq hw) (neg_notMem_unitsPrincipal_two_succ_of_val_eq hw)).mpr
