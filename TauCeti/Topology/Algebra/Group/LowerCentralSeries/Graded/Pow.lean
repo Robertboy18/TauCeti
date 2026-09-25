@@ -66,11 +66,11 @@ theorem mk_commutatorElement_pow_left {k : ℕ} {a b : G}
     simpa only [zero_add, Nat.add_assoc] using
       commutator_mem_pLowerCentralSeries ha (commutator_mem_pLowerCentralSeries ha hb)
   simp only [← QuotientGroup.mk'_apply, map_commutatorElement, map_pow, map_mul]
-  apply commutatorElement_pow_left_of_central
-  intro g
-  obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective g
-  simpa only [← QuotientGroup.mk'_apply, map_commutatorElement] using
-    commute_mk_of_mem_pLowerCentralSeries hd g
+  refine commutatorElement_pow_left_of_commute ?_ ?_ n
+  · simpa only [← QuotientGroup.mk'_apply, map_commutatorElement] using
+      commute_mk_of_mem_pLowerCentralSeries hd a
+  · simpa only [← QuotientGroup.mk'_apply, map_commutatorElement] using
+      commute_mk_of_mem_pLowerCentralSeries hd ⁅a, b⁆
 
 /-- Collection in the right input modulo `λ_{j+3}`. The correction involves
 `⁅b, ⁅a, b⁆⁆`; reversing the outer commutator would change its sign. -/
@@ -83,11 +83,11 @@ theorem mk_commutatorElement_pow_right {j : ℕ} {a b : G}
     simpa only [zero_add, add_zero, Nat.add_assoc] using
       commutator_mem_pLowerCentralSeries hb (commutator_mem_pLowerCentralSeries ha hb)
   simp only [← QuotientGroup.mk'_apply, map_commutatorElement, map_pow, map_mul]
-  apply commutatorElement_pow_right_of_central
-  intro g
-  obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective g
-  simpa only [← QuotientGroup.mk'_apply, map_commutatorElement] using
-    commute_mk_of_mem_pLowerCentralSeries hd g
+  refine commutatorElement_pow_right_of_commute ?_ ?_ n
+  · simpa only [← QuotientGroup.mk'_apply, map_commutatorElement] using
+      commute_mk_of_mem_pLowerCentralSeries hd b
+  · simpa only [← QuotientGroup.mk'_apply, map_commutatorElement] using
+      commute_mk_of_mem_pLowerCentralSeries hd ⁅a, b⁆
 
 /-- The correction to `[π x, y] = π [x, y]` when `x` has degree zero is
 `(p choose 2) • [x, [x, y]]`, transported to the degree of `π [x, y]`. -/
