@@ -197,6 +197,8 @@ theorem exists_topologicalClosure_zpowers_sup_zpowers_eq_of_not_dvd {f : ℕ} {a
   refine ⟨g, w, hg2, hgf,
     (neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv).mp hvg,
     fun h ↦ hvg' ((neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv).mpr h), hw, ?_⟩
+  -- The level `g + 1` is not inferred from this membership argument, so specify both
+  -- levels of the antitone inclusion before asking `omega` to use `hgf`.
   rw [topologicalClosure_zpowers_sup_zpowers_eq_of_mem_unitsPrincipal_succ hg2 hvg hvg'
     (unitsPrincipal_antitone 2 (show g + 1 ≤ f by omega)
       ((mem_unitsPrincipal_iff_of_val_mul_one_sub_pow_eq_one (by exact_mod_cast hu)).mpr le_rfl))]
