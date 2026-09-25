@@ -149,7 +149,8 @@ instance : MulAction.QuotientAction (ConjAct G) (commutator N).topologicalClosur
 /-- **Conjugation on the topological abelianization of a normal subgroup.** The group `G`, as
 `ConjAct G`, acts on `N^{ab}` by group automorphisms, with `g • (n : N^{ab}) = (g • n : N)`
 (`MulAction.Quotient.smul_mk`). -/
-instance : MulDistribMulAction (ConjAct G) (TopologicalAbelianization N) where
+instance instMulDistribMulActionConjAct :
+    MulDistribMulAction (ConjAct G) (TopologicalAbelianization N) where
   toMulAction := inferInstance
   smul_mul g x y := by
     induction x using QuotientGroup.induction_on with | H x => ?_
@@ -201,7 +202,8 @@ theorem conjAut_mk (g : G) :
 action of `G` by conjugation, which factors through `G ⧸ N` because `N` acts trivially
 (`toConjAct_smul_eq_self_of_mem`); on classes, `(g : G ⧸ N) • (n : N^{ab}) = g * n * g⁻¹`
 (`mk_smul_mk`). -/
-instance : MulDistribMulAction (G ⧸ N) (TopologicalAbelianization N) where
+instance instMulDistribMulActionQuotient :
+    MulDistribMulAction (G ⧸ N) (TopologicalAbelianization N) where
   smul γ x := conjAut N γ x
   one_smul x := congrArg (fun e : MulAut (TopologicalAbelianization N) => e x) (map_one (conjAut N))
   mul_smul γ δ x :=
