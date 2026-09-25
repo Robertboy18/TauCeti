@@ -86,14 +86,14 @@ theorem top_pLowerCentralSeries_multiplicative_zmod_sq_two_eq_bot :
 variable {H : Type u} [Group H] [TopologicalSpace H] [DiscreteTopology H]
 
 /-- A discrete group isomorphic to `ℤ/p²` has `p`-class at most two. -/
-theorem pLowerCentralSeries_two_eq_bot_of_mulEquiv_multiplicative_zmod_sq
+theorem _root_.MulEquiv.pLowerCentralSeries_two_eq_bot_multiplicative_zmod_sq
     (e : H ≃* Multiplicative (ZMod (p ^ 2))) : pLowerCentralSeries p H 2 = ⊥ := by
   rw [← Subgroup.map_eq_bot_iff_of_injective (f := e.toMonoidHom) _ e.injective,
     e.map_pLowerCentralSeries_eq_of_discreteTopology, pLowerCentralSeries_eq_of_discreteTopology,
     top_pLowerCentralSeries_multiplicative_zmod_sq_two_eq_bot]
 
 /-- A discrete group isomorphic to the Heisenberg group over `ZMod p` has `p`-class at most two. -/
-theorem pLowerCentralSeries_two_eq_bot_of_mulEquiv_heisenbergGroup
+theorem _root_.MulEquiv.pLowerCentralSeries_two_eq_bot_heisenbergGroup
     (e : H ≃* HeisenbergGroup (ZMod p)) : pLowerCentralSeries p H 2 = ⊥ := by
   let : TopologicalSpace (HeisenbergGroup (ZMod p)) := ⊥
   have : DiscreteTopology (HeisenbergGroup (ZMod p)) := ⟨rfl⟩
@@ -103,7 +103,7 @@ theorem pLowerCentralSeries_two_eq_bot_of_mulEquiv_heisenbergGroup
 
 /-- In a discrete group isomorphic to the Heisenberg group over `ZMod p`, the `p`-power classes of
 the two standard generators `(1, 0, 0)` and `(0, 1, 0)` vanish: their `p`-th powers are trivial. -/
-theorem gradedPow_gradedMkZero_eq_zero_of_mulEquiv_heisenbergGroup
+theorem _root_.MulEquiv.gradedPow_gradedMkZero_eq_zero_heisenbergGroup
     (e : H ≃* HeisenbergGroup (ZMod p)) {a : HeisenbergGroup (ZMod p)} (ha : a.z = 0)
     (ha' : a.x * a.y = 0) : gradedPow p H 0 (gradedMkZero p H (e.symm a)) = 0 := by
   have hpow : a ^ p = 1 := by
@@ -123,24 +123,24 @@ theorem ofAdd_one_pow_ne_one : (Multiplicative.ofAdd (1 : ZMod (p ^ 2))) ^ p ≠
   nlinarith [hp.two_le]
 
 /-- In a discrete group isomorphic to `ℤ/p²`, the `p`-power class of the generator is nonzero. -/
-theorem gradedPow_gradedMkZero_ne_zero_of_mulEquiv_multiplicative_zmod_sq
+theorem _root_.MulEquiv.gradedPow_gradedMkZero_ne_zero_multiplicative_zmod_sq
     (e : H ≃* Multiplicative (ZMod (p ^ 2))) :
     gradedPow p H 0 (gradedMkZero p H (e.symm (Multiplicative.ofAdd 1))) ≠ 0 := by
   rw [gradedPow_gradedMkZero, ne_eq, gradedMk_eq_zero_iff, Subgroup.coe_mk]
   simp only [Nat.reduceAdd]
-  rw [pLowerCentralSeries_two_eq_bot_of_mulEquiv_multiplicative_zmod_sq e, Subgroup.mem_bot,
+  rw [e.pLowerCentralSeries_two_eq_bot_multiplicative_zmod_sq, Subgroup.mem_bot,
     ← map_pow, e.symm.map_eq_one_iff]
   exact ofAdd_one_pow_ne_one
 
 /-- In a discrete group isomorphic to the Heisenberg group over `𝔽_p`, the bracket of the classes
 of the two standard generators `(1, 0, 0)` and `(0, 1, 0)` is nonzero. -/
-theorem gradedBracket_gradedMkZero_ne_zero_of_mulEquiv_heisenbergGroup
+theorem _root_.MulEquiv.gradedBracket_gradedMkZero_ne_zero_heisenbergGroup
     (e : H ≃* HeisenbergGroup (ZMod p)) :
     gradedBracket p H 0 0 (gradedMkZero p H (e.symm ⟨1, 0, 0⟩))
       (gradedMkZero p H (e.symm ⟨0, 1, 0⟩)) ≠ 0 := by
   rw [gradedBracket_gradedMkZero, ne_eq, gradedMk_eq_zero_iff, Subgroup.coe_mk]
   simp only [Nat.reduceAdd]
-  rw [pLowerCentralSeries_two_eq_bot_of_mulEquiv_heisenbergGroup e, Subgroup.mem_bot,
+  rw [e.pLowerCentralSeries_two_eq_bot_heisenbergGroup, Subgroup.mem_bot,
     ← map_commutatorElement, e.symm.map_eq_one_iff, HeisenbergGroup.commutatorElement_eq]
   intro h
   have := congrArg HeisenbergGroup.z h
@@ -207,7 +207,7 @@ theorem linearIndependent_degreeOneFamily_of :
     refine eq_zero_of_sum_smul_eq_zero p (sum_smul_degreeOneFamily_eq_zero p X hP
       (fun k ↦ if k = i then e.symm (Multiplicative.ofAdd 1) else 1) hc) (Sum.inl i) ?_ ?_
     · rw [degreeOneFamily_inl]
-      simpa using gradedPow_gradedMkZero_ne_zero_of_mulEquiv_multiplicative_zmod_sq e
+      simpa using e.gradedPow_gradedMkZero_ne_zero_multiplicative_zmod_sq
     · rintro (k | ⟨⟨k, l⟩, hkl⟩) hk
       · have hki : k ≠ i := fun h ↦ hk (by rw [h])
         rw [degreeOneFamily_inl]
@@ -227,13 +227,13 @@ theorem linearIndependent_degreeOneFamily_of :
     have hpow (k : X) : gradedPow p _ 0 (gradedMkZero p _ (y k)) = 0 := by
       simp only [y]
       split_ifs
-      · exact gradedPow_gradedMkZero_eq_zero_of_mulEquiv_heisenbergGroup e rfl (mul_zero _)
-      · exact gradedPow_gradedMkZero_eq_zero_of_mulEquiv_heisenbergGroup e rfl (zero_mul _)
+      · exact e.gradedPow_gradedMkZero_eq_zero_heisenbergGroup rfl (mul_zero _)
+      · exact e.gradedPow_gradedMkZero_eq_zero_heisenbergGroup rfl (zero_mul _)
       · rw [gradedMkZero_one, gradedPow_zero]
     refine eq_zero_of_sum_smul_eq_zero p (sum_smul_degreeOneFamily_eq_zero p X hP y hc)
       (Sum.inr ⟨(i, j), hij⟩) ?_ ?_
     · rw [degreeOneFamily_inr]
-      simpa [y, hij.ne'] using gradedBracket_gradedMkZero_ne_zero_of_mulEquiv_heisenbergGroup e
+      simpa [y, hij.ne'] using e.gradedBracket_gradedMkZero_ne_zero_heisenbergGroup
     · rintro (k | ⟨⟨k, l⟩, hkl⟩) hk
       · rw [degreeOneFamily_inl, hpow]
       · rw [degreeOneFamily_inr]

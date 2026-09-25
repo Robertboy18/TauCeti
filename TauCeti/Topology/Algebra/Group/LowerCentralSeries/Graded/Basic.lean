@@ -625,6 +625,7 @@ theorem gradedPow_add_zero_of_two (hp : p = 2) (x y : gradedPiece p G 0) :
 
 /-- **`π` commutes with natural multiples in degree zero**, for every `p`: the defect of
 additivity of `π` on `n • x` and `x` is a multiple of `[x, x] = 0`. -/
+@[simp]
 theorem gradedPow_nsmul_zero (n : ℕ) (x : gradedPiece p G 0) :
     gradedPow p G 0 (n • x) = n • gradedPow p G 0 x := by
   induction n with
@@ -635,6 +636,7 @@ theorem gradedPow_nsmul_zero (n : ℕ) (x : gradedPiece p G 0) :
 
 /-- **`π` commutes with scalars in degree zero**, for nonzero `p`: the `ZMod p`-action is by natural
 multiples. -/
+@[simp]
 theorem gradedPow_smul_zero [NeZero p] (c : ZMod p) (x : gradedPiece p G 0) :
     gradedPow p G 0 (c • x) = c • gradedPow p G 0 x := by
   rw [← ZMod.natCast_zmod_val c, Nat.cast_smul_eq_nsmul, Nat.cast_smul_eq_nsmul,
