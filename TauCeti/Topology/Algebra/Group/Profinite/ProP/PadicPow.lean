@@ -236,10 +236,10 @@ theorem eq_padicPow_of_continuous (hA : IsProP p A) {a : A} {f : ℤ_[p] → A} 
   exact congrFun (PadicInt.denseRange_natCast.equalizer hf hcont
     (funext fun k ↦ by simp [hnat k])) l
 
-/-- A closed subgroup containing `a` contains every `p`-adic power of `a`: the powers of `a`
-by natural numbers lie in it, and the exponents in `ℕ` are dense in `ℤ_[p]`. -/
+/-- A closed subgroup containing `a` contains every `p`-adic power of `a`. -/
 theorem padicPow_mem (hA : IsProP p A) {H : Subgroup A} (hH : IsClosed (H : Set A)) {a : A}
     (ha : a ∈ H) (l : ℤ_[p]) : hA.padicPow a l ∈ H := by
+  -- The exponents `l` with `a ^ l ∈ H` form a closed set containing the dense subset `ℕ`.
   have hclosed : IsClosed {l : ℤ_[p] | hA.padicPow a l ∈ H} :=
     hH.preimage (hA.continuous_padicPow.comp (continuous_id.prodMk continuous_const))
   have hnat : Set.range (Nat.cast : ℕ → ℤ_[p]) ⊆ {l : ℤ_[p] | hA.padicPow a l ∈ H} := by
