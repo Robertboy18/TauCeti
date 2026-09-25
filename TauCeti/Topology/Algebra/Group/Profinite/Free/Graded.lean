@@ -72,47 +72,26 @@ lets the detecting groups live in any universe. -/
 
 section Detecting
 
-variable {p : ℕ} [Fact p.Prime]
+variable {p : ℕ}
 
-omit [Fact p.Prime] in
-/-- **The cyclic group of order `p ^ 2` has `p`-class two.** -/
-theorem top_pLowerCentralSeries_multiplicative_zmod_sq_two :
+/-- **The cyclic group of order `p ^ 2` has `p`-class at most two.** -/
+theorem top_pLowerCentralSeries_multiplicative_zmod_sq_two_eq_bot :
     (⊤ : Subgroup (Multiplicative (ZMod (p ^ 2)))).pLowerCentralSeries p 2 = ⊥ := by
   rw [Subgroup.top_pLowerCentralSeries_eq_range_powMonoidHom, MonoidHom.range_eq_bot_iff]
   refine MonoidHom.ext fun x ↦ ?_
   rw [powMonoidHom_apply, MonoidHom.one_apply, ← ofAdd_toAdd x, ← ofAdd_nsmul, nsmul_eq_mul,
     ZMod.natCast_self, zero_mul, ofAdd_zero]
 
-/-- The `p`-th power of the generator of `ℤ/p²` is nontrivial. -/
-theorem ofAdd_one_pow_ne_one : (Multiplicative.ofAdd (1 : ZMod (p ^ 2))) ^ p ≠ 1 := by
-  have hp : p.Prime := Fact.out
-  rw [← ofAdd_nsmul, ne_eq, ofAdd_eq_one, nsmul_one, ZMod.natCast_eq_zero_iff]
-  intro h
-  have := Nat.le_of_dvd hp.pos h
-  nlinarith [hp.two_le]
-
 variable {H : Type u} [Group H] [TopologicalSpace H] [DiscreteTopology H]
 
-omit [Fact p.Prime] in
-/-- A discrete group isomorphic to `ℤ/p²` has `p`-class two. -/
+/-- A discrete group isomorphic to `ℤ/p²` has `p`-class at most two. -/
 theorem pLowerCentralSeries_two_eq_bot_of_mulEquiv_multiplicative_zmod_sq
     (e : H ≃* Multiplicative (ZMod (p ^ 2))) : pLowerCentralSeries p H 2 = ⊥ := by
   rw [← Subgroup.map_eq_bot_iff_of_injective (f := e.toMonoidHom) _ e.injective,
     e.map_pLowerCentralSeries_eq_of_discreteTopology, pLowerCentralSeries_eq_of_discreteTopology,
-    top_pLowerCentralSeries_multiplicative_zmod_sq_two]
+    top_pLowerCentralSeries_multiplicative_zmod_sq_two_eq_bot]
 
-/-- In a discrete group isomorphic to `ℤ/p²`, the `p`-power class of the generator is nonzero. -/
-theorem gradedPow_gradedMkZero_ne_zero_of_mulEquiv_multiplicative_zmod_sq
-    (e : H ≃* Multiplicative (ZMod (p ^ 2))) :
-    gradedPow p H 0 (gradedMkZero p H (e.symm (Multiplicative.ofAdd 1))) ≠ 0 := by
-  rw [gradedPow_gradedMkZero, ne_eq, gradedMk_eq_zero_iff, Subgroup.coe_mk]
-  simp only [Nat.reduceAdd]
-  rw [pLowerCentralSeries_two_eq_bot_of_mulEquiv_multiplicative_zmod_sq e, Subgroup.mem_bot,
-    ← map_pow, e.symm.map_eq_one_iff]
-  exact ofAdd_one_pow_ne_one
-
-omit [Fact p.Prime] in
-/-- A discrete group isomorphic to the Heisenberg group over `𝔽_p` has `p`-class two. -/
+/-- A discrete group isomorphic to the Heisenberg group over `𝔽_p` has `p`-class at most two. -/
 theorem pLowerCentralSeries_two_eq_bot_of_mulEquiv_heisenbergGroup
     (e : H ≃* HeisenbergGroup (ZMod p)) : pLowerCentralSeries p H 2 = ⊥ := by
   let : TopologicalSpace (HeisenbergGroup (ZMod p)) := ⊥
@@ -131,6 +110,26 @@ theorem gradedPow_gradedMkZero_eq_zero_of_mulEquiv_heisenbergGroup
     ext <;> simp [ha, ha', nsmul_eq_mul]
   rw [gradedPow_gradedMkZero, gradedMk_eq_zero_iff, Subgroup.coe_mk, ← map_pow, hpow, map_one]
   exact one_mem _
+
+variable [Fact p.Prime]
+
+/-- The `p`-th power of the generator of `ℤ/p²` is nontrivial. -/
+theorem ofAdd_one_pow_ne_one : (Multiplicative.ofAdd (1 : ZMod (p ^ 2))) ^ p ≠ 1 := by
+  have hp : p.Prime := Fact.out
+  rw [← ofAdd_nsmul, ne_eq, ofAdd_eq_one, nsmul_one, ZMod.natCast_eq_zero_iff]
+  intro h
+  have := Nat.le_of_dvd hp.pos h
+  nlinarith [hp.two_le]
+
+/-- In a discrete group isomorphic to `ℤ/p²`, the `p`-power class of the generator is nonzero. -/
+theorem gradedPow_gradedMkZero_ne_zero_of_mulEquiv_multiplicative_zmod_sq
+    (e : H ≃* Multiplicative (ZMod (p ^ 2))) :
+    gradedPow p H 0 (gradedMkZero p H (e.symm (Multiplicative.ofAdd 1))) ≠ 0 := by
+  rw [gradedPow_gradedMkZero, ne_eq, gradedMk_eq_zero_iff, Subgroup.coe_mk]
+  simp only [Nat.reduceAdd]
+  rw [pLowerCentralSeries_two_eq_bot_of_mulEquiv_multiplicative_zmod_sq e, Subgroup.mem_bot,
+    ← map_pow, e.symm.map_eq_one_iff]
+  exact ofAdd_one_pow_ne_one
 
 /-- In a discrete group isomorphic to the Heisenberg group over `𝔽_p`, the bracket of the classes
 of the two standard generators `(1, 0, 0)` and `(0, 1, 0)` is nonzero. -/

@@ -10,25 +10,25 @@ public import Mathlib.GroupTheory.PGroup
 public import TauCeti.GroupTheory.PLowerCentralSeries
 
 /-!
-# The Heisenberg group over a commutative ring
+# The Heisenberg group over a ring
 
-The **Heisenberg group** `HeisenbergGroup R` over a commutative ring `R` is the group of unipotent
+The **Heisenberg group** `HeisenbergGroup R` over a ring `R` is the group of unipotent
 upper triangular `3 × 3` matrices over `R`, written in the coordinates `(x, y, z)` of the strictly
 upper triangle, so that
 
   `(x, y, z) * (x', y', z') = (x + x', y + y', z + z' + x * y')`.
 
-It is nilpotent of class two: every commutator lies on the `z`-axis, which is central, and the
-commutator of `(x, y, z)` and `(x', y', z')` is `(0, 0, x * y' - x' * y)`. Over a ring of
+It is nilpotent of class at most two: every commutator lies on the `z`-axis, which is central, and
+the commutator of `(x, y, z)` and `(x', y', z')` is `(0, 0, x * y' - x' * y)`. Over a ring of
 characteristic `p` the `p`-th power of every element lies on the `z`-axis as well, so the second
-term of the lower `p`-central series is trivial; over `𝔽_p` the group has order `p ^ 3`. This is
-the smallest nonabelian `p`-group of `p`-class two, and it detects brackets in the degree-one
-graded piece of the lower `p`-series of a free pro-`p` group.
+term of the lower `p`-central series is trivial. Over `𝔽_p`, for a prime `p`, the group is
+nonabelian of order `p ^ 3`, hence the smallest nonabelian `p`-group, and has `p`-class exactly
+two; it detects brackets in the degree-one graded piece of the lower `p`-series of a free pro-`p`
+group.
 
 ## Main definitions
 
-* `TauCeti.HeisenbergGroup`: the Heisenberg group over a commutative ring, with its group
-  structure.
+* `TauCeti.HeisenbergGroup`: the Heisenberg group over a ring, with its group structure.
 * `TauCeti.HeisenbergGroup.zAxis`: the central subgroup of elements `(0, 0, z)`.
 
 ## Main results
@@ -48,7 +48,7 @@ open scoped commutatorElement
 
 namespace TauCeti
 
-/-- The **Heisenberg group** over a commutative ring `R`: triples `(x, y, z)` with the
+/-- The **Heisenberg group** over a ring `R`: triples `(x, y, z)` with the
 multiplication `(x, y, z) * (x', y', z') = (x + x', y + y', z + z' + x * y')`, the group of
 unipotent upper triangular `3 × 3` matrices in the coordinates of the strictly upper triangle. -/
 @[ext]
@@ -77,7 +77,7 @@ theorem card_eq : Nat.card (HeisenbergGroup R) = Nat.card R ^ 3 := by
   rw [Nat.card_congr equivProd, Nat.card_prod, Nat.card_prod]
   ring
 
-variable [CommRing R]
+variable [Ring R]
 
 instance : Mul (HeisenbergGroup R) := ⟨fun a b => ⟨a.x + b.x, a.y + b.y, a.z + b.z + a.x * b.y⟩⟩
 instance : One (HeisenbergGroup R) := ⟨⟨0, 0, 0⟩⟩
@@ -94,7 +94,7 @@ instance : Inv (HeisenbergGroup R) := ⟨fun a => ⟨-a.x, -a.y, -a.z + a.x * a.
 @[simp] theorem inv_z (a : HeisenbergGroup R) : a⁻¹.z = -a.z + a.x * a.y := rfl
 
 instance : Group (HeisenbergGroup R) where
-  mul_assoc a b c := by ext <;> simp <;> ring
+  mul_assoc a b c := by ext <;> simp only [mul_x, mul_y, mul_z, add_mul, mul_add] <;> abel
   one_mul a := by ext <;> simp
   mul_one a := by ext <;> simp
   inv_mul_cancel a := by ext <;> simp
@@ -102,8 +102,8 @@ instance : Group (HeisenbergGroup R) where
 /-- **The commutator formula**: `⁅(x, y, z), (x', y', z')⁆ = (0, 0, x * y' - x' * y)`. -/
 theorem commutatorElement_eq (a b : HeisenbergGroup R) :
     ⁅a, b⁆ = ⟨0, 0, a.x * b.y - b.x * a.y⟩ := by
-  ext <;> simp [commutatorElement_def]
-  ring
+  ext <;> simp [commutatorElement_def, add_mul]
+  abel
 
 /-- **The power formula**: `(x, y, z) ^ n = (n • x, n • y, n • z + (n choose 2) • (x * y))`. -/
 theorem pow_eq (a : HeisenbergGroup R) (n : ℕ) :
@@ -112,8 +112,8 @@ theorem pow_eq (a : HeisenbergGroup R) (n : ℕ) :
   | zero => ext <;> simp
   | succ n ih =>
     rw [pow_succ, ih, Nat.choose_succ_succ' n 1, Nat.choose_one_right]
-    ext <;> simp [add_smul]
-    ring
+    ext <;> simp [add_smul, nsmul_eq_mul, mul_assoc]
+    abel
 
 /-- The **`z`-axis** `{(0, 0, z)}`, a central subgroup. -/
 def zAxis : Subgroup (HeisenbergGroup R) where
@@ -136,7 +136,8 @@ theorem zAxis_le_center : zAxis ≤ center (HeisenbergGroup R) := by
   intro b
   ext <;> simp [hax, hay, add_comm]
 
-/-- Every commutator lies on the `z`-axis: the Heisenberg group is nilpotent of class two. -/
+/-- Every commutator lies on the `z`-axis: the Heisenberg group is nilpotent of class at most
+two. -/
 theorem commutatorElement_mem_zAxis (a b : HeisenbergGroup R) : ⁅a, b⁆ ∈ zAxis := by
   rw [commutatorElement_eq]
   exact ⟨rfl, rfl⟩
@@ -168,8 +169,8 @@ theorem pLowerCentralSeries_top_one_le_zAxis :
   Subgroup.pLowerCentralSeries_succ_le_iff.mpr
     ⟨fun a _ => pow_char_mem_zAxis p a, fun a _ b _ => commutatorElement_mem_zAxis a b⟩
 
-/-- **The Heisenberg group has `p`-class two** in characteristic `p`: the second term of its
-lower `p`-central series is trivial. -/
+/-- **The Heisenberg group has `p`-class at most two** in characteristic `p`: the second term of
+its lower `p`-central series is trivial. -/
 theorem pLowerCentralSeries_top_two_eq_bot :
     (⊤ : Subgroup (HeisenbergGroup R)).pLowerCentralSeries p 2 = ⊥ := by
   refine le_bot_iff.mp (Subgroup.pLowerCentralSeries_succ_le_iff.mpr ⟨fun a ha => ?_, ?_⟩)
