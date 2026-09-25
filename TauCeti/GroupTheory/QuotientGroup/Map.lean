@@ -91,6 +91,7 @@ theorem mapOfLE_comp_mk' [U.Normal] [V.Normal] (hVU : V ≤ U) :
 
 /-- The homomorphism `G ⧸ U →* H ⧸ N` induced by `f` composed with the quotient homomorphism
 `G ⧸ V →* G ⧸ U` is the homomorphism `G ⧸ V →* H ⧸ N` induced by `f`. -/
+@[simp]
 theorem map_comp_mapOfLE {H : Type*} [Group H] {N : Subgroup H} [N.Normal] [U.Normal] [V.Normal]
     (hVU : V ≤ U) (f : G →* H) (h : U ≤ N.comap f) :
     (_root_.QuotientGroup.map U N f h).comp (mapOfLE hVU) =
@@ -99,6 +100,7 @@ theorem map_comp_mapOfLE {H : Type*} [Group H] {N : Subgroup H} [N.Normal] [U.No
 
 /-- The quotient homomorphism `H ⧸ M →* H ⧸ N` composed with the homomorphism `G ⧸ U →* H ⧸ M`
 induced by `f` is the homomorphism `G ⧸ U →* H ⧸ N` induced by `f`. -/
+@[simp]
 theorem mapOfLE_comp_map {H : Type*} [Group H] {M N : Subgroup H} [M.Normal] [N.Normal]
     [U.Normal] (hMN : M ≤ N) (f : G →* H) (h : U ≤ M.comap f) :
     (mapOfLE hMN).comp (_root_.QuotientGroup.map U M f h) =

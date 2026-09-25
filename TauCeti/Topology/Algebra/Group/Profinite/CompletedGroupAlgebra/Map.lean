@@ -36,7 +36,8 @@ algebras.
 ## Main results
 
 * `TauCeti.completedGroupAlgebra.proj_map`, `TauCeti.completedGroupAlgebra.proj_map_of_le`: the
-  levelwise description of `map`.
+  levelwise description of `map`; `TauCeti.completedGroupAlgebra.mapDomain_map_proj_of_le` is the
+  compatibility between the levels of `R[[Γ]]` behind it.
 * `TauCeti.completedGroupAlgebra.map_of`: `map` sends the group element `γ` to the group element
   `f γ`.
 * `TauCeti.completedGroupAlgebra.map_id`, `TauCeti.completedGroupAlgebra.map_comp`: the functor
@@ -65,6 +66,19 @@ namespace completedGroupAlgebra
 
 variable (f : Γ →* Δ) (hf : Continuous f)
 
+omit [TopologicalSpace Δ] in
+/-- The image of the projection of `x` at the level `U'` of `R[[Γ]]` under the map
+`R[Γ ⧸ U'] → R[Δ ⧸ V]` induced by `f` can be read from any level `U ≤ U'`: it is the image of the
+projection of `x` at `U` under the map `R[Γ ⧸ U] → R[Δ ⧸ V]` induced by `f`. This is the
+compatibility between the levels of `R[[Γ]]` that the levelwise description of `map` rests on. -/
+theorem mapDomain_map_proj_of_le {U U' : OpenNormalSubgroup Γ} (hUU' : U ≤ U') (V : Subgroup Δ)
+    [V.Normal] (h : U'.toSubgroup ≤ V.comap f) (x : completedGroupAlgebra R Γ) :
+    MonoidAlgebra.mapDomain (QuotientGroup.map U'.toSubgroup V f h) (proj R Γ U' x) =
+      MonoidAlgebra.mapDomain (QuotientGroup.map U.toSubgroup V f fun _ hg ↦ h (hUU' hg))
+        (proj R Γ U x) := by
+  rw [← mapDomain_mapOfLE_proj hUU', MonoidAlgebra.mapDomain_mapDomain, ← MonoidHom.coe_comp,
+    QuotientGroup.map_comp_mapOfLE]
+
 /-- The `R`-algebra homomorphism `R[[Γ]] →ₐ[R] R[[Δ]]` induced by a continuous group
 homomorphism `f : Γ →* Δ`: at the level `V` of `R[[Δ]]` it applies the map
 `R[Γ ⧸ f⁻¹(V)] → R[Δ ⧸ V]` induced by `f` to the level `f⁻¹(V)` of `R[[Γ]]` (`proj_map`). It sends
@@ -79,8 +93,7 @@ noncomputable def map : completedGroupAlgebra R Γ →ₐ[R] completedGroupAlgeb
         OpenNormalSubgroup.mem_comap.mpr (hVW (OpenNormalSubgroup.mem_comap.mp hg))
       simp only [AlgHom.comp_apply, MonoidAlgebra.mapDomainAlgHom_apply]
       rw [MonoidAlgebra.mapDomain_mapDomain, ← MonoidHom.coe_comp, QuotientGroup.mapOfLE_comp_map,
-        ← mapDomain_mapOfLE_proj h, MonoidAlgebra.mapDomain_mapDomain, ← MonoidHom.coe_comp,
-        QuotientGroup.map_comp_mapOfLE]
+        mapDomain_map_proj_of_le R f h]
 
 /-- The projection of `map R f hf x` at the level `V` of `R[[Δ]]` is the image of the projection
 of `x` at the level `f⁻¹(V)` of `R[[Γ]]` under the map induced by `f` on the quotients. -/
@@ -94,6 +107,7 @@ theorem proj_map (V : OpenNormalSubgroup Δ) (x : completedGroupAlgebra R Γ) :
 /-- The composite of `map R f hf` with the projection at the level `V` of `R[[Δ]]` is the
 projection at the level `f⁻¹(V)` of `R[[Γ]]` followed by the map induced by `f` on the
 quotients. -/
+@[simp]
 theorem proj_comp_map (V : OpenNormalSubgroup Δ) :
     (proj R Δ V).comp (map R f hf) =
       (MonoidAlgebra.mapDomainAlgHom R R (QuotientGroup.map (V.comap f hf).toSubgroup V.toSubgroup
@@ -108,8 +122,7 @@ theorem proj_map_of_le (U : OpenNormalSubgroup Γ) (V : OpenNormalSubgroup Δ)
     proj R Δ V (map R f hf x) =
       MonoidAlgebra.mapDomain (QuotientGroup.map U.toSubgroup V.toSubgroup f h) (proj R Γ U x) := by
   have hU : U ≤ V.comap f hf := fun _ hg ↦ OpenNormalSubgroup.mem_comap.mpr (h hg)
-  rw [proj_map, ← mapDomain_mapOfLE_proj hU, MonoidAlgebra.mapDomain_mapDomain,
-    ← MonoidHom.coe_comp, QuotientGroup.map_comp_mapOfLE]
+  rw [proj_map, mapDomain_map_proj_of_le R f hU]
 
 /-- The induced map sends the group element `γ` to the group element `f γ`. -/
 @[simp]

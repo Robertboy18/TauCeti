@@ -36,6 +36,7 @@ theorem mapDomain_id (x : MonoidAlgebra R M) : mapDomain id x = x :=
 
 /-- Pushing the coefficients forward along two maps in turn is pushing them forward along the
 composite. -/
+@[simp]
 theorem mapDomain_mapDomain (f : M → N) (g : N → O) (x : MonoidAlgebra R M) :
     mapDomain g (mapDomain f x) = mapDomain (g ∘ f) x :=
   ext <| by rw [coeff_mapDomain, coeff_mapDomain, coeff_mapDomain, Finsupp.mapDomain_comp]
