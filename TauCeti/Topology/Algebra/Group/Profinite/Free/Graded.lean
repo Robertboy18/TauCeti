@@ -75,7 +75,7 @@ section Detecting
 
 variable {p : ℕ}
 
-/-- **The cyclic group of order `p ^ 2` has `p`-class at most two.** -/
+/-- **The cyclic group `ℤ/p²` has `p`-class at most two** (for `p > 0` it has order `p ^ 2`). -/
 theorem top_pLowerCentralSeries_multiplicative_zmod_sq_two_eq_bot :
     (⊤ : Subgroup (Multiplicative (ZMod (p ^ 2)))).pLowerCentralSeries p 2 = ⊥ := by
   rw [Subgroup.top_pLowerCentralSeries_eq_range_powMonoidHom, MonoidHom.range_eq_bot_iff]
