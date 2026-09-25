@@ -95,7 +95,6 @@ lemma inChartAt_apply (x₀ : M) (z : E) (v : Fin 2 → E) :
   exact form.altAt_apply _ _
 
 /-- At the centre of its chart, the coordinate expression of a two-form is its value there. -/
-@[simp]
 lemma inChartAt_extChartAt_self (x : M) : form.inChartAt x (extChartAt I x x) = form.altAt x := by
   ext v
   rw [inChartAt_apply, extChartAt_to_inv, altAt_apply]
