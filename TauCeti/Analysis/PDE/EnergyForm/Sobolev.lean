@@ -670,13 +670,9 @@ theorem garding_energyFormH1_self_of_mass_lower_bound_with_parameter {delta eps 
   have hval := integrable_jetField_fst_sq u
   have hlower := (hgrad.const_mul (lam - eps)).add
     (hval.const_mul (delta - beta ^ 2 / (4 * eps)))
-  have hprincipal : ∀ᵐ x ∂mu.restrict (Omega : Set (EuclideanSpace ℝ ι)),
-      ∀ ξ : EuclideanSpace ℝ ι, lam * ‖ξ‖ ^ 2 ≤ dotProduct ξ (Matrix.mulVec (a x) ξ) :=
-    hmem.mono fun x hx ξ => by
-      simpa only [Matrix.toQuadraticForm'_apply] using h.lower_bound hx ξ
-  have key := garding_energyFormIntegral_self_of_mass_lower_bound_of_bounds_with_parameter
-    (μ := mu.restrict Omega) (a := a) (b := b) (c := c) (U := jetField u) heps hprincipal
-    (hmem.mono hb_bound) (hmem.mono hc_lower) hlower
+  have key := h.garding_energyFormIntegral_self_of_mass_lower_bound_with_parameter_on
+    (μ := mu.restrict Omega) (b := b) (c := c) (U := jetField u) hmem
+    (hmem.mono hb_bound) (hmem.mono hc_lower) heps hlower
     (integrable_energyIntegrand_jetField h ha hb hc hb_bound hc_bound u u)
   refine le_trans (le_of_eq ?_) key
   rw [integral_add (hgrad.const_mul _) (hval.const_mul _), integral_const_mul, integral_const_mul,

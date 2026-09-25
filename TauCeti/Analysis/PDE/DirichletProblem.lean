@@ -47,8 +47,9 @@ in a ball, whose Poincaré constants are the slab width `t - s` and the diameter
 both cases the drift smallness condition `βP < λ` is what makes the resulting constant positive,
 and with no drift it is vacuous.
 
-A mass floor `δ > β²/(2λ)` gives another route: coercivity with constant
-`min (λ/2) (δ - β²/(2λ))`, on any open domain, including all of Euclidean space. The theorem
+A mass floor `δ` satisfying `β² < 4λδ` gives another route. Choose `0 < ε < λ` with
+`β² < 4εδ`; the coercivity constant is `min (λ - ε) (δ - β²/(4ε))`, on any open domain,
+including all of Euclidean space. The theorem
 `TauCeti.PDE.UniformlyEllipticOn.existsUnique_isWeakSolutionDirichlet_of_mass_lower_bound`
 therefore needs no geometric or Poincaré hypothesis. These are sufficient conditions; when
 coercivity is unavailable the Fredholm alternative (Lane D, item 18) replaces Lax--Milgram.
