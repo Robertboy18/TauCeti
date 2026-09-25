@@ -47,12 +47,9 @@ variable {G : Type*} [Monoid G] {M : Type*} [AddCommGroup M] [DistribMulAction G
 definition rather than an instance because it depends on the stability hypothesis. See note
 [reducible non-instances]. -/
 abbrev _root_.AddSubgroup.restrictDistribMulAction (N : AddSubgroup M)
-    (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) : DistribMulAction G N where
-  smul g x := ⟨g • (x : M), hN g x x.property⟩
-  one_smul x := Subtype.ext (one_smul G (x : M))
-  mul_smul g h x := Subtype.ext (mul_smul g h (x : M))
-  smul_zero g := Subtype.ext (smul_zero g)
-  smul_add g x y := Subtype.ext (smul_add g (x : M) (y : M))
+    (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) : DistribMulAction G N :=
+  letI : SMul G N := ⟨fun g x ↦ ⟨g • (x : M), hN g x x.property⟩⟩
+  N.subtype_injective.distribMulAction N.subtype fun _ _ ↦ rfl
 
 /-- The defining equation of `AddSubgroup.restrictDistribMulAction`: the inclusion of `N` in `M`
 is equivariant. -/
@@ -78,14 +75,10 @@ theorem _root_.AddSubgroup.restrictDistribMulAction_inclusion_smul {N K : AddSub
 `g • ↑x = ↑(g • x)`. It is a definition rather than an instance because it depends on the
 stability hypothesis. See note [reducible non-instances]. -/
 abbrev _root_.AddSubgroup.quotientDistribMulAction (N : AddSubgroup M)
-    (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) : DistribMulAction G (M ⧸ N) where
-  smul g := QuotientAddGroup.map N N (DistribSMul.toAddMonoidHom M g) fun x hx ↦ hN g x hx
-  one_smul x :=
-    QuotientAddGroup.induction_on x fun x ↦ congrArg QuotientAddGroup.mk (one_smul G x)
-  mul_smul g h x :=
-    QuotientAddGroup.induction_on x fun x ↦ congrArg QuotientAddGroup.mk (mul_smul g h x)
-  smul_zero g := map_zero (QuotientAddGroup.map N N (DistribSMul.toAddMonoidHom M g) _)
-  smul_add g := map_add (QuotientAddGroup.map N N (DistribSMul.toAddMonoidHom M g) _)
+    (hN : ∀ g : G, ∀ x ∈ N, g • x ∈ N) : DistribMulAction G (M ⧸ N) :=
+  letI : SMul G (M ⧸ N) :=
+    ⟨fun g ↦ QuotientAddGroup.map N N (DistribSMul.toAddMonoidHom M g) fun x hx ↦ hN g x hx⟩
+  (QuotientAddGroup.mk'_surjective N).distribMulAction (QuotientAddGroup.mk' N) fun _ _ ↦ rfl
 
 /-- The defining equation of `AddSubgroup.quotientDistribMulAction` on the class of an
 element. -/
@@ -109,9 +102,10 @@ abbrev _root_.AddSubgroup.subquotientDistribMulAction (N K : AddSubgroup M)
     AddSubgroup.mem_addSubgroupOf.mpr (hN g x (AddSubgroup.mem_addSubgroupOf.mp hx))
 
 /-- If `N` is `G`-stable and `g • x - x ∈ N` for every `g`, then `N ⊔ zmultiples x` is
-`G`-stable. -/
+`G`-stable. The element is explicit so that the partial application to `hN` and `hx` has the
+shape of a stability hypothesis. -/
 theorem smul_mem_sup_zmultiples {N : AddSubgroup M} (hN : ∀ g : G, ∀ y ∈ N, g • y ∈ N) {x : M}
-    (hx : ∀ g : G, g • x - x ∈ N) (g : G) {y : M} (hy : y ∈ N ⊔ AddSubgroup.zmultiples x) :
+    (hx : ∀ g : G, g • x - x ∈ N) (g : G) (y : M) (hy : y ∈ N ⊔ AddSubgroup.zmultiples x) :
     g • y ∈ N ⊔ AddSubgroup.zmultiples x := by
   obtain ⟨n, hn, m, hm, rfl⟩ := AddSubgroup.mem_sup.mp hy
   obtain ⟨k, rfl⟩ := AddSubgroup.mem_zmultiples_iff.mp hm
@@ -124,13 +118,17 @@ theorem smul_mem_sup_zmultiples {N : AddSubgroup M} (hN : ∀ g : G, ∀ y ∈ N
     (AddSubgroup.mem_sup_right (AddSubgroup.zsmul_mem _ (AddSubgroup.mem_zmultiples x) k))
 
 /-- If `K` is obtained from `N` by adjoining an element fixed modulo `N`, then the induced
-action on `K ⧸ N.addSubgroupOf K` is trivial. No finiteness or torsion assumption is needed. -/
+action on `K ⧸ N.addSubgroupOf K` is trivial. The stability of `K` is automatic, by
+`TauCeti.smul_mem_sup_zmultiples`, so the induced action is stated for that proof of it; any other
+proof gives the same action by proof irrelevance. No finiteness or torsion assumption is
+needed. -/
 theorem subquotient_smul_eq_self_of_eq_sup_zmultiples {N K : AddSubgroup M}
-    (hN : ∀ g : G, ∀ y ∈ N, g • y ∈ N) (hK : ∀ g : G, ∀ y ∈ K, g • y ∈ K)
+    (hN : ∀ g : G, ∀ y ∈ N, g • y ∈ N)
     {x : M} (hgen : K = N ⊔ AddSubgroup.zmultiples x) (hx : ∀ g : G, g • x - x ∈ N)
     (g : G) (y : K ⧸ N.addSubgroupOf K) :
-    letI := N.subquotientDistribMulAction K hN hK
+    letI := N.subquotientDistribMulAction K hN (hgen ▸ smul_mem_sup_zmultiples hN hx)
     g • y = y := by
+  have hK : ∀ g : G, ∀ y ∈ K, g • y ∈ K := hgen ▸ smul_mem_sup_zmultiples hN hx
   let := K.restrictDistribMulAction hK
   let := N.subquotientDistribMulAction K hN hK
   obtain ⟨y, rfl⟩ := QuotientAddGroup.mk_surjective y

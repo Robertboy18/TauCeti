@@ -50,8 +50,8 @@ private noncomputable def filtrationStep
   if h : N.1 = ⊤ then N else
     ⟨N.1 ⊔ AddSubgroup.zmultiples
         (exists_notMem_nsmul_mem_smul_sub_mem_of_isProP hG htors N.2 h).choose,
-      fun g _ hy ↦ smul_mem_sup_zmultiples N.2
-        (exists_notMem_nsmul_mem_smul_sub_mem_of_isProP hG htors N.2 h).choose_spec.2.2 g hy⟩
+      smul_mem_sup_zmultiples N.2
+        (exists_notMem_nsmul_mem_smul_sub_mem_of_isProP hG htors N.2 h).choose_spec.2.2⟩
 
 private theorem filtrationStep_of_ne_top
     {N : {N : AddSubgroup M // ∀ g : G, ∀ x ∈ N, g • x ∈ N}} (h : N.1 ≠ ⊤) :
@@ -168,6 +168,6 @@ theorem exists_filtration_with_trivial_factors_of_isProP (hG : IsProP p G)
   refine ⟨N, hN, h0, hmono, htop, hcard, fun i hi ↦ ?_⟩
   obtain ⟨x, hx, hxN, hpx, hgx⟩ := hgen i hi
   exact ⟨⟨subquotientEquivZModOfEqSupZmultiples hx hxN hpx⟩,
-    subquotient_smul_eq_self_of_eq_sup_zmultiples (hN i) (hN (i + 1)) hx hgx⟩
+    subquotient_smul_eq_self_of_eq_sup_zmultiples (hN i) hx hgx⟩
 
 end TauCeti
