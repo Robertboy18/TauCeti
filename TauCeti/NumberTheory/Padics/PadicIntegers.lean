@@ -25,6 +25,7 @@ totally disconnected space `ℤ_p`, and the topology of the units is the subspac
 ## Main results
 
 * `PadicInt.isUnit_one_add_of_dvd`: `1 + x` is a unit of `ℤ_[p]` whenever `p ∣ x`.
+* `PadicInt.units_neg_one_ne_one`: `-1 ≠ 1` in `ℤ_[p]ˣ`.
 * `PadicInt.range_units_val`: the units of `ℤ_[p]` are the elements of norm `1`.
 * `PadicInt.compactSpace_units`, `PadicInt.totallyDisconnectedSpace_units`: `ℤ_[p]ˣ` is a
   profinite group.
@@ -41,6 +42,12 @@ theorem isUnit_one_add_of_dvd {x : ℤ_[p]} (hx : (p : ℤ_[p]) ∣ x) : IsUnit 
   IsLocalRing.isUnit_of_mem_nonunits_one_sub_self _ <| by
     rw [sub_add_cancel_left, mem_nonunits, norm_neg]
     exact (norm_lt_one_iff_dvd x).mpr hx
+
+/-- `-1 ≠ 1` in `ℤ_pˣ`: the unit group has an element of order two. -/
+theorem units_neg_one_ne_one : (-1 : ℤ_[p]ˣ) ≠ 1 := fun h ↦ by
+  have := congrArg Units.val h
+  rw [Units.val_neg, Units.val_one] at this
+  exact (by norm_num : (-1 : ℤ_[p]) ≠ 1) this
 
 /-- The units of `ℤ_p` are the elements of norm `1`. -/
 theorem range_units_val : Set.range (Units.val : ℤ_[p]ˣ → ℤ_[p]) = {x | ‖x‖ = 1} :=
