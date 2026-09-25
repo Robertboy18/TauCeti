@@ -264,8 +264,8 @@ variable {R : Subgroup G} [R.Normal] {N}
 /-- For normal subgroups `R ≤ N`, the map `R^{ab} →* N^{ab}` induced by the inclusion is
 equivariant for conjugation by `G`. -/
 theorem map_inclusion_smul (h : R ≤ N) (g : ConjAct G) (x : TopologicalAbelianization R) :
-    map (Subgroup.inclusion h) (continuous_inclusion (SetLike.coe_subset_coe.mpr h)) (g • x) =
-      g • map (Subgroup.inclusion h) (continuous_inclusion (SetLike.coe_subset_coe.mpr h)) x := by
+    map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) (g • x) =
+      g • map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) x := by
   induction x using QuotientGroup.induction_on with | H x => ?_
   rw [MulAction.Quotient.smul_mk, map_mk, map_mk, MulAction.Quotient.smul_mk]
   -- Both sides are the class of `g * x * g⁻¹` in `N`; the inclusion only changes the membership
@@ -275,10 +275,8 @@ theorem map_inclusion_smul (h : R ≤ N) (g : ConjAct G) (x : TopologicalAbelian
 /-- For normal subgroups `R ≤ N`, the map `R^{ab} →* N^{ab}` induced by the inclusion
 intertwines the actions of `G ⧸ R` and `G ⧸ N`. -/
 theorem map_inclusion_mk_smul (h : R ≤ N) (g : G) (x : TopologicalAbelianization R) :
-    map (Subgroup.inclusion h)
-      (continuous_inclusion (SetLike.coe_subset_coe.mpr h)) ((g : G ⧸ R) • x) =
-      (g : G ⧸ N) • map (Subgroup.inclusion h)
-        (continuous_inclusion (SetLike.coe_subset_coe.mpr h)) x := by
+    map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) ((g : G ⧸ R) • x) =
+      (g : G ⧸ N) • map (Subgroup.inclusion h) (Subgroup.continuous_inclusion h) x := by
   rw [mk_smul, mk_smul, map_inclusion_smul]
 
 end Conjugation
