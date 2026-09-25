@@ -34,6 +34,18 @@ Labute's classification of Demushkin groups runs (Labute, §4, p. 121): `E` is g
 by finitely many classes of elements of `X`, and it is this finite generation that lets the
 relator class be expressed as a `Λ`-combination of generators.
 
+**The convention for the action.** Labute writes the action of `Γ` on `E` as
+`ȳ · x̄ = [y⁻¹ x y]` (§4 Definition, p. 121). The module structure used here is Mathlib's
+conjugation action `ȳ • x̄ = [y x y⁻¹]` (`TopologicalAbelianization.mk_smul_mk`, extended to the
+group elements of `Λ` by `TauCeti.IsProP.completedGroupAlgebraModule_of_smul`), so Labute's
+action is `ȳ⁻¹ • x̄` (`TopologicalAbelianization.mk_inv_smul_mk`): the two differ by the inversion
+of `Γ`. Since `Γ ≅ Im χ` is commutative, inversion is a continuous automorphism of `Γ`, and
+`TauCeti.completedGroupAlgebra.map` turns it into an involutive algebra automorphism `ι` of `Λ`
+with Labute's scalar action `l ·_L ξ = ι l • ξ`. The two module structures therefore have the
+same submodules, the same spans and the same generating sets, and the finite generation proved
+here holds verbatim for Labute's action; only the coefficients of a `Λ`-combination of given
+generators change, by `ι`. No such coefficients are computed in this file.
+
 ## Main results
 
 * `TauCeti.IsProP.module_finite_topologicalAbelianization`: if `N` is the closed normal closure
@@ -167,9 +179,14 @@ theorem exists_finite_topologicalClosure_normalClosure_eq_ker :
 topologically finitely generated pro-`p` group `G` to a commutative `T1` group, the topological
 abelianization `E = X ⧸ (X, X)` of `X = ker χ` is a finitely generated module over the completed
 group algebra `Λ = ℤ_p[[G ⧸ X]]`, for the module structure
-`TauCeti.IsProP.completedGroupAlgebraModule` through conjugation. For `G` free pro-`p` of finite
-rank and `χ` an orientation `G → ℤ_pˣ` this is the module of Labute, §4, on which the
-classification of Demushkin groups runs. -/
+`TauCeti.IsProP.completedGroupAlgebraModule` through conjugation `ȳ • x̄ = [y x y⁻¹]`. For `G`
+free pro-`p` of finite rank and `χ` an orientation `G → ℤ_pˣ` this is the module of Labute, §4,
+on which the classification of Demushkin groups runs, with his action `ȳ · x̄ = [y⁻¹ x y]`
+composed with the inversion of `Γ`; finite generation is the same statement for both conventions
+(see the module docstring). The generators are the classes of the finite normal generating set
+of `X` produced by `exists_finite_topologicalClosure_normalClosure_eq_ker`, not of prescribed
+basis elements of `G`; the expression of the relator class in a normalized basis is a later step
+of the classification. -/
 theorem module_finite_topologicalAbelianization_ker :
     haveI : IsClosed (χ.ker : Set G) := χ.coe_ker ▸ isClosed_singleton.preimage hχ
     letI := (hG.topologicalAbelianization χ.ker).completedGroupAlgebraModule (G ⧸ χ.ker)
