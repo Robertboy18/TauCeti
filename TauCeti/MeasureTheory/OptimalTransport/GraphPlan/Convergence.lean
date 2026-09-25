@@ -8,9 +8,9 @@ module
 public import Mathlib.MeasureTheory.Function.UniformIntegrable
 public import Mathlib.MeasureTheory.Measure.Portmanteau
 public import TauCeti.MeasureTheory.Function.Lusin
-public import TauCeti.MeasureTheory.OptimalTransport.GraphPlan
+public import TauCeti.MeasureTheory.OptimalTransport.GraphPlan.Basic
 
-import Mathlib.MeasureTheory.Integral.DominatedConvergence
+import Mathlib.MeasureTheory.Function.ConvergenceInDistribution
 
 /-!
 # Convergence of transport maps and of their graph plans
@@ -24,23 +24,27 @@ and back.
 
 **Narrow convergence is convergence in measure.** The graph plans of `T n` converge weakly to
 the graph plan of `T₀` exactly when `T n` converges to `T₀` in `μ`-measure. From convergence in
-measure, a subsequence converges almost everywhere, and dominated convergence gives the weak
-convergence along it; the full sequence follows because every subsequence has such a further
-subsequence. Conversely, Lusin's theorem makes `T₀` continuous on a closed set `F` of nearly full
-measure, so that `{(x, y) | x ∈ F, ε ≤ edist y (T₀ x)}` is a closed subset of `X × Y` carrying
-no mass under the limit graph plan; the portmanteau theorem bounds the mass the plans of `T n`
-give it, and that mass is exactly `μ {x ∈ F | ε ≤ edist (T n x) (T₀ x)}`.
+measure, a subsequence converges almost everywhere, and almost-everywhere convergence gives the
+convergence in distribution of the graph maps along it; the full sequence follows because every
+subsequence has such a further subsequence. Conversely, Lusin's theorem makes `T₀` continuous on
+a closed set `F` of nearly full measure, so that `{(x, y) | x ∈ F, ε ≤ edist y (T₀ x)}` is a
+closed subset of `X × Y` carrying no mass under the limit graph plan; the portmanteau theorem
+bounds the mass the plans of `T n` give it, and that mass is exactly
+`μ {x ∈ F | ε ≤ edist (T n x) (T₀ x)}`.
 
 **`Lᵖ` convergence is convergence in measure plus uniform integrability.** For `1 ≤ p < ∞` and
 maps with finite `p`-th moment about a basepoint `y₀`, the distances `dist (T n x) (T₀ x)`
 converge to `0` in `Lᵖ(μ)` exactly when `T n` converges to `T₀` in measure and the family
 `dist (T n ·) y₀` is uniformly integrable in `Lᵖ(μ)`. This is Vitali's convergence theorem
 transported to metric-space-valued maps; the uniform integrability condition does not depend on
-the basepoint, since the left-hand side does not mention it.
+the basepoint, since the left-hand side does not mention it. Uniform integrability is Mathlib's
+`MeasureTheory.UnifIntegrable`, the predicate its Vitali theorem uses, or equivalently
+`MeasureTheory.UniformIntegrable`, which adds a uniform `Lᵖ` bound; the bound follows from the
+`Lᵖ` convergence, since a convergent sequence of finite norms is bounded.
 
 The weak topology on `ProbabilityMeasure (X × Y)` is the one Mathlib puts on probability measures,
-and graph plans are bundled through `MeasureTheory.ProbabilityMeasure.map` along `x ↦ (x, T x)`;
-`TauCeti.toMeasure_map_prodMk_self` identifies the underlying measure with `TauCeti.graphPlan`.
+and graph plans are bundled through `MeasureTheory.ProbabilityMeasure.map` along `x ↦ (x, T x)`,
+whose underlying measure is `TauCeti.graphPlan` by `TauCeti.toMeasure_map_prodMk_self`.
 
 ## Main statements
 
@@ -51,7 +55,9 @@ and graph plans are bundled through `MeasureTheory.ProbabilityMeasure.map` along
   pseudo-metrizable Borel source for Lusin's theorem;
 * `TauCeti.tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_unifIntegrable` — **Vitali's theorem
   for maps into a pseudometric space**: for `1 ≤ p < ∞`, `Lᵖ` convergence of `dist (T n ·) (T₀ ·)`
-  to `0` is convergence in measure together with uniform integrability of `dist (T n ·) y₀`.
+  to `0` is convergence in measure together with uniform integrability of `dist (T n ·) y₀`;
+* `TauCeti.tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_uniformIntegrable` — the same with
+  `MeasureTheory.UniformIntegrable`, which also records the uniform `Lᵖ` bound.
 
 ## References
 
@@ -64,17 +70,11 @@ and graph plans are bundled through `MeasureTheory.ProbabilityMeasure.map` along
 public section
 
 open Filter MeasureTheory ProbabilityTheory Set Topology
-open scoped ENNReal
+open scoped ENNReal NNReal
 
 namespace TauCeti
 
 variable {X Y : Type*} [MeasurableSpace X] [MeasurableSpace Y]
-
-/-- The bundled pushforward of a probability measure along the graph map `x ↦ (x, T x)` is the
-graph plan of `T`. -/
-theorem toMeasure_map_prodMk_self (T : X → Y) (μ : ProbabilityMeasure X) :
-    ((μ.map fun x ↦ (x, T x) : ProbabilityMeasure (X × Y)) : Measure (X × Y)) = graphPlan T μ := by
-  rw [ProbabilityMeasure.toMeasure_map, graphPlan_def]
 
 section Narrow
 
@@ -90,22 +90,10 @@ the graph plan of `T₀`. -/
 theorem tendsto_map_prodMk_self_of_tendstoInMeasure (hT : ∀ n, AEMeasurable (T n) μ)
     (hT₀ : AEMeasurable T₀ μ) (h : TendstoInMeasure (μ : Measure X) T atTop T₀) :
     Tendsto (fun n ↦ μ.map fun x ↦ (x, T n x)) atTop (𝓝 (μ.map fun x ↦ (x, T₀ x))) := by
-  rw [ProbabilityMeasure.tendsto_iff_forall_integral_tendsto]
-  intro f
-  have hint : ∀ S : X → Y, AEMeasurable S μ →
-      ∫ z, f z ∂((μ.map fun x ↦ (x, S x) : ProbabilityMeasure (X × Y)) : Measure (X × Y)) =
-        ∫ x, f (x, S x) ∂μ := fun S hS ↦ by
-    rw [ProbabilityMeasure.toMeasure_map]
-    exact integral_map (aemeasurable_prodMk_self hS) f.continuous.measurable.aestronglyMeasurable
-  simp_rw [hint _ (hT _), hint _ hT₀]
   refine tendsto_of_subseq_tendsto fun ns hns ↦ ?_
   obtain ⟨ms, -, hms⟩ := TendstoInMeasure.exists_seq_tendsto_ae fun ε hε ↦ (h ε hε).comp hns
-  refine ⟨ms, tendsto_integral_of_dominated_convergence (fun _ ↦ ‖f‖) (fun k ↦ ?_)
-    (integrable_const _) (fun k ↦ ae_of_all _ fun x ↦ f.norm_coe_le_norm _) ?_⟩
-  · exact f.continuous.measurable.comp_aemeasurable (aemeasurable_prodMk_self (hT _))
-      |>.aestronglyMeasurable
-  · filter_upwards [hms] with x hx
-    exact (f.continuous.tendsto _).comp (tendsto_const_nhds.prodMk_nhds hx)
+  exact ⟨ms, (tendstoInDistribution_of_ae_tendsto (fun k ↦ aemeasurable_prodMk_self (hT _))
+    (aemeasurable_prodMk_self hT₀) (hms.mono fun x hx ↦ tendsto_const_nhds.prodMk_nhds hx)).tendsto⟩
 
 end OfTendstoInMeasure
 
@@ -122,8 +110,9 @@ theorem tendstoInMeasure_of_tendsto_map_prodMk_self (hT : ∀ n, AEMeasurable (T
   rw [ENNReal.tendsto_nhds_zero]
   intro δ hδ
   have hδ2 : 0 < δ / 2 := ENNReal.half_pos hδ.ne'
-  obtain ⟨F, hF, hFμ, hFcont⟩ :=
-    exists_isClosed_measure_compl_lt_continuousOn_of_aemeasurable (μ := (μ : Measure X)) hT₀ hδ2.ne'
+  obtain ⟨F, -, hF, hFμ, hFcont⟩ := exists_isClosed_measure_diff_lt_continuousOn_of_aemeasurable
+    (μ := (μ : Measure X)) hT₀ MeasurableSet.univ (measure_ne_top _ _) hδ2.ne'
+  rw [← compl_eq_univ_sdiff] at hFμ
   set C : Set (X × Y) := F ×ˢ univ ∩ {z | ε ≤ edist z.2 (T₀ z.1)} with hC
   have hCclosed : IsClosed C := by
     refine ContinuousOn.preimage_isClosed_of_isClosed (t := Ici ε) ?_ (hF.prod isClosed_univ)
@@ -132,10 +121,8 @@ theorem tendstoInMeasure_of_tendsto_map_prodMk_self (hT : ∀ n, AEMeasurable (T
       (continuous_snd.continuousOn.prodMk (hFcont.comp continuous_fst.continuousOn fun z hz ↦ hz.1))
   have hCmeas : MeasurableSet C := hCclosed.measurableSet
   have hlim : ((μ.map fun x ↦ (x, T₀ x) : ProbabilityMeasure (X × Y)) : Measure (X × Y)) C = 0 := by
-    rw [toMeasure_map_prodMk_self, graphPlan_apply hT₀ hCmeas]
-    convert measure_empty (μ := (μ : Measure X)) using 2
-    ext x
-    simp [hC, hε.ne']
+    have hempty : {x | (x, T₀ x) ∈ C} = ∅ := by ext x; simp [hC, hε.ne']
+    rw [toMeasure_map_prodMk_self, graphPlan_apply hT₀ hCmeas, hempty, measure_empty]
   have hCn : Tendsto
       (fun n ↦ ((μ.map fun x ↦ (x, T n x) : ProbabilityMeasure (X × Y)) : Measure (X × Y)) C)
       atTop (𝓝 0) := by
@@ -182,7 +169,6 @@ theorem tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_unifIntegrable (hp : 1 ≤
     (hTp : ∀ n, MemLp (fun x ↦ dist (T n x) y₀) p μ) (hT₀p : MemLp (fun x ↦ dist (T₀ x) y₀) p μ) :
     Tendsto (fun n ↦ eLpNorm (fun x ↦ dist (T n x) (T₀ x)) p μ) atTop (𝓝 0) ↔
       TendstoInMeasure μ T atTop T₀ ∧ UnifIntegrable (fun n x ↦ dist (T n x) y₀) p μ := by
-  have hp0 : p ≠ 0 := (zero_lt_one.trans_le hp).ne'
   have hd : ∀ n, AEStronglyMeasurable (fun x ↦ dist (T n x) (T₀ x)) μ := fun n ↦
     ((hT n).dist hT₀).aestronglyMeasurable
   -- convergence in measure of the maps is convergence in measure of their distances to `0`
@@ -198,25 +184,63 @@ theorem tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_unifIntegrable (hp : 1 ≤
     fun n ↦ ae_of_all _ fun x ↦ by
       rw [Real.norm_of_nonneg dist_nonneg, Real.norm_of_nonneg (by positivity)]
       exact dist_triangle _ _ _
+  have hdp : ∀ n, MemLp (fun x ↦ dist (T n x) (T₀ x)) p μ := fun n ↦
+    ((hTp n).add hT₀p).of_le (hd n) (h₁ n)
   have hd₀ : UnifIntegrable (fun _ : ℕ ↦ fun x ↦ dist (T₀ x) y₀) p μ :=
     unifIntegrable_const hp hp' hT₀p
-  constructor
-  · intro hL
-    refine ⟨key.2 ?_, ?_⟩
-    · exact tendstoInMeasure_of_tendsto_eLpNorm (p := p) hp0 hd aestronglyMeasurable_zero
-        (by simpa using hL)
-    · refine (UnifIntegrable.add ?_ hd₀ hp hd fun _ ↦ hT₀p.aestronglyMeasurable).ae_mono
-        fun n ↦ (h₂ n).mono fun x hx ↦ ?_
-      · refine unifIntegrable_of_tendsto_Lp_zero hp hp' (fun n ↦ ?_) hL
-        exact ((hTp n).add hT₀p).of_le (hd n) (h₁ n)
-      · simpa only [← ofReal_norm, Pi.add_apply] using ENNReal.ofReal_le_ofReal hx
-  · rintro ⟨hTm, hui⟩
-    have hui' : UnifIntegrable (fun n x ↦ dist (T n x) (T₀ x)) p μ :=
-      (UnifIntegrable.add hui hd₀ hp (fun n ↦ (hTp n).aestronglyMeasurable)
-        fun _ ↦ hT₀p.aestronglyMeasurable).ae_mono fun n ↦ (h₁ n).mono fun x hx ↦ by
-          simpa only [← ofReal_norm, Pi.add_apply] using ENNReal.ofReal_le_ofReal hx
-    simpa using tendsto_Lp_finite_of_tendstoInMeasure hp hp' hd (MemLp.zero (p := p) (μ := μ))
-      hui' (key.1 hTm)
+  -- Vitali's theorem for the distances, then transport of uniform integrability
+  have hV := tendstoInMeasure_iff_tendsto_Lp_finite hp hp' hdp (MemLp.zero (p := p) (μ := μ))
+  simp only [sub_zero] at hV
+  rw [← hV, key]
+  refine and_congr_right fun _ ↦ ⟨fun hui ↦ ?_, fun hui ↦ ?_⟩
+  · exact (UnifIntegrable.add hui hd₀ hp hd fun _ ↦ hT₀p.aestronglyMeasurable).ae_mono
+      fun n ↦ (h₂ n).mono fun x hx ↦ enorm_le_iff_norm_le.2 hx
+  · exact (UnifIntegrable.add hui hd₀ hp (fun n ↦ (hTp n).aestronglyMeasurable)
+      fun _ ↦ hT₀p.aestronglyMeasurable).ae_mono fun n ↦ (h₁ n).mono fun x hx ↦
+        enorm_le_iff_norm_le.2 hx
+
+/-- **Vitali's convergence theorem for maps into a pseudometric space**, with
+`MeasureTheory.UniformIntegrable`: under the hypotheses of
+`TauCeti.tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_unifIntegrable`, `dist (T n x) (T₀ x)`
+tends to `0` in `Lᵖ(μ)` if and only if `T n` converges to `T₀` in `μ`-measure and the family
+`dist (T n ·) y₀` is uniformly integrable in `Lᵖ(μ)` with a uniform `Lᵖ` bound. -/
+theorem tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_uniformIntegrable (hp : 1 ≤ p)
+    (hp' : p ≠ ∞) (hT : ∀ n, AEMeasurable (T n) μ) (hT₀ : AEMeasurable T₀ μ)
+    (hTp : ∀ n, MemLp (fun x ↦ dist (T n x) y₀) p μ) (hT₀p : MemLp (fun x ↦ dist (T₀ x) y₀) p μ) :
+    Tendsto (fun n ↦ eLpNorm (fun x ↦ dist (T n x) (T₀ x)) p μ) atTop (𝓝 0) ↔
+      TendstoInMeasure μ T atTop T₀ ∧ UniformIntegrable (fun n x ↦ dist (T n x) y₀) p μ := by
+  refine ⟨fun hL ↦ ?_, fun ⟨hTm, hui⟩ ↦
+    (tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_unifIntegrable hp hp' hT hT₀ hTp hT₀p).2
+      ⟨hTm, hui.unifIntegrable⟩⟩
+  obtain ⟨hTm, hui⟩ :=
+    (tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_unifIntegrable hp hp' hT hT₀ hTp hT₀p).1 hL
+  refine ⟨hTm, fun n ↦ (hTp n).aestronglyMeasurable, hui, ?_⟩
+  -- the convergent sequence of finite `Lᵖ` norms of the distances is bounded
+  have hd : ∀ n, AEStronglyMeasurable (fun x ↦ dist (T n x) (T₀ x)) μ := fun n ↦
+    ((hT n).dist hT₀).aestronglyMeasurable
+  have hfin : ∀ n, eLpNorm (fun x ↦ dist (T n x) (T₀ x)) p μ ≠ ∞ := fun n ↦
+    (((hTp n).add hT₀p).of_le (hd n) (ae_of_all _ fun x ↦ by
+      rw [Pi.add_apply, Real.norm_of_nonneg dist_nonneg, Real.norm_of_nonneg (by positivity)]
+      exact dist_triangle_right _ _ _)).eLpNorm_ne_top
+  obtain ⟨C, hC⟩ : ∃ C : ℝ≥0, ∀ n, eLpNorm (fun x ↦ dist (T n x) (T₀ x)) p μ ≤ C := by
+    have ht : Tendsto (fun n ↦ (eLpNorm (fun x ↦ dist (T n x) (T₀ x)) p μ).toNNReal) atTop
+        (𝓝 0) := by
+      simpa [Function.comp_def] using (ENNReal.tendsto_toNNReal ENNReal.zero_ne_top).comp hL
+    obtain ⟨C, hC⟩ := ht.bddAbove_range
+    exact ⟨C, fun n ↦ by
+      rw [← ENNReal.coe_toNNReal (hfin n)]
+      exact ENNReal.coe_le_coe.2 (hC ⟨n, rfl⟩)⟩
+  refine ⟨C + (eLpNorm (fun x ↦ dist (T₀ x) y₀) p μ).toNNReal, fun n ↦ ?_⟩
+  calc eLpNorm (fun x ↦ dist (T n x) y₀) p μ
+      ≤ eLpNorm ((fun x ↦ dist (T n x) (T₀ x)) + fun x ↦ dist (T₀ x) y₀) p μ :=
+        eLpNorm_mono_ae <| ae_of_all _ fun x ↦ by
+          rw [Pi.add_apply, Real.norm_of_nonneg dist_nonneg, Real.norm_of_nonneg (by positivity)]
+          exact dist_triangle _ _ _
+    _ ≤ eLpNorm (fun x ↦ dist (T n x) (T₀ x)) p μ + eLpNorm (fun x ↦ dist (T₀ x) y₀) p μ :=
+        eLpNorm_add_le (hd n) hT₀p.aestronglyMeasurable hp
+    _ ≤ C + (eLpNorm (fun x ↦ dist (T₀ x) y₀) p μ).toNNReal := by
+        rw [ENNReal.coe_toNNReal hT₀p.eLpNorm_ne_top]
+        exact add_le_add_left (hC n) _
 
 end Lp
 
