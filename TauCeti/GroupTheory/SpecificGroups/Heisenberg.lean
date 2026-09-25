@@ -73,6 +73,8 @@ instance [Fintype R] : Fintype (HeisenbergGroup R) := Fintype.ofEquiv _ equivPro
 
 instance [Finite R] : Finite (HeisenbergGroup R) := Finite.of_equiv _ equivProd.symm
 
+/-- The Heisenberg group over `R` has cardinality `(Nat.card R) ^ 3`; over `𝔽_p` its order is
+`p ^ 3`. -/
 theorem card_eq : Nat.card (HeisenbergGroup R) = Nat.card R ^ 3 := by
   rw [Nat.card_congr equivProd, Nat.card_prod, Nat.card_prod]
   ring

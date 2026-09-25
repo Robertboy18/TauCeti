@@ -24,12 +24,13 @@ canonical generators `x_i = freeProP.of i`. The degree-one graded piece
 the `p`-power classes and the brackets of the generator classes `x'_i ∈ gr_0(F)`. So
 `gr_1(F) ≅ 𝔽_p^X ⊕ Λ²(𝔽_p^X)` has dimension `#X + (#X choose 2)`.
 
-Spanning is the general statement `TauCeti.span_range_degreeOneFamily_eq_top`, which needs only
-that `λ_2(F)` is open. Linear independence is detected on two finite `p`-groups of `p`-class two,
-through the universal property of `F`: the cyclic group `ℤ/p²`, whose generator has a nonzero
-`p`-power class, isolates the coefficient of `π x'_i`; and the Heisenberg group over `𝔽_p`, whose
-two standard generators have trivial `p`-th powers and a nontrivial commutator, isolates the
-coefficient of `[x'_i, x'_j]`. Both groups are lifted to the universe of `X`.
+The basis is the degree-one family `TauCeti.degreeOneFamily` of the canonical generators, indexed
+by `X ⊕ {(i, j) : i < j}`, so its coordinates split a class in `gr_1(F)` into its `p`-power part,
+with one coefficient per generator, and its commutator part, with one coefficient per unordered
+pair of generators. These coordinates are what reading off the class of a relator of a pro-`p`
+group presented on the generators `x_i` requires. The results hold for any universe of `X`; the
+two finite `p`-groups of `p`-class two used as detecting groups are `ℤ/p²` and the Heisenberg
+group over `𝔽_p`.
 
 At `p = 2` the bracket `[x'_0, x'_1]` in `gr_1(freeProP 2 (Fin 2))` is therefore nonzero, and the
 degree-zero power-defect formula shows that the `2`-power operator on this free pro-`2` group is
