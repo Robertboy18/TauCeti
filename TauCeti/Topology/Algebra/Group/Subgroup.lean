@@ -52,7 +52,9 @@ series of a profinite group.
 * `Subgroup.toAddSubgroup_topologicalClosure`: converting to an additive subgroup commutes with
   topological closure.
 * `MonoidHom.map_topologicalClosure_le`: a continuous homomorphism maps the topological closure of
-  a subgroup into the topological closure of its image.
+  a subgroup into the topological closure of its image; `MonoidHom.map_topologicalClosure`: with
+  equality when the source is compact and the target Hausdorff, in which case
+  `Subgroup.isClosed_map` says that images of closed subgroups are closed.
 * `Subgroup.commutator_topologicalClosure_right_le`: a closed subgroup containing `⁅A, B⁆`
   contains `⁅A, B.topologicalClosure⁆`.
 * `TauCeti.mem_or_inv_mul_mem_of_mem_topologicalClosure_zpowers`: if a closed subgroup `H`
@@ -132,6 +134,22 @@ theorem _root_.MonoidHom.map_topologicalClosure_le (f : G →* H) (hf : Continuo
     (S : Subgroup G) : S.topologicalClosure.map f ≤ (S.map f).topologicalClosure := by
   rw [← SetLike.coe_subset_coe, coe_map, topologicalClosure_coe, topologicalClosure_coe, coe_map]
   exact image_closure_subset_closure_image hf
+
+omit [IsTopologicalGroup G] [IsTopologicalGroup H] in
+/-- A continuous homomorphism from a compact group to a Hausdorff group maps closed subgroups to
+closed subgroups. -/
+theorem isClosed_map [CompactSpace G] [T2Space H] {S : Subgroup G} (hS : IsClosed (S : Set G))
+    (f : G →* H) (hf : Continuous f) : IsClosed (S.map f : Set H) := by
+  rw [coe_map]
+  exact hf.isClosedMap _ hS
+
+/-- A continuous homomorphism from a compact group to a Hausdorff group maps the topological
+closure of a subgroup onto the topological closure of its image. -/
+theorem _root_.MonoidHom.map_topologicalClosure [CompactSpace G] [T2Space H] (f : G →* H)
+    (hf : Continuous f) (S : Subgroup G) :
+    S.topologicalClosure.map f = (S.map f).topologicalClosure := by
+  rw [← SetLike.coe_set_eq, coe_map, topologicalClosure_coe, topologicalClosure_coe, coe_map]
+  exact image_closure_of_isCompact isClosed_closure.isCompact hf.continuousOn
 
 open scoped commutatorElement in
 /-- A closed subgroup containing the commutators `⁅A, B⁆` contains the commutators
