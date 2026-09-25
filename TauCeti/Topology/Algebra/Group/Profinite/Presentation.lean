@@ -360,7 +360,7 @@ theorem mk_eq_one_iff (r : freeProP p X) :
 
 /-- The kernel of the quotient map onto a presented pro-`p` group is the closed normal closure of
 the relators. -/
-theorem ker_mk :
+@[simp] theorem ker_mk :
     (mk p rels : freeProP p X →* presentedProP p X rels).ker =
       (Subgroup.normalClosure rels).topologicalClosure :=
   Subgroup.ext fun r ↦ MonoidHom.mem_ker.trans (mk_eq_one_iff r)
