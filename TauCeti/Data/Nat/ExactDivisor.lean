@@ -268,6 +268,16 @@ def prodPrimePow (N : ℕ) (s : Finset ℕ) : ℕ := ∏ p ∈ s, p ^ N.factoriz
 
 variable {s : Finset ℕ}
 
+/-- The empty set cuts out the exact divisor `1`. -/
+@[simp]
+theorem prodPrimePow_empty : prodPrimePow N ∅ = 1 := Finset.prod_empty
+
+/-- **Adjoining a prime multiplies by its maximal power**: `∏ p ∈ insert q s, p ^ v_p(N)` is
+`q ^ v_q(N)` times the product over `s`, for `q ∉ s`. -/
+theorem prodPrimePow_insert {q : ℕ} (hq : q ∉ s) :
+    prodPrimePow N (insert q s) = q ^ N.factorization q * prodPrimePow N s :=
+  Finset.prod_insert hq
+
 /-- **The exponents of `∏ p ∈ s, p ^ v_p(N)`:** the full exponent of `N` at the primes of `s`,
 and `0` elsewhere. -/
 theorem factorization_prodPrimePow (hs : s ⊆ N.primeFactors) (q : ℕ) :
