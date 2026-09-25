@@ -5,7 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 public import Mathlib.LinearAlgebra.Quotient.Basic
+public import Mathlib.RingTheory.Finiteness.Defs
 public import Mathlib.Topology.Algebra.LinearTopology
 public import Mathlib.Topology.Algebra.Nonarchimedean.TotallyDisconnected
 public import TauCeti.Topology.Algebra.Module.Quotient
@@ -44,6 +46,8 @@ witness that a compact totally disconnected topological ring is a compact module
 
 ## Main results
 
+* `Submodule.FG.isCompact`: over a compact semiring, a finitely generated submodule of a
+  topological module is compact.
 * `OpenAddSubgroup.exists_submodule_isOpen_subset`: over a compact ring, an open additive subgroup
   of a topological module contains an open submodule.
 * `TauCeti.NonarchimedeanAddGroup.isLinearTopology`: over a compact ring, a nonarchimedean
@@ -72,6 +76,27 @@ witness that a compact totally disconnected topological ring is a compact module
 public section
 
 open Filter Topology
+
+section CompactSemiring
+
+variable {R M : Type*} [Semiring R] [TopologicalSpace R] [CompactSpace R] [AddCommMonoid M]
+  [Module R M] [TopologicalSpace M] [ContinuousAdd M] [ContinuousSMul R M]
+
+/-- **A finitely generated submodule of a topological module over a compact semiring is compact**:
+it is the image of a finite power of `R` under the continuous linear-combination map. This is
+Mathlib's `Submodule.isCompact_of_fg` without the commutativity assumption on `R`, which its proof
+never uses; the completed group algebra of a nonabelian profinite group is the case that needs
+the generalization. -/
+theorem Submodule.FG.isCompact {N : Submodule R M} (hN : N.FG) : IsCompact (N : Set M) := by
+  obtain ⟨s, hs⟩ := hN
+  have : LinearMap.range (Fintype.linearCombination R (α := s) Subtype.val) = N := by
+    simp [hs]
+  rw [← this]
+  refine isCompact_range ?_
+  simp only [Fintype.linearCombination, Finset.univ_eq_attach, LinearMap.coe_mk, AddHom.coe_mk]
+  fun_prop
+
+end CompactSemiring
 
 namespace TauCeti
 

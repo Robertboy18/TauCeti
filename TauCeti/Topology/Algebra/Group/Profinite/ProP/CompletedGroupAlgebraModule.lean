@@ -38,6 +38,8 @@ one constructed here (Labute, §4, p. 121).
   `TauCeti.IsProP.isScalarTower_completedGroupAlgebraModule`,
   `TauCeti.IsProP.continuousSMul_completedGroupAlgebraModule`: the group elements act as `Γ`
   does, the structure extends the `ℤ_p`-module structure, and it is topological.
+* `TauCeti.IsProP.module_finite_completedGroupAlgebraModule`: the module is finitely generated
+  when the `Γ`-orbit of a finite set generates a dense subgroup of `A`.
 
 ## References
 
@@ -101,6 +103,42 @@ theorem continuousSMul_completedGroupAlgebraModule (hA : IsProP p A) :
   letI := hA.module
   letI := hA.smulCommClass_module (Γ := Γ)
   hA.isCompactModule.continuousSMul_completedGroupAlgebraModule
+
+section FiniteGeneration
+
+open scoped Pointwise
+
+/-- **Finite generation over `ℤ_p[[Γ]]`.** If the `Γ`-orbit of a finite subset `T` of an abelian
+pro-`p` group `A` generates a dense subgroup, then the classes of the elements of `T` span
+`Additive A` over `ℤ_p[[Γ]]`, so it is a finitely generated module. This is the general
+`TauCeti.IsCompactModule.module_finite_of_dense_closure_univ_smul`, with the generation hypothesis
+read on the multiplicative group `A`, where its topology lives. -/
+theorem module_finite_completedGroupAlgebraModule (hA : IsProP p A) {T : Set A} (hT : T.Finite)
+    (hgen : Dense (Subgroup.closure ((Set.univ : Set Γ) • T) : Set A)) :
+    letI := hA.completedGroupAlgebraModule Γ
+    Module.Finite (completedGroupAlgebra ℤ_[p] Γ) (Additive A) := by
+  let _ : Module ℤ_[p] (Additive A) := hA.module
+  let _ : SMulCommClass Γ ℤ_[p] (Additive A) := hA.smulCommClass_module
+  refine hA.isCompactModule.module_finite_of_dense_closure_univ_smul Γ
+    (T := Additive.ofMul '' T) (hT.image _) ?_
+  -- The orbit of the additive classes is the additive image of the orbit.
+  have himage : (Set.univ : Set Γ) • (Additive.ofMul '' T) =
+      Additive.ofMul '' ((Set.univ : Set Γ) • T) := by
+    ext x
+    constructor
+    · rintro ⟨γ, -, _, ⟨t, ht, rfl⟩, rfl⟩
+      exact ⟨γ • t, Set.smul_mem_smul (Set.mem_univ _) ht, Additive.ofMul_smul γ t⟩
+    · rintro ⟨_, ⟨γ, -, t, ht, rfl⟩, rfl⟩
+      exact ⟨γ, Set.mem_univ _, Additive.ofMul t, ⟨t, ht, rfl⟩, (Additive.ofMul_smul γ t).symm⟩
+  have hpre (S : Set A) : Additive.ofMul '' S = Additive.toMul ⁻¹' S :=
+    congrFun (Set.image_eq_preimage_of_inverse toMul_ofMul ofMul_toMul) S
+  have hcoe : ((Subgroup.closure ((Set.univ : Set Γ) • T)).toAddSubgroup : Set (Additive A)) =
+      Additive.toMul ⁻¹' (Subgroup.closure ((Set.univ : Set Γ) • T) : Set A) :=
+    Set.ext fun x ↦ Additive.mem_toAddSubgroup _ x
+  rw [himage, hpre, ← Subgroup.toAddSubgroup_closure, hcoe, ← hpre]
+  exact Additive.ofMul.surjective.denseRange.dense_image continuous_ofMul hgen
+
+end FiniteGeneration
 
 end Module
 
