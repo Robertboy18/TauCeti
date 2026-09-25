@@ -156,6 +156,24 @@ noncomputable def cohomologicalDimension : ℕ∞ :=
 
 variable {p G}
 
+/-- The defining property of `CohomologicalDimensionLE`, available to modules that only see the
+declaration and not its body. -/
+theorem cohomologicalDimensionLE_iff {n : ℕ} :
+    CohomologicalDimensionLE.{v} p G n ↔
+      ∀ (M : Type (max u v)) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+        [DistribMulAction G M] [ContinuousSMul G M], IsPPrimaryTorsion p M →
+        ∀ i : ℕ, n < i → Subsingleton (continuousCohomology i (ofDiscreteModule ℤ G M)) :=
+  Iff.rfl
+
+/-- The defining property of `StrictCohomologicalDimensionLE`, available to modules that only see
+the declaration and not its body. -/
+theorem strictCohomologicalDimensionLE_iff {n : ℕ} :
+    StrictCohomologicalDimensionLE.{v} p G n ↔
+      ∀ (M : Type (max u v)) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+        [DistribMulAction G M] [ContinuousSMul G M], ∀ i : ℕ, n < i →
+        AddCommGroup.primaryComponent (continuousCohomology i (ofDiscreteModule ℤ G M)) p = ⊥ :=
+  Iff.rfl
+
 /-- The ordinary vanishing predicate is upward closed in `n`. -/
 theorem CohomologicalDimensionLE.mono {m n : ℕ} (h : CohomologicalDimensionLE.{v} p G m)
     (hmn : m ≤ n) : CohomologicalDimensionLE.{v} p G n :=
