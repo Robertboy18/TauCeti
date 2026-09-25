@@ -47,11 +47,6 @@ theorem monic_one_add_X : (1 + X : R[X]).Monic := by
   rw [add_comm, ← C_1]
   exact monic_X_add_C 1
 
-/-- The polynomial `1 + X` has degree one. -/
-@[simp]
-theorem natDegree_one_add_X [Nontrivial R] : (1 + X : R[X]).natDegree = 1 := by
-  rw [add_comm, ← C_1, natDegree_X_add_C]
-
 /-- The constant coefficient of `(1 + X) ^ n - 1` vanishes. -/
 theorem coeff_one_add_X_pow_sub_one_zero (n : ℕ) : ((1 + X) ^ n - 1 : R[X]).coeff 0 = 0 := by
   simp [coeff_one_add_X_pow]
@@ -69,7 +64,7 @@ theorem natDegree_one_add_X_pow_sub_one [Nontrivial R] (n : ℕ) :
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp
   have h : ((1 + X : R[X]) ^ n).natDegree = n := by
-    rw [monic_one_add_X.natDegree_pow, natDegree_one_add_X, mul_one]
+    rw [monic_one_add_X.natDegree_pow, natDegree_one_add, natDegree_X, mul_one]
   rw [natDegree_sub_eq_left_of_natDegree_lt (by rw [natDegree_one, h]; exact hn), h]
 
 /-- The polynomial `(1 + X) ^ n - 1` is monic for `n ≠ 0`. -/
@@ -77,7 +72,7 @@ theorem monic_one_add_X_pow_sub_one {n : ℕ} (hn : n ≠ 0) : ((1 + X) ^ n - 1 
   nontriviality R
   refine (monic_one_add_X.pow n).sub_of_left ?_
   rw [degree_one, degree_eq_natDegree (monic_one_add_X.pow n).ne_zero,
-    monic_one_add_X.natDegree_pow, natDegree_one_add_X, mul_one]
+    monic_one_add_X.natDegree_pow, natDegree_one_add, natDegree_X, mul_one]
   exact_mod_cast Nat.pos_of_ne_zero hn
 
 /-- **`(1 + X) ^ (p ^ m) - 1` is a distinguished polynomial at `(p)`**, for a prime `p`: it is
