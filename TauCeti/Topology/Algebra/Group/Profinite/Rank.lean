@@ -324,7 +324,8 @@ finitely generated topological group `G`. Then `U` is topologically finitely gen
 (`TauCeti.IsTopologicallyFinitelyGenerated.of_openSubgroup_of_finiteIndex`), and
 `d(U) ≤ 1 + [G : U] * (d(G) - 1)`, with subtraction in `ℕ`. This is the topological form of
 Schreier's index formula `Subgroup.rank_le_one_add_index_mul_rank_sub_one`. The bound is sharp:
-the open subgroups of a free group attain it, by the Nielsen–Schreier theorem. -/
+finite-index subgroups of nontrivial finitely generated discrete free groups attain it, by the
+Nielsen–Schreier theorem. -/
 theorem topologicalGeneratorRankNat_le_of_openSubgroup_of_finiteIndex
     (hG : IsTopologicallyFinitelyGenerated G) (U : OpenSubgroup G) [U.toSubgroup.FiniteIndex] :
     topologicalGeneratorRankNat U.toSubgroup (hG.of_openSubgroup_of_finiteIndex U) ≤

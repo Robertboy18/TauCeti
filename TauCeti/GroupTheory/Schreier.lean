@@ -229,7 +229,7 @@ theorem _root_.Subgroup.exists_finset_card_le_one_add_index_mul (H : Subgroup G)
     ∃ T : Finset H, T.card ≤ 1 + H.index * (S.card - 1) ∧ closure (T : Set H) = ⊤ := by
   classical
   -- Take the Schreier generators of `Subgroup.closure_mul_image_eq_top'` along a Schreier
-  -- transversal `R`: the `n - 1` of them at pairs `(r', s)` with `r' * s ∈ R` are trivial.
+  -- transversal `R`: at least `n - 1` of them at pairs `(r', s)` with `r' * s ∈ R` are trivial.
   obtain ⟨R, hR⟩ := H.exists_finset_isSchreierTransversal hS
   have hRcard : R.card = H.index := by
     rw [← hR.isComplement.card_right, ← Nat.card_eq_finsetCard, Finset.coe_sort_coe]
