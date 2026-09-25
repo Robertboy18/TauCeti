@@ -593,7 +593,7 @@ theorem UniformlyEllipticOn.exists_lowerOrder_eq_restrictL {lam : ℝ} (hlam : 0
     (hVΩ : closure (V : Set (EuclideanSpace ℝ ι)) ⊆ Omega) :
     ∃ U : Wkp mu V 2 2, Wkp.lowerOrder 1 U =
       W1p.restrictL (SetLike.coe_subset_coe.mp (subset_closure.trans hVΩ)) u := by
-  obtain ⟨g, hg⟩ := exists_forcing_energyFormH1_const_zero_zero_eq hb hc hu
+  obtain ⟨g, hg⟩ := exists_forcing_energyFormH1_const_eq hb hc hu
   obtain ⟨w, f', hw, -, hgrad, -⟩ :=
     exists_isWeakSolutionDirichlet_top_ae_eq_on_of_isCompact hg hV hVΩ
   have htop : mu.restrict ((⊤ : Opens (EuclideanSpace ℝ ι)) : Set (EuclideanSpace ℝ ι)) = mu := by
