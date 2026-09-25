@@ -13,13 +13,13 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Basic
 # Spanning the degree-one graded piece of the lower `p`-series
 
 Let `G` be a topological group whose second lower `p`-series term `λ_2` is open, and let `s` be a
-subset that topologically generates `G`. Then the degree-zero classes of the elements of `s` span
-`gr_0(G) = G ⧸ λ_1` over `𝔽_p`, and the degree-one piece `gr_1(G) = λ_1 ⧸ λ_2` is spanned by
+subset that topologically generates `G`. For `p ≠ 0`, the degree-zero classes of the elements of `s`
+span `gr_0(G) = G ⧸ λ_1` over `ZMod p`, and the degree-one piece `gr_1(G) = λ_1 ⧸ λ_2` is spanned by
 the `p`-power classes `π g'` and the brackets `[g', h']` for `g, h ∈ s`. The generating set `s`
 is arbitrary: it need not be finite, and only the closure of the subgroup it generates matters.
-The degree-zero statement needs only that `λ_1` is open. Both statements bound `gr_0(G)` and
-`gr_1(G)` in terms of the generators, which is the first step in computing the graded pieces of a
-group given by generators.
+The degree-zero statement holds for every `p` and needs only that `λ_1` is open. Both statements
+bound `gr_0(G)` and `gr_1(G)` in terms of the generators, which is the first step in computing
+the graded pieces of a group given by generators.
 
 For a linearly ordered index type the generators are packaged as `TauCeti.degreeOneFamily`: the
 `p`-power classes `π y'_i` together with the brackets `[y'_i, y'_j]` for `i < j`. For a free pro-`p`
@@ -100,8 +100,8 @@ theorem span_gradedMkZero_image_eq_top (h₁ : IsOpen (pLowerCentralSeries p G 1
 
 /-! ### Degree one -/
 
-/-- **The bracket of two elements of a span** lies in any subspace containing the brackets of the
-generators: the bracket is `𝔽_p`-bilinear. -/
+/-- **The bracket of two elements of a span** lies in any submodule containing the brackets of the
+generators: the bracket is `ZMod p`-bilinear. -/
 theorem gradedBracket_mem_of_mem_span (W : Submodule (ZMod p) (gradedPiece p G 1))
     {S : Set (gradedPiece p G 0)} (hS : ∀ x ∈ S, ∀ y ∈ S, gradedBracket p G 0 0 x y ∈ W)
     {x y : gradedPiece p G 0} (hx : x ∈ span (ZMod p) S) (hy : y ∈ span (ZMod p) S) :
@@ -117,7 +117,7 @@ theorem gradedBracket_mem_of_mem_span (W : Submodule (ZMod p) (gradedPiece p G 1
     exact W.smul_mem r hxy
   | smul_right r x y _ _ hxy => rw [ZMod.map_smul]; exact W.smul_mem r hxy
 
-/-- **The `p`-power of an element of a span** lies in any subspace containing the `p`-powers and
+/-- **The `p`-power of an element of a span** lies in any submodule containing the `p`-powers and
 the brackets of the generators: the degree-zero defect of additivity of `π` is a bracket. -/
 theorem gradedPow_mem_of_mem_span [NeZero p] (W : Submodule (ZMod p) (gradedPiece p G 1))
     {S : Set (gradedPiece p G 0)} (hpow : ∀ x ∈ S, gradedPow p G 0 x ∈ W)

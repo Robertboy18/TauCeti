@@ -92,7 +92,7 @@ theorem pLowerCentralSeries_two_eq_bot_of_mulEquiv_multiplicative_zmod_sq
     e.map_pLowerCentralSeries_eq_of_discreteTopology, pLowerCentralSeries_eq_of_discreteTopology,
     top_pLowerCentralSeries_multiplicative_zmod_sq_two_eq_bot]
 
-/-- A discrete group isomorphic to the Heisenberg group over `𝔽_p` has `p`-class at most two. -/
+/-- A discrete group isomorphic to the Heisenberg group over `ZMod p` has `p`-class at most two. -/
 theorem pLowerCentralSeries_two_eq_bot_of_mulEquiv_heisenbergGroup
     (e : H ≃* HeisenbergGroup (ZMod p)) : pLowerCentralSeries p H 2 = ⊥ := by
   let : TopologicalSpace (HeisenbergGroup (ZMod p)) := ⊥
@@ -101,7 +101,7 @@ theorem pLowerCentralSeries_two_eq_bot_of_mulEquiv_heisenbergGroup
     e.map_pLowerCentralSeries_eq_of_discreteTopology, pLowerCentralSeries_eq_of_discreteTopology,
     HeisenbergGroup.pLowerCentralSeries_top_two_eq_bot]
 
-/-- In a discrete group isomorphic to the Heisenberg group over `𝔽_p`, the `p`-power classes of
+/-- In a discrete group isomorphic to the Heisenberg group over `ZMod p`, the `p`-power classes of
 the two standard generators `(1, 0, 0)` and `(0, 1, 0)` vanish: their `p`-th powers are trivial. -/
 theorem gradedPow_gradedMkZero_eq_zero_of_mulEquiv_heisenbergGroup
     (e : H ≃* HeisenbergGroup (ZMod p)) {a : HeisenbergGroup (ZMod p)} (ha : a.z = 0)

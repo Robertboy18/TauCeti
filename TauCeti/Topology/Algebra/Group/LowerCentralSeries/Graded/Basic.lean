@@ -633,7 +633,7 @@ theorem gradedPow_nsmul_zero (n : ℕ) (x : gradedPiece p G 0) :
     rw [succ_nsmul, gradedPow_add_zero, ih, map_nsmul, gradedBracket_self, nsmul_zero, nsmul_zero,
       add_zero, succ_nsmul]
 
-/-- **`π` commutes with scalars in degree zero**, for every `p`: the `ZMod p`-action is by natural
+/-- **`π` commutes with scalars in degree zero**, for nonzero `p`: the `ZMod p`-action is by natural
 multiples. -/
 theorem gradedPow_smul_zero [NeZero p] (c : ZMod p) (x : gradedPiece p G 0) :
     gradedPow p G 0 (c • x) = c • gradedPow p G 0 x := by
