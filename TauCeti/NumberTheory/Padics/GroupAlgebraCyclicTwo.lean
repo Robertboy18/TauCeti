@@ -53,7 +53,7 @@ theorem monoidAlgebraRatPadicCyclicTwoEquiv_apply
     monoidAlgebraRatPadicCyclicTwoEquiv x =
       (x.coeff 1 + x.coeff (Multiplicative.ofAdd 1),
         x.coeff 1 - x.coeff (Multiplicative.ofAdd 1)) := by
-  letI : Invertible (2 : ℚ_[2]) := invertibleOfNonzero two_ne_zero
+  let : Invertible (2 : ℚ_[2]) := invertibleOfNonzero two_ne_zero
   change MonoidAlgebra.cyclicTwoEquivProd ℚ_[2] x = _
   rw [MonoidAlgebra.cyclicTwoEquivProd_apply]
   simpa only [MonoidAlgebra.cyclicTwoToProd_single_one_add_single_ofAdd_one] using
@@ -66,7 +66,7 @@ theorem monoidAlgebraRatPadicCyclicTwoEquiv_symm_apply (z : ℚ_[2] × ℚ_[2]) 
     monoidAlgebraRatPadicCyclicTwoEquiv.symm z =
       MonoidAlgebra.single 1 ((z.1 + z.2) / 2) +
         MonoidAlgebra.single (Multiplicative.ofAdd 1) ((z.1 - z.2) / 2) := by
-  letI : Invertible (2 : ℚ_[2]) := invertibleOfNonzero two_ne_zero
+  let : Invertible (2 : ℚ_[2]) := invertibleOfNonzero two_ne_zero
   change (MonoidAlgebra.cyclicTwoEquivProd ℚ_[2]).symm z = _
   simpa only [invOf_eq_inv, div_eq_mul_inv, mul_comm] using
     MonoidAlgebra.cyclicTwoEquivProd_symm_apply ℚ_[2] z
