@@ -14,18 +14,19 @@ public import TauCeti.Topology.Algebra.GroupAction.QuotientAddGroup
 # Dévissage of finite `p`-primary coefficients for pro-`p` groups
 
 Let `G` be a compact pro-`p` group and `n` a degree. If the continuous cohomology `Hⁿ(G, A)`
-vanishes for every finite discrete `G`-module `A` killed by `p` with **trivial** action, then it
-vanishes for every finite discrete `p`-primary `G`-module `M`, whatever the action. The trivial
-`p`-torsion modules are the finite direct sums of copies of `𝔽_p`, so this is the statement that
-the single coefficient module `𝔽_p` detects the vanishing of `Hⁿ(G, -)` on all finite `p`-primary
-coefficients; it is the pro-`p` case of dévissage (NSW (3.3.2), final clause; Koch takes it as the
-definition of cohomological dimension for pro-`p` groups).
+vanishes for every finite discrete `G`-module `A` killed by `p` with **trivial** action, that is
+for every finite elementary abelian `p`-group with `G` acting trivially, then it vanishes for every
+finite discrete `p`-primary `G`-module `M`, whatever the action. This is the pro-`p` case of
+dévissage (NSW (3.3.2), final clause; Koch takes it as the definition of cohomological dimension
+for pro-`p` groups). The test class is the whole class of finite trivial modules killed by `p`;
+this file does not reduce it further to the single module `𝔽_p`.
 
-The argument is the trivial-filtration theorem
-`TauCeti.exists_addSubgroup_natCard_eq_invariant_of_isProP` together with the long exact
-sequence. A nonzero finite `p`-primary `M` contains a `G`-stable subgroup `N` of order `p` on
-which `G` acts trivially; `Hⁿ(G, N)` vanishes by hypothesis, `Hⁿ(G, M ⧸ N)` vanishes by induction
-on the order, and exactness of `Hⁿ(G, N) → Hⁿ(G, M) → Hⁿ(G, M ⧸ N)` forces `Hⁿ(G, M) = 0`.
+The result combines the trivial-filtration theorem
+`TauCeti.exists_addSubgroup_natCard_eq_invariant_of_isProP`, which places a `G`-stable subgroup
+of order `p` with trivial action inside every nonzero finite `p`-primary module, with exactness
+of the long exact sequence at `Hⁿ(G, M)`
+(`TauCeti.ContCohomology.DiscreteShortExact.longExact_exact₂`), which passes vanishing from that
+subgroup and the quotient by it to `M`.
 
 The coefficients range over finite modules only. Passing from finite `p`-primary coefficients to
 all discrete `p`-primary torsion coefficients, as in the vanishing predicate
