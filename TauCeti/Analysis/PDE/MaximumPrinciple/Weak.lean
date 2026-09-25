@@ -61,6 +61,7 @@ theorem energyFormH1_posPart_right (u : W1p mu Omega 2) :
   have hvalue : W1p.value (W1p.posPart (by norm_num) u) x = max (W1p.value u x) 0 := by
     rw [W1p.value_posPart]
     exact hv
+  -- Membership in each indicator set below is exactly the positivity test on the value.
   by_cases hx : 0 < W1p.value u x
   · have hjet : jetField (W1p.posPart (by norm_num) u) x = jetField u x := by
       rw [jetField_apply, hvalue, hg, max_eq_left hx.le,
@@ -88,13 +89,13 @@ theorem value_nonpos_of_energyFormH1_nonpos {u : W1p mu Omega 2}
   let w : W1p0 mu Omega 2 := ⟨W1p.posPart (by norm_num) u, hboundary⟩
   have hvalue : ∀ᵐ x ∂mu.restrict Omega,
       W1p.value (w : W1p mu Omega 2) x = max (W1p.value u x) 0 := by
-    change ⇑(W1p.value (W1p.posPart (by norm_num) u)) =ᵐ[mu.restrict Omega] _
+    dsimp only [w]
     rw [W1p.value_posPart]
     exact Lp.coeFn_posPart (W1p.value u)
   have hnonneg : ∀ᵐ x ∂mu.restrict Omega, 0 ≤ W1p.value (w : W1p mu Omega 2) x :=
     hvalue.mono fun x hx ↦ hx.symm ▸ le_max_right _ _
   have henergy := hu w hnonneg
-  change energyFormH1 a b c u (W1p.posPart (by norm_num) u) ≤ 0 at henergy
+  dsimp only [w] at henergy
   rw [energyFormH1_posPart_right] at henergy
   have hnorm : ‖w‖ = 0 := by
     have hbound := (hlower w).trans henergy
