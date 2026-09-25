@@ -5,18 +5,38 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded
+public import TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded.Basic
 
 /-!
 # Power and bracket in degree zero of the lower `p`-series
 
-The binomial collection formula gives the correction to compatibility of the power operator
-with the bracket when the powered input has degree zero. For odd `p` the correction vanishes;
-for `p = 2` it is an iterated bracket.
+Away from degree zero the power operator `π` on the graded pieces of the lower `p`-series
+commutes with the bracket (`TauCeti.gradedPow_gradedBracket_left`,
+`TauCeti.gradedPow_gradedBracket_right`). This file treats the remaining case, where the powered
+input has degree zero. The binomial collection formula for `⁅a ^ n, b⁆` and `⁅a, b ^ n⁆` produces
+a correction term: for `x` of degree zero,
 
-The power/bracket compatibility laws follow the `GradedPowerLaws` blueprint in the Tau Ceti
-roadmap's `ProfiniteProPGroups/Suggested.lean`. The degree-zero extensions follow the
-Layer 8 discussion in the roadmap README.
+  `[π x, y] = π [x, y] + (p choose 2) • [x, [x, y]]`,
+
+and symmetrically `[x, π y] = π [x, y] + (p choose 2) • [y, [x, y]]` for `y` of degree zero. For
+odd `p` the correction vanishes, so `π` commutes with the bracket in every degree; for `p = 2` it
+is the iterated bracket `[[x, y], x]`, resp. `[[x, y], y]`. These are the counterparts for the
+bracket of the degree-zero additivity defect `π (x + y) = π x + π y + (p choose 2) • [y, x]`
+(`TauCeti.gradedPow_add_zero`), and together with the results away from degree zero they describe
+`π` on the whole graded Lie algebra.
+
+## Main results
+
+* `TauCeti.mk_commutatorElement_pow_left`, `TauCeti.mk_commutatorElement_pow_right`: the
+  collection formulas for `⁅a ^ n, b⁆` and `⁅a, b ^ n⁆` modulo `λ_{k+3}` when the unpowered input
+  lies in `λ_k`.
+* `TauCeti.gradedBracket_gradedPow_zero_left`, `TauCeti.gradedBracket_gradedPow_zero_right`: the
+  degree-zero corrections `(p choose 2) • [x, [x, y]]` and `(p choose 2) • [y, [x, y]]`.
+* `TauCeti.gradedPow_gradedBracket_left_of_odd`, `TauCeti.gradedPow_gradedBracket_right_of_odd`:
+  for odd `p`, `π [x, y] = [π x, y] = [x, π y]` in every degree.
+* `TauCeti.gradedBracket_gradedPow_zero_left_of_two`,
+  `TauCeti.gradedBracket_gradedPow_zero_right_of_two`: for `p = 2`,
+  `[π x, y] = π [x, y] + [[x, y], x]` and `[x, π y] = π [x, y] + [[x, y], y]`.
 
 ## References
 
@@ -33,62 +53,7 @@ namespace TauCeti
 
 universe u
 
-variable {G : Type u} [Group G]
-
-private theorem commutatorElement_pow_left_of_central {a b : G}
-    (h : ∀ g : G, Commute g ⁅a, ⁅a, b⁆⁆) (n : ℕ) :
-    ⁅a ^ n, b⁆ = ⁅a, b⁆ ^ n * ⁅a, ⁅a, b⁆⁆ ^ n.choose 2 := by
-  let c := ⁅a, b⁆
-  let t := b * a * b⁻¹
-  let d := ⁅a, c⁆
-  have hc : Commute c d := h c
-  have ht : Commute t d := h t
-  have htc : ⁅t, c⁆ = d := by
-    calc
-      ⁅t, c⁆ = c⁻¹ * d * c := by
-        dsimp [c, t, d]
-        simp only [commutatorElement_def]
-        group
-      _ = d := by rw [hc.inv_left.eq]; group
-  have hct : c * t = a := by
-    dsimp [c, t]
-    rw [commutatorElement_def]
-    group
-  have hpow := Commute.mul_pow_eq_pow_mul_pow_mul_commutatorElement_pow_choose_two
-    (a := c) (b := t) (by rwa [htc]) (by rwa [htc]) n
-  rw [hct, htc] at hpow
-  have ht_pow : t ^ n = b * a ^ n * b⁻¹ :=
-    (map_pow (MulAut.conj b) a n).symm
-  calc
-    ⁅a ^ n, b⁆ = a ^ n * (t ^ n)⁻¹ := by rw [ht_pow, commutatorElement_def]; group
-    _ = c ^ n * t ^ n * d ^ n.choose 2 * (t ^ n)⁻¹ := by rw [hpow]
-    _ = c ^ n * d ^ n.choose 2 := by
-      rw [mul_assoc (c ^ n) (t ^ n), ((ht.pow_left n).pow_right (n.choose 2)).eq]
-      group
-
-private theorem commutatorElement_pow_right_of_central {a b : G}
-    (h : ∀ g : G, Commute g ⁅b, ⁅a, b⁆⁆) (n : ℕ) :
-    ⁅a, b ^ n⁆ = ⁅a, b⁆ ^ n * ⁅b, ⁅a, b⁆⁆ ^ n.choose 2 := by
-  have hswap : ⁅b, ⁅b, a⁆⁆ = ⁅b, ⁅a, b⁆⁆⁻¹ := by
-    rw [← commutatorElement_inv a b]
-    calc
-      ⁅b, ⁅a, b⁆⁻¹⁆ = ⁅a, b⁆⁻¹ * ⁅b, ⁅a, b⁆⁆⁻¹ * ⁅a, b⁆ := by
-        generalize ⁅a, b⁆ = c
-        simp only [commutatorElement_def]
-        group
-      _ = ⁅b, ⁅a, b⁆⁆⁻¹ := by
-        rw [(h ⁅a, b⁆).inv_left.inv_right.eq, mul_assoc, inv_mul_cancel, mul_one]
-  have hleft := commutatorElement_pow_left_of_central (a := b) (b := a)
-    (fun g => by rw [hswap]; exact (h g).inv_right) n
-  calc
-    ⁅a, b ^ n⁆ = (⁅b, ⁅b, a⁆⁆ ^ n.choose 2)⁻¹ * (⁅b, a⁆ ^ n)⁻¹ := by
-      simpa only [commutatorElement_inv, mul_inv_rev] using congrArg Inv.inv hleft
-    _ = ⁅b, ⁅a, b⁆⁆ ^ n.choose 2 * ⁅a, b⁆ ^ n := by
-      rw [hswap, ← inv_pow, inv_inv, ← inv_pow, commutatorElement_inv]
-    _ = ⁅a, b⁆ ^ n * ⁅b, ⁅a, b⁆⁆ ^ n.choose 2 :=
-      ((h ⁅a, b⁆).pow_left n |>.pow_right (n.choose 2)).eq.symm
-
-variable {p : ℕ} [TopologicalSpace G] [IsTopologicalGroup G]
+variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
 /-- Collection of a powered commutator modulo `λ_{k+3}`. The iterated commutator lies in
 `λ_{k+2}`, so its image is central and the binomial formula applies. -/
@@ -128,8 +93,7 @@ theorem mk_commutatorElement_pow_right {j : ℕ} {a b : G}
 `(p choose 2) • [x, [x, y]]`, transported to the degree of `π [x, y]`. -/
 theorem gradedBracket_gradedPow_zero_left {k : ℕ} (x : gradedPiece p G 0)
     (y : gradedPiece p G k) :
-    gradedCast p G (show 1 + k + 1 = 0 + k + 1 + 1 by omega)
-        (gradedBracket p G 1 k (gradedPow p G 0 x) y) =
+    gradedCast p G (by omega) (gradedBracket p G 1 k (gradedPow p G 0 x) y) =
       gradedPow p G (0 + k + 1) (gradedBracket p G 0 k x y) +
         p.choose 2 • gradedCast p G (by omega)
           (gradedBracket p G 0 (0 + k + 1) x (gradedBracket p G 0 k x y)) := by
@@ -144,8 +108,7 @@ theorem gradedBracket_gradedPow_zero_left {k : ℕ} (x : gradedPiece p G 0)
 `(p choose 2) • [y, [x, y]]`, with the inner bracket in this order. -/
 theorem gradedBracket_gradedPow_zero_right {j : ℕ} (x : gradedPiece p G j)
     (y : gradedPiece p G 0) :
-    gradedCast p G (show j + 1 + 1 = j + 0 + 1 + 1 by omega)
-        (gradedBracket p G j 1 x (gradedPow p G 0 y)) =
+    gradedCast p G (by omega) (gradedBracket p G j 1 x (gradedPow p G 0 y)) =
       gradedPow p G (j + 0 + 1) (gradedBracket p G j 0 x y) +
         p.choose 2 • gradedCast p G (by omega)
           (gradedBracket p G 0 (j + 0 + 1) y (gradedBracket p G j 0 x y)) := by
@@ -197,32 +160,30 @@ private theorem gradedCast_trans {i j k : ℕ} (hij : i = j) (hjk : j = k)
 The last term has this orientation because every graded piece is killed by `2`. -/
 theorem gradedBracket_gradedPow_zero_left_of_two (hp : p = 2) {k : ℕ}
     (x : gradedPiece p G 0) (y : gradedPiece p G k) :
-    gradedCast p G (show 1 + k + 1 = 0 + k + 1 + 1 by omega)
-        (gradedBracket p G 1 k (gradedPow p G 0 x) y) =
+    gradedCast p G (by omega) (gradedBracket p G 1 k (gradedPow p G 0 x) y) =
       gradedPow p G (0 + k + 1) (gradedBracket p G 0 k x y) +
         gradedCast p G (by omega)
           (gradedBracket p G (0 + k + 1) 0 (gradedBracket p G 0 k x y) x) := by
   subst hp
   rw [gradedBracket_gradedPow_zero_left, Nat.choose_self, one_nsmul]
   congr 1
-  have h := congrArg (gradedCast 2 G (show 0 + (0 + k + 1) + 1 = 0 + k + 1 + 1 by omega))
-    (gradedCast_gradedBracket_swap x (gradedBracket 2 G 0 k x y))
-  simpa only [gradedCast_trans, gradedCast_rfl, gradedCast_neg, neg_gradedPiece_two] using h.symm
+  -- Skew-symmetry reverses the outer bracket up to a sign, which is trivial for `p = 2`.
+  rw [← neg_gradedPiece_two (gradedBracket 2 G 0 (0 + k + 1) x (gradedBracket 2 G 0 k x y)),
+    ← gradedCast_gradedBracket_swap, gradedCast_trans]
 
 /-- For `p = 2` and `y` of degree zero, `[x, π y] = π [x, y] + [[x, y], y]`.
 The inner bracket retains the order `[x, y]`. -/
 theorem gradedBracket_gradedPow_zero_right_of_two (hp : p = 2) {j : ℕ}
     (x : gradedPiece p G j) (y : gradedPiece p G 0) :
-    gradedCast p G (show j + 1 + 1 = j + 0 + 1 + 1 by omega)
-        (gradedBracket p G j 1 x (gradedPow p G 0 y)) =
+    gradedCast p G (by omega) (gradedBracket p G j 1 x (gradedPow p G 0 y)) =
       gradedPow p G (j + 0 + 1) (gradedBracket p G j 0 x y) +
         gradedCast p G (by omega)
           (gradedBracket p G (j + 0 + 1) 0 (gradedBracket p G j 0 x y) y) := by
   subst hp
   rw [gradedBracket_gradedPow_zero_right, Nat.choose_self, one_nsmul]
   congr 1
-  have h := congrArg (gradedCast 2 G (show 0 + (j + 0 + 1) + 1 = j + 0 + 1 + 1 by omega))
-    (gradedCast_gradedBracket_swap y (gradedBracket 2 G j 0 x y))
-  simpa only [gradedCast_trans, gradedCast_rfl, gradedCast_neg, neg_gradedPiece_two] using h.symm
+  -- Skew-symmetry reverses the outer bracket up to a sign, which is trivial for `p = 2`.
+  rw [← neg_gradedPiece_two (gradedBracket 2 G 0 (j + 0 + 1) y (gradedBracket 2 G j 0 x y)),
+    ← gradedCast_gradedBracket_swap, gradedCast_trans]
 
 end TauCeti
