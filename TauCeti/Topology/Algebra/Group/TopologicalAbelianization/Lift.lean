@@ -21,24 +21,26 @@ an abelian profinite group given by its universal property.
 
 ## Main definitions
 
-* `TauCeti.TopologicalAbelianization.lift`: the continuous homomorphism
+* `TopologicalAbelianization.lift`: the continuous homomorphism
   `TopologicalAbelianization G →ₜ* A` induced by a continuous homomorphism `G →ₜ* A` into a
   commutative `T1` group.
 
 ## Main results
 
-* `TauCeti.TopologicalAbelianization.topologicalClosure_commutator_le_ker`: the closure of the
+* `TopologicalAbelianization.topologicalClosure_commutator_le_ker`: the closure of the
   commutator subgroup lies in the kernel of every continuous homomorphism to a commutative `T1`
   group.
-* `TauCeti.TopologicalAbelianization.lift_mk`, `TauCeti.TopologicalAbelianization.lift_unique`:
+* `TopologicalAbelianization.lift_mk`, `TopologicalAbelianization.lift_unique`:
   the factorisation and its uniqueness.
-* `TauCeti.TopologicalAbelianization.hom_ext`: a continuous homomorphism out of the topological
+* `TopologicalAbelianization.hom_ext`: a continuous homomorphism out of the topological
   abelianization is determined by its composite with the projection.
 -/
 
 public section
 
-namespace TauCeti.TopologicalAbelianization
+open TauCeti
+
+namespace TopologicalAbelianization
 
 variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
@@ -87,4 +89,4 @@ theorem hom_ext {B : Type*} [Monoid B] [TopologicalSpace B]
     obtain ⟨x, rfl⟩ := QuotientGroup.mk_surjective q
     exact DFunLike.congr_fun h x
 
-end TauCeti.TopologicalAbelianization
+end TopologicalAbelianization
