@@ -18,19 +18,27 @@ over a right transversal `R` of `H` containing `1`, `s` runs over `S`, and `g �
 these generators gives `[G : H] * |S|` of them (`Subgroup.exists_finset_card_le_mul`). This file
 sharpens the count to `1 + [G : H] * (|S| - 1)`, the classical Schreier index formula.
 
-The saving comes from the choice of transversal. A **Schreier transversal** is a right
-transversal `R` of `H` that contains `1` and is closed under prefixes: every `r ≠ 1` in `R` is
-`r' * s` for some `r' ∈ R` and `s ∈ S`. Along such a transversal the Schreier generators at the
-pairs `(r', s)` with `r' * s ∈ R` are trivial, and there are `|R| - 1` such pairs. Every subgroup
-of finite index has a finite Schreier transversal with respect to every generating set.
+The saving comes from the choice of transversal. A **Schreier transversal** is, in this file, a
+right transversal `R` of `H` that contains `1` and satisfies the *predecessor condition*: every
+`r ≠ 1` in `R` is `r' * s` for some `r' ∈ R` and `s ∈ S`. Along such a transversal the Schreier
+generators at the pairs `(r', s)` with `r' * s ∈ R` are trivial, and there are at least `|R| - 1`
+such pairs, one for each `r ≠ 1`. Every subgroup of finite index has a finite Schreier
+transversal with respect to every generating set.
 
-Prefixes are taken with respect to `S` alone, without inverses, which the finite index makes
-possible; the usual definition allows letters from `S⁻¹` as well, and a transversal in the sense
-used here is one in the usual sense.
+The predecessor condition is a one-step condition: it does not ask that every element of `R` be
+reached from `1` by a chain of such steps, so it allows cycles: if `S` contains both `s` and
+`s⁻¹`, then `r = r' * s` and `r' = r * s⁻¹` satisfy it with neither `r` nor `r'` reached from
+`1`. It is therefore weaker than the usual notion of a Schreier transversal, a prefix-closed set
+of reduced words in `S ∪ S⁻¹`, and it only uses letters from `S`, not from `S⁻¹`. The one-step
+condition is all that the index formula needs. The transversal built in
+`Subgroup.exists_finset_isSchreierTransversal` starts from `{1}` and adds elements of the form
+`r * s` with `r` already present, so it is reached from `1` by chains of steps, but the
+predicate does not record this.
 
 ## Main results
 
-* `Subgroup.IsSchreierTransversal`: a prefix-closed right transversal containing `1`.
+* `Subgroup.IsSchreierTransversal`: a right transversal containing `1` in which every other
+  element is an element of the transversal times an element of `S`.
 * `Subgroup.exists_finset_isSchreierTransversal`: a finite-index subgroup has a finite Schreier
   transversal with respect to every generating set.
 * `Subgroup.exists_finset_card_le_one_add_index_mul`: **Schreier's index formula**: a subgroup of
@@ -62,10 +70,12 @@ theorem _root_.Subgroup.IsComplement.coe_toRightFun_of_mem {H : Subgroup G} {R :
   exact congrArg Subtype.val h
 
 /-- A **Schreier transversal** of a subgroup `H` with respect to a set `S`: a right transversal
-`R` of `H`, so that `H * R = G` with unique factorization, which contains `1` and is closed under
-prefixes, in the sense that every `r ≠ 1` in `R` is `r' * s` for some `r' ∈ R` and `s ∈ S`.
-When `S` generates `G`, the Schreier generators of `H` at the pairs `(r', s)` with `r' * s ∈ R`
-are trivial, which is what sharpens Schreier's lemma to the index formula
+`R` of `H`, so that `H * R = G` with unique factorization, which contains `1` and satisfies the
+predecessor condition that every `r ≠ 1` in `R` is `r' * s` for some `r' ∈ R` and `s ∈ S`.
+This is a one-step condition: it does not require `r` to be reached from `1` by a chain of such
+steps, so it is weaker than the usual notion of a prefix-closed transversal. When `S` generates
+`G`, the Schreier generators of `H` at the pairs `(r', s)` with `r' * s ∈ R` are trivial, which
+is what sharpens Schreier's lemma to the index formula
 `Subgroup.exists_finset_card_le_one_add_index_mul`. -/
 structure _root_.Subgroup.IsSchreierTransversal (H : Subgroup G) (S R : Set G) : Prop where
   /-- `R` is a right transversal of `H`. -/
@@ -77,9 +87,9 @@ structure _root_.Subgroup.IsSchreierTransversal (H : Subgroup G) (S R : Set G) :
 
 section Existence
 
-/-- A prefix-closed finite set of representatives of pairwise distinct right cosets of `H`
-containing `1`: a Schreier transversal that may miss some cosets. The existence proof enlarges
-such a set until no coset is missing. -/
+/-- A finite set of representatives of pairwise distinct right cosets of `H` containing `1` and
+satisfying the predecessor condition: a Schreier transversal that may miss some cosets. The
+existence proof enlarges such a set until no coset is missing. -/
 private structure IsPartialSchreierTransversal (H : Subgroup G) (S : Set G) (R : Finset G) :
     Prop where
   one_mem : (1 : G) ∈ R
@@ -227,8 +237,8 @@ theorem _root_.Subgroup.exists_finset_card_le_one_add_index_mul (H : Subgroup G)
   let f : G → H := fun g ↦ ⟨g * (hR.isComplement.toRightFun g : G)⁻¹,
     hR.isComplement.mul_inv_toRightFun_mem g⟩
   refine ⟨((R * S) \ R).image f, ?_, ?_⟩
-  · -- Count: `R * S` has at most `n * d` elements, and by the prefix condition at least `n - 1`
-    -- of them lie in `R`.
+  · -- Count: `R * S` has at most `n * d` elements, and by the predecessor condition at least
+    -- `n - 1` of them lie in `R`, namely every `r ≠ 1`.
     have hsub : R.erase 1 ⊆ R ∩ (R * S) := fun r hr ↦ by
       obtain ⟨hr1, hr⟩ := Finset.mem_erase.mp hr
       obtain ⟨r', hr', s, hs, h⟩ := hR.exists_mul_eq r (Finset.mem_coe.mpr hr) hr1
