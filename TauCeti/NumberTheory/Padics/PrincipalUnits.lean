@@ -13,6 +13,7 @@ public import Mathlib.RingTheory.ZMod.UnitsCyclic
 public import Mathlib.Topology.Algebra.Group.Subgroup
 public import Mathlib.Topology.Algebra.Group.Units
 public import TauCeti.NumberTheory.Padics.RingHoms
+import Mathlib.RingTheory.LocalRing.ResidueField.Basic
 import TauCeti.NumberTheory.Padics.PadicIntegers
 
 /-!
@@ -40,7 +41,9 @@ sorted by how they sit over `{±1}` inside `ℤ_2ˣ = {±1} × (1 + 4ℤ_2)`.
 ## Main declarations
 
 * `TauCeti.unitsPrincipal p f`: the principal unit group `U^(f) = 1 + p^f ℤ_p`, with
-  `TauCeti.mem_unitsPrincipal_iff` (`u ∈ U^(f) ↔ p ^ f ∣ u - 1`) and its norm form.
+  `TauCeti.mem_unitsPrincipal_iff` (`u ∈ U^(f) ↔ p ^ f ∣ u - 1`) and its norm form; at level
+  one, `TauCeti.mem_unitsPrincipal_one_iff_toZMod` and `TauCeti.mem_unitsPrincipal_one_iff_residue`
+  read the condition in `ℤ/pℤ` and in the residue field.
 * `TauCeti.isOpen_unitsPrincipal`, `TauCeti.isClosed_unitsPrincipal`,
   `TauCeti.unitsPrincipal_antitone`, `TauCeti.iInf_unitsPrincipal_eq_bot`,
   `TauCeti.hasBasis_nhds_one_unitsPrincipal`: the topology of the filtration.
@@ -94,6 +97,20 @@ theorem mem_unitsPrincipal_iff {f : ℕ} {u : ℤ_[p]ˣ} :
 theorem mem_unitsPrincipal_iff_norm {f : ℕ} {u : ℤ_[p]ˣ} :
     u ∈ unitsPrincipal p f ↔ ‖(u : ℤ_[p]) - 1‖ ≤ (p : ℝ) ^ (-(f : ℤ)) := by
   rw [mem_unitsPrincipal_iff, PadicInt.norm_le_pow_iff_mem_span_pow, Ideal.mem_span_singleton]
+
+/-- `u ∈ U^(1)` iff `u ≡ 1 mod p`, read in `ℤ/pℤ`. -/
+theorem mem_unitsPrincipal_one_iff_toZMod {u : ℤ_[p]ˣ} :
+    u ∈ unitsPrincipal p 1 ↔ PadicInt.toZMod (u : ℤ_[p]) = 1 := by
+  rw [mem_unitsPrincipal_iff, pow_one, ← Ideal.mem_span_singleton,
+    ← PadicInt.maximalIdeal_eq_span_p, ← PadicInt.ker_toZMod, RingHom.mem_ker, map_sub, map_one,
+    sub_eq_zero]
+
+/-- `u ∈ U^(1)` iff `u` reduces to `1` in the residue field of `ℤ_p`. -/
+theorem mem_unitsPrincipal_one_iff_residue {u : ℤ_[p]ˣ} :
+    u ∈ unitsPrincipal p 1 ↔ IsLocalRing.residue ℤ_[p] (u : ℤ_[p]) = 1 := by
+  rw [mem_unitsPrincipal_iff, pow_one, ← Ideal.mem_span_singleton,
+    ← PadicInt.maximalIdeal_eq_span_p, ← IsLocalRing.residue_eq_zero_iff, map_sub, map_one,
+    sub_eq_zero]
 
 variable (p) in
 @[simp]
