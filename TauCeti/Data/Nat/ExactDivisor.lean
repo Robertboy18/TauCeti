@@ -277,6 +277,7 @@ theorem prodPrimePow_empty : prodPrimePow N ∅ = 1 := Finset.prod_empty
 
 /-- **Adjoining a prime multiplies by its maximal power**: `∏ p ∈ insert q s, p ^ v_p(N)` is
 `q ^ v_q(N)` times the product over `s`, for `q ∉ s`. -/
+@[simp]
 theorem prodPrimePow_insert {q : ℕ} (hq : q ∉ s) :
     prodPrimePow N (insert q s) = q ^ N.factorization q * prodPrimePow N s :=
   Finset.prod_insert hq
