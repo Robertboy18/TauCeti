@@ -36,7 +36,7 @@ the presented group has topological generator rank exactly `n`.
 
 ## Main results
 
-* `TauCeti.demushkinWordNeTwo_presentedProPGen` and its two companions: the generators of the
+* `TauCeti.demushkinWordNeTwo_presentedProPGen_eq_one` and its two companions: the generators of the
   normal-form presentation satisfy its defining relation.
 * `TauCeti.demushkinWordNeTwo_mem_proPFrattini`, `TauCeti.demushkinWordTwoOdd_mem_proPFrattini`,
   `TauCeti.demushkinWordTwoEven_mem_proPFrattini`: each word lies in the pro-`p` Frattini
@@ -67,14 +67,15 @@ variable {H : Type*} [Group H]
 
 /-- **Labute's commutator** `(x, y) = x⁻¹y⁻¹xy`, the convention in which the Demushkin
 normal-form relators are written. Mathlib's `⁅x, y⁆ = xyx⁻¹y⁻¹` is the other convention; the two
-are related by `TauCeti.labuteComm_eq_commutatorElement`, and generate the same subgroups. -/
+are related by `TauCeti.labuteComm_eq_commutatorElement_inv_inv`, and generate the same
+subgroups. -/
 def labuteComm (x y : H) : H := x⁻¹ * y⁻¹ * x * y
 
 /-- The defining equation of `TauCeti.labuteComm`. -/
 theorem labuteComm_def (x y : H) : labuteComm x y = x⁻¹ * y⁻¹ * x * y := (rfl)
 
 /-- Labute's commutator is Mathlib's commutator of the inverses: `(x, y) = ⁅x⁻¹, y⁻¹⁆`. -/
-theorem labuteComm_eq_commutatorElement (x y : H) : labuteComm x y = ⁅x⁻¹, y⁻¹⁆ := by
+theorem labuteComm_eq_commutatorElement_inv_inv (x y : H) : labuteComm x y = ⁅x⁻¹, y⁻¹⁆ := by
   rw [labuteComm_def, commutatorElement_def, inv_inv, inv_inv]
 
 /-- A monoid homomorphism carries Labute's commutator to Labute's commutator. -/
@@ -85,7 +86,8 @@ theorem map_labuteComm {K F : Type*} [Group K] [FunLike F H K] [MonoidHomClass F
 
 /-- Labute's commutator is trivial exactly when the two elements commute. -/
 theorem labuteComm_eq_one_iff_commute (x y : H) : labuteComm x y = 1 ↔ Commute x y := by
-  rw [labuteComm_eq_commutatorElement, commutatorElement_eq_one_iff_commute, Commute.inv_inv_iff]
+  rw [labuteComm_eq_commutatorElement_inv_inv, commutatorElement_eq_one_iff_commute,
+    Commute.inv_inv_iff]
 
 /-- Labute's commutator of two commuting elements is trivial. -/
 theorem _root_.Commute.labuteComm_eq_one {x y : H} (h : Commute x y) : labuteComm x y = 1 :=
@@ -98,7 +100,7 @@ theorem labuteComm_eq_one {A : Type*} [CommGroup A] (x y : A) : labuteComm x y =
 
 /-- Labute's commutator lies in the commutator subgroup. -/
 theorem labuteComm_mem_commutator (x y : H) : labuteComm x y ∈ commutator H := by
-  rw [labuteComm_eq_commutatorElement]
+  rw [labuteComm_eq_commutatorElement_inv_inv]
   exact Subgroup.commutator_mem_commutator (Subgroup.mem_top _) (Subgroup.mem_top _)
 
 /-- Labute's commutator lies in the pro-`p` Frattini subgroup of a topological group. -/
@@ -323,7 +325,7 @@ variable (p : ℕ)
 /-- The `ℕ`-indexed generators of the `q ≠ 2` normal-form presentation satisfy its defining
 relation `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n) = 1`. -/
 @[simp]
-theorem demushkinWordNeTwo_presentedProPGen (q n : ℕ) :
+theorem demushkinWordNeTwo_presentedProPGen_eq_one (q n : ℕ) :
     demushkinWordNeTwo q n (presentedProPGen p n {demushkinWordNeTwo q n (freeProPGen p n)}) =
       1 := by
   rw [← presentedProP.mk_comp_freeProPGen, ← map_demushkinWordNeTwo]
@@ -332,7 +334,7 @@ theorem demushkinWordNeTwo_presentedProPGen (q n : ℕ) :
 /-- The `ℕ`-indexed generators of the `q = 2`, `n` odd normal-form presentation satisfy its
 defining relation `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n) = 1`. -/
 @[simp]
-theorem demushkinWordTwoOdd_presentedProPGen (f n : ℕ) :
+theorem demushkinWordTwoOdd_presentedProPGen_eq_one (f n : ℕ) :
     demushkinWordTwoOdd f n (presentedProPGen p n {demushkinWordTwoOdd f n (freeProPGen p n)}) =
       1 := by
   rw [← presentedProP.mk_comp_freeProPGen, ← map_demushkinWordTwoOdd]
@@ -341,7 +343,7 @@ theorem demushkinWordTwoOdd_presentedProPGen (f n : ℕ) :
 /-- The `ℕ`-indexed generators of the `q = 2`, `n` even normal-form presentation satisfy its
 defining relation `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n) = 1`. -/
 @[simp]
-theorem demushkinWordTwoEven_presentedProPGen (a f n : ℕ) :
+theorem demushkinWordTwoEven_presentedProPGen_eq_one (a f n : ℕ) :
     demushkinWordTwoEven a f n
       (presentedProPGen p n {demushkinWordTwoEven a f n (freeProPGen p n)}) = 1 := by
   rw [← presentedProP.mk_comp_freeProPGen, ← map_demushkinWordTwoEven]
