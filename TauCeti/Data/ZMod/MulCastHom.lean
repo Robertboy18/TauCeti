@@ -100,12 +100,19 @@ theorem mulCastHom_castHom_mul (b : ZMod n) (a : ZMod m) :
     mul_assoc]
 
 -- Not `@[simp]`: Mathlib's simp lemma `ZMod.castHom_apply` rewrites the left-hand side to
--- `(mulCastHom k h a).cast` first, so the tagged lemma fails the `simpNF` linter.
+-- `(mulCastHom k h a).cast` first, so the tagged lemma fails the `simpNF` linter; the simp normal
+-- form is `cast_mulCastHom` below.
 /-- The reduction modulo `k` kills the multiples of `k`. -/
 theorem castHom_mulCastHom (a : ZMod m) :
     castHom (Dvd.intro_left m h) (ZMod k) (mulCastHom k h a) = 0 := by
   obtain ⟨a, rfl⟩ := intCast_surjective a
   rw [mulCastHom_intCast, map_mul, map_natCast, natCast_self, mul_zero]
+
+/-- The cast of a multiple of `k` to `ZMod k` vanishes: the simp normal form of
+`castHom_mulCastHom`. -/
+@[simp]
+theorem cast_mulCastHom (a : ZMod m) : ((mulCastHom k h a).cast : ZMod k) = 0 := by
+  rw [← castHom_apply (h := Dvd.intro_left m h), castHom_mulCastHom]
 
 /-- **Exactness of `ZMod m → ZMod n → ZMod k`**: the classes modulo `n = m * k` killed by the
 reduction modulo `k` are exactly the multiples of `k`. -/
