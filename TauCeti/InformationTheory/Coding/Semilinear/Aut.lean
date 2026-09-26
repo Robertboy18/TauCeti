@@ -101,6 +101,7 @@ theorem mem_semilinearMonomialGroup {f : Equiv.Perm (ι → R)} :
       (semilinearMonomialEquiv u e σ).toEquiv = f :=
   Iff.rfl
 
+/-- Every semilinear monomial transformation lies in the semilinear monomial group. -/
 theorem semilinearMonomialEquiv_toEquiv_mem_semilinearMonomialGroup (u : ι → Rˣ) (e : Equiv.Perm ι)
     (σ : R ≃+* R) : (semilinearMonomialEquiv u e σ).toEquiv ∈ semilinearMonomialGroup R ι :=
   ⟨σ, u, e, rfl⟩
@@ -165,9 +166,11 @@ theorem mem_semilinearAut {f : Equiv.Perm (ι → R)} :
     f ∈ semilinearAut C ↔ f ∈ semilinearMonomialGroup R ι ∧ f • (C : Set (ι → R)) = C :=
   Iff.rfl
 
+/-- Every semilinear automorphism of a code is a semilinear monomial transformation. -/
 theorem semilinearAut_le_semilinearMonomialGroup : semilinearAut C ≤ semilinearMonomialGroup R ι :=
   inf_le_left
 
+/-- A semilinear automorphism of a code sends codewords to codewords. -/
 theorem apply_mem_of_mem_semilinearAut {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearAut C)
     {x : ι → R} (hx : x ∈ C) : f x ∈ C := by
   have hx' := Set.smul_mem_smul_set (a := f) (s := (C : Set (ι → R))) hx
@@ -196,11 +199,15 @@ theorem semilinearMonomialEquiv_toEquiv_mem_semilinearAut_iff (u : ι → Rˣ) (
 instance instSMulSemilinearAut : SMul (semilinearAut C) C where
   smul f c := ⟨(f : Equiv.Perm (ι → R)) c, apply_mem_of_mem_semilinearAut f.2 c.2⟩
 
+/-- Coercing the action of a semilinear automorphism on a codeword back to a word gives the
+underlying permutation of the word space applied to that codeword. -/
 @[simp]
 theorem coe_smul_semilinearAut (f : semilinearAut C) (c : C) :
     ((f • c : C) : ι → R) = (f : Equiv.Perm (ι → R)) c :=
   (rfl)
 
+/-- The action of the semilinear automorphism group on the codewords is additive, since every
+semilinear monomial transformation is additive. -/
 instance instDistribMulActionSemilinearAut : DistribMulAction (semilinearAut C) C where
   one_smul _ := Subtype.ext (by simp)
   mul_smul _ _ _ := Subtype.ext (by simp)
