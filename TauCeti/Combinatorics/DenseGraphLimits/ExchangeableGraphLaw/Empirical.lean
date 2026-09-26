@@ -7,7 +7,7 @@ module
 
 public import TauCeti.Combinatorics.DenseGraphLimits.ExchangeableGraphLaw.Mixture
 public import TauCeti.Combinatorics.DenseGraphLimits.ExchangeableGraphLaw.Unbiased
-public import TauCeti.Combinatorics.DenseGraphLimits.GraphonSpace.HomDensity.Basic
+public import TauCeti.Combinatorics.DenseGraphLimits.GraphonSpace.HomDensity
 public import TauCeti.Combinatorics.DenseGraphLimits.StepGraphon.FiniteGraph.Basic
 public import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
 
@@ -146,7 +146,7 @@ theorem mixtureExchangeableLaw_eq_of_tendsto_empiricalMixing {P : ProbabilityMea
   refine ExchangeableGraphLaw.ext_upperMass fun k F => ?_
   rw [upperMass_mixtureExchangeableLaw]
   have hP := ProbabilityMeasure.tendsto_iff_forall_integral_tendsto.1 hconv (homDensityBCF F)
-  simp only [coe_homDensityBCF] at hP
+  simp only [homDensityBCF_apply] at hP
   exact tendsto_nhds_unique hP ((tendsto_integral_homDensityOnSpace_empiricalMixing L F).comp hφ)
 
 end DenseGraphLimits
