@@ -70,6 +70,12 @@ theorem variationField_apply (F : ℝ → ℝ → M) (t : ℝ) :
     variationField I F t = curveVelocity I (fun s ↦ F s t) 0 :=
   (rfl)
 
+/-- The variation field as a function of the curve parameter: the unapplied form of
+`variationField_apply`. -/
+theorem variationField_def (F : ℝ → ℝ → M) :
+    variationField I F = fun t ↦ curveVelocity I (fun s ↦ F s t) 0 :=
+  (rfl)
+
 /-- At a parameter where every curve of the family passes through the same point, the variation
 field vanishes. -/
 theorem variationField_eq_zero {t : ℝ} (h : ∀ s, F s t = F 0 t) :
@@ -115,8 +121,7 @@ theorem hasDerivAt_norm_sq_curveVelocity {t : ℝ}
     ((isTorsionFree_iff_torsion_eq_zero _).2 (torsion_leviCivitaConnection_eq_zero I))
     (f := F) (u := 0) (v := t) (hf.of_le (by simp))
   rw [← hswap, real_inner_comm (curveVelocity I (F 0) t), ← two_mul, real_inner_comm] at hprod
-  rw [show variationField I F = fun r ↦ curveVelocity I (fun q ↦ F q r) 0 from
-    funext (variationField_apply F)]
+  rw [variationField_def]
   exact hprod.congr_of_eventuallyEq
     (Eventually.of_forall fun s ↦ (real_inner_self_eq_norm_sq _).symm)
 
@@ -138,8 +143,7 @@ theorem hasDerivAt_inner_variationField_curveVelocity {t : ℝ}
   obtain ⟨u, hu, hγu⟩ := (contMDiffAt_iff_contMDiffOn_nhds (by simp)).mp hγt
   have hγcoord := differentiableAt_sectionCoord_curveVelocity (I := I) (E := E) (γ := F 0)
     (hγu.mono interior_subset) isOpen_interior (mem_interior_iff_mem_nhds.mpr hu)
-  rw [show variationField I F = fun r ↦ curveVelocity I (fun q ↦ F q r) 0 from
-    funext (variationField_apply F)]
+  rw [variationField_def]
   exact (isMetricCompatible_leviCivitaConnection (I := I) (M := M))
     |>.hasDerivAt_inner_alongCurve (hγt.mdifferentiableAt two_ne_zero) hVcoord hγcoord
 
