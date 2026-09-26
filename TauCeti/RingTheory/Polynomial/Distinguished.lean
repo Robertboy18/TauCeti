@@ -13,11 +13,12 @@ public import Mathlib.RingTheory.Polynomial.Eisenstein.Distinguished
 # The polynomial `(1 + X) ^ n - 1`
 
 The polynomial `(1 + X) ^ n - 1` over a commutative ring `R` is monic of degree `n` for `n ≠ 0`,
-with constant coefficient `0` and `k`-th coefficient the binomial coefficient `n.choose k`. When
-`n = p ^ m` is a power of a prime `p`, every binomial coefficient `(p ^ m).choose k` with
-`0 < k < p ^ m` is divisible by `p`, so the polynomial is *distinguished* at the ideal `(p)`: monic
-with all non-leading coefficients in `(p)`. Over the `p`-adic integers this is the shape of divisor
-for which Mathlib's Weierstrass division in `ℤ_p⟦X⟧` is available.
+with constant coefficient `0` and, for `0 < k`, `k`-th coefficient the binomial coefficient
+`n.choose k`. When `n = p ^ m` is a power of a prime `p`, every binomial coefficient
+`(p ^ m).choose k` with `0 < k < p ^ m` is divisible by `p`, so the polynomial is
+*distinguished* at the ideal `(p)`: monic with all non-leading coefficients in `(p)`. Over the
+`p`-adic integers this is the shape of divisor for which Mathlib's Weierstrass division in
+`ℤ_p⟦X⟧` is available.
 
 This is the polynomial cutting out the finite levels of the power-series coordinate on the
 completed group algebra `ℤ_p[[Γ]]` of a procyclic pro-`p` group `Γ`: at a level `Γ ⧸ U` of order
