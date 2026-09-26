@@ -28,7 +28,7 @@ subgroups of `ℤ_pˣ` computed in `TauCeti.NumberTheory.Padics.GeneratedClosedS
 `1 + qℤ_p` in the first case, `{±1} × U^(f)` in the second, and in the third `{±1} × U^(f)` when
 `2^f ∣ α` and the twisted subgroup `U^[v₂(α)]` otherwise.
 
-The values are prescribed through the equations they satisfy, `u (1 - p^f) = 1` and
+The values are prescribed through the equations they satisfy, `u (1 - q) = 1` for `q = p^f` and
 `v (1 + α) = -1`, so that no inverse has to be constructed to state a result. The characters are
 defined for arbitrary values `u`, `v` (in `1 + pℤ_p` for the first family, so that the target of the
 lift is pro-`p`); the equations enter only in the image computations.
@@ -126,11 +126,13 @@ theorem range_standardOrientationNeTwo (hn : 1 < n) :
 
 /-- **The image of the standard orientation of the `q ≠ 2` normal form is `1 + qℤ_p`**: for
 `q = p^f` with `f ≥ 1`, and `f ≥ 2` when `p = 2`, the character with `χ(x₂) = (1 - q)⁻¹` and
-`χ(x_i) = 1` otherwise has image `U^(f)`. -/
-theorem range_standardOrientationNeTwo_eq_unitsPrincipal (hn : 1 < n) {f : ℕ} (hf : 0 < f)
-    (hf₂ : p = 2 → 2 ≤ f) (hu' : (u : ℤ_[p]) * (1 - (p : ℤ_[p]) ^ f) = 1) :
+`χ(x_i) = 1` otherwise has image `U^(f) = 1 + qℤ_p`. -/
+theorem range_standardOrientationNeTwo_eq_unitsPrincipal (hn : 1 < n) {f : ℕ} (hq : q = p ^ f)
+    (hf : 0 < f) (hf₂ : p = 2 → 2 ≤ f) (hu' : (u : ℤ_[p]) * (1 - (q : ℤ_[p])) = 1) :
     (standardOrientationNeTwo q n u hu).toMonoidHom.range = unitsPrincipal p f := by
-  rw [range_standardOrientationNeTwo q n u hu hn,
+  subst hq
+  push_cast at hu'
+  rw [range_standardOrientationNeTwo _ n u hu hn,
     topologicalClosure_zpowers_eq_unitsPrincipal_of_val_mul_one_sub_pow_eq_one hf hf₂ hu']
 
 end NeTwo
