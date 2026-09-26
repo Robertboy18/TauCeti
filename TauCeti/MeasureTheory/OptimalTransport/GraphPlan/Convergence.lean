@@ -46,8 +46,9 @@ for maps into a pseudometric space and mentions no graph plan; it is
 * `TauCeti.tendsto_map_prodMk_self_iff_tendstoInMeasure` — the graph plans of `T n` converge
   weakly to the graph plan of `T₀` if and only if `T n` converges to `T₀` in `μ`-measure; the two
   implications are `TauCeti.tendsto_map_prodMk_self_of_tendstoInMeasure`, valid on any
-  topological source, and `TauCeti.tendstoInMeasure_of_tendsto_map_prodMk_self`, which needs a
-  pseudo-metrizable Borel source for Lusin's theorem.
+  topological source, and `TauCeti.tendstoInMeasure_of_tendsto_map_prodMk_self`, which needs `μ`
+  weakly regular for Lusin's theorem and `X × Y` with outer approximation of closed sets for the
+  portmanteau theorem; a probability measure on a pseudo-metrizable Borel source has both.
 
 ## References
 
@@ -87,8 +88,9 @@ theorem tendsto_map_prodMk_self_of_tendstoInMeasure (hT : ∀ n, AEMeasurable (T
 
 end OfTendstoInMeasure
 
-variable [TopologicalSpace X] [TopologicalSpace.PseudoMetrizableSpace X] [BorelSpace X]
+variable [TopologicalSpace X] [OpensMeasurableSpace X] [(μ : Measure X).WeaklyRegular]
   [PseudoEMetricSpace Y] [SecondCountableTopology Y] [OpensMeasurableSpace Y]
+  [HasOuterApproxClosed (X × Y)]
 
 /-- If the graph plans of `T n` converge weakly to the graph plan of `T₀`, then `T n` converges
 to `T₀` in `μ`-measure. -/
@@ -131,10 +133,12 @@ theorem tendstoInMeasure_of_tendsto_map_prodMk_self (hT : ∀ n, AEMeasurable (T
     _ ≤ δ / 2 + δ / 2 := add_le_add hn hFμ.le
     _ = δ := ENNReal.add_halves δ
 
-/-- **Narrow convergence of graph plans is convergence in measure.** For a probability measure
-`μ` on a pseudo-metrizable Borel space and almost-everywhere measurable maps into a
-second-countable pseudo-emetric space, the graph plans of `T n` converge weakly to the graph plan
-of `T₀` if and only if `T n` converges to `T₀` in `μ`-measure. -/
+/-- **Narrow convergence of graph plans is convergence in measure.** For a weakly regular
+probability measure `μ` on a space `X` with measurable opens and almost-everywhere measurable maps
+into a second-countable pseudo-emetric space `Y` such that closed subsets of `X × Y` are outer
+approximable, the graph plans of `T n` converge weakly to the graph plan of `T₀` if and only if
+`T n` converges to `T₀` in `μ`-measure. Both instance hypotheses hold when `X` is a
+pseudo-metrizable Borel space. -/
 theorem tendsto_map_prodMk_self_iff_tendstoInMeasure (hT : ∀ n, AEMeasurable (T n) μ)
     (hT₀ : AEMeasurable T₀ μ) :
     Tendsto (fun n ↦ μ.map fun x ↦ (x, T n x)) atTop (𝓝 (μ.map fun x ↦ (x, T₀ x))) ↔
