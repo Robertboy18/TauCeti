@@ -22,20 +22,17 @@ homomorphism densities are a complete set of coordinates on graphon space.
 The graphons may live on different probability spaces, and no standard-Borel or atomlessness
 hypothesis is needed on either carrier.
 
-The argument runs through sampling. The homomorphism densities of a graphon are the upper masses
-of its sampling laws, so two graphons with equal densities have the same `n`-vertex sampling law
-for every `n`. By the second sampling lemma
-`TauCeti.DenseGraphLimits.sampleGraph_cutDist_tendsto_inProbability`, a large sample from either
-graphon is close to it in cut distance with probability more than a half. Since the two laws
-coincide, some single finite graph is close to both graphons at once, and the triangle inequality
-for the coupling cut distance finishes the proof.
+The inverse direction rests on the second sampling lemma
+`TauCeti.DenseGraphLimits.sampleGraph_cutDist_tendsto_inProbability`: the homomorphism densities
+determine the sampling laws (`TauCeti.DenseGraphLimits.sampleGraph_eq_of_forall_homDensity_eq`),
+and the sampling laws determine the graphon up to cut distance.
 
 ## Main results
 
 * `TauCeti.DenseGraphLimits.cutDist_eq_zero_of_forall_homDensity_eq` — graphons with the same
   homomorphism densities are at cut distance zero (the inverse counting lemma);
 * `TauCeti.DenseGraphLimits.cutDist_eq_zero_iff_forall_homDensity_eq` — the separation theorem;
-* `TauCeti.DenseGraphLimits.graphonSpace_ext_homDensity` — points of graphon space are equal
+* `TauCeti.DenseGraphLimits.graphonSpace_ext_iff_homDensity` — points of graphon space are equal
   exactly when all their homomorphism densities agree.
 
 ## References
@@ -64,9 +61,9 @@ section CrossCarrier
 variable {Ω₁ Ω₂ : Type*} [MeasurableSpace Ω₁] [MeasurableSpace Ω₂]
 variable {μ₁ : Measure Ω₁} {μ₂ : Measure Ω₂} [IsProbabilityMeasure μ₁] [IsProbabilityMeasure μ₂]
 
-/-- Two graphons with the same sampling laws have a common finite sample within `ε` of both: for
-`n` large, a sample from either graphon is within `ε` of it with probability more than a half,
-and the two laws coincide. -/
+/-- Two graphons with the same sampling laws have a common finite graph within `ε` of both in cut
+distance. This is the bridge from sampling laws to cut distance behind
+`TauCeti.DenseGraphLimits.cutDist_eq_zero_of_forall_homDensity_eq`. -/
 private theorem exists_cutDist_finiteGraphGraphon_lt (U : Graphon Ω₁ μ₁) (W : Graphon Ω₂ μ₂)
     (h : ∀ n, sampleGraph U n = sampleGraph W n) {ε : ℝ} (hε : 0 < ε) :
     ∃ (n : ℕ) (G : SimpleGraph (Fin n)),
@@ -122,7 +119,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasu
 /-- **Separation on graphon space.** Two points of graphon space are equal if and only if every
 finite graph has the same homomorphism density at them: the homomorphism densities are a complete
 set of coordinates on graphon space. -/
-theorem graphonSpace_ext_homDensity (U W : GraphonSpace Ω μ) :
+theorem graphonSpace_ext_iff_homDensity (U W : GraphonSpace Ω μ) :
     U = W ↔ ∀ (n : ℕ) (F : SimpleGraph (Fin n)) [DecidableRel F.Adj],
       homDensityOnSpace F U = homDensityOnSpace F W := by
   obtain ⟨U, rfl⟩ := SeparationQuotient.surjective_mk U
