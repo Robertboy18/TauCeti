@@ -8,6 +8,7 @@ module
 public import Mathlib.RepresentationTheory.Homological.ContCohomology.Basic
 public import TauCeti.Algebra.Homology.ShortComplex.PreservesHomology
 public import TauCeti.RepresentationTheory.Continuous.TopRep.RestrictScalars
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Functoriality
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.SmoothDiscrete
 
 /-!
@@ -60,6 +61,12 @@ what lets every result of the first kind be applied to coefficients of the secon
   a cocycle to the class of the corresponding cocycle, and
   `TauCeti.ContCohomology.cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles` identifies the
   corresponding cocycle as the same homogeneous cochain.
+* `TauCeti.ContCohomology.coeffMap_comp_restrictScalarsIntIso_hom`: the isomorphism is natural in
+  the representation, with respect to the coefficient maps
+  `TauCeti.ContinuousCohomology.coeffMap`;
+  `TopRep.cochainsMap_comp_homogeneousCochainsRestrictScalarsIntIso_hom` and
+  `TauCeti.ContCohomology.cocyclesMap_comp_cocyclesRestrictScalarsIntIso_hom` are the
+  corresponding statements for the cochains and the cocycles.
 * `TauCeti.ContCohomology.ofDiscreteModule_eq_restrictScalarsInt_obj`: for a discrete `X`, the
   underlying additive representation is `TauCeti.ofDiscreteModule ℤ G X.V`.
 
@@ -110,22 +117,25 @@ theorem resolutionXRestrictScalarsIntIso_succ (X : TopRep k G) (n : ℕ) :
 theorem d_comp_resolutionXRestrictScalarsIntIso_hom (X : TopRep k G) (n : ℕ) :
     d (restrictScalarsInt.obj X) n ≫ (resolutionXRestrictScalarsIntIso X (n + 1)).hom =
       (resolutionXRestrictScalarsIntIso X n).hom ≫ restrictScalarsInt.map (d X n) := by
+  -- `simp` cannot drive the inductive step: `coind₁Functor` is an abbreviation, which `simp`
+  -- unfolds to `ofHom (coind₁Map _)` before the naturality lemmas, stated for
+  -- `(coind₁Functor ℤ G).map`, can apply. The rewrites below unfold the two recursions,
+  -- reassociate, and apply those lemmas.
   induction n with
   | zero =>
-    rw [resolutionXRestrictScalarsIntIso_succ, resolutionXRestrictScalarsIntIso_zero, d_zero,
-      d_zero, Iso.trans_hom, Functor.mapIso_hom, Iso.refl_hom, CategoryTheory.Functor.map_id,
-      Category.id_comp, Category.id_comp, coind₁ι_comp_coind₁RestrictScalarsIntIso_hom]
+    simp only [resolutionXRestrictScalarsIntIso_succ, resolutionXRestrictScalarsIntIso_zero,
+      d_zero, Iso.trans_hom, Functor.mapIso_hom, Iso.refl_hom, Category.id_comp]
+    exact coind₁ι_comp_coind₁RestrictScalarsIntIso_hom X
   | succ n ih =>
-    rw [d_succ, d_succ, Preadditive.sub_comp, CategoryTheory.Functor.map_sub, Preadditive.comp_sub,
-      resolutionXRestrictScalarsIntIso_succ X (n + 1), Iso.trans_hom, Functor.mapIso_hom]
+    rw [d_succ, d_succ, resolutionXRestrictScalarsIntIso_succ X (n + 1), Iso.trans_hom,
+      Functor.mapIso_hom, Preadditive.sub_comp, Functor.map_sub, Preadditive.comp_sub]
     congr 1
     · -- the unit `coind₁ι` is natural, and compatible with forgetting the scalars
-      rw [← coind₁ι_app, ← coind₁ι_app, ← Category.assoc, ← (coind₁ι (k := ℤ) (G := G)).naturality,
-        CategoryTheory.Functor.id_map, Category.assoc, coind₁ι_app, coind₁ι_app,
-        coind₁ι_comp_coind₁RestrictScalarsIntIso_hom]
+      rw [← coind₁ι_app, ← coind₁ι_app, ← NatTrans.naturality_assoc, Functor.id_map, coind₁ι_app,
+        coind₁ι_app, coind₁ι_comp_coind₁RestrictScalarsIntIso_hom]
     · -- the coinduction of the differential, by the induction hypothesis
-      rw [← Category.assoc, ← CategoryTheory.Functor.map_comp, ih, CategoryTheory.Functor.map_comp,
-        Category.assoc, coind₁Functor_map_comp_coind₁RestrictScalarsIntIso_hom,
+      rw [← Functor.map_comp_assoc, ih, Functor.map_comp_assoc,
+        coind₁Functor_map_comp_coind₁RestrictScalarsIntIso_hom,
         resolutionXRestrictScalarsIntIso_succ X n, Iso.trans_hom, Functor.mapIso_hom,
         Category.assoc]
 
@@ -144,8 +154,8 @@ noncomputable def homogeneousCochainsRestrictScalarsIntIso (X : TopRep k G) :
       rw [Functor.mapHomologicalComplex_obj_d, homogeneousCochains.d_eq,
         homogeneousCochains.d_eq, Iso.trans_hom, Iso.trans_hom, Functor.mapIso_hom,
         Functor.mapIso_hom, Category.assoc, invariantsRestrictScalarsIntIso_hom_comp_map,
-        ← Category.assoc, ← Functor.map_comp, ← d_comp_resolutionXRestrictScalarsIntIso_hom,
-        Functor.map_comp, Category.assoc])
+        ← Functor.map_comp_assoc, ← d_comp_resolutionXRestrictScalarsIntIso_hom,
+        Functor.map_comp_assoc])
 
 /-- The component in degree `n` of `homogeneousCochainsRestrictScalarsIntIso` is the identification
 of the invariants of the identified resolutions. -/
@@ -155,11 +165,66 @@ theorem homogeneousCochainsRestrictScalarsIntIso_hom_f (X : TopRep k G) (n : ℕ
         invariantsRestrictScalarsIntIso (resolutionX X (n + 1))).hom :=
   (rfl)
 
+/-! ### Naturality -/
+
+section Naturality
+
+open ContinuousCohomology
+
+variable {X Y : TopRep k G} (f : X ⟶ Y)
+
+/-- The identification of the resolutions is natural in the representation: on the elements of
+the resolutions, the map induced by the underlying additive map of `f` is the map induced by
+`f`. -/
+theorem resolutionXRestrictScalarsIntIso_hom_resolutionMap_apply (i : ℕ)
+    (v : (resolutionX (restrictScalarsInt.obj X) i).V) :
+    (resolutionXRestrictScalarsIntIso Y i).hom.hom
+        ((resolutionMap (ContinuousMonoidHom.id G) (restrictScalarsInt.map f) i).hom v) =
+      (resolutionMap (ContinuousMonoidHom.id G) f i).hom
+        ((resolutionXRestrictScalarsIntIso X i).hom.hom v) := by
+  -- `resolutionMap` at the identity homomorphism is, in degree `i + 1`, the coinduction of the
+  -- map in degree `i`; this is definitional, so the induction step is the induction hypothesis at
+  -- the value `v x`.
+  induction i with
+  | zero => exact restrictScalarsInt_map_hom_apply f v
+  | succ i ih =>
+    refine ContinuousMap.ext fun x ↦ ?_
+    simp only [resolutionXRestrictScalarsIntIso_succ, Iso.trans_hom, CategoryTheory.comp_apply,
+      Functor.mapIso_hom, hom_ofHom]
+    rw [coind₁RestrictScalarsIntIso_hom_apply, coind₁RestrictScalarsIntIso_hom_apply]
+    exact ih (v x)
+
+/-- The identification of the complexes of homogeneous cochains is natural in the
+representation. -/
+theorem cochainsMap_comp_homogeneousCochainsRestrictScalarsIntIso_hom :
+    cochainsMap (ContinuousMonoidHom.id G) (restrictScalarsInt.map f) ≫
+        (homogeneousCochainsRestrictScalarsIntIso Y).hom =
+      (homogeneousCochainsRestrictScalarsIntIso X).hom ≫
+        (TopModuleCat.restrictScalarsInt.mapHomologicalComplex _).map
+          (cochainsMap (ContinuousMonoidHom.id G) f) := by
+  ext i x
+  -- In degree `i` the cochain map is the map induced on the invariants by the map on the
+  -- resolutions in degree `i + 1`; this is definitional but not visible to `rw`, so the square is
+  -- checked on elements.
+  have h := congr($(invariantsRestrictScalarsIntIso_hom_comp_map
+    (resolutionMap (ContinuousMonoidHom.id G) f (i + 1)))
+      ((invariantsFunctor ℤ G).map (resolutionXRestrictScalarsIntIso X (i + 1)).hom x))
+  simp only [CategoryTheory.comp_apply, HomologicalComplex.comp_f,
+    Functor.mapHomologicalComplex_map_f, homogeneousCochainsRestrictScalarsIntIso_hom_f,
+    Iso.trans_hom] at h ⊢
+  refine Eq.trans ?_ h.symm
+  exact congrArg (fun w ↦ (invariantsRestrictScalarsIntIso (resolutionX Y (i + 1))).hom w)
+    (Subtype.ext ((resolutionXRestrictScalarsIntIso_hom_resolutionMap_apply f (i + 1) x.1).trans
+      (restrictScalarsInt_map_hom_apply _ _).symm))
+
+end Naturality
+
 end TopRep
 
 namespace TauCeti.ContCohomology
 
-open TopRep ContinuousCohomology
+open TopRep _root_.ContinuousCohomology
+open TauCeti.ContinuousCohomology (coeffMap coeffMap_def)
 
 variable {k : Type*} [Ring k] [TopologicalSpace k] {G : Type*} [Group G] [TopologicalSpace G]
   [IsTopologicalGroup G] (X : TopRep k G) (n : ℕ)
@@ -210,6 +275,48 @@ theorem π_comp_restrictScalarsIntIso_hom :
     (homogeneousCochainsRestrictScalarsIntIso X).hom n _).trans <|
     (congrArg (_ ≫ ·) (((homogeneousCochains X).sc n).homologyπ_comp_mapHomologyIso_hom
       TopModuleCat.restrictScalarsInt)).trans (Category.assoc _ _ _).symm
+
+variable {X} {Y : TopRep k G} (f : X ⟶ Y)
+
+/-- The identification of the cocycles is natural in the representation: on cocycles, the map
+induced by the underlying additive map of `f` is the underlying additive map of the map induced
+by `f`. -/
+@[reassoc (attr := simp)]
+theorem cocyclesMap_comp_cocyclesRestrictScalarsIntIso_hom :
+    cocyclesMap (ContinuousMonoidHom.id G) (restrictScalarsInt.map f) n ≫
+        (cocyclesRestrictScalarsIntIso Y n).hom =
+      (cocyclesRestrictScalarsIntIso X n).hom ≫
+        TopModuleCat.restrictScalarsInt.map (cocyclesMap (ContinuousMonoidHom.id G) f n) := by
+  have hmono : Mono (TopModuleCat.restrictScalarsInt.map ((homogeneousCochains Y).iCycles n)) := by
+    rw [← (Iso.inv_comp_eq _).2 (cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles Y n).symm]
+    infer_instance
+  have h := HomologicalComplex.congr_hom
+    (cochainsMap_comp_homogeneousCochainsRestrictScalarsIntIso_hom f) n
+  simp only [HomologicalComplex.comp_f, Functor.mapHomologicalComplex_map_f] at h
+  rw [← cancel_mono (TopModuleCat.restrictScalarsInt.map ((homogeneousCochains Y).iCycles n)),
+    Category.assoc, cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles,
+    HomologicalComplex.cyclesMap_i_assoc, Category.assoc, ← Functor.map_comp,
+    HomologicalComplex.cyclesMap_i, Functor.map_comp,
+    cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles_assoc, h]
+
+/-- **Continuous cohomology does not see the scalars, naturally.** The identification
+`restrictScalarsIntIso` is natural in the representation: it carries the coefficient map of the
+underlying additive map of `f` to the underlying additive map of the coefficient map of `f`. -/
+@[reassoc (attr := simp)]
+theorem coeffMap_comp_restrictScalarsIntIso_hom :
+    coeffMap (restrictScalarsInt.map f) n ≫ (restrictScalarsIntIso Y n).hom =
+      (restrictScalarsIntIso X n).hom ≫ TopModuleCat.restrictScalarsInt.map (coeffMap f n) := by
+  have h₁ : π (restrictScalarsInt.obj X) n ≫ coeffMap (restrictScalarsInt.map f) n =
+      cocyclesMap (ContinuousMonoidHom.id G) (restrictScalarsInt.map f) n ≫
+        π (restrictScalarsInt.obj Y) n := by
+    rw [coeffMap_def]
+    exact π_map _ _ n
+  have h₂ : π X n ≫ coeffMap f n = cocyclesMap (ContinuousMonoidHom.id G) f n ≫ π Y n := by
+    rw [coeffMap_def]
+    exact π_map _ _ n
+  rw [← cancel_epi (π (restrictScalarsInt.obj X) n), reassoc_of% h₁,
+    π_comp_restrictScalarsIntIso_hom, π_comp_restrictScalarsIntIso_hom_assoc, ← Functor.map_comp,
+    h₂, Functor.map_comp, cocyclesMap_comp_cocyclesRestrictScalarsIntIso_hom_assoc]
 
 end TauCeti.ContCohomology
 

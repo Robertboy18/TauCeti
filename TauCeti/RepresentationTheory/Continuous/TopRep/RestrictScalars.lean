@@ -126,8 +126,11 @@ theorem restrictScalarsInt_obj_ρ_apply (X : TopRep k G) (g : G) (x : X.V) :
   (rfl)
 
 /-- The underlying function of a morphism is unchanged by forgetting the scalars. -/
+-- The argument is typed by the domain of `restrictScalarsInt.map f`, so that `simp` can use the
+-- lemma: `(restrictScalarsInt.obj X).V` is `X.V` only after unfolding `restrictScalarsInt`.
 @[simp]
-theorem restrictScalarsInt_map_hom_apply {X Y : TopRep k G} (f : X ⟶ Y) (x : X.V) :
+theorem restrictScalarsInt_map_hom_apply {X Y : TopRep k G} (f : X ⟶ Y)
+    (x : (restrictScalarsInt.obj X).V) :
     (restrictScalarsInt.map f).hom x = f.hom x :=
   (rfl)
 
@@ -167,8 +170,10 @@ def coind₁RestrictScalarsIntIso (X : TopRep k G) :
       isIntertwining' _ := rfl }
 
 /-- `coind₁RestrictScalarsIntIso` is the identity on the function space `C(G, X.V)`. -/
+-- The argument is typed by the domain of the map, as in `restrictScalarsInt_map_hom_apply`.
 @[simp]
-theorem coind₁RestrictScalarsIntIso_hom_apply (X : TopRep k G) (f : C(G, X.V)) :
+theorem coind₁RestrictScalarsIntIso_hom_apply (X : TopRep k G)
+    (f : C(G, (restrictScalarsInt.obj X).V)) :
     (coind₁RestrictScalarsIntIso X).hom.hom f = f :=
   (rfl)
 
