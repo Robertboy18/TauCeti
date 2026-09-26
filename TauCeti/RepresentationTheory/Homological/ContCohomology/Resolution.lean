@@ -38,7 +38,7 @@ variable {k : Type*} [Ring k] [TopologicalSpace k] {G : Type*} [Group G] [Topolo
 @[simp]
 theorem resolutionX_succ_ρ_apply_apply (n : ℕ) (g : G) (F : (resolutionX X (n + 1)).V) (x : G) :
     ((resolutionX X (n + 1)).ρ g F) x = (resolutionX X n).ρ g (F (g⁻¹ * x)) :=
-  (rfl)
+  ContRepresentation.coind₁_apply_apply (resolutionX X n).ρ g F x
 
 /-- The successor differential of the coinduced resolution, at a point:
 `(d (n + 1) F) x = F - d n (F x)`. -/
