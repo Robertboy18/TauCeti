@@ -56,16 +56,15 @@ equality of degrees through Mathlib's `HomologicalComplex.XIsoOfEq`, whose evalu
 `TauCeti.TopPairing.resolutionCupPairing` and `TauCeti.TopPairing.cupCochain` land in degree
 `m + n`; in their Leibniz rules the term `d a ⌣ b` lives in degree `m + 1 + n` and is transported.
 
-## Local compactness
+## Continuity
 
 For fixed inputs `a` and `b`, the base case `g ↦ (a g) ⌣ (b g)` is the pointwise pairing composed
 with the continuous map `g ↦ (a g, b g)`, and the successor step `(a ⌣ b) g = (a g) ⌣ b` is
-postcomposition with a fixed continuous map, so both values are continuous maps on `G` for every
-topological group `G`. The successor step, however, needs the base case to be jointly continuous
-in the pair `(a, b)` in order to be a well-defined continuous map, and joint continuity of
-`(a, b) ↦ (g ↦ (a g, b g))` is continuity of evaluation `C(G, -) × G → -` for the compact-open
-topology; this is where `LocallyCompactSpace G` enters. Compact groups, in particular profinite
-groups, are locally compact, so the hypothesis is automatic in the arithmetic applications.
+postcomposition with a fixed continuous map. The successor step, however, needs the base case to
+be jointly continuous in the pair `(a, b)` in order to be a well-defined continuous map, and joint
+continuity of `(a, b) ↦ (g ↦ (a g, b g))` for the compact-open topologies is
+`ContinuousMap.continuous_prodMk`, which holds because a topological group is a regular space. No
+hypothesis beyond `IsTopologicalGroup G` is needed anywhere in the file.
 
 ## Main definitions
 
@@ -176,11 +175,15 @@ def pointwise : (n k : ℕ) → k = n →
   | 0, _ + 1, hk => absurd hk (by omega)
   | _ + 1, 0, hk => absurd hk (by omega)
 
+-- Not a `simp` lemma: with `X Y Z : TopRep.{max v w}` the universe `w` of the left-hand side is
+-- only reachable under `max`, and the simpNF linter reports that the lemma does not rewrite its
+-- own left-hand side; use it with `rw`.
 theorem pointwise_zero_apply (hk : 0 = 0) (x : X.V) (y : Y.V) :
     P.pointwise 0 0 hk (x, y) = P.bil x y := by
   rw [pointwise]
   rfl
 
+@[simp]
 theorem pointwise_succ_apply {n k : ℕ} (hk : k + 1 = n + 1) (x : X.V)
     (F : C(G, (TopRep.resolutionX Y n).V)) (h : G) :
     (P.pointwise (n + 1) (k + 1) hk (x, F) : C(G, (TopRep.resolutionX Z k).V)) h =
@@ -290,8 +293,6 @@ theorem d_pointwise : ∀ (n k : ℕ) (hk : k = n) (x : X.V) (F : (TopRep.resolu
 
 /-! ### The Alexander–Whitney pairing on the resolution -/
 
-variable [LocallyCompactSpace G]
-
 /-- **The Alexander–Whitney pairing on the coinduced resolution**, with explicit total degree:
 an element of the `(m + 1)`-st term of the resolution of `X` paired with an element of the
 `(n + 1)`-st term of the resolution of `Y` gives an element of the `(k + 1)`-st term of the
@@ -307,6 +308,7 @@ def resolutionCup : (m n k : ℕ) → k = n + m →
       (continuous_postcomp _).comp ContinuousMap.continuous_prodMk_const_right⟩
   | _ + 1, _, 0, hk => absurd hk (by omega)
 
+@[simp]
 theorem resolutionCup_zero_apply {n k : ℕ} (hk : k = n + 0) (a : C(G, X.V))
     (b : C(G, (TopRep.resolutionX Y n).V)) (g : G) :
     (P.resolutionCup 0 n k hk (a, b) : C(G, (TopRep.resolutionX Z k).V)) g =
@@ -314,6 +316,7 @@ theorem resolutionCup_zero_apply {n k : ℕ} (hk : k = n + 0) (a : C(G, X.V))
   rw [resolutionCup]
   rfl
 
+@[simp]
 theorem resolutionCup_succ_apply {m n k : ℕ} (hk : k + 1 = n + (m + 1))
     (a : C(G, (TopRep.resolutionX X (m + 1)).V)) (b : (TopRep.resolutionX Y (n + 1)).V)
     (g : G) :
@@ -403,7 +406,7 @@ theorem resolutionCup_ρ : ∀ (m n k : ℕ) (hk : k = n + m) (g : G)
     exact resolutionCup_ρ m n k (Nat.succ.inj hk) g (a (g⁻¹ * h)) b
 
 /-- Pairing the constant map at `x` with `b` is the pointwise pairing of `x` with `b`. -/
-theorem resolutionCup_zero_d_zero {n k : ℕ} (hk : k = n + 0) (x : X.V)
+private theorem resolutionCup_zero_d_zero {n k : ℕ} (hk : k = n + 0) (x : X.V)
     (b : (TopRep.resolutionX Y (n + 1)).V) :
     P.resolutionCup 0 n k hk ((TopRep.d X 0).hom x, b) =
       P.pointwise (n + 1) (k + 1) (by omega) (x, b) :=
@@ -533,10 +536,10 @@ def cupCochain (m n : ℕ) :
     (fun r a b ↦ Subtype.ext (LinearMap.map_smul _ r b.1))
 
 /-- The underlying resolution element of a cup product of homogeneous cochains is the
-Alexander–Whitney pairing of the underlying elements. Not a `simp` lemma: `simp` rewrites the
-implicit carrier `(TopRep.resolution' Z).X (m + n)` on the left-hand side through
-`CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the statement is not in `simp`-normal
-form; use it with `rw`. -/
+Alexander–Whitney pairing of the underlying elements. -/
+-- Not a `simp` lemma: `simp` rewrites the implicit carrier `(TopRep.resolution' Z).X (m + n)` on
+-- the left-hand side through `CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the
+-- statement is not in `simp`-normal form; use it with `rw`.
 theorem coe_cupCochain (m n : ℕ) (a : (TopRep.homogeneousCochains X).X m)
     (b : (TopRep.homogeneousCochains Y).X n) :
     Subtype.val (P.cupCochain m n a b) = P.resolutionCupPairing m n a.1 b.1 := by
