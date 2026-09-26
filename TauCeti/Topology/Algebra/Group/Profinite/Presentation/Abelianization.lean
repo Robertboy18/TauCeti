@@ -64,6 +64,8 @@ order of the torsion subgroup of `G^{ab}`, and it is `0` when `q = 0`.
   `TauCeti.presentedProP.oneRelatorAbelianizationEquiv_mk_of_self`,
   `TauCeti.presentedProP.oneRelatorAbelianizationEquiv_symm_ofAdd_mk`: the values of the
   isomorphism on the generators and of its inverse.
+* `TauCeti.presentedProP.eq_zero_iff_mem_topologicalClosure_commutator`: `q = 0` exactly when the
+  relator lies in the closed commutator subgroup of the free pro-`p` group.
 * `TauCeti.presentedProP.exists_nonempty_oneRelatorAbelianizationEquiv`: for nonempty `X`, some
   coordinate `x₀` of the exponent vector divides all the others, and the isomorphism exists with
   `q` that coordinate.
@@ -396,6 +398,21 @@ theorem oneRelatorAbelianizationEquiv_symm_ofAdd_mk [Fintype X] (a : {x // x ≠
       abelianizationHom {r} (ofAdd ((LinearEquiv.piSplitAt x₀ w hw).symm (a, b))) := by
   rw [ContinuousMulEquiv.symm_apply_eq, oneRelatorAbelianizationEquiv_apply,
     toSplitQuot_abelianizationHom, splitQuotHom_ofAdd, LinearMap.piSplitAtQuot_piSplitAt_symm]
+
+include hw hr in
+/-- **The torsion-free case of the structure theorem.** The coordinate `q` of the exponent vector
+`exponentSum r = q • w`, `w x₀ = 1`, of the relator vanishes exactly when `r` lies in the closed
+commutator subgroup of the free pro-`p` group; then the factor `ℤ_p ⧸ q ℤ_p` of
+`oneRelatorAbelianizationEquiv` is `ℤ_p` and `G^{ab} ≅ ℤ_p^X` is torsion-free. -/
+theorem eq_zero_iff_mem_topologicalClosure_commutator :
+    q = 0 ↔ r ∈ (commutator (freeProP p X)).topologicalClosure := by
+  rw [← freeProP.exponentSum_eq_one_iff, ← toAdd_eq_zero, hr]
+  constructor
+  · rintro rfl
+    exact zero_smul _ _
+  · intro h
+    have := congr_fun h x₀
+    rwa [Pi.smul_apply, hw, smul_eq_mul, mul_one, Pi.zero_apply] at this
 
 end OneRelator
 

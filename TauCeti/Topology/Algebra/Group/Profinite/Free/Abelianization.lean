@@ -42,7 +42,8 @@ of `R`; see `TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianizatio
 
 * `TauCeti.freeProP.abelianizationEquiv_mk`, `TauCeti.freeProP.abelianizationEquiv_symm_ofAdd`:
   the isomorphism is induced by `exponentSum`, and its inverse is `u ↦ ∏ x, x_x ^ (u x)`.
-* `TauCeti.freeProP.exponentSum_surjective`: the exponent-sum map is surjective.
+* `TauCeti.freeProP.exponentSum_surjective`, `TauCeti.freeProP.exponentSum_eq_one_iff`: the
+  exponent-sum map is surjective, and its kernel is the closed commutator subgroup.
 
 ## References
 
@@ -178,6 +179,16 @@ theorem exponentSum_surjective [Finite X] : Function.Surjective (exponentSum p X
   cases nonempty_fintype X
   obtain ⟨y, hy⟩ := QuotientGroup.mk_surjective ((abelianizationEquiv p X).symm u)
   exact ⟨y, by rw [← abelianizationEquiv_mk, hy, ContinuousMulEquiv.apply_symm_apply]⟩
+
+omit [Fintype X] in
+/-- **The kernel of the exponent-sum map is the closed commutator subgroup**: for `X` finite,
+`exponentSum y = 1` exactly when `y` lies in the closure of the commutator subgroup of the free
+pro-`p` group. -/
+theorem exponentSum_eq_one_iff [Finite X] (y : freeProP p X) :
+    exponentSum p X y = 1 ↔ y ∈ (commutator (freeProP p X)).topologicalClosure := by
+  cases nonempty_fintype X
+  rw [← abelianizationEquiv_mk, map_eq_one_iff _ (abelianizationEquiv p X).injective,
+    QuotientGroup.eq_one_iff]
 
 end freeProP
 

@@ -11,12 +11,14 @@ public import Mathlib.RingTheory.Ideal.Span
 import Mathlib.Tactic.LinearCombination
 
 /-!
-# The quotient of a free module by one vector with a unit coordinate
+# The quotient of `X → R` by one vector with a unit coordinate
 
 Let `R` be a commutative ring, `X` a type with a distinguished point `x₀`, and `w : X → R` a
-vector with `w x₀ = 1`. Replacing the coordinate vector at `x₀` by `w` gives a new basis of
-`X → R`, whose coordinate functions are `u ↦ u x - u x₀ * w x` for `x ≠ x₀` together with
-`u ↦ u x₀`. The resulting linear isomorphism
+vector with `w x₀ = 1`. Every `u : X → R` decomposes uniquely as `u x₀ • w` plus a vector
+vanishing at `x₀`, which gives a change of coordinates on the product module `X → R`: the new
+coordinates of `u` are `u x - u x₀ * w x` for `x ≠ x₀` together with `u x₀`. (For finite `X` this
+is the change of basis replacing the coordinate vector at `x₀` by `w`.) The resulting linear
+isomorphism
 
 `LinearEquiv.piSplitAt x₀ w hw : (X → R) ≃ₗ[R] ({x // x ≠ x₀} → R) × R`
 
@@ -28,14 +30,15 @@ span of the single vector `q • w`, hence the identification
 
 Every vector `v` with a coordinate `v x₀` dividing all the other coordinates has the shape
 `v = v x₀ • w` with `w x₀ = 1` (`exists_eq_smul_of_forall_dvd`); over a valuation ring every
-vector on a finite index type has such a coordinate. This is the linear algebra behind the
+vector on a finite nonempty index type has such a coordinate. This is the linear algebra behind the
 structure of the abelianization of a one-relator pro-`p` group: the relator contributes the single
 vector `v = q • w` to `ℤ_p^n`, and the quotient is `ℤ_p^{n-1} × ℤ_p/q`.
 
 ## Main definitions
 
-* `TauCeti.LinearEquiv.piSplitAt`: the change of basis `(X → R) ≃ₗ[R] ({x // x ≠ x₀} → R) × R`
-  replacing the coordinate vector at `x₀` by `w`.
+* `TauCeti.LinearEquiv.piSplitAt`: the change of coordinates
+  `(X → R) ≃ₗ[R] ({x // x ≠ x₀} → R) × R` replacing the coordinate at `x₀` by the coordinate
+  along `w`.
 * `TauCeti.LinearMap.piSplitAtQuot`: the composite with reduction modulo `q` in the second
   factor.
 * `TauCeti.LinearEquiv.piQuotSpanSmul`: the induced isomorphism
@@ -73,9 +76,11 @@ namespace LinearEquiv
 variable (x₀ : X) (w : X → R) (hw : w x₀ = 1)
 
 open Classical in
-/-- **The change of basis replacing the coordinate vector at `x₀` by `w`.** For `w x₀ = 1`, the
-vectors `w` and the coordinate vectors at `x ≠ x₀` form a basis of `X → R`; the coordinates of `u`
-in that basis are `u x - u x₀ * w x` at `x ≠ x₀` and `u x₀` on `w`. -/
+/-- **The change of coordinates on `X → R` replacing the coordinate at `x₀` by the coordinate
+along `w`.** For `w x₀ = 1`, every `u : X → R` decomposes uniquely as `u x₀ • w` plus a vector
+vanishing at `x₀`; the new coordinates of `u` are `u x - u x₀ * w x` at `x ≠ x₀` and `u x₀` along
+`w`. For finite `X` this is the change of basis from the coordinate vectors to `w` together with
+the coordinate vectors at `x ≠ x₀`. -/
 noncomputable def piSplitAt : (X → R) ≃ₗ[R] ({x // x ≠ x₀} → R) × R where
   toFun u := (fun x ↦ u x - u x₀ * w x, u x₀)
   invFun a x := (if h : x = x₀ then 0 else a.1 ⟨x, h⟩) + a.2 * w x
@@ -106,20 +111,20 @@ theorem piSplitAt_symm_apply [DecidableEq X] (a : ({x // x ≠ x₀} → R) × R
     (piSplitAt x₀ w hw).symm a x = (if h : x = x₀ then 0 else a.1 ⟨x, h⟩) + a.2 * w x := by
   by_cases h : x = x₀ <;> simp [piSplitAt, h]
 
-/-- The change of basis sends a multiple of `w` to the corresponding multiple of the second basis
-vector. -/
+/-- The change of coordinates sends a multiple of `w` to the corresponding multiple in the second
+factor. -/
 theorem piSplitAt_smul (c : R) : piSplitAt x₀ w hw (c • w) = (0, c) := by
   ext x <;> simp [hw]
 
-/-- The change of basis fixes the coordinate vectors at `x ≠ x₀`. -/
+/-- The change of coordinates fixes the coordinate vectors at `x ≠ x₀`. -/
 theorem piSplitAt_single_of_ne [DecidableEq X] {x : X} (hx : x ≠ x₀) :
     piSplitAt x₀ w hw (Pi.single x 1) = (Pi.single ⟨x, hx⟩ 1, 0) := by
   ext y
   · simp [Pi.single_apply, Subtype.ext_iff, hx.symm]
   · simp [hx.symm]
 
-/-- The change of basis sends the coordinate vector at `x₀` to `(-w, 1)`: it is `w` minus the
-vector `w - e_{x₀}` supported away from `x₀`. -/
+/-- The change of coordinates sends the coordinate vector at `x₀` to `(-w, 1)`: it is `w` minus
+the vector `w - e_{x₀}` supported away from `x₀`. -/
 theorem piSplitAt_single_self [DecidableEq X] :
     piSplitAt x₀ w hw (Pi.single x₀ 1) = (fun x : {x // x ≠ x₀} ↦ -w x, 1) := by
   ext y
@@ -132,8 +137,9 @@ namespace LinearMap
 
 variable (x₀ : X) (w : X → R) (hw : w x₀ = 1) (q : R)
 
-/-- The change of basis `LinearEquiv.piSplitAt` followed by reduction modulo `q` on the coordinate
-along `w`. Its kernel is the span of `q • w` (`ker_piSplitAtQuot`). -/
+/-- The change of coordinates `LinearEquiv.piSplitAt` followed by reduction modulo `q` on the
+coordinate along `w`. Its kernel is the span of `q • w` (`ker_piSplitAtQuot`), and it is
+surjective (`piSplitAtQuot_surjective`). -/
 noncomputable def piSplitAtQuot : (X → R) →ₗ[R] ({x // x ≠ x₀} → R) × (R ⧸ Ideal.span {q}) :=
   (LinearMap.id.prodMap (Ideal.span {q}).mkQ) ∘ₗ (LinearEquiv.piSplitAt x₀ w hw).toLinearMap
 
@@ -144,14 +150,14 @@ theorem piSplitAtQuot_apply (u : X → R) :
         (Submodule.Quotient.mk (u x₀) : R ⧸ Ideal.span {q})) :=
   (rfl)
 
-/-- The reduction composed with the inverse change of basis is reduction modulo `q` on the second
-coordinate. -/
+/-- The reduction composed with the inverse change of coordinates is reduction modulo `q` on the
+second coordinate. -/
 theorem piSplitAtQuot_piSplitAt_symm (a : {x // x ≠ x₀} → R) (b : R) :
     piSplitAtQuot x₀ w hw q ((LinearEquiv.piSplitAt x₀ w hw).symm (a, b)) =
       (a, Submodule.Quotient.mk b) := by
   simp [piSplitAtQuot]
 
-/-- The change of basis followed by reduction modulo `q` is surjective. -/
+/-- The change of coordinates followed by reduction modulo `q` is surjective. -/
 theorem piSplitAtQuot_surjective : Function.Surjective (piSplitAtQuot x₀ w hw q) := by
   rintro ⟨a, b⟩
   obtain ⟨c, rfl⟩ := Submodule.Quotient.mk_surjective _ b
@@ -195,8 +201,8 @@ namespace LinearEquiv
 
 variable (x₀ : X) (w : X → R) (hw : w x₀ = 1) (q : R)
 
-/-- **The quotient of a free module by one vector.** For `w x₀ = 1`, the quotient of `X → R` by
-the span of `q • w` is `({x // x ≠ x₀} → R) × R ⧸ (q)`, through the change of basis
+/-- **The quotient of `X → R` by one vector.** For `w x₀ = 1`, the quotient of `X → R` by the
+span of `q • w` is `({x // x ≠ x₀} → R) × R ⧸ (q)`, through the change of coordinates
 `LinearEquiv.piSplitAt`. -/
 noncomputable def piQuotSpanSmul :
     ((X → R) ⧸ Submodule.span R {q • w}) ≃ₗ[R] ({x // x ≠ x₀} → R) × (R ⧸ Ideal.span {q}) :=
