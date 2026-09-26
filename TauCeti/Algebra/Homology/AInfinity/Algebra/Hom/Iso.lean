@@ -106,14 +106,22 @@ theorem barMap_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linea
     (f.inverse hf).barMap = (f.barEquiv hf).symm.toLinearMap := (rfl)
 
 @[simp]
-theorem barMap_inverse_barMap (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
-    (z : ReducedTensorWords R A) : (f.inverse hf).barMap (f.barMap z) = z := by
-  rw [barMap_inverse, LinearEquiv.coe_coe, ← barEquiv_apply f hf, LinearEquiv.symm_apply_apply]
+theorem barEquiv_symm_barMap (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
+    (z : ReducedTensorWords R A) : (f.barEquiv hf).symm (f.barMap z) = z := by
+  rw [← barEquiv_apply f hf, LinearEquiv.symm_apply_apply]
 
 @[simp]
+theorem barMap_barEquiv_symm (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
+    (w : ReducedTensorWords R B) : f.barMap ((f.barEquiv hf).symm w) = w := by
+  rw [← barEquiv_apply f hf, LinearEquiv.apply_symm_apply]
+
+theorem barMap_inverse_barMap (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
+    (z : ReducedTensorWords R A) : (f.inverse hf).barMap (f.barMap z) = z :=
+  f.barEquiv_symm_barMap hf z
+
 theorem barMap_barMap_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
-    (w : ReducedTensorWords R B) : f.barMap ((f.inverse hf).barMap w) = w := by
-  rw [barMap_inverse, LinearEquiv.coe_coe, ← barEquiv_apply f hf, LinearEquiv.apply_symm_apply]
+    (w : ReducedTensorWords R B) : f.barMap ((f.inverse hf).barMap w) = w :=
+  f.barMap_barEquiv_symm hf w
 
 /-- The inverse is a left inverse. -/
 @[simp]
