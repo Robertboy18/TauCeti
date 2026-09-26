@@ -79,7 +79,7 @@ def IsAdmissible (U : OpenNormalSubgroup (freeProC C X)) : Prop :=
     freeProC.of x₀ ∈ U.toSubgroup
 
 /-- The whole group is admissible. -/
-theorem isAdmissible_top : IsAdmissible C x₀ (openNormalSubgroupTop (freeProC C X)) := by
+private theorem isAdmissible_top : IsAdmissible C x₀ (openNormalSubgroupTop (freeProC C X)) := by
   have : Subsingleton (freeProC C X ⧸ (openNormalSubgroupTop (freeProC C X)).toSubgroup) :=
     QuotientGroup.subsingleton_iff.mpr (openNormalSubgroupTop_toSubgroup _)
   refine ⟨(continuous_const (y := (1 : freeProC C X ⧸ _))).congr fun _ ↦ Subsingleton.elim _ _, ?_⟩
@@ -89,8 +89,8 @@ theorem isAdmissible_top : IsAdmissible C x₀ (openNormalSubgroupTop (freeProC 
 variable {C x₀}
 
 /-- The intersection of two admissible open normal subgroups is admissible. -/
-theorem IsAdmissible.inf {U V : OpenNormalSubgroup (freeProC C X)} (hU : IsAdmissible C x₀ U)
-    (hV : IsAdmissible C x₀ V) : IsAdmissible C x₀ (U ⊓ V) :=
+private theorem IsAdmissible.inf {U V : OpenNormalSubgroup (freeProC C X)}
+    (hU : IsAdmissible C x₀ U) (hV : IsAdmissible C x₀ V) : IsAdmissible C x₀ (U ⊓ V) :=
   ⟨OpenNormalSubgroup.continuous_mk_inf hU.1 hV.1, Subgroup.mem_inf.mpr ⟨hU.2, hV.2⟩⟩
 
 variable (C x₀)
@@ -119,8 +119,8 @@ instance isClosed_kernel :
 
 /-- **Compactness for the admissible subgroups.** An open subgroup of the free pro-`C` group on
 the type `X` containing the kernel contains an admissible open normal subgroup. -/
-theorem exists_isAdmissible_le {M : Subgroup (freeProC C X)} (hM : IsOpen (M : Set (freeProC C X)))
-    (hKM : kernel C x₀ ≤ M) :
+private theorem exists_isAdmissible_le {M : Subgroup (freeProC C X)}
+    (hM : IsOpen (M : Set (freeProC C X))) (hKM : kernel C x₀ ≤ M) :
     ∃ U : OpenNormalSubgroup (freeProC C X), IsAdmissible C x₀ U ∧ U.toSubgroup ≤ M := by
   have : Nonempty {U : OpenNormalSubgroup (freeProC C X) // IsAdmissible C x₀ U} :=
     ⟨⟨_, isAdmissible_top C x₀⟩⟩
