@@ -5,11 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Analysis.Complex.Conformal.LocalDegree
+public import TauCeti.Geometry.Manifold.Complex.Chart
 public import Mathlib.Analysis.Analytic.Order
-public import Mathlib.Geometry.Manifold.ContMDiff.Atlas
-public import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
-public import Mathlib.Geometry.Manifold.MFDeriv.Basic
 public import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Data.ENat.Monoid
 
@@ -24,9 +21,10 @@ order of vanishing of `e' ∘ f ∘ e.symm - e' (f x)` at `e x`, computed with M
 preferred charts `chartAt ℂ x` and `chartAt ℂ (f x)`, and proves that any two charts of the
 maximal atlases give the same value when `f` is holomorphic near `x`
 (`TauCeti.RiemannSurface.localMultiplicity_eq_analyticOrderNatAt`): a transition map is a
-holomorphic injection of an open set, so its derivative vanishes nowhere, and Mathlib's
-`analyticOrderAt_comp_of_deriv_ne_zero` and `AnalyticAt.analyticOrderAt_comp` show that
-reparametrising either the source or the target leaves the order unchanged.
+holomorphic injection of an open set, so its derivative vanishes nowhere
+(`TauCeti.deriv_symm_trans_ne_zero`), and Mathlib's `analyticOrderAt_comp_of_deriv_ne_zero` and
+`AnalyticAt.analyticOrderAt_comp` show that reparametrising either the source or the target
+leaves the order unchanged.
 
 For a map holomorphic near `x`, the local multiplicity vanishes exactly when `f` is constant
 near `x`, and otherwise it is positive; it multiplies under composition; and it equals `1`
@@ -47,7 +45,8 @@ multiplicities over any fibre. Neither the local normal form nor the degree is p
   charts of the maximal atlases at `x` and `f x`.
 * `TauCeti.RiemannSurface.localMultiplicity_eq_zero_iff` and
   `TauCeti.RiemannSurface.localMultiplicity_pos_iff`: it vanishes exactly at points near which
-  `f` is constant.
+  `f` is constant; in particular a constant map has local multiplicity `0`
+  (`TauCeti.RiemannSurface.localMultiplicity_const`).
 * `TauCeti.RiemannSurface.localMultiplicity_comp`: it multiplies under composition.
 * `TauCeti.RiemannSurface.localMultiplicity_eq_one_iff`: it is `1` exactly when `f` is
   injective near `x`.
@@ -72,55 +71,6 @@ namespace TauCeti.RiemannSurface
 
 variable {X Y Z : Type*} [TopologicalSpace X] [ChartedSpace ℂ X] [TopologicalSpace Y]
   [ChartedSpace ℂ Y] [TopologicalSpace Z] [ChartedSpace ℂ Z] {f : X → Y} {x : X}
-
-/-! ### Transition maps and chart representatives -/
-
-section Transition
-
-variable {e e' : OpenPartialHomeomorph X ℂ}
-
-/-- The transition map between two charts of the maximal atlas of a Riemann surface is
-holomorphic on its domain. -/
-theorem differentiableOn_symm_trans (he : e ∈ maximalAtlas 𝓘(ℂ) 1 X)
-    (he' : e' ∈ maximalAtlas 𝓘(ℂ) 1 X) :
-    DifferentiableOn ℂ (e.symm ≫ₕ e') (e.symm ≫ₕ e').source :=
-  (((contMDiffOn_of_mem_maximalAtlas he').comp
-    ((contMDiffOn_symm_of_mem_maximalAtlas he).mono inter_subset_left)
-    inter_subset_right).contDiffOn).differentiableOn one_ne_zero
-
-/-- The transition map between two charts of the maximal atlas is analytic at the image of a
-point common to both chart domains. -/
-theorem analyticAt_symm_trans (he : e ∈ maximalAtlas 𝓘(ℂ) 1 X)
-    (he' : e' ∈ maximalAtlas 𝓘(ℂ) 1 X) (hx : x ∈ e.source) (hx' : x ∈ e'.source) :
-    AnalyticAt ℂ (e' ∘ e.symm) (e x) :=
-  (differentiableOn_symm_trans he he').analyticAt <|
-    (e.symm ≫ₕ e').open_source.mem_nhds ⟨e.map_source hx, by simpa [e.left_inv hx] using hx'⟩
-
-/-- The derivative of a transition map between two charts of the maximal atlas vanishes nowhere:
-a transition map is a holomorphic injection of an open set. -/
-theorem deriv_symm_trans_ne_zero (he : e ∈ maximalAtlas 𝓘(ℂ) 1 X)
-    (he' : e' ∈ maximalAtlas 𝓘(ℂ) 1 X) (hx : x ∈ e.source) (hx' : x ∈ e'.source) :
-    deriv (e' ∘ e.symm) (e x) ≠ 0 :=
-  deriv_ne_zero_of_injOn (differentiableOn_symm_trans he he') (e.symm ≫ₕ e').open_source
-    (e.symm ≫ₕ e').injOn ⟨e.map_source hx, by simpa [e.left_inv hx] using hx'⟩
-
-end Transition
-
-/-- A map that is holomorphic near `x` has an analytic representative in any charts of the
-maximal atlases at `x` and `f x`. -/
-theorem analyticAt_chart_comp_comp_symm {e : OpenPartialHomeomorph X ℂ}
-    {e' : OpenPartialHomeomorph Y ℂ} (he : e ∈ maximalAtlas 𝓘(ℂ) 1 X)
-    (he' : e' ∈ maximalAtlas 𝓘(ℂ) 1 Y) (hx : x ∈ e.source) (hfx : f x ∈ e'.source)
-    (hf : ∀ᶠ y in 𝓝 x, MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) f y) :
-    AnalyticAt ℂ (fun z ↦ e' (f (e.symm z))) (e x) := by
-  rw [Complex.analyticAt_iff_eventually_differentiableAt]
-  have hcont : Tendsto (fun z ↦ f (e.symm z)) (𝓝 (e x)) (𝓝 (f x)) :=
-    hf.self_of_nhds.continuousAt.tendsto.comp (e.tendsto_symm hx)
-  filter_upwards [e.open_target.mem_nhds (e.map_source hx), (e.tendsto_symm hx).eventually hf,
-    hcont.eventually (e'.open_source.mem_nhds hfx)] with z hz hfz hfz'
-  have := ((mdifferentiableWithinAt_iff_of_mem_maximalAtlas he he' (e.map_target hz) hfz').1
-    (mdifferentiableWithinAt_univ.2 hfz)).2
-  simpa [mfld_simps, differentiableWithinAt_univ, Function.comp_def, e.right_inv hz] using this
 
 /-! ### The local multiplicity -/
 
@@ -151,6 +101,21 @@ theorem localMultiplicity_congr {g : X → Y} (h : f =ᶠ[𝓝 x] g) :
   filter_upwards [((chartAt ℂ x).tendsto_symm (mem_chart_source ℂ x)).eventually h] with z hz
   simp only [hz]
 
+/-- A map that is constant near `x` has local multiplicity `0` at `x`. -/
+theorem localMultiplicity_eq_zero_of_eventuallyConst (h : EventuallyConst f (𝓝 x)) :
+    localMultiplicity f x = 0 := by
+  have hc : EventuallyConst (fun z ↦ chartAt ℂ (f x) (f ((chartAt ℂ x).symm z)))
+      (𝓝 (chartAt ℂ x x)) :=
+    (h.comp_tendsto ((chartAt ℂ x).tendsto_symm (mem_chart_source ℂ x))).comp (chartAt ℂ (f x))
+  rw [eventuallyConst_iff_analyticOrderAt_sub_eq_top] at hc
+  simp only [(chartAt ℂ x).left_inv (mem_chart_source ℂ x)] at hc
+  rw [localMultiplicity_def, analyticOrderNatAt, hc, ENat.toNat_top]
+
+/-- A constant map has local multiplicity `0` everywhere. -/
+@[simp]
+theorem localMultiplicity_const (y : Y) (x : X) : localMultiplicity (fun _ ↦ y) x = 0 :=
+  localMultiplicity_eq_zero_of_eventuallyConst (.const y)
+
 variable [IsManifold 𝓘(ℂ) 1 X] [IsManifold 𝓘(ℂ) 1 Y] [IsManifold 𝓘(ℂ) 1 Z]
 
 /-- **Chart independence of the local multiplicity.** For a map holomorphic near `x`, the local
@@ -171,9 +136,7 @@ theorem localMultiplicity_eq_analyticOrderNatAt {e : OpenPartialHomeomorph X ℂ
   set F : ℂ → ℂ := fun z ↦ c' (f (c.symm z)) with hF
   set g : ℂ → ℂ := c ∘ e.symm with hg
   set ψ : ℂ → ℂ := e' ∘ c'.symm with hψ
-  have hFa : AnalyticAt ℂ F (c x) :=
-    analyticAt_chart_comp_comp_symm (chart_mem_maximalAtlas x) (chart_mem_maximalAtlas (f x))
-      hcx hc'fx hf
+  have hFa : AnalyticAt ℂ F (c x) := analyticAt_chartAt_comp_comp_chartAt_symm hf
   have hFcx : F (c x) = c' (f x) := by simp [hF, c.left_inv hcx]
   have hga : AnalyticAt ℂ g (e x) := analyticAt_symm_trans he (chart_mem_maximalAtlas x) hx hcx
   have hg' : deriv g (e x) ≠ 0 := deriv_symm_trans_ne_zero he (chart_mem_maximalAtlas x) hx hcx
@@ -213,34 +176,26 @@ theorem localMultiplicity_eq_analyticOrderNatAt {e : OpenPartialHomeomorph X ℂ
 is constant near `x`. -/
 theorem localMultiplicity_eq_zero_iff (hf : ∀ᶠ y in 𝓝 x, MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) f y) :
     localMultiplicity f x = 0 ↔ EventuallyConst f (𝓝 x) := by
-  rw [localMultiplicity_def]
+  refine ⟨fun h ↦ ?_, localMultiplicity_eq_zero_of_eventuallyConst⟩
+  rw [localMultiplicity_def, analyticOrderNatAt, ENat.toNat_eq_zero] at h
   set c := chartAt ℂ x
   set c' := chartAt ℂ (f x)
   have hcx : x ∈ c.source := mem_chart_source ℂ x
   have hc'fx : f x ∈ c'.source := mem_chart_source ℂ (f x)
-  have hFa : AnalyticAt ℂ (fun z ↦ c' (f (c.symm z))) (c x) :=
-    analyticAt_chart_comp_comp_symm (chart_mem_maximalAtlas x) (chart_mem_maximalAtlas (f x))
-      hcx hc'fx hf
   have hFs : AnalyticAt ℂ (fun z ↦ c' (f (c.symm z)) - c' (f x)) (c x) :=
-    hFa.sub analyticAt_const
+    (analyticAt_chartAt_comp_comp_chartAt_symm hf).sub analyticAt_const
   -- The recentred representative vanishes at `c x`, so its order is nonzero, and it has
   -- infinite order exactly when the representative is constant near `c x`.
   have hne : analyticOrderAt (fun z ↦ c' (f (c.symm z)) - c' (f x)) (c x) ≠ 0 := by
     rw [hFs.analyticOrderAt_ne_zero, c.left_inv hcx, sub_self]
-  have htop : analyticOrderAt (fun z ↦ c' (f (c.symm z)) - c' (f x)) (c x) = ⊤ ↔
-      EventuallyConst (fun z ↦ c' (f (c.symm z))) (𝓝 (c x)) := by
+  have htop : EventuallyConst (fun z ↦ c' (f (c.symm z))) (𝓝 (c x)) := by
     rw [eventuallyConst_iff_analyticOrderAt_sub_eq_top]
-    simp only [c.left_inv hcx]
-  rw [analyticOrderNatAt, ENat.toNat_eq_zero, or_iff_right hne, htop]
-  constructor
-  · intro h
-    -- `f` agrees near `x` with `c'.symm ∘ (c' ∘ f ∘ c.symm) ∘ c`.
-    refine ((h.comp_tendsto (c.continuousAt hcx)).comp c'.symm).congr ?_
-    filter_upwards [c.open_source.mem_nhds hcx,
-      hf.self_of_nhds.continuousAt.eventually (c'.open_source.mem_nhds hc'fx)] with y hy hy'
-    simp [c.left_inv hy, c'.left_inv hy']
-  · intro h
-    exact (h.comp_tendsto (c.tendsto_symm hcx)).comp c'
+    simpa only [c.left_inv hcx] using h.resolve_left hne
+  -- `f` agrees near `x` with `c'.symm ∘ (c' ∘ f ∘ c.symm) ∘ c`.
+  refine ((htop.comp_tendsto (c.continuousAt hcx)).comp c'.symm).congr ?_
+  filter_upwards [c.open_source.mem_nhds hcx,
+    hf.self_of_nhds.continuousAt.eventually (c'.open_source.mem_nhds hc'fx)] with y hy hy'
+  simp [c.left_inv hy, c'.left_inv hy']
 
 /-- For a map holomorphic near `x`, the local multiplicity at `x` is positive exactly when the
 map is not constant near `x`. -/
@@ -274,15 +229,15 @@ theorem localMultiplicity_comp {g : Y → Z}
   set c'' := chartAt ℂ (g (f x))
   have hcx : x ∈ c.source := mem_chart_source ℂ x
   have hc'fx : f x ∈ c'.source := mem_chart_source ℂ (f x)
-  have hc''gfx : g (f x) ∈ c''.source := mem_chart_source ℂ (g (f x))
   have hFa : AnalyticAt ℂ (fun z ↦ c' (f (c.symm z))) (c x) :=
-    analyticAt_chart_comp_comp_symm (chart_mem_maximalAtlas x) (chart_mem_maximalAtlas (f x))
-      hcx hc'fx hf
+    analyticAt_chartAt_comp_comp_chartAt_symm hf
+  -- The representative of `g` is analytic at `c' (f x)`; it is stated at the unsimplified point
+  -- `c' (f (c.symm (c x)))`, the value at `c x` of the representative of `f`, so that
+  -- `AnalyticAt.analyticOrderAt_comp` below unifies without rewriting the goal.
   have hGa : AnalyticAt ℂ (fun w ↦ c'' (g (c'.symm w)) - c'' (g (f x)))
       (c' (f (c.symm (c x)))) := by
     rw [c.left_inv hcx]
-    exact (analyticAt_chart_comp_comp_symm (chart_mem_maximalAtlas (f x))
-      (chart_mem_maximalAtlas (g (f x))) hc'fx hc''gfx hg).sub analyticAt_const
+    exact (analyticAt_chartAt_comp_comp_chartAt_symm hg).sub analyticAt_const
   have hcont : Tendsto (fun z ↦ f (c.symm z)) (𝓝 (c x)) (𝓝 (f x)) :=
     hf.self_of_nhds.continuousAt.tendsto.comp (c.tendsto_symm hcx)
   -- The representative of `g ∘ f` is the composition of the representatives of `g` and `f`.
@@ -307,19 +262,15 @@ theorem localMultiplicity_eq_one_iff (hf : ∀ᶠ y in 𝓝 x, MDifferentiableAt
   have hcx : x ∈ c.source := mem_chart_source ℂ x
   have hc'fx : f x ∈ c'.source := mem_chart_source ℂ (f x)
   have hFa : AnalyticAt ℂ (fun z ↦ c' (f (c.symm z))) (c x) :=
-    analyticAt_chart_comp_comp_symm (chart_mem_maximalAtlas x) (chart_mem_maximalAtlas (f x))
-      hcx hc'fx hf
+    analyticAt_chartAt_comp_comp_chartAt_symm hf
   -- The recentred representative has order `1` exactly when the derivative of the
   -- representative does not vanish, that is, exactly when the representative is injective near
   -- `c x`.
   have h1 : analyticOrderNatAt (fun z ↦ c' (f (c.symm z)) - c' (f x)) (c x) = 1 ↔
       ∃ V ∈ 𝓝 (c x), InjOn (fun z ↦ c' (f (c.symm z))) V := by
-    have hcancel : ∀ a : ℕ∞, a + 1 = 1 ↔ a = 0 := fun a ↦ by
-      induction a using ENat.recTopCoe with
-      | top => simp
-      | coe n => norm_cast; omega
     rw [analyticOrderNatAt, ENat.toNat_eq_iff one_ne_zero, Nat.cast_one,
-      exists_injOn_nhds_iff_deriv_ne_zero hFa, ← hFa.deriv.analyticOrderAt_eq_zero, ← hcancel,
+      exists_injOn_nhds_iff_deriv_ne_zero hFa, ← hFa.deriv.analyticOrderAt_eq_zero,
+      ← (ENat.add_left_injective_of_ne_top ENat.one_ne_top).eq_iff' (zero_add 1),
       hFa.analyticOrderAt_deriv_add_one]
     simp only [c.left_inv hcx]
   rw [h1]
@@ -345,7 +296,7 @@ theorem localMultiplicity_id (x : X) : localMultiplicity (id : X → X) x = 1 :=
     ⟨univ, univ_mem, injective_id.injOn⟩
 
 /-- A chart of the maximal atlas has local multiplicity `1` at every point of its domain. -/
-theorem localMultiplicity_of_mem_maximalAtlas {e : OpenPartialHomeomorph X ℂ}
+theorem localMultiplicity_eq_one_of_mem_maximalAtlas {e : OpenPartialHomeomorph X ℂ}
     (he : e ∈ maximalAtlas 𝓘(ℂ) 1 X) (hx : x ∈ e.source) : localMultiplicity e x = 1 :=
   (localMultiplicity_eq_one_iff ((e.open_source.eventually_mem hx).mono fun _ hy ↦
     (contMDiffAt_of_mem_maximalAtlas he hy).mdifferentiableAt one_ne_zero)).2
@@ -363,11 +314,11 @@ theorem localMultiplicity_eq_analyticOrderNatAt_sub (f : ℂ → ℂ) (z : ℂ) 
 /-- The power map `z ↦ z ^ m` has local multiplicity `m` at the origin. -/
 theorem localMultiplicity_pow_zero (m : ℕ) : localMultiplicity (fun z : ℂ ↦ z ^ m) 0 = m := by
   rcases Nat.eq_zero_or_pos m with rfl | hm
-  · simp [analyticOrderNatAt, analyticOrderAt_eq_top]
-  · have : (fun w : ℂ ↦ w ^ m - 0 ^ m) = id ^ m := by
-      ext w
+  · simp
+  · have : (fun w : ℂ ↦ w ^ m - 0 ^ m) = (· - 0) ^ m := by
+      funext w
       simp [zero_pow hm.ne']
-    rw [localMultiplicity_eq_analyticOrderNatAt_sub, this, analyticOrderNatAt_pow analyticAt_id]
-    simp [analyticOrderNatAt]
+    rw [localMultiplicity_eq_analyticOrderNatAt_sub, this, analyticOrderNatAt,
+      analyticOrderAt_centeredMonomial, ENat.toNat_natCast]
 
 end TauCeti.RiemannSurface
