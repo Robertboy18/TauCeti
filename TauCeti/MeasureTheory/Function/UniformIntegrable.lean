@@ -30,8 +30,9 @@ bound follows from the `Lᵖ` convergence, since a convergent sequence of finite
 
 * `TauCeti.memLp_dist_of_memLp_dist` — two maps with finite `p`-th moment about a basepoint have
   a distance with finite `p`-th moment;
-* `TauCeti.eLpNorm_dist_le_eLpNorm_dist_add` and `MeasureTheory.UnifIntegrable.dist_of_memLp_dist`
-  — the triangle inequality lifted to `Lᵖ` norms of distances and to uniform integrability;
+* `TauCeti.eLpNorm_dist_le_eLpNorm_dist_add`, `MeasureTheory.UnifIntegrable.dist_of_memLp_dist`
+  and `MeasureTheory.UniformIntegrable.dist_of_memLp_dist` — the triangle inequality lifted to
+  `Lᵖ` norms of distances and to uniform integrability, with and without the uniform `Lᵖ` bound;
 * `TauCeti.unifIntegrable_dist_iff_dist` and `TauCeti.uniformIntegrable_dist_iff_dist` — uniform
   integrability of the distances to a basepoint does not depend on the basepoint;
 * `TauCeti.tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_unifIntegrable` — **Vitali's theorem
@@ -109,6 +110,21 @@ theorem _root_.MeasureTheory.UnifIntegrable.dist_of_memLp_dist {ι : Type*} {T :
     fun _ ↦ hSS'.aestronglyMeasurable).ae_mono fun i ↦ ae_of_all _ fun x ↦
       enorm_le_iff_norm_le.2 (norm_dist_le_norm_dist_add_dist (T i x) (S x) (S' x))
 
+/-- Uniform integrability in `Lᵖ(μ)` with a uniform `Lᵖ` bound of the distances `dist (T i ·) (S ·)`
+to a reference map `S` passes to any almost-everywhere measurable reference map `S'` with
+`dist (S ·) (S' ·)` of finite `p`-th moment, for `1 ≤ p < ∞`: the uniform bound grows by the
+`Lᵖ` norm of `dist (S ·) (S' ·)`. -/
+theorem _root_.MeasureTheory.UniformIntegrable.dist_of_memLp_dist {ι : Type*} {T : ι → X → Y}
+    {S S' : X → Y} (h : UniformIntegrable (fun i x ↦ dist (T i x) (S x)) p μ) (hp : 1 ≤ p)
+    (hp' : p ≠ ∞) (hT : ∀ i, AEMeasurable (T i) μ) (hS : AEMeasurable S μ)
+    (hS' : AEMeasurable S' μ) (hSS' : MemLp (fun x ↦ dist (S x) (S' x)) p μ) :
+    UniformIntegrable (fun i x ↦ dist (T i x) (S' x)) p μ := by
+  obtain ⟨-, hui, C, hC⟩ := h
+  refine ⟨fun i ↦ ((hT i).dist hS').aestronglyMeasurable, hui.dist_of_memLp_dist hp hp' hT hS hSS',
+    C + (eLpNorm (fun x ↦ dist (S x) (S' x)) p μ).toNNReal, fun i ↦ ?_⟩
+  rw [ENNReal.coe_add, ENNReal.coe_toNNReal hSS'.eLpNorm_ne_top]
+  exact (eLpNorm_dist_le_eLpNorm_dist_add hp (hT i) hS hS').trans (add_le_add_left (hC i) _)
+
 end MemLp
 
 section Basepoint
@@ -135,13 +151,9 @@ theorem uniformIntegrable_dist_iff_dist (hp : 1 ≤ p) (hp' : p ≠ ∞)
       UniformIntegrable (fun i x ↦ dist (T i x) y₁) p μ := by
   suffices key : ∀ y₀ y₁ : Y, UniformIntegrable (fun i x ↦ dist (T i x) y₀) p μ →
       UniformIntegrable (fun i x ↦ dist (T i x) y₁) p μ from ⟨key y₀ y₁, key y₁ y₀⟩
-  rintro y₀ y₁ ⟨-, hui, C, hC⟩
-  refine ⟨fun i ↦ ((hT i).dist aemeasurable_const).aestronglyMeasurable,
-    (unifIntegrable_dist_iff_dist hp hp' hT).1 hui,
-    C + (eLpNorm (fun _ : X ↦ dist y₀ y₁) p μ).toNNReal, fun i ↦ ?_⟩
-  rw [ENNReal.coe_add, ENNReal.coe_toNNReal (memLp_const _).eLpNorm_ne_top]
-  exact (eLpNorm_dist_le_eLpNorm_dist_add (S := fun _ ↦ y₀) hp (hT i) aemeasurable_const
-    aemeasurable_const).trans (add_le_add_left (hC i) _)
+  intro y₀ y₁ h
+  exact h.dist_of_memLp_dist hp hp' hT aemeasurable_const aemeasurable_const
+    (memLp_const (dist y₀ y₁))
 
 end Basepoint
 
@@ -189,7 +201,6 @@ theorem tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_uniformIntegrable (hp : 1 
       ⟨hTm, hui.unifIntegrable⟩⟩
   obtain ⟨hTm, hui⟩ :=
     (tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_unifIntegrable hp hp' hT hT₀ hTp hT₀p).1 hL
-  refine ⟨hTm, fun n ↦ (hTp n).aestronglyMeasurable, hui, ?_⟩
   have hdp : ∀ n, MemLp (fun x ↦ dist (T n x) (T₀ x)) p μ := fun n ↦
     memLp_dist_of_memLp_dist (hT n) hT₀ (hTp n) hT₀p
   -- the convergent sequence of finite `Lᵖ` norms of the distances is bounded
@@ -201,10 +212,13 @@ theorem tendsto_eLpNorm_dist_iff_tendstoInMeasure_and_uniformIntegrable (hp : 1 
     exact ⟨C, fun n ↦ by
       rw [← ENNReal.coe_toNNReal (hdp n).eLpNorm_ne_top]
       exact ENNReal.coe_le_coe.2 (hC ⟨n, rfl⟩)⟩
-  refine ⟨C + (eLpNorm (fun x ↦ dist (T₀ x) y₀) p μ).toNNReal, fun n ↦ ?_⟩
-  rw [ENNReal.coe_add, ENNReal.coe_toNNReal hT₀p.eLpNorm_ne_top]
-  exact (eLpNorm_dist_le_eLpNorm_dist_add hp (hT n) hT₀ aemeasurable_const).trans
-    (add_le_add_left (hC n) _)
+  -- the distances to the reference map `T₀` are uniformly integrable with the bound `C`, and the
+  -- reference map transports to the basepoint `y₀`
+  have hui' : UniformIntegrable (fun n x ↦ dist (T n x) (T₀ x)) p μ :=
+    ⟨fun n ↦ (hdp n).aestronglyMeasurable,
+      hui.dist_of_memLp_dist hp hp' hT aemeasurable_const (by simpa only [dist_comm] using hT₀p),
+      C, hC⟩
+  exact ⟨hTm, hui'.dist_of_memLp_dist hp hp' hT hT₀ aemeasurable_const hT₀p⟩
 
 end Vitali
 

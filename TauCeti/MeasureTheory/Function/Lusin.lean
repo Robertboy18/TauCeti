@@ -111,7 +111,7 @@ theorem exists_isClosed_measure_sdiff_lt_continuousOn_of_aemeasurable (hf : AEMe
     (hs : MeasurableSet s) (hμs : μ s ≠ ∞) (hε : ε ≠ 0) :
     ∃ F ⊆ s, IsClosed F ∧ μ (s \ F) < ε ∧ ContinuousOn f F := by
   set N := toMeasurable μ {x | f x ≠ hf.mk f x} with hN
-  have hNμ : μ N = 0 := by rw [hN, measure_toMeasurable]; exact hf.ae_eq_mk
+  have hNμ : μ N = 0 := by rw [hN, measure_toMeasurable]; exact ae_iff.1 hf.ae_eq_mk
   obtain ⟨F, hFs, hF, hFμ, hFf⟩ := exists_isClosed_measure_sdiff_lt_continuousOn hf.measurable_mk
     (hs.diff (measurableSet_toMeasurable μ _)) (ne_top_of_le_ne_top hμs (measure_mono sdiff_subset))
     hε

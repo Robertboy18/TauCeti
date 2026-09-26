@@ -80,6 +80,8 @@ theorem tendsto_map_prodMk_self_of_tendstoInMeasure (hT : ∀ n, AEMeasurable (T
     Tendsto (fun n ↦ μ.map fun x ↦ (x, T n x)) atTop (𝓝 (μ.map fun x ↦ (x, T₀ x))) := by
   refine tendsto_of_subseq_tendsto fun ns hns ↦ ?_
   obtain ⟨ms, -, hms⟩ := TendstoInMeasure.exists_seq_tendsto_ae fun ε hε ↦ (h ε hε).comp hns
+  -- `TendstoInDistribution.tendsto` is stated with the structure literal
+  -- `⟨(μ : Measure X).map _, inferInstance⟩`, which is the definition of `ProbabilityMeasure.map`
   exact ⟨ms, (tendstoInDistribution_of_ae_tendsto (fun k ↦ aemeasurable_prodMk_self (hT _))
     (aemeasurable_prodMk_self hT₀) (hms.mono fun x hx ↦ tendsto_const_nhds.prodMk_nhds hx)).tendsto⟩
 
