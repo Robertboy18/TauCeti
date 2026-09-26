@@ -6,7 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Analysis.Calculus.DifferentialForm.Const
-public import TauCeti.Geometry.Manifold.TwoForm
+public import TauCeti.Geometry.Manifold.TwoForm.Basic
+import TauCeti.Analysis.Normed.Module.Alternating.Bilinear
 
 /-!
 # Closed smooth two-forms on manifolds
@@ -171,22 +172,6 @@ theorem inChartAt_eq_compContinuousLinearMap {x₀ x : M} {z : E}
 
 /-! ### Smoothness of the coordinate expression -/
 
-/-- Half the antisymmetrization of a continuous bilinear form, as a continuous linear map into
-the continuous alternating two-forms. On an alternating bilinear form it recovers the form. It is
-assembled from Mathlib's `alternatizeUncurryFinCLM` so that it is a continuous linear map, which is
-what transfers the smoothness of the bilinear section to that of the alternating expression; it is
-an implementation device for `contMDiffAt_inChartAt_comp_extChartAt` only. -/
-private def alternatizeBilin : (E →L[ℝ] E →L[ℝ] ℝ) →L[ℝ] E [⋀^Fin 2]→L[ℝ] ℝ :=
-  (2⁻¹ : ℝ) • (ContinuousAlternatingMap.alternatizeUncurryFinCLM ℝ E ℝ).comp
-    (ContinuousLinearMap.compL ℝ E (E →L[ℝ] ℝ) (E [⋀^Fin 1]→L[ℝ] ℝ)
-      ((ContinuousAlternatingMap.ofSubsingletonLIE (𝕜 := ℝ) (E := E) (F := ℝ)
-        (0 : Fin 1)).toContinuousLinearEquiv : (E →L[ℝ] ℝ) →L[ℝ] E [⋀^Fin 1]→L[ℝ] ℝ))
-
-private lemma alternatizeBilin_apply (B : E →L[ℝ] E →L[ℝ] ℝ) (v : Fin 2 → E) :
-    alternatizeBilin B v = 2⁻¹ * (B (v 0) (v 1) - B (v 1) (v 0)) := by
-  simp [alternatizeBilin, ContinuousAlternatingMap.alternatizeUncurryFin_apply, Fin.sum_univ_two,
-    Fin.removeNth, Fin.succAbove, sub_eq_add_neg]
-
 /-- In the hom-bundle trivialization at `x₀`, the fibre component of the bilinear section
 underlying `form` at a point `y` of the chart source is the bilinear form transported along the
 inverse tangent trivialization. -/
@@ -209,18 +194,22 @@ private lemma trivializationAt_toContMDiffSection_snd_apply (x₀ : M) {y : M}
   -- `tangentCoordChange` is by definition this coordinate change of the tangent bundle core
   rfl
 
-/-- On the chart source, the coordinate expression of `form` composed with the chart is the
-antisymmetrization of the fibre component of the hom-bundle trivialization of its bilinear
-section; this is the identity through which smoothness of the section is transferred. -/
-private lemma inChartAt_extChartAt_eq_alternatizeBilin (x₀ : M) {y : M}
+/-- On the chart source, the coordinate expression of `form` composed with the chart is half the
+alternatization of the fibre component of the hom-bundle trivialization of its bilinear section,
+through the continuous linear map `(2⁻¹ : ℝ) • ContinuousAlternatingMap.alternatizeBilinCLM ℝ E ℝ`;
+this is the identity through which smoothness of the section is transferred. -/
+private lemma inChartAt_extChartAt_eq_smul_alternatizeBilinCLM (x₀ : M) {y : M}
     (hy : y ∈ (chartAt H x₀).source) :
     form.inChartAt x₀ (extChartAt I x₀ y) =
-      alternatizeBilin ((trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
-        (fun b : M ↦ TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ) x₀
-          ⟨y, form.toContMDiffSection y⟩).2) := by
+      ((2⁻¹ : ℝ) • ContinuousAlternatingMap.alternatizeBilinCLM ℝ E ℝ)
+        ((trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+          (fun b : M ↦ TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ) x₀
+            ⟨y, form.toContMDiffSection y⟩).2) := by
   have hy' : y ∈ (extChartAt I x₀).source := by rwa [extChartAt_source]
   ext v
-  rw [alternatizeBilin_apply, form.trivializationAt_toContMDiffSection_snd_apply x₀ hy,
+  rw [_root_.smul_apply, ContinuousAlternatingMap.smul_apply,
+    ContinuousAlternatingMap.alternatizeBilinCLM_apply, smul_eq_mul,
+    form.trivializationAt_toContMDiffSection_snd_apply x₀ hy,
     form.trivializationAt_toContMDiffSection_snd_apply x₀ hy, inChartAt_apply,
     (extChartAt I x₀).left_inv hy']
   -- antisymmetry of the alternating form; the evaluation lemma is instantiated by hand because
@@ -246,9 +235,10 @@ theorem contMDiffAt_inChartAt_comp_extChartAt (x₀ : M) {y : M}
   have hsec := (Trivialization.contMDiffAt_section_iff (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
     (fun b : M ↦ TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ) x₀) hbase).1
     (form.toContMDiffSection.contMDiff y)
-  refine ((alternatizeBilin (E := E)).contMDiffAt.comp y hsec).congr_of_eventuallyEq ?_
+  refine (((2⁻¹ : ℝ) • ContinuousAlternatingMap.alternatizeBilinCLM ℝ E ℝ).contMDiffAt.comp y
+    hsec).congr_of_eventuallyEq ?_
   filter_upwards [extChartAt_source_mem_nhds' hy] with y' hy''
-  exact form.inChartAt_extChartAt_eq_alternatizeBilin x₀ (by rwa [← extChartAt_source I])
+  exact form.inChartAt_extChartAt_eq_smul_alternatizeBilinCLM x₀ (by rwa [← extChartAt_source I])
 
 /-- The coordinate expression of a smooth two-form is smooth, within `range I`, at every point of
 the chart target. -/
