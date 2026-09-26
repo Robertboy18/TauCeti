@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.RepresentationTheory.Homological.ContCohomology.Basic
 public import TauCeti.Algebra.Homology.ShortComplex.PreservesHomology
 public import TauCeti.RepresentationTheory.Continuous.TopRep.RestrictScalars
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Functoriality
@@ -287,17 +286,25 @@ theorem cocyclesMap_comp_cocyclesRestrictScalarsIntIso_hom :
         (cocyclesRestrictScalarsIntIso Y n).hom =
       (cocyclesRestrictScalarsIntIso X n).hom ≫
         TopModuleCat.restrictScalarsInt.map (cocyclesMap (ContinuousMonoidHom.id G) f n) := by
-  have hmono : Mono (TopModuleCat.restrictScalarsInt.map ((homogeneousCochains Y).iCycles n)) := by
-    rw [← (Iso.inv_comp_eq _).2 (cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles Y n).symm]
-    infer_instance
-  have h := HomologicalComplex.congr_hom
-    (cochainsMap_comp_homogeneousCochainsRestrictScalarsIntIso_hom f) n
-  simp only [HomologicalComplex.comp_f, Functor.mapHomologicalComplex_map_f] at h
-  rw [← cancel_mono (TopModuleCat.restrictScalarsInt.map ((homogeneousCochains Y).iCycles n)),
-    Category.assoc, cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles,
-    HomologicalComplex.cyclesMap_i_assoc, Category.assoc, ← Functor.map_comp,
-    HomologicalComplex.cyclesMap_i, Functor.map_comp,
-    cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles_assoc, h]
+  -- The first square is the naturality of the identification of the cochains, the second is
+  -- `ShortComplex.mapCyclesIso_hom_naturality`; as in
+  -- `cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles`, the composites only split after
+  -- unfolding, so the squares are pasted as terms.
+  have h : HomologicalComplex.cyclesMap
+        (cochainsMap (ContinuousMonoidHom.id G) (restrictScalarsInt.map f)) n ≫
+        HomologicalComplex.cyclesMap (homogeneousCochainsRestrictScalarsIntIso Y).hom n =
+      HomologicalComplex.cyclesMap (homogeneousCochainsRestrictScalarsIntIso X).hom n ≫
+        HomologicalComplex.cyclesMap
+          ((TopModuleCat.restrictScalarsInt.mapHomologicalComplex _).map
+            (cochainsMap (ContinuousMonoidHom.id G) f)) n := by
+    rw [← HomologicalComplex.cyclesMap_comp, ← HomologicalComplex.cyclesMap_comp,
+      cochainsMap_comp_homogeneousCochainsRestrictScalarsIntIso_hom]
+  exact (Category.assoc _ _ _).symm.trans <| (congrArg (· ≫ _) h).trans <|
+    (Category.assoc _ _ _).trans <|
+      (congrArg (_ ≫ ·) (ShortComplex.mapCyclesIso_hom_naturality
+        ((HomologicalComplex.shortComplexFunctor _ _ n).map
+          (cochainsMap (ContinuousMonoidHom.id G) f)) TopModuleCat.restrictScalarsInt)).trans
+        (Category.assoc _ _ _).symm
 
 /-- **Continuous cohomology does not see the scalars, naturally.** The identification
 `restrictScalarsIntIso` is natural in the representation: it carries the coefficient map of the
@@ -306,17 +313,24 @@ underlying additive map of `f` to the underlying additive map of the coefficient
 theorem coeffMap_comp_restrictScalarsIntIso_hom :
     coeffMap (restrictScalarsInt.map f) n ≫ (restrictScalarsIntIso Y n).hom =
       (restrictScalarsIntIso X n).hom ≫ TopModuleCat.restrictScalarsInt.map (coeffMap f n) := by
-  have h₁ : π (restrictScalarsInt.obj X) n ≫ coeffMap (restrictScalarsInt.map f) n =
-      cocyclesMap (ContinuousMonoidHom.id G) (restrictScalarsInt.map f) n ≫
-        π (restrictScalarsInt.obj Y) n := by
-    rw [coeffMap_def]
-    exact π_map _ _ n
-  have h₂ : π X n ≫ coeffMap f n = cocyclesMap (ContinuousMonoidHom.id G) f n ≫ π Y n := by
-    rw [coeffMap_def]
-    exact π_map _ _ n
-  rw [← cancel_epi (π (restrictScalarsInt.obj X) n), reassoc_of% h₁,
-    π_comp_restrictScalarsIntIso_hom, π_comp_restrictScalarsIntIso_hom_assoc, ← Functor.map_comp,
-    h₂, Functor.map_comp, cocyclesMap_comp_cocyclesRestrictScalarsIntIso_hom_assoc]
+  -- As in `cocyclesMap_comp_cocyclesRestrictScalarsIntIso_hom`, with
+  -- `ShortComplex.mapHomologyIso_hom_naturality` for the second square.
+  have h : HomologicalComplex.homologyMap
+        (cochainsMap (ContinuousMonoidHom.id G) (restrictScalarsInt.map f)) n ≫
+        HomologicalComplex.homologyMap (homogeneousCochainsRestrictScalarsIntIso Y).hom n =
+      HomologicalComplex.homologyMap (homogeneousCochainsRestrictScalarsIntIso X).hom n ≫
+        HomologicalComplex.homologyMap
+          ((TopModuleCat.restrictScalarsInt.mapHomologicalComplex _).map
+            (cochainsMap (ContinuousMonoidHom.id G) f)) n := by
+    rw [← HomologicalComplex.homologyMap_comp, ← HomologicalComplex.homologyMap_comp,
+      cochainsMap_comp_homogeneousCochainsRestrictScalarsIntIso_hom]
+  rw [coeffMap_def, coeffMap_def]
+  exact (Category.assoc _ _ _).symm.trans <| (congrArg (· ≫ _) h).trans <|
+    (Category.assoc _ _ _).trans <|
+      (congrArg (_ ≫ ·) (ShortComplex.mapHomologyIso_hom_naturality
+        ((HomologicalComplex.shortComplexFunctor _ _ n).map
+          (cochainsMap (ContinuousMonoidHom.id G) f)) TopModuleCat.restrictScalarsInt)).trans
+        (Category.assoc _ _ _).symm
 
 end TauCeti.ContCohomology
 
@@ -326,7 +340,7 @@ namespace TauCeti.ContCohomology
 
 open TopRep
 
-variable {k : Type*} [Ring k] [TopologicalSpace k] {G : Type*} [Group G]
+variable {k : Type*} [Ring k] [TopologicalSpace k] {G : Type*} [Monoid G]
 
 attribute [local instance] TopRep.distribMulAction
 

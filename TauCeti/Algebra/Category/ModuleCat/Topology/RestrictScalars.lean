@@ -6,10 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.Category.ModuleCat.Topology.Homology
-public import Mathlib.Algebra.Homology.ShortComplex.PreservesHomology
 public import Mathlib.LinearAlgebra.Quotient.Basic
-public import Mathlib.Topology.Algebra.Group.ZPow
-public import Mathlib.Topology.Algebra.Module.Basic
 public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.RestrictScalars
 
 /-!

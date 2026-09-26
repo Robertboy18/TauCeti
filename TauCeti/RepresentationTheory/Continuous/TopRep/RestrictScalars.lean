@@ -6,8 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.RepresentationTheory.Continuous.TopRep
-public import Mathlib.Topology.Algebra.Group.ZPow
-public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.RestrictScalars
 public import TauCeti.Algebra.Category.ModuleCat.Topology.RestrictScalars
 
 /-!
