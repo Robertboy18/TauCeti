@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.TateCohomology.Cup.DegreeZero
+public import TauCeti.RepresentationTheory.Homological.TateCohomology.Cup.ZeroLeft
 public import TauCeti.RepresentationTheory.Homological.TateCohomology.DimensionShift
 
 /-!
@@ -34,8 +34,12 @@ the first variable, associativity, graded commutativity and the compatibility wi
 the further properties of the product; they are not proved here.
 
 The target degree of `cup` is a parameter `r` together with a proof of `p + q = r`, in the style of
-Mathlib's `ShortComplex.ShortExact.δ`, so that neither the definition nor its consumers need to
-transport classes along equalities of degrees.
+Mathlib's `ShortComplex.ShortExact.δ`. The definition transports the degree produced by its
+recursion to `r` along this proof, once, so that consumers can supply the target degree they need
+together with the equality of degrees and never transport classes themselves.
+
+In bidegree `(0, q)` the product is the existing product `cup0H` with a degree-zero class in the
+first factor (`cup_zero_left`), because both satisfy the same rule for the dimension shifts.
 
 ## Main definitions
 
@@ -45,6 +49,7 @@ transport classes along equalities of degrees.
 ## Main statements
 
 * `TauCeti.TateCohomology.cup_zero_right`: in bidegree `(p, 0)` the product is `cupH0`.
+* `TauCeti.TateCohomology.cup_zero_left`: in bidegree `(0, q)` the product is `cup0H`.
 * `TauCeti.TateCohomology.cup_dimensionShiftUpIso_hom`,
   `TauCeti.TateCohomology.cup_dimensionShiftDownIso_hom`: the defining rule
   `x ∪ δ y = (-1)^p δ (x ∪ y)` for the upward shift when the second degree is nonnegative, and for
@@ -130,28 +135,18 @@ def cup (p q r : ℤ) (h : p + q = r) :
 /-!
 The unfolding lemmas below are stated with the target degree in the form in which the recursion
 produces it, so that the transport along an equality of degrees in the definition of `cup` is
-along a reflexivity proof and disappears definitionally.
+along a reflexivity proof and disappears definitionally. Where a proof needs them at a second
+degree such as `(n : ℤ) + 1` or `Int.negSucc n + 1`, which is of the form the recursion matches on
+by definition but not syntactically, they are applied as terms through `LinearMap.congr_fun₂`,
+which unifies up to definitional equality, rather than by `rw`.
 -/
 
 private theorem cup_natCast (p : ℤ) (n : ℕ) (h : p + n = addNat p n) :
     cup M N p n (addNat p n) h = cupNonneg M p n N :=
   rfl
 
-private theorem cup_natCast_add_one (p : ℤ) (n : ℕ) (h : p + (n + 1) = addNat p (n + 1)) :
-    cup M N p (n + 1) (addNat p (n + 1)) h = cupNonneg M p (n + 1) N :=
-  rfl
-
 private theorem cup_negSucc (p : ℤ) (n : ℕ) (h : p + Int.negSucc n = p - (n + 1 : ℕ)) :
     cup M N p (Int.negSucc n) (p - (n + 1 : ℕ)) h = cupNeg M p n N :=
-  rfl
-
-private theorem cup_negSucc_zero_add_one (p : ℤ) (h : p + (Int.negSucc 0 + 1) = p) :
-    cup M N p (Int.negSucc 0 + 1) p h = cupH0 M N p :=
-  rfl
-
-private theorem cup_negSucc_succ_add_one (p : ℤ) (n : ℕ)
-    (h : p + (Int.negSucc (n + 1) + 1) = p - (n + 1 : ℕ)) :
-    cup M N p (Int.negSucc (n + 1) + 1) (p - (n + 1 : ℕ)) h = cupNeg M p n N :=
   rfl
 
 private theorem cupNonneg_succ_apply (p : ℤ) (n : ℕ) (x : tateCohomology M p)
@@ -185,6 +180,12 @@ private theorem cupNeg_succ_apply (p : ℤ) (n : ℕ) (x : tateCohomology M p)
 theorem cup_zero_right (p : ℤ) (h : p + 0 = p) : cup M N p 0 p h = cupH0 M N p :=
   cup_natCast M N p 0 h
 
+/-- The sign `(-1) ^ p` applied before and after a linear map cancels. -/
+private theorem negOnePow_smul_map_negOnePow_smul {X Y : ModuleCat k} (f : X ⟶ Y) (p : ℤ) (v : X) :
+    p.negOnePow • f (p.negOnePow • v) = f v := by
+  rw [Units.smul_def, Units.smul_def, map_zsmul, smul_smul, ← Units.val_mul, Int.units_mul_self,
+    Units.val_one, one_smul]
+
 /-- **The defining rule of the cup product for the upward dimension shift**: for `x` of degree `p`
 and `y` of nonnegative degree `q` in `dimensionShiftUp N`, `x ∪ δ y = (-1)^p δ (x ∪ y)`, where the
 first `δ` is the shift `H^q(G, dimensionShiftUp N) ≅ H^(q+1)(G, N)` and the second is its tensor
@@ -197,8 +198,9 @@ theorem cup_dimensionShiftUpIso_hom {p q r' r : ℤ} (hq : 0 ≤ q) (h' : p + q 
   obtain ⟨n, rfl⟩ := Int.eq_ofNat_of_zero_le hq
   obtain rfl : r' = addNat p n := by rw [addNat_eq]; omega
   obtain rfl : r = addNat p (n + 1) := by rw [addNat_eq]; push_cast; omega
-  rw [cup_natCast_add_one, cup_natCast, cupNonneg_succ_apply, ← ModuleCat.comp_apply,
-    Iso.hom_inv_id, ModuleCat.id_apply]
+  rw [cup_natCast M (dimensionShiftUp N) p n]
+  refine (LinearMap.congr_fun₂ (cup_natCast M N p (n + 1) _) x _).trans ?_
+  rw [cupNonneg_succ_apply, Iso.hom_inv_id_apply]
 
 /-- **The defining rule of the cup product for the downward dimension shift**: for `x` of degree
 `p` and `y` of negative degree `q` in `N`, `x ∪ δ y = (-1)^p δ (x ∪ y)`, where the first `δ` is the
@@ -210,17 +212,84 @@ theorem cup_dimensionShiftDownIso_hom {p q r' r : ℤ} (hq : q < 0) (h' : p + q 
       p.negOnePow • (tensorDimensionShiftDownIso N M r' r h).hom (cup M N p q r' h' x y) := by
   obtain ⟨n, rfl⟩ := Int.eq_negSucc_of_lt_zero hq
   obtain rfl : r' = p - (n + 1 : ℕ) := by rw [Int.negSucc_eq] at h'; omega
+  rw [cup_negSucc M N p n]
   cases n with
   | zero =>
-    obtain rfl : r = p := by simp at h; omega
-    rw [cup_negSucc_zero_add_one, cup_negSucc, cupNeg_zero_apply, Units.smul_def, Units.smul_def,
-      map_zsmul, smul_smul, ← Units.val_mul, Int.units_mul_self, Units.val_one, one_smul,
-      ← ModuleCat.comp_apply, Iso.inv_hom_id, ModuleCat.id_apply]
+    obtain rfl : p = r := by simp at h; omega
+    rw [cupNeg_zero_apply, negOnePow_smul_map_negOnePow_smul, Iso.inv_hom_id_apply]
+    -- `Int.negSucc 0 + 1` is `0` by definition, so the left-hand side is `cup` in bidegree
+    -- `(p, 0)`.
+    exact LinearMap.congr_fun₂ (cup_zero_right M (dimensionShiftDown N) p _) x _
   | succ n =>
     obtain rfl : r = p - (n + 1 : ℕ) := by push_cast at h ⊢; omega
-    rw [cup_negSucc_succ_add_one, cup_negSucc, cupNeg_succ_apply, Units.smul_def, Units.smul_def,
-      map_zsmul, smul_smul, ← Units.val_mul, Int.units_mul_self, Units.val_one, one_smul,
-      ← ModuleCat.comp_apply, Iso.inv_hom_id, ModuleCat.id_apply]
+    rw [cupNeg_succ_apply, negOnePow_smul_map_negOnePow_smul, Iso.inv_hom_id_apply]
+    exact LinearMap.congr_fun₂ (cup_negSucc M (dimensionShiftDown N) p n _) x _
+
+/-- The upward step in the proof of `cup_zero_left`: if `cup` agrees with `cup0H` in bidegree
+`(0, q)` for the upward shift of `N`, where `0 ≤ q`, then it does in bidegree `(0, q + 1)` for
+`N`. -/
+private theorem cup_zero_left_add_one {q : ℤ} (hq : 0 ≤ q) (h : 0 + (q + 1) = q + 1)
+    (ih : ∀ h : 0 + q = q,
+      cup M (dimensionShiftUp N) 0 q q h = cup0H M (dimensionShiftUp N) q) :
+    cup M N 0 (q + 1) (q + 1) h = cup0H M N (q + 1) := by
+  ext x y
+  obtain ⟨y, rfl⟩ : ∃ y', (dimensionShiftUpIso N q).hom y' = y :=
+    ⟨(dimensionShiftUpIso N q).inv y, Iso.inv_hom_id_apply _ _⟩
+  -- `δ_cup0H` for the upward dimension-shifting sequence of `N`, with the terms of the sequence
+  -- and of its tensor product with `M` spelled out.
+  have hδ := δ_cup0H M (S := ShortComplex.mk (coindBotUnit N) (dimensionShiftUpπ N)
+      (coindBotUnit_comp_dimensionShiftUpπ N))
+    (by simpa only [dimensionShiftUpSES_def] using dimensionShiftUpSES_shortExact N)
+    (by simpa only [dimensionShiftUpSES_def] using dimensionShiftUpSES_tensorLeft_shortExact N M)
+    q x y
+  dsimp only [ShortComplex.map_X₁, ShortComplex.map_X₃] at hδ
+  rw [cup_dimensionShiftUpIso_hom M N hq (zero_add q) rfl, ih, Int.negOnePow_zero, one_smul,
+    tensorDimensionShiftUpIso_hom, dimensionShiftUpIso_hom]
+  exact hδ
+
+/-- The downward step in the proof of `cup_zero_left`: if `cup` agrees with `cup0H` in bidegree
+`(0, q + 1)` for the downward shift of `N`, where `q < 0`, then it does in bidegree `(0, q)` for
+`N`. -/
+private theorem cup_zero_left_of_add_one {q : ℤ} (hq : q < 0) (h : 0 + q = q)
+    (ih : ∀ h : 0 + (q + 1) = q + 1,
+      cup M (dimensionShiftDown N) 0 (q + 1) (q + 1) h = cup0H M (dimensionShiftDown N) (q + 1)) :
+    cup M N 0 q q h = cup0H M N q := by
+  ext x y
+  refine (tensorDimensionShiftDownIso N M q (q + 1) rfl).toLinearEquiv.injective ?_
+  have key := cup_dimensionShiftDownIso_hom M N hq h rfl x y
+  rw [ih, Int.negOnePow_zero, one_smul] at key
+  -- `δ_cup0H` for the downward dimension-shifting sequence of `N`, with the terms of the sequence
+  -- and of its tensor product with `M` spelled out.
+  have hδ := δ_cup0H M (S := ShortComplex.mk (dimensionShiftDownι N) (indBotCounit N)
+      (dimensionShiftDownι_comp_indBotCounit N))
+    (by simpa only [dimensionShiftDownSES_def] using dimensionShiftDownSES_shortExact N)
+    (by simpa only [dimensionShiftDownSES_def] using
+      dimensionShiftDownSES_tensorLeft_shortExact N M) q x y
+  dsimp only [ShortComplex.map_X₁, ShortComplex.map_X₃] at hδ
+  rw [Iso.toLinearEquiv_apply, Iso.toLinearEquiv_apply, ← key, tensorDimensionShiftDownIso_hom,
+    dimensionShiftDownIso_hom]
+  exact hδ.symm
+
+/-- In bidegree `(0, q)` the cup product is the product `cup0H` with a degree-zero class in the
+first factor: both are `cupH0` in bidegree `(0, 0)` and both satisfy `x ∪ δ y = δ (x ∪ y)` for the
+dimension shifts of the second variable. -/
+@[simp]
+theorem cup_zero_left (q : ℤ) (h : 0 + q = q) : cup M N 0 q q h = cup0H M N q := by
+  rcases le_or_gt 0 q with hq | hq
+  · induction q, hq using Int.leInduction generalizing N with
+    | base => rw [cup_zero_right, cup0H_zero]
+    | succ q hq ih => exact cup_zero_left_add_one M N hq h (ih (dimensionShiftUp N))
+  · obtain ⟨n, rfl⟩ := Int.eq_negSucc_of_lt_zero hq
+    clear hq
+    induction n generalizing N with
+    | zero =>
+      -- `Int.negSucc 0 + 1` is `0` by definition, so the hypothesis of the step is the bidegree
+      -- `(0, 0)` case.
+      exact cup_zero_left_of_add_one M N (Int.negSucc_lt_zero 0) h fun h ↦
+        (cup_zero_right M (dimensionShiftDown N) 0 h).trans
+          (cup0H_zero M (dimensionShiftDown N)).symm
+    | succ n ih =>
+      exact cup_zero_left_of_add_one M N (Int.negSucc_lt_zero _) h (ih (dimensionShiftDown N))
 
 variable {M N}
 
