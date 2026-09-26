@@ -312,20 +312,21 @@ degree**: `δ : Hⁱ(G, Coind_1^G M ⧸ M) → Hⁱ⁺¹(G, M)` for `i ≥ 1` an
 theorem coindBotShortExact_delta_bijective (i : ℕ) (hi : 0 < i) :
     Function.Bijective ((coindBotShortExact G M).delta i).hom := by
   obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hi.ne'
-  refine ⟨fun x y hxy => ?_, fun y => ?_⟩
-  · -- exactness at `Hⁿ⁺¹(G, Coind_1^G M ⧸ M)`, the preceding term being zero
-    rw [← sub_eq_zero, ← map_sub] at hxy
-    obtain ⟨a, ha⟩ := ((coindBotShortExact G M).longExact_exact₃ (n + 1) (x - y)).1 hxy
-    rw [Subsingleton.elim a 0, map_zero] at ha
-    exact sub_eq_zero.1 ha.symm
-  · -- exactness at `Hⁿ⁺²(G, M)`, the following term being zero
-    exact ((coindBotShortExact G M).longExact_exact₁ (n + 1) y).1 (Subsingleton.elim _ _)
+  refine ⟨(LinearMap.injective_iff_eq_zero_of_exact
+      ((coindBotShortExact G M).longExact_exact₃ (n + 1))).2 ?_,
+    (LinearMap.surjective_iff_eq_zero_of_exact
+      ((coindBotShortExact G M).longExact_exact₁ (n + 1))).2 ?_⟩
+  · -- the map into `Hⁿ⁺¹(G, Coind_1^G M ⧸ M)` is zero because its source is
+    exact LinearMap.ext fun x => by rw [Subsingleton.elim x 0, map_zero, map_zero]
+  · -- the map out of `Hⁿ⁺²(G, M)` is zero because its target is
+    exact Subsingleton.elim _ _
 
 /-- **Dimension shifting in every positive degree**, `Hⁱ⁺¹(G, M) ≅ Hⁱ(G, Coind_1^G M ⧸ M)` for
 `i ≥ 1` and a compact group `G`, as an isomorphism of Mathlib's canonical continuous cohomology. Its
 inverse is the connecting map of `TauCeti.ContCohomology.coindBotShortExact`
-(`dimensionShiftIso_inv`), which is bijective, and both sides are discrete. Its explicit degree-one
-instance is `TauCeti.ContCohomology.explicitDimensionShift1`. -/
+(`dimensionShiftIso_inv`), which is bijective, and both sides are discrete. The analogous statement
+on the explicit low-degree model, for a profinite `G` and in the direction of the connecting map,
+is `TauCeti.ContCohomology.explicitDimensionShift1 : H¹(G, Coind_1^G M ⧸ M) ≃+ H²(G, M)`. -/
 noncomputable def dimensionShiftIso (i : ℕ) (hi : 0 < i) :
     continuousCohomology (i + 1) (ofDiscreteModule ℤ G M) ≅
       continuousCohomology i (ofDiscreteModule ℤ G (DimensionShiftQuotient G M)) :=

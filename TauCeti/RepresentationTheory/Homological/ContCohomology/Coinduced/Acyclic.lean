@@ -6,11 +6,9 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Category.ModuleCat.Topology.Zero
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Discrete
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Functor
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CompactDiscrete
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Resolution
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.SmoothDiscrete
 public import TauCeti.Topology.Algebra.Monoid
 
 /-!
