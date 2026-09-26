@@ -52,9 +52,9 @@ instance discreteTopology [CompactSpace X] [DiscreteTopology Y] :
   exact hfin.isOpen_biInter fun y _ ↦ isOpen_setOfPred_mapsTo
     (isClosed_singleton.preimage f.continuous).isCompact (isOpen_discrete _)
 
-/-- Pairing a map with a constant into a product is continuous, the mirror image of Mathlib's
-`ContinuousMap.continuous_prodMk_const`. -/
-theorem continuous_prodMk_const' {Z : Type*} [TopologicalSpace Z] :
+/-- Pairing a map with a constant in the right component of a product is continuous, the mirror
+image of Mathlib's `ContinuousMap.continuous_prodMk_const`, whose constant is the left component. -/
+theorem continuous_prodMk_const_right {Z : Type*} [TopologicalSpace Z] :
     Continuous fun p : C(X, Y) × Z ↦ p.1.prodMk (const X p.2) := by
   have : (fun p : C(X, Y) × Z ↦ p.1.prodMk (const X p.2)) =
       fun p ↦ ContinuousMap.prodSwap.comp ((const X p.2).prodMk p.1) := by

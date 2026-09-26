@@ -58,12 +58,14 @@ equality of degrees through Mathlib's `HomologicalComplex.XIsoOfEq`, whose evalu
 
 ## Local compactness
 
-The successor step `(a ⌣ b) g = (a g) ⌣ b` is postcomposition with a fixed continuous map, and
-the base case pairs a coefficient with a constant, so both are continuous for every topological
-group `G`. Joint continuity of the base case in `(a, b)`, which the successor step needs in order
-to be a well-defined continuous map, evaluates `a` and `b` at a variable point of `G`; this is
-where `LocallyCompactSpace G` enters. Compact groups, in particular profinite groups, are locally
-compact, so the hypothesis is automatic in the arithmetic applications.
+For fixed inputs `a` and `b`, the base case `g ↦ (a g) ⌣ (b g)` is the pointwise pairing composed
+with the continuous map `g ↦ (a g, b g)`, and the successor step `(a ⌣ b) g = (a g) ⌣ b` is
+postcomposition with a fixed continuous map, so both values are continuous maps on `G` for every
+topological group `G`. The successor step, however, needs the base case to be jointly continuous
+in the pair `(a, b)` in order to be a well-defined continuous map, and joint continuity of
+`(a, b) ↦ (g ↦ (a g, b g))` is continuity of evaluation `C(G, -) × G → -` for the compact-open
+topology; this is where `LocallyCompactSpace G` enters. Compact groups, in particular profinite
+groups, are locally compact, so the hypothesis is automatic in the arithmetic applications.
 
 ## Main definitions
 
@@ -302,7 +304,7 @@ def resolutionCup : (m n k : ℕ) → k = n + m →
       (continuous_postcomp _).comp ContinuousMap.continuous_prodMk⟩
   | m + 1, n, k + 1, hk =>
     ⟨fun p ↦ (resolutionCup m n k (Nat.succ.inj hk)).comp (p.1.prodMk (const G p.2)),
-      (continuous_postcomp _).comp ContinuousMap.continuous_prodMk_const'⟩
+      (continuous_postcomp _).comp ContinuousMap.continuous_prodMk_const_right⟩
   | _ + 1, _, 0, hk => absurd hk (by omega)
 
 theorem resolutionCup_zero_apply {n k : ℕ} (hk : k = n + 0) (a : C(G, X.V))
@@ -468,7 +470,8 @@ theorem resolutionCupPairing_apply (m n : ℕ) (a : (TopRep.resolution'X X m).V)
 
 /-- **The base case of the Alexander–Whitney recursion**: a `0`-cochain `a` cupped with `b` is the
 pointwise pairing of `a g` with every value of `b g`, transported from degree `n` to `0 + n`. -/
-theorem resolutionCupPairing_zero_apply (n : ℕ) (a : (TopRep.resolution'X X 0).V)
+@[simp]
+theorem resolutionCupPairing_apply_zero (n : ℕ) (a : (TopRep.resolution'X X 0).V)
     (b : (TopRep.resolution'X Y n).V) (g : G) :
     (P.resolutionCupPairing 0 n a b : C(G, (TopRep.resolutionX Z (0 + n)).V)) g =
       ((TopRep.resolution Z).XIsoOfEq (Nat.zero_add n).symm).hom.hom
@@ -477,7 +480,8 @@ theorem resolutionCupPairing_zero_apply (n : ℕ) (a : (TopRep.resolution'X X 0)
 
 /-- **The successor case of the Alexander–Whitney recursion**: `(a ⌣ b) g = (a g) ⌣ b`,
 transported from degree `m + n + 1` to `m + 1 + n`. -/
-theorem resolutionCupPairing_succ_apply (m n : ℕ) (a : (TopRep.resolution'X X (m + 1)).V)
+@[simp]
+theorem resolutionCupPairing_apply_succ (m n : ℕ) (a : (TopRep.resolution'X X (m + 1)).V)
     (b : (TopRep.resolution'X Y n).V) (g : G) :
     (P.resolutionCupPairing (m + 1) n a b : C(G, (TopRep.resolutionX Z (m + 1 + n)).V)) g =
       ((TopRep.resolution Z).XIsoOfEq (by omega : m + n + 1 = m + 1 + n)).hom.hom
