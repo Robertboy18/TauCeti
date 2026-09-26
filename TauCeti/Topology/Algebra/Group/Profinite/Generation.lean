@@ -59,6 +59,8 @@ profinite group.
   to another such set.
 * `Filter.Tendsto.convergesToOne_range`: the range of a map tending to `1` along the cofinite
   filter converges to one.
+* `TauCeti.ConvergesToOne.isCompact_insert_one`, `TauCeti.ConvergesToOne.isClosed_insert_one`: a
+  set converging to one is compact, and in a Hausdorff space closed, once `1` is added to it.
 * `Subgroup.exists_convergesToOne_lift_quotient`: a converging set in a quotient by a closed
   normal subgroup has a converging set of representatives upstairs.
 * `Subgroup.exists_convergesToOne_lift_quotient_topologicallyGenerates`: if the set generates the
@@ -139,6 +141,17 @@ theorem _root_.Filter.Tendsto.convergesToOne_range {ι : Type*} {f : ι → G}
   refine ((mem_cofinite.mp (hf hU)).image f).subset ?_
   rintro _ ⟨⟨i, rfl⟩, hi⟩
   exact ⟨i, hi, rfl⟩
+
+/-- A set converging to one is compact once `1` is added to it. -/
+theorem ConvergesToOne.isCompact_insert_one {s : Set G} (hs : ConvergesToOne s) :
+    IsCompact (insert 1 s) := by
+  simpa only [Subtype.range_coe] using hs.isCompact_insert_range_of_cofinite
+
+/-- In a Hausdorff space, a set converging to one is closed once `1` is added to it; so for a
+profinite group `G` the subspace `insert 1 s` is a profinite space. -/
+theorem ConvergesToOne.isClosed_insert_one [T2Space G] {s : Set G} (hs : ConvergesToOne s) :
+    IsClosed (insert 1 s) :=
+  hs.isCompact_insert_one.isClosed
 
 end One
 

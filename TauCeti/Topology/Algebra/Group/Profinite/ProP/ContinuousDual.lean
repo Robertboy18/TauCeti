@@ -33,6 +33,8 @@ Frattini quotient is an isomorphism of `𝔽_p`-vector spaces from the continuou
   of a continuous `𝔽_p`-valued character.
 * `TauCeti.proPFrattini_eq_iInf_ker`: the pro-`p` Frattini subgroup is the intersection of the
   kernels of the continuous `𝔽_p`-valued characters.
+* `TauCeti.ker_le_proPFrattini_of_forall_exists_comp_eq`: a continuous homomorphism through which
+  every continuous `𝔽_p`-valued character factors has kernel inside the pro-`p` Frattini subgroup.
 * `TauCeti.frattiniQuotientDualEquiv`: the continuous `𝔽_p`-dual of the Frattini quotient is the
   continuous `𝔽_p`-dual of `G`.
 
@@ -96,6 +98,20 @@ theorem proPFrattini_eq_iInf_ker [ContinuousMul G] :
   refine mem_proPFrattini_iff.mpr fun U hU ↦ ?_
   obtain ⟨φ, hφ⟩ := exists_continuousMonoidHom_ker_eq hU
   exact hφ ▸ Subgroup.mem_iInf.mp hx φ
+
+/-- **The Frattini criterion for a kernel.** If every continuous `𝔽_p`-valued character of `G`
+factors through a continuous homomorphism `φ : G → H`, then the kernel of `φ` lies in the pro-`p`
+Frattini subgroup of `G`. -/
+theorem ker_le_proPFrattini_of_forall_exists_comp_eq [ContinuousMul G] {H : Type*} [Group H]
+    [TopologicalSpace H] (φ : G →ₜ* H)
+    (h : ∀ ψ : G →ₜ* Multiplicative (ZMod p),
+      ∃ χ : H →ₜ* Multiplicative (ZMod p), χ.comp φ = ψ) :
+    φ.ker ≤ proPFrattini p G := by
+  rw [proPFrattini_eq_iInf_ker]
+  refine le_iInf fun ψ x hx ↦ ?_
+  obtain ⟨χ, rfl⟩ := h ψ
+  rw [MonoidHom.mem_ker, ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_coe] at hx ⊢
+  rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, hx, map_one]
 
 /-- Precomposition with the Frattini quotient projection identifies continuous homomorphisms
 from the quotient with continuous homomorphisms from `G` for a discrete target of cardinality
