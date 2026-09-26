@@ -192,6 +192,7 @@ theorem map_presentedProPGen {K F : Type*} [Group K] [FunLike F (presentedProP p
 /-- The quotient map carries the tuple `freeProPGen` to the tuple `presentedProPGen`: the
 function-level form of `TauCeti.presentedProP.mk_freeProPGen`, which lets a word read on
 `presentedProPGen` be pulled back through `map_demushkinWordNeTwo` and its companions. -/
+@[simp]
 theorem presentedProP.mk_comp_freeProPGen :
     ⇑(presentedProP.mk p rels) ∘ freeProPGen p n = presentedProPGen p n rels :=
   funext (presentedProP.mk_freeProPGen p n rels)
