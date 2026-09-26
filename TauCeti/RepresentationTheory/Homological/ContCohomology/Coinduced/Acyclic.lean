@@ -48,11 +48,12 @@ A cocycle `F` of degree `n + 1` is thus sent by evaluation to a cocycle `Φ` of 
 `A`, which is `d (Φ 1)` by the contraction; spreading `Φ 1` back over `G` gives an invariant
 cochain whose differential is the spread of `d (Φ 1) = Φ` (`d_coindLevel_const`), which is `F`.
 
-Compactness of `G` enters only through the discreteness of every level of the resolution
-(`TauCeti.discreteTopology_resolutionX`), which makes the maps above continuous. Neither total
-disconnectedness of `G` nor any continuity of the action is needed, and `A` is a bare abelian
-group: the resolution of `A` is formed for the discrete topology, which the final statement does
-not mention.
+Compactness of `G` enters in two places. Every level of the resolution is discrete
+(`TauCeti.discreteTopology_resolutionX`), which makes `evalLevel` and `coindLevel` continuous, and
+`G` is locally compact, which makes evaluation `C(G, Z) × G → Z` continuous and hence lets the
+two-variable family `shear` be curried. Neither total disconnectedness of `G` nor any continuity
+of the action is needed, and `A` is a bare abelian group: the resolution of `A` is formed for the
+discrete topology, which the final statement does not mention.
 
 ## Main definitions
 
