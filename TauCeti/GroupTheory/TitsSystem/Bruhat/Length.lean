@@ -34,8 +34,8 @@ The right-handed versions follow by inversion, which carries the cell at `w` to 
 
 ## Main declarations
 
-* `TauCeti.TitsSystem.bruhatCell_one_mul` and `TauCeti.TitsSystem.bruhatCell_mul_one`: the
-  identity cell `B` is absorbed by every cell.
+* `TauCeti.TitsSystem.subgroupB_mul_bruhatCell` and `TauCeti.TitsSystem.bruhatCell_mul_subgroupB`:
+  the identity cell `B` is absorbed by every cell.
 * `TauCeti.TitsSystem.subset_bruhatCell_mul_of_mem_simple` and
   `TauCeti.TitsSystem.bruhatCell_mul_subset_union_of_mem_simple`: the adjacent cell always occurs
   in the product with a simple cell, and nothing beyond the adjacent and the original cell does.
@@ -71,20 +71,22 @@ local prefix:100 "ℓ " => T.simpleGenerators.wordLength
 
 /-! ### Absorption of the identity cell and the two-sided rank-one bounds -/
 
-/-- The identity cell is absorbed on the left: `B (B w B) = B w B`. -/
+/-- The identity cell `B` (see `TauCeti.TitsSystem.bruhatCell_one`) is absorbed on the left:
+`B (B w B) = B w B`. -/
 @[simp]
-theorem bruhatCell_one_mul (w : T.WeylGroup) :
-    T.bruhatCell 1 * T.bruhatCell w = T.bruhatCell w := by
+theorem subgroupB_mul_bruhatCell (w : T.WeylGroup) :
+    (T.subgroupB : Set G) * T.bruhatCell w = T.bruhatCell w := by
   obtain ⟨n, rfl⟩ := QuotientGroup.mk'_surjective T.intersection w
-  simp only [QuotientGroup.mk'_apply, bruhatCell_one, bruhatCell_mk, DoubleCoset.doubleCoset]
+  simp only [QuotientGroup.mk'_apply, bruhatCell_mk, DoubleCoset.doubleCoset]
   rw [← mul_assoc, ← mul_assoc, coe_mul_coe]
 
-/-- The identity cell is absorbed on the right: `(B w B) B = B w B`. -/
+/-- The identity cell `B` (see `TauCeti.TitsSystem.bruhatCell_one`) is absorbed on the right:
+`(B w B) B = B w B`. -/
 @[simp]
-theorem bruhatCell_mul_one (w : T.WeylGroup) :
-    T.bruhatCell w * T.bruhatCell 1 = T.bruhatCell w := by
+theorem bruhatCell_mul_subgroupB (w : T.WeylGroup) :
+    T.bruhatCell w * (T.subgroupB : Set G) = T.bruhatCell w := by
   obtain ⟨n, rfl⟩ := QuotientGroup.mk'_surjective T.intersection w
-  simp only [QuotientGroup.mk'_apply, bruhatCell_one, bruhatCell_mk, DoubleCoset.doubleCoset]
+  simp only [QuotientGroup.mk'_apply, bruhatCell_mk, DoubleCoset.doubleCoset]
   rw [mul_assoc, coe_mul_coe]
 
 /-- The adjacent cell always occurs in the product with a simple cell on the left. -/
@@ -139,12 +141,12 @@ theorem bruhatCell_mul_eq_of_wordLength_le {s : T.WeylGroup} (hs : s ∈ T.simpl
     intro w hw _
     rw [Nat.le_zero, Group.Generators.wordLength_eq_zero_iff] at hw
     subst hw
-    rw [mul_one, T.bruhatCell_mul_one]
+    rw [mul_one, T.bruhatCell_one, T.bruhatCell_mul_subgroupB]
   | succ n ih =>
     intro w hwn hw
     obtain ⟨l, hl, hlen, rfl⟩ := T.exists_prod_eq_of_wordLength w
     rcases List.eq_nil_or_concat l with rfl | ⟨l', s', rfl⟩
-    · rw [List.prod_nil, mul_one, T.bruhatCell_mul_one]
+    · rw [List.prod_nil, mul_one, T.bruhatCell_one, T.bruhatCell_mul_subgroupB]
     rw [List.concat_eq_append, List.forall_mem_append, List.forall_mem_singleton] at hl
     obtain ⟨hl', hs'⟩ := hl
     rw [List.concat_eq_append, List.prod_append, List.prod_singleton] at hw hwn hlen ⊢
@@ -195,7 +197,7 @@ theorem bruhatCell_mul_eq_union_of_wordLength_lt {s : T.WeylGroup} (hs : s ∈ T
     _ = (T.bruhatCell 1 ∪ T.bruhatCell s) * T.bruhatCell (s * w) := by
         rw [← mul_assoc, T.bruhatCell_mul_self_eq_union_of_mem_simple hs]
     _ = T.bruhatCell (s * w) ∪ T.bruhatCell w := by
-        rw [Set.union_mul, T.bruhatCell_one_mul, hkey]
+        rw [Set.union_mul, T.bruhatCell_one, T.subgroupB_mul_bruhatCell, hkey]
 
 /-- A simple reflection never preserves the length. -/
 theorem wordLength_simple_mul_ne {s : T.WeylGroup} (hs : s ∈ T.simple) (w : T.WeylGroup) :
@@ -208,7 +210,7 @@ theorem wordLength_simple_mul_ne {s : T.WeylGroup} (hs : s ∈ T.simple) (w : T.
   have h3 : T.bruhatCell (s * w) ⊆ T.bruhatCell w := by
     calc T.bruhatCell (s * w) ⊆ T.bruhatCell w ∪ T.bruhatCell (s * w) := Set.subset_union_right
       _ = (T.bruhatCell 1 ∪ T.bruhatCell s) * T.bruhatCell w := by
-          rw [Set.union_mul, T.bruhatCell_one_mul, h1]
+          rw [Set.union_mul, T.bruhatCell_one, T.subgroupB_mul_bruhatCell, h1]
       _ = T.bruhatCell s * T.bruhatCell s * T.bruhatCell w := by
           rw [T.bruhatCell_mul_self_eq_union_of_mem_simple hs]
       _ = T.bruhatCell w := by rw [mul_assoc, h1, h2]

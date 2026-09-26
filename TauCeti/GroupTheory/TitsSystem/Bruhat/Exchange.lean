@@ -87,7 +87,8 @@ theorem exists_eraseIdx_prod_eq_of_bruhatCell_mul_ne {s : T.WeylGroup} (hs : s �
     (h : T.bruhatCell s * T.bruhatCell l.prod ≠ T.bruhatCell (s * l.prod)) :
     ∃ j < l.length, s * l.prod = (l.eraseIdx j).prod := by
   induction l using List.reverseRecOn with
-  | nil => exact absurd (by rw [List.prod_nil, mul_one, T.bruhatCell_mul_one]) h
+  | nil =>
+    exact absurd (by rw [List.prod_nil, mul_one, T.bruhatCell_one, T.bruhatCell_mul_subgroupB]) h
   | append_singleton l' s' ih =>
     rw [List.forall_mem_append, List.forall_mem_singleton] at hl
     obtain ⟨hl', hs'⟩ := hl
