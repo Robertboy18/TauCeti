@@ -84,8 +84,7 @@ theorem proPFrattini_quotient_pLowerCentralStep_eq_bot (hp : p.Prime) (R : Subgr
   · obtain ⟨x, rfl⟩ := QuotientGroup.mk_surjective a
     obtain ⟨y, rfl⟩ := QuotientGroup.mk_surjective b
     refine (QuotientGroup.commute_mk_iff.mpr (mem_subgroupOf.mpr ?_)).eq
-    simpa [commutatorElement_def] using
-      commutator_le_pLowerCentralStep R (commutator_mem_commutator x.2 (mem_top (y : F)))
+    simpa [commutatorElement_def] using commutator_mem_pLowerCentralStep x.2 (y : F)
   · obtain ⟨n, rfl⟩ := QuotientGroup.mk_surjective q
     rw [← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff, mem_subgroupOf, coe_pow]
     exact pow_mem_pLowerCentralStep n.2

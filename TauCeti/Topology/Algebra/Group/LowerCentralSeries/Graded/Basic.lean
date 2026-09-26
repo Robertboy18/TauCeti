@@ -46,6 +46,8 @@ finite; this is proved in `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCe
 
 ## Main results
 
+* `TauCeti.natCard_quotient_pLowerCentralStep_eq_natCard_gradedPiece`: for a normal subgroup
+  `R = λ_k`, the quotient `R ⧸ Rᵖ[R, G]` has as many elements as `gr_k(G)`.
 * `TauCeti.gradedBracket_self`, `TauCeti.gradedBracket_jacobi`: the bracket is alternating and
   satisfies the Jacobi identity.
 * `TauCeti.gradedPow_add_of_one_le`: `π` is additive in every degree `k ≥ 1`.
@@ -312,6 +314,19 @@ theorem gradedPieceZeroEquiv_gradedMk (x : pLowerCentralSeries p G 0) :
     gradedPieceZeroEquiv p G (gradedMk p G 0 x) =
       Additive.ofMul ((x : G) : G ⧸ pLowerCentralSeries p G 1) :=
   gradedPieceInclusion_gradedMk x
+
+/-- For a normal subgroup `R` equal to the term `λ_k` of the lower `p`-series, the quotient
+`R ⧸ Rᵖ[R, G]` is the graded piece `gr_k(G) = λ_k ⧸ λ_{k+1}`, up to the additive notation; in
+particular they have the same cardinality. The equation `R = λ_k` is a hypothesis rather than a
+substitution, so that the statement applies to the relation subgroup of a presentation, whose
+quotient type depends on it. -/
+theorem natCard_quotient_pLowerCentralStep_eq_natCard_gradedPiece {R : Subgroup G} [R.Normal]
+    {k : ℕ} (hR : R = pLowerCentralSeries p G k) :
+    Nat.card (R ⧸ (pLowerCentralStep p R).subgroupOf R) = Nat.card (gradedPiece p G k) := by
+  subst hR
+  exact Nat.card_congr ((QuotientGroup.quotientMulEquivOfEq
+    (congrArg (Subgroup.subgroupOf · _) (pLowerCentralSeries_succ p G k).symm)).toEquiv.trans
+      Additive.ofMul)
 
 /-! ### The class of an element of `G` in degree zero -/
 
