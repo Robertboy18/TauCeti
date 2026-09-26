@@ -528,7 +528,11 @@ def cupCochain (m n : ℕ) :
     (fun a b b' ↦ Subtype.ext (map_add _ b.1 b'.1))
     (fun r a b ↦ Subtype.ext (LinearMap.map_smul _ r b.1))
 
-@[simp]
+/-- The underlying resolution element of a cup product of homogeneous cochains is the
+Alexander–Whitney pairing of the underlying elements. Not a `simp` lemma: `simp` rewrites the
+implicit carrier `(TopRep.resolution' Z).X (m + n)` on the left-hand side through
+`CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the statement is not in `simp`-normal
+form; use it with `rw`. -/
 theorem coe_cupCochain (m n : ℕ) (a : (TopRep.homogeneousCochains X).X m)
     (b : (TopRep.homogeneousCochains Y).X n) :
     Subtype.val (P.cupCochain m n a b) = P.resolutionCupPairing m n a.1 b.1 := by
