@@ -645,12 +645,13 @@ theorem exists_forcing_energyFormH1_principal_eq {a : EuclideanSpace ℝ ι → 
         ∫ x in Omega, (c x * W1p.value u x) * W1p.value (v : W1p mu Omega 2) x ∂mu := by
     rw [energyFormIntegral_def]
     simp [energyIntegrand_apply, jetField_apply, driftForm_apply, massForm_apply]
-  have h : energyFormIntegral (mu.restrict Omega) a b c (jetField u)
-      (jetField (v : W1p mu Omega 2)) = _ := hu v
-  rw [energyFormIntegral_principal_drift_mass _ _ _ _ _ _
+  -- Unfold the `H¹` wrapper to `energyFormIntegral` in the weak equation and the goal; the
+  -- split lemma writes the vanishing lower-order coefficients as `fun _ => 0`, so the goal's
+  -- `0` is put in that form by `Pi.zero_def` before the two sides are compared.
+  have h := hu v
+  rw [energyFormH1, energyFormIntegral_principal_drift_mass _ _ _ _ _ _
     (integrable_energyIntegrand_jetField ha u _) hdrift hmass, hdrift_eq, hmass_eq] at h
-  change energyFormIntegral (mu.restrict Omega) a (fun _ => 0) (fun _ => 0) (jetField u)
-    (jetField (v : W1p mu Omega 2)) = _
+  rw [energyFormH1, Pi.zero_def, Pi.zero_def]
   calc
     _ = ∫ x in Omega, f x * W1p.value (v : W1p mu Omega 2) x ∂mu -
         ∫ x in Omega, ⟪b x, W1p.gradient u x⟫_ℝ *
