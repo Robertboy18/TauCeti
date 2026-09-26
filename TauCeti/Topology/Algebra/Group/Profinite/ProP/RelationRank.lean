@@ -51,7 +51,9 @@ on `𝔽_p` is never part of a statement here.
 * `TauCeti.presentedProP.finite_H2_iff`: `H²(G, 𝔽_p)` is finite exactly when `R ⧸ Rᵖ[R, F]` is
   topologically finitely generated.
 * `TauCeti.presentedProP.topologicalGeneratorRankNat_quotient_pLowerCentralStep_eq`: the count
-  `d(R ⧸ Rᵖ[R, F])` is the same for any two minimal presentations of `G`.
+  `d(R ⧸ Rᵖ[R, F])` is the same for any two minimal presentations of `G`, and
+  `TauCeti.presentedProP.isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff`: so is
+  its finiteness.
 
 ## References
 
@@ -231,31 +233,49 @@ section Independence
 variable {X : Type u} {Y : Type w} (rels : Set (freeProP p X)) (rels' : Set (freeProP p Y))
   {G : Type v} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
+/-- **Presentation independence of the finiteness of the relation rank.** For two minimal
+presentations `G ≅ ⟨X ∣ rels⟩` and `G ≅ ⟨Y ∣ rels'⟩` of the same group, with relators in the
+Frattini subgroups of the free pro-`p` groups `F` on `X` and `F'` on `Y` and relation subgroups `R`
+and `R'`, the quotient `R ⧸ Rᵖ[R, F]` is topologically finitely generated exactly when
+`R' ⧸ R'ᵖ[R', F']` is: both mean that `H²(G, 𝔽_p)` is finite. -/
+theorem isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff
+    (hrels : rels ⊆ proPFrattini p (freeProP p X)) (hrels' : rels' ⊆ proPFrattini p (freeProP p Y))
+    (e : presentedProP p X rels ≃ₜ* G) (e' : presentedProP p Y rels' ≃ₜ* G) :
+    IsTopologicallyFinitelyGenerated ((normalClosure rels).topologicalClosure ⧸
+        (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
+          (normalClosure rels).topologicalClosure) ↔
+      IsTopologicallyFinitelyGenerated ((normalClosure rels').topologicalClosure ⧸
+        (pLowerCentralStep p (normalClosure rels').topologicalClosure).subgroupOf
+          (normalClosure rels').topologicalClosure) := by
+  let := trivialZModAction (p := p) G
+  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
+  rw [← finite_H2_iff rels hrels e (fun _ _ ↦ rfl), ← finite_H2_iff rels' hrels' e' (fun _ _ ↦ rfl)]
+
 /-- **Presentation independence of the relation rank.** For two minimal presentations
 `G ≅ ⟨X ∣ rels⟩` and `G ≅ ⟨Y ∣ rels'⟩` of the same group, with relators in the Frattini subgroups
 of the free pro-`p` groups `F` on `X` and `F'` on `Y` and relation subgroups `R` and `R'`, the
 counts `d(R ⧸ Rᵖ[R, F])` and `d(R' ⧸ R'ᵖ[R', F'])` agree: both are the exponent of the order
-`p ^ r` of `H²(G, 𝔽_p)`. -/
+`p ^ r` of `H²(G, 𝔽_p)`. Finite generation of `R' ⧸ R'ᵖ[R', F']` is supplied by
+`TauCeti.presentedProP.isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff`. -/
 theorem topologicalGeneratorRankNat_quotient_pLowerCentralStep_eq
     (hrels : rels ⊆ proPFrattini p (freeProP p X)) (hrels' : rels' ⊆ proPFrattini p (freeProP p Y))
     (e : presentedProP p X rels ≃ₜ* G) (e' : presentedProP p Y rels' ≃ₜ* G)
     (h : IsTopologicallyFinitelyGenerated ((normalClosure rels).topologicalClosure ⧸
       (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
-        (normalClosure rels).topologicalClosure))
-    (h' : IsTopologicallyFinitelyGenerated ((normalClosure rels').topologicalClosure ⧸
-      (pLowerCentralStep p (normalClosure rels').topologicalClosure).subgroupOf
-        (normalClosure rels').topologicalClosure)) :
+        (normalClosure rels).topologicalClosure)) :
     topologicalGeneratorRankNat ((normalClosure rels).topologicalClosure ⧸
         (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
           (normalClosure rels).topologicalClosure) h =
       topologicalGeneratorRankNat ((normalClosure rels').topologicalClosure ⧸
         (pLowerCentralStep p (normalClosure rels').topologicalClosure).subgroupOf
-          (normalClosure rels').topologicalClosure) h' := by
+          (normalClosure rels').topologicalClosure)
+        ((isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff rels rels' hrels hrels'
+          e e').mp h) := by
   let := trivialZModAction (p := p) G
   have : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
   exact Nat.pow_right_injective (Fact.out : p.Prime).two_le
     ((natCard_H2 rels hrels e (fun _ _ ↦ rfl) h).symm.trans
-      (natCard_H2 rels' hrels' e' (fun _ _ ↦ rfl) h'))
+      (natCard_H2 rels' hrels' e' (fun _ _ ↦ rfl) _))
 
 end Independence
 

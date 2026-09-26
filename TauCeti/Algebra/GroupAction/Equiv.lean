@@ -45,7 +45,7 @@ variable {G H M N : Type*} [Mul G] [Mul H] [Add M] [Add N] [SMul G M] [SMul H N]
 /-- The inverse of an additive equivalence compatible with a change of the acting group is
 compatible with the inverse change: if `e (φ h • m) = h • e m` for a multiplicative equivalence
 `φ : H ≃* G`, then `e.symm (φ.symm g • n) = g • e.symm n`. -/
-theorem symm_map_smul_of_map_mulEquiv_smul (φ : H ≃* G) (e : M ≃+ N)
+theorem symm_map_smul_of_map_mulEquiv_smul (e : M ≃+ N) (φ : H ≃* G)
     (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) (g : G) (n : N) :
     e.symm (φ.symm g • n) = g • e.symm n := by
   apply e.injective

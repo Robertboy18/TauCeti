@@ -501,7 +501,7 @@ noncomputable def explicitMap2Equiv [ContinuousMul G] [ContinuousMul H]
     (φ : H ≃ₜ* G) (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
     (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) : H2 G M ≃+ H2 H N := by
   have hequiv' : ∀ (g : G) (n : N), e.symm (φ.symm g • n) = g • e.symm n :=
-    AddEquiv.symm_map_smul_of_map_mulEquiv_smul φ.toMulEquiv e hequiv
+    AddEquiv.symm_map_smul_of_map_mulEquiv_smul e φ.toMulEquiv hequiv
   exact
     { toFun := explicitMap2 G M H N φ e.toAddMonoidHom he hequiv
       invFun := explicitMap2 H N G M φ.symm e.symm.toAddMonoidHom he' hequiv'
@@ -538,7 +538,7 @@ theorem explicitMap2Equiv_symm_apply [ContinuousMul G] [ContinuousMul H]
     (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) (x : H2 H N) :
     (explicitMap2Equiv G M H N φ e he he' hequiv).symm x =
       explicitMap2 H N G M φ.symm e.symm.toAddMonoidHom he'
-        (AddEquiv.symm_map_smul_of_map_mulEquiv_smul φ.toMulEquiv e hequiv) x :=
+        (AddEquiv.symm_map_smul_of_map_mulEquiv_smul e φ.toMulEquiv hequiv) x :=
   (rfl)
 
 end Cohomology
