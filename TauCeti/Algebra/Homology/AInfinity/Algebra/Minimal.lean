@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Homology.AInfinity.Algebra.Hom.Cohomology
+public import TauCeti.Algebra.Homology.AInfinity.Algebra.Hom.Iso
 
 /-!
 # Minimal A∞ algebras
@@ -30,6 +30,8 @@ algebras, a morphism is a quasi-isomorphism exactly when its linear part is bije
   minimal.
 * `TauCeti.AInfinityHom.isQuasiIso_iff_linearPart_bijective`: between minimal algebras, a
   quasi-isomorphism has bijective linear part.
+* `TauCeti.AInfinityHom.isQuasiIso_iff_isIso`: between minimal algebras, the quasi-isomorphisms
+  are exactly the `A∞` isomorphisms.
 
 ## References
 
@@ -163,6 +165,17 @@ theorem isQuasiIso_iff_linearPart_bijective (hA : AA.IsMinimal) (hB : BB.IsMinim
     funext (cohomologyMap_cohomologyEquiv hA hB f)
   rw [isQuasiIso_def, ← EquivLike.bijective_comp hA.cohomologyEquiv, hcomm,
     EquivLike.comp_bijective]
+
+/-- Between minimal algebras, an `A∞` morphism is a quasi-isomorphism exactly when it is an
+isomorphism of `A∞` algebras: a minimal model is unique up to `A∞` isomorphism. -/
+theorem isQuasiIso_iff_isIso (hA : AA.IsMinimal) (hB : BB.IsMinimal) (f : AInfinityHom AA BB) :
+    f.IsQuasiIso ↔ f.IsIso := by
+  rw [isQuasiIso_iff_linearPart_bijective hA hB, isIso_iff_bijective_linearPart]
+
+/-- A quasi-isomorphism between minimal algebras is an isomorphism of `A∞` algebras. -/
+theorem IsQuasiIso.isIso (hA : AA.IsMinimal) (hB : BB.IsMinimal) {f : AInfinityHom AA BB}
+    (hf : f.IsQuasiIso) : f.IsIso :=
+  (isQuasiIso_iff_isIso hA hB f).1 hf
 
 end AInfinityHom
 
