@@ -5,6 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.Algebra.Homology.Additive
+public import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
 public import Mathlib.Algebra.Homology.ShortComplex.PreservesHomology
 
 /-!
@@ -21,6 +23,14 @@ records the companion statement for the class map: under the two identifications
 This is what makes a homology class computed after applying `F` recognisable as the image of a
 class before applying it, for instance when a connecting map is constructed in an abelian category
 after forgetting structure from a non-abelian one.
+
+The same identifications are then restated for a homological complex `K` and a functor `F`
+preserving homology: `HomologicalComplex.mapCyclesIso` and `HomologicalComplex.mapHomologyIso`
+identify the cycles and the homology of `(F.mapHomologicalComplex c).obj K` in degree `n` with
+the images under `F` of those of `K`. They are the short complex statements at `K.sc n`, which is
+what the degree-`n` cycles and homology of a homological complex are by definition, but stated
+against `K.iCycles n` and `K.homologyπ n`, the names a consumer of homological complexes works
+with.
 -/
 
 public section
@@ -62,3 +72,42 @@ theorem homologyπ_comp_mapHomologyIso_hom [S.HasHomology] [(S.map F).HasHomolog
       (congrArg Iso.hom (LeftHomologyData.mapCyclesIso_eq h F)).symm
 
 end CategoryTheory.ShortComplex
+
+namespace HomologicalComplex
+
+open CategoryTheory
+
+variable {C D : Type*} [Category C] [Category D] [Limits.HasZeroMorphisms C]
+  [Limits.HasZeroMorphisms D] {ι : Type*} {c : ComplexShape ι} (K : HomologicalComplex C c)
+  (F : C ⥤ D) [F.PreservesZeroMorphisms] [F.PreservesHomology] (n : ι) [K.HasHomology n]
+  [((F.mapHomologicalComplex c).obj K).HasHomology n]
+
+/-- For a functor `F` preserving homology, the cycles in degree `n` of the image of `K` under `F`
+are the image under `F` of the cycles of `K`. -/
+noncomputable def mapCyclesIso :
+    ((F.mapHomologicalComplex c).obj K).cycles n ≅ F.obj (K.cycles n) :=
+  (K.sc n).mapCyclesIso F
+
+/-- For a functor `F` preserving homology, the homology in degree `n` of the image of `K` under
+`F` is the image under `F` of the homology of `K`. -/
+noncomputable def mapHomologyIso :
+    ((F.mapHomologicalComplex c).obj K).homology n ≅ F.obj (K.homology n) :=
+  (K.sc n).mapHomologyIso F
+
+/-- `mapCyclesIso` carries the inclusion of the cycles of the image of `K` to the image of the
+inclusion of the cycles of `K`. -/
+@[reassoc (attr := simp)]
+theorem mapCyclesIso_hom_iCycles :
+    (K.mapCyclesIso F n).hom ≫ F.map (K.iCycles n) =
+      ((F.mapHomologicalComplex c).obj K).iCycles n :=
+  (K.sc n).mapCyclesIso_hom_iCycles F
+
+/-- Under `mapCyclesIso` and `mapHomologyIso`, the class map of the image of `K` is the image
+under `F` of the class map of `K`. -/
+@[reassoc (attr := simp)]
+theorem homologyπ_comp_mapHomologyIso_hom :
+    ((F.mapHomologicalComplex c).obj K).homologyπ n ≫ (K.mapHomologyIso F n).hom =
+      (K.mapCyclesIso F n).hom ≫ F.map (K.homologyπ n) :=
+  (K.sc n).homologyπ_comp_mapHomologyIso_hom F
+
+end HomologicalComplex
