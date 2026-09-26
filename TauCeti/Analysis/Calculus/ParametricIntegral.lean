@@ -151,7 +151,7 @@ namespace TauCeti
 /-- **Differentiation under a parametrized interval integral.** If `G` is `C¹` on an open set
 containing the segment `{x₀} × [a, b]`, then `x ↦ ∫ t in a..b, G (x, t)` is differentiable at
 `x₀`, with derivative the integral of the partial derivative of `G` in the first variable. -/
-theorem hasDerivAt_intervalIntegral_of_contDiffOn {G : ℝ × ℝ → F} [CompleteSpace F]
+theorem hasDerivAt_intervalIntegral_of_contDiffOn {G : ℝ × ℝ → F}
     {U : Set (ℝ × ℝ)} (hU : IsOpen U) (hG : ContDiffOn ℝ 1 G U) {x₀ a b : ℝ}
     (hsub : {x₀} ×ˢ Set.uIcc a b ⊆ U) :
     HasDerivAt (fun x ↦ ∫ t in a..b, G (x, t))
