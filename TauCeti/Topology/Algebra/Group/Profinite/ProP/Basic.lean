@@ -32,6 +32,7 @@ separate topological fact is supplied by `QuotientGroup.instTotallyDisconnectedS
   instance an elementary abelian group, is pro-`p`.
 * `isProP_iff_isPGroup`: for a discrete topology, pro-`p` agrees with `IsPGroup`.
 * `isProP_multiplicative_zmod_pow`: the discrete cyclic group `ℤ/pⁿ` is pro-`p`.
+* `isProP_multiplicative_zmod`: the discrete cyclic group `ℤ/p` is pro-`p`, for every `p`.
 * `IsProP.exists_forall_pow_pow_eq_one`: each finite quotient of a pro-`p` group is killed by
   a power of `p`.
 * `IsProP.of_surjective`: a continuous surjective image of a pro-`p` group is pro-`p`.
@@ -104,9 +105,9 @@ theorem isProP_multiplicative_zmod_pow (p n : ℕ) [Fact p.Prime] :
     IsProP p (Multiplicative (ZMod (p ^ n))) :=
   (IsPGroup.of_card (n := n) (by simp [Nat.card_eq_fintype_card])).isProP
 
-/-- The cyclic group `ℤ/p` of prime order, written multiplicatively and with its discrete topology,
-is pro-`p`. -/
-theorem isProP_multiplicative_zmod (p : ℕ) [Fact p.Prime] : IsProP p (Multiplicative (ZMod p)) :=
+/-- The cyclic group `ℤ/p`, written multiplicatively and with its discrete topology, is pro-`p`.
+No primality of `p` is needed: every element of `ℤ/p` is killed by `p`. -/
+theorem isProP_multiplicative_zmod (p : ℕ) : IsProP p (Multiplicative (ZMod p)) :=
   (ZModModule.isPGroup_multiplicative (n := p) (G := ZMod p)).isProP
 
 end Discrete
