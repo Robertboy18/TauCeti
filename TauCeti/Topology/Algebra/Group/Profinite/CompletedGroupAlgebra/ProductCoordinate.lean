@@ -74,10 +74,15 @@ noncomputable def prodPowerSeriesCoordinate :
 @[simp]
 theorem prodPowerSeriesCoordinate_X :
     prodPowerSeriesCoordinate C hΓ hγ PowerSeries.X = of ℤ_[p] (C × Γ) (1, γ) - 1 := by
+  -- `mapAlgEquiv` is `mapAlgHom` on the underlying map, so Mathlib's `mapAlgHom_single` applies.
+  have h : MonoidAlgebra.mapAlgEquiv ℤ_[p] C (powerSeriesCoordinate hΓ hγ)
+      (MonoidAlgebra.single 1 PowerSeries.X) =
+        MonoidAlgebra.single 1 (powerSeriesCoordinate hΓ hγ PowerSeries.X) :=
+    MonoidAlgebra.mapAlgHom_single (powerSeriesCoordinate hΓ hγ).toAlgHom 1 PowerSeries.X
   rw [prodPowerSeriesCoordinate, AlgEquiv.trans_apply, AlgEquiv.trans_apply,
-    MonoidAlgebra.powerSeriesAlgEquiv_symm_X, MonoidAlgebra.mapAlgEquiv_single,
-    powerSeriesCoordinate_X, coe_monoidAlgebraProdEquiv, monoidAlgebraProdHom_single_one, map_sub,
-    map_of, map_one, MonoidHom.inr_apply]
+    MonoidAlgebra.powerSeriesAlgEquiv_symm_X, h, powerSeriesCoordinate_X,
+    coe_monoidAlgebraProdEquiv, monoidAlgebraProdHom_single_one, map_sub, map_of, map_one,
+    MonoidHom.inr_apply]
 
 /-- The coordinate sends `1 + X` to the group element `(1, γ)`. -/
 @[simp]
@@ -91,10 +96,13 @@ theorem prodPowerSeriesCoordinate_one_add_X :
 theorem prodPowerSeriesCoordinate_C_single (c : C) (a : ℤ_[p]) :
     prodPowerSeriesCoordinate C hΓ hγ (PowerSeries.C (MonoidAlgebra.single c a)) =
       algebraMap ℤ_[p] (completedGroupAlgebra ℤ_[p] (C × Γ)) a * of ℤ_[p] (C × Γ) (c, 1) := by
+  have h : MonoidAlgebra.mapAlgEquiv ℤ_[p] C (powerSeriesCoordinate hΓ hγ)
+      (MonoidAlgebra.single c (PowerSeries.C a)) =
+        MonoidAlgebra.single c (powerSeriesCoordinate hΓ hγ (PowerSeries.C a)) :=
+    MonoidAlgebra.mapAlgHom_single (powerSeriesCoordinate hΓ hγ).toAlgHom c (PowerSeries.C a)
   rw [prodPowerSeriesCoordinate, AlgEquiv.trans_apply, AlgEquiv.trans_apply,
-    MonoidAlgebra.powerSeriesAlgEquiv_symm_C_single, MonoidAlgebra.mapAlgEquiv_single,
-    PowerSeries.C_eq_algebraMap, AlgEquiv.commutes, coe_monoidAlgebraProdEquiv,
-    monoidAlgebraProdHom_single, AlgHom.commutes]
+    MonoidAlgebra.powerSeriesAlgEquiv_symm_C_single, h, PowerSeries.C_eq_algebraMap,
+    AlgEquiv.commutes, coe_monoidAlgebraProdEquiv, monoidAlgebraProdHom_single, AlgHom.commutes]
 
 /-- The coordinate sends the group element `c` of the group ring to the group element `(c, 1)`. -/
 theorem prodPowerSeriesCoordinate_C_single_one (c : C) :
