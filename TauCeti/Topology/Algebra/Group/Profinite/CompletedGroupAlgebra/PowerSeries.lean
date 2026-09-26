@@ -377,7 +377,7 @@ theorem powerSeriesCoordinate_padicPow_apply (u : ℤ_[p])
       ((powerSeriesCoordinate hΓ hγ).toAlgHom (PowerSeries.binomialSeries ℤ_[p] u - 1)) :=
     hX ▸ isTopologicallyNilpotent_of_sub_one hΓ (hΓ.padicPow γ u)
   have h := PowerSeries.aeval_subst (ε := (powerSeriesCoordinate hΓ hγ).toAlgHom)
-    (PowerSeries.hasSubst_binomialSeries_sub_one u) (continuous_powerSeriesCoordinate hΓ hγ) hb ψ
+    (hasSubst_binomialSeries_sub_one u) (continuous_powerSeriesCoordinate hΓ hγ) hb ψ
   -- Both sides are evaluations of `ψ`, at points identified by `hX`.
   rw [coe_powerSeriesCoordinate]
   refine Eq.trans ?_ h.symm

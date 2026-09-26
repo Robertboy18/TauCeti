@@ -19,12 +19,14 @@ power-series coordinates of a completed group algebra attached to two topologica
 
 ## Main results
 
-* `PowerSeries.hasSubst_binomialSeries_sub_one`: `(1 + X) ^ u - 1` can be substituted.
+* `TauCeti.hasSubst_binomialSeries_sub_one`: `(1 + X) ^ u - 1` can be substituted.
 -/
 
 public section
 
-namespace PowerSeries
+namespace TauCeti
+
+open PowerSeries
 
 variable {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
 
@@ -34,4 +36,4 @@ theorem hasSubst_binomialSeries_sub_one [BinomialRing R] (u : R) :
     HasSubst (binomialSeries S u - 1) :=
   HasSubst.of_constantCoeff_zero' (by simp)
 
-end PowerSeries
+end TauCeti
