@@ -10,7 +10,6 @@ public import Mathlib.Algebra.Group.TypeTags.Finite
 public import Mathlib.NumberTheory.Padics.MahlerBasis
 public import Mathlib.NumberTheory.Padics.ProperSpace
 public import Mathlib.RingTheory.Filtration
-public import Mathlib.RingTheory.PowerSeries.Binomial
 public import Mathlib.RingTheory.PowerSeries.Inverse
 public import Mathlib.RingTheory.PowerSeries.Trunc
 public import TauCeti.Algebra.MonoidAlgebra.Cyclic
