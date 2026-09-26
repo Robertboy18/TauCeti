@@ -336,13 +336,15 @@ theorem isClosed_const {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
   have : (const B hB).altAt = fun _ ↦ (const B hB).altAt x := by
     ext y v
     rw [h, h]
-  rw [this, extDeriv_const]
+  rw [this, ContinuousAlternatingMap.extDeriv_const]
 
+/-- The zero two-form is closed. -/
 theorem isClosed_zero : (0 : SmoothTwoForm I M).IsClosed := by
   intro x₀ z hz
   rw [inChartAt_zero]
-  exact extDerivWithin_const 0 _ z
+  exact ContinuousAlternatingMap.extDerivWithin_const 0 _ z
 
+/-- The sum of two closed two-forms is closed. -/
 theorem IsClosed.add {form' : SmoothTwoForm I M} (h : form.IsClosed) (h' : form'.IsClosed) :
     (form + form').IsClosed := by
   intro x₀ z hz
@@ -350,16 +352,19 @@ theorem IsClosed.add {form' : SmoothTwoForm I M} (h : form.IsClosed) (h' : form'
     (form.differentiableWithinAt_inChartAt x₀ hz) (form'.differentiableWithinAt_inChartAt x₀ hz),
     h x₀ z hz, h' x₀ z hz, add_zero]
 
+/-- A real scalar multiple of a closed two-form is closed. -/
 theorem IsClosed.smul (c : ℝ) (h : form.IsClosed) : (c • form).IsClosed := by
   intro x₀ z hz
   rw [inChartAt_smul,
     extDerivWithin_smul _ _ (I.uniqueDiffOn _ (extChartAt_target_subset_range x₀ hz)),
     h x₀ z hz, smul_zero]
 
+/-- The negative of a closed two-form is closed. -/
 theorem IsClosed.neg (h : form.IsClosed) : (-form).IsClosed := by
   rw [← neg_one_smul ℝ form]
   exact h.smul (-1)
 
+/-- The difference of two closed two-forms is closed. -/
 theorem IsClosed.sub {form' : SmoothTwoForm I M} (h : form.IsClosed) (h' : form'.IsClosed) :
     (form - form').IsClosed := by
   rw [sub_eq_add_neg]

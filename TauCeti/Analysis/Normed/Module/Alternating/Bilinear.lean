@@ -48,6 +48,8 @@ noncomputable def alternatizeBilinCLM : (E →L[𝕜] E →L[𝕜] F) →L[𝕜]
 
 variable {𝕜 E F}
 
+/-- The alternatization of a continuous bilinear map `B` evaluates on `v : Fin 2 → E` to
+`B (v 0) (v 1) - B (v 1) (v 0)`. -/
 @[simp]
 lemma alternatizeBilinCLM_apply (B : E →L[𝕜] E →L[𝕜] F) (v : Fin 2 → E) :
     alternatizeBilinCLM 𝕜 E F B v = B (v 0) (v 1) - B (v 1) (v 0) := by

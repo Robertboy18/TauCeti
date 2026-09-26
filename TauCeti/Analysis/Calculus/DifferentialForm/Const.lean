@@ -17,8 +17,8 @@ derivative zero, within any set and at any point. This complements the linearity
 
 ## Main declarations
 
-* `extDerivWithin_const` and `extDeriv_const`: the exterior derivative of a constant form
-  vanishes.
+* `ContinuousAlternatingMap.extDerivWithin_const` and `ContinuousAlternatingMap.extDeriv_const`:
+  the exterior derivative of a constant form vanishes.
 -/
 
 public section
@@ -27,17 +27,21 @@ variable {𝕜 E F : Type*} [NontriviallyNormedField 𝕜]
   [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedAddCommGroup F] [NormedSpace 𝕜 F]
   {n : ℕ}
 
+namespace ContinuousAlternatingMap
+
 /-- The exterior derivative within a set of a constant differential form vanishes. -/
 @[simp]
 theorem extDerivWithin_const (ω : E [⋀^Fin n]→L[𝕜] F) (s : Set E) (x : E) :
     extDerivWithin (fun _ ↦ ω) s x = 0 := by
   rw [extDerivWithin, fderivWithin_fun_const, Pi.zero_apply,
-    ← ContinuousAlternatingMap.alternatizeUncurryFinCLM_apply, map_zero]
+    ← alternatizeUncurryFinCLM_apply, ContinuousLinearMap.map_zero]
 
 /-- The exterior derivative of a constant differential form vanishes. -/
 @[simp]
 theorem extDeriv_const (ω : E [⋀^Fin n]→L[𝕜] F) (x : E) :
     extDeriv (fun _ ↦ ω) x = 0 := by
   rw [← extDerivWithin_univ, extDerivWithin_const]
+
+end ContinuousAlternatingMap
 
 end
