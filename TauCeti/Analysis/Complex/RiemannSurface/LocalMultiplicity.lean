@@ -9,6 +9,7 @@ public import TauCeti.Geometry.Manifold.Complex.Chart
 public import Mathlib.Analysis.Analytic.Order
 public import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Data.ENat.Monoid
+import TauCeti.Analysis.Analytic.Order
 
 /-!
 # The local multiplicity of a holomorphic map between Riemann surfaces
@@ -268,11 +269,9 @@ theorem localMultiplicity_eq_one_iff (hf : ∀ᶠ y in 𝓝 x, MDifferentiableAt
   -- `c x`.
   have h1 : analyticOrderNatAt (fun z ↦ c' (f (c.symm z)) - c' (f x)) (c x) = 1 ↔
       ∃ V ∈ 𝓝 (c x), InjOn (fun z ↦ c' (f (c.symm z))) V := by
-    rw [analyticOrderNatAt, ENat.toNat_eq_iff one_ne_zero, Nat.cast_one,
-      exists_injOn_nhds_iff_deriv_ne_zero hFa, ← hFa.deriv.analyticOrderAt_eq_zero,
-      ← (ENat.add_left_injective_of_ne_top ENat.one_ne_top).eq_iff' (zero_add 1),
-      hFa.analyticOrderAt_deriv_add_one]
-    simp only [c.left_inv hcx]
+    rw [analyticOrderNatAt, ENat.toNat_eq_iff one_ne_zero, Nat.cast_one]
+    simpa only [c.left_inv hcx] using hFa.analyticOrderAt_sub_eq_one_iff_deriv_ne_zero.trans
+      (exists_injOn_nhds_iff_deriv_ne_zero hFa).symm
   rw [h1]
   constructor
   · rintro ⟨V, hV, hinj⟩
@@ -313,12 +312,9 @@ theorem localMultiplicity_eq_analyticOrderNatAt_sub (f : ℂ → ℂ) (z : ℂ) 
 
 /-- The power map `z ↦ z ^ m` has local multiplicity `m` at the origin. -/
 theorem localMultiplicity_pow_zero (m : ℕ) : localMultiplicity (fun z : ℂ ↦ z ^ m) 0 = m := by
-  rcases Nat.eq_zero_or_pos m with rfl | hm
+  rcases eq_or_ne m 0 with rfl | hm
   · simp
-  · have : (fun w : ℂ ↦ w ^ m - 0 ^ m) = (· - 0) ^ m := by
-      funext w
-      simp [zero_pow hm.ne']
-    rw [localMultiplicity_eq_analyticOrderNatAt_sub, this, analyticOrderNatAt,
-      analyticOrderAt_centeredMonomial, ENat.toNat_natCast]
+  · rw [localMultiplicity_eq_analyticOrderNatAt_sub, analyticOrderNatAt,
+      analyticOrderAt_pow_sub_zero_pow hm, ENat.toNat_natCast]
 
 end TauCeti.RiemannSurface

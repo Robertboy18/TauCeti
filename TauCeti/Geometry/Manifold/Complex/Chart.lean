@@ -57,8 +57,9 @@ variable {e e' : OpenPartialHomeomorph X ℂ}
 on its domain. -/
 theorem differentiableOn_symm_trans (he : e ∈ maximalAtlas 𝓘(ℂ) 1 X)
     (he' : e' ∈ maximalAtlas 𝓘(ℂ) 1 X) :
-    DifferentiableOn ℂ (e' ∘ e.symm) (e.symm ≫ₕ e').source :=
-  (((contMDiffOn_of_mem_maximalAtlas he').comp
+    DifferentiableOn ℂ (e' ∘ e.symm) (e.symm ≫ₕ e').source := by
+  rw [OpenPartialHomeomorph.trans_source, OpenPartialHomeomorph.symm_source]
+  exact (((contMDiffOn_of_mem_maximalAtlas he').comp
     ((contMDiffOn_symm_of_mem_maximalAtlas he).mono inter_subset_left)
     inter_subset_right).contDiffOn).differentiableOn one_ne_zero
 
@@ -69,7 +70,7 @@ theorem analyticAt_symm_trans (he : e ∈ maximalAtlas 𝓘(ℂ) 1 X)
     (he' : e' ∈ maximalAtlas 𝓘(ℂ) 1 X) (hx : x ∈ e.source) (hx' : x ∈ e'.source) :
     AnalyticAt ℂ (e' ∘ e.symm) (e x) :=
   (differentiableOn_symm_trans he he').analyticAt <|
-    (e.symm ≫ₕ e').open_source.mem_nhds ⟨e.map_source hx, by simpa [e.left_inv hx] using hx'⟩
+    (e.symm ≫ₕ e').open_source.mem_nhds (e.toPartialEquiv.mem_symm_trans_source hx hx')
 
 /-- The derivative of a transition map between two charts of the maximal atlas vanishes nowhere:
 a transition map is a holomorphic injection of an open set. -/
@@ -78,7 +79,7 @@ theorem deriv_symm_trans_ne_zero (he : e ∈ maximalAtlas 𝓘(ℂ) 1 X)
     deriv (e' ∘ e.symm) (e x) ≠ 0 :=
   deriv_ne_zero_of_injOn (differentiableOn_symm_trans he he') (e.symm ≫ₕ e').open_source
     (by simpa only [OpenPartialHomeomorph.coe_trans] using (e.symm ≫ₕ e').injOn)
-    ⟨e.map_source hx, by simpa [e.left_inv hx] using hx'⟩
+    (e.toPartialEquiv.mem_symm_trans_source hx hx')
 
 end Transition
 
