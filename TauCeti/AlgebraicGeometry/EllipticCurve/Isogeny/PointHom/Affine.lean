@@ -30,22 +30,28 @@ The computation is the relative norm of a prime. The ideal of `P` extends to the
 (`Isogeny.map_XYIdeal_eq_asIdeal_of_valuation_eq`), `𝔓` lies over the ideal `𝔮` of `Q`, and
 `N(𝔓) = 𝔮 ^ f(𝔓 ∣ 𝔮)`. The residue degree is `1` because both residue fields are the constant
 field, but the general formula `N(𝔓) = 𝔮 ^ f` is available in Mathlib only over a perfect base
-field. Over a separably closed field and for a separable isogeny every prime above `𝔮` has
-residue degree one — every place splits completely, `Isogeny.isSplitCompletely` — and then the
-fundamental identity alone yields `N(𝔓) = 𝔮`
-(`Ideal.relNorm_eq_of_forall_inertiaDeg_eq_one`). That is the hypothesis set of this file.
+field. When every prime above `𝔮` has residue degree one, the fundamental identity alone yields
+`N(𝔓) = 𝔮` (`Ideal.relNorm_eq_of_forall_inertiaDeg_eq_one`); that residue-degree condition is the
+hypothesis of the core theorem, with no assumption on `F` or on the separability of `φ`. Over a
+separably closed field and for a separable isogeny it holds at every prime — every place splits
+completely, `Isogeny.isSplitCompletely` — which is the corollary.
 
 ## Main results
 
-* `TauCeti.Isogeny.toPointHom_some_eq_some_of_isEquiv_comap_pointPlace`: if the place of the
-  affine point `P` of `W₁` restricts along `φ` to the place of the affine point `Q` of `W₂`, then
-  `φ.toPointHom P = Q`.
+* `TauCeti.Isogeny.toPointHom_some_eq_some_of_isEquiv_comap_pointPlace_of_forall_inertiaDeg_eq_one`:
+  if the place of the affine point `P` of `W₁` restricts along `φ` to the place of the affine point
+  `Q` of `W₂`, and every prime of the intermediate ring over the ideal of `Q` has inertia degree
+  one, then `φ.toPointHom P = Q`.
+* `TauCeti.Isogeny.toPointHom_some_eq_some_of_isEquiv_comap_pointPlace`: the same conclusion over
+  a separably closed field for a separable isogeny, where the residue-degree condition always holds.
 
 ## References
 
 * [J. Silverman, *The Arithmetic of Elliptic Curves*][silverman2009], II.3 (the pushforward of
-  divisors along a map of curves, computed by the norm) and III.4.10 (a separable isogeny over a
-  separably closed field has fibres of full size).
+  divisors along a map of curves, computed by the norm), III.4.8 (an isogeny is a homomorphism on
+  points: the identification of the additive class-group map `toPointHom` with the map on points
+  that `φ^* x₂`, `φ^* y₂` define is this theorem in the form the repository consumes), and III.4.10
+  (a separable isogeny over a separably closed field has fibres of full size).
 -/
 
 public section
@@ -69,21 +75,28 @@ local instance : IsDedekindDomain W₁.CoordinateRing :=
 local instance : IsDedekindDomain W₂.CoordinateRing :=
   W₂.isDedekindDomain_coordinateRing_of_isIntegrallyClosed
 
-/-- **The class-group point map evaluates at affine points.** Over a separably closed field, a
-separable isogeny `φ` sends the affine point `(x, y)` of `W₁` to the affine point `(x', y')` of
-`W₂` as soon as the place of `(x, y)` restricts along `φ^*` to the place of `(x', y')` — that is,
-as soon as `φ^* x₂` and `φ^* y₂` take the values `x'` and `y'` at `(x, y)`.
+/-- **The class-group point map evaluates at affine points, given trivial residue extensions over
+the target point.** If the place of the affine point `(x, y)` of `W₁` restricts along `φ^*` to the
+place of the affine point `(x', y')` of `W₂` — that is, if `φ^* x₂` and `φ^* y₂` take the values
+`x'` and `y'` at `(x, y)` — and every prime of the intermediate ring over the ideal of `(x', y')`
+has inertia degree one, then `φ.toPointHom` sends `(x, y)` to `(x', y')`.
 
-Together with `Isogeny.toPointHom_some_eq_zero_of_isEquiv_comap_infinityPlace` this identifies
-the class-group construction with the map on points that the rational functions `φ^* x₂`, `φ^* y₂`
-define. -/
-theorem toPointHom_some_eq_some_of_isEquiv_comap_pointPlace [IsSepClosed F]
-    [Algebra.IsSeparable φ.fieldPullback.fieldRange W₁.FunctionField]
+Nothing is assumed of `F` or of the separability of `φ`: the residue-degree hypothesis is the whole
+input beyond the places, and `toPointHom_some_eq_some_of_isEquiv_comap_pointPlace` discharges it
+over a separably closed field for a separable isogeny. The algebra structure of `W₂.CoordinateRing`
+on the intermediate ring is the caller's, pinned to the pullback one by `halg` exactly as
+`Isogeny.isScalarTower_intermediateRing` pins it, so that the hypothesis can be stated. -/
+theorem toPointHom_some_eq_some_of_isEquiv_comap_pointPlace_of_forall_inertiaDeg_eq_one
+    [inst : Algebra W₂.CoordinateRing φ.intermediateRing]
+    (halg : inst = φ.pullbackToIntermediateRing.toAlgebra)
     {x y : F} (h : W₁.Nonsingular x y) {x' y' : F} (h' : W₂.Nonsingular x' y')
     (hP : (((CoordinateRing.pointPlace h.1).valuation W₁.FunctionField).comap
       (φ.fieldPullback : W₂.FunctionField →+* W₁.FunctionField)).IsEquiv
-        ((CoordinateRing.pointPlace h'.1).valuation W₂.FunctionField)) :
+        ((CoordinateRing.pointPlace h'.1).valuation W₂.FunctionField))
+    (hf : ∀ Q ∈ (CoordinateRing.pointPlace h'.1).asIdeal.primesOver φ.intermediateRing,
+      Q.inertiaDeg W₂.CoordinateRing = 1) :
     φ.toPointHom (.some x y h) = .some x' y' h' := by
+  subst halg
   -- the structures `pushClassMonoidHom_mk0` builds, re-introduced to compute the norm
   let _ : Algebra W₂.CoordinateRing W₁.FunctionField := φ.pullback.toRingHom.toAlgebra
   let _ : Algebra W₂.FunctionField W₁.FunctionField := φ.fieldPullback.toRingHom.toAlgebra
@@ -102,17 +115,6 @@ theorem toPointHom_some_eq_some_of_isEquiv_comap_pointPlace [IsSepClosed F]
     Module.isTorsionFree_iff_algebraMap_injective.mpr φ.pullbackToIntermediateRing_injective
   have : FaithfulSMul W₂.CoordinateRing φ.intermediateRing :=
     (faithfulSMul_iff_algebraMap_injective _ _).mpr φ.pullbackToIntermediateRing_injective
-  -- the function-field extension along `φ`, over the base field
-  have hfp : ∀ z, algebraMap W₂.FunctionField W₁.FunctionField z = φ.fieldPullback z := fun _ ↦ rfl
-  have := φ.isScalarTower_of_algebraMap_eq_fieldPullback hfp
-  have := φ.finiteDimensional_functionField hfp
-  have := φ.isSeparable_functionField hfp
-  -- the constants land in the intermediate ring, which makes its primes places over `F`
-  let _ : Algebra F φ.intermediateRing :=
-    ((algebraMap F W₁.FunctionField).codRestrict φ.intermediateRing fun c ↦ by
-      rw [IsScalarTower.algebraMap_apply F W₁.CoordinateRing W₁.FunctionField]
-      exact φ.algebraMap_mem_intermediateRing _).toAlgebra
-  have : IsScalarTower F φ.intermediateRing W₁.FunctionField := .of_algebraMap_eq fun _ ↦ rfl
   -- `φ^* x₂` has no pole at `P`, because `x₂` has none at the affine point `Q`
   have hxle : (CoordinateRing.pointPlace h.1).valuation W₁.FunctionField
       (φ.pullback (algebraMap F[X] W₂.CoordinateRing X)) ≤ 1 := by
@@ -146,20 +148,6 @@ theorem toPointHom_some_eq_some_of_isEquiv_comap_pointPlace [IsSepClosed F]
       ← (CoordinateRing.pointPlace h'.1).valuation_lt_one_iff_mem (K := W₂.FunctionField),
       ← 𝔓.valuation_lt_one_iff_mem (K := W₁.FunctionField), h𝔓, hval]
     exact (Valuation.isEquiv_iff_val_lt_one.mp hP).symm⟩
-  -- every prime over the ideal of `Q` has residue degree one, the place of `Q` splitting
-  -- completely in the separable extension `F(W₁) / F(W₂)` over the separably closed field `F`
-  have hf : ∀ Q ∈ (CoordinateRing.pointPlace h'.1).asIdeal.primesOver φ.intermediateRing,
-      Q.inertiaDeg W₂.CoordinateRing = 1 := by
-    intro Q hQ
-    have hQp : Q.IsPrime := hQ.1
-    have hQl : Q.LiesOver (CoordinateRing.pointPlace h'.1).asIdeal := hQ.2
-    let Q' : HeightOneSpectrum φ.intermediateRing :=
-      ⟨Q, hQp, Ideal.ne_bot_of_mem_primesOver (CoordinateRing.pointPlace h'.1).ne_bot hQ⟩
-    have hsplit := φ.isSplitCompletely hfp
-      (Place.ofPrime F W₂.FunctionField (CoordinateRing.pointPlace h'.1))
-    rw [← Place.relativeDegree_ofPrime F W₂.FunctionField (k' := F) (F' := W₁.FunctionField) Q']
-    exact hsplit.relativeDegree_eq_one (Place.restrict_ofPrime F W₂.FunctionField (k' := F)
-      (F' := W₁.FunctionField) (CoordinateRing.pointPlace h'.1) Q')
   -- hence the norm of `𝔓` is the ideal of `Q`
   have hnorm : Ideal.relNorm W₂.CoordinateRing 𝔓.asIdeal =
       (CoordinateRing.pointPlace h'.1).asIdeal :=
@@ -176,6 +164,57 @@ theorem toPointHom_some_eq_some_of_isEquiv_comap_pointPlace [IsSepClosed F]
   change Ideal.relNorm W₂.CoordinateRing ((CoordinateRing.XYIdeal W₁ x (C y)).map
     (algebraMap W₁.CoordinateRing φ.intermediateRing)) = _
   rw [RingHom.algebraMap_toAlgebra, hmap, hnorm, CoordinateRing.pointPlace_asIdeal]
+
+/-- **The class-group point map evaluates at affine points.** Over a separably closed field, a
+separable isogeny `φ` sends the affine point `(x, y)` of `W₁` to the affine point `(x', y')` of
+`W₂` as soon as the place of `(x, y)` restricts along `φ^*` to the place of `(x', y')` — that is,
+as soon as `φ^* x₂` and `φ^* y₂` take the values `x'` and `y'` at `(x, y)`.
+
+Together with `Isogeny.toPointHom_some_eq_zero_of_isEquiv_comap_infinityPlace` this identifies
+the class-group construction with the map on points that the rational functions `φ^* x₂`, `φ^* y₂`
+define. -/
+theorem toPointHom_some_eq_some_of_isEquiv_comap_pointPlace [IsSepClosed F]
+    [Algebra.IsSeparable φ.fieldPullback.fieldRange W₁.FunctionField]
+    {x y : F} (h : W₁.Nonsingular x y) {x' y' : F} (h' : W₂.Nonsingular x' y')
+    (hP : (((CoordinateRing.pointPlace h.1).valuation W₁.FunctionField).comap
+      (φ.fieldPullback : W₂.FunctionField →+* W₁.FunctionField)).IsEquiv
+        ((CoordinateRing.pointPlace h'.1).valuation W₂.FunctionField)) :
+    φ.toPointHom (.some x y h) = .some x' y' h' := by
+  -- the pullback-induced structures, as `IntermediateRing/Basic.lean` prescribes
+  let _ : Algebra W₂.CoordinateRing W₁.FunctionField := φ.pullback.toRingHom.toAlgebra
+  let _ : Algebra W₂.FunctionField W₁.FunctionField := φ.fieldPullback.toRingHom.toAlgebra
+  have : IsScalarTower W₂.CoordinateRing W₂.FunctionField W₁.FunctionField :=
+    .of_algebraMap_eq fun x ↦ (φ.fieldPullback_algebraMap x).symm
+  let _ : Algebra W₂.CoordinateRing φ.intermediateRing := φ.pullbackToIntermediateRing.toAlgebra
+  have : IsScalarTower W₂.CoordinateRing φ.intermediateRing W₁.FunctionField :=
+    φ.isScalarTower_intermediateRing rfl fun _ ↦ rfl
+  have := φ.isDedekindDomain_intermediateRing fun _ ↦ rfl
+  have : FaithfulSMul W₂.CoordinateRing φ.intermediateRing :=
+    (faithfulSMul_iff_algebraMap_injective _ _).mpr φ.pullbackToIntermediateRing_injective
+  -- the function-field extension along `φ`, over the base field
+  have hfp : ∀ z, algebraMap W₂.FunctionField W₁.FunctionField z = φ.fieldPullback z := fun _ ↦ rfl
+  have := φ.isScalarTower_of_algebraMap_eq_fieldPullback hfp
+  have := φ.finiteDimensional_functionField hfp
+  have := φ.isSeparable_functionField hfp
+  -- the constants land in the intermediate ring, which makes its primes places over `F`
+  let _ : Algebra F φ.intermediateRing :=
+    ((algebraMap F W₁.FunctionField).codRestrict φ.intermediateRing fun c ↦ by
+      rw [IsScalarTower.algebraMap_apply F W₁.CoordinateRing W₁.FunctionField]
+      exact φ.algebraMap_mem_intermediateRing _).toAlgebra
+  have : IsScalarTower F φ.intermediateRing W₁.FunctionField := .of_algebraMap_eq fun _ ↦ rfl
+  -- every prime over the ideal of `Q` has residue degree one, the place of `Q` splitting
+  -- completely in the separable extension `F(W₁) / F(W₂)` over the separably closed field `F`
+  refine φ.toPointHom_some_eq_some_of_isEquiv_comap_pointPlace_of_forall_inertiaDeg_eq_one rfl h h'
+    hP fun Q hQ ↦ ?_
+  have hQp : Q.IsPrime := hQ.1
+  have hQl : Q.LiesOver (CoordinateRing.pointPlace h'.1).asIdeal := hQ.2
+  let Q' : HeightOneSpectrum φ.intermediateRing :=
+    ⟨Q, hQp, Ideal.ne_bot_of_mem_primesOver (CoordinateRing.pointPlace h'.1).ne_bot hQ⟩
+  have hsplit := φ.isSplitCompletely hfp
+    (Place.ofPrime F W₂.FunctionField (CoordinateRing.pointPlace h'.1))
+  rw [← Place.relativeDegree_ofPrime F W₂.FunctionField (k' := F) (F' := W₁.FunctionField) Q']
+  exact hsplit.relativeDegree_eq_one (Place.restrict_ofPrime F W₂.FunctionField (k' := F)
+    (F' := W₁.FunctionField) (CoordinateRing.pointPlace h'.1) Q')
 
 end Isogeny
 
