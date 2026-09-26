@@ -167,9 +167,6 @@ def homDensityBCF (F : SimpleGraph V) [DecidableRel F.Adj] : GraphonSpace Ω μ 
 theorem coe_homDensityBCF (F : SimpleGraph V) [DecidableRel F.Adj] :
     ⇑(homDensityBCF (μ := μ) F) = homDensityOnSpace F := (rfl)
 
-theorem homDensityBCF_apply (F : SimpleGraph V) [DecidableRel F.Adj] (x : GraphonSpace Ω μ) :
-    homDensityBCF F x = homDensityOnSpace F x := (rfl)
-
 variable {V₁ V₂ : Type*} [Fintype V₁] [Fintype V₂]
 
 /-- The bounded continuous homomorphism density of an edgeless graph is the constant `1`. -/

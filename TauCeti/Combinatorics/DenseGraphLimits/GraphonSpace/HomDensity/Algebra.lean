@@ -74,6 +74,8 @@ def homDensityAlgebra : StarSubalgebra ℝ (GraphonSpace Ω μ →ᵇ ℝ) where
   star_mem' {g} hg := by
     rwa [show star g = g from ext fun x => star_trivial _]
 
+/-- Each generating homomorphism density belongs to the algebra it generates. -/
+@[simp]
 theorem homDensityBCF_mem_homDensityAlgebra {n : ℕ} (F : SimpleGraph (Fin n))
     [DecidableRel F.Adj] : homDensityBCF (μ := μ) F ∈ homDensityAlgebra :=
   Algebra.subset_adjoin ⟨n, F, ‹_›, rfl⟩
