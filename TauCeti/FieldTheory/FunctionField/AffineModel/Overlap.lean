@@ -5,8 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.Algebra.Subalgebra.Basic
 public import TauCeti.FieldTheory.FunctionField.AffineModel.IntegralClosure
-public import TauCeti.RingTheory.Localization.AsSubring
+public import TauCeti.FieldTheory.FunctionField.HolomorphyRing.Localization
 
 /-!
 # The overlap of the two affine charts of a function field
@@ -19,32 +20,26 @@ place set, since no place is both a zero and a pole of `x`, and they overlap on 
 `x` is a unit.
 
 This file identifies the ring of the overlap. Inverting `x` in `R_x` gives the localization
-`R_x[1/x]`, realized inside `F` by Mathlib's `Localization.subalgebra.ofField`, and this
-localization is the holomorphy ring of the overlap. Applied to `x⁻¹`, the same statement identifies
-`R_{x⁻¹}[x]` with the same ring, so the two localizations are one and the same subring of `F`: the
-two charts glue along their common localization. The overlap ring is a Dedekind domain whose height
-one primes are the places of the overlap, and the prime of the overlap ring below such a place
-contracts to the prime of `R_x` below it (`TauCeti.Place.comap_center_asIdeal`).
-
-The identification is proved for an arbitrary holomorphy ring `𝒪_S` and any nonzero `x ∈ 𝒪_S`:
-`𝒪_S[1/x]` is the holomorphy ring of the places of `S` at which `x⁻¹` is regular. A function
-regular at those places has its poles on `S` only among the finitely many zeros of `x`, so a
-sufficiently high power of `x` clears them (`TauCeti.exists_pow_mul_mem_holomorphyRing`).
+`R_x[1/x]`, realized inside `F` by Mathlib's `Localization.subalgebra.ofField`, and by
+`TauCeti.coe_ofField_powers_eq_holomorphyRing` this localization is the holomorphy ring of the
+overlap. Applied to `x⁻¹`, the same statement identifies `R_{x⁻¹}[x]` with the same ring, so the
+two localizations are one and the same subring of `F`: the two charts glue along their common
+localization, and `TauCeti.ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv` is the
+resulting ring isomorphism `R_x[1/x] ≃+* R_{x⁻¹}[x]`, compatible with the two inclusions into `F`.
+The overlap ring is a Dedekind domain whose height one primes are the places of the overlap
+(`TauCeti.ofFieldPowersHeightOneSpectrumEquiv`), and the prime of the overlap ring below such a
+place contracts to the prime of `R_x` below it (`TauCeti.Place.comap_center_asIdeal`).
 
 ## Main results
 
-* `TauCeti.coe_ofField_powers_eq_holomorphyRing`: if a subalgebra `A` of `F` is the holomorphy ring
-  of a set `S` of places and `x ∈ A`, then the localization `A[1/x] ⊆ F` is the holomorphy ring of
-  the places of `S` at which `x⁻¹` is regular; `TauCeti.mem_ofField_powers_iff_forall_mem_integers`
-  is the membership form.
-* `TauCeti.forall_algebraMap_mem_integers_ofField_powers_iff`: the finite chart of `A[1/x]` is the
-  set of places of `S` at which `x⁻¹` is regular.
-* `TauCeti.ofFieldPowersHeightOneSpectrumEquiv`: for a Dedekind `A`, the places of that chart are
-  the height one primes of `A[1/x]`.
 * `TauCeti.coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing` and
   `TauCeti.coe_ofField_powers_integralClosure_adjoin_eq_coe_ofField_powers_inv`: the two charts
   `R_x` and `R_{x⁻¹}` localize to one and the same subring of `F`, the holomorphy ring of the
   places at which `x` is a unit.
+* `TauCeti.ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv`: the ring isomorphism
+  `R_x[1/x] ≃+* R_{x⁻¹}[x]` induced by that equality, with
+  `TauCeti.coe_ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv_apply` and its `symm`
+  version recording that it commutes with the inclusions into `F`.
 * `TauCeti.valuation_integralClosureAdjoinHeightOneSpectrumEquiv_eq_valuation_inv`: at a place
   of the overlap, the primes of `R_x` and of `R_{x⁻¹}` below it induce the same valuation on `F`.
 
@@ -66,109 +61,29 @@ universe u v
 
 variable {k : Type u} {F : Type v} [Field k] [Field F] [Algebra k F]
 
-/-! ### The localization of a holomorphy ring away from a function -/
-
-section Localization
-
-variable {R : Type*} [CommRing R] [Algebra R F] {A : Subalgebra R F} [IsFractionRing A F]
-  {S : Set (Place k F)}
-
-/-- **`𝒪_S[1/x]` is the holomorphy ring of the places of `S` at which `x⁻¹` is regular.** Stated
-for a subalgebra `A` of `F` that is, as a set, the holomorphy ring of `S`, so that it applies to the
-affine model `R_x` as well as to `𝒪_S` itself. -/
-theorem coe_ofField_powers_eq_holomorphyRing (hF : IsFunctionField k F)
-    (hA : (A : Set F) = (holomorphyRing S : Set F)) (x : A) (hx : Submonoid.powers x ≤ A⁰) :
-    (ofField F (Submonoid.powers x) hx : Set F) =
-      holomorphyRing (S ∩ {P : Place k F | (x : F)⁻¹ ∈ P.integers}) := by
-  have hA' : ∀ y : F, y ∈ A ↔ y ∈ holomorphyRing S := fun y ↦ by
-    rw [← SetLike.mem_coe, hA, SetLike.mem_coe]
-  have hx0 : (x : F) ≠ 0 := fun h ↦
-    nonZeroDivisors.ne_zero (hx (Submonoid.mem_powers x)) (Subtype.ext h)
-  ext z
-  rw [SetLike.mem_coe, mem_ofField_powers_iff, Subalgebra.range_algebraMap, SetLike.mem_coe,
-    mem_holomorphyRing_iff]
-  simp only [Subalgebra.mem_toSubring, Subalgebra.algebraMap_apply, hA', mem_holomorphyRing_iff,
-    Set.mem_inter_iff, Set.mem_ofPred_eq, and_imp]
-  constructor
-  · rintro ⟨n, hn⟩ P hP hPx
-    have hz : z = (x : F)⁻¹ ^ n * ((x : F) ^ n * z) := by
-      rw [← mul_assoc, inv_pow, inv_mul_cancel₀ (pow_ne_zero n hx0), one_mul]
-    rw [hz]
-    exact mul_mem (pow_mem hPx n) (hn P hP)
-  · intro h
-    obtain ⟨n, hn⟩ :=
-      exists_pow_mul_mem_holomorphyRing hF ((hA' x).mp x.2) fun P hP hPx ↦ h P hP hPx
-    exact ⟨n, mem_holomorphyRing_iff.mp hn⟩
-
-/-- **Membership in `𝒪_S[1/x]`**: a function lies in the localization exactly when it is regular
-at every place of `S` at which `x⁻¹` is regular. -/
-theorem mem_ofField_powers_iff_forall_mem_integers (hF : IsFunctionField k F)
-    (hA : (A : Set F) = (holomorphyRing S : Set F)) (x : A) (hx : Submonoid.powers x ≤ A⁰)
-    {z : F} :
-    z ∈ ofField F (Submonoid.powers x) hx ↔
-      ∀ P ∈ S, (x : F)⁻¹ ∈ P.integers → z ∈ P.integers := by
-  rw [← SetLike.mem_coe, coe_ofField_powers_eq_holomorphyRing hF hA x hx, SetLike.mem_coe,
-    mem_holomorphyRing_iff]
-  simp only [Set.mem_inter_iff, Set.mem_ofPred_eq, and_imp]
-
-/-- **The finite chart of `𝒪_S[1/x]`**: a place is finite on the localization exactly when it
-belongs to `S` and `x⁻¹` is regular there. -/
-theorem forall_algebraMap_mem_integers_ofField_powers_iff (hF : IsFunctionField k F)
-    (hA : (A : Set F) = (holomorphyRing S : Set F)) (x : A) (hx : Submonoid.powers x ≤ A⁰)
-    {P : Place k F} :
-    (∀ a : ofField F (Submonoid.powers x) hx, algebraMap _ F a ∈ P.integers) ↔
-      P ∈ S ∩ {P : Place k F | (x : F)⁻¹ ∈ P.integers} := by
-  rw [← coe_holomorphyRing_subset_integers_iff hF,
-    ← coe_ofField_powers_eq_holomorphyRing hF hA x hx]
-  exact ⟨fun h a ha ↦ h ⟨a, ha⟩, fun h a ↦ h a.2⟩
-
-variable [Algebra k A] [IsScalarTower k A F] [IsDedekindDomain A]
-
-/-- **The height one primes of `𝒪_S[1/x]` are the places of `S` at which `x⁻¹` is regular**, for
-a Dedekind `𝒪_S`: `TauCeti.Place.heightOneSpectrumEquiv` for the localization, read along the
-identification of its finite chart. -/
-noncomputable def ofFieldPowersHeightOneSpectrumEquiv (hF : IsFunctionField k F)
-    (hA : (A : Set F) = (holomorphyRing S : Set F)) (x : A) (hx : Submonoid.powers x ≤ A⁰) :
-    ↥(S ∩ {P : Place k F | (x : F)⁻¹ ∈ P.integers}) ≃
-      HeightOneSpectrum (ofField F (Submonoid.powers x) hx) :=
-  (Equiv.subtypeEquivRight fun _ ↦
-      (forall_algebraMap_mem_integers_ofField_powers_iff hF hA x hx).symm).trans
-    (Place.heightOneSpectrumEquiv k F _)
-
-@[simp]
-theorem ofFieldPowersHeightOneSpectrumEquiv_apply (hF : IsFunctionField k F)
-    (hA : (A : Set F) = (holomorphyRing S : Set F)) (x : A) (hx : Submonoid.powers x ≤ A⁰)
-    (P : ↥(S ∩ {P : Place k F | (x : F)⁻¹ ∈ P.integers})) :
-    ofFieldPowersHeightOneSpectrumEquiv hF hA x hx P =
-      (P : Place k F).center
-        ((forall_algebraMap_mem_integers_ofField_powers_iff hF hA x hx).mpr P.2) :=
-  Place.heightOneSpectrumEquiv_apply k F _
-
-@[simp]
-theorem coe_ofFieldPowersHeightOneSpectrumEquiv_symm_apply (hF : IsFunctionField k F)
-    (hA : (A : Set F) = (holomorphyRing S : Set F)) (x : A) (hx : Submonoid.powers x ≤ A⁰)
-    (𝔭 : HeightOneSpectrum (ofField F (Submonoid.powers x) hx)) :
-    ((ofFieldPowersHeightOneSpectrumEquiv hF hA x hx).symm 𝔭 : Place k F) =
-      Place.ofPrime k F 𝔭 :=
-  Place.coe_heightOneSpectrumEquiv_symm_apply k F 𝔭
-
-end Localization
+variable (x : F) [IsFractionRing (integralClosure (Algebra.adjoin k {x}) F) F]
 
 /-! ### The two charts `R_x` and `R_{x⁻¹}` glue along their common localization -/
 
-section IntegralClosureAdjoin
+section Gluing
 
-variable (x : F) [IsFractionRing (integralClosure (Algebra.adjoin k {x}) F) F]
+variable (hx : Submonoid.powers
+    (⟨x, (integralClosure (Algebra.adjoin k {x}) F).algebraMap_mem
+      ⟨x, Algebra.self_mem_adjoin_singleton k x⟩⟩ : integralClosure (Algebra.adjoin k {x}) F) ≤
+      (integralClosure (Algebra.adjoin k {x}) F)⁰)
+  (hx' : Submonoid.powers
+    (⟨x⁻¹, (integralClosure (Algebra.adjoin k {x⁻¹}) F).algebraMap_mem
+      ⟨x⁻¹, Algebra.self_mem_adjoin_singleton k x⁻¹⟩⟩ :
+        integralClosure (Algebra.adjoin k {x⁻¹}) F) ≤
+      (integralClosure (Algebra.adjoin k {x⁻¹}) F)⁰)
 
 /-- **`R_x[1/x]` is the holomorphy ring of the overlap of the two charts**: the places at which
 `x` is a unit, the intersection of the finite chart of `R_x` with that of `R_{x⁻¹}`. -/
-theorem coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing (hF : IsFunctionField k F)
-    (hx : Submonoid.powers
-      (⟨x, self_mem_integralClosure_adjoin x⟩ : integralClosure (Algebra.adjoin k {x}) F) ≤
-        (integralClosure (Algebra.adjoin k {x}) F)⁰) :
+theorem coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing (hF : IsFunctionField k F) :
     (ofField F (Submonoid.powers
-      (⟨x, self_mem_integralClosure_adjoin x⟩ : integralClosure (Algebra.adjoin k {x}) F)) hx :
-        Set F) =
+      (⟨x, (integralClosure (Algebra.adjoin k {x}) F).algebraMap_mem
+        ⟨x, Algebra.self_mem_adjoin_singleton k x⟩⟩ : integralClosure (Algebra.adjoin k {x}) F))
+          hx : Set F) =
       holomorphyRing ({P : Place k F | x ∈ P.integers} ∩ {P : Place k F | x⁻¹ ∈ P.integers}) :=
   coe_ofField_powers_eq_holomorphyRing hF (by
     rw [← Subalgebra.coe_restrictScalars k,
@@ -179,22 +94,63 @@ theorem coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing (hF : IsFunc
 and the same subring, the holomorphy ring of the places at which `x` is a unit. -/
 theorem coe_ofField_powers_integralClosure_adjoin_eq_coe_ofField_powers_inv
     (hF : IsFunctionField k F)
-    [IsFractionRing (integralClosure (Algebra.adjoin k {x⁻¹}) F) F]
-    (hx : Submonoid.powers
-      (⟨x, self_mem_integralClosure_adjoin x⟩ : integralClosure (Algebra.adjoin k {x}) F) ≤
-        (integralClosure (Algebra.adjoin k {x}) F)⁰)
-    (hx' : Submonoid.powers
-      (⟨x⁻¹, self_mem_integralClosure_adjoin x⁻¹⟩ : integralClosure (Algebra.adjoin k {x⁻¹}) F) ≤
-        (integralClosure (Algebra.adjoin k {x⁻¹}) F)⁰) :
+    [IsFractionRing (integralClosure (Algebra.adjoin k {x⁻¹}) F) F] :
     (ofField F (Submonoid.powers
-      (⟨x, self_mem_integralClosure_adjoin x⟩ : integralClosure (Algebra.adjoin k {x}) F)) hx :
-        Set F) =
+      (⟨x, (integralClosure (Algebra.adjoin k {x}) F).algebraMap_mem
+        ⟨x, Algebra.self_mem_adjoin_singleton k x⟩⟩ : integralClosure (Algebra.adjoin k {x}) F))
+          hx : Set F) =
       (ofField F (Submonoid.powers
-        (⟨x⁻¹, self_mem_integralClosure_adjoin x⁻¹⟩ :
-          integralClosure (Algebra.adjoin k {x⁻¹}) F)) hx' : Set F) := by
-  rw [coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing x hF hx,
-    coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing x⁻¹ hF hx', inv_inv,
+        (⟨x⁻¹, (integralClosure (Algebra.adjoin k {x⁻¹}) F).algebraMap_mem
+          ⟨x⁻¹, Algebra.self_mem_adjoin_singleton k x⁻¹⟩⟩ :
+            integralClosure (Algebra.adjoin k {x⁻¹}) F)) hx' : Set F) := by
+  rw [coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing x hx hF,
+    coe_ofField_powers_integralClosure_adjoin_eq_holomorphyRing x⁻¹ hx' hF, inv_inv,
     Set.inter_comm]
+
+/-- **The two charts glue along their common localization, as rings**: the ring isomorphism
+`R_x[1/x] ≃+* R_{x⁻¹}[x]` induced by
+`TauCeti.coe_ofField_powers_integralClosure_adjoin_eq_coe_ofField_powers_inv`. It is the identity
+of `F` restricted to the overlap ring, so it commutes with the two inclusions into `F`
+(`TauCeti.coe_ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv_apply`). -/
+noncomputable def ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv
+    (hF : IsFunctionField k F)
+    [IsFractionRing (integralClosure (Algebra.adjoin k {x⁻¹}) F) F] :
+    ofField F (Submonoid.powers
+      (⟨x, (integralClosure (Algebra.adjoin k {x}) F).algebraMap_mem
+        ⟨x, Algebra.self_mem_adjoin_singleton k x⟩⟩ : integralClosure (Algebra.adjoin k {x}) F))
+          hx ≃+*
+      ofField F (Submonoid.powers
+        (⟨x⁻¹, (integralClosure (Algebra.adjoin k {x⁻¹}) F).algebraMap_mem
+          ⟨x⁻¹, Algebra.self_mem_adjoin_singleton k x⁻¹⟩⟩ :
+            integralClosure (Algebra.adjoin k {x⁻¹}) F)) hx' :=
+  Subalgebra.ringEquivOfSetEq _ _
+    (coe_ofField_powers_integralClosure_adjoin_eq_coe_ofField_powers_inv x hx hx' hF)
+
+@[simp]
+theorem coe_ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv_apply
+    (hF : IsFunctionField k F)
+    [IsFractionRing (integralClosure (Algebra.adjoin k {x⁻¹}) F) F]
+    (a : ofField F (Submonoid.powers
+      (⟨x, (integralClosure (Algebra.adjoin k {x}) F).algebraMap_mem
+        ⟨x, Algebra.self_mem_adjoin_singleton k x⟩⟩ : integralClosure (Algebra.adjoin k {x}) F))
+          hx) :
+    (ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv x hx hx' hF a : F) = a :=
+  Subalgebra.coe_ringEquivOfSetEq_apply _ _ _ a
+
+@[simp]
+theorem coe_ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv_symm_apply
+    (hF : IsFunctionField k F)
+    [IsFractionRing (integralClosure (Algebra.adjoin k {x⁻¹}) F) F]
+    (b : ofField F (Submonoid.powers
+      (⟨x⁻¹, (integralClosure (Algebra.adjoin k {x⁻¹}) F).algebraMap_mem
+        ⟨x⁻¹, Algebra.self_mem_adjoin_singleton k x⁻¹⟩⟩ :
+          integralClosure (Algebra.adjoin k {x⁻¹}) F)) hx') :
+    ((ofFieldPowersIntegralClosureAdjoinEquivOfFieldPowersInv x hx hx' hF).symm b : F) = b :=
+  Subalgebra.coe_ringEquivOfSetEq_symm_apply _ _ _ b
+
+end Gluing
+
+/-! ### The two normalized valuations agree on the overlap -/
 
 /-- **The two normalized valuations agree on the overlap**: at a place `P` at which `x` is a unit,
 the height one prime of `R_x` below `P` and the height one prime of `R_{x⁻¹}` below `P` induce
@@ -210,7 +166,5 @@ theorem valuation_integralClosureAdjoinHeightOneSpectrumEquiv_eq_valuation_inv
   rw [integralClosureAdjoinHeightOneSpectrumEquiv_apply,
     integralClosureAdjoinHeightOneSpectrumEquiv_apply, Place.valuation_center,
     Place.valuation_center]
-
-end IntegralClosureAdjoin
 
 end TauCeti
