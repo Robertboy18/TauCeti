@@ -33,10 +33,10 @@ maps produced by `ProbabilityTheory.HasLaw` are only almost-everywhere measurabl
 
 ## Main statements
 
-* `TauCeti.exists_isClosed_measure_sdiff_lt_continuousOn` — **Lusin's theorem**: a measurable map
-  into a second-countable space is continuous on a closed subset of any measurable set `s` of
+* `Measurable.exists_isClosed_measure_sdiff_lt_continuousOn` — **Lusin's theorem**: a measurable
+  map into a second-countable space is continuous on a closed subset of any measurable set `s` of
   finite measure whose complement in `s` has measure less than any prescribed `ε > 0`;
-* `TauCeti.exists_isClosed_measure_sdiff_lt_continuousOn_of_aemeasurable` — the same for an
+* `AEMeasurable.exists_isClosed_measure_sdiff_lt_continuousOn` — the same for an
   almost-everywhere measurable map.
 
 ## References
@@ -61,8 +61,8 @@ variable {X Y : Type*} [TopologicalSpace X] [MeasurableSpace X] [OpensMeasurable
 /-- **Lusin's theorem.** A measurable map `f` from a weakly regular measure space into a
 second-countable topological space is continuous on a closed set `F ⊆ s` with `μ (s \ F) < ε`,
 for every measurable set `s` of finite measure and every `ε > 0`. -/
-theorem exists_isClosed_measure_sdiff_lt_continuousOn (hf : Measurable f) (hs : MeasurableSet s)
-    (hμs : μ s ≠ ∞) (hε : ε ≠ 0) :
+theorem _root_.Measurable.exists_isClosed_measure_sdiff_lt_continuousOn (hf : Measurable f)
+    (hs : MeasurableSet s) (hμs : μ s ≠ ∞) (hε : ε ≠ 0) :
     ∃ F ⊆ s, IsClosed F ∧ μ (s \ F) < ε ∧ ContinuousOn f F := by
   set B := TopologicalSpace.countableBasis Y
   have : Countable B := (TopologicalSpace.countable_countableBasis Y).to_subtype
@@ -107,12 +107,12 @@ theorem exists_isClosed_measure_sdiff_lt_continuousOn (hf : Measurable f) (hs : 
 /-- **Lusin's theorem** for an almost-everywhere measurable map: it is continuous on a closed set
 `F ⊆ s` with `μ (s \ F) < ε`, for every measurable set `s` of finite measure and every
 `ε > 0`. -/
-theorem exists_isClosed_measure_sdiff_lt_continuousOn_of_aemeasurable (hf : AEMeasurable f μ)
+theorem _root_.AEMeasurable.exists_isClosed_measure_sdiff_lt_continuousOn (hf : AEMeasurable f μ)
     (hs : MeasurableSet s) (hμs : μ s ≠ ∞) (hε : ε ≠ 0) :
     ∃ F ⊆ s, IsClosed F ∧ μ (s \ F) < ε ∧ ContinuousOn f F := by
   set N := toMeasurable μ {x | f x ≠ hf.mk f x} with hN
   have hNμ : μ N = 0 := by rw [hN, measure_toMeasurable]; exact ae_iff.1 hf.ae_eq_mk
-  obtain ⟨F, hFs, hF, hFμ, hFf⟩ := exists_isClosed_measure_sdiff_lt_continuousOn hf.measurable_mk
+  obtain ⟨F, hFs, hF, hFμ, hFf⟩ := hf.measurable_mk.exists_isClosed_measure_sdiff_lt_continuousOn
     (hs.diff (measurableSet_toMeasurable μ _)) (ne_top_of_le_ne_top hμs (measure_mono sdiff_subset))
     hε
   refine ⟨F, hFs.trans sdiff_subset, hF, ?_, ?_⟩
