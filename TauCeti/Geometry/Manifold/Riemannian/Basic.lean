@@ -28,6 +28,8 @@ to a fixed vector, depends continuously on the base point.
   Riemannian bundle as a continuous Riemannian bundle.
 * `ContMDiffOn.continuousOn_norm_mfderiv`: for a `C¹` map `f` from an open subset of a normed space
   to a Riemannian manifold, `z ↦ ‖df_z ξ‖` is continuous.
+* `ContMDiffOn.contDiffOn_inner_mfderiv`: for a `C^(m+1)` map `f` from an open subset of a normed
+  space to a `C^m` Riemannian manifold, `z ↦ ⟪df_z ξ, df_z η⟫` is `C^m`.
 -/
 
 public section
@@ -139,5 +141,20 @@ theorem ContMDiffOn.continuousOn_norm_mfderiv {f : F → M} {U : Set F} {n : ℕ
   -- Riemannian norm is continuous on `TM`
   (TauCeti.continuous_norm_bundle E (fun x : M ↦ TangentSpace I x)).comp_continuousOn
     (hf.contMDiffOn_mk_mfderiv_apply (m := 0) (by simpa using hn) hU ξ).continuousOn
+
+omit [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
+/-- Let `f` be a `C^n` map from an open subset `U` of a real normed space to a manifold whose
+tangent spaces carry a `C^m` Riemannian metric, with `m + 1 ≤ n`. For fixed vectors `ξ` and `η`,
+the Riemannian inner product `⟪df_z ξ, df_z η⟫` is a `C^m` function of `z ∈ U`. -/
+theorem ContMDiffOn.contDiffOn_inner_mfderiv {f : F → M} {U : Set F} {m n : ℕ∞ω}
+    [IsContMDiffRiemannianBundle I m E (fun x : M ↦ TangentSpace I x)]
+    (hf : ContMDiffOn 𝓘(ℝ, F) I n f U) (hmn : m + 1 ≤ n) (hU : IsOpen U) (ξ η : F) :
+    ContDiffOn ℝ m
+      (fun z ↦ inner ℝ (mfderiv 𝓘(ℝ, F) I f z ξ) (mfderiv 𝓘(ℝ, F) I f z η)) U := by
+  -- the two lifted directional derivatives `z ↦ (f z, df_z ξ)` are `C^m` into `TM`, and the
+  -- Riemannian inner product of two `C^m` sections over the same base map is `C^m`
+  rw [← contMDiffOn_iff_contDiffOn]
+  exact ContMDiffOn.inner_bundle (hf.contMDiffOn_mk_mfderiv_apply hmn hU ξ)
+    (hf.contMDiffOn_mk_mfderiv_apply hmn hU η)
 
 end NormMFDeriv
