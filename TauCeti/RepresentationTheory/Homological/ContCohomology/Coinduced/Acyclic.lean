@@ -5,8 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Category.ModuleCat.Topology.EpiMono
+public import TauCeti.Algebra.Category.ModuleCat.Topology.Zero
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Discrete
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Functor
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CompactDiscrete
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Resolution
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.SmoothDiscrete
@@ -76,6 +77,9 @@ any continuity of the action is needed. The coefficient ring `R` is arbitrary: e
   `A`; `TauCeti.ContCohomology.subsingleton_continuousCohomology_discreteCoind_bot_int` is its
   `R = ℤ` case for the integral module structure `AddCommGroup.toIntModule` on `Coind_1^G A`, the
   one Mathlib's instance search produces, and for an abelian group `A` without topology.
+* `TauCeti.ContCohomology.coindAcyclic`: the same vanishing in the bundled language,
+  `Hⁿ(G, Coind_1^G A)` is a zero object of `TopModuleCat R` for `n > 0` and a smooth discrete
+  representation `A` of the trivial subgroup, with `Coind_1^G A = TauCeti.coindTopRep R G ⊥ A`.
 
 ## References
 
@@ -91,7 +95,7 @@ open CategoryTheory TopRep
 
 namespace TauCeti.ContCohomology
 
-universe u
+universe u v
 
 section General
 
@@ -135,7 +139,7 @@ theorem evalLevel_d : ∀ (m : ℕ) (F : (resolutionX 𝒞 m).V),
 
 /-- In degree zero, an element of `Coind_1^G A` whose translates evaluate at `1` to `Ψ` is `Ψ`
 itself. -/
-theorem eq_ofContinuousMap_of_forall_evalLevel_smul (f : DiscreteCoind G ⊥ A) (Ψ : C(G, A))
+private theorem eq_ofContinuousMap_of_forall_evalLevel_smul (f : DiscreteCoind G ⊥ A) (Ψ : C(G, A))
     (h : ∀ y : G, evalLevel R G A 0 (y • f) = Ψ y) : f = DiscreteCoind.ofContinuousMap G A Ψ :=
   DiscreteCoind.ext fun y => by
     have hy := h y
@@ -268,7 +272,7 @@ instance subsingleton_continuousCohomology_discreteCoind_bot (n : ℕ) :
     (evalLevel R G A (n + 2) (Subtype.val ((homogeneousCochains 𝒞).iCycles (n + 1) z)) 1)),
     fun g => ρ_coindLevel_const R G A (n + 1) g _⟩, ?_⟩
   -- its differential spreads `d (Φ 1) = Φ` over `G`, which is the invariant cocycle itself
-  refine TopModuleCat.injective_of_mono ((homogeneousCochains 𝒞).iCycles (n + 1)) ?_
+  refine (homogeneousCochains 𝒞).iCycles_injective (n + 1) ?_
   refine (ConcreteCategory.congr_hom ((homogeneousCochains 𝒞).toCycles_i n (n + 1)) _).trans ?_
   refine Subtype.ext ?_
   rw [homogeneousCochains.d_apply, d_coindLevel_const, hΦ']
@@ -298,5 +302,32 @@ instance subsingleton_continuousCohomology_discreteCoind_bot_int (n : ℕ) :
   subsingleton_continuousCohomology_discreteCoind_bot ℤ G A n
 
 end Int
+
+/-! ### The bundled statement -/
+
+section Bundled
+
+attribute [local instance] TopRep.distribMulAction TopRep.smulCommClass
+
+variable (R : Type v) [Ring R] [TopologicalSpace R]
+  (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
+
+/-- **`Coind_1^G A` is acyclic in every positive degree**, in the bundled language: for a smooth
+discrete representation `A` of the trivial subgroup, the continuous cohomology
+`Hⁿ(G, Coind_1^G A)` of `Coind_1^G A = TauCeti.coindTopRep R G ⊥ A` is a zero object of
+`TopModuleCat R` for every `n > 0`. This is
+`subsingleton_continuousCohomology_discreteCoind_bot` for the underlying module of `A`, with the
+action of the trivial subgroup read off from `A`. -/
+theorem coindAcyclic (A : SmoothDiscreteTopRep.{v, u, u} R (⊥ : Subgroup G)) (n : ℕ)
+    (hn : 0 < n) :
+    Limits.IsZero (continuousCohomology n ((smoothDiscreteι R G).obj (coindTopRep R G ⊥ A))) := by
+  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn.ne'
+  have : DiscreteTopology A.obj.V := A.property.discreteTopology
+  have : Subsingleton
+      (continuousCohomology (n + 1) ((smoothDiscreteι R G).obj (coindTopRep R G ⊥ A))) :=
+    subsingleton_continuousCohomology_discreteCoind_bot R G A.obj.V n
+  exact TopModuleCat.isZero_of_subsingleton _
+
+end Bundled
 
 end TauCeti.ContCohomology
