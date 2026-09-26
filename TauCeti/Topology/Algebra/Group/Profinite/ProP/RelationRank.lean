@@ -29,9 +29,9 @@ normal closure of the relators, this identifies the order of `H²(G, 𝔽_p)` wi
 `p ^ d(R ⧸ Rᵖ[R, F])`. By Burnside's basis theorem for normal generation
 (`TauCeti.IsProP.topologicalGeneratorRankNat_quotient_pLowerCentralStep_le_iff`), the exponent
 `d(R ⧸ Rᵖ[R, F])` is the least number of generators of `R` as a closed normal subgroup of `F`: the
-dimension of `H²(G, 𝔽_p)` **counts the relations** of `G`. Since `H²(G, 𝔽_p)` does not see the
-presentation, that count is the same for every minimal presentation of `G`. This is the
-presentation independence of the relation rank.
+exponent `r` in the order `p ^ r` of `H²(G, 𝔽_p)` **counts the relations** of `G`. Since
+`H²(G, 𝔽_p)` does not see the presentation, that count is the same for every minimal presentation
+of `G`. This is the presentation independence of the relation rank.
 
 The statements are about the order of `H²(G, 𝔽_p)`, for the explicit continuous cohomology `H2` of
 the trivial `G`-module `𝔽_p`; the action of `G` on `ZMod p` is carried as an instance together
@@ -44,6 +44,9 @@ on `𝔽_p` is never part of a statement here.
 * `TauCeti.natCard_H2_quotient_of_le_proPFrattini`: for profinite `G` with `H²(G, 𝔽_p) = 0` and
   `N ≤ Φ(G)` closed normal, `H²(G ⧸ N, 𝔽_p)` has `p ^ d(N ⧸ Nᵖ[N, G])` elements;
   `TauCeti.finite_H2_quotient_iff_of_le_proPFrattini` is the finiteness criterion.
+* `TauCeti.natCard_H2_of_le_proPFrattini`: for `G ≅ F ⧸ R` with `F` a free pro-`p` group and
+  `R ≤ Φ(F)` closed normal, `H²(G, 𝔽_p)` has `p ^ d(R ⧸ Rᵖ[R, F])` elements;
+  `TauCeti.finite_H2_iff_of_le_proPFrattini` is the finiteness criterion.
 * `TauCeti.presentedProP.natCard_H2`: for a minimal presentation `⟨X ∣ rels⟩ ≅ G` with relation
   subgroup `R`, `H²(G, 𝔽_p)` has `p ^ d(R ⧸ Rᵖ[R, F])` elements, and
   `TauCeti.presentedProP.natCard_H2_le_pow_iff`: it has at most `p ^ n` elements exactly when `R`
@@ -134,18 +137,23 @@ variable (hRc : IsClosed (R : Set (freeProP p X))) (hR : R ≤ proPFrattini p (f
   (htriv : ∀ (g : G) (m : ZMod p), g • m = m)
 include hRc hR e htrivF htriv
 
-/-- `H²(G, 𝔽_p)` is finite exactly when `R ⧸ Rᵖ[R, F]` is topologically finitely generated, for
-`G ≅ F ⧸ R` with `R ≤ Φ(F)` closed normal in the free pro-`p` group `F`. -/
-private theorem finite_H2_iff_of_le_proPFrattini :
+/-- **Finiteness of `H²(G, 𝔽_p)` for a quotient of a free pro-`p` group.** Let `F` be the free
+pro-`p` group on `X`, let `R ≤ Φ(F)` be a closed normal subgroup, and let `G ≅ F ⧸ R` be a group
+acting trivially on `𝔽_p`, as does `F`. Then `H²(G, 𝔽_p)` is finite exactly when `R ⧸ Rᵖ[R, F]`
+is topologically finitely generated. -/
+theorem finite_H2_iff_of_le_proPFrattini :
     Finite (H2 G (ZMod p)) ↔
       IsTopologicallyFinitelyGenerated (R ⧸ (pLowerCentralStep p R).subgroupOf R) := by
   have := freeProP.subsingleton_H2_zmod (p := p) (X := X)
   rw [← finite_H2_quotient_iff_of_le_proPFrattini hRc hR htrivF]
   exact (h2QuotientEquiv e htrivF htriv).toEquiv.finite_iff.symm
 
-/-- `H²(G, 𝔽_p)` has `p ^ d(R ⧸ Rᵖ[R, F])` elements, for `G ≅ F ⧸ R` with `R ≤ Φ(F)` closed
-normal in the free pro-`p` group `F` and `R ⧸ Rᵖ[R, F]` topologically finitely generated. -/
-private theorem natCard_H2_of_le_proPFrattini
+/-- **`H²(G, 𝔽_p)` counts the generators of `R ⧸ Rᵖ[R, F]` for a quotient of a free pro-`p`
+group.** Let `F` be the free pro-`p` group on `X`, let `R ≤ Φ(F)` be a closed normal subgroup with
+`R ⧸ Rᵖ[R, F]` topologically finitely generated, and let `G ≅ F ⧸ R` be a group acting trivially
+on `𝔽_p`, as does `F`. Then `H²(G, 𝔽_p)` has `p ^ d(R ⧸ Rᵖ[R, F])` elements, where `d` is the
+topological generator rank. -/
+theorem natCard_H2_of_le_proPFrattini
     (h : IsTopologicallyFinitelyGenerated (R ⧸ (pLowerCentralStep p R).subgroupOf R)) :
     Nat.card (H2 G (ZMod p)) =
       p ^ topologicalGeneratorRankNat (R ⧸ (pLowerCentralStep p R).subgroupOf R) h := by
