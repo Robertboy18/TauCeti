@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.Category.ModuleCat.Topology.Homology
-public import Mathlib.LinearAlgebra.Quotient.Basic
 public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.RestrictScalars
 
 /-!
