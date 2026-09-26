@@ -26,7 +26,8 @@ the middle terms `M ⊗ Coind_⊥^G A` and `M ⊗ Ind_⊥^G A` still have vanish
 their connecting maps are isomorphisms as well (`tensorDimensionShiftUpIso`,
 `tensorDimensionShiftDownIso`). These tensored shifts take the target degree as a parameter, so
 that a construction proceeding by recursion on the degree, such as the cup product in all
-bidegrees, needs no transport along equalities of degrees.
+bidegrees, needs no transport along equalities of degrees between its recursive steps; the cup
+product transports its result once, at the end, to the requested target degree.
 
 Each isomorphism below has Mathlib's connecting homomorphism `TateCohomology.δ` as its forward
 map. Thus its naturality in a morphism of the short exact sequences is the existing theorem

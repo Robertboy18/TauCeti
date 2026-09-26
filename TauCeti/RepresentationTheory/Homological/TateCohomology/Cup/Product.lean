@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.Ring.NegOnePow
 public import TauCeti.RepresentationTheory.Homological.TateCohomology.Cup.ZeroLeft
 public import TauCeti.RepresentationTheory.Homological.TateCohomology.DimensionShift
 
@@ -180,12 +181,6 @@ private theorem cupNeg_succ_apply (p : ℤ) (n : ℕ) (x : tateCohomology M p)
 theorem cup_zero_right (p : ℤ) (h : p + 0 = p) : cup M N p 0 p h = cupH0 M N p :=
   cup_natCast M N p 0 h
 
-/-- The sign `(-1) ^ p` applied before and after a linear map cancels. -/
-private theorem negOnePow_smul_map_negOnePow_smul {X Y : ModuleCat k} (f : X ⟶ Y) (p : ℤ) (v : X) :
-    p.negOnePow • f (p.negOnePow • v) = f v := by
-  rw [Units.smul_def, Units.smul_def, map_zsmul, smul_smul, ← Units.val_mul, Int.units_mul_self,
-    Units.val_one, one_smul]
-
 /-- **The defining rule of the cup product for the upward dimension shift**: for `x` of degree `p`
 and `y` of nonnegative degree `q` in `dimensionShiftUp N`, `x ∪ δ y = (-1)^p δ (x ∪ y)`, where the
 first `δ` is the shift `H^q(G, dimensionShiftUp N) ≅ H^(q+1)(G, N)` and the second is its tensor
@@ -216,13 +211,15 @@ theorem cup_dimensionShiftDownIso_hom {p q r' r : ℤ} (hq : q < 0) (h' : p + q 
   cases n with
   | zero =>
     obtain rfl : p = r := by simp at h; omega
-    rw [cupNeg_zero_apply, negOnePow_smul_map_negOnePow_smul, Iso.inv_hom_id_apply]
+    rw [cupNeg_zero_apply, map_zsmul_unit, negOnePow_smul_negOnePow_smul,
+      Iso.inv_hom_id_apply]
     -- `Int.negSucc 0 + 1` is `0` by definition, so the left-hand side is `cup` in bidegree
     -- `(p, 0)`.
     exact LinearMap.congr_fun₂ (cup_zero_right M (dimensionShiftDown N) p _) x _
   | succ n =>
     obtain rfl : r = p - (n + 1 : ℕ) := by push_cast at h ⊢; omega
-    rw [cupNeg_succ_apply, negOnePow_smul_map_negOnePow_smul, Iso.inv_hom_id_apply]
+    rw [cupNeg_succ_apply, map_zsmul_unit, negOnePow_smul_negOnePow_smul,
+      Iso.inv_hom_id_apply]
     exact LinearMap.congr_fun₂ (cup_negSucc M (dimensionShiftDown N) p n _) x _
 
 /-- The upward step in the proof of `cup_zero_left`: if `cup` agrees with `cup0H` in bidegree
