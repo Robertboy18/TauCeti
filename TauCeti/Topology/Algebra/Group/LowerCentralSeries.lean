@@ -174,6 +174,15 @@ theorem isClosed_pLowerCentralStep_subgroupOf (N : Subgroup G) :
     IsClosed ((pLowerCentralStep p N).subgroupOf N : Set N) :=
   (isClosed_pLowerCentralStep N).preimage continuous_subtype_val
 
+/-- `N ⧸ Nᵖ[N, G]` is an abstract `p`-group: the `p`-th power of every element is `1`, since the
+`p`-th powers of the elements of `N` lie in `pLowerCentralStep p N`. -/
+theorem isPGroup_quotient_pLowerCentralStep_subgroupOf (N : Subgroup G) [N.Normal] :
+    IsPGroup p (N ⧸ (pLowerCentralStep p N).subgroupOf N) := fun q ↦ by
+  obtain ⟨n, rfl⟩ := QuotientGroup.mk_surjective q
+  refine ⟨1, ?_⟩
+  rw [pow_one, ← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff, mem_subgroupOf, coe_pow]
+  exact pow_mem_pLowerCentralStep n.2
+
 /-- **Conjugation acts trivially on `N ⧸ Nᵖ[N, G]`.** For a normal subgroup `N`, the class of the
 conjugate `g n g⁻¹` in the quotient of `N` by `pLowerCentralStep p N` is the class of `n`. -/
 @[simp]

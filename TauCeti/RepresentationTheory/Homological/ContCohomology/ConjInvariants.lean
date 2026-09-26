@@ -18,12 +18,14 @@ The invariant classes `H¹(N, M)^G` are the continuous homomorphisms `N → M` t
 the conjugacy classes of `G` in `N` (`mem_H1ConjInvariants_iff_of_smul_eq_self`).
 
 When `M` is killed by `p`, for instance `M = 𝔽_p`, such a homomorphism kills the `p`-th powers as
-well as the commutators `⁅N, G⁆`, so it factors through the quotient `N ⧸ Nᵖ[N, G]` of `N` by the
-closed subgroup `TauCeti.pLowerCentralStep p N`, and conversely. Hence
+well as the commutators `⁅N, G⁆`. If moreover `M` is a `T1Space`, so that the kernel of a continuous
+homomorphism into `M` is closed, the homomorphism factors through the quotient `N ⧸ Nᵖ[N, G]` of `N`
+by the closed subgroup `TauCeti.pLowerCentralStep p N`, and conversely. Hence
 `H¹(N, M)^G ≃ Hom_cont(N ⧸ Nᵖ[N, G], M)` (`H1ConjInvariantsEquivOfSmulEqSelf`), for a closed
-normal subgroup `N`. For `M = 𝔽_p` the right-hand side is the continuous `𝔽_p`-dual of
-`N ⧸ Nᵖ[N, G]`; for a pro-`p` group `G` its dimension is the topological generator rank of that
-quotient, which is worked out in `TauCeti.Topology.Algebra.Group.Profinite.ProP.InvariantDual`.
+normal subgroup `N` and a `T1Space` `M` killed by `p`. For `M = 𝔽_p` the right-hand side is the
+continuous `𝔽_p`-dual of `N ⧸ Nᵖ[N, G]`; for a profinite group `G` its dimension is the topological
+generator rank of that quotient, which is worked out in
+`TauCeti.Topology.Algebra.Group.Profinite.ProP.InvariantDual`.
 
 The invariant classes are the domain of the transgression in the five-term exact sequence of a
 group extension `1 → N → G → G ⧸ N → 1`. For a minimal presentation `1 → R → F → G → 1` of a
@@ -36,9 +38,9 @@ pro-`p` group by a free pro-`p` group, the transgression is an isomorphism, and 
 * `TauCeti.ContCohomology.mem_H1ConjInvariants_iff_of_smul_eq_self`: for trivial coefficients, a
   class in `H¹(N, M)` is conjugation-invariant exactly when the continuous homomorphism `N → M` it
   represents is constant on the conjugacy classes of `G` in `N`.
-* `TauCeti.ContCohomology.H1ConjInvariantsEquivOfSmulEqSelf`: for trivial coefficients killed by
-  `p` and a closed normal subgroup `N`, `H¹(N, M)^G` is the group of continuous homomorphisms
-  `N ⧸ Nᵖ[N, G] → M`.
+* `TauCeti.ContCohomology.H1ConjInvariantsEquivOfSmulEqSelf`: for trivial `T1Space` coefficients
+  killed by `p` and a closed normal subgroup `N`, `H¹(N, M)^G` is the group of continuous
+  homomorphisms `N ⧸ Nᵖ[N, G] → M`.
 
 ## References
 
@@ -95,8 +97,9 @@ section Quotient
 variable (p : ℕ) [T1Space M] (hN : IsClosed (N : Set G)) (hpM : ∀ m : M, p • m = 0)
 include hN hpM
 
-/-- For coefficients killed by `p`, the continuous homomorphism `N → M` representing a
-conjugation-invariant class kills `Nᵖ[N, G]`. -/
+/-- For `T1Space` coefficients killed by `p`, the continuous homomorphism `N → M` representing a
+conjugation-invariant class kills `Nᵖ[N, G]`: its kernel is closed, so the characteristic property
+of `pLowerCentralStep` applies. -/
 theorem pLowerCentralStep_subgroupOf_le_ker_of_mem_H1ConjInvariants {x : H1 N M}
     (hx : x ∈ H1ConjInvariants G M N) :
     (pLowerCentralStep p N).subgroupOf N ≤
@@ -113,9 +116,10 @@ theorem pLowerCentralStep_subgroupOf_le_ker_of_mem_H1ConjInvariants {x : H1 N M}
     ⟨fun n ↦ hA _, fun g n ↦ (mem_H1ConjInvariants_iff_of_smul_eq_self htriv).mp hx g n⟩
 
 /-- **Conjugation-invariant classes as characters of `N ⧸ Nᵖ[N, G]`.** For a closed normal
-subgroup `N` of `G` and coefficients `M` with trivial `G`-action killed by `p`, the `G`-invariant
-classes in `H¹(N, M)` are the continuous homomorphisms `N ⧸ Nᵖ[N, G] → M`. A class is sent to the
-character of the quotient induced by the continuous homomorphism `N → M` it represents. -/
+subgroup `N` of `G` and `T1Space` coefficients `M` with trivial `G`-action killed by `p`, the
+`G`-invariant classes in `H¹(N, M)` are the continuous homomorphisms `N ⧸ Nᵖ[N, G] → M`. A class
+is sent to the character of the quotient induced by the continuous homomorphism `N → M` it
+represents. -/
 noncomputable def H1ConjInvariantsEquivOfSmulEqSelf :
     H1ConjInvariants G M N ≃+
       Additive ((N ⧸ (pLowerCentralStep p N).subgroupOf N) →ₜ* Multiplicative M) where
