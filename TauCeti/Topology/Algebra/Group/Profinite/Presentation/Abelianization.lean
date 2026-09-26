@@ -10,7 +10,7 @@ public import TauCeti.LinearAlgebra.Quotient.PiSpanSingleton
 public import TauCeti.RingTheory.Valuation.FinsetDvd
 public import TauCeti.Topology.Algebra.Module.PiSpanSingleton
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Abelianization
-public import TauCeti.Topology.Algebra.Group.Profinite.Presentation
+public import TauCeti.Topology.Algebra.Group.Profinite.Presentation.Basic
 public import TauCeti.Topology.Separation.TypeTags
 
 /-!
@@ -68,8 +68,8 @@ order of the torsion subgroup of `G^{ab}`, and it is `0` when `q = 0`.
   `TauCeti.presentedProP.oneRelatorAbelianizationEquiv_mk_of_self`,
   `TauCeti.presentedProP.oneRelatorAbelianizationEquiv_symm_ofAdd_mk`: the values of the
   isomorphism on the generators and of its inverse.
-* `TauCeti.presentedProP.eq_zero_iff_mem_topologicalClosure_commutator`: `q = 0` exactly when the
-  relator lies in the closed commutator subgroup of the free pro-`p` group.
+* `TauCeti.presentedProP.oneRelator_q_eq_zero_iff_mem_topologicalClosure_commutator`: `q = 0`
+  exactly when the relator lies in the closed commutator subgroup of the free pro-`p` group.
 * `TauCeti.presentedProP.exists_nonempty_oneRelatorAbelianizationEquiv`: for nonempty `X`, some
   coordinate `x₀` of the exponent vector divides all the others, and the isomorphism exists with
   `q` that coordinate.
@@ -401,7 +401,7 @@ include hw hr in
 `exponentSum r = q • w`, `w x₀ = 1`, of the relator vanishes exactly when `r` lies in the closed
 commutator subgroup of the free pro-`p` group; then the factor `ℤ_p ⧸ q ℤ_p` of
 `oneRelatorAbelianizationEquiv` is `ℤ_p` and `G^{ab} ≅ ℤ_p^X` is torsion-free. -/
-theorem eq_zero_iff_mem_topologicalClosure_commutator :
+theorem oneRelator_q_eq_zero_iff_mem_topologicalClosure_commutator :
     q = 0 ↔ r ∈ (commutator (freeProP p X)).topologicalClosure := by
   rw [← freeProP.exponentSum_eq_one_iff, ← toAdd_eq_zero, hr]
   constructor

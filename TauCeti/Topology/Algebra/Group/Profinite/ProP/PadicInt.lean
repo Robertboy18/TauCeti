@@ -315,7 +315,7 @@ theorem topologicallyGenerates_ofAdd_single_padicInt :
     intro x a
     have hc : Continuous fun a : ℤ_[p] ↦ ofAdd (Pi.single x a : X → ℤ_[p]) :=
       continuous_ofAdd.comp (continuous_single (A := fun _ : X ↦ ℤ_[p]) x)
-    change ofAdd (Pi.single x a) ∈ closure (S : Set (Multiplicative (X → ℤ_[p])))
+    rw [← SetLike.mem_coe, Subgroup.topologicalClosure_coe]
     refine map_mem_closure (f := fun a : ℤ_[p] ↦ ofAdd (Pi.single x a : X → ℤ_[p])) hc
       (PadicInt.denseRange_intCast a) ?_
     rintro _ ⟨n, rfl⟩
