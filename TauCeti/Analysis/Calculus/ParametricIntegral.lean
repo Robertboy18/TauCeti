@@ -150,13 +150,15 @@ theorem contDiff_integral_Icc_of_contDiff
 namespace TauCeti
 
 /-- **Differentiation under a parametrized interval integral.** If `G` is `C¹` on an open set
-containing the segment `{x₀} × [a, b]`, then `x ↦ ∫ t in a..b, G (x, t)` is differentiable at
-`x₀`, with derivative the integral of the partial derivative of `G` in the first variable. -/
+containing the segment `{x₀} × [a, b]`, then the partial derivative of `G` in the first variable
+is interval integrable along that segment, and `x ↦ ∫ t in a..b, G (x, t)` is differentiable at
+`x₀` with derivative the integral of this partial derivative. -/
 theorem hasDerivAt_intervalIntegral_of_contDiffOn {G : ℝ × ℝ → F}
     {U : Set (ℝ × ℝ)} (hU : IsOpen U) (hG : ContDiffOn ℝ 1 G U) {x₀ a b : ℝ}
     (hsub : {x₀} ×ˢ Set.uIcc a b ⊆ U) :
-    HasDerivAt (fun x ↦ ∫ t in a..b, G (x, t))
-      (∫ t in a..b, fderiv ℝ G (x₀, t) (1, 0)) x₀ := by
+    IntervalIntegrable (fun t ↦ fderiv ℝ G (x₀, t) (1, 0)) volume a b ∧
+      HasDerivAt (fun x ↦ ∫ t in a..b, G (x, t))
+        (∫ t in a..b, fderiv ℝ G (x₀, t) (1, 0)) x₀ := by
   obtain ⟨u, v, huo, hvo, hu, hv, huv⟩ :=
     generalized_tube_lemma isCompact_singleton isCompact_uIcc hU hsub
   have hx₀u : x₀ ∈ u := hu (Set.mem_singleton x₀)
@@ -185,7 +187,7 @@ theorem hasDerivAt_intervalIntegral_of_contDiffOn {G : ℝ × ℝ → F}
   refine (intervalIntegral.hasDerivAt_integral_of_dominated_loc_of_deriv_le
     (μ := volume) (F := fun x t ↦ G (x, t)) (F' := fun x t ↦ G' (x, t))
     (bound := fun _ ↦ C) (Metric.closedBall_mem_nhds x₀ (half_pos hε)) ?_ ?_ ?_ ?_
-    intervalIntegrable_const ?_).2
+    intervalIntegrable_const ?_)
   · filter_upwards [huo.mem_nhds hx₀u] with x hx
     exact ((hslice hx hG.continuousOn).mono Set.uIoc_subset_uIcc).aestronglyMeasurable
       measurableSet_uIoc

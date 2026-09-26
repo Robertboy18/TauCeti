@@ -267,10 +267,11 @@ theorem hasDerivAt_energy {a b : ℝ}
     rw [energy_def]
     congr 1
     exact intervalIntegral.integral_congr fun t ht ↦ (hGeq hs (hV ht)).symm
+  obtain ⟨hG'int, hGderiv⟩ := TauCeti.hasDerivAt_intervalIntegral_of_contDiffOn hUVo hG
+    (prod_mono (singleton_subset_iff.mpr h0U) hV)
   have hmain : HasDerivAt (fun s ↦ energy I (F s) a b)
       ((∫ t in a..b, fderiv ℝ G (0, t) (1, 0)) / 2) 0 :=
-    ((TauCeti.hasDerivAt_intervalIntegral_of_contDiffOn hUVo hG (prod_mono
-      (singleton_subset_iff.mpr h0U) hV)).div_const 2).congr_of_eventuallyEq henergy
+    (hGderiv.div_const 2).congr_of_eventuallyEq henergy
   -- Pointwise on `V`, the integrand is `d/dt K (0, t) - ⟪V(t), D_t γ'(t)⟫`; both terms are
   -- continuous on `V`, and the fundamental theorem of calculus evaluates the first at the
   -- endpoints.
@@ -280,17 +281,12 @@ theorem hasDerivAt_energy {a b : ℝ}
     fun t ht ↦ fderiv_inner_mfderiv_fst_eq (hsurf h0U ht)
   have hK0cont : ContinuousOn (deriv fun r ↦ K (0, r)) V :=
     hK0.continuousOn_deriv_of_isOpen hVo le_rfl
-  have hG'cont : ContinuousOn (fun t ↦ fderiv ℝ G (0, t) (1, 0)) V :=
-    ((hG.continuousOn_fderiv_of_isOpen hUVo le_rfl).clm_apply continuousOn_const).comp
-      (continuous_const.prodMk continuous_id).continuousOn fun r hr ↦ ⟨h0U, hr⟩
   have hK'int : IntervalIntegrable (deriv fun r ↦ K (0, r)) volume a b :=
     (hK0cont.mono hV).intervalIntegrable
   have hVAint : IntervalIntegrable (fun t ↦ inner ℝ (variationField I F t)
       (alongCurve (leviCivitaConnection I M) (F 0) (curveVelocity I (F 0)) t)) volume a b := by
-    refine (((hK0cont.mono hV).sub ((hG'cont.mono hV).div_const 2)).congr ?_).intervalIntegrable
-    intro t ht
-    simp only [Pi.sub_apply]
-    rw [hpt t (hV ht)]
+    refine (hK'int.sub (hG'int.div_const 2)).congr fun t ht ↦ ?_
+    rw [hpt t (hV (uIoc_subset_uIcc ht))]
     ring
   have hFTC : ∫ t in a..b, deriv (fun r ↦ K (0, r)) t = K (0, b) - K (0, a) :=
     intervalIntegral.integral_eq_sub_of_hasDerivAt
