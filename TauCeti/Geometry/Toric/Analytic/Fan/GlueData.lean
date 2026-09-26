@@ -171,8 +171,12 @@ theorem analyticAffineChartι_eq_analyticAffineChartι_iff {σ τ : Φ.cones}
     exact ⟨⟨Φ.analyticOverlapLeft hΦ σ τ z, Φ.analyticOverlapLeft_mem hΦ σ τ z⟩, rfl, key z _⟩
 
 /-- The inclusion of the chart of a face factors through the chart diagram map into the chart of
-the ambient cone. -/
-@[reassoc (attr := simp)]
+the ambient cone.
+
+This is not a simp lemma: `analyticAffineChartDiagram_map` rewrites the diagram map to the
+analytic face map, and the resulting composite with the chart inclusion is only well-typed after
+unfolding the diagram, so simp cannot use either spelling. -/
+@[reassoc]
 theorem analyticAffineChartDiagram_map_comp_analyticAffineChartι {τ σ : Φ.cones} (f : τ ⟶ σ) :
     (Φ.analyticAffineChartDiagram hΦ).map f ≫ Φ.analyticAffineChartι hΦ σ =
       Φ.analyticAffineChartι hΦ τ := by
