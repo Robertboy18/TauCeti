@@ -174,6 +174,7 @@ theorem apply_mem_of_mem_semilinearAut {f : Equiv.Perm (ι → R)} (hf : f ∈ s
 
 /-- The permutation of the word space underlying a semilinear monomial transformation moves the
 set of codewords to the semilinear image of the code. -/
+@[simp]
 theorem semilinearMonomialEquiv_toEquiv_smul_coe (u : ι → Rˣ) (e : Equiv.Perm ι) (σ : R ≃+* R) :
     (semilinearMonomialEquiv u e σ).toEquiv • (C : Set (ι → R)) =
       (C.map (semilinearMonomialEquiv u e σ).toLinearMap : Set (ι → R)) := by
@@ -275,8 +276,9 @@ theorem semilinearMonomialEquiv_toEquiv_not_mem_map_of_ne_refl [Nonempty ι] (u 
   obtain ⟨i⟩ := ‹Nonempty ι›
   classical
   refine hσ (RingEquiv.ext fun r ↦ ?_)
-  have hg' : ∀ x, g x = semilinearMonomialEquiv u e σ x := fun x ↦
-    congr_fun (congrArg DFunLike.coe hg) x
+  have hg' : ∀ x, g x = semilinearMonomialEquiv u e σ x := fun x ↦ by
+    simpa only [MulAction.toPermHom_apply, MulAction.toPerm_apply, LinearEquiv.smul_def,
+      LinearEquiv.coe_toEquiv] using DFunLike.congr_fun hg x
   -- Compare the linear and the semilinear scalar rules on the word `Pi.single i 1` at the
   -- coordinate `e i`, where that word is sent to the unit `u i`.
   have h := congr_fun (hg' (r • Pi.single i 1)) (e i)
