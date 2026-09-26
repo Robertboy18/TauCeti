@@ -66,16 +66,17 @@ theorem exists_eq_smul_of_forall_dvd {R X : Type*} [Monoid R] {v : X → R} {x�
     simp
   · simp [Function.update_of_ne hx, hc x]
 
-variable {R : Type*} [CommRing R] {X : Type*} [DecidableEq X]
+variable {R : Type*} [CommRing R] {X : Type*}
 
 namespace LinearEquiv
 
 variable (x₀ : X) (w : X → R) (hw : w x₀ = 1)
 
+open Classical in
 /-- **The change of basis replacing the coordinate vector at `x₀` by `w`.** For `w x₀ = 1`, the
 vectors `w` and the coordinate vectors at `x ≠ x₀` form a basis of `X → R`; the coordinates of `u`
 in that basis are `u x - u x₀ * w x` at `x ≠ x₀` and `u x₀` on `w`. -/
-def piSplitAt : (X → R) ≃ₗ[R] ({x // x ≠ x₀} → R) × R where
+noncomputable def piSplitAt : (X → R) ≃ₗ[R] ({x // x ≠ x₀} → R) × R where
   toFun u := (fun x ↦ u x - u x₀ * w x, u x₀)
   invFun a x := (if h : x = x₀ then 0 else a.1 ⟨x, h⟩) + a.2 * w x
   map_add' u v := by
@@ -101,9 +102,9 @@ theorem piSplitAt_apply (u : X → R) :
   (rfl)
 
 @[simp]
-theorem piSplitAt_symm_apply (a : ({x // x ≠ x₀} → R) × R) (x : X) :
-    (piSplitAt x₀ w hw).symm a x = (if h : x = x₀ then 0 else a.1 ⟨x, h⟩) + a.2 * w x :=
-  (rfl)
+theorem piSplitAt_symm_apply [DecidableEq X] (a : ({x // x ≠ x₀} → R) × R) (x : X) :
+    (piSplitAt x₀ w hw).symm a x = (if h : x = x₀ then 0 else a.1 ⟨x, h⟩) + a.2 * w x := by
+  by_cases h : x = x₀ <;> simp [piSplitAt, h]
 
 /-- The change of basis sends a multiple of `w` to the corresponding multiple of the second basis
 vector. -/
@@ -111,7 +112,7 @@ theorem piSplitAt_smul (c : R) : piSplitAt x₀ w hw (c • w) = (0, c) := by
   ext x <;> simp [hw]
 
 /-- The change of basis fixes the coordinate vectors at `x ≠ x₀`. -/
-theorem piSplitAt_single_of_ne {x : X} (hx : x ≠ x₀) :
+theorem piSplitAt_single_of_ne [DecidableEq X] {x : X} (hx : x ≠ x₀) :
     piSplitAt x₀ w hw (Pi.single x 1) = (Pi.single ⟨x, hx⟩ 1, 0) := by
   ext y
   · simp [Pi.single_apply, Subtype.ext_iff, hx.symm]
@@ -119,7 +120,7 @@ theorem piSplitAt_single_of_ne {x : X} (hx : x ≠ x₀) :
 
 /-- The change of basis sends the coordinate vector at `x₀` to `(-w, 1)`: it is `w` minus the
 vector `w - e_{x₀}` supported away from `x₀`. -/
-theorem piSplitAt_single_self :
+theorem piSplitAt_single_self [DecidableEq X] :
     piSplitAt x₀ w hw (Pi.single x₀ 1) = (fun x : {x // x ≠ x₀} ↦ -w x, 1) := by
   ext y
   · simp [Pi.single_eq_of_ne y.2]
@@ -133,7 +134,7 @@ variable (x₀ : X) (w : X → R) (hw : w x₀ = 1) (q : R)
 
 /-- The change of basis `LinearEquiv.piSplitAt` followed by reduction modulo `q` on the coordinate
 along `w`. Its kernel is the span of `q • w` (`ker_piSplitAtQuot`). -/
-def piSplitAtQuot : (X → R) →ₗ[R] ({x // x ≠ x₀} → R) × (R ⧸ Ideal.span {q}) :=
+noncomputable def piSplitAtQuot : (X → R) →ₗ[R] ({x // x ≠ x₀} → R) × (R ⧸ Ideal.span {q}) :=
   (LinearMap.id.prodMap (Ideal.span {q}).mkQ) ∘ₗ (LinearEquiv.piSplitAt x₀ w hw).toLinearMap
 
 @[simp]
@@ -150,18 +151,19 @@ theorem piSplitAtQuot_piSplitAt_symm (a : {x // x ≠ x₀} → R) (b : R) :
       (a, Submodule.Quotient.mk b) := by
   simp [piSplitAtQuot]
 
+/-- The change of basis followed by reduction modulo `q` is surjective. -/
 theorem piSplitAtQuot_surjective : Function.Surjective (piSplitAtQuot x₀ w hw q) := by
   rintro ⟨a, b⟩
   obtain ⟨c, rfl⟩ := Submodule.Quotient.mk_surjective _ b
   exact ⟨(LinearEquiv.piSplitAt x₀ w hw).symm (a, c), piSplitAtQuot_piSplitAt_symm x₀ w hw q a c⟩
 
 /-- The reduction fixes the coordinate vectors at `x ≠ x₀`. -/
-theorem piSplitAtQuot_single_of_ne {x : X} (hx : x ≠ x₀) :
+theorem piSplitAtQuot_single_of_ne [DecidableEq X] {x : X} (hx : x ≠ x₀) :
     piSplitAtQuot x₀ w hw q (Pi.single x 1) = (Pi.single ⟨x, hx⟩ 1, 0) := by
   simp [piSplitAtQuot, LinearEquiv.piSplitAt_single_of_ne x₀ w hw hx]
 
 /-- The reduction sends the coordinate vector at `x₀` to `(-w, 1)`. -/
-theorem piSplitAtQuot_single_self :
+theorem piSplitAtQuot_single_self [DecidableEq X] :
     piSplitAtQuot x₀ w hw q (Pi.single x₀ 1) =
       (fun x : {x // x ≠ x₀} ↦ -w x, Submodule.Quotient.mk 1) := by
   simp [piSplitAtQuot, LinearEquiv.piSplitAt_single_self x₀ w hw]

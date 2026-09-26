@@ -63,8 +63,7 @@ namespace freeProP
 
 section ExponentSum
 
-variable [DecidableEq X]
-
+open Classical in
 /-- **The exponent-sum map** of the free pro-`p` group on `X`: the continuous homomorphism to
 `ℤ_p^X` sending the generator at `x` to the coordinate vector `e_x`. On a word in the generators it
 records the total exponent of each generator; it induces the abelianization isomorphism
@@ -73,8 +72,9 @@ noncomputable def exponentSum : freeProP p X →ₜ* Multiplicative (X → ℤ_[
   lift (isProP_multiplicative_pi_padicInt p X) fun x ↦ ofAdd (Pi.single x 1)
 
 @[simp]
-theorem exponentSum_of (x : X) : exponentSum p X (of x) = ofAdd (Pi.single x 1) :=
-  lift_of _ _ x
+theorem exponentSum_of [DecidableEq X] (x : X) :
+    exponentSum p X (of x) = ofAdd (Pi.single x 1) :=
+  (lift_of _ _ x).trans (by congr; exact Subsingleton.elim _ _)
 
 end ExponentSum
 
@@ -101,9 +101,7 @@ private theorem abelianizationInv_ofAdd (u : X → ℤ_[p]) :
       ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u x) :=
   (rfl)
 
-variable [DecidableEq X]
-
-private theorem abelianizationInv_ofAdd_single (x : X) :
+private theorem abelianizationInv_ofAdd_single [DecidableEq X] (x : X) :
     abelianizationInv p X (ofAdd (Pi.single x 1)) =
       ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) := by
   rw [abelianizationInv_ofAdd, Finset.prod_eq_single x
@@ -119,6 +117,7 @@ noncomputable def abelianizationEquiv :
   toFun := TopologicalAbelianization.lift (exponentSum p X)
   invFun := abelianizationInv p X
   left_inv x := by
+    classical
     obtain ⟨y, rfl⟩ := QuotientGroup.mk_surjective x
     have h : (abelianizationInv p X).comp ((TopologicalAbelianization.lift (exponentSum p X)).comp
         (ContinuousMonoidHom.quotientMk _)) = ContinuousMonoidHom.quotientMk _ :=
@@ -130,6 +129,7 @@ noncomputable def abelianizationEquiv :
     simpa only [ContinuousMonoidHom.coe_comp, Function.comp_apply,
       ContinuousMonoidHom.quotientMk_apply] using this
   right_inv u := by
+    classical
     have h : (TopologicalAbelianization.lift (exponentSum p X)).comp (abelianizationInv p X) =
         ContinuousMonoidHom.id _ :=
       continuousMonoidHom_ext_multiplicative_pi_padicInt p X fun x ↦ by
@@ -151,7 +151,7 @@ theorem abelianizationEquiv_mk (y : freeProP p X) :
 
 /-- The abelianization isomorphism sends the class of the generator at `x` to the coordinate
 vector at `x`. -/
-theorem abelianizationEquiv_mk_of (x : X) :
+theorem abelianizationEquiv_mk_of [DecidableEq X] (x : X) :
     abelianizationEquiv p X ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) =
       ofAdd (Pi.single x 1) := by
   rw [abelianizationEquiv_mk, exponentSum_of]
@@ -167,7 +167,7 @@ theorem abelianizationEquiv_symm_ofAdd (u : X → ℤ_[p]) :
 /-- The inverse of the abelianization isomorphism sends the coordinate vector at `x` to the class
 of the generator at `x`. -/
 @[simp]
-theorem abelianizationEquiv_symm_ofAdd_single (x : X) :
+theorem abelianizationEquiv_symm_ofAdd_single [DecidableEq X] (x : X) :
     (abelianizationEquiv p X).symm (ofAdd (Pi.single x 1)) =
       ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) :=
   abelianizationInv_ofAdd_single p X x

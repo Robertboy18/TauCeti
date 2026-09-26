@@ -33,13 +33,17 @@ valuation ring — the change of basis `TauCeti.LinearEquiv.piSplitAt` then iden
 `ℤ_p^X ⧸ ℤ_p v` with `ℤ_p^{X ∖ {x₀}} × ℤ_p ⧸ (q)`. This is the **abelianization structure theorem
 for one-relator pro-`p` groups** (`oneRelatorAbelianizationEquiv`):
 
-`G^{ab} ≅ ℤ_p^{n-1} × ℤ_p ⧸ q ℤ_p,   n = #X, q = v x₀`,
+`G^{ab} ≅ ℤ_p^{n-1} × ℤ_p ⧸ q ℤ_p,   n = #X, q = v x₀`.
 
-with `q = 0` exactly when the relator lies in the closed commutator subgroup, and then
-`G^{ab} ≅ ℤ_p^n` is torsion-free. When `q ≠ 0` the factor `ℤ_p ⧸ q ℤ_p` is finite cyclic and is the
-torsion subgroup of `G^{ab}`. For a Demushkin group, whose minimal presentation has a single
-relator, this is Labute's description `G ⧸ [G, G] ≅ ℤ_p^{n-1} ⊕ ℤ ⧸ q` of the abelianization, and
-the integer `q ∈ {0} ∪ p^ℕ` read off the torsion is the invariant `q(G)` of the classification.
+Here `q : ℤ_p` is a coordinate of the exponent vector, determined by the relator only up to a
+unit of `ℤ_p`; the factor `ℤ_p ⧸ q ℤ_p` depends only on the ideal `q ℤ_p`, that is on the valuation
+of `q`. One has `q = 0` exactly when the relator lies in the closed commutator subgroup, and then
+`G^{ab} ≅ ℤ_p^n` is torsion-free. When `q ≠ 0` the factor `ℤ_p ⧸ q ℤ_p` is finite cyclic of order
+`p^{v_p(q)}` and is the torsion subgroup of `G^{ab}`. For a Demushkin group, whose minimal
+presentation has a single relator, this is Labute's description `G ⧸ [G, G] ≅ ℤ_p^{n-1} ⊕ ℤ ⧸ q(G)`
+of the abelianization: the integer invariant `q(G) ∈ {0} ∪ p^ℕ` of the classification is not the
+coordinate `q` itself but the normalised generator `p^{v_p(q)}` of the ideal `q ℤ_p`, that is the
+order of the torsion subgroup of `G^{ab}`, and it is `0` when `q = 0`.
 
 ## Main definitions
 
@@ -92,7 +96,7 @@ private theorem coe_mk_apply (y : freeProP p X) :
 
 section Hom
 
-variable [Fintype X] [DecidableEq X]
+variable [Fintype X]
 
 /-- **The abelianization map of a presentation.** For `G = presentedProP p X rels`, the continuous
 homomorphism `ℤ_p^X → G^{ab}` sending `u` to `∏ x, x_x ^ (u x)`, the product of the `p`-adic
@@ -101,6 +105,10 @@ the composite of the inverse of `TauCeti.freeProP.abelianizationEquiv` with the 
 `F^{ab} → G^{ab}` induced by the presentation, and it is surjective. -/
 noncomputable def abelianizationHom :
     Multiplicative (X → ℤ_[p]) →ₜ* TopologicalAbelianization (presentedProP p X rels) :=
+  -- `TopologicalAbelianization.map` takes the continuity proof at the `→*` coercion of `mk p rels`,
+  -- and the rewrites with `map_mk` below match `hf` syntactically at implicit transparency; the
+  -- field `(mk p rels).continuous` has the defeq but distinct type `Continuous ⇑(mk p rels)`, so
+  -- it is passed through `show` at the required type here and at every `map (mk p rels) _` below.
   (⟨TopologicalAbelianization.map (mk p rels : freeProP p X →* presentedProP p X rels)
       (show Continuous ⇑(mk p rels : freeProP p X →* presentedProP p X rels) from
         (mk p rels).continuous),
@@ -130,7 +138,7 @@ theorem abelianizationHom_exponentSum (y : freeProP p X) :
 /-- The abelianization map of a presentation sends the coordinate vector at `x` to the class of the
 generator at `x`. -/
 @[simp]
-theorem abelianizationHom_ofAdd_single (x : X) :
+theorem abelianizationHom_ofAdd_single [DecidableEq X] (x : X) :
     abelianizationHom rels (ofAdd (Pi.single x 1)) =
       ((of p rels x : presentedProP p X rels) :
         TopologicalAbelianization (presentedProP p X rels)) := by
@@ -238,7 +246,7 @@ end Hom
 
 section OneRelator
 
-variable [DecidableEq X] (r : freeProP p X) (x₀ : X) (w : X → ℤ_[p]) (hw : w x₀ = 1) (q : ℤ_[p])
+variable (r : freeProP p X) (x₀ : X) (w : X → ℤ_[p]) (hw : w x₀ = 1) (q : ℤ_[p])
 
 private theorem continuous_piSplitAtQuot : Continuous (LinearMap.piSplitAtQuot x₀ w hw q) := by
   have h : ⇑(LinearMap.piSplitAtQuot x₀ w hw q) = fun u : X → ℤ_[p] ↦
@@ -292,6 +300,7 @@ private theorem toSplitQuot_mk (y : freeProP p X) :
 
 private theorem toSplitQuot_abelianizationHom [Fintype X] (u : Multiplicative (X → ℤ_[p])) :
     toSplitQuot r x₀ w hw q hr (abelianizationHom {r} u) = splitQuotHom x₀ w hw q u := by
+  classical
   have h : (toSplitQuot r x₀ w hw q hr).comp (abelianizationHom {r}) = splitQuotHom x₀ w hw q :=
     continuousMonoidHom_ext_multiplicative_pi_padicInt p X fun x ↦ by
       rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, abelianizationHom_ofAdd_single,
@@ -357,7 +366,8 @@ theorem oneRelatorAbelianizationEquiv_mk (y : freeProP p X) :
 
 /-- The abelianization isomorphism of a one-relator group sends the class of the generator at
 `x ≠ x₀` to the coordinate vector at `x`. -/
-theorem oneRelatorAbelianizationEquiv_mk_of_ne {x : X} (hx : x ≠ x₀) :
+@[simp]
+theorem oneRelatorAbelianizationEquiv_mk_of_ne [DecidableEq X] {x : X} (hx : x ≠ x₀) :
     oneRelatorAbelianizationEquiv r x₀ w hw q hr
         ((of p {r} x : presentedProP p X {r}) : TopologicalAbelianization (presentedProP p X {r})) =
       ofAdd (Pi.single ⟨x, hx⟩ 1, 0) := by
@@ -366,11 +376,13 @@ theorem oneRelatorAbelianizationEquiv_mk_of_ne {x : X} (hx : x ≠ x₀) :
 
 /-- The abelianization isomorphism of a one-relator group sends the class of the generator at `x₀`
 to `(-w, 1)`. -/
+@[simp]
 theorem oneRelatorAbelianizationEquiv_mk_of_self :
     oneRelatorAbelianizationEquiv r x₀ w hw q hr
         ((of p {r} x₀ : presentedProP p X {r}) :
           TopologicalAbelianization (presentedProP p X {r})) =
       ofAdd (fun x : {x // x ≠ x₀} ↦ -w x, Submodule.Quotient.mk 1) := by
+  classical
   rw [← mk_of, oneRelatorAbelianizationEquiv_mk, freeProP.exponentSum_of, toAdd_ofAdd,
     LinearMap.piSplitAtQuot_single_self x₀ w hw q]
 
@@ -390,7 +402,7 @@ end OneRelator
 /-- **Existence form of the abelianization structure theorem.** For a one-relator pro-`p` group
 `G = ⟨X ∣ r⟩` on a finite nonempty type, some coordinate `x₀` of the exponent vector `v` of `r`
 divides all the others, and `G^{ab} ≅ ℤ_p^{X ∖ {x₀}} × ℤ_p ⧸ v x₀ ℤ_p`. -/
-theorem exists_nonempty_oneRelatorAbelianizationEquiv [Finite X] [DecidableEq X] [Nonempty X]
+theorem exists_nonempty_oneRelatorAbelianizationEquiv [Finite X] [Nonempty X]
     (r : freeProP p X) :
     ∃ x₀ : X, (∀ x, (freeProP.exponentSum p X r).toAdd x₀ ∣ (freeProP.exponentSum p X r).toAdd x) ∧
       Nonempty (TopologicalAbelianization (presentedProP p X {r}) ≃ₜ*
