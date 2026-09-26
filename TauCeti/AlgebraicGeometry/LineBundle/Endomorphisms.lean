@@ -25,9 +25,12 @@ their domains, so they glue to a global function `r` with `φ = r • 𝟙`. Uni
 that a global function is determined by its restrictions to a cover and is read off from its
 action on a basis section.
 
-The bijection is the statement that a line bundle has no automorphisms other than the global units;
-it is the input for rigidifying line bundles along a section, where a trivialization along the
-section kills these automorphisms.
+The bijection is the statement that a line bundle has no automorphisms other than the global units.
+It is the input for rigidifying line bundles along a section `x₀ : S → X` of `f : X → S`: a
+trivialization along `x₀` fixes the pullback to `S` of every automorphism, so no nontrivial
+automorphism survives once the restriction `Γ(X, 𝒪_X)ˣ → Γ(S, 𝒪_S)ˣ` along `x₀` is injective, for
+instance when `f_* 𝒪_X = 𝒪_S`. Without that injectivity the units in the kernel of the restriction
+still act on the rigidified bundle.
 
 ## Main declarations
 
@@ -73,6 +76,7 @@ def Hom.trivializationScalar (φ : M ⟶ M) : Γ(X, V) :=
 
 /-- An endomorphism of `M` multiplies the basis section of a rank-one trivialization by its
 trivialization scalar. -/
+@[simp]
 theorem Hom.app_trivializationGenerator (φ : M ⟶ M) :
     φ.app V (trivializationGenerator M t) =
       φ.trivializationScalar t • trivializationGenerator M t := by
