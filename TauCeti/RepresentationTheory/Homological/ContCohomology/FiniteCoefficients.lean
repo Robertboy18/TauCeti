@@ -66,7 +66,7 @@ public section
 
 namespace TauCeti
 
-open CategoryTheory TopRep
+open CategoryTheory Topology TopRep
 
 universe u v w
 
@@ -141,7 +141,19 @@ theorem cochainsMap_f_injective (hι : Function.Injective ι.hom) (n : ℕ) :
     Function.Injective ((cochainsMap (ContinuousMonoidHom.id G) ι).f n) := fun _ _ h ↦
   Subtype.ext (resolutionMap_injective ι hι (n + 1) (congrArg Subtype.val h))
 
-variable [CompactSpace G] [DiscreteTopology X.V] [DiscreteTopology Y.V]
+/-- The maps induced on the coinduced resolutions by an inducing morphism of representations are
+inducing in every degree: each term of the resolution of `Y` carries the topology induced from the
+corresponding term of the resolution of `X`. -/
+theorem resolutionMap_isInducing (hι : IsInducing ι.hom) :
+    ∀ n : ℕ, IsInducing (resolutionMap (ContinuousMonoidHom.id G) ι n).hom
+  | 0 => hι
+  | n + 1 =>
+    -- in degree `n + 1` the map is `F ↦ (resolutionMap _ ι n) ∘ F`, by definition
+    ContinuousMap.isInducing_postcomp
+      ⟨_, map_continuous (resolutionMap (ContinuousMonoidHom.id G) ι n).hom⟩
+      (resolutionMap_isInducing hι n)
+
+variable [DiscreteTopology X.V] [DiscreteTopology Y.V]
 
 /-- An element of the coinduced resolution of `X` all of whose values lie in the range of an
 injective morphism `ι : Y ⟶ X` comes from the coinduced resolution of `Y`. -/
@@ -157,16 +169,13 @@ theorem exists_resolutionMap_eq_of_resolutionValues_subset (hι : Function.Injec
       exists_resolutionMap_eq_of_resolutionValues_subset hι n _
         ((resolutionValues_apply_subset X n F g).trans hF)
     choose y hy using h
-    have hcont : Continuous y := by
-      rw [continuous_discrete_rng]
-      intro y₀
-      have : y ⁻¹' {y₀} = (F : C(G, (resolutionX X n).V)) ⁻¹'
-          {(resolutionMap (ContinuousMonoidHom.id G) ι n).hom y₀} := by
-        ext g
-        simp only [Set.mem_preimage, Set.mem_singleton_iff, ← hy g]
-        exact ⟨fun h ↦ h ▸ rfl, fun h ↦ resolutionMap_injective ι hι n h⟩
-      rw [this]
-      exact (map_continuous _).isOpen_preimage _ (isOpen_discrete _)
+    -- an injective map between discrete spaces is inducing
+    have hind : IsInducing ι.hom := isInducing_iff_nhds.2 fun y ↦ by
+      simp only [nhds_discrete, Filter.comap_pure, ← Set.image_singleton, hι.preimage_image,
+        Filter.principal_singleton]
+    have hcont : Continuous y :=
+      (resolutionMap_isInducing ι hind n).continuous_iff.2 <|
+        (map_continuous (F : C(G, (resolutionX X n).V))).congr fun g ↦ (hy g).symm
     refine ⟨⟨y, hcont⟩, ?_⟩
     ext g
     -- in degree `n + 1` the map is `F ↦ (resolutionMap _ ι n) ∘ F`, by definition
