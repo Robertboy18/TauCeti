@@ -22,20 +22,14 @@ the object on which the infinite-rank theory of free pro-`C` groups is built.
 
 The construction quotients the free pro-`C` group `freeProC C X` on the underlying type of `X` by
 the intersection of its **admissible** open normal subgroups, those `U` through which the
-generator map `X → freeProC C X ⧸ U` is continuous and kills `x₀`. The admissible subgroups
-are closed under finite intersection, so a compactness argument shows that every open normal
-subgroup of the quotient is refined by an admissible one, which is what makes the generator
-map continuous on the quotient; every continuous map to a profinite pro-`C` group only sees
-admissible subgroups, which is the universal property. Nothing in the construction uses
-compactness of `X`, so the definitions and theorems are stated for an arbitrary pointed
+generator map `X → freeProC C X ⧸ U` is continuous and kills `x₀`. Nothing in the construction
+uses compactness of `X`, so the definitions and theorems are stated for an arbitrary pointed
 topological space.
 
 For a discrete `X` the object is the free pro-`C` group on the type `X ∖ {x₀}`. For the one-point
 compactification `S⁺` of a space `S`, pointed at `∞`, the inclusion `S → S⁺` induces a continuous
 surjection `freeProC C S → F_C(S⁺, ∞)`, and for discrete `S` the images of the points of `S`
-converge to `1`. At the class of finite `p`-groups and infinite discrete `S` this surjection is
-not injective, because the two groups have different generator ranks; that computation is not
-made here.
+converge to `1`.
 
 ## Main definitions
 
@@ -193,8 +187,7 @@ theorem coe_freeProC_of (x : X) :
 theorem of_basePoint : of C x₀ x₀ = 1 :=
   (QuotientGroup.eq_one_iff _).mpr ((mem_kernel_iff C x₀).mpr fun _ hU ↦ hU.2)
 
-/-- **The canonical map is continuous.** Every open normal subgroup of the quotient is refined by
-an admissible subgroup, through which the generator map is continuous by definition. -/
+/-- **The canonical map from the pointed space to its free pro-`C` group is continuous.** -/
 theorem continuous_of : Continuous (of C x₀) := by
   rw [continuous_iff_forall_continuous_mk]
   intro W
@@ -256,8 +249,8 @@ variable {C x₀} {P : Type u} [Group P] [TopologicalSpace P] [IsTopologicalGrou
 
 /-- The preimage of an open normal subgroup of a profinite pro-`C` group under the lift of a
 continuous base-point-preserving map is admissible. -/
-theorem isAdmissible_comap_lift (hP : IsProC C P) {f : X → P} (hf : Continuous f) (hf₀ : f x₀ = 1)
-    (V : OpenNormalSubgroup P) :
+private theorem isAdmissible_comap_lift (hP : IsProC C P) {f : X → P} (hf : Continuous f)
+    (hf₀ : f x₀ = 1) (V : OpenNormalSubgroup P) :
     IsAdmissible C x₀ (V.comap (freeProC.lift hP f : freeProC C X →* P)
       (freeProC.lift hP f).continuous) := by
   have hcomp : (freeProC.lift hP f : freeProC C X →* P) ∘ (freeProC.of : X → freeProC C X) = f :=
@@ -269,8 +262,8 @@ theorem isAdmissible_comap_lift (hP : IsProC C P) {f : X → P} (hf : Continuous
 
 /-- The kernel dies under the lift of a continuous base-point-preserving map to a profinite pro-`C`
 group. -/
-theorem kernel_le_ker_lift (hP : IsProC C P) {f : X → P} (hf : Continuous f) (hf₀ : f x₀ = 1) :
-    kernel C x₀ ≤ (freeProC.lift hP f : freeProC C X →* P).ker := by
+private theorem kernel_le_ker_lift (hP : IsProC C P) {f : X → P} (hf : Continuous f)
+    (hf₀ : f x₀ = 1) : kernel C x₀ ≤ (freeProC.lift hP f : freeProC C X →* P).ker := by
   intro y hy
   rw [MonoidHom.mem_ker]
   have h : freeProC.lift hP f y ∈ ⨅ V : OpenNormalSubgroup P, V.toSubgroup :=
@@ -342,8 +335,8 @@ variable [DiscreteTopology X]
 
 open scoped Classical in
 /-- **For a discrete space, the free pro-`C` group on `(X, x₀)` is the free pro-`C` group on the
-type `X ∖ {x₀}`.** Every map out of a discrete space is continuous, so the universal properties
-of the two objects agree. -/
+type `X ∖ {x₀}`**, matching the image of a point other than the base point with the corresponding
+generator. -/
 noncomputable def equivFreeProC : freeProCPointed C x₀ ≃ₜ* freeProC C {x : X // x ≠ x₀} where
   toFun := lift (isProC_freeProC C _) (fun x ↦ if h : x = x₀ then 1 else freeProC.of ⟨x, h⟩)
     continuous_of_discreteTopology (by simp)
