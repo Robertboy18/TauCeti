@@ -8,6 +8,7 @@ module
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Pointed.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Rank
 public import TauCeti.Topology.Compactification.OnePoint.Finsupp
+public import TauCeti.Topology.ContinuousMap.Algebra
 import Mathlib.LinearAlgebra.Dimension.Constructions
 import TauCeti.Topology.Algebra.ContinuousMulEquiv
 import TauCeti.Topology.Algebra.Group.Profinite.ProP.DualRank
@@ -83,7 +84,8 @@ noncomputable def characterOfContinuousMap (f : C(X, ZMod p)) (hf : f x₀ = 0) 
   ((ContinuousMulEquiv.ulift : ULift.{u} (Multiplicative (ZMod p)) ≃ₜ* Multiplicative (ZMod p)) :
       ULift.{u} (Multiplicative (ZMod p)) →ₜ* Multiplicative (ZMod p)).comp
     (lift (isProC_finiteGroupClassP_iff.mpr
-        ((isProP_multiplicative_zmod p).of_equiv ContinuousMulEquiv.ulift.symm))
+        ((ZModModule.isPGroup_multiplicative (n := p) (G := ZMod p)).isProP.of_equiv
+          ContinuousMulEquiv.ulift.symm))
       (fun x ↦ ULift.up (Multiplicative.ofAdd (f x)))
       (continuous_uliftUp.comp (continuous_ofAdd.comp f.continuous)) (ULift.ext _ _ (by simp [hf])))
 
@@ -159,11 +161,12 @@ theorem topologicalGeneratorRank_onePoint :
     ← (OnePoint.finsuppLinearEquivKerEvalInfty S (ZMod p) (ZMod p)).rank_eq, rank_finsupp_self,
     Cardinal.lift_uzero]
 
-/-- **The free pro-`p` group on an infinite type does not embed in the free pro-`p` group on its
-pointed one-point compactification.** For an infinite discrete space `S`, the continuous surjection
-`freeProC C S → F_C(S⁺, ∞)` induced by `S → S⁺` is not injective when `C` is the class of finite
-`p`-groups: an injective continuous surjection between profinite groups is a topological
-isomorphism, which would force the ranks `p ^ #S` of the source and `#S` of the target to agree. -/
+/-- **The canonical surjection from the free pro-`p` group on an infinite type onto the free pro-`p`
+group on its pointed one-point compactification is not injective.** For an infinite discrete space
+`S`, the continuous surjection `freeProC C S → F_C(S⁺, ∞)` induced by `S → S⁺` is not injective when
+`C` is the class of finite `p`-groups: an injective continuous surjection between profinite groups
+is a topological isomorphism, which would force the ranks `p ^ #S` of the source and `#S` of the
+target to agree. -/
 theorem not_injective_fromFreeProC [Infinite S] :
     ¬ Function.Injective (fromFreeProC (finiteGroupClassP.{u} p) S) := by
   intro hinj

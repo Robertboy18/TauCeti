@@ -7,26 +7,27 @@ module
 
 public import Mathlib.Topology.Compactification.OnePoint.Basic
 public import Mathlib.Topology.ContinuousMap.Algebra
+import TauCeti.Topology.ContinuousMap.Algebra
 
 /-!
 # Continuous maps on a one-point compactification vanishing at infinity
 
-Let `S` be a discrete space and `M` a discrete topological module. A continuous map from the
-one-point compactification `S⁺` of `S` to `M` that vanishes at `∞` is determined by its values on
+Let `S` be a discrete space. A finitely supported function `S →₀ M` into a topological space `M`
+with a zero extends by `0` at `∞` to a continuous map on the one-point compactification `S⁺` of
+`S`, since it is eventually `0` along the cofinite filter. When `M` is a discrete topological
+module, conversely, a continuous map `S⁺ → M` that vanishes at `∞` is determined by its values on
 `S`, and these values form a finitely supported function: continuity at `∞` says that all but
-finitely many of them are `0`. Conversely a finitely supported function `S →₀ M` extends by `0` at
-`∞` to a continuous map on `S⁺`. The two constructions are the mutually inverse linear maps of
+finitely many of them are `0`. The two constructions are the mutually inverse linear maps of
 `TauCeti.OnePoint.finsuppLinearEquivKerEvalInfty`, an isomorphism between `S →₀ M` and the
 kernel of evaluation at `∞` on `C(S⁺, M)`.
 
 ## Main definitions
 
 * `TauCeti.OnePoint.continuousMapOfFinsupp`: the extension by `0` at `∞` of a finitely supported
-  function on a discrete space, as a continuous map on the one-point compactification.
+  function on a discrete space, as a continuous map on the one-point compactification, for any
+  topological codomain.
 * `TauCeti.OnePoint.finsuppLinearEquivKerEvalInfty`: the linear isomorphism between `S →₀ M` and
   the continuous maps `S⁺ → M` vanishing at `∞`, for `S` and `M` discrete.
-* `TauCeti.ContinuousMap.coe_apply_eq_zero_of_mem_ker_evalCLM`: a continuous map in the kernel of
-  evaluation at a point vanishes there, stated with the evaluation written as a function value.
 -/
 
 public section
@@ -52,14 +53,15 @@ theorem finite_setOf_apply_coe_ne_apply_infty {Y : Type*} [TopologicalSpace Y]
 
 section Zero
 
-variable (M : Type v) [Zero M] [TopologicalSpace M] [DiscreteTopology M]
+variable (M : Type v) [Zero M] [TopologicalSpace M]
 
-/-- The support of a finitely supported function `S →₀ M` is finite, so its extension by `0` at
-`∞` is continuous on the one-point compactification of the discrete space `S`. -/
+/-- A finitely supported function `S →₀ M` is eventually `0` along the cofinite filter, so its
+extension by `0` at `∞` is continuous on the one-point compactification of the discrete space `S`,
+whatever the topology of `M`. -/
 noncomputable def continuousMapOfFinsupp (g : S →₀ M) : C(OnePoint S, M) :=
-  _root_.OnePoint.continuousMapMkDiscrete g 0 <| by
-    rw [nhds_discrete, tendsto_pure, eventually_cofinite]
-    exact g.hasFiniteSupport
+  _root_.OnePoint.continuousMapMkDiscrete g 0 <|
+    tendsto_const_nhds.congr' <|
+      (eventually_cofinite.mpr g.hasFiniteSupport).mono fun _ hs ↦ hs.symm
 
 @[simp]
 theorem continuousMapOfFinsupp_apply_coe (g : S →₀ M) (s : S) :
@@ -77,12 +79,6 @@ section Module
 variable (R : Type*) [Semiring R]
 variable (M : Type v) [AddCommMonoid M] [TopologicalSpace M] [ContinuousAdd M] [Module R M]
   [ContinuousConstSMul R M]
-
-/-- A continuous map in the kernel of evaluation at a point vanishes there. -/
-theorem _root_.TauCeti.ContinuousMap.coe_apply_eq_zero_of_mem_ker_evalCLM {α : Type*}
-    [TopologicalSpace α] (x : α) (f : (ContinuousMap.evalCLM R x : C(α, M) →L[R] M).ker) :
-    (f : C(α, M)) x = 0 :=
-  (ContinuousMap.evalCLM_apply R x (f : C(α, M))).symm.trans (LinearMap.mem_ker.mp f.2)
 
 variable (S) [DiscreteTopology M]
 

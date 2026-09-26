@@ -134,7 +134,8 @@ to the finite `p`-group `ℤ/p`, lifted to the universe of `X`. -/
 noncomputable def characterOfFun (f : X → ZMod p) : freeProP p X →ₜ* Multiplicative (ZMod p) :=
   ((ContinuousMulEquiv.ulift : ULift.{u} (Multiplicative (ZMod p)) ≃ₜ* Multiplicative (ZMod p)) :
       ULift.{u} (Multiplicative (ZMod p)) →ₜ* Multiplicative (ZMod p)).comp
-    (lift ((isProP_multiplicative_zmod p).of_equiv ContinuousMulEquiv.ulift.symm)
+    (lift ((ZModModule.isPGroup_multiplicative (n := p) (G := ZMod p)).isProP.of_equiv
+        ContinuousMulEquiv.ulift.symm)
       fun x ↦ ULift.up (Multiplicative.ofAdd (f x)))
 
 /-- The character attached to `f` takes the value `f x` at the generator `x`. -/
