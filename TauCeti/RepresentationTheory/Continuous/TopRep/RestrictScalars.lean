@@ -62,11 +62,9 @@ variable {R : Type*} [Ring R] {G : Type*} [Monoid G] {V W : Type*}
 
 /-- A continuous representation on a topological `R`-module, read as a continuous representation
 on the underlying topological abelian group: each operator is restricted to a continuous
-`ℤ`-linear map. The body is exposed because the point of the construction is that the operators
-are the same functions as before, and a consumer identifying the action of `π.restrictScalarsInt`
-with that of `π`, for instance through `TopRep.distribMulAction`, needs that identification to be
-definitional. -/
-@[expose] def restrictScalarsInt (π : ContRepresentation R G V) : ContRepresentation ℤ G V :=
+`ℤ`-linear map. Its behaviour is `ContRepresentation.restrictScalarsInt_apply`: the operators are
+the same functions as before. -/
+def restrictScalarsInt (π : ContRepresentation R G V) : ContRepresentation ℤ G V :=
   ofMonoidHom
     { toFun g := (π g).restrictScalars ℤ
       map_one' := ContinuousLinearMap.ext fun v ↦ by simp

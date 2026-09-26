@@ -349,7 +349,15 @@ the discrete coefficient dictionary to `X.V` with the action read off from `X`. 
 `restrictScalarsIntIso`, this applies every statement about the coefficients
 `TauCeti.ofDiscreteModule ℤ G M` to the continuous cohomology of `X`. -/
 theorem ofDiscreteModule_eq_restrictScalarsInt_obj (X : TopRep k G) [DiscreteTopology X.V] :
-    ofDiscreteModule ℤ G X.V = restrictScalarsInt.obj X :=
-  ofDiscreteModule_eq_self (restrictScalarsInt.obj X)
+    ofDiscreteModule ℤ G X.V = restrictScalarsInt.obj X := by
+  -- This is not `ofDiscreteModule_eq_self (restrictScalarsInt.obj X)`: that statement carries the
+  -- module structure and the derived action of `restrictScalarsInt.obj X`, whereas a consumer
+  -- holds `X.V` with its canonical `ℤ`-module structure and the action derived from `X`.
+  have h : (ofDiscreteModule ℤ G X.V).ρ = (restrictScalarsInt.obj X).ρ :=
+    DFunLike.ext _ _ fun g ↦ ContinuousLinearMap.ext fun (x : X.V) ↦
+      ((ofDiscreteModule_ρ_apply_apply (R := ℤ) g x).trans
+        (TopRep.distribMulAction_smul X g x)).trans (restrictScalarsInt_obj_ρ_apply X g x).symm
+  -- Both sides are `TopRep.of` of their operators, so they agree as soon as the operators do.
+  exact congrArg (TopRep.of (X := X.V)) h
 
 end TauCeti.ContCohomology
