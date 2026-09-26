@@ -8,7 +8,6 @@ module
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Pointed.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Rank
 public import TauCeti.Topology.Compactification.OnePoint.Finsupp
-public import TauCeti.Topology.ContinuousMap.Algebra
 import Mathlib.LinearAlgebra.Dimension.Constructions
 import TauCeti.Topology.Algebra.ContinuousMulEquiv
 import TauCeti.Topology.Algebra.Group.Profinite.ProP.DualRank
@@ -70,12 +69,6 @@ variable (p : ℕ) [Fact p.Prime] {X : Type u} [TopologicalSpace X] (x₀ : X)
 
 /-! ### Continuous characters -/
 
-omit [Fact p.Prime] in
-/-- The free pro-`C` group on a pointed space, for `C` the class of finite `p`-groups, is
-pro-`p`. -/
-theorem isProP_finiteGroupClassP : IsProP p (freeProCPointed (finiteGroupClassP.{u} p) x₀) :=
-  isProC_finiteGroupClassP_iff.mp (isProC_freeProCPointed (finiteGroupClassP.{u} p) x₀)
-
 /-- The continuous `𝔽_p`-valued character of the free pro-`p` group on `(X, x₀)` extending a
 continuous map `f : X → 𝔽_p` with `f x₀ = 0`: the universal property applied to the finite `p`-group
 `ℤ/p`, lifted to the universe of `X`. -/
@@ -118,7 +111,7 @@ noncomputable def continuousZModDualEquiv :
   map_add' := map_add _
   map_smul' := ZMod.map_smul _
   invFun f := Additive.ofMul (characterOfContinuousMap p x₀ f.1
-      (ContinuousMap.coe_apply_eq_zero_of_mem_ker_evalCLM (ZMod p) (ZMod p) x₀ f))
+      ((ContinuousMap.evalCLM_apply (ZMod p) x₀ f.1).symm.trans (LinearMap.mem_ker.mp f.2)))
   left_inv φ := Additive.toMul.injective <| hom_ext fun x ↦ by simp [restrictAddMonoidHom]
   right_inv f := Subtype.ext <| ContinuousMap.ext fun x ↦ by simp [restrictAddMonoidHom]
 
@@ -134,7 +127,7 @@ theorem continuousZModDualEquiv_symm_apply
     (f : (ContinuousMap.evalCLM (ZMod p) x₀ : C(X, ZMod p) →L[ZMod p] ZMod p).ker) :
     (continuousZModDualEquiv p x₀).symm f =
       (Additive.ofMul (characterOfContinuousMap p x₀ f.1
-      (ContinuousMap.coe_apply_eq_zero_of_mem_ker_evalCLM (ZMod p) (ZMod p) x₀ f)) :
+      ((ContinuousMap.evalCLM_apply (ZMod p) x₀ f.1).symm.trans (LinearMap.mem_ker.mp f.2))) :
         continuousZModDual p (freeProCPointed (finiteGroupClassP.{u} p) x₀)) :=
   (rfl)
 
@@ -147,7 +140,7 @@ theorem topologicalGeneratorRank_eq_rank :
     topologicalGeneratorRank (freeProCPointed (finiteGroupClassP.{u} p) x₀) =
       Module.rank (ZMod p)
         (ContinuousMap.evalCLM (ZMod p) x₀ : C(X, ZMod p) →L[ZMod p] ZMod p).ker := by
-  rw [(isProP_finiteGroupClassP p x₀).topologicalGeneratorRank_eq_rank_continuousZModDual,
+  rw [(isProP_finiteGroupClassP x₀ p).topologicalGeneratorRank_eq_rank_continuousZModDual,
     (continuousZModDualEquiv p x₀).rank_eq]
 
 variable (S : Type u) [TopologicalSpace S] [DiscreteTopology S]

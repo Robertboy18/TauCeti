@@ -7,7 +7,6 @@ module
 
 public import Mathlib.Topology.Compactification.OnePoint.Basic
 public import Mathlib.Topology.ContinuousMap.Algebra
-import TauCeti.Topology.ContinuousMap.Algebra
 
 /-!
 # Continuous maps on a one-point compactification vanishing at infinity
@@ -95,13 +94,14 @@ noncomputable def finsuppLinearEquivKerEvalInfty :
     induction x using OnePoint.rec <;> simp
   invFun f := Finsupp.ofSupportFinite (fun s ↦ f.1 s) <| by
     have h := finite_setOf_apply_coe_ne_apply_infty f.1
-    rwa [ContinuousMap.coe_apply_eq_zero_of_mem_ker_evalCLM R M ∞ f] at h
+    rwa [(ContinuousMap.evalCLM_apply R ∞ f.1).symm.trans (LinearMap.mem_ker.mp f.2)] at h
   left_inv g := by
     ext s
     exact congrFun Finsupp.ofSupportFinite_coe s
   right_inv f := Subtype.ext <| ContinuousMap.ext fun x ↦ by
     induction x using OnePoint.rec with
-    | infty => simp [ContinuousMap.coe_apply_eq_zero_of_mem_ker_evalCLM R M ∞ f]
+    | infty =>
+      exact ((ContinuousMap.evalCLM_apply R ∞ f.1).symm.trans (LinearMap.mem_ker.mp f.2)).symm
     | coe s =>
       simp only [continuousMapOfFinsupp_apply_coe]
       exact congrFun Finsupp.ofSupportFinite_coe s
