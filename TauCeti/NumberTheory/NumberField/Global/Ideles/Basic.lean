@@ -7,6 +7,8 @@ module
 
 public import Mathlib.NumberTheory.NumberField.AdeleRing
 
+import TauCeti.NumberTheory.NumberField.Global.Adeles.Basic
+
 /-!
 # Basic API for ideles
 
@@ -104,10 +106,7 @@ theorem toFiniteIdele_ofCompletion (w : NumberField.InfinitePlace K) (u : w.Comp
 continuous. -/
 @[continuity, fun_prop]
 theorem continuous_ofCompletion (w : NumberField.InfinitePlace K) :
-    Continuous (ofCompletion R K w) := by
-  -- `AdeleRing.ofCompletion R K w` sends `x` to `(Pi.mulSingle w x, 1)`, with the classical
-  -- decidable equality chosen by `InfiniteAdeleRing.ofCompletion`.
-  let _ := Classical.decEq (NumberField.InfinitePlace K)
-  exact Units.continuous_map ((continuous_mulSingle w).prodMk continuous_const)
+    Continuous (ofCompletion R K w) :=
+  (AdeleRing.continuous_ofCompletion R K w).units_map _
 
 end NumberField.IdeleGroup

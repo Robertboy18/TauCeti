@@ -7,8 +7,8 @@ module
 
 public import Mathlib.NumberTheory.NumberField.Completion.InfinitePlace
 
-import Mathlib.Analysis.Normed.Module.Connected
-import Mathlib.LinearAlgebra.Complex.FiniteDimensional
+import Mathlib.Analysis.Complex.Convex
+import Mathlib.Topology.Algebra.Group.Units
 import TauCeti.Topology.Algebra.Group.Units
 
 /-!
@@ -16,8 +16,8 @@ import TauCeti.Topology.Algebra.Group.Units
 
 Let `w` be an infinite place of a number field `K`.  The completion `w.Completion` is isometric to
 `ℝ` when `w` is real and to `ℂ` when `w` is complex.  Consequently the unit group `w.Completionˣ`
-is connected at a complex place, being homeomorphic to `ℂ ∖ {0}`, while at a real place the units
-of positive real part form a preconnected set, homeomorphic to the positive half-line.
+is connected at a complex place, being homeomorphic to `ℂˣ`, while at a real place the units of
+positive real part form a preconnected set, homeomorphic to the positive half-line.
 
 These are the archimedean inputs to the description of the open subgroups of the idele class
 group: an open subgroup is also closed, so it contains every connected set of ideles through the
@@ -26,10 +26,13 @@ each real place.
 
 ## Main results
 
+* `NumberField.InfinitePlace.Completion.isometryEquivComplexOfIsComplex_apply` and
+  `NumberField.InfinitePlace.Completion.isometryEquivRealOfIsReal_apply`: the isometries of a
+  completion with `ℂ` and with `ℝ` evaluate to the extension embeddings.
 * `NumberField.InfinitePlace.Completion.connectedSpace_units_of_isComplex`: the unit group of a
   complex completion is connected.
-* `NumberField.InfinitePlace.Completion.isPreconnected_setOf_pos_units_of_isReal`: the positive
-  units of a real completion form a preconnected set.
+* `NumberField.InfinitePlace.Completion.isPreconnected_setOf_extensionEmbeddingOfIsReal_pos`: the
+  positive units of a real completion form a preconnected set.
 -/
 
 public section
@@ -38,30 +41,51 @@ namespace NumberField.InfinitePlace.Completion
 
 variable {K : Type*} [Field K] {w : InfinitePlace K}
 
-/-- **The unit group of a complex completion is connected**: it is homeomorphic to `ℂ ∖ {0}`. -/
+/-- The isometry `w.Completion ≃ᵢ ℂ` of a complex place evaluates to the extension embedding.
+This records the definition of `isometryEquivComplexOfIsComplex`, whose underlying equivalence is
+`ringEquivComplexOfIsComplex hw`. -/
+@[simp]
+theorem isometryEquivComplexOfIsComplex_apply (hw : w.IsComplex) (x : w.Completion) :
+    isometryEquivComplexOfIsComplex hw x = extensionEmbedding w x := rfl
+
+/-- The isometry `w.Completion ≃ᵢ ℝ` of a real place evaluates to the real extension embedding.
+This records the definition of `isometryEquivRealOfIsReal`, whose underlying equivalence is
+`ringEquivRealOfIsReal hw`. -/
+@[simp]
+theorem isometryEquivRealOfIsReal_apply (hw : w.IsReal) (x : w.Completion) :
+    isometryEquivRealOfIsReal hw x = extensionEmbeddingOfIsReal hw x := rfl
+
+/-- **The unit group of a complex completion is connected**: it is homeomorphic to `ℂˣ`. -/
 theorem connectedSpace_units_of_isComplex (hw : w.IsComplex) : ConnectedSpace w.Completionˣ := by
-  have h : IsPreconnected ((Units.val : w.Completionˣ → w.Completion) ⁻¹' {0}ᶜ) := by
-    refine IsPreconnected.preimage_units_val ?_ (by simp)
-    have h0 : IsPreconnected ({0}ᶜ : Set ℂ) :=
-      (isConnected_compl_singleton_of_one_lt_rank
-        (by rw [Complex.rank_real_complex]; exact Cardinal.one_lt_two) 0).isPreconnected
-    convert (isometryEquivComplexOfIsComplex hw).toHomeomorph.isPreconnected_preimage.mpr h0
-      using 1
-    ext x
-    simp only [Set.mem_compl_iff, Set.mem_singleton_iff, Set.mem_preimage]
-    exact (map_eq_zero (extensionEmbedding w)).symm.not
-  have huniv : ((Units.val : w.Completionˣ → w.Completion) ⁻¹' {0}ᶜ) = Set.univ :=
-    Set.eq_univ_of_forall fun u ↦ u.ne_zero
-  rw [huniv] at h
-  exact connectedSpace_iff_univ.mpr ⟨Set.univ_nonempty, h⟩
+  -- The ring isomorphism with `ℂ` is a homeomorphism, since it and its inverse are the isometry
+  -- `isometryEquivComplexOfIsComplex hw` and its inverse.
+  have hcont : Continuous (ringEquivComplexOfIsComplex hw) :=
+    (isometryEquivComplexOfIsComplex hw).continuous.congr fun x ↦
+      (isometryEquivComplexOfIsComplex_apply hw x).trans
+        (ringEquivComplexOfIsComplex_apply hw x).symm
+  have hsymm : Continuous (ringEquivComplexOfIsComplex hw).symm :=
+    (isometryEquivComplexOfIsComplex hw).symm.continuous.congr fun z ↦
+      ((ringEquivComplexOfIsComplex hw).symm_apply_eq.mpr (by
+        rw [ringEquivComplexOfIsComplex_apply, ← isometryEquivComplexOfIsComplex_apply hw,
+          IsometryEquiv.apply_symm_apply])).symm
+  let e : w.Completion ≃ₜ* ℂ :=
+    { ringEquivComplexOfIsComplex hw with
+      continuous_toFun := hcont
+      continuous_invFun := hsymm }
+  exact (Units.mapContinuousMulEquiv e).toHomeomorph.connectedSpace_iff.mpr inferInstance
 
 /-- **The positive units of a real completion form a preconnected set**: they are homeomorphic to
 the positive real half-line. -/
-theorem isPreconnected_setOf_pos_units_of_isReal (hw : w.IsReal) :
+theorem isPreconnected_setOf_extensionEmbeddingOfIsReal_pos (hw : w.IsReal) :
     IsPreconnected {u : w.Completionˣ | 0 < extensionEmbeddingOfIsReal hw u} := by
-  rw [← Set.preimage_ofPred_eq (p := fun x : w.Completion ↦ 0 < extensionEmbeddingOfIsReal hw x)
-    (f := (Units.val : w.Completionˣ → w.Completion))]
-  refine IsPreconnected.preimage_units_val ?_ (by simp)
-  exact (isometryEquivRealOfIsReal hw).toHomeomorph.isPreconnected_preimage.mpr isPreconnected_Ioi
+  have h := (isometryEquivRealOfIsReal hw).toHomeomorph.isPreconnected_preimage.mpr
+    (isPreconnected_Ioi (a := (0 : ℝ)))
+  rw [IsometryEquiv.coe_toHomeomorph] at h
+  have hset : {u : w.Completionˣ | 0 < extensionEmbeddingOfIsReal hw u} =
+      Units.val ⁻¹' ((isometryEquivRealOfIsReal hw) ⁻¹' Set.Ioi 0) := by
+    ext u
+    simp only [Set.mem_ofPred_eq, Set.mem_preimage, Set.mem_Ioi, isometryEquivRealOfIsReal_apply]
+  rw [hset]
+  exact IsPreconnected.preimage_units_val h (by simp)
 
 end NumberField.InfinitePlace.Completion

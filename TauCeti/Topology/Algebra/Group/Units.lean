@@ -41,13 +41,8 @@ variable {M : Type*} [Monoid M] [TopologicalSpace M]
 filters of the unit and of its inverse along the two coercions to `M`. -/
 theorem nhds_eq_comap_inf (u : Mˣ) :
     𝓝 u = (𝓝 (u : M)).comap val ⊓ (𝓝 (↑u⁻¹ : M)).comap (fun v : Mˣ ↦ (↑v⁻¹ : M)) := by
-  have h := MulOpposite.comap_op_nhds (MulOpposite.op (↑u⁻¹ : M))
-  rw [MulOpposite.unop_op] at h
-  rw [isInducing_embedProduct.nhds_eq_comap, embedProduct_apply, nhds_prod_eq, comap_prod, ← h,
-    comap_comap]
-  -- Both sides are now pullbacks along the two components of `embedProduct`, which are by
-  -- definition the coercion and the opposite of the inverse coercion.
-  rfl
+  have h := @nhds_inf Mˣ (.induced (val : Mˣ → M) ‹_›) (.induced (fun v : Mˣ ↦ (↑v⁻¹ : M)) ‹_›) u
+  rwa [nhds_induced, nhds_induced, ← topology_eq_inf] at h
 
 /-- **Neighbourhoods of a unit.**  A set is a neighbourhood of `u` in `Mˣ` exactly when it contains
 every unit `v` with `v` in a prescribed neighbourhood of `u` and `v⁻¹` in a prescribed

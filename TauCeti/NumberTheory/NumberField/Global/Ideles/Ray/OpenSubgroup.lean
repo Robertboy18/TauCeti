@@ -24,11 +24,14 @@ The proof works in the idele group.  An open subgroup `V` of the ideles is a nei
 so it contains all ideles `x` with `x` and `x⁻¹` in a neighbourhood `W` of `1` in the adele ring.
 The finite part of `W` contains a basic congruence neighbourhood: integrality at every finite
 place and a congruence `x_v ≡ 1` to some level `n v` at finitely many places `v`.  The modulus `𝔪`
-with exponent `n v + 1` at those places and every real place in its infinite part therefore has
+with exponent `n v` at those places and every real place in its infinite part therefore has
 `ideleCongruenceSubgroup 𝔪 ≤ V`, once the archimedean components are handled: an open subgroup is
 closed, so `V` contains every connected set of ideles through `1`, hence all ideles concentrated at
 a complex place and all positive ideles concentrated at a real place.  The finite and archimedean
 components of a congruence idele are then separately in `V`.
+
+Since the ray subgroups and the idele congruence subgroups are themselves open, a subgroup of the
+idele class group or of the idele group is open exactly when it contains one of them.
 
 ## Main results
 
@@ -37,8 +40,12 @@ components of a congruence idele are then separately in `V`.
   real place.
 * `TauCeti.GlobalNumberFields.exists_ideleCongruenceSubgroup_le_of_isOpen`: every open subgroup
   of the idele group contains an idele congruence subgroup.
+* `TauCeti.GlobalNumberFields.isOpen_iff_exists_ideleCongruenceSubgroup_le`: a subgroup of the
+  idele group is open exactly when it contains an idele congruence subgroup.
 * `TauCeti.GlobalNumberFields.exists_raySubgroup_le_of_isOpen`: every open subgroup of the idele
   class group contains a ray subgroup.
+* `TauCeti.GlobalNumberFields.isOpen_iff_exists_raySubgroup_le`: a subgroup of the idele class
+  group is open exactly when it contains a ray subgroup.
 
 ## References
 
@@ -73,8 +80,8 @@ theorem ofCompletion_mem_of_isOpen {V : Subgroup (IdeleGroup (𝓞 K) K)}
     ⟨Subgroup.isClosed_of_isOpen _ hopen, hopen⟩
   rw [← Subgroup.mem_comap]
   rcases w.isReal_or_isComplex with hw | hw
-  · exact (InfinitePlace.Completion.isPreconnected_setOf_pos_units_of_isReal hw).subset_isClopen
-      hclopen ⟨1, by simp, one_mem _⟩ (hu hw)
+  · exact (InfinitePlace.Completion.isPreconnected_setOf_extensionEmbeddingOfIsReal_pos
+      hw).subset_isClopen hclopen ⟨1, by simp, one_mem _⟩ (hu hw)
   · have := InfinitePlace.Completion.connectedSpace_units_of_isComplex hw
     exact Set.eq_univ_iff_forall.mp (hclopen.eq_univ ⟨1, one_mem _⟩) u
 
@@ -98,33 +105,31 @@ theorem exists_ideleCongruenceSubgroup_le_of_isOpen (V : Subgroup (IdeleGroup (�
   have hWf0 : (fun a ↦ 1 + a) ⁻¹' Wf ∈ 𝓝 (0 : FiniteAdeleRing (𝓞 K) K) :=
     (continuous_const_add 1).continuousAt.preimage_mem_nhds (by rwa [add_zero])
   obtain ⟨I, n, hIn⟩ := FiniteAdeleRing.exists_finset_forall_mem_of_mem_nhds_zero hWf0
-  -- The modulus: exponent `n v + 1` at each place of `I`, and every real place.
+  -- The modulus: exponent `n v` at each place of `I`, and every real place.
   obtain ⟨𝔪, h𝔪f, h𝔪i⟩ : ∃ 𝔪 : Modulus K,
-      𝔪.finitePart = ∏ v ∈ I, v.asIdeal ^ (n v + 1) ∧ 𝔪.infinitePart = Finset.univ :=
-    ⟨⟨∏ v ∈ I, v.asIdeal ^ (n v + 1), by
+      𝔪.finitePart = ∏ v ∈ I, v.asIdeal ^ n v ∧ 𝔪.infinitePart = Finset.univ :=
+    ⟨⟨∏ v ∈ I, v.asIdeal ^ n v, by
       rw [ne_eq, ← Ideal.zero_eq_bot]
       exact Finset.prod_ne_zero_iff.mpr fun v _ ↦
         pow_ne_zero _ (by rw [Ideal.zero_eq_bot]; exact v.ne_bot), Finset.univ⟩, rfl, rfl⟩
   refine ⟨𝔪, fun x hx ↦ ?_⟩
-  -- The finite component of a congruence idele lies in `W₁ ∩ W₂`.
+  -- The finite component of a congruence idele lies in `W₁ ∩ W₂`: it is integral at every finite
+  -- place and congruent to `1` to level `n v` at each `v ∈ I`.
   have hfin : ∀ y ∈ ideleCongruenceSubgroup 𝔪,
       ((IdeleGroup.ofFiniteIdele (𝓞 K) K (IdeleGroup.toFiniteIdele (𝓞 K) K y) :
         IdeleGroup (𝓞 K) K) : 𝔸[K]) ∈ W₁ ∩ W₂ := by
     intro y hy
     rw [IdeleGroup.coe_ofFiniteIdele, IdeleGroup.coe_toFiniteIdele]
     refine hWprod ⟨mem_of_mem_nhds hWinf, ?_⟩
-    have h := hIn ((y : 𝔸[K]).2 - 1) (fun v ↦ ?_) (fun v hv ↦ ?_)
-    · rwa [Set.mem_preimage, add_sub_cancel] at h
-    · rw [FiniteAdeleRing.sub_apply, FiniteAdeleRing.one_apply]
-      refine sub_mem ?_ (one_mem _)
-      rw [mem_adicCompletionIntegers, ← coe_ideleFiniteCoord]
-      exact (ideleCongruenceSubgroup.valued_ideleFiniteCoord_eq_one hy v).le
-    · have hdvd : v.asIdeal ^ (n v + 1) ∣ 𝔪.finitePart := h𝔪f ▸ Finset.dvd_prod_of_mem _ hv
-      have hexp : n v + 1 ≤ 𝔪.exponent v := (𝔪.pow_dvd_finitePart_iff_le_exponent v).mp hdvd
-      rw [FiniteAdeleRing.sub_apply, FiniteAdeleRing.one_apply, ← coe_ideleFiniteCoord]
-      refine (ideleCongruenceSubgroup.valued_ideleFiniteCoord_sub_one_le hy
-        ((dvd_pow_self _ (Nat.succ_ne_zero _)).trans hdvd)).trans (WithZero.exp_le_exp.mpr ?_)
-      omega
+    have h := hIn ((y : 𝔸[K]).2 - 1)
+      (fun v ↦ by
+        rw [FiniteAdeleRing.sub_apply, FiniteAdeleRing.one_apply]
+        exact sub_mem (ideleCongruenceSubgroup.snd_mem_adicCompletionIntegers hy v) (one_mem _))
+      (fun v hv ↦ by
+        have hdvd : v.asIdeal ^ n v ∣ 𝔪.finitePart := h𝔪f ▸ Finset.dvd_prod_of_mem _ hv
+        rw [FiniteAdeleRing.sub_apply, FiniteAdeleRing.one_apply]
+        exact ideleCongruenceSubgroup.valued_snd_sub_one_le_of_pow_dvd hy hdvd)
+    rwa [Set.mem_preimage, add_sub_cancel] at h
   -- Decompose `x` into its archimedean components, which lie in `V` by connectedness, and its
   -- finite component, which lies in `V` by the choice of `W₁` and `W₂`.
   rw [← IdeleGroup.prod_ofCompletion_mul_ofFiniteIdele x]
@@ -134,6 +139,13 @@ theorem exists_ideleCongruenceSubgroup_le_of_isOpen (V : Subgroup (IdeleGroup (�
   · refine hW _ (hfin x hx).1 ?_
     rw [← map_inv, ← map_inv]
     exact (hfin x⁻¹ ((ideleCongruenceSubgroup 𝔪).inv_mem hx)).2
+
+/-- **A subgroup of the idele group is open exactly when it contains an idele congruence
+subgroup.** -/
+theorem isOpen_iff_exists_ideleCongruenceSubgroup_le (V : Subgroup (IdeleGroup (𝓞 K) K)) :
+    IsOpen (V : Set (IdeleGroup (𝓞 K) K)) ↔ ∃ 𝔪 : Modulus K, ideleCongruenceSubgroup 𝔪 ≤ V :=
+  ⟨exists_ideleCongruenceSubgroup_le_of_isOpen V,
+    fun ⟨𝔪, h⟩ ↦ Subgroup.isOpen_mono h (isOpen_ideleCongruenceSubgroup 𝔪)⟩
 
 /-- **Every open subgroup of the idele class group contains a ray subgroup.**  The pullback of the
 subgroup to the idele group is open, so it contains an idele congruence subgroup, whose image is the
@@ -148,5 +160,10 @@ theorem exists_raySubgroup_le_of_isOpen (U : Subgroup (IdeleClassGroup (𝓞 K) 
   refine ⟨𝔪, fun c hc ↦ ?_⟩
   obtain ⟨x, hx, rfl⟩ := mem_raySubgroup_iff.mp hc
   exact Subgroup.mem_comap.mp (h𝔪 hx)
+
+/-- **A subgroup of the idele class group is open exactly when it contains a ray subgroup.** -/
+theorem isOpen_iff_exists_raySubgroup_le (U : Subgroup (IdeleClassGroup (𝓞 K) K)) :
+    IsOpen (U : Set (IdeleClassGroup (𝓞 K) K)) ↔ ∃ 𝔪 : Modulus K, raySubgroup 𝔪 ≤ U :=
+  ⟨exists_raySubgroup_le_of_isOpen U, fun ⟨𝔪, h⟩ ↦ Subgroup.isOpen_mono h (isOpen_raySubgroup 𝔪)⟩
 
 end TauCeti.GlobalNumberFields
