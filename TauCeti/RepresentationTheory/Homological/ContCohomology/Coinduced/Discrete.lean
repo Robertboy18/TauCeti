@@ -159,9 +159,17 @@ instance instSMulScalar : SMul R (DiscreteCoind G U A) :=
 theorem coe_smul_scalar (r : R) (f : DiscreteCoind G U A) (g : G) :
     (r • f) g = r • f g := rfl
 
-instance instModuleScalar : Module R (DiscreteCoind G U A) :=
-  Function.Injective.module R (toCoind G U A).toAddMonoidHom
-    (toCoind G U A).injective fun _ _ => rfl
+/-- The scalar module structure on the discrete carrier. Its scalar action is `instSMulScalar`
+itself, so that instances stated for that action, such as `instSMulCommClass`, apply to the module
+structure at instance transparency. -/
+instance instModuleScalar : Module R (DiscreteCoind G U A) where
+  toSMul := instSMulScalar
+  one_smul f := ext fun g => one_smul R (f g)
+  mul_smul r s f := ext fun g => mul_smul r s (f g)
+  smul_zero r := ext fun _ => smul_zero r
+  smul_add r f f' := ext fun g => smul_add r (f g) (f' g)
+  add_smul r s f := ext fun g => add_smul r s (f g)
+  zero_smul f := ext fun g => zero_smul R (f g)
 
 end Scalar
 

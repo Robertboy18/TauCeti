@@ -13,9 +13,9 @@ public import Mathlib.Algebra.Category.ModuleCat.Topology.Basic
 
 A morphism of topological modules is a monomorphism exactly when it is injective
 (`TopModuleCat.mono_iff_injective`), the counterpart for `TopModuleCat R` of
-`ModuleCat.mono_iff_injective`. The forward direction goes through the forgetful functor to
-`ModuleCat R`, which preserves monomorphisms because it is a right adjoint; the backward direction
-holds in any concrete category. Epimorphisms are not characterised here.
+`ModuleCat.mono_iff_injective`. It lets an elementwise argument treat a categorical monomorphism
+of topological modules, such as the inclusion of the cycles of a complex in `TopModuleCat R`, as an
+injective map (`TopModuleCat.injective_of_mono`). Epimorphisms are not characterised here.
 -/
 
 public section
@@ -26,10 +26,10 @@ namespace TopModuleCat
 
 variable {R : Type*} [Ring R] [TopologicalSpace R]
 
-/-- A morphism of topological modules is a monomorphism exactly when it is injective. The forward
-direction goes through the forgetful functor to modules, which preserves monomorphisms because it
-is a right adjoint. -/
+/-- A morphism of topological modules is a monomorphism exactly when it is injective, as in
+`ModuleCat.mono_iff_injective`. -/
 theorem mono_iff_injective {X Y : TopModuleCat R} (f : X ⟶ Y) : Mono f ↔ Function.Injective f.hom :=
+  -- the forgetful functor to modules is a right adjoint, so it preserves monomorphisms
   ⟨fun _ => (ModuleCat.mono_iff_injective ((forget₂ (TopModuleCat R) (ModuleCat R)).map f)).1
     inferInstance, fun h => ConcreteCategory.mono_of_injective f h⟩
 
