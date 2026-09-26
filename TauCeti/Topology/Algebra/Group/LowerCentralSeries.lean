@@ -50,6 +50,10 @@ see `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCentralSeries`.
 
 * `TauCeti.pLowerCentralStep_le_iff`: a closed subgroup contains `pLowerCentralStep p H` exactly
   when it contains the `p`-th powers of `H` and the commutators `⁅H, G⁆`.
+* `TauCeti.mk_conjNormal_eq`, `TauCeti.pLowerCentralStep_subgroupOf_le_ker_iff`: conjugation by
+  `G` acts trivially on `N ⧸ Nᵖ[N, G]`, and a homomorphism on a closed normal subgroup `N` with
+  closed kernel kills `pLowerCentralStep p N` exactly when it kills `p`-th powers and is invariant
+  under conjugation by `G`.
 * `TauCeti.pLowerCentralSeries_antitone`, `TauCeti.isClosed_pLowerCentralSeries`,
   `TauCeti.pLowerCentralSeries_normal`: the series is descending, closed and normal.
 * `TauCeti.pow_mem_pLowerCentralSeries`, `TauCeti.commutator_pLowerCentralSeries_top_le`,
@@ -154,6 +158,55 @@ instance pLowerCentralStep_normal (H : Subgroup G) [H.Normal] :
 theorem pLowerCentralStep_le {H : Subgroup G} [H.Normal] (hH : IsClosed (H : Set G)) :
     pLowerCentralStep p H ≤ H :=
   (pLowerCentralStep_le_iff hH).mpr ⟨fun _ hx ↦ H.pow_mem hx p, commutator_le_left H ⊤⟩
+
+/-- One step of the lower `p`-series of a subgroup `N`, read inside `N`, is a closed subgroup of
+`N`. -/
+theorem isClosed_pLowerCentralStep_subgroupOf (N : Subgroup G) :
+    IsClosed ((pLowerCentralStep p N).subgroupOf N : Set N) :=
+  (isClosed_pLowerCentralStep N).preimage continuous_subtype_val
+
+/-- **Conjugation acts trivially on `N ⧸ Nᵖ[N, G]`.** For a normal subgroup `N`, the class of the
+conjugate `g n g⁻¹` in the quotient of `N` by `pLowerCentralStep p N` is the class of `n`. -/
+theorem mk_conjNormal_eq {N : Subgroup G} [N.Normal] (g : G) (n : N) :
+    ((MulAut.conjNormal g n : N) : N ⧸ (pLowerCentralStep p N).subgroupOf N) = n := by
+  rw [QuotientGroup.eq, mem_subgroupOf, coe_mul, coe_inv, MulAut.conjNormal_apply]
+  have h : ((g * (n : G) * g⁻¹)⁻¹ * n : G) = ⁅(n : G)⁻¹, g⁆⁻¹ := by
+    rw [commutatorElement_inv, commutatorElement_def]
+    group
+  rw [h]
+  exact (pLowerCentralStep p N).inv_mem (commutator_mem_pLowerCentralStep (N.inv_mem n.2) g)
+
+/-- **Homomorphisms out of `N` that factor through `N ⧸ Nᵖ[N, G]`.** For a closed normal subgroup
+`N` and a homomorphism `φ` on `N` with closed kernel, `φ` kills `pLowerCentralStep p N` exactly when
+it kills the `p`-th powers and is invariant under conjugation by `G`. -/
+theorem pLowerCentralStep_subgroupOf_le_ker_iff {N : Subgroup G} [N.Normal]
+    (hN : IsClosed (N : Set G)) {A : Type*} [Group A] (φ : N →* A)
+    (hφ : IsClosed (φ.ker : Set N)) :
+    (pLowerCentralStep p N).subgroupOf N ≤ φ.ker ↔
+      (∀ n : N, φ n ^ p = 1) ∧ ∀ (g : G) (n : N), φ (MulAut.conjNormal g n) = φ n := by
+  constructor
+  · intro h
+    refine ⟨fun n ↦ ?_, fun g n ↦ ?_⟩
+    · rw [← map_pow]
+      exact h (mem_subgroupOf.mpr (by rw [coe_pow]; exact pow_mem_pLowerCentralStep n.2))
+    · rw [← inv_mul_eq_one, ← map_inv, ← map_mul]
+      exact h (QuotientGroup.eq.mp (mk_conjNormal_eq g n))
+  · rintro ⟨hpow, hconj⟩
+    -- The image of the kernel in `G` is a closed subgroup containing `Nᵖ` and `⁅N, G⁆`.
+    have hK : IsClosed ((φ.ker.map N.subtype : Subgroup G) : Set G) := by
+      rw [coe_map, coe_subtype]
+      exact hN.isClosedMap_subtype_val _ hφ
+    have hle : pLowerCentralStep p N ≤ φ.ker.map N.subtype := by
+      refine (pLowerCentralStep_le_iff hK).mpr ⟨fun x hx ↦ ?_, commutator_le.mpr fun x hx g _ ↦ ?_⟩
+      · exact ⟨⟨x, hx⟩ ^ p, MonoidHom.mem_ker.mpr (by rw [map_pow, hpow]), rfl⟩
+      · -- `⁅x, g⁆ = x * (g x⁻¹ g⁻¹)`, and `φ` takes the same value at `x⁻¹` and its conjugate.
+        have hxg : ⁅x, g⁆ ∈ N := commutator_le_left N ⊤ (commutator_mem_commutator hx (mem_top g))
+        refine ⟨⟨⁅x, g⁆, hxg⟩, MonoidHom.mem_ker.mpr ?_, rfl⟩
+        have : (⟨⁅x, g⁆, hxg⟩ : N) = ⟨x, hx⟩ * MulAut.conjNormal g (⟨x, hx⟩ : N)⁻¹ :=
+          Subtype.ext (by simp [commutatorElement_def, mul_assoc])
+        rw [this, map_mul, hconj, map_inv, mul_inv_cancel]
+    refine (comap_mono hle).trans ?_
+    rw [comap_map_eq, ker_subtype, sup_bot_eq]
 
 variable {H : Type*} [Group H] [TopologicalSpace H] [IsTopologicalGroup H]
 
