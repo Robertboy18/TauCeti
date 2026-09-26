@@ -93,7 +93,9 @@ noncomputable def cupCocycles (m n : ℕ) :
       simp only [map_smul, HomologicalComplex.iCycles_cyclesMkOfEq]))
 
 /-- On underlying cochains, the cup product of cocycles is the cup product of cochains. -/
-@[simp]
+-- Not a `simp` lemma: `simp` rewrites the implicit carrier `(homogeneousCochains Z).X (m + n)` on
+-- the left-hand side through `CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the
+-- statement is not in `simp`-normal form; use it with `rw`.
 theorem iCycles_cupCocycles (m n : ℕ) (a : cocycles X m) (b : cocycles Y n) :
     (homogeneousCochains Z).iCycles (m + n) (P.cupCocycles m n a b) =
       P.cupCochain m n ((homogeneousCochains X).iCycles m a)
