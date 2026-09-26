@@ -32,9 +32,9 @@ an `𝔽_p`-linear function of the classes `ω_i` alone, and `𝔽_p`-linear in 
 part is the derivative of the commutator part of `ρ` in the direction `ω`, and for odd `p` the
 `p`-power part contributes `Σ_i c_i π ω_i`. For `p = 2` the `p`-power part contributes in addition
 the brackets `Σ_i c_i [ω_i, ξ_i]`: the square of `x_i * w_i` is `x_i ^ 2 * w_i ^ 2 * ⁅w_i, x_i⁆`
-up to `λ_{m+2}(F)`, and the commutator `⁅w_i, x_i⁆` lies in `λ_{m+1}(F)` and not in `λ_{m+2}(F)`.
-That term is the trace, in every degree, of the failure of additivity of `π` on `gr_0(F)` at
-`p = 2`.
+up to `λ_{m+2}(F)`, and the commutator `⁅w_i, x_i⁆` lies in `λ_{m+1}(F)` and may have a nonzero
+class in `gr_{m+1}(F)`. That term is the trace, in every degree, of the failure of additivity of
+`π` on `gr_0(F)` at `p = 2`.
 
 The image of `δ` is the subspace of `gr_{m+1}(F)` that the successive-approximation arguments of
 the classification of Demushkin groups compare with `gr_{m+1}(F)`; there `m + 1` is the modulus of
@@ -48,8 +48,8 @@ the normal-form congruence, and the classes `ω_i` are the level-`m` basis corre
 
 ## Main results
 
-* `TauCeti.freeProP.inv_mul_basisModification_mem`: `θ_w` is congruent to the identity modulo
-  `λ_m(F)`.
+* `TauCeti.freeProP.inv_mul_basisModification_mem_pLowerCentralSeries`: `θ_w` is congruent to the
+  identity modulo `λ_m(F)`.
 * `TauCeti.freeProP.gradedDeviation_basisModification`,
   `TauCeti.freeProP.gradedMk_inv_mul_basisModification`: the class of `r⁻¹ * θ_w r` in
   `gr_{m+1}(F)` is `δ(ω)`; in particular it depends only on the classes `ω_i`.
@@ -75,7 +75,7 @@ variable {p : ℕ} {X : Type u} {m : ℕ}
 
 /-- **The basis modification** `θ_w : F → F`, `x_i ↦ x_i * w_i`, of the free pro-`p` group
 `F = freeProP p X` by a family `w : X → λ_m(F)`. It is congruent to the identity modulo `λ_m(F)`
-(`TauCeti.freeProP.inv_mul_basisModification_mem`). -/
+(`TauCeti.freeProP.inv_mul_basisModification_mem_pLowerCentralSeries`). -/
 noncomputable def basisModification (w : X → pLowerCentralSeries p (freeProP p X) m) :
     freeProP p X →ₜ* freeProP p X :=
   lift (isProP_freeProP p X) fun i ↦ of i * (w i : freeProP p X)
@@ -86,8 +86,8 @@ theorem basisModification_of (w : X → pLowerCentralSeries p (freeProP p X) m) 
   lift_of _ _ i
 
 /-- **The basis modification is congruent to the identity modulo `λ_m(F)`.** -/
-theorem inv_mul_basisModification_mem (w : X → pLowerCentralSeries p (freeProP p X) m)
-    (g : freeProP p X) :
+theorem inv_mul_basisModification_mem_pLowerCentralSeries
+    (w : X → pLowerCentralSeries p (freeProP p X) m) (g : freeProP p X) :
     g⁻¹ * basisModification w g ∈ pLowerCentralSeries p (freeProP p X) m := by
   -- The quotient by the closed subgroup `λ_m(F)` is Hausdorff, so two continuous homomorphisms
   -- into it agreeing on the generators are equal.
@@ -111,7 +111,8 @@ modification: `D_0 ξ_i = ω_i` in `gr_m(F)`, where `ξ_i` and `ω_i` are the cl
 theorem gradedDeviation_basisModification_gradedMkZero_of
     (w : X → pLowerCentralSeries p (freeProP p X) m) (i : X) :
     gradedDeviation (basisModification w).toMonoidHom (basisModification w).continuous
-        (inv_mul_basisModification_mem w) 0 (gradedMkZero p (freeProP p X) (of i)) =
+        (inv_mul_basisModification_mem_pLowerCentralSeries w) 0
+        (gradedMkZero p (freeProP p X) (of i)) =
       gradedMk p (freeProP p X) m (w i) := by
   rw [gradedDeviation_gradedMkZero]
   congr 1
@@ -200,12 +201,12 @@ theorem basisModificationDelta_apply [Fintype X] (hm : 1 ≤ m) (ρ : gradedPiec
 theorem gradedDeviation_basisModification (hm : 1 ≤ m)
     (w : X → pLowerCentralSeries p (freeProP p X) m) (ρ : gradedPiece p (freeProP p X) 1) :
     gradedDeviation (basisModification w).toMonoidHom (basisModification w).continuous
-        (inv_mul_basisModification_mem w) 1 ρ =
+        (inv_mul_basisModification_mem_pLowerCentralSeries w) 1 ρ =
       basisModificationDelta p X hm ρ fun i ↦ gradedMk p (freeProP p X) m (w i) := by
   -- Both sides are linear in `ρ`, and they agree on the standard basis of `gr_1(F)` by the
   -- Leibniz rule and the `π`-compatibility of the deviation.
   have key : (gradedDeviation (basisModification w).toMonoidHom (basisModification w).continuous
-      (inv_mul_basisModification_mem w) 1).toZModLinearMap p =
+      (inv_mul_basisModification_mem_pLowerCentralSeries w) 1).toZModLinearMap p =
         (basisModificationDelta p X hm).flip fun i ↦ gradedMk p (freeProP p X) m (w i) := by
     refine (degreeOneBasis p X).ext fun b ↦ ?_
     rw [LinearMap.flip_apply, AddMonoidHom.coe_toZModLinearMap]
@@ -222,12 +223,14 @@ theorem gradedDeviation_basisModification (hm : 1 ≤ m)
 `gr_{m+1}(F)` of `r⁻¹ * θ_w r` is `δ_ρ(ω)`, for `m ≥ 1`, where `ρ ∈ gr_1(F)` is the class of `r`
 and `ω_i ∈ gr_m(F)` the class of `w_i`. In particular that class depends only on the classes
 `ω_i` of the modifications. -/
+@[simp]
 theorem gradedMk_inv_mul_basisModification (hm : 1 ≤ m)
     (w : X → pLowerCentralSeries p (freeProP p X) m)
     (r : pLowerCentralSeries p (freeProP p X) 1) :
     gradedMk p (freeProP p X) (m + 1) ⟨(r : freeProP p X)⁻¹ * basisModification w r,
         inv_mul_apply_mem_pLowerCentralSeries (basisModification w).toMonoidHom
-          (basisModification w).continuous (inv_mul_basisModification_mem w) r.2⟩ =
+          (basisModification w).continuous
+          (inv_mul_basisModification_mem_pLowerCentralSeries w) r.2⟩ =
       basisModificationDelta p X hm (gradedMk p (freeProP p X) 1 r)
         fun i ↦ gradedMk p (freeProP p X) m (w i) := by
   have h := gradedDeviation_basisModification hm w (gradedMk p (freeProP p X) 1 r)
