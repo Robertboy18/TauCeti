@@ -156,17 +156,13 @@ theorem AdeleRing.fst_mul (a b : AdeleRing R K) : (a * b).1 = a.1 * b.1 :=
   rfl
 
 /-- The embedding of the completion at an infinite place into the infinite adele ring is
-continuous: each coordinate of `InfiniteAdeleRing.ofCompletion w x` is either `x` or `1`. -/
+continuous: it is the coordinate inclusion `Pi.mulSingle w`. -/
 @[continuity, fun_prop]
 theorem InfiniteAdeleRing.continuous_ofCompletion (w : InfinitePlace K) :
     Continuous (InfiniteAdeleRing.ofCompletion w) := by
   classical
-  refine continuous_pi fun w' ↦ ?_
-  rcases eq_or_ne w' w with rfl | h
-  · exact continuous_id.congr fun x ↦
-      ((InfiniteAdeleRing.ofCompletion_apply w' x w').trans (Pi.mulSingle_eq_same _ _)).symm
-  · exact continuous_const.congr fun x ↦
-      ((InfiniteAdeleRing.ofCompletion_apply w x w').trans (Pi.mulSingle_eq_of_ne h _)).symm
+  exact (continuous_mulSingle w).congr fun x ↦
+    funext fun w' ↦ (InfiniteAdeleRing.ofCompletion_apply w x w').symm
 
 /-- The embedding of the completion at an infinite place into the adele ring is continuous. -/
 @[continuity, fun_prop]

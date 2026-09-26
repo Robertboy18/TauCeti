@@ -174,8 +174,7 @@ theorem exponent_pos_of_mem_support {𝔪 : Modulus K} {v : HeightOneSpectrum (�
 finite part exactly when `n` is at most the exponent of `v`. -/
 theorem pow_dvd_finitePart_iff_le_exponent (𝔪 : Modulus K) (v : HeightOneSpectrum (𝓞 K))
     {n : ℕ} : v.asIdeal ^ n ∣ 𝔪.finitePart ↔ n ≤ 𝔪.exponent v := by
-  rw [exponent, ← Associates.prime_pow_dvd_iff_le (Associates.mk_ne_zero.mpr 𝔪.finitePart_ne_zero)
-    (Associates.irreducible_mk.mpr v.irreducible), ← Associates.mk_pow, Associates.mk_le_mk_iff_dvd]
+  rw [exponent, le_count_associates_iff_le_pow v 𝔪.finitePart_ne_bot, Ideal.dvd_iff_le]
 
 /-- **The prescribed prime power divides the finite part.**  This is what turns membership in the
 finite part into the valuation bound recorded by `IsCongrOne`. -/

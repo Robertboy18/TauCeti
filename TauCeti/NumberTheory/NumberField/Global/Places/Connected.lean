@@ -29,6 +29,8 @@ each real place.
 * `NumberField.InfinitePlace.Completion.isometryEquivComplexOfIsComplex_apply` and
   `NumberField.InfinitePlace.Completion.isometryEquivRealOfIsReal_apply`: the isometries of a
   completion with `ℂ` and with `ℝ` evaluate to the extension embeddings.
+* `NumberField.InfinitePlace.Completion.continuousMulEquivComplexOfIsComplex`: the continuous
+  multiplicative isomorphism `w.Completion ≃ₜ* ℂ` of a complex place.
 * `NumberField.InfinitePlace.Completion.connectedSpace_units_of_isComplex`: the unit group of a
   complex completion is connected.
 * `NumberField.InfinitePlace.Completion.isPreconnected_setOf_extensionEmbeddingOfIsReal_pos`: the
@@ -55,24 +57,32 @@ This records the definition of `isometryEquivRealOfIsReal`, whose underlying equ
 theorem isometryEquivRealOfIsReal_apply (hw : w.IsReal) (x : w.Completion) :
     isometryEquivRealOfIsReal hw x = extensionEmbeddingOfIsReal hw x := rfl
 
-/-- **The unit group of a complex completion is connected**: it is homeomorphic to `ℂˣ`. -/
-theorem connectedSpace_units_of_isComplex (hw : w.IsComplex) : ConnectedSpace w.Completionˣ := by
-  -- The ring isomorphism with `ℂ` is a homeomorphism, since it and its inverse are the isometry
-  -- `isometryEquivComplexOfIsComplex hw` and its inverse.
-  have hcont : Continuous (ringEquivComplexOfIsComplex hw) :=
+/-- The continuous multiplicative isomorphism `w.Completion ≃ₜ* ℂ` of a complex place.  Its
+underlying map is the ring isomorphism `ringEquivComplexOfIsComplex hw`, which is a homeomorphism
+because it and its inverse are the isometry `isometryEquivComplexOfIsComplex hw` and its inverse. -/
+noncomputable def continuousMulEquivComplexOfIsComplex (hw : w.IsComplex) : w.Completion ≃ₜ* ℂ where
+  __ := ringEquivComplexOfIsComplex hw
+  continuous_toFun :=
     (isometryEquivComplexOfIsComplex hw).continuous.congr fun x ↦
       (isometryEquivComplexOfIsComplex_apply hw x).trans
         (ringEquivComplexOfIsComplex_apply hw x).symm
-  have hsymm : Continuous (ringEquivComplexOfIsComplex hw).symm :=
+  continuous_invFun :=
     (isometryEquivComplexOfIsComplex hw).symm.continuous.congr fun z ↦
       ((ringEquivComplexOfIsComplex hw).symm_apply_eq.mpr (by
         rw [ringEquivComplexOfIsComplex_apply, ← isometryEquivComplexOfIsComplex_apply hw,
           IsometryEquiv.apply_symm_apply])).symm
-  let e : w.Completion ≃ₜ* ℂ :=
-    { ringEquivComplexOfIsComplex hw with
-      continuous_toFun := hcont
-      continuous_invFun := hsymm }
-  exact (Units.mapContinuousMulEquiv e).toHomeomorph.connectedSpace_iff.mpr inferInstance
+
+/-- The continuous multiplicative isomorphism `w.Completion ≃ₜ* ℂ` of a complex place evaluates
+to the extension embedding. -/
+@[simp]
+theorem continuousMulEquivComplexOfIsComplex_apply (hw : w.IsComplex) (x : w.Completion) :
+    continuousMulEquivComplexOfIsComplex hw x = extensionEmbedding w x := (rfl)
+
+/-- **The unit group of a complex completion is connected**: it is homeomorphic to `ℂˣ` through
+`continuousMulEquivComplexOfIsComplex hw`. -/
+theorem connectedSpace_units_of_isComplex (hw : w.IsComplex) : ConnectedSpace w.Completionˣ :=
+  (Units.mapContinuousMulEquiv
+    (continuousMulEquivComplexOfIsComplex hw)).toHomeomorph.connectedSpace_iff.mpr inferInstance
 
 /-- **The positive units of a real completion form a preconnected set**: they are homeomorphic to
 the positive real half-line. -/
