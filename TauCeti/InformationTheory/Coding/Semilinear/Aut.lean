@@ -12,7 +12,7 @@ public import TauCeti.Algebra.Module.Equiv.Basic
 public import TauCeti.InformationTheory.Coding.Semilinear.Basic
 
 /-!
-# The semilinear group and the semilinear automorphism group of a code
+# The semilinear monomial group and the semilinear automorphism group of a code
 
 A semilinear monomial transformation of the word space `ι → R` applies a ring automorphism of
 the alphabet to every coordinate, rescales by coordinate units, and relabels the coordinates.
@@ -26,10 +26,10 @@ the group acts on codewords.
 
 ## Main definitions
 
-* `TauCeti.semilinearGroup R ι`: the group of semilinear monomial transformations of `ι → R`,
-  as a subgroup of the permutation group `Equiv.Perm (ι → R)` of the word space.
+* `TauCeti.semilinearMonomialGroup R ι`: the group of semilinear monomial transformations of
+  `ι → R`, as a subgroup of the permutation group `Equiv.Perm (ι → R)` of the word space.
 * `TauCeti.semilinearAut C`: the semilinear automorphism group of a code `C`, the subgroup of
-  `TauCeti.semilinearGroup R ι` stabilizing the set of codewords, acting on the codewords.
+  `TauCeti.semilinearMonomialGroup R ι` stabilizing the set of codewords, acting on the codewords.
 
 ## Main statements
 
@@ -42,9 +42,9 @@ the group acts on codewords.
   nonempty, a semilinear monomial transformation with a nontrivial alphabet automorphism is not
   induced by any `R`-linear automorphism, so the semilinear groups can be strictly larger than
   the images of the monomial ones.
-* `TauCeti.semilinearGroup_eq_map_monomialGroup`, `TauCeti.semilinearAut_eq_map_monomialAut`:
-  when the identity is the only ring automorphism of the alphabet, as for `ZMod n`, the
-  semilinear groups are the images of the monomial ones.
+* `TauCeti.semilinearMonomialGroup_eq_map_monomialGroup`,
+  `TauCeti.semilinearAut_eq_map_monomialAut`: when the identity is the only ring automorphism
+  of the alphabet, as for `ZMod n`, the semilinear groups are the images of the monomial ones.
 
 Linear automorphisms of the word space are sent to permutations by
 `MulAction.toPermHom ((ι → R) ≃ₗ[R] (ι → R)) (ι → R)`; this is the map along which the monomial
@@ -66,13 +66,13 @@ attribute [local instance] RingHomInvPair.of_ringEquiv RingHomInvPair.of_ringEqu
 
 variable {R ι : Type*}
 
-/-! ### The semilinear group of a word space -/
+/-! ### The semilinear monomial group of a word space -/
 
-section SemilinearGroup
+section SemilinearMonomialGroup
 
 /-- The group of semilinear monomial transformations of the word space `ι → R`, as a subgroup
 of its permutation group. -/
-def semilinearGroup (R ι : Type*) [CommSemiring R] : Subgroup (Equiv.Perm (ι → R)) where
+def semilinearMonomialGroup (R ι : Type*) [CommSemiring R] : Subgroup (Equiv.Perm (ι → R)) where
   carrier := {f | ∃ (σ : R ≃+* R) (u : ι → Rˣ) (e : Equiv.Perm ι),
     (semilinearMonomialEquiv u e σ).toEquiv = f}
   one_mem' := ⟨RingEquiv.refl R, 1, Equiv.refl ι, by
@@ -93,56 +93,57 @@ def semilinearGroup (R ι : Type*) [CommSemiring R] : Subgroup (Equiv.Perm (ι �
 
 variable [CommSemiring R]
 
-/-- The semilinear group consists exactly of the semilinear monomial transformations of
+/-- The semilinear monomial group consists exactly of the semilinear monomial transformations of
 `ι → R`. -/
 @[simp]
-theorem mem_semilinearGroup {f : Equiv.Perm (ι → R)} :
-    f ∈ semilinearGroup R ι ↔ ∃ (σ : R ≃+* R) (u : ι → Rˣ) (e : Equiv.Perm ι),
+theorem mem_semilinearMonomialGroup {f : Equiv.Perm (ι → R)} :
+    f ∈ semilinearMonomialGroup R ι ↔ ∃ (σ : R ≃+* R) (u : ι → Rˣ) (e : Equiv.Perm ι),
       (semilinearMonomialEquiv u e σ).toEquiv = f :=
   Iff.rfl
 
-theorem semilinearMonomialEquiv_toEquiv_mem_semilinearGroup (u : ι → Rˣ) (e : Equiv.Perm ι)
-    (σ : R ≃+* R) : (semilinearMonomialEquiv u e σ).toEquiv ∈ semilinearGroup R ι :=
+theorem semilinearMonomialEquiv_toEquiv_mem_semilinearMonomialGroup (u : ι → Rˣ) (e : Equiv.Perm ι)
+    (σ : R ≃+* R) : (semilinearMonomialEquiv u e σ).toEquiv ∈ semilinearMonomialGroup R ι :=
   ⟨σ, u, e, rfl⟩
 
-/-- An element of the semilinear group is additive. -/
+/-- An element of the semilinear monomial group is additive. -/
 @[simp]
-theorem map_add_of_mem_semilinearGroup {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearGroup R ι)
-    (x y : ι → R) : f (x + y) = f x + f y := by
+theorem map_add_of_mem_semilinearMonomialGroup {f : Equiv.Perm (ι → R)}
+    (hf : f ∈ semilinearMonomialGroup R ι) (x y : ι → R) : f (x + y) = f x + f y := by
   obtain ⟨σ, u, e, rfl⟩ := hf
   simp only [LinearEquiv.coe_toEquiv, map_add]
 
-/-- An element of the semilinear group fixes the zero word. -/
+/-- An element of the semilinear monomial group fixes the zero word. -/
 @[simp]
-theorem map_zero_of_mem_semilinearGroup {f : Equiv.Perm (ι → R)}
-    (hf : f ∈ semilinearGroup R ι) : f 0 = 0 := by
+theorem map_zero_of_mem_semilinearMonomialGroup {f : Equiv.Perm (ι → R)}
+    (hf : f ∈ semilinearMonomialGroup R ι) : f 0 = 0 := by
   obtain ⟨σ, u, e, rfl⟩ := hf
   simp only [LinearEquiv.coe_toEquiv, map_zero]
 
-/-- An element of the semilinear group is semilinear for some automorphism of the alphabet. -/
-theorem exists_map_smul_of_mem_semilinearGroup {f : Equiv.Perm (ι → R)}
-    (hf : f ∈ semilinearGroup R ι) :
+/-- An element of the semilinear monomial group is semilinear for some automorphism of the
+alphabet. -/
+theorem exists_map_smul_of_mem_semilinearMonomialGroup {f : Equiv.Perm (ι → R)}
+    (hf : f ∈ semilinearMonomialGroup R ι) :
     ∃ σ : R ≃+* R, ∀ (r : R) (x : ι → R), f (r • x) = σ r • f x := by
   obtain ⟨σ, u, e, rfl⟩ := hf
   exact ⟨σ, fun r x ↦ (semilinearMonomialEquiv u e σ).map_smulₛₗ r x⟩
 
-/-- An element of the semilinear group preserves Hamming weight. -/
+/-- An element of the semilinear monomial group preserves Hamming weight. -/
 @[simp]
-theorem hammingNorm_apply_of_mem_semilinearGroup [Fintype ι] [DecidableEq R]
-    {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearGroup R ι) (x : ι → R) :
+theorem hammingNorm_apply_of_mem_semilinearMonomialGroup [Fintype ι] [DecidableEq R]
+    {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearMonomialGroup R ι) (x : ι → R) :
     hammingNorm (f x) = hammingNorm x := by
   obtain ⟨σ, u, e, rfl⟩ := hf
   exact hammingNorm_semilinearMonomialEquiv u e σ x
 
-/-- An element of the semilinear group preserves Hamming distance. -/
+/-- An element of the semilinear monomial group preserves Hamming distance. -/
 @[simp]
-theorem hammingDist_apply_of_mem_semilinearGroup [Fintype ι] [DecidableEq R]
-    {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearGroup R ι) (x y : ι → R) :
+theorem hammingDist_apply_of_mem_semilinearMonomialGroup [Fintype ι] [DecidableEq R]
+    {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearMonomialGroup R ι) (x y : ι → R) :
     hammingDist (f x) (f y) = hammingDist x y := by
   obtain ⟨σ, u, e, rfl⟩ := hf
   exact hammingDist_semilinearMonomialEquiv u e σ x y
 
-end SemilinearGroup
+end SemilinearMonomialGroup
 
 /-! ### The semilinear automorphism group of a code -/
 
@@ -153,7 +154,7 @@ variable [CommSemiring R] (C : Submodule R (ι → R))
 /-- The semilinear automorphism group of a linear code: the semilinear monomial transformations
 of its word space that map the set of codewords onto itself. -/
 def semilinearAut : Subgroup (Equiv.Perm (ι → R)) :=
-  semilinearGroup R ι ⊓ MulAction.stabilizer (Equiv.Perm (ι → R)) (C : Set (ι → R))
+  semilinearMonomialGroup R ι ⊓ MulAction.stabilizer (Equiv.Perm (ι → R)) (C : Set (ι → R))
 
 variable {C}
 
@@ -161,10 +162,10 @@ variable {C}
 transformations mapping the set of codewords onto itself. -/
 @[simp]
 theorem mem_semilinearAut {f : Equiv.Perm (ι → R)} :
-    f ∈ semilinearAut C ↔ f ∈ semilinearGroup R ι ∧ f • (C : Set (ι → R)) = C :=
+    f ∈ semilinearAut C ↔ f ∈ semilinearMonomialGroup R ι ∧ f • (C : Set (ι → R)) = C :=
   Iff.rfl
 
-theorem semilinearAut_le_semilinearGroup : semilinearAut C ≤ semilinearGroup R ι :=
+theorem semilinearAut_le_semilinearMonomialGroup : semilinearAut C ≤ semilinearMonomialGroup R ι :=
   inf_le_left
 
 theorem apply_mem_of_mem_semilinearAut {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearAut C)
@@ -189,7 +190,7 @@ theorem semilinearMonomialEquiv_toEquiv_mem_semilinearAut_iff (u : ι → Rˣ) (
     (semilinearMonomialEquiv u e σ).toEquiv ∈ semilinearAut C ↔
       C.map (semilinearMonomialEquiv u e σ).toLinearMap = C := by
   rw [mem_semilinearAut, semilinearMonomialEquiv_toEquiv_smul_coe, SetLike.coe_set_eq]
-  exact and_iff_right (semilinearMonomialEquiv_toEquiv_mem_semilinearGroup u e σ)
+  exact and_iff_right (semilinearMonomialEquiv_toEquiv_mem_semilinearMonomialGroup u e σ)
 
 /-- A semilinear automorphism of a code permutes its codewords. -/
 instance instSMulSemilinearAut : SMul (semilinearAut C) C where
@@ -204,30 +205,33 @@ instance instDistribMulActionSemilinearAut : DistribMulAction (semilinearAut C) 
   one_smul _ := Subtype.ext (by simp)
   mul_smul _ _ _ := Subtype.ext (by simp)
   smul_zero f :=
-    Subtype.ext (map_zero_of_mem_semilinearGroup (semilinearAut_le_semilinearGroup f.2))
+    Subtype.ext
+      (map_zero_of_mem_semilinearMonomialGroup (semilinearAut_le_semilinearMonomialGroup f.2))
   smul_add f c d :=
-    Subtype.ext (map_add_of_mem_semilinearGroup (semilinearAut_le_semilinearGroup f.2) c d)
+    Subtype.ext
+      (map_add_of_mem_semilinearMonomialGroup (semilinearAut_le_semilinearMonomialGroup f.2) c d)
 
 /-- A semilinear automorphism of a code acts on its codewords semilinearly for some automorphism
 of the alphabet. -/
 theorem exists_smul_smul_semilinearAut (f : semilinearAut C) :
     ∃ σ : R ≃+* R, ∀ (r : R) (c : C), f • (r • c) = σ r • (f • c) := by
   obtain ⟨σ, hσ⟩ :=
-    exists_map_smul_of_mem_semilinearGroup (semilinearAut_le_semilinearGroup f.2)
+    exists_map_smul_of_mem_semilinearMonomialGroup (semilinearAut_le_semilinearMonomialGroup f.2)
   exact ⟨σ, fun r c ↦ Subtype.ext (hσ r c)⟩
 
 /-- A semilinear automorphism of a code preserves Hamming weight. -/
 @[simp]
 theorem hammingNorm_semilinearAut_apply [Fintype ι] [DecidableEq R] (f : semilinearAut C)
     (x : ι → R) : hammingNorm ((f : Equiv.Perm (ι → R)) x) = hammingNorm x :=
-  hammingNorm_apply_of_mem_semilinearGroup (semilinearAut_le_semilinearGroup f.2) x
+  hammingNorm_apply_of_mem_semilinearMonomialGroup (semilinearAut_le_semilinearMonomialGroup f.2) x
 
 /-- A semilinear automorphism of a code preserves Hamming distance. -/
 @[simp]
 theorem hammingDist_semilinearAut_apply [Fintype ι] [DecidableEq R] (f : semilinearAut C)
     (x y : ι → R) :
     hammingDist ((f : Equiv.Perm (ι → R)) x) ((f : Equiv.Perm (ι → R)) y) = hammingDist x y :=
-  hammingDist_apply_of_mem_semilinearGroup (semilinearAut_le_semilinearGroup f.2) x y
+  hammingDist_apply_of_mem_semilinearMonomialGroup (semilinearAut_le_semilinearMonomialGroup f.2)
+    x y
 
 end SemilinearAut
 
@@ -248,13 +252,13 @@ theorem toPermHom_monomialEquiv (u : ι → Rˣ) (e : Equiv.Perm ι) :
     RingEquiv.refl_apply]
 
 /-- A monomial transformation is a semilinear monomial transformation. -/
-theorem map_monomialGroup_le_semilinearGroup :
+theorem map_monomialGroup_le_semilinearMonomialGroup :
     (monomialGroup R ι).map (MulAction.toPermHom ((ι → R) ≃ₗ[R] (ι → R)) (ι → R)) ≤
-      semilinearGroup R ι := by
+      semilinearMonomialGroup R ι := by
   rintro f ⟨g, hg, rfl⟩
   obtain ⟨u, e, rfl⟩ := mem_monomialGroup.mp hg
   rw [toPermHom_monomialEquiv]
-  exact semilinearMonomialEquiv_toEquiv_mem_semilinearGroup u e _
+  exact semilinearMonomialEquiv_toEquiv_mem_semilinearMonomialGroup u e _
 
 /-- A monomial automorphism of a code is a semilinear automorphism of it. -/
 theorem map_monomialAut_le_semilinearAut :
@@ -262,8 +266,9 @@ theorem map_monomialAut_le_semilinearAut :
       semilinearAut C := by
   rintro f ⟨g, hg, rfl⟩
   obtain ⟨hg, hgC⟩ := mem_monomialAut.mp hg
-  exact mem_semilinearAut.mpr ⟨map_monomialGroup_le_semilinearGroup (Subgroup.mem_map_of_mem _ hg),
-    by rw [LinearEquiv.toPermHom_smul_coe, hgC]⟩
+  exact mem_semilinearAut.mpr
+    ⟨map_monomialGroup_le_semilinearMonomialGroup (Subgroup.mem_map_of_mem _ hg),
+      by rw [LinearEquiv.toPermHom_smul_coe, hgC]⟩
 
 /-- A semilinear monomial transformation whose alphabet automorphism is not the identity is not
 the permutation underlying any `R`-linear automorphism of the word space. -/
@@ -292,14 +297,14 @@ section TrivialAutomorphisms
 variable [Subsingleton (R ≃+* R)]
 
 /-- When the identity is the only ring automorphism of the alphabet, as for `ZMod n`, the
-semilinear group is the image of the monomial group. -/
+semilinear monomial group is the image of the monomial group. -/
 @[simp]
-theorem semilinearGroup_eq_map_monomialGroup :
-    semilinearGroup R ι =
+theorem semilinearMonomialGroup_eq_map_monomialGroup :
+    semilinearMonomialGroup R ι =
       (monomialGroup R ι).map (MulAction.toPermHom ((ι → R) ≃ₗ[R] (ι → R)) (ι → R)) := by
-  refine le_antisymm ?_ map_monomialGroup_le_semilinearGroup
+  refine le_antisymm ?_ map_monomialGroup_le_semilinearMonomialGroup
   intro f hf
-  obtain ⟨σ, u, e, rfl⟩ := mem_semilinearGroup.mp hf
+  obtain ⟨σ, u, e, rfl⟩ := mem_semilinearMonomialGroup.mp hf
   obtain rfl := Subsingleton.elim σ (RingEquiv.refl R)
   exact Subgroup.mem_map.mpr
     ⟨monomialEquiv u e, monomialEquiv_mem_monomialGroup u e, toPermHom_monomialEquiv u e⟩
@@ -313,7 +318,7 @@ theorem semilinearAut_eq_map_monomialAut :
   refine le_antisymm ?_ map_monomialAut_le_semilinearAut
   intro f hf
   obtain ⟨hf', hfC⟩ := mem_semilinearAut.mp hf
-  obtain ⟨σ, u, e, rfl⟩ := mem_semilinearGroup.mp hf'
+  obtain ⟨σ, u, e, rfl⟩ := mem_semilinearMonomialGroup.mp hf'
   obtain rfl := Subsingleton.elim σ (RingEquiv.refl R)
   refine Subgroup.mem_map.mpr ⟨monomialEquiv u e,
     mem_monomialAut.mpr ⟨monomialEquiv_mem_monomialGroup u e, SetLike.coe_injective ?_⟩,
