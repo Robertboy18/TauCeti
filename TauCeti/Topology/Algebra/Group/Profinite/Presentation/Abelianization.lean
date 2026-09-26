@@ -5,11 +5,11 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.Topology.Algebra.Module.Compact
 public import TauCeti.LinearAlgebra.Quotient.PiSpanSingleton
 public import TauCeti.RingTheory.Valuation.FinsetDvd
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Abelianization
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation
-public import TauCeti.Topology.Algebra.Ring.Ideal
 public import TauCeti.Topology.Separation.TypeTags
 
 /-!
@@ -86,14 +86,6 @@ namespace presentedProP
 variable (rels : Set (freeProP p X))
 
 omit [Fact p.Prime] in
-/-- The quotient map of a presentation is continuous, stated for its underlying monoid
-homomorphism `mk p rels : freeProP p X →* presentedProP p X rels`, which is the form that
-`TopologicalAbelianization.map` and the other constructions on monoid homomorphisms consume. -/
-theorem continuous_coe_mk :
-    Continuous ⇑(mk p rels : freeProP p X →* presentedProP p X rels) :=
-  (mk p rels).continuous
-
-omit [Fact p.Prime] in
 private theorem coe_mk_apply (y : freeProP p X) :
     (mk p rels : freeProP p X →* presentedProP p X rels) y = mk p rels y :=
   (rfl)
@@ -110,7 +102,9 @@ the composite of the inverse of `TauCeti.freeProP.abelianizationEquiv` with the 
 noncomputable def abelianizationHom :
     Multiplicative (X → ℤ_[p]) →ₜ* TopologicalAbelianization (presentedProP p X rels) :=
   (⟨TopologicalAbelianization.map (mk p rels : freeProP p X →* presentedProP p X rels)
-      (continuous_coe_mk rels), TopologicalAbelianization.continuous_map _ _⟩ :
+      (show Continuous ⇑(mk p rels : freeProP p X →* presentedProP p X rels) from
+        (mk p rels).continuous),
+    TopologicalAbelianization.continuous_map _ _⟩ :
     TopologicalAbelianization (freeProP p X) →ₜ*
       TopologicalAbelianization (presentedProP p X rels)).comp
     ((freeProP.abelianizationEquiv p X).symm :
@@ -119,7 +113,9 @@ noncomputable def abelianizationHom :
 theorem abelianizationHom_apply (u : Multiplicative (X → ℤ_[p])) :
     abelianizationHom rels u =
       TopologicalAbelianization.map (mk p rels : freeProP p X →* presentedProP p X rels)
-        (continuous_coe_mk rels) ((freeProP.abelianizationEquiv p X).symm u) :=
+        (show Continuous ⇑(mk p rels : freeProP p X →* presentedProP p X rels) from
+          (mk p rels).continuous)
+        ((freeProP.abelianizationEquiv p X).symm u) :=
   (rfl)
 
 /-- The abelianization map of a presentation composed with the exponent-sum map of the free group
@@ -144,7 +140,9 @@ theorem abelianizationHom_ofAdd_single (x : X) :
 theorem abelianizationHom_surjective : Function.Surjective (abelianizationHom rels) := by
   intro g
   obtain ⟨y, hy⟩ := TopologicalAbelianization.map_surjective
-    (mk p rels : freeProP p X →* presentedProP p X rels) (continuous_coe_mk rels)
+    (mk p rels : freeProP p X →* presentedProP p X rels)
+    (show Continuous ⇑(mk p rels : freeProP p X →* presentedProP p X rels) from
+      (mk p rels).continuous)
     (mk_surjective p rels) g
   exact ⟨freeProP.abelianizationEquiv p X y, by
     rw [abelianizationHom_apply, ContinuousMulEquiv.symm_apply_apply, hy]⟩
@@ -161,7 +159,9 @@ theorem abelianizationHom_ofAdd (u : X → ℤ_[p]) :
   rw [(isProP_freeProP p X).topologicalAbelianization.map_padicPow
     (isProP p X rels).topologicalAbelianization
     (TopologicalAbelianization.map (mk p rels : freeProP p X →* presentedProP p X rels)
-      (continuous_coe_mk rels)) (TopologicalAbelianization.continuous_map _ _),
+      (show Continuous ⇑(mk p rels : freeProP p X →* presentedProP p X rels) from
+        (mk p rels).continuous))
+    (TopologicalAbelianization.continuous_map _ _),
     TopologicalAbelianization.map_mk, coe_mk_apply, mk_of]
 
 variable (r : freeProP p X)
@@ -194,11 +194,14 @@ theorem abelianizationHom_ofAdd_eq_one_iff (u : X → ℤ_[p]) :
     -- the closed normal closure `R` of `r`.
     have hmem : (freeProP.abelianizationEquiv p X).symm (ofAdd u) ∈
         (TopologicalAbelianization.map (mk p {r} : freeProP p X →* presentedProP p X {r})
-          (continuous_coe_mk {r})).ker := by
+          (show Continuous ⇑(mk p {r} : freeProP p X →* presentedProP p X {r}) from
+            (mk p {r}).continuous)).ker := by
       rw [MonoidHom.mem_ker, ← abelianizationHom_apply]
       exact h
     rw [TopologicalAbelianization.ker_map_of_surjective
-      (mk p {r} : freeProP p X →* presentedProP p X {r}) (continuous_coe_mk {r})
+      (mk p {r} : freeProP p X →* presentedProP p X {r})
+      (show Continuous ⇑(mk p {r} : freeProP p X →* presentedProP p X {r}) from
+        (mk p {r}).continuous)
       (mk_surjective p {r}), ker_mk] at hmem
     obtain ⟨y, hy, hyu⟩ := hmem
     -- `R` lies in the preimage of the closed subgroup of `p`-adic powers of `ρ`.
@@ -226,7 +229,9 @@ theorem abelianizationHom_ofAdd_eq_one_iff (u : X → ℤ_[p]) :
     rw [abelianizationHom_apply, ← hpow, ContinuousMulEquiv.symm_apply_apply,
       hF.map_padicPow hG
         (TopologicalAbelianization.map (mk p {r} : freeProP p X →* presentedProP p X {r})
-          (continuous_coe_mk {r})) (TopologicalAbelianization.continuous_map _ _),
+          (show Continuous ⇑(mk p {r} : freeProP p X →* presentedProP p X {r}) from
+            (mk p {r}).continuous))
+        (TopologicalAbelianization.continuous_map _ _),
       TopologicalAbelianization.map_mk, h1, QuotientGroup.mk_one, IsProP.one_padicPow]
 
 end Hom

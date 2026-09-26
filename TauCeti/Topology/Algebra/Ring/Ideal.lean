@@ -8,7 +8,6 @@ module
 public import Mathlib.RingTheory.Ideal.Quotient.Operations
 public import Mathlib.Topology.Algebra.Ring.Ideal
 public import Mathlib.Topology.Algebra.Group.Quotient
-public import Mathlib.Topology.Algebra.Module.Compact
 
 /-!
 # The quotient of a topological ring by an ideal
@@ -56,9 +55,6 @@ a point; it is not a further hypothesis of the theorem but a consequence for its
   automatically once `I` is known to be closed.
 * `Ideal.Quotient.continuous_lift`: a continuous ring homomorphism annihilating `I` induces a
   *continuous* homomorphism on `R ⧸ I`, with no hypothesis on `I`.
-* `Ideal.isClosed_of_compactSpace_of_isNoetherianRing`: every ideal of a compact Hausdorff
-  Noetherian topological ring is closed, as an instance, so that `R ⧸ I` is `T3` for every ideal
-  `I` of such a ring, for instance of `ℤ_p`.
 * `RingHom.isHomeomorph_kerLift`: the map `R ⧸ ker f →+* S` induced by `f` is a homeomorphism when
   `f` is a quotient map. `IsHomeomorph.homeomorph` bundles that as
   `R ⧸ ker f ≃ₜ S`, and the map bundled is the ring homomorphism `RingHom.kerLift`, so the ring
@@ -135,16 +131,3 @@ theorem isHomeomorph_kerLift (hq : IsQuotientMap (f : R → S)) : IsHomeomorph (
 end RingHom
 
 end FirstIsomorphism
-
-section Noetherian
-
-/-- **Every ideal of a compact Hausdorff Noetherian topological ring is closed**: it is finitely
-generated, hence the continuous image of a compact space, hence compact and closed. In particular
-`R ⧸ I` is `T3` for every ideal `I`, by `Submodule.t3_quotient_of_isClosed`. The ring of `p`-adic
-integers is the motivating example. -/
-instance (priority := 100) Ideal.isClosed_of_compactSpace_of_isNoetherianRing {R : Type*}
-    [CommSemiring R] [TopologicalSpace R] [IsTopologicalSemiring R] [CompactSpace R] [T2Space R]
-    [IsNoetherianRing R] (I : Ideal R) : IsClosed (I : Set R) :=
-  (Ideal.isCompact_of_fg (IsNoetherian.noetherian I)).isClosed
-
-end Noetherian
