@@ -56,8 +56,8 @@ theorem semilinearMonomialEquiv_frobeniusEquiv_conjugatePerm_not_mem_map_monomia
   have htwo : (2 : F) = 0 := CharTwo.two_eq_zero
   grind
 
-/-- The semilinear automorphism group of the hexacode is strictly larger than its monomial
-automorphism group. -/
+/-- The semilinear automorphism group of the hexacode strictly contains the image of its monomial
+automorphism group in the permutation group of the word space. -/
 theorem map_monomialAut_code_lt_semilinearAut_code :
     (monomialAut (code ω)).map
         (MulAction.toPermHom ((Fin 6 → F) ≃ₗ[F] (Fin 6 → F)) (Fin 6 → F)) <

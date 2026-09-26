@@ -8,6 +8,7 @@ module
 public import Mathlib.Algebra.Group.Action.Pointwise.Set.Basic
 public import Mathlib.Algebra.Group.Subgroup.Map
 public import Mathlib.GroupTheory.GroupAction.Defs
+public import TauCeti.Algebra.Module.Equiv.Basic
 public import TauCeti.InformationTheory.Coding.Semilinear.Basic
 
 /-!
@@ -105,12 +106,14 @@ theorem semilinearMonomialEquiv_toEquiv_mem_semilinearGroup (u : ι → Rˣ) (e 
   ⟨σ, u, e, rfl⟩
 
 /-- An element of the semilinear group is additive. -/
+@[simp]
 theorem map_add_of_mem_semilinearGroup {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearGroup R ι)
     (x y : ι → R) : f (x + y) = f x + f y := by
   obtain ⟨σ, u, e, rfl⟩ := hf
   simp only [LinearEquiv.coe_toEquiv, map_add]
 
 /-- An element of the semilinear group fixes the zero word. -/
+@[simp]
 theorem map_zero_of_mem_semilinearGroup {f : Equiv.Perm (ι → R)}
     (hf : f ∈ semilinearGroup R ι) : f 0 = 0 := by
   obtain ⟨σ, u, e, rfl⟩ := hf
@@ -124,6 +127,7 @@ theorem exists_map_smul_of_mem_semilinearGroup {f : Equiv.Perm (ι → R)}
   exact ⟨σ, fun r x ↦ (semilinearMonomialEquiv u e σ).map_smulₛₗ r x⟩
 
 /-- An element of the semilinear group preserves Hamming weight. -/
+@[simp]
 theorem hammingNorm_apply_of_mem_semilinearGroup [Fintype ι] [DecidableEq R]
     {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearGroup R ι) (x : ι → R) :
     hammingNorm (f x) = hammingNorm x := by
@@ -131,6 +135,7 @@ theorem hammingNorm_apply_of_mem_semilinearGroup [Fintype ι] [DecidableEq R]
   exact hammingNorm_semilinearMonomialEquiv u e σ x
 
 /-- An element of the semilinear group preserves Hamming distance. -/
+@[simp]
 theorem hammingDist_apply_of_mem_semilinearGroup [Fintype ι] [DecidableEq R]
     {f : Equiv.Perm (ι → R)} (hf : f ∈ semilinearGroup R ι) (x y : ι → R) :
     hammingDist (f x) (f y) = hammingDist x y := by
@@ -172,8 +177,9 @@ set of codewords to the semilinear image of the code. -/
 theorem semilinearMonomialEquiv_toEquiv_smul_coe (u : ι → Rˣ) (e : Equiv.Perm ι) (σ : R ≃+* R) :
     (semilinearMonomialEquiv u e σ).toEquiv • (C : Set (ι → R)) =
       (C.map (semilinearMonomialEquiv u e σ).toLinearMap : Set (ι → R)) := by
-  rw [Submodule.map_coe, ← Set.image_smul]
-  rfl
+  ext x
+  simp only [Set.mem_smul_set, SetLike.mem_coe, Submodule.mem_map, Equiv.Perm.smul_def,
+    LinearEquiv.coe_toEquiv, LinearEquiv.coe_coe]
 
 /-- A semilinear monomial transformation is a semilinear automorphism of `C` exactly when its
 semilinear image of `C` is `C`. -/
@@ -229,14 +235,6 @@ end SemilinearAut
 section Monomial
 
 variable [CommSemiring R] {C : Submodule R (ι → R)}
-
-/-- The permutation of the word space underlying a linear automorphism moves the set of codewords
-to the image of the code. -/
-theorem _root_.LinearEquiv.toPermHom_smul_coe (g : (ι → R) ≃ₗ[R] (ι → R)) :
-    MulAction.toPermHom ((ι → R) ≃ₗ[R] (ι → R)) (ι → R) g • (C : Set (ι → R)) =
-      (C.map (g : (ι → R) →ₗ[R] (ι → R)) : Set (ι → R)) := by
-  rw [Submodule.map_coe, ← Set.image_smul]
-  rfl
 
 /-- The permutation of the word space underlying a monomial transformation is the semilinear
 monomial transformation with the identity alphabet automorphism. -/
