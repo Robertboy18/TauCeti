@@ -6,7 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.AlgebraicGeometry.EllipticCurve.Isogeny.PointHom.Basic
-public import TauCeti.AlgebraicGeometry.EllipticCurve.Isogeny.Unramified
+-- Proof-only: a separable isogeny over a separably closed field splits every place completely.
+import TauCeti.AlgebraicGeometry.EllipticCurve.Isogeny.Unramified
 -- Proof-only: the relative norm of a prime over a maximal ideal with trivial residue extensions.
 import TauCeti.NumberTheory.DedekindDomain.RelNorm
 -- Proof-only: the dictionary between places over the place of a prime and the primes above it.
@@ -22,19 +23,16 @@ import TauCeti.RingTheory.DedekindDomain.AdicValuation.Basic
 intermediate ring and normed down to the target coordinate ring. Its geometric reading is that
 `φ` sends a point `P` of `W₁` to the point lying under it — the point `Q` of `W₂` whose place is
 the restriction along `φ^*` of the place of `P`. `PointHom/Basic.lean` proves this when `Q` is the
-point at infinity; this file proves it when `Q` is affine, so that the class-group construction
-computes the value of the rational map at every rational point.
+point at infinity; this file proves it when `Q` is affine. Together, for a separable isogeny over
+a separably closed field, they show that the class-group construction computes the value of the
+rational map at every rational point.
 
-The computation is the relative norm of a prime. The ideal of `P` extends to the height one prime
-`𝔓` of the intermediate ring carrying the valuation of `P`
-(`Isogeny.map_XYIdeal_eq_asIdeal_of_valuation_eq`), `𝔓` lies over the ideal `𝔮` of `Q`, and
-`N(𝔓) = 𝔮 ^ f(𝔓 ∣ 𝔮)`. The residue degree is `1` because both residue fields are the constant
-field, but the general formula `N(𝔓) = 𝔮 ^ f` is available in Mathlib only over a perfect base
-field. When every prime above `𝔮` has residue degree one, the fundamental identity alone yields
-`N(𝔓) = 𝔮` (`Ideal.relNorm_eq_of_forall_inertiaDeg_eq_one`); that residue-degree condition is the
-hypothesis of the core theorem, with no assumption on `F` or on the separability of `φ`. Over a
-separably closed field and for a separable isogeny it holds at every prime — every place splits
-completely, `Isogeny.isSplitCompletely` — which is the corollary.
+The affine case is a computation of the relative norm of the prime of the intermediate ring over
+the ideal `𝔮` of `Q`. The core theorem assumes only that every prime of the intermediate ring over
+`𝔮` has residue degree one — the condition under which
+`Ideal.relNorm_eq_of_forall_inertiaDeg_eq_one` computes that norm — and nothing about `F` or the
+separability of `φ`. Over a separably closed field a separable isogeny splits every place
+completely (`Isogeny.isSplitCompletely`), which discharges the condition and gives the corollary.
 
 ## Main results
 

@@ -30,10 +30,9 @@ this consequence.
   when a prime above it divides the original ideal.
 * `Ideal.relNorm_eq_of_forall_inertiaDeg_eq_one`: over a maximal ideal `p` all of whose primes
   have inertia degree one, the relative norm of each prime above `p` is `p` itself. This is the
-  formula `N(P) = p ^ f(P ∣ p)` in the one case the fundamental identity `∑ e · f = n` decides by
-  counting alone; Mathlib's `Ideal.relNorm_eq_pow_of_isMaximal` proves the general formula through
-  a Galois closure and therefore asks for a perfect base field, which a function field in positive
-  characteristic is not.
+  formula `N(P) = p ^ f(P ∣ p)` with every `f` equal to `1`, stated without the perfect-base-field
+  hypothesis of Mathlib's `Ideal.relNorm_eq_pow_of_isMaximal`, so that it applies to extensions of
+  function fields in positive characteristic.
 -/
 
 public section
@@ -114,14 +113,13 @@ theorem dvd_relNorm_iff_exists_liesOver_dvd {p : Ideal A} [p.IsPrime] (hp : p �
 
 /-- **Over a maximal ideal all of whose primes have inertia degree one, the relative norm of each
 prime above it is that maximal ideal.** This is `N(P) = p ^ f(P ∣ p)` when every `f` is `1`, with
-no separability or Galois hypothesis on the extension.
-
-The norm of a prime `Q` over `p` is some power `p ^ s_Q` with `s_Q ≥ 1`, and applying the norm to
-`p B = ∏ Q ^ e_Q` gives `∑ e_Q · s_Q = n`; the fundamental identity `∑ e_Q · f_Q = n` with every
-`f_Q = 1` then forces every `s_Q = 1`. -/
+no separability or Galois hypothesis on the extension. -/
 theorem relNorm_eq_of_forall_inertiaDeg_eq_one {p : Ideal A} [p.IsMaximal] (hp : p ≠ ⊥)
     (hf : ∀ Q ∈ p.primesOver B, Q.inertiaDeg A = 1) (P : Ideal B) [P.IsPrime] [P.LiesOver p] :
     relNorm A P = p := by
+  -- The norm of a prime `Q` over `p` is some power `p ^ s_Q` with `s_Q ≥ 1`, and applying the norm
+  -- to `p B = ∏ Q ^ e_Q` gives `∑ e_Q · s_Q = n`; the fundamental identity `∑ e_Q · f_Q = n` with
+  -- every `f_Q = 1` then forces every `s_Q = 1`.
   have : Algebra.IsIntegral A B := Algebra.IsIntegral.of_finite A B
   have hpt : p ≠ ⊤ := IsMaximal.ne_top inferInstance
   -- the norm of each prime over `p` is a positive power of `p`
