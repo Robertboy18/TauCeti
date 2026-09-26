@@ -105,14 +105,15 @@ theorem exists_lift_basis_frattiniQuotient_topologicallyGenerates (hG : IsProP p
 omit [TotallyDisconnectedSpace G] in
 /-- **Continuous `𝔽_p`-characters with prescribed values.** In a topologically finitely generated
 compact group, a family `g` whose classes in the pro-`p` Frattini quotient are linearly independent
-over `𝔽_p` takes any prescribed values `a k` under some continuous homomorphism into a discrete
+over `𝔽_p` takes any prescribed values `a k` under some continuous homomorphism into a topological
 `𝔽_p`-vector space `A`: the values define a linear functional on the span of the classes, which
-extends to the Frattini quotient, and the Frattini quotient is discrete. -/
+extends to the Frattini quotient, and the Frattini quotient is discrete, so no hypothesis on the
+topology of `A` is needed. -/
 theorem IsTopologicallyFinitelyGenerated.exists_continuousMonoidHom_apply_eq
     (hfg : IsTopologicallyFinitelyGenerated G) {ι : Type*} {g : ι → G}
     (hg : LinearIndependent (ZMod p) fun k ↦
       Additive.ofMul ((QuotientGroup.mk' (proPFrattini p G)) (g k)))
-    {A : Type*} [AddCommGroup A] [Module (ZMod p) A] [TopologicalSpace A] [DiscreteTopology A]
+    {A : Type*} [AddCommGroup A] [Module (ZMod p) A] [TopologicalSpace A]
     (a : ι → A) :
     ∃ ψ : G →ₜ* Multiplicative A, ∀ k, ψ (g k) = Multiplicative.ofAdd (a k) := by
   obtain ⟨φ, hφ⟩ := LinearMap.exists_extend ((Module.Basis.span hg).constr (ZMod p) a)
