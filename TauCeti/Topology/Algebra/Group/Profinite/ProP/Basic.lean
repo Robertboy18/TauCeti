@@ -104,6 +104,11 @@ theorem isProP_multiplicative_zmod_pow (p n : ℕ) [Fact p.Prime] :
     IsProP p (Multiplicative (ZMod (p ^ n))) :=
   (IsPGroup.of_card (n := n) (by simp [Nat.card_eq_fintype_card])).isProP
 
+/-- The cyclic group `ℤ/p` of prime order, written multiplicatively and with its discrete topology,
+is pro-`p`. -/
+theorem isProP_multiplicative_zmod (p : ℕ) [Fact p.Prime] : IsProP p (Multiplicative (ZMod p)) :=
+  (ZModModule.isPGroup_multiplicative (n := p) (G := ZMod p)).isProP
+
 end Discrete
 
 namespace IsProP
