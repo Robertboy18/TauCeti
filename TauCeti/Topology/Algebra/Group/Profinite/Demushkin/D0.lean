@@ -276,13 +276,10 @@ theorem isTopologicallyFinitelyGenerated_demushkinD0 :
   (Set.toFinite {d0A, d0S, d0Y}).isTopologicallyFinitelyGenerated d0_topologicallyGenerates
 
 /-- The relator `A²S⁴(S,Y)` lies in the Frattini subgroup of the free pro-`2` group on three
-generators: `A²` and `S⁴ = (S²)²` are squares and `(S,Y) = ⁅S⁻¹, Y⁻¹⁆` is a commutator. -/
+generators, being the `q = 2`, `n` odd normal-form word with `f = 2 ≥ 1`. -/
 theorem d0Relator_mem_proPFrattini : d0Relator ∈ proPFrattini 2 (freeProP 2 (Fin 3)) := by
-  refine mul_mem (mul_mem (pow_mem_proPFrattini _) ?_) ?_
-  · exact pow_mem_proPFrattini_of_dvd (by norm_num) _
-  · simpa [commutatorElement_def] using commutator_le_proPFrattini Nat.prime_two
-      (Subgroup.commutator_mem_commutator (Subgroup.mem_top (freeProP.of (1 : Fin 3))⁻¹)
-        (Subgroup.mem_top (freeProP.of (2 : Fin 3))⁻¹))
+  rw [d0Relator_eq_demushkinWordTwoOdd]
+  exact demushkinWordTwoOdd_mem_proPFrattini two_pos 3 _
 
 /-- **`D₀` has topological generator rank `3`**: its presentation on `A`, `S`, `Y` is minimal,
 because the relator lies in the Frattini subgroup of the free pro-`2` group. -/

@@ -120,13 +120,6 @@ theorem coe_subgroupSubtype (S : Subgroup G) : (subgroupSubtype S : S →* G) = 
 theorem subgroupSubtype_apply (S : Subgroup G) (s : S) : subgroupSubtype S s = (s : G) :=
   (rfl)
 
-/-- The range of a continuous homomorphism out of a compact group into a Hausdorff group is a
-closed subgroup. -/
-theorem isClosed_range [CompactSpace G] {K : Type*} [Group K] [TopologicalSpace K] [T2Space K]
-    (χ : G →ₜ* K) : IsClosed (χ.toMonoidHom.range : Set K) := by
-  rw [MonoidHom.coe_range, ContinuousMonoidHom.coe_toMonoidHom]
-  exact (isCompact_range χ.continuous).isClosed
-
 end ContinuousMonoidHom
 
 /-- The inverse conjugation homomorphism of a normal subgroup, with the subspace topology. -/

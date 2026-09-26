@@ -178,6 +178,15 @@ theorem presentedProPGen_val (i : Fin n) :
     presentedProPGen p n rels i = presentedProP.of p rels i := by
   rw [← presentedProP.mk_freeProPGen, freeProPGen_val, presentedProP.mk_of]
 
+/-- The value of a homomorphism on the `ℕ`-indexed generators of a presented group. -/
+theorem map_presentedProPGen {K F : Type*} [Group K] [FunLike F (presentedProP p (Fin n) rels) K]
+    [MonoidHomClass F (presentedProP p (Fin n) rels) K] (φ : F) (i : ℕ) :
+    φ (presentedProPGen p n rels i) =
+      if h : i < n then φ (presentedProP.of p rels ⟨i, h⟩) else 1 := by
+  split_ifs with h
+  · rw [presentedProPGen_of_lt p n rels h]
+  · rw [presentedProPGen_eq_one_of_le p n rels (not_lt.mp h), map_one]
+
 end Generators
 
 /-! ### The three normal-form words -/
