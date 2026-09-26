@@ -215,7 +215,8 @@ theorem IsDedekindDomain.HeightOneSpectrum.ideleFiniteCoord_ofCompletion
 
 /-- **Ideles are determined by their coordinates**: two ideles with the same coordinate at every
 infinite place and the same finite component are equal. -/
-theorem NumberField.IdeleGroup.ext_of_ideleInfiniteCoord_of_toFiniteIdele {x y : IdeleGroup R K}
+@[ext]
+theorem NumberField.IdeleGroup.ext {x y : IdeleGroup R K}
     (hinf : ∀ w : InfinitePlace K, w.ideleInfiniteCoord x = w.ideleInfiniteCoord y)
     (hfin : IdeleGroup.toFiniteIdele R K x = IdeleGroup.toFiniteIdele R K y) : x = y := by
   refine Units.ext (Prod.ext (funext fun w ↦ ?_) ?_)
@@ -232,7 +233,7 @@ theorem NumberField.IdeleGroup.prod_ofCompletion_mul_ofFiniteIdele [NumberField 
     (∏ w, IdeleGroup.ofCompletion R K w (w.ideleInfiniteCoord x)) *
       IdeleGroup.ofFiniteIdele R K (IdeleGroup.toFiniteIdele R K x) = x := by
   classical
-  refine IdeleGroup.ext_of_ideleInfiniteCoord_of_toFiniteIdele (fun w ↦ ?_) ?_
+  refine IdeleGroup.ext (fun w ↦ ?_) ?_
   · rw [map_mul, map_prod, InfinitePlace.ideleInfiniteCoord_ofFiniteIdele, mul_one,
       Finset.prod_eq_single w
         (fun w' _ hw' ↦ InfinitePlace.ideleInfiniteCoord_ofCompletion_of_ne w hw'.symm _)

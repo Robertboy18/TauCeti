@@ -61,21 +61,25 @@ open scoped NumberField NumberField.AdeleRing WithZero
 
 namespace TauCeti.GlobalNumberFields
 
-variable {K : Type*} [Field K] [NumberField K]
+variable {K : Type*} [Field K]
+
+section
+
+variable {R : Type*} [CommRing R] [IsDedekindDomain R] [Algebra R K] [IsFractionRing R K]
 
 /-- **An open subgroup of the idele group contains the archimedean identity component**: it
 contains every idele concentrated at a complex place and every positive idele concentrated at a real
-place.  Its pullback to the local unit group is an open, hence closed, subgroup, and the sets in
-question are preconnected and contain `1`. -/
-theorem ofCompletion_mem_of_isOpen {V : Subgroup (IdeleGroup (𝓞 K) K)}
-    (hV : IsOpen (V : Set (IdeleGroup (𝓞 K) K))) (w : InfinitePlace K) (u : w.Completionˣ)
+place.  Membership of an idele in an open subgroup therefore depends on its archimedean components
+only through their signs at the real places. -/
+theorem ofCompletion_mem_of_isOpen {V : Subgroup (IdeleGroup R K)}
+    (hV : IsOpen (V : Set (IdeleGroup R K))) (w : InfinitePlace K) (u : w.Completionˣ)
     (hu : ∀ hw : w.IsReal, 0 < InfinitePlace.Completion.extensionEmbeddingOfIsReal hw u) :
-    IdeleGroup.ofCompletion (𝓞 K) K w u ∈ V := by
-  have hopen : IsOpen ((V.comap (IdeleGroup.ofCompletion (𝓞 K) K w) : Subgroup w.Completionˣ) :
+    IdeleGroup.ofCompletion R K w u ∈ V := by
+  have hopen : IsOpen ((V.comap (IdeleGroup.ofCompletion R K w) : Subgroup w.Completionˣ) :
       Set w.Completionˣ) := by
     rw [Subgroup.coe_comap]
-    exact hV.preimage (IdeleGroup.continuous_ofCompletion (𝓞 K) K w)
-  have hclopen : IsClopen ((V.comap (IdeleGroup.ofCompletion (𝓞 K) K w) : Subgroup w.Completionˣ) :
+    exact hV.preimage (IdeleGroup.continuous_ofCompletion R K w)
+  have hclopen : IsClopen ((V.comap (IdeleGroup.ofCompletion R K w) : Subgroup w.Completionˣ) :
       Set w.Completionˣ) :=
     ⟨Subgroup.isClosed_of_isOpen _ hopen, hopen⟩
   rw [← Subgroup.mem_comap]
@@ -85,10 +89,13 @@ theorem ofCompletion_mem_of_isOpen {V : Subgroup (IdeleGroup (𝓞 K) K)}
   · have := InfinitePlace.Completion.connectedSpace_units_of_isComplex hw
     exact Set.eq_univ_iff_forall.mp (hclopen.eq_univ ⟨1, one_mem _⟩) u
 
-/-- **Every open subgroup of the idele group contains an idele congruence subgroup.**  The
-subgroup is a neighbourhood of `1`; its finite part contains a basic congruence neighbourhood, which
-prescribes the finite part of the modulus, and the infinite part of the modulus consists of all real
-places, so that the archimedean components of a congruence idele lie in the identity component. -/
+end
+
+variable [NumberField K]
+
+/-- **Every open subgroup of the idele group contains an idele congruence subgroup.**  The idele
+congruence subgroups are therefore cofinal among the open subgroups of the idele group; see
+`isOpen_iff_exists_ideleCongruenceSubgroup_le` for the resulting characterisation of openness. -/
 theorem exists_ideleCongruenceSubgroup_le_of_isOpen (V : Subgroup (IdeleGroup (𝓞 K) K))
     (hV : IsOpen (V : Set (IdeleGroup (𝓞 K) K))) :
     ∃ 𝔪 : Modulus K, ideleCongruenceSubgroup 𝔪 ≤ V := by
@@ -147,9 +154,10 @@ theorem isOpen_iff_exists_ideleCongruenceSubgroup_le (V : Subgroup (IdeleGroup (
   ⟨exists_ideleCongruenceSubgroup_le_of_isOpen V,
     fun ⟨𝔪, h⟩ ↦ Subgroup.isOpen_mono h (isOpen_ideleCongruenceSubgroup 𝔪)⟩
 
-/-- **Every open subgroup of the idele class group contains a ray subgroup.**  The pullback of the
-subgroup to the idele group is open, so it contains an idele congruence subgroup, whose image is the
-corresponding ray subgroup. -/
+/-- **Every open subgroup of the idele class group contains a ray subgroup.**  The ray subgroups
+are therefore cofinal among the open subgroups of the idele class group, so that the finite
+quotients `C_K / raySubgroup 𝔪` see every open subgroup; see `isOpen_iff_exists_raySubgroup_le` for
+the resulting characterisation of openness. -/
 theorem exists_raySubgroup_le_of_isOpen (U : Subgroup (IdeleClassGroup (𝓞 K) K))
     (hU : IsOpen (U : Set (IdeleClassGroup (𝓞 K) K))) :
     ∃ 𝔪 : Modulus K, raySubgroup 𝔪 ≤ U := by
@@ -157,7 +165,9 @@ theorem exists_raySubgroup_le_of_isOpen (U : Subgroup (IdeleClassGroup (𝓞 K) 
     (U.comap (QuotientGroup.mk' (IdeleGroup.principalSubgroup (𝓞 K) K))) (by
       rw [Subgroup.coe_comap]
       exact hU.preimage QuotientGroup.continuous_mk)
-  exact ⟨𝔪, raySubgroup_le_iff.mpr h𝔪⟩
+  refine ⟨𝔪, fun c hc ↦ ?_⟩
+  obtain ⟨x, hx, rfl⟩ := mem_raySubgroup_iff.mp hc
+  exact h𝔪 hx
 
 /-- **A subgroup of the idele class group is open exactly when it contains a ray subgroup.** -/
 theorem isOpen_iff_exists_raySubgroup_le (U : Subgroup (IdeleClassGroup (𝓞 K) K)) :

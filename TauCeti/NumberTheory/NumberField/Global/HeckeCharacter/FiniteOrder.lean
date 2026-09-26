@@ -62,9 +62,9 @@ theorem isOpen_ker_ofRayClassCharacter {𝔪 : Modulus K} (η : RayClassCharacte
       IdeleClassGroup (𝓞 K) K →* ℂˣ).ker : Set (IdeleClassGroup (𝓞 K) K)) :=
   isOpen_ker_of_isFiniteOrder (isFiniteOrder_ofRayClassCharacter η)
 
-/-- **A Hecke character with open kernel is the pullback of a ray class character**: the open
-kernel contains a ray subgroup `raySubgroup 𝔪`, and a character trivial on it factors through the
-ray class group of `𝔪`. -/
+/-- **A Hecke character with open kernel is the pullback of a ray class character** of some
+modulus `𝔪`.  Together with `isOpen_ker_ofRayClassCharacter` this identifies the Hecke characters
+with open kernel with the ray class characters of all moduli. -/
 theorem exists_ofRayClassCharacter_eq_of_isOpen_ker {χ : HeckeCharacter K}
     (hχ : IsOpen ((χ : IdeleClassGroup (𝓞 K) K →* ℂˣ).ker : Set (IdeleClassGroup (𝓞 K) K))) :
     ∃ (𝔪 : Modulus K) (η : RayClassCharacter 𝔪), ofRayClassCharacter 𝔪 η = χ := by
