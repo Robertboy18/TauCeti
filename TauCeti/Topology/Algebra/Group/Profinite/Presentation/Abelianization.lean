@@ -36,10 +36,10 @@ for one-relator pro-`p` groups** (`oneRelatorAbelianizationEquiv`):
 `G^{ab} ≅ ℤ_p^{n-1} × ℤ_p ⧸ q ℤ_p,   n = #X, q = v x₀`,
 
 with `q = 0` exactly when the relator lies in the closed commutator subgroup, and then
-`G^{ab} ≅ ℤ_p^n`. In particular the torsion subgroup of `G^{ab}` is the cyclic group `ℤ_p ⧸ q ℤ_p`,
-finite when `q ≠ 0`. For a Demushkin group, whose minimal presentation has a single relator, this
-is Labute's description `G ⧸ [G, G] ≅ ℤ_p^{n-1} ⊕ ℤ ⧸ q` of the abelianization, and the integer
-`q ∈ {0} ∪ p^ℕ` read off the torsion is the invariant `q(G)` of the classification.
+`G^{ab} ≅ ℤ_p^n` is torsion-free. When `q ≠ 0` the factor `ℤ_p ⧸ q ℤ_p` is finite cyclic and is the
+torsion subgroup of `G^{ab}`. For a Demushkin group, whose minimal presentation has a single
+relator, this is Labute's description `G ⧸ [G, G] ≅ ℤ_p^{n-1} ⊕ ℤ ⧸ q` of the abelianization, and
+the integer `q ∈ {0} ∪ p^ℕ` read off the torsion is the invariant `q(G)` of the classification.
 
 ## Main definitions
 
@@ -320,8 +320,9 @@ and write the exponent vector of `r` as `exponentSum r = q • w` with `w x₀ =
 `G^{ab} ≃ₜ* ℤ_p^{X ∖ {x₀}} × ℤ_p ⧸ q ℤ_p`
 
 as topological groups, the isomorphism sending the class of the generator at `x ≠ x₀` to the
-coordinate vector at `x` and the class of the generator at `x₀` to `(-w, 1)`. The torsion of
-`G^{ab}` is the cyclic factor `ℤ_p ⧸ q ℤ_p`, which is `ℤ_p` when `q = 0` and finite otherwise. -/
+coordinate vector at `x` and the class of the generator at `x₀` to `(-w, 1)`. When `q ≠ 0` the
+factor `ℤ_p ⧸ q ℤ_p` is finite cyclic and is the torsion subgroup of `G^{ab}`; when `q = 0` it is
+`ℤ_p` and `G^{ab} ≅ ℤ_p^X` is torsion-free. -/
 noncomputable def oneRelatorAbelianizationEquiv :
     TopologicalAbelianization (presentedProP p X {r}) ≃ₜ*
       Multiplicative (({x // x ≠ x₀} → ℤ_[p]) × (ℤ_[p] ⧸ Ideal.span {q})) :=
