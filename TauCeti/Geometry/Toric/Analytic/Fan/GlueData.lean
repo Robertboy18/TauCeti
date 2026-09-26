@@ -38,9 +38,10 @@ point of the chart of the intersection cone.
 
 The gluing data is built with `TopCat.GlueData.mk'`, whose index type and spaces live in one
 universe, so the lattice `N` and the real vector space `V` are taken in a common universe here.
-The gluing core and the gluing data are exposed so that the charts of the gluing data are
-definitionally the affine analytic charts, which is what lets the chart inclusions be stated on
-the objects of `TauCeti.Toric.Fan.analyticAffineChartDiagram`.
+The gluing data is exposed so that its index type and charts are definitionally the cones and the
+affine analytic charts, which is what lets the chart inclusions be stated on the objects of
+`TauCeti.Toric.Fan.analyticAffineChartDiagram` and lets the `TopCat.GlueData` API be applied at a
+cone.
 
 ## References
 
@@ -61,34 +62,31 @@ variable {N V : Type u} [AddCommGroup N] [AddCommGroup V] [Module ℝ V]
 
 /-! ### The gluing data -/
 
-/-- The gluing core of the affine analytic charts of a regular fan: the charts, their overlap
-loci and the overlap transitions, together with the identity, triple-overlap and cocycle laws. -/
-@[expose] noncomputable def analyticGlueCore : TopCat.GlueData.MkCore where
-  J := Φ.cones
-  U σ := (Φ.analyticAffineChartDiagram hΦ).obj σ
-  V σ τ := Φ.analyticOverlapOpens hΦ σ τ
-  t σ τ := Φ.analyticOverlapTransition hΦ σ τ
-  V_id := Φ.analyticOverlapOpens_self hΦ
-  t_id σ := by rw [analyticOverlapTransition_self, TopCat.coe_id]
-  t_inter {σ τ} υ x h := by
-    -- `x` is a point of the overlap open set, and the transition is stated on the
-    -- corresponding `TopCat` object; these agree only up to unfolding `Opens.toTopCat`.
-    erw [analyticOverlapTransition_apply]
-    exact Φ.analyticOverlapHomeomorph_mem hΦ σ τ υ x h
-  cocycle σ τ υ x h := by
-    -- Restate the transition formula on points of the overlap open sets, the form in which
-    -- `TopCat.GlueData.MkCore` phrases the cocycle law.
-    have e : ∀ (σ τ : Φ.cones) (y : Φ.analyticOverlapOpens hΦ σ τ),
-        Subtype.val (Φ.analyticOverlapTransition hΦ σ τ y) =
-          Subtype.val (Φ.analyticOverlapHomeomorph hΦ σ τ y) := fun σ τ y ↦ by
-      erw [analyticOverlapTransition_apply]
-    simp only [e]
-    exact Φ.analyticOverlapHomeomorph_cocycle hΦ σ τ υ x h
-
 /-- The gluing data of the affine analytic charts of a regular fan along their overlap
-transitions. -/
+transitions: the charts, their overlap loci and the overlap transitions, together with the
+identity, triple-overlap and cocycle laws. -/
 @[expose] noncomputable def analyticGlueData : TopCat.GlueData :=
-  TopCat.GlueData.mk' (Φ.analyticGlueCore hΦ)
+  TopCat.GlueData.mk'
+    { J := Φ.cones
+      U σ := (Φ.analyticAffineChartDiagram hΦ).obj σ
+      V σ τ := Φ.analyticOverlapOpens hΦ σ τ
+      t σ τ := Φ.analyticOverlapTransition hΦ σ τ
+      V_id := Φ.analyticOverlapOpens_self hΦ
+      t_id σ := by rw [analyticOverlapTransition_self, TopCat.coe_id]
+      t_inter {σ τ} υ x h := by
+        -- `x` is a point of the overlap open set, and the transition is stated on the
+        -- corresponding `TopCat` object; these agree only up to unfolding `Opens.toTopCat`.
+        erw [analyticOverlapTransition_apply]
+        exact Φ.analyticOverlapHomeomorph_mem hΦ σ τ υ x h
+      cocycle σ τ υ x h := by
+        -- Restate the transition formula on points of the overlap open sets, the form in which
+        -- `TopCat.GlueData.MkCore` phrases the cocycle law.
+        have e : ∀ (σ τ : Φ.cones) (y : Φ.analyticOverlapOpens hΦ σ τ),
+            Subtype.val (Φ.analyticOverlapTransition hΦ σ τ y) =
+              Subtype.val (Φ.analyticOverlapHomeomorph hΦ σ τ y) := fun σ τ y ↦ by
+          erw [analyticOverlapTransition_apply]
+        simp only [e]
+        exact Φ.analyticOverlapHomeomorph_cocycle hΦ σ τ υ x h }
 
 /-- The gluing data is indexed by the cones of the fan. -/
 @[simp] theorem analyticGlueData_J : (Φ.analyticGlueData hΦ).J = Φ.cones := (rfl)
@@ -171,11 +169,10 @@ theorem analyticAffineChartι_eq_analyticAffineChartι_iff {σ τ : Φ.cones}
     exact ⟨⟨Φ.analyticOverlapLeft hΦ σ τ z, Φ.analyticOverlapLeft_mem hΦ σ τ z⟩, rfl, key z _⟩
 
 /-- The inclusion of the chart of a face factors through the chart diagram map into the chart of
-the ambient cone.
-
-This is not a simp lemma: `analyticAffineChartDiagram_map` rewrites the diagram map to the
-analytic face map, and the resulting composite with the chart inclusion is only well-typed after
-unfolding the diagram, so simp cannot use either spelling. -/
+the ambient cone. -/
+-- This is not a simp lemma: `analyticAffineChartDiagram_map` rewrites the diagram map to the
+-- analytic face map, and the resulting composite with the chart inclusion is only well-typed after
+-- unfolding the diagram, so simp cannot use either spelling.
 @[reassoc]
 theorem analyticAffineChartDiagram_map_comp_analyticAffineChartι {τ σ : Φ.cones} (f : τ ⟶ σ) :
     (Φ.analyticAffineChartDiagram hΦ).map f ≫ Φ.analyticAffineChartι hΦ σ =
