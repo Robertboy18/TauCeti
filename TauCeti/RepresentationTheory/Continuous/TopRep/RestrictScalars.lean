@@ -181,7 +181,9 @@ theorem coind₁RestrictScalarsIntIso_inv_apply (X : TopRep k G) (f : C(G, X.V))
 
 /-- The identification of the coinduced representations is compatible with the unit
 `TopRep.coind₁ι`, the inclusion of a representation as the constant functions. -/
-@[reassoc (attr := simp)]
+-- Not a simp lemma: the unit lives in `TopRep.{max v w}`, so the carrier universe of `X` occurs
+-- in every constant of the left-hand side only as `max v w`, which `simp` cannot instantiate.
+@[reassoc]
 theorem coind₁ι_comp_coind₁RestrictScalarsIntIso_hom (X : TopRep k G) :
     ofHom (restrictScalarsInt.obj X).ρ.coind₁ι ≫ (coind₁RestrictScalarsIntIso X).hom =
       restrictScalarsInt.map (ofHom X.ρ.coind₁ι) :=

@@ -73,7 +73,6 @@ theorem restrictScalarsInt_obj (M : TopModuleCat.{v} R) : restrictScalarsInt.obj
   (rfl)
 
 /-- Forgetting the scalars of a morphism restricts its scalars to `ℤ`. -/
-@[simp]
 theorem restrictScalarsInt_map_hom {M N : TopModuleCat.{v} R} (f : M ⟶ N) :
     (restrictScalarsInt.map f).hom = f.hom.restrictScalars ℤ :=
   (rfl)
