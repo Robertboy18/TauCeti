@@ -114,7 +114,7 @@ private def cupNeg (p : ℤ) : (n : ℕ) → (N : Rep k G) →
 
 variable (N : Rep k G)
 
-/-- **The Tate cup product** `Ĥᵖ(G, M) × Ĥ^q(G, N) → Ĥʳ(G, M ⊗ N)` for `p + q = r`, in all integer
+/-- **The Tate cup product** `H^p(G, M) × H^q(G, N) → H^r(G, M ⊗ N)` for `p + q = r`, in all integer
 bidegrees, as a `k`-bilinear map. In bidegree `(p, 0)` it is `cupH0` (`cup_zero_right`), and it is
 determined from there by the rule `x ∪ δ y = (-1)^p δ (x ∪ y)` for the connecting maps of the
 dimension-shifting sequences of `N` and of their tensor products with `M`
@@ -187,7 +187,7 @@ theorem cup_zero_right (p : ℤ) (h : p + 0 = p) : cup M N p 0 p h = cupH0 M N p
 
 /-- **The defining rule of the cup product for the upward dimension shift**: for `x` of degree `p`
 and `y` of nonnegative degree `q` in `dimensionShiftUp N`, `x ∪ δ y = (-1)^p δ (x ∪ y)`, where the
-first `δ` is the shift `Ĥ^q(G, dimensionShiftUp N) ≅ Ĥ^(q+1)(G, N)` and the second is its tensor
+first `δ` is the shift `H^q(G, dimensionShiftUp N) ≅ H^(q+1)(G, N)` and the second is its tensor
 product with `M`. -/
 theorem cup_dimensionShiftUpIso_hom {p q r' r : ℤ} (hq : 0 ≤ q) (h' : p + q = r')
     (h : r' + 1 = r) (x : tateCohomology M p) (y : tateCohomology (dimensionShiftUp N) q) :
@@ -202,7 +202,7 @@ theorem cup_dimensionShiftUpIso_hom {p q r' r : ℤ} (hq : 0 ≤ q) (h' : p + q 
 
 /-- **The defining rule of the cup product for the downward dimension shift**: for `x` of degree
 `p` and `y` of negative degree `q` in `N`, `x ∪ δ y = (-1)^p δ (x ∪ y)`, where the first `δ` is the
-shift `Ĥ^q(G, N) ≅ Ĥ^(q+1)(G, dimensionShiftDown N)` and the second is its tensor product with
+shift `H^q(G, N) ≅ H^(q+1)(G, dimensionShiftDown N)` and the second is its tensor product with
 `M`. -/
 theorem cup_dimensionShiftDownIso_hom {p q r' r : ℤ} (hq : q < 0) (h' : p + q = r')
     (h : r' + 1 = r) (x : tateCohomology M p) (y : tateCohomology N q) :
