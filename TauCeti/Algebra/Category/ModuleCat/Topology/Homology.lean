@@ -116,8 +116,8 @@ theorem homologyπ_eq_zero_iff {x : S.cycles} :
   exact LinearMap.mem_range
 
 /-- The inclusion of the cycles of a short complex of topological modules into its middle term is
-injective. This is the elementwise form of `CategoryTheory.ShortComplex.iCycles` being a
-monomorphism, read through the forgetful functor to `TopCat`, which preserves limits. -/
+injective: two cycles with the same underlying element of the middle term are equal, so equalities
+between cycles can be checked after applying `S.iCycles`. -/
 theorem iCycles_injective : Function.Injective S.iCycles.hom :=
   ConcreteCategory.injective_of_mono_of_preservesPullback
     ((forget₂ (TopModuleCat R) TopCat).map S.iCycles)

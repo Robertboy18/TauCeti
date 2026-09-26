@@ -12,7 +12,7 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Functorial
 public import TauCeti.Topology.Algebra.GroupAction.QuotientAddGroup
 
 /-!
-# Continuous cohomology of a discrete module is detected on its finite submodules
+# Continuous cohomology of a discrete module is detected on finite sets of values
 
 Let `G` be a compact group and `X` a discrete topological representation of `G`. Mathlib's
 continuous cohomology `Hⁿ(G, X)` is the homology of the homogeneous cochain complex, whose degree
@@ -21,9 +21,11 @@ continuous cohomology `Hⁿ(G, X)` is the homology of the homogeneous cochain co
 such cochain takes only finitely many values in `X` once all its arguments are evaluated. This
 file records that fact and its consequence for cohomology: every class of `Hⁿ(G, X)` is the image
 of a class of `Hⁿ(G, Y)` for any subrepresentation `Y ⊆ X` containing those finitely many values.
+Without further hypotheses `Y` may be infinite, since the values need not generate a finite
+subgroup.
 
-For a discrete torsion `G`-module `M` with continuous action, the values of a cocycle generate a
-finite `G`-stable subgroup `N ≤ M`, so every class of `Hⁿ(G, M)` comes from `Hⁿ(G, N)` for a
+For a discrete **torsion** `G`-module `M` with continuous action, the values of a cocycle generate
+a finite `G`-stable subgroup `N ≤ M`, so every class of `Hⁿ(G, M)` comes from `Hⁿ(G, N)` for a
 finite `N`. In particular the vanishing of `Hⁿ(G, -)` on all finite `p`-primary discrete modules
 implies its vanishing on all `p`-primary discrete modules, which lets the `p`-cohomological
 dimension be tested on finite coefficient modules alone. This is the coefficient half of the
