@@ -21,16 +21,16 @@ product of a simple cell with an arbitrary cell:
 ```
 
 This file decides between them by the length function: the first alternative holds exactly when
-`ℓ (s w) > ℓ w`, the second exactly when `ℓ (s w) < ℓ w`. The length-increasing case is proved by
-induction on a reduced word for `w`, peeling off its last letter; the length-decreasing case
-follows by applying the increasing case to `s w` and multiplying by the square of the simple cell,
-which is `B ∪ B s B`.
+`ℓ (s w) > ℓ w`, the second exactly when `ℓ (s w) < ℓ w` (Bourbaki, Chapter IV, §2, no. 4,
+Theorem 2). Multiplication of Bruhat cells by simple cells is thereby governed entirely by the
+length function on the Weyl group, which is the input for the exchange condition in
+`TauCeti.GroupTheory.TitsSystem.Bruhat.Exchange`.
 
-A consequence is that a simple reflection never preserves the length: `ℓ (s w) = ℓ w ± 1`. Both
-alternatives would otherwise make `(B s B)(B s B)(B w B)` equal to `B w B` and to
-`B w B ∪ B (s w) B` at once, contradicting the disjointness of distinct cells.
+Conversely the cells control the length: since one of the two alternatives always holds, a simple
+reflection never preserves the length, `ℓ (s w) = ℓ w ± 1`.
 
-The right-handed versions follow by inversion, which carries the cell at `w` to the cell at `w⁻¹`.
+Every statement has a `_right` variant for multiplication by a simple cell on the right, because
+inversion carries the cell at `w` to the cell at `w⁻¹` and preserves the length.
 
 ## Main declarations
 
@@ -67,6 +67,7 @@ local prefix:100 "ℓ " => T.simpleGenerators.wordLength
 /-! ### The rank-one law decided by the length function -/
 
 /-- **Length-increasing multiplication.** If `ℓ w ≤ ℓ (s w)`, then `(B s B)(B w B) = B (s w) B`. -/
+@[simp]
 theorem bruhatCell_mul_eq_of_wordLength_le {s : T.WeylGroup} (hs : s ∈ T.simple)
     {w : T.WeylGroup} (hw : ℓ w ≤ ℓ (s * w)) :
     T.bruhatCell s * T.bruhatCell w = T.bruhatCell (s * w) := by
@@ -124,9 +125,11 @@ theorem bruhatCell_mul_eq_of_wordLength_le {s : T.WeylGroup} (hs : s ∈ T.simpl
 
 /-- **Length-decreasing multiplication.** If `ℓ (s w) < ℓ w`, then
 `(B s B)(B w B) = B (s w) B ∪ B w B`. -/
+@[simp]
 theorem bruhatCell_mul_eq_union_of_wordLength_lt {s : T.WeylGroup} (hs : s ∈ T.simple)
     {w : T.WeylGroup} (hw : ℓ (s * w) < ℓ w) :
     T.bruhatCell s * T.bruhatCell w = T.bruhatCell (s * w) ∪ T.bruhatCell w := by
+  -- Apply the length-increasing case to `s w` and multiply by `(B s B)(B s B) = B ∪ B s B`.
   have hkey : T.bruhatCell s * T.bruhatCell (s * w) = T.bruhatCell w := by
     have h := T.bruhatCell_mul_eq_of_wordLength_le hs (w := s * w)
       (by rw [T.simple_mul_simple_cancel_left hs]; exact hw.le)
@@ -141,6 +144,8 @@ theorem bruhatCell_mul_eq_union_of_wordLength_lt {s : T.WeylGroup} (hs : s ∈ T
 /-- A simple reflection never preserves the length. -/
 theorem wordLength_simple_mul_ne {s : T.WeylGroup} (hs : s ∈ T.simple) (w : T.WeylGroup) :
     ℓ (s * w) ≠ ℓ w := by
+  -- Otherwise the length-increasing case applies to both `w` and `s w`, and
+  -- `(B s B)(B s B)(B w B) = B ∪ B s B` times `B w B` would collapse to the single cell `B w B`.
   intro h
   have h1 := T.bruhatCell_mul_eq_of_wordLength_le hs (w := w) h.ge
   have h2 := T.bruhatCell_mul_eq_of_wordLength_le hs (w := s * w)
@@ -165,6 +170,7 @@ theorem wordLength_simple_mul {s : T.WeylGroup} (hs : s ∈ T.simple) (w : T.Wey
 
 /-- The two alternatives of the rank-one law are decided by the length: `(B s B)(B w B)` is the
 single cell `B (s w) B` exactly when `s` increases the length of `w`. -/
+@[simp]
 theorem bruhatCell_mul_eq_iff_wordLength_lt {s : T.WeylGroup} (hs : s ∈ T.simple)
     (w : T.WeylGroup) :
     T.bruhatCell s * T.bruhatCell w = T.bruhatCell (s * w) ↔ ℓ w < ℓ (s * w) := by
@@ -179,6 +185,7 @@ theorem bruhatCell_mul_eq_iff_wordLength_lt {s : T.WeylGroup} (hs : s ∈ T.simp
 
 /-- The two alternatives of the rank-one law are decided by the length: `(B s B)(B w B)` is the
 union `B (s w) B ∪ B w B` exactly when `s` decreases the length of `w`. -/
+@[simp]
 theorem bruhatCell_mul_eq_union_iff_wordLength_lt {s : T.WeylGroup} (hs : s ∈ T.simple)
     (w : T.WeylGroup) :
     T.bruhatCell s * T.bruhatCell w = T.bruhatCell (s * w) ∪ T.bruhatCell w ↔
@@ -192,11 +199,6 @@ theorem bruhatCell_mul_eq_union_iff_wordLength_lt {s : T.WeylGroup} (hs : s ∈ 
   exact T.simple_ne_one hs (by simpa using T.bruhatCell_subset_iff.mp h3)
 
 /-! ### The right-handed versions -/
-
-/-- The length of `w s` is the length of `s w⁻¹`. -/
-theorem wordLength_mul_simple_eq_wordLength_simple_mul_inv (w : T.WeylGroup) {s : T.WeylGroup}
-    (hs : s ∈ T.simple) : ℓ (w * s) = ℓ (s * w⁻¹) := by
-  rw [← Group.Generators.wordLength_inv _ (w * s), mul_inv_rev, T.inv_simple hs]
 
 /-- A simple reflection never preserves the length, on the right. -/
 theorem wordLength_mul_simple_ne (w : T.WeylGroup) {s : T.WeylGroup} (hs : s ∈ T.simple) :
@@ -214,6 +216,7 @@ theorem wordLength_mul_simple (w : T.WeylGroup) {s : T.WeylGroup} (hs : s ∈ T.
 
 /-- **Length-increasing multiplication on the right.** If `ℓ w ≤ ℓ (w s)`, then
 `(B w B)(B s B) = B (w s) B`. -/
+@[simp]
 theorem bruhatCell_mul_eq_of_wordLength_le_right (w : T.WeylGroup) {s : T.WeylGroup}
     (hs : s ∈ T.simple) (hw : ℓ w ≤ ℓ (w * s)) :
     T.bruhatCell w * T.bruhatCell s = T.bruhatCell (w * s) := by
@@ -225,6 +228,7 @@ theorem bruhatCell_mul_eq_of_wordLength_le_right (w : T.WeylGroup) {s : T.WeylGr
 
 /-- **Length-decreasing multiplication on the right.** If `ℓ (w s) < ℓ w`, then
 `(B w B)(B s B) = B (w s) B ∪ B w B`. -/
+@[simp]
 theorem bruhatCell_mul_eq_union_of_wordLength_lt_right (w : T.WeylGroup) {s : T.WeylGroup}
     (hs : s ∈ T.simple) (hw : ℓ (w * s) < ℓ w) :
     T.bruhatCell w * T.bruhatCell s = T.bruhatCell (w * s) ∪ T.bruhatCell w := by
@@ -236,6 +240,7 @@ theorem bruhatCell_mul_eq_union_of_wordLength_lt_right (w : T.WeylGroup) {s : T.
 
 /-- On the right, `(B w B)(B s B)` is the single cell `B (w s) B` exactly when `s` increases the
 length of `w`. -/
+@[simp]
 theorem bruhatCell_mul_eq_iff_wordLength_lt_right (w : T.WeylGroup) {s : T.WeylGroup}
     (hs : s ∈ T.simple) :
     T.bruhatCell w * T.bruhatCell s = T.bruhatCell (w * s) ↔ ℓ w < ℓ (w * s) := by
@@ -250,6 +255,7 @@ theorem bruhatCell_mul_eq_iff_wordLength_lt_right (w : T.WeylGroup) {s : T.WeylG
 
 /-- On the right, `(B w B)(B s B)` is the union `B (w s) B ∪ B w B` exactly when `s` decreases the
 length of `w`. -/
+@[simp]
 theorem bruhatCell_mul_eq_union_iff_wordLength_lt_right (w : T.WeylGroup) {s : T.WeylGroup}
     (hs : s ∈ T.simple) :
     T.bruhatCell w * T.bruhatCell s = T.bruhatCell (w * s) ∪ T.bruhatCell w ↔

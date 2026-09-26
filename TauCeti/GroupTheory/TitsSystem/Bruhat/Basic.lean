@@ -41,6 +41,10 @@ simple cells are developed in `TauCeti.GroupTheory.TitsSystem.Bruhat.Subword`.
 * `TauCeti.TitsSystem.bruhatCells_eq_univ`: the Bruhat cells cover the ambient group.
 * `TauCeti.TitsSystem.bruhatCell_mul_eq_or_eq_union_of_mem_simple`: multiplication on the left by
   a simple Bruhat cell gives either the adjacent cell or its union with the original cell.
+* `TauCeti.TitsSystem.subset_bruhatCell_mul_of_mem_simple` and
+  `TauCeti.TitsSystem.bruhatCell_mul_subset_union_of_mem_simple`: the adjacent cell always occurs
+  in the product with a simple cell on the left, and nothing beyond the adjacent and the original
+  cell does.
 * `TauCeti.TitsSystem.bruhatCell_mul_self_eq_union_of_mem_simple`: the square of a simple cell is
   its union with the identity cell.
 * `TauCeti.TitsSystem.exists_mem_doubleCoset`: every group element lies in a cell represented
@@ -264,6 +268,24 @@ theorem bruhatCell_mul_eq_or_eq_union_of_mem_simple {s : T.WeylGroup} (hs : s �
   simpa only [QuotientGroup.mk'_apply, ← QuotientGroup.mk_mul, Subgroup.comap_subtype,
     bruhatCell_mk] using
     T.mul_doubleCoset_eq_or_eq_union_of_mem_simple hs r rfl n
+
+/-- The adjacent cell always occurs in the product with a simple cell on the left. -/
+theorem subset_bruhatCell_mul_of_mem_simple {s : T.WeylGroup} (hs : s ∈ T.simple)
+    (w : T.WeylGroup) : T.bruhatCell (s * w) ⊆ T.bruhatCell s * T.bruhatCell w := by
+  rcases T.bruhatCell_mul_eq_or_eq_union_of_mem_simple hs w with h | h
+  · rw [h]
+  · rw [h]
+    exact Set.subset_union_left
+
+/-- The product with a simple cell on the left lies in the union of the adjacent and the original
+cell. -/
+theorem bruhatCell_mul_subset_union_of_mem_simple {s : T.WeylGroup} (hs : s ∈ T.simple)
+    (w : T.WeylGroup) :
+    T.bruhatCell s * T.bruhatCell w ⊆ T.bruhatCell (s * w) ∪ T.bruhatCell w := by
+  rcases T.bruhatCell_mul_eq_or_eq_union_of_mem_simple hs w with h | h
+  · rw [h]
+    exact Set.subset_union_left
+  · rw [h]
 
 /-- The square of a simple Bruhat cell is the union of that cell with the identity cell:
 `(B s B)(B s B) = B ∪ B s B`.

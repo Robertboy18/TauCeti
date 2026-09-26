@@ -35,6 +35,9 @@ reflection has length one, and multiplying by one changes the length by at most 
 * `TauCeti.TitsSystem.wordLength_simple_mul_le` and
   `TauCeti.TitsSystem.wordLength_le_wordLength_simple_mul_add_one`: multiplication by a simple
   reflection changes the length by at most one.
+* `TauCeti.TitsSystem.wordLength_mul_simple_eq_wordLength_simple_mul_inv`: since the length is
+  invariant under inversion, right multiplication by a simple reflection is governed by left
+  multiplication on the inverse.
 
 ## References
 
@@ -72,6 +75,12 @@ theorem wordProd_eq_prod (l : List (T.simple × Bool)) :
     obtain ⟨⟨s, hs⟩, b⟩ := x
     rw [Group.Generators.wordProd_cons, ih, List.map_cons, List.prod_cons]
     cases b <;> simp [T.inv_simple hs]
+
+/-- Reversing a list of simple reflections inverts its product. -/
+theorem prod_reverse_eq_inv_prod {l : List T.WeylGroup} (hl : ∀ s ∈ l, s ∈ T.simple) :
+    l.reverse.prod = l.prod⁻¹ := by
+  rw [List.prod_inv_reverse, List.map_congr_left (f := fun x ↦ x⁻¹) (g := fun x ↦ x)
+    fun s hs ↦ T.inv_simple (hl s hs), List.map_id']
 
 /-- **Length through lists of simple reflections.** The length of `w` is at most `n` exactly when
 `w` is the product of a list of at most `n` simple reflections. -/
@@ -132,5 +141,10 @@ theorem wordLength_le_wordLength_simple_mul_add_one {s : T.WeylGroup} (hs : s �
 theorem wordLength_le_wordLength_mul_simple_add_one (w : T.WeylGroup) {s : T.WeylGroup}
     (hs : s ∈ T.simple) : ℓ w ≤ ℓ (w * s) + 1 := by
   simpa only [T.simple_mul_simple_cancel_right w hs] using T.wordLength_mul_simple_le (w * s) hs
+
+/-- The length of `w s` is the length of `s w⁻¹`. -/
+theorem wordLength_mul_simple_eq_wordLength_simple_mul_inv (w : T.WeylGroup) {s : T.WeylGroup}
+    (hs : s ∈ T.simple) : ℓ (w * s) = ℓ (s * w⁻¹) := by
+  rw [← Group.Generators.wordLength_inv _ (w * s), mul_inv_rev, T.inv_simple hs]
 
 end TauCeti.TitsSystem
