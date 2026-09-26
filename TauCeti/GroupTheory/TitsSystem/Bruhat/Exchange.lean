@@ -15,7 +15,7 @@ This file proves that the pair `(W, S)` satisfies the **exchange condition**: if
 reflection, `w = s₁ ⋯ s_q` is a product of simple reflections, and `ℓ (s w) < ℓ w`, then
 
 ```text
-s w = s₁ ⋯ ŝ_j ⋯ s_q
+s w = s₁ ⋯ s_{j-1} s_{j+1} ⋯ s_q
 ```
 
 for some `j`, that is, `s w` is spelled by the same word with one letter deleted. No reducedness is
