@@ -7,7 +7,9 @@ module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Burnside
 public import Mathlib.LinearAlgebra.Basis.Basic
+import Mathlib.LinearAlgebra.Basis.VectorSpace
 import TauCeti.Algebra.Module.ZMod.Span.Basic
+public import TauCeti.Topology.Algebra.Group.Profinite.ProP.FiniteGeneration
 import TauCeti.Topology.Algebra.Group.Subgroup
 
 /-!
@@ -17,6 +19,14 @@ Burnside's topological generation criterion says that a set generates a profinit
 group topologically exactly when its image spans a dense subspace of the Frattini quotient
 over `𝔽_p`. When the quotient is finite, this is equivalent to algebraic spanning. Any basis
 of the Frattini quotient lifts to topological generators, even when the quotient is infinite.
+
+Dually, when the group is topologically finitely generated, a family whose classes in the Frattini
+quotient are linearly independent is separated by continuous characters: for any prescribed values
+in a discrete `𝔽_p`-vector space there is a continuous homomorphism taking them
+(`TauCeti.IsTopologicallyFinitelyGenerated.exists_continuousMonoidHom_apply_eq`). Topological
+finite generation makes the Frattini quotient discrete, so that every linear functional on it is
+continuous; without it the statement fails for infinite families, whose values along a converging
+family would have to converge.
 
 ## References
 
@@ -91,5 +101,31 @@ theorem exists_lift_basis_frattiniQuotient_topologicallyGenerates (hG : IsProP p
   have hg' i : Additive.ofMul ((QuotientGroup.mk' (proPFrattini p G)) (g i)) = b i :=
     congrArg Additive.ofMul (hg i)
   exact ⟨g, hg', topologicallyGenerates_of_basis_frattiniQuotient hG b g hg'⟩
+
+omit [TotallyDisconnectedSpace G] in
+/-- **Continuous `𝔽_p`-characters with prescribed values.** In a topologically finitely generated
+compact group, a family `g` whose classes in the pro-`p` Frattini quotient are linearly independent
+over `𝔽_p` takes any prescribed values `a k` under some continuous homomorphism into a discrete
+`𝔽_p`-vector space `A`: the values define a linear functional on the span of the classes, which
+extends to the Frattini quotient, and the Frattini quotient is discrete. -/
+theorem IsTopologicallyFinitelyGenerated.exists_continuousMonoidHom_apply_eq
+    (hfg : IsTopologicallyFinitelyGenerated G) {ι : Type*} {g : ι → G}
+    (hg : LinearIndependent (ZMod p) fun k ↦
+      Additive.ofMul ((QuotientGroup.mk' (proPFrattini p G)) (g k)))
+    {A : Type*} [AddCommGroup A] [Module (ZMod p) A] [TopologicalSpace A] [DiscreteTopology A]
+    (a : ι → A) :
+    ∃ ψ : G →ₜ* Multiplicative A, ∀ k, ψ (g k) = Multiplicative.ofAdd (a k) := by
+  obtain ⟨φ, hφ⟩ := LinearMap.exists_extend ((Module.Basis.span hg).constr (ZMod p) a)
+  have hφk (k : ι) : φ (Additive.ofMul (g k : G ⧸ proPFrattini p G)) = a k := by
+    have h := LinearMap.congr_fun hφ (Module.Basis.span hg k)
+    rw [LinearMap.comp_apply, Module.Basis.constr_basis, Module.Basis.span_apply] at h
+    exact h
+  have : DiscreteTopology (G ⧸ proPFrattini p G) :=
+    QuotientGroup.discreteTopology (hfg.isOpen_proPFrattini p)
+  refine ⟨⟨(AddMonoidHom.toMultiplicativeRight φ.toAddMonoidHom).comp
+    (QuotientGroup.mk' (proPFrattini p G)), (continuous_of_discreteTopology
+      (f := ⇑(AddMonoidHom.toMultiplicativeRight φ.toAddMonoidHom))).comp
+      QuotientGroup.continuous_mk⟩, fun k ↦ ?_⟩
+  simp [AddMonoidHom.coe_toMultiplicativeRight, hφk]
 
 end TauCeti
