@@ -23,9 +23,10 @@ The uniform integrability of `dist (T n ·) y₀` does not depend on the basepoi
 triangle inequality, changing the basepoint changes each distance by at most the constant
 `dist y₀ y₁`, and constants are uniformly integrable over a finite measure. Uniform integrability is
 Mathlib's `MeasureTheory.UnifIntegrable`, the predicate its Vitali theorem uses. Mathlib's stronger
-`MeasureTheory.UniformIntegrable` adds a uniform `Lᵖ` bound on the family; under the hypotheses of
-the convergence theorem the two predicates coincide, because the `Lᵖ` convergence supplies the
-bound: a convergent sequence of finite norms is bounded.
+`MeasureTheory.UniformIntegrable` adds a uniform `Lᵖ` bound on the family. The convergence theorem
+is stated with either predicate: when the `Lᵖ` convergence of the distances is assumed, the
+convergent sequence of their finite `Lᵖ` norms is bounded, and this bound upgrades
+`MeasureTheory.UnifIntegrable` to `MeasureTheory.UniformIntegrable`.
 
 ## Main statements
 

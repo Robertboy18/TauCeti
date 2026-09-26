@@ -402,11 +402,6 @@ theorem coe_graph (hT : HasLaw T ν.toMeasure μ.toMeasure) :
     (graph hT : ProbabilityMeasure (X × Y)) = μ.map fun x ↦ (x, T x) :=
   (rfl)
 
-/-- The underlying measure of a bundled graph plan is the graph plan. -/
-theorem toMeasure_graph (hT : HasLaw T ν.toMeasure μ.toMeasure) :
-    ((graph hT : ProbabilityMeasure (X × Y)) : Measure (X × Y)) = graphPlan T μ.toMeasure := by
-  rw [coe_graph, toMeasure_map_prodMk_self]
-
 end Coupling
 
 end TauCeti
