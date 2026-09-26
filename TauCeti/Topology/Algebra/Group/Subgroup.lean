@@ -44,6 +44,11 @@ series of a profinite group.
   using `U.subgroupOf D`, is continuous.
 * `Dense.denseRange_subgroupOf_codRestrict`: a dense subgroup meets an open subgroup densely.
 * `Subgroup.instIsClosedTopologicalClosure`: the topological closure of a subgroup is closed.
+* `Subgroup.dense_iff_topologicalClosure_eq_top`: a subgroup is dense exactly when its topological
+  closure is everything; `IsClosed.subgroup_topologicalClosure_eq`: a closed subgroup is its own
+  topological closure.
+* `Subgroup.dense_preimage_val_iff_le_topologicalClosure`: a subgroup `H ≤ K` is dense in `K`
+  exactly when `K` lies in the topological closure of `H`.
 * `TauCeti.instNormal_topologicalClosure_normalClosure`: the closure of a normal closure is
   normal.
 * `TauCeti.topologicalClosure_normalClosure_le_ker`: relators killed by a continuous map have
@@ -55,7 +60,7 @@ series of a profinite group.
 * `ContinuousMonoidHom.topologicalClosure_normalClosure_ker`: the kernel of a continuous
   homomorphism to a `T1` group is its own closed normal closure.
 * `Subgroup.toAddSubgroup_topologicalClosure`: converting to an additive subgroup commutes with
-  topological closure.
+  topological closure; `Subgroup.dense_toAddSubgroup_iff`: and preserves density.
 * `MonoidHom.map_topologicalClosure_le`: a continuous homomorphism maps the topological closure of
   a subgroup into the topological closure of its image; `MonoidHom.map_topologicalClosure`: with
   equality when the subgroup's closure is compact and the target Hausdorff.
@@ -137,6 +142,32 @@ instance instIsClosedTopologicalClosure (s : Subgroup G) :
     IsClosed (s.topologicalClosure : Set G) :=
   s.isClosed_topologicalClosure
 
+/-- A subgroup is dense exactly when its topological closure is the whole group. -/
+@[to_additive /-- An additive subgroup is dense exactly when its topological closure is the whole
+group. -/]
+theorem dense_iff_topologicalClosure_eq_top {s : Subgroup G} :
+    Dense (s : Set G) ↔ s.topologicalClosure = ⊤ := by
+  rw [SetLike.ext'_iff, topologicalClosure_coe, coe_top, dense_iff_closure_eq]
+
+/-- A closed subgroup is its own topological closure. -/
+@[to_additive /-- A closed additive subgroup is its own topological closure. -/]
+theorem _root_.IsClosed.subgroup_topologicalClosure_eq {s : Subgroup G}
+    (hs : IsClosed (s : Set G)) : s.topologicalClosure = s :=
+  SetLike.coe_injective (topologicalClosure_coe.trans hs.closure_eq)
+
+/-- A subgroup `H ≤ K` is dense in `K` exactly when `K` lies in the topological closure of `H`. -/
+theorem dense_preimage_val_iff_le_topologicalClosure {H K : Subgroup G} (h : H ≤ K) :
+    Dense ((Subtype.val : K → G) ⁻¹' (H : Set G)) ↔ K ≤ H.topologicalClosure := by
+  have himage : (Subtype.val : K → G) '' (Subtype.val ⁻¹' (H : Set G)) = H :=
+    Set.image_preimage_eq_of_subset (by rw [Subtype.range_coe_subtype]; exact h)
+  constructor
+  · intro hd x hx
+    have := closure_subtype.1 (hd ⟨x, hx⟩)
+    rwa [himage, ← topologicalClosure_coe] at this
+  · intro hle x
+    rw [closure_subtype, himage, ← topologicalClosure_coe]
+    exact hle x.2
+
 omit [IsTopologicalGroup G] in
 /-- A closed subgroup of a compact group is compact. -/
 instance instCompactSpace_of_isClosed [CompactSpace G] (N : Subgroup G) [IsClosed (N : Set G)] :
@@ -172,6 +203,12 @@ theorem toAddSubgroup_topologicalClosure (S : Subgroup G) :
   -- set-theoretic closure of the same carrier. The definitional reduction is confined
   -- to this bridge so consumers can rewrite without unfolding these representations.
   (rfl)
+
+/-- Converting a subgroup to an additive subgroup preserves density. -/
+theorem dense_toAddSubgroup_iff (S : Subgroup G) :
+    Dense (S.toAddSubgroup : Set (Additive G)) ↔ Dense (S : Set G) := by
+  rw [AddSubgroup.dense_iff_topologicalClosure_eq_top, dense_iff_topologicalClosure_eq_top,
+    ← toAddSubgroup_topologicalClosure, ← toAddSubgroup.map_top, toAddSubgroup.injective.eq_iff]
 
 variable {H : Type*} [Group H] [TopologicalSpace H] [IsTopologicalGroup H]
 
@@ -221,38 +258,25 @@ theorem topologicalClosure_commutator_le_of_forall_commutatorElement_mem {s : Se
     (hN : IsClosed (N : Set G)) (h : ∀ x ∈ s, ∀ y ∈ s, ⁅x, y⁆ ∈ N) :
     (_root_.commutator G).topologicalClosure ≤ N := by
   have : IsClosed (N : Set G) := hN
-  -- A closed subgroup containing `s` is everything.
-  have key {K : Subgroup G} (hK : IsClosed (K : Set G)) (hsK : s ⊆ K) : K = ⊤ :=
-    top_le_iff.1 (hs ▸ (closure s).topologicalClosure_minimal ((closure_le K).2 hsK) hK)
-  -- Commuting with a fixed element of the Hausdorff group `G ⧸ N` is a closed condition.
-  have hcl (y : G ⧸ N) :
-      IsClosed (((centralizer {y}).comap (QuotientGroup.mk' N) : Subgroup G) : Set G) := by
-    rw [coe_comap]
-    -- The carrier of `Subgroup.centralizer {y}` is `Set.centralizer {y}`.
-    exact (Set.isClosed_centralizer {y}).preimage QuotientGroup.continuous_mk
-  have hmem (x y : G) : x ∈ (centralizer {(y : G ⧸ N)}).comap (QuotientGroup.mk' N) ↔
-      (x : G ⧸ N) * y = y * x := by
-    rw [mem_comap, QuotientGroup.mk'_apply, mem_centralizer_singleton_iff]
-  -- The images of the generators are central: they commute with the generators, so with all.
-  have h₁ (x : G) (hx : x ∈ s) (b : G) : (b : G ⧸ N) * x = x * b := by
-    rw [← hmem]
-    refine (key (hcl _) fun y hy ↦ ?_).symm ▸ mem_top b
-    rw [SetLike.mem_coe, hmem]
-    have hxy : ⁅(x : G ⧸ N), (y : G ⧸ N)⁆ = 1 := by
-      rw [← QuotientGroup.mk'_apply, ← QuotientGroup.mk'_apply, ← map_commutatorElement,
-        QuotientGroup.mk'_apply, QuotientGroup.eq_one_iff]
-      exact h x hx y hy
-    exact (commutatorElement_eq_one_iff_commute.1 hxy).eq.symm
-  -- Hence every element commutes with every element, and the commutators lie in `N`.
-  have h₂ (a b : G) : (a : G ⧸ N) * b = b * a := by
-    rw [← hmem]
-    exact (key (hcl _) fun x hx ↦ (hmem x b).2 (h₁ x hx b).symm).symm ▸ mem_top a
+  -- The images of the generators commute pairwise in `G ⧸ N`, so the closed subgroup they
+  -- generate, which is all of `G ⧸ N`, is commutative.
+  have hcomm : IsMulCommutative ((closure s).map (QuotientGroup.mk' N)) := by
+    rw [MonoidHom.map_closure]
+    refine isMulCommutative_closure ?_
+    rintro _ ⟨x, hx, rfl⟩ _ ⟨y, hy, rfl⟩ -
+    rw [← commutatorElement_eq_one_iff_commute, ← map_commutatorElement, QuotientGroup.mk'_apply,
+      QuotientGroup.eq_one_iff]
+    exact h x hx y hy
+  have htop : IsMulCommutative (⊤ : Subgroup (G ⧸ N)) := by
+    rw [← (QuotientGroup.mk'_surjective N).denseRange.topologicalClosure_map_subgroup
+      QuotientGroup.continuous_mk hs]
+    infer_instance
   refine (_root_.commutator G).topologicalClosure_minimal ?_ hN
   rw [_root_.commutator_def, commutator_le]
   intro a _ b _
   rw [← QuotientGroup.eq_one_iff, ← QuotientGroup.mk'_apply, map_commutatorElement,
     commutatorElement_eq_one_iff_commute]
-  exact h₂ a b
+  exact setLike_mul_comm (mem_top _) (mem_top _)
 
 end Subgroup
 

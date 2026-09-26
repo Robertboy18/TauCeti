@@ -332,27 +332,25 @@ theorem topologicalClosure_closure_univ_smul_image_mk_eq_top {S : Set G}
       obtain ⟨a, ha, hax⟩ := Group.mem_conjugatesOfSet_iff.1 hx
       obtain ⟨g, rfl⟩ := isConj_iff.1 hax
       have haN : a ∈ N := hSN (Subgroup.subset_normalClosure ha)
-      have : (⟨g * a * g⁻¹, hxN⟩ : N) = MulAut.conjNormal g ⟨a, haN⟩ := Subtype.ext rfl
+      have : (⟨g * a * g⁻¹, hxN⟩ : N) = MulAut.conjNormal g ⟨a, haN⟩ :=
+        Subtype.ext (MulAut.conjNormal_apply g ⟨a, haN⟩).symm
       rw [this, ← mk_smul_mk]
       exact Subgroup.subset_closure (Set.smul_mem_smul (Set.mem_univ _) ⟨⟨a, haN⟩, ha, rfl⟩)
     | one =>
-      have : (⟨1, hxN⟩ : N) = 1 := rfl
+      have : (⟨1, hxN⟩ : N) = 1 := Subtype.ext rfl
       rw [this, QuotientGroup.mk_one]
       exact H.one_mem
     | mul x y hxc hyc hx hy =>
-      have : (⟨x * y, hxN⟩ : N) = ⟨x, hSN hxc⟩ * ⟨y, hSN hyc⟩ := rfl
+      have : (⟨x * y, hxN⟩ : N) = ⟨x, hSN hxc⟩ * ⟨y, hSN hyc⟩ := Subtype.ext rfl
       rw [this, QuotientGroup.mk_mul]
       exact H.mul_mem (hx _) (hy _)
     | inv x hxc hx =>
-      have : (⟨x⁻¹, hxN⟩ : N) = ⟨x, hSN hxc⟩⁻¹ := rfl
+      have : (⟨x⁻¹, hxN⟩ : N) = ⟨x, hSN hxc⟩⁻¹ := Subtype.ext rfl
       rw [this, QuotientGroup.mk_inv]
       exact H.inv_mem (hx _)
   -- The normal closure of `S` is dense in `N`, and `mk : N → N^{ab}` is a continuous surjection.
-  have hdense : Dense ((Subtype.val : N → G) ⁻¹' (Subgroup.normalClosure S : Set G)) := by
-    intro x
-    rw [closure_subtype, Set.image_preimage_eq_of_subset (by
-      rw [Subtype.range_coe_subtype]; exact hSN), ← Subgroup.topologicalClosure_coe, hS]
-    exact x.2
+  have hdense : Dense ((Subtype.val : N → G) ⁻¹' (Subgroup.normalClosure S : Set G)) :=
+    (Subgroup.dense_preimage_val_iff_le_topologicalClosure hSN).2 hS.ge
   have himage := (QuotientGroup.mk'_surjective
     (commutator N).topologicalClosure).denseRange.dense_image QuotientGroup.continuous_mk hdense
   have hsub : QuotientGroup.mk' (commutator N).topologicalClosure ''
