@@ -36,6 +36,8 @@ the presented group has topological generator rank exactly `n`.
 
 ## Main results
 
+* `TauCeti.demushkinWordNeTwo_presentedProPGen` and its two companions: the generators of the
+  normal-form presentation satisfy its defining relation.
 * `TauCeti.demushkinWordNeTwo_mem_proPFrattini`, `TauCeti.demushkinWordTwoOdd_mem_proPFrattini`,
   `TauCeti.demushkinWordTwoEven_mem_proPFrattini`: each word lies in the pro-`p` Frattini
   subgroup.
@@ -187,6 +189,13 @@ theorem map_presentedProPGen {K F : Type*} [Group K] [FunLike F (presentedProP p
   · rw [presentedProPGen_of_lt p n rels h]
   · rw [presentedProPGen_eq_one_of_le p n rels (not_lt.mp h), map_one]
 
+/-- The quotient map carries the tuple `freeProPGen` to the tuple `presentedProPGen`: the
+function-level form of `TauCeti.presentedProP.mk_freeProPGen`, which lets a word read on
+`presentedProPGen` be pulled back through `map_demushkinWordNeTwo` and its companions. -/
+theorem presentedProP.mk_comp_freeProPGen :
+    ⇑(presentedProP.mk p rels) ∘ freeProPGen p n = presentedProPGen p n rels :=
+  funext (presentedProP.mk_freeProPGen p n rels)
+
 end Generators
 
 /-! ### The three normal-form words -/
@@ -303,6 +312,41 @@ theorem map_demushkinWordTwoEven_eq_one (a f n : ℕ) {x : ℕ → G} (h₀ : χ
     Function.comp_apply, h₀, h₂, one_pow, one_pow, one_mul]
 
 end Words
+
+/-! ### The generators of a normal-form presentation satisfy the relation -/
+
+section Relation
+
+variable (p : ℕ)
+
+/-- The `ℕ`-indexed generators of the `q ≠ 2` normal-form presentation satisfy its defining
+relation `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n) = 1`. -/
+@[simp]
+theorem demushkinWordNeTwo_presentedProPGen (q n : ℕ) :
+    demushkinWordNeTwo q n (presentedProPGen p n {demushkinWordNeTwo q n (freeProPGen p n)}) =
+      1 := by
+  rw [← presentedProP.mk_comp_freeProPGen, ← map_demushkinWordNeTwo]
+  exact presentedProP.mk_relator _ (Set.mem_singleton _)
+
+/-- The `ℕ`-indexed generators of the `q = 2`, `n` odd normal-form presentation satisfy its
+defining relation `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n) = 1`. -/
+@[simp]
+theorem demushkinWordTwoOdd_presentedProPGen (f n : ℕ) :
+    demushkinWordTwoOdd f n (presentedProPGen p n {demushkinWordTwoOdd f n (freeProPGen p n)}) =
+      1 := by
+  rw [← presentedProP.mk_comp_freeProPGen, ← map_demushkinWordTwoOdd]
+  exact presentedProP.mk_relator _ (Set.mem_singleton _)
+
+/-- The `ℕ`-indexed generators of the `q = 2`, `n` even normal-form presentation satisfy its
+defining relation `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n) = 1`. -/
+@[simp]
+theorem demushkinWordTwoEven_presentedProPGen (a f n : ℕ) :
+    demushkinWordTwoEven a f n
+      (presentedProPGen p n {demushkinWordTwoEven a f n (freeProPGen p n)}) = 1 := by
+  rw [← presentedProP.mk_comp_freeProPGen, ← map_demushkinWordTwoEven]
+  exact presentedProP.mk_relator _ (Set.mem_singleton _)
+
+end Relation
 
 /-! ### The words lie in the Frattini subgroup -/
 
