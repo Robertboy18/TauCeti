@@ -36,6 +36,9 @@ homomorphisms `R → 𝔽_p` are exactly those factoring through `R ⧸ Rᵖ[R, 
 
 ## Main results
 
+* `TauCeti.proPFrattini_quotient_pLowerCentralStep_eq_bot`: the quotient `R ⧸ Rᵖ[R, F]` of a
+  closed normal subgroup of a profinite group has trivial pro-`p` Frattini subgroup, that is, it
+  is elementary abelian.
 * `TauCeti.IsProP.topologicalClosure_normalClosure_eq_iff_topologicalClosure_sup_eq`: a subset `s`
   of `R` generates `R` as a closed normal subgroup exactly when `s` and `Rᵖ[R, F]` together
   topologically generate `R`.
@@ -67,6 +70,25 @@ universe u
 
 variable {p : ℕ} {F : Type u} [Group F] [TopologicalSpace F] [IsTopologicalGroup F]
   [CompactSpace F] [TotallyDisconnectedSpace F]
+
+/-- **`R ⧸ Rᵖ[R, F]` is elementary abelian.** The quotient of a closed normal subgroup `R` of a
+profinite group by `Rᵖ[R, F]` is commutative and killed by `p`, so for a prime `p` its pro-`p`
+Frattini subgroup is trivial. -/
+theorem proPFrattini_quotient_pLowerCentralStep_eq_bot (hp : p.Prime) (R : Subgroup F) [R.Normal]
+    (hR : IsClosed (R : Set F)) :
+    proPFrattini p (R ⧸ (pLowerCentralStep p R).subgroupOf R) = ⊥ := by
+  have : CompactSpace R := isCompact_iff_compactSpace.mp hR.isCompact
+  have hK := isClosed_pLowerCentralStep_subgroupOf (p := p) R
+  refine (proPFrattini_eq_bot_iff hp).mpr ⟨⟨⟨fun a b ↦ ?_⟩⟩,
+    Monoid.exponent_dvd_iff_forall_pow_eq_one.mpr fun q ↦ ?_⟩
+  · obtain ⟨x, rfl⟩ := QuotientGroup.mk_surjective a
+    obtain ⟨y, rfl⟩ := QuotientGroup.mk_surjective b
+    refine (QuotientGroup.commute_mk_iff.mpr (mem_subgroupOf.mpr ?_)).eq
+    simpa [commutatorElement_def] using
+      commutator_le_pLowerCentralStep R (commutator_mem_commutator x.2 (mem_top (y : F)))
+  · obtain ⟨n, rfl⟩ := QuotientGroup.mk_surjective q
+    rw [← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff, mem_subgroupOf, coe_pow]
+    exact pow_mem_pLowerCentralStep n.2
 
 namespace IsProP
 

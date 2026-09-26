@@ -27,7 +27,9 @@ while `Φ(G)` has index `p ^ d(G)`, so `d(H) = d(G)` holds exactly when `ker f �
 
 * `TauCeti.IsProP.topologicalGeneratorRankNat_eq_finrank_quotient_proPFrattini`: the generator
   rank is the dimension of the Frattini quotient.
-* `TauCeti.IsProP.natCard_quotient_proPFrattini`: the Frattini quotient has order `p ^ d(G)`.
+* `TauCeti.IsProP.natCard_quotient_proPFrattini`: the Frattini quotient has order `p ^ d(G)`;
+  `TauCeti.IsProP.natCard_of_proPFrattini_eq_bot`: so a group with trivial Frattini subgroup has
+  order `p ^ d(G)`.
 * `TauCeti.IsProP.topologicalGeneratorRank_quotient_proPFrattini`: a pro-`p` group and its
   Frattini quotient have the same cardinal topological generator rank.
 * `TauCeti.IsProP.index_proPFrattini_sup_ker`: along a continuous surjection `f : G ↠ H` onto a
@@ -111,6 +113,12 @@ theorem natCard_quotient_proPFrattini (hG : IsProP p G)
       Module.natCard_eq_pow_finrank
     _ = p ^ topologicalGeneratorRankNat G hfg := by
       rw [Nat.card_zmod, hG.topologicalGeneratorRankNat_eq_finrank_quotient_proPFrattini hfg]
+
+/-- A topologically finitely generated pro-`p` group with trivial pro-`p` Frattini subgroup has
+order `p` raised to its natural-number topological generator rank. -/
+theorem natCard_of_proPFrattini_eq_bot (hG : IsProP p G) (hfg : IsTopologicallyFinitelyGenerated G)
+    (hΦ : proPFrattini p G = ⊥) : Nat.card G = p ^ topologicalGeneratorRankNat G hfg := by
+  rw [← hG.natCard_quotient_proPFrattini hfg, ← Subgroup.index_eq_card, hΦ, Subgroup.index_bot]
 
 /-- **A profinite pro-`p` group and its Frattini quotient have the same topological generator
 rank.** Generation passes to the quotient; conversely a generating set of the quotient converging
