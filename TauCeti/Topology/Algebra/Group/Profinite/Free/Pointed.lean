@@ -56,8 +56,8 @@ made here.
 * `TauCeti.freeProCPointed.dense_closure_range_of`: the image of `X` generates topologically.
 * `TauCeti.freeProCPointed.fromFreeProC_surjective`: the free pro-`C` group on a type maps onto
   the free pro-`C` group on its pointed one-point compactification.
-* `TauCeti.freeProCPointed.convergesToOne_range_of_coe`: for a discrete space `S`, the images of
-  the points of `S` in `F_C(S⁺, ∞)` converge to `1`.
+* `TauCeti.freeProCPointed.tendsto_of_coe_cofinite_nhds_one`: for a discrete space `S`, the
+  images of the points of `S` in `F_C(S⁺, ∞)` converge to `1` along the cofinite filter on `S`.
 
 ## References
 
@@ -427,23 +427,19 @@ theorem fromFreeProC_surjective : Function.Surjective (fromFreeProC C S) := by
   | coe s => exact Subgroup.subset_closure ⟨s, rfl⟩
 
 /-- **The images of the points of a discrete space converge to `1`** in the free pro-`C` group on
-its pointed one-point compactification: every neighbourhood of `1` contains the images of all but
-finitely many points of `S`. -/
+its pointed one-point compactification: the map `s ↦ of C ∞ s` tends to `1` along the cofinite
+filter on `S`, that is every neighbourhood of `1` contains the images of all but finitely many
+points of `S`. -/
+theorem tendsto_of_coe_cofinite_nhds_one [DiscreteTopology S] :
+    Filter.Tendsto (fun s : S ↦ of C ∞ (s : OnePoint S)) Filter.cofinite (nhds 1) := by
+  have h := (continuous_iff_from_discrete (of C ∞)).mp (continuous_of C (∞ : OnePoint S))
+  rwa [of_basePoint] at h
+
+/-- The set of images of the points of a discrete space converges to one in the free pro-`C`
+group on its pointed one-point compactification, in the sense of `TauCeti.ConvergesToOne`. -/
 theorem convergesToOne_range_of_coe [DiscreteTopology S] :
-    ConvergesToOne (Set.range fun s : S ↦ of C ∞ (s : OnePoint S)) := by
-  rw [convergesToOne_iff]
-  intro N hN
-  -- The preimage of `N` under the continuous map `of` is a neighbourhood of `∞`.
-  have hpre : of C ∞ ⁻¹' N ∈ nhds (∞ : OnePoint S) := by
-    apply (continuous_of C (∞ : OnePoint S)).continuousAt.preimage_mem_nhds
-    rwa [of_basePoint]
-  obtain ⟨O, hON, hOopen, hOinf⟩ := mem_nhds_iff.mp hpre
-  -- Its complement meets `S` in a compact, hence finite, set.
-  have hfin : (((↑) : S → OnePoint S) ⁻¹' O)ᶜ.Finite :=
-    ((isOpen_iff_of_mem hOinf).mp hOopen).2.finite_of_discrete
-  refine (hfin.image fun s : S ↦ of C ∞ (s : OnePoint S)).subset ?_
-  rintro _ ⟨⟨s, rfl⟩, hs⟩
-  exact ⟨s, fun hsO ↦ hs (hON hsO), rfl⟩
+    ConvergesToOne (Set.range fun s : S ↦ of C ∞ (s : OnePoint S)) :=
+  (tendsto_of_coe_cofinite_nhds_one C S).convergesToOne_range
 
 end freeProCPointed
 
