@@ -35,7 +35,7 @@ the upper masses of a disjoint union of patterns multiply because homomorphism d
   a sampling law is its homomorphism density;
 * `TauCeti.DenseGraphLimits.sampleGraph_Ici` — the same identity as a measure of an upper ray;
 * `TauCeti.DenseGraphLimits.sampleGraph_eq_of_forall_homDensity_eq` — graphons with the same
-  homomorphism densities have the same sampling laws;
+  homomorphism densities on `n` vertices have the same `n`-vertex sampling law;
 * `TauCeti.DenseGraphLimits.isDissociated_sampleExchangeableLaw` — sampling laws are dissociated.
 
 ## References
@@ -105,16 +105,15 @@ variable {Ω₁ Ω₂ : Type*} [MeasurableSpace Ω₁] [MeasurableSpace Ω₂]
 variable {μ₁ : Measure Ω₁} {μ₂ : Measure Ω₂} [IsProbabilityMeasure μ₁] [IsProbabilityMeasure μ₂]
 
 /-- **Sampling laws are determined by homomorphism densities.** Two graphons, on arbitrary
-probability carriers, with the same homomorphism density for every finite graph have the same
-sampling laws: a law on the finite lattice of graphs is determined by its upper-ray masses, which
-are homomorphism densities. -/
-theorem sampleGraph_eq_of_forall_homDensity_eq (U : Graphon Ω₁ μ₁) (W : Graphon Ω₂ μ₂)
-    (h : ∀ (n : ℕ) (F : SimpleGraph (Fin n)) [DecidableRel F.Adj],
-      homDensity F U = homDensity F W) (n : ℕ) :
+probability carriers, with the same homomorphism density for every graph on `n` vertices have the
+same `n`-vertex sampling law: a law on the finite lattice of graphs is determined by its upper-ray
+masses, which are homomorphism densities. -/
+theorem sampleGraph_eq_of_forall_homDensity_eq (U : Graphon Ω₁ μ₁) (W : Graphon Ω₂ μ₂) (n : ℕ)
+    (h : ∀ (F : SimpleGraph (Fin n)) [DecidableRel F.Adj], homDensity F U = homDensity F W) :
     sampleGraph U n = sampleGraph W n := by
   classical
   refine Measure.ext_of_Ici_of_finite _ _ fun F => ?_
-  rw [sampleGraph_Ici, sampleGraph_Ici, h n F]
+  rw [sampleGraph_Ici, sampleGraph_Ici, h F]
 
 end CrossCarrier
 

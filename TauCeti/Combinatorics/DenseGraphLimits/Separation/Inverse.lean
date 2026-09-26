@@ -95,7 +95,7 @@ theorem cutDist_eq_zero_of_forall_homDensity_eq (U : Graphon Ω₁ μ₁) (W : G
     cutDist U W = 0 := by
   refine le_antisymm (le_of_forall_pos_le_add fun ε hε => ?_) (cutDist_nonneg U W)
   obtain ⟨n, G, hGU, hGW⟩ := exists_cutDist_finiteGraphGraphon_lt U W
-    (sampleGraph_eq_of_forall_homDensity_eq U W h) (half_pos hε)
+    (fun n => sampleGraph_eq_of_forall_homDensity_eq U W n (h n)) (half_pos hε)
   calc cutDist U W
       ≤ cutDist U (finiteGraphGraphon G) + cutDist (finiteGraphGraphon G) W :=
         cutDist_triangle U (finiteGraphGraphon G) W
