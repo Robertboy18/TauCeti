@@ -36,8 +36,12 @@ of `G`. This is the presentation independence of the relation rank.
 The statements are about the order of `H²(G, 𝔽_p)`, for the explicit continuous cohomology `H2` of
 the trivial `G`-module `𝔽_p`; the action of `G` on `ZMod p` is carried as an instance together
 with the hypothesis that it is trivial, as in
-`TauCeti.Topology.Algebra.Group.Profinite.ProP.InvariantDual`. The action of the free pro-`p` group
-on `𝔽_p` is never part of a statement here.
+`TauCeti.Topology.Algebra.Group.Profinite.ProP.InvariantDual`. The statements about a quotient
+`G ≅ F ⧸ R` of a free pro-`p` group `F` (`TauCeti.finite_H2_iff_of_le_proPFrattini` and
+`TauCeti.natCard_H2_of_le_proPFrattini`) carry the action of `F` on `𝔽_p` in the same way, as an
+instance with the hypothesis that it is trivial. The `TauCeti.presentedProP` statements about a
+minimal presentation do not: they supply the trivial action of `F` internally, and only the action
+of `G` appears.
 
 ## Main results
 
