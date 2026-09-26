@@ -58,19 +58,11 @@ theorem isometryEquivRealOfIsReal_apply (hw : w.IsReal) (x : w.Completion) :
     isometryEquivRealOfIsReal hw x = extensionEmbeddingOfIsReal hw x := rfl
 
 /-- The continuous multiplicative isomorphism `w.Completion ≃ₜ* ℂ` of a complex place.  Its
-underlying map is the ring isomorphism `ringEquivComplexOfIsComplex hw`, which is a homeomorphism
-because it and its inverse are the isometry `isometryEquivComplexOfIsComplex hw` and its inverse. -/
-noncomputable def continuousMulEquivComplexOfIsComplex (hw : w.IsComplex) : w.Completion ≃ₜ* ℂ where
-  __ := ringEquivComplexOfIsComplex hw
-  continuous_toFun :=
-    (isometryEquivComplexOfIsComplex hw).continuous.congr fun x ↦
-      (isometryEquivComplexOfIsComplex_apply hw x).trans
-        (ringEquivComplexOfIsComplex_apply hw x).symm
-  continuous_invFun :=
-    (isometryEquivComplexOfIsComplex hw).symm.continuous.congr fun z ↦
-      ((ringEquivComplexOfIsComplex hw).symm_apply_eq.mpr (by
-        rw [ringEquivComplexOfIsComplex_apply, ← isometryEquivComplexOfIsComplex_apply hw,
-          IsometryEquiv.apply_symm_apply])).symm
+underlying map is the ring isomorphism `ringEquivComplexOfIsComplex hw`, which respects open sets
+because it is the isometry `isometryEquivComplexOfIsComplex hw`. -/
+noncomputable def continuousMulEquivComplexOfIsComplex (hw : w.IsComplex) : w.Completion ≃ₜ* ℂ :=
+  (ringEquivComplexOfIsComplex hw).toMulEquiv.toContinuousMulEquiv fun _ ↦
+    (isometryEquivComplexOfIsComplex hw).toHomeomorph.isOpen_preimage
 
 /-- The continuous multiplicative isomorphism `w.Completion ≃ₜ* ℂ` of a complex place evaluates
 to the extension embedding. -/

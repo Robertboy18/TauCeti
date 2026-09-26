@@ -157,9 +157,7 @@ theorem exists_raySubgroup_le_of_isOpen (U : Subgroup (IdeleClassGroup (𝓞 K) 
     (U.comap (QuotientGroup.mk' (IdeleGroup.principalSubgroup (𝓞 K) K))) (by
       rw [Subgroup.coe_comap]
       exact hU.preimage QuotientGroup.continuous_mk)
-  refine ⟨𝔪, fun c hc ↦ ?_⟩
-  obtain ⟨x, hx, rfl⟩ := mem_raySubgroup_iff.mp hc
-  exact Subgroup.mem_comap.mp (h𝔪 hx)
+  exact ⟨𝔪, raySubgroup_le_iff.mpr h𝔪⟩
 
 /-- **A subgroup of the idele class group is open exactly when it contains a ray subgroup.** -/
 theorem isOpen_iff_exists_raySubgroup_le (U : Subgroup (IdeleClassGroup (𝓞 K) K)) :

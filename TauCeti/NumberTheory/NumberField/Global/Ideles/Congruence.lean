@@ -311,11 +311,9 @@ theorem isOpen_ideleCongruenceSubgroup (𝔪 : Modulus K) :
   have hmemA : ∀ x ∈ ideleCongruenceSubgroup 𝔪, (x : 𝔸[K]) ∈ A := by
     intro x hx
     refine ⟨fun v ↦ ?_, fun v hv ↦ ?_, fun w hw ↦ ?_⟩
-    · rw [mem_adicCompletionIntegers, ← HeightOneSpectrum.coe_ideleFiniteCoord,
-        ideleCongruenceSubgroup.valued_ideleFiniteCoord_eq_one hx v]
-    · rw [← HeightOneSpectrum.coe_ideleFiniteCoord]
-      exact ideleCongruenceSubgroup.valued_ideleFiniteCoord_sub_one_le hx
-        ((Modulus.mem_support_iff 𝔪 v).mp hv)
+    · exact ideleCongruenceSubgroup.snd_mem_adicCompletionIntegers hx v
+    · exact ideleCongruenceSubgroup.valued_snd_sub_one_le_of_pow_dvd hx
+        (𝔪.pow_exponent_dvd_finitePart v)
     · rw [← InfinitePlace.coe_ideleInfiniteCoord]
       exact ideleCongruenceSubgroup.extensionEmbeddingOfIsReal_pos hx hw
   have hset : (ideleCongruenceSubgroup 𝔪 : Set (IdeleGroup (𝓞 K) K)) =

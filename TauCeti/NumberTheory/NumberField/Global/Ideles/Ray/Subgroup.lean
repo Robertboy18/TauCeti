@@ -32,6 +32,8 @@ idele classes to ray classes.
 
 * `TauCeti.GlobalNumberFields.mem_raySubgroup_iff`: membership through a congruence-idele
   representative.
+* `TauCeti.GlobalNumberFields.raySubgroup_le_iff`: a ray subgroup lies below a subgroup exactly
+  when the congruence subgroup lies below its pullback to the ideles.
 * `TauCeti.GlobalNumberFields.mk_mem_raySubgroup_iff`: a class represented by an idele belongs
   precisely when that idele is in the join of the congruence subgroup and the principal ideles.
 * `TauCeti.GlobalNumberFields.raySubgroup_antitone`: ray subgroups decrease when the modulus
@@ -66,6 +68,15 @@ theorem mem_raySubgroup_iff {𝔪 : Modulus K} {c : IdeleClassGroup (𝓞 K) K} 
       ∃ x : IdeleGroup (𝓞 K) K, x ∈ ideleCongruenceSubgroup 𝔪 ∧
         QuotientGroup.mk' (IdeleGroup.principalSubgroup (𝓞 K) K) x = c := by
   rw [raySubgroup, Subgroup.mem_map]
+
+/-- **A ray subgroup lies below a subgroup exactly when the congruence subgroup lies below its
+pullback to the ideles.** -/
+theorem raySubgroup_le_iff {𝔪 : Modulus K} {U : Subgroup (IdeleClassGroup (𝓞 K) K)} :
+    raySubgroup 𝔪 ≤ U ↔
+      ideleCongruenceSubgroup 𝔪 ≤
+        U.comap (QuotientGroup.mk' (IdeleGroup.principalSubgroup (𝓞 K) K)) := by
+  rw [raySubgroup]
+  exact Subgroup.map_le_iff_le_comap
 
 /-- **The pullback of a ray subgroup to the ideles.**  An idele represents a class in
 `raySubgroup 𝔪` exactly when it belongs to the join of the congruence subgroup and the principal
