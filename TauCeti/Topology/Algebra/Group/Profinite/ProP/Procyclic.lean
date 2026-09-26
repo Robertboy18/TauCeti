@@ -16,7 +16,7 @@ element of `P` is a `p`-adic power `a ^ l` with `l ∈ ℤ_[p]`
 (`TauCeti.IsProP.mem_topologicalClosure_closure_singleton_iff`). This file identifies which of
 those powers again generate: for `P` nontrivial, `a ^ u` topologically generates `P` exactly when
 `u` is a unit of `ℤ_[p]`, the non-unit powers lying in the pro-`p` Frattini subgroup. Consequently
-any two topological generators of a nontrivial procyclic pro-`p` group differ by a unit exponent.
+any two topological generators of a procyclic pro-`p` group differ by a unit exponent.
 
 This is the change-of-generator statement behind the power-series coordinates of the completed
 group algebra `ℤ_p[[P]]` of an infinite procyclic pro-`p` group: the coordinates attached to two
@@ -27,7 +27,7 @@ topological generators `a` and `a ^ u` differ by the substitution `X ↦ (1 + X)
 * `TauCeti.IsProP.topologicalClosure_closure_padicPow_eq_top_iff`: if `a` topologically
   generates the nontrivial pro-`p` group `P`, then `a ^ u` does so exactly when `u` is a unit.
 * `TauCeti.IsProP.exists_isUnit_padicPow_eq_of_topologicalClosure_closure_eq_top`: two
-  topological generators of a nontrivial procyclic pro-`p` group differ by a unit exponent.
+  topological generators of a procyclic pro-`p` group differ by a unit exponent.
 
 ## References
 
@@ -39,12 +39,12 @@ public section
 namespace TauCeti.IsProP
 
 variable {p : ℕ} [Fact p.Prime] {P : Type*} [Group P] [TopologicalSpace P]
-  [IsTopologicalGroup P] [CompactSpace P] [TotallyDisconnectedSpace P] [Nontrivial P]
+  [IsTopologicalGroup P] [CompactSpace P] [TotallyDisconnectedSpace P]
 
 /-- **A unit power of a topological generator is a topological generator, and nothing else is.**
 If `a` topologically generates the nontrivial pro-`p` group `P`, then the `p`-adic power `a ^ u`
 topologically generates `P` if and only if `u` is a unit of `ℤ_[p]`. -/
-theorem topologicalClosure_closure_padicPow_eq_top_iff (hP : IsProP p P) {a : P}
+theorem topologicalClosure_closure_padicPow_eq_top_iff [Nontrivial P] (hP : IsProP p P) {a : P}
     (ha : (Subgroup.closure ({a} : Set P)).topologicalClosure = ⊤) (u : ℤ_[p]) :
     (Subgroup.closure ({hP.padicPow a u} : Set P)).topologicalClosure = ⊤ ↔ IsUnit u := by
   constructor
@@ -69,13 +69,14 @@ theorem topologicalClosure_closure_padicPow_eq_top_iff (hP : IsProP p P) {a : P}
     have h := hP.padicPow_mem (Subgroup.isClosed_topologicalClosure _) hmem (↑u⁻¹ : ℤ_[p])
     rwa [← hP.padicPow_mul, Units.mul_inv, hP.padicPow_one] at h
 
-/-- **Two topological generators of a nontrivial procyclic pro-`p` group differ by a unit
-exponent**: if `a` and `b` both topologically generate `P`, then `b = a ^ u` for a unit `u` of
-`ℤ_[p]`. -/
+/-- **Two topological generators of a procyclic pro-`p` group differ by a unit exponent**: if
+`a` and `b` both topologically generate `P`, then `b = a ^ u` for a unit `u` of `ℤ_[p]`. -/
 theorem exists_isUnit_padicPow_eq_of_topologicalClosure_closure_eq_top (hP : IsProP p P)
     {a b : P} (ha : (Subgroup.closure ({a} : Set P)).topologicalClosure = ⊤)
     (hb : (Subgroup.closure ({b} : Set P)).topologicalClosure = ⊤) :
     ∃ u : ℤ_[p], IsUnit u ∧ hP.padicPow a u = b := by
+  rcases subsingleton_or_nontrivial P with _ | _
+  · exact ⟨1, isUnit_one, Subsingleton.elim _ _⟩
   obtain ⟨u, rfl⟩ :=
     hP.mem_topologicalClosure_closure_singleton_iff.mp (ha ▸ Subgroup.mem_top b)
   exact ⟨u, (hP.topologicalClosure_closure_padicPow_eq_top_iff ha u).mp hb, rfl⟩
