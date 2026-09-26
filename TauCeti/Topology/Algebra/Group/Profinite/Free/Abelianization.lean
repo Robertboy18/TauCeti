@@ -151,7 +151,6 @@ theorem abelianizationEquiv_mk (y : freeProP p X) :
 
 /-- The abelianization isomorphism sends the class of the generator at `x` to the coordinate
 vector at `x`. -/
-@[simp]
 theorem abelianizationEquiv_mk_of (x : X) :
     abelianizationEquiv p X ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) =
       ofAdd (Pi.single x 1) := by
