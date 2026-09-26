@@ -6,7 +6,7 @@ Authors: Claude
 module
 
 public import TauCeti.Combinatorics.DenseGraphLimits.ExchangeableGraphLaw.Sampling
-public import TauCeti.Combinatorics.DenseGraphLimits.GraphonSpace.HomDensity
+public import TauCeti.Combinatorics.DenseGraphLimits.GraphonSpace.HomDensity.Basic
 public import TauCeti.Combinatorics.DenseGraphLimits.Separation.Forward
 public import Mathlib.MeasureTheory.Measure.DiracProba
 public import Mathlib.MeasureTheory.Measure.GiryMonad
@@ -46,7 +46,9 @@ and the mixture of a Dirac mass at `⟦W⟧` is the sampling law of `W`.
 * `TauCeti.DenseGraphLimits.upperMass_mixtureExchangeableLaw` — the upper mass of a pattern under
   a mixture law is the average of its homomorphism density against the mixing measure;
 * `TauCeti.DenseGraphLimits.mixtureExchangeableLaw_diracProba` — the mixture of a Dirac mass at a
-  graphon class is that graphon's sampling law.
+  graphon class is that graphon's sampling law;
+* `TauCeti.DenseGraphLimits.mixtureExchangeableLaw_eq_iff` — two mixing measures have the same
+  mixture law iff they have the same average of every homomorphism density.
 
 ## References
 
@@ -181,6 +183,20 @@ theorem mixtureExchangeableLaw_diracProba (W : Graphon Ω μ) :
   ExchangeableGraphLaw.ext fun k => by
     rw [mixtureExchangeableLaw_law, sampleExchangeableLaw_law, ← sampleGraphOnSpace_mk]
     exact Measure.dirac_bind (measurable_sampleGraphOnSpace k) _
+
+/-- **The moments of the mixing measure determine the mixture law.** Two mixing measures on graphon
+space have the same mixture law iff they have the same average of every homomorphism density: the
+level-`k` marginals are determined by their upper masses, which are exactly these averages. -/
+theorem mixtureExchangeableLaw_eq_iff (P Q : ProbabilityMeasure (GraphonSpace Ω μ)) :
+    mixtureExchangeableLaw P = mixtureExchangeableLaw Q ↔
+      ∀ (k : ℕ) (F : SimpleGraph (Fin k)) [DecidableRel F.Adj],
+        ∫ x, homDensityOnSpace F x ∂(P : Measure (GraphonSpace Ω μ)) =
+          ∫ x, homDensityOnSpace F x ∂(Q : Measure (GraphonSpace Ω μ)) := by
+  refine ⟨fun h k F _ => ?_, fun h => ExchangeableGraphLaw.ext_upperMass fun k F => ?_⟩
+  · rw [← upperMass_mixtureExchangeableLaw, ← upperMass_mixtureExchangeableLaw, h]
+  · classical
+    rw [upperMass_mixtureExchangeableLaw, upperMass_mixtureExchangeableLaw]
+    exact h k F
 
 end DenseGraphLimits
 

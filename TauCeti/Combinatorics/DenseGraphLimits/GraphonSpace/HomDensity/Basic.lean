@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Combinatorics.DenseGraphLimits.Counting
 public import TauCeti.Combinatorics.DenseGraphLimits.GraphonSpace.Basic
+public import TauCeti.Combinatorics.DenseGraphLimits.HomDensity.Structural
 
 /-!
 # Homomorphism densities on graphon space
@@ -14,7 +15,10 @@ public import TauCeti.Combinatorics.DenseGraphLimits.GraphonSpace.Basic
 Homomorphism density is invariant under zero cut distance, so it descends from strict graphon
 representatives to `GraphonSpace`.  The descended observable retains the quantitative counting
 bound: for a finite graph `F`, it is Lipschitz with constant equal to the number of edges of `F`.
-In particular every homomorphism density is continuous on graphon space.
+In particular every homomorphism density is continuous on graphon space, and since it takes values
+in `[0, 1]` it is a bounded continuous function on graphon space (`homDensityBCF`). The structural
+laws of homomorphism density — normalization on edgeless graphs, multiplicativity over disjoint
+unions, invariance under embeddings — descend to the quotient as well.
 
 These quotient-stable observables are the coordinates used by graphon separation, compactness, and
 the equivalence between cut-distance convergence and convergence of all homomorphism densities.
@@ -22,7 +26,9 @@ the equivalence between cut-distance convergence and convergence of all homomorp
 ## Main definitions
 
 * `TauCeti.DenseGraphLimits.homDensityOnSpace` is homomorphism density on the cut-distance
-  quotient.
+  quotient;
+* `TauCeti.DenseGraphLimits.homDensityBCF` is the same observable as a bounded continuous
+  function on graphon space.
 
 ## Main results
 
@@ -33,7 +39,12 @@ the equivalence between cut-distance convergence and convergence of all homomorp
   `TauCeti.DenseGraphLimits.homDensityOnSpace_le_one` bound it in `[0, 1]`;
 * `TauCeti.DenseGraphLimits.lipschitzWith_homDensityOnSpace` gives the edge-count Lipschitz bound;
 * `TauCeti.DenseGraphLimits.continuous_homDensityOnSpace` gives continuity on every fixed-carrier
-  graphon space.
+  graphon space;
+* `TauCeti.DenseGraphLimits.homDensityOnSpace_bot`,
+  `TauCeti.DenseGraphLimits.homDensityOnSpace_sum` and
+  `TauCeti.DenseGraphLimits.homDensityOnSpace_map_embedding` are the descended structural laws,
+  with `TauCeti.DenseGraphLimits.homDensityBCF_bot`, `TauCeti.DenseGraphLimits.homDensityBCF_sum`
+  and `TauCeti.DenseGraphLimits.homDensityBCF_map_embedding` their bounded-continuous forms.
 
 ## References
 
@@ -109,6 +120,78 @@ theorem lipschitzWith_homDensityOnSpace (F : SimpleGraph V) [DecidableRel F.Adj]
 theorem continuous_homDensityOnSpace (F : SimpleGraph V) [DecidableRel F.Adj] :
     Continuous (homDensityOnSpace (μ := μ) F) :=
   (lipschitzWith_homDensityOnSpace (μ := μ) F).continuous
+
+section Structural
+
+variable {V₁ V₂ : Type*} [Fintype V₁] [Fintype V₂]
+
+/-- **Normalization on graphon space.** The homomorphism density of an edgeless graph is `1`. -/
+@[simp]
+theorem homDensityOnSpace_bot (x : GraphonSpace Ω μ) :
+    homDensityOnSpace (⊥ : SimpleGraph V) x = 1 := by
+  obtain ⟨W, rfl⟩ := SeparationQuotient.surjective_mk x
+  rw [homDensityOnSpace_mk, homDensity_bot]
+
+/-- **Multiplicativity on graphon space.** The homomorphism density of a disjoint union of finite
+graphs is the product of the homomorphism densities. -/
+@[simp]
+theorem homDensityOnSpace_sum (F₁ : SimpleGraph V₁) [DecidableRel F₁.Adj] (F₂ : SimpleGraph V₂)
+    [DecidableRel F₂.Adj] (x : GraphonSpace Ω μ) :
+    homDensityOnSpace (F₁ ⊕g F₂) x = homDensityOnSpace F₁ x * homDensityOnSpace F₂ x := by
+  obtain ⟨W, rfl⟩ := SeparationQuotient.surjective_mk x
+  rw [homDensityOnSpace_mk, homDensityOnSpace_mk, homDensityOnSpace_mk, homDensity_sum]
+
+/-- **Embedding invariance on graphon space.** Mapping a finite graph along an embedding preserves
+its homomorphism density. -/
+@[simp]
+theorem homDensityOnSpace_map_embedding [DecidableEq V₂] (F : SimpleGraph V₁) [DecidableRel F.Adj]
+    (f : V₁ ↪ V₂) (x : GraphonSpace Ω μ) :
+    homDensityOnSpace (F.map f) x = homDensityOnSpace F x := by
+  obtain ⟨W, rfl⟩ := SeparationQuotient.surjective_mk x
+  rw [homDensityOnSpace_mk, homDensityOnSpace_mk, homDensity_map_embedding]
+
+end Structural
+
+section BoundedContinuous
+
+open BoundedContinuousFunction
+
+/-- The homomorphism density of a finite graph, as a bounded continuous function on graphon space:
+it is continuous and takes values in `[0, 1]`. -/
+def homDensityBCF (F : SimpleGraph V) [DecidableRel F.Adj] : GraphonSpace Ω μ →ᵇ ℝ :=
+  .mkOfBound ⟨homDensityOnSpace F, continuous_homDensityOnSpace F⟩ 1 fun x y =>
+    Real.dist_le_of_mem_Icc_01 ⟨homDensityOnSpace_nonneg F x, homDensityOnSpace_le_one F x⟩
+      ⟨homDensityOnSpace_nonneg F y, homDensityOnSpace_le_one F y⟩
+
+@[simp]
+theorem coe_homDensityBCF (F : SimpleGraph V) [DecidableRel F.Adj] :
+    ⇑(homDensityBCF (μ := μ) F) = homDensityOnSpace F := (rfl)
+
+theorem homDensityBCF_apply (F : SimpleGraph V) [DecidableRel F.Adj] (x : GraphonSpace Ω μ) :
+    homDensityBCF F x = homDensityOnSpace F x := (rfl)
+
+variable {V₁ V₂ : Type*} [Fintype V₁] [Fintype V₂]
+
+/-- The bounded continuous homomorphism density of an edgeless graph is the constant `1`. -/
+@[simp]
+theorem homDensityBCF_bot : homDensityBCF (μ := μ) (⊥ : SimpleGraph V) = 1 :=
+  ext fun x => by simp
+
+/-- The bounded continuous homomorphism density of a disjoint union is the product. -/
+@[simp]
+theorem homDensityBCF_sum (F₁ : SimpleGraph V₁) [DecidableRel F₁.Adj] (F₂ : SimpleGraph V₂)
+    [DecidableRel F₂.Adj] :
+    homDensityBCF (μ := μ) (F₁ ⊕g F₂) = homDensityBCF F₁ * homDensityBCF F₂ :=
+  ext fun x => by simp
+
+/-- Mapping a finite graph along an embedding preserves its bounded continuous homomorphism
+density. -/
+@[simp]
+theorem homDensityBCF_map_embedding [DecidableEq V₂] (F : SimpleGraph V₁) [DecidableRel F.Adj]
+    (f : V₁ ↪ V₂) : homDensityBCF (μ := μ) (F.map f) = homDensityBCF F :=
+  ext fun x => by simp
+
+end BoundedContinuous
 
 end DenseGraphLimits
 
