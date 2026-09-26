@@ -23,8 +23,9 @@ particular `R` is generated as a closed normal subgroup of `F` by `n` elements e
 finitely generated, the least number of generators of `R` as a closed normal subgroup of `F` is
 its topological generator rank.
 
-The input is Nakayama's lemma for pro-`p` groups, `TauCeti.IsProP.eq_bot_of_le_pLowerCentralStep`:
-a subgroup `K` with `K ≤ Kᵖ[K, F]` lies in every term of the lower `p`-series, hence is trivial.
+The input is Nakayama's lemma for pro-`p` groups in its relative form,
+`TauCeti.IsProP.le_of_le_topologicalClosure_sup_pLowerCentralStep`: if `R ≤ closure (N ⬝ Rᵖ[R, F])`
+for a closed normal subgroup `N`, then `R ≤ N`.
 
 For a minimal presentation `1 → R → F → G → 1` of a pro-`p` group, with `F` free pro-`p`, the
 transgression identifies `H¹(R, 𝔽_p)^F` with `H²(G, 𝔽_p)`, and the `F`-invariant continuous
@@ -35,8 +36,6 @@ homomorphisms `R → 𝔽_p` are exactly those factoring through `R ⧸ Rᵖ[R, 
 
 ## Main results
 
-* `TauCeti.IsProP.le_of_le_topologicalClosure_sup_pLowerCentralStep`: **Nakayama's lemma, relative
-  form.** If `R ≤ closure (N ⬝ Rᵖ[R, F])` for a closed normal subgroup `N`, then `R ≤ N`.
 * `TauCeti.IsProP.topologicalClosure_normalClosure_eq_iff_topologicalClosure_sup_eq`: a subset `s`
   of `R` generates `R` as a closed normal subgroup exactly when `s` and `Rᵖ[R, F]` together
   topologically generate `R`.
@@ -70,30 +69,6 @@ variable {p : ℕ} {F : Type u} [Group F] [TopologicalSpace F] [IsTopologicalGro
   [CompactSpace F] [TotallyDisconnectedSpace F]
 
 namespace IsProP
-
-/-- **Nakayama's lemma for pro-`p` groups, relative form.** If a subgroup `R` of a pro-`p` group
-lies in the closure of `N ⬝ Rᵖ[R, F]` for a closed normal subgroup `N`, then `R ≤ N`: the image of
-`R` in `F ⧸ N` is contained in its own `pLowerCentralStep`, hence trivial. -/
-theorem le_of_le_topologicalClosure_sup_pLowerCentralStep (hF : IsProP p F) (hp : p.Prime)
-    {R N : Subgroup F} [N.Normal] (hN : IsClosed (N : Set F))
-    (h : R ≤ (N ⊔ pLowerCentralStep p R).topologicalClosure) : R ≤ N := by
-  -- Closedness of `N` makes the quotient `F ⧸ N` profinite, so it is again pro-`p`.
-  have := hN
-  set q : F →* F ⧸ N := QuotientGroup.mk' N
-  have hq : Continuous q := QuotientGroup.continuous_mk
-  have hmap : R.map q ≤ pLowerCentralStep p (R.map q) := by
-    calc R.map q ≤ ((N ⊔ pLowerCentralStep p R).topologicalClosure).map q := map_mono h
-      _ = ((pLowerCentralStep p R).map q).topologicalClosure := by
-        rw [q.map_topologicalClosure hq _ (isClosed_topologicalClosure _).isCompact,
-          Subgroup.map_sup, (Subgroup.map_eq_bot_iff N).mpr (QuotientGroup.ker_mk' N).ge,
-          bot_sup_eq]
-      _ = pLowerCentralStep p (R.map q) := by
-        rw [q.map_pLowerCentralStep_eq_of_surjective hq hq.isClosedMap
-          (QuotientGroup.mk'_surjective N)]
-        exact SetLike.coe_injective
-          (by rw [topologicalClosure_coe, (isClosed_pLowerCentralStep _).closure_eq])
-  have hbot := (hF.quotient N).eq_bot_of_le_pLowerCentralStep hp hmap
-  rwa [Subgroup.map_eq_bot_iff, QuotientGroup.ker_mk'] at hbot
 
 variable (hF : IsProP p F) (hp : p.Prime) {R : Subgroup F} [R.Normal] (hR : IsClosed (R : Set F))
 include hF hp hR
