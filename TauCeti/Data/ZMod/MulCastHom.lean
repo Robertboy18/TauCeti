@@ -13,17 +13,19 @@ public import Mathlib.Data.ZMod.Basic
 
 For natural numbers `m`, `k` and `n = m * k`, multiplication by `k` is a well-defined additive
 homomorphism `ZMod m →+ ZMod n`: the class of an integer `a` modulo `m` goes to the class of
-`a * k` modulo `n`. Together with the reduction `ZMod.castHom : ZMod n →+* ZMod k` it forms the
-short exact sequence of cyclic groups
+`a * k` modulo `n`. Together with the reduction `ZMod.castHom : ZMod n →+* ZMod k` it forms, for
+`k ≠ 0`, the short exact sequence of cyclic groups
 
 ```text
 0 → ZMod m → ZMod n → ZMod k → 0
 ```
 
 since multiplication by `k ≠ 0` is injective, the reduction is surjective, and the classes killed
-by the reduction are exactly the multiples of `k`. The multiplications compose, and they commute
-with the reductions. The instance of interest is `m = pⁱ`, `k = pʲ`, `n = pⁱ⁺ʲ`, which gives the
-sequences `0 → ℤ/pⁱ → ℤ/pⁱ⁺ʲ → ℤ/pʲ → 0` of the coefficient systems of `p`-adic characters.
+by the reduction are exactly the multiples of `k` (for `k = 0` the multiplication is the zero map,
+and only the exactness at `ZMod n` and the surjectivity survive). The multiplications compose, and
+they commute with the reductions. The instance of interest is `m = pⁱ`, `k = pʲ`, `n = pⁱ⁺ʲ`, which
+gives the sequences `0 → ℤ/pⁱ → ℤ/pⁱ⁺ʲ → ℤ/pʲ → 0` of the coefficient systems of `p`-adic
+characters.
 
 ## Main definitions
 
@@ -97,6 +99,8 @@ theorem mulCastHom_castHom_mul (b : ZMod n) (a : ZMod m) :
   rw [map_intCast, ← Int.cast_mul, mulCastHom_intCast, mulCastHom_intCast, Int.cast_mul,
     mul_assoc]
 
+-- Not `@[simp]`: Mathlib's simp lemma `ZMod.castHom_apply` rewrites the left-hand side to
+-- `(mulCastHom k h a).cast` first, so the tagged lemma fails the `simpNF` linter.
 /-- The reduction modulo `k` kills the multiples of `k`. -/
 theorem castHom_mulCastHom (a : ZMod m) :
     castHom (Dvd.intro_left m h) (ZMod k) (mulCastHom k h a) = 0 := by

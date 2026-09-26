@@ -243,11 +243,11 @@ theorem mulPow_injective (h : i + j = n) : Function.Injective (mulPow χ h) := f
     (ZMod.mulCastHom_injective _ _ (pow_ne_zero j (Fact.out : p.Prime).ne_zero) (congrArg val hxy))
 
 /-- Multiplication by `p⁰` is the identity. -/
+@[simp]
 theorem mulPow_zero : mulPow χ (Nat.add_zero i) = DistribMulActionHom.id G :=
   DistribMulActionHom.ext fun x ↦ ZModTwist.ext <| by
-    obtain ⟨a, ha⟩ := ZMod.intCast_surjective x.val
-    rw [val_mulPow, DistribMulActionHom.id_apply, ← ha, ZMod.mulCastHom_intCast, pow_zero,
-      Nat.cast_one, mul_one]
+    simp only [val_mulPow, DistribMulActionHom.id_apply, pow_zero, ZMod.mulCastHom_one,
+      AddMonoidHom.id_apply]
 
 /-- Two successive multiplications, by `pʲ` and then by `pᵏ`, compose to the multiplication by
 `pʲ⁺ᵏ`. The index equation of the composite is taken as a hypothesis, so that any proof of it may
@@ -255,12 +255,12 @@ be used. -/
 theorem mulPow_mulPow {k m : ℕ} (h : i + j = n) (h' : n + k = m) (h'' : i + (j + k) = m)
     (x : ZModTwist χ i) : mulPow χ h' (mulPow χ h x) = mulPow χ h'' x :=
   ZModTwist.ext <| by
-    obtain ⟨a, ha⟩ := ZMod.intCast_surjective x.val
-    rw [val_mulPow, val_mulPow, val_mulPow, ← ha, ZMod.mulCastHom_intCast,
-      ← Int.cast_natCast (p ^ j), ← Int.cast_mul, ZMod.mulCastHom_intCast, ZMod.mulCastHom_intCast,
-      Int.cast_mul, Int.cast_natCast, pow_add, Nat.cast_mul, mul_assoc]
+    rw [val_mulPow, val_mulPow, val_mulPow,
+      ZMod.mulCastHom_mulCastHom _ _ _ _ (by rw [← pow_add, ← pow_add, h''])]
+    simp only [pow_add]
 
 /-- The reduction modulo `pʲ` kills the image of the multiplication by `pʲ`. -/
+@[simp]
 theorem reduce_mulPow (h : i + j = n) (x : ZModTwist χ i) :
     reduce χ (Nat.le.intro ((Nat.add_comm j i).trans h)) (mulPow χ h x) = 0 :=
   ZModTwist.ext (ZMod.castHom_mulCastHom _ _ x.val)
