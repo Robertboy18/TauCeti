@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.NumberTheory.Padics.PrincipalUnits
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Basis
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.Basic
 import TauCeti.NumberTheory.Padics.InverseLimit
@@ -37,22 +36,24 @@ corrected by a homomorphism into `pⁱ I(χ)/pⁱ⁺¹ ≅ 𝔽_p`, on which `G`
 
 ## Main results
 
-* `TauCeti.IsProP.charScalar_one_eq_one`: a pro-`p` group acts trivially on `I(χ)/p`.
 * `TauCeti.HasPrescriptionProperty.exists_forall_reduce_eq`: under the prescription property a
   continuous `1`-cocycle with values in `I(χ)/pʲ` is the pointwise reduction of one with values in
   `I(χ)/pⁿ`, for `j ≤ n`.
 * `TauCeti.HasPrescriptionProperty.exists_forall_reduce_eq_and_val_eq`: under the prescription
   property, every tuple `c : ι → ℤ_p` is realized on a family `g` with linearly independent
   Frattini classes by a compatible system of continuous `1`-cocycles `fᵢ : G → I(χ)/pⁱ`.
-* `TauCeti.hasPrescriptionProperty_of_forall_exists_forall_reduce_eq`: conversely, if every tuple is
-  so realized on a topological generating family, the character has the prescription property.
-* `TauCeti.IsProP.hasPrescriptionProperty_iff_forall_exists_forall_reduce_eq`: the equivalence, for
-  the lifts of a basis of the Frattini quotient, that is for a minimal generating tuple.
-* `TauCeti.exists_continuous_forall_toZModPow_eq_val`: a compatible system of continuous
+* `TauCeti.hasPrescriptionProperty_of_forall_exists_forall_reduce_eq_and_val_eq`: conversely, if
+  every tuple is so realized on a topological generating family, the character has the
+  prescription property.
+* `TauCeti.IsProP.hasPrescriptionProperty_iff_forall_exists_forall_reduce_eq_and_val_eq`: the
+  equivalence, for the lifts of a basis of the Frattini quotient, that is for a minimal generating
+  tuple.
+* `TauCeti.exists_continuous_forall_mul_eq_and_forall_toZModPow_eq_val` and
+  `TauCeti.exists_forall_reduce_eq_and_forall_val_eq_toZModPow`: a compatible system of continuous
   `1`-cocycles with values in the `I(χ)/pⁱ` is the family of reductions of a continuous crossed
-  homomorphism `G → ℤ_p`.
-* `TauCeti.IsProP.hasPrescriptionProperty_iff_forall_exists_continuous_forall_mul_eq`: the
-  prescription property is the existence, for every tuple `c`, of a continuous crossed
+  homomorphism `G → ℤ_p`, and conversely.
+* `TauCeti.IsProP.hasPrescriptionProperty_iff_forall_exists_continuous_forall_mul_eq_and_apply_eq`:
+  the prescription property is the existence, for every tuple `c`, of a continuous crossed
   homomorphism `F : G → ℤ_p` for `χ` with `F(gⱼ) = cⱼ` on a minimal generating tuple.
 
 ## References
@@ -70,33 +71,6 @@ universe u
 open ContCohomology
 
 variable {p : ℕ} [Fact p.Prime] {G : Type u} [Group G] [TopologicalSpace G]
-
-/-! ### The bottom level of the twisted coefficients of a pro-`p` group -/
-
-section LevelOne
-
-variable (hG : IsProP p G) (χ : G →ₜ* ℤ_[p]ˣ)
-include hG
-
-/-- A continuous character of a pro-`p` group takes values in the principal units `1 + pℤ_p`: its
-range is a pro-`p` subgroup of `ℤ_pˣ`. -/
-theorem IsProP.mem_unitsPrincipal_one (g : G) : χ g ∈ unitsPrincipal p 1 :=
-  have : IsProP p χ.toMonoidHom.range :=
-    hG.of_surjective χ.toMonoidHom.rangeRestrict (continuous_induced_rng.mpr χ.continuous)
-      χ.toMonoidHom.rangeRestrict_surjective
-  this.le_unitsPrincipal_one ⟨g, rfl⟩
-
-/-- **A pro-`p` group acts trivially on `I(χ)/p`**: the scalar `χ g mod p` is `1`. -/
-theorem IsProP.charScalar_one_eq_one (g : G) : charScalar χ 1 g = 1 := by
-  rw [charScalar_apply]
-  exact mem_unitsPrincipal_iff_toZModPow.mp (hG.mem_unitsPrincipal_one χ g)
-
-/-- The action of a pro-`p` group on the bottom level `I(χ)/p` of the twisted coefficients is
-trivial. -/
-theorem IsProP.smul_zModTwist_one_eq_self (g : G) (x : ZModTwist χ 1) : g • x = x :=
-  ZModTwist.ext (by rw [ZModTwist.val_smul, hG.charScalar_one_eq_one χ g, one_mul])
-
-end LevelOne
 
 /-! ### Exact lifting of cocycles between levels -/
 
@@ -244,7 +218,7 @@ Prop. 6, (iii) ⇒ (i)). If `g` generates `G` topologically and every `c : ι �
 values on `g` of a compatible system of continuous `1`-cocycles `fᵢ : G → I(χ)/pⁱ`, then `χ` has the
 prescription property: a continuous `1`-cocycle with values in `I(χ)/p` is determined by its values
 on `g`, so it is the bottom member of such a system, and the members above reduce onto it. -/
-theorem hasPrescriptionProperty_of_forall_exists_forall_reduce_eq
+theorem hasPrescriptionProperty_of_forall_exists_forall_reduce_eq_and_val_eq
     (h : ∀ c : ι → ℤ_[p], ∃ f : ∀ i : ℕ, Z1 G (ZModTwist χ i),
       (∀ ⦃i j : ℕ⦄ (h : j ≤ i) (x : G),
         ZModTwist.reduce χ h ((f i : G → ZModTwist χ i) x) = (f j : G → ZModTwist χ j) x) ∧
@@ -274,8 +248,8 @@ Let `G` be a topologically finitely generated pro-`p` group and `g : ι → G` a
 tuple, that is a family of lifts of a basis `b` of the Frattini quotient over `𝔽_p`. A continuous
 character `χ` has the prescription property exactly when every `c : ι → ℤ_p` is the tuple of values
 on `g` of a compatible system of continuous `1`-cocycles `fᵢ : G → I(χ)/pⁱ`. -/
-theorem IsProP.hasPrescriptionProperty_iff_forall_exists_forall_reduce_eq [IsTopologicalGroup G]
-    [CompactSpace G] [TotallyDisconnectedSpace G] (hG : IsProP p G)
+theorem IsProP.hasPrescriptionProperty_iff_forall_exists_forall_reduce_eq_and_val_eq
+    [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] (hG : IsProP p G)
     (hfg : IsTopologicallyFinitelyGenerated G) {ι : Type*}
     (b : Module.Basis ι (ZMod p) (Additive (G ⧸ proPFrattini p G))) {g : ι → G}
     (hgb : ∀ k, Additive.ofMul ((QuotientGroup.mk' (proPFrattini p G)) (g k)) = b k)
@@ -285,9 +259,8 @@ theorem IsProP.hasPrescriptionProperty_iff_forall_exists_forall_reduce_eq [IsTop
         ZModTwist.reduce χ h ((f i : G → ZModTwist χ i) x) = (f j : G → ZModTwist χ j) x) ∧
       ∀ (i : ℕ) (k : ι), ((f i : G → ZModTwist χ i) (g k)).val = PadicInt.toZModPow i (c k) :=
   ⟨fun hχ c ↦ hχ.exists_forall_reduce_eq_and_val_eq hG hfg
-    (by rw [show (fun k ↦ Additive.ofMul ((QuotientGroup.mk' (proPFrattini p G)) (g k))) = b from
-      funext hgb]; exact b.linearIndependent) c,
-    hasPrescriptionProperty_of_forall_exists_forall_reduce_eq
+    (by simpa only [hgb] using b.linearIndependent) c,
+    hasPrescriptionProperty_of_forall_exists_forall_reduce_eq_and_val_eq
       (topologicallyGenerates_of_basis_frattiniQuotient hG b g hgb)⟩
 
 /-! ### Crossed homomorphisms with values in `ℤ_p`
@@ -305,7 +278,8 @@ variable {χ : G →ₜ* ℤ_[p]ˣ}
 /-- **A compatible system of crossed homomorphisms assembles into a `p`-adic one.** Continuous
 `1`-cocycles `fᵢ : G → I(χ)/pⁱ` compatible under the reductions are the reductions modulo `pⁱ` of a
 continuous map `F : G → ℤ_p` with `F (x * y) = χ x * F y + F x`. -/
-theorem exists_continuous_forall_toZModPow_eq_val (f : ∀ i : ℕ, Z1 G (ZModTwist χ i))
+theorem exists_continuous_forall_mul_eq_and_forall_toZModPow_eq_val
+    (f : ∀ i : ℕ, Z1 G (ZModTwist χ i))
     (hf : ∀ ⦃i j : ℕ⦄ (h : j ≤ i) (x : G),
       ZModTwist.reduce χ h ((f i : G → ZModTwist χ i) x) = (f j : G → ZModTwist χ j) x) :
     ∃ F : G → ℤ_[p], Continuous F ∧ (∀ x y, F (x * y) = (χ x : ℤ_[p]) * F y + F x) ∧
@@ -329,6 +303,24 @@ theorem exists_continuous_forall_toZModPow_eq_val (f : ∀ i : ℕ, Z1 G (ZModTw
     rw [ZModTwist.val_add, ZModTwist.val_smul, charScalar_apply] at h
     rw [map_add, map_mul, hr, hr, hr, h]
 
+/-- **A `p`-adic crossed homomorphism reduces to a compatible system.** A continuous `F : G → ℤ_p`
+with `F (x * y) = χ x * F y + F x` reduces modulo the `pⁱ` to continuous `1`-cocycles
+`fᵢ : G → I(χ)/pⁱ`, compatible under the reductions, with `fᵢ x = F x mod pⁱ`. -/
+theorem exists_forall_reduce_eq_and_forall_val_eq_toZModPow (F : G → ℤ_[p]) (hFc : Continuous F)
+    (hF : ∀ x y, F (x * y) = (χ x : ℤ_[p]) * F y + F x) :
+    ∃ f : ∀ i : ℕ, Z1 G (ZModTwist χ i),
+      (∀ ⦃i j : ℕ⦄ (h : j ≤ i) (x : G),
+        ZModTwist.reduce χ h ((f i : G → ZModTwist χ i) x) = (f j : G → ZModTwist χ j) x) ∧
+      ∀ (i : ℕ) (x : G), ((f i : G → ZModTwist χ i) x).val = PadicInt.toZModPow i (F x) := by
+  refine ⟨fun i ↦ ⟨fun x ↦ ⟨PadicInt.toZModPow i (F x)⟩, mem_Z1_iff.2 ⟨?_, fun x y ↦ ?_⟩⟩,
+    fun i j hji x ↦ ?_, fun i x ↦ rfl⟩
+  · exact (continuous_of_discreteTopology (f := fun t : ZMod (p ^ i) ↦
+      (⟨t⟩ : ZModTwist χ i))).comp ((PadicInt.continuous_toZModPow i).comp hFc)
+  · exact ZModTwist.ext (by
+      simp only [ZModTwist.val_add, ZModTwist.val_smul, charScalar_apply, hF, map_add, map_mul])
+  · exact ZModTwist.ext (by
+      simp only [ZModTwist.val_reduce, ZMod.castHom_apply, PadicInt.cast_toZModPow _ _ hji])
+
 variable [IsTopologicalGroup G] [CompactSpace G] {ι : Type*} {g : ι → G}
 
 /-- **The prescription property gives `p`-adic crossed homomorphisms with prescribed values.**
@@ -344,7 +336,7 @@ theorem HasPrescriptionProperty.exists_continuous_forall_mul_eq_and_apply_eq
     ∃ F : G → ℤ_[p], Continuous F ∧ (∀ x y, F (x * y) = (χ x : ℤ_[p]) * F y + F x) ∧
       ∀ k, F (g k) = c k := by
   obtain ⟨f, hf, hfc⟩ := hχ.exists_forall_reduce_eq_and_val_eq hG hfg hg c
-  obtain ⟨F, hFc, hFmul, hF⟩ := exists_continuous_forall_toZModPow_eq_val f hf
+  obtain ⟨F, hFc, hFmul, hF⟩ := exists_continuous_forall_mul_eq_and_forall_toZModPow_eq_val f hf
   exact ⟨F, hFc, hFmul, fun k ↦ PadicInt.ext_of_toZModPow.1 fun i ↦ (hF i (g k)).trans (hfc i k)⟩
 
 omit [CompactSpace G] in
@@ -352,22 +344,15 @@ omit [CompactSpace G] in
 generates `G` topologically and every `c : ι → ℤ_p` is the tuple of values on `g` of a continuous
 `F : G → ℤ_p` with `F (x * y) = χ x * F y + F x`, then `χ` has the prescription property: the
 reductions of `F` modulo the `pⁱ` form a compatible system of continuous `1`-cocycles. -/
-theorem hasPrescriptionProperty_of_forall_exists_continuous_forall_mul_eq
+theorem hasPrescriptionProperty_of_forall_exists_continuous_forall_mul_eq_and_apply_eq
     (hg : (Subgroup.closure (Set.range g)).topologicalClosure = ⊤)
     (h : ∀ c : ι → ℤ_[p], ∃ F : G → ℤ_[p], Continuous F ∧
       (∀ x y, F (x * y) = (χ x : ℤ_[p]) * F y + F x) ∧ ∀ k, F (g k) = c k) :
     HasPrescriptionProperty χ := by
-  refine hasPrescriptionProperty_of_forall_exists_forall_reduce_eq hg fun c ↦ ?_
+  refine hasPrescriptionProperty_of_forall_exists_forall_reduce_eq_and_val_eq hg fun c ↦ ?_
   obtain ⟨F, hFc, hFmul, hF⟩ := h c
-  refine ⟨fun i ↦ ⟨fun x ↦ ⟨PadicInt.toZModPow i (F x)⟩, mem_Z1_iff.2 ⟨?_, fun x y ↦ ?_⟩⟩,
-    fun i j hji x ↦ ?_, fun i k ↦ ?_⟩
-  · exact (continuous_of_discreteTopology (f := fun t : ZMod (p ^ i) ↦
-      (⟨t⟩ : ZModTwist χ i))).comp ((PadicInt.continuous_toZModPow i).comp hFc)
-  · exact ZModTwist.ext (by
-      simp only [ZModTwist.val_add, ZModTwist.val_smul, charScalar_apply, hFmul, map_add, map_mul])
-  · exact ZModTwist.ext (by
-      simp only [ZModTwist.val_reduce, ZMod.castHom_apply, PadicInt.cast_toZModPow _ _ hji])
-  · exact congrArg (PadicInt.toZModPow i) (hF k)
+  obtain ⟨f, hf, hfF⟩ := exists_forall_reduce_eq_and_forall_val_eq_toZModPow F hFc hFmul
+  exact ⟨f, hf, fun i k ↦ (hfF i (g k)).trans (congrArg (PadicInt.toZModPow i) (hF k))⟩
 
 /-- **Labute's third formulation of the prescription property, `p`-adic form** (Labute, Prop. 6,
 (i) ⇔ (iii)). Let `G` be a topologically finitely generated pro-`p` group and `g : ι → G` a minimal
@@ -375,7 +360,7 @@ generating tuple, that is a family of lifts of a basis `b` of the Frattini quoti
 continuous character `χ` has the prescription property exactly when every `c : ι → ℤ_p` is the tuple
 of values on `g` of a continuous crossed homomorphism `F : G → ℤ_p` for `χ`, that is a continuous
 `F` with `F (x * y) = χ x * F y + F x`. -/
-theorem IsProP.hasPrescriptionProperty_iff_forall_exists_continuous_forall_mul_eq
+theorem IsProP.hasPrescriptionProperty_iff_forall_exists_continuous_forall_mul_eq_and_apply_eq
     [TotallyDisconnectedSpace G] (hG : IsProP p G) (hfg : IsTopologicallyFinitelyGenerated G)
     (b : Module.Basis ι (ZMod p) (Additive (G ⧸ proPFrattini p G)))
     (hgb : ∀ k, Additive.ofMul ((QuotientGroup.mk' (proPFrattini p G)) (g k)) = b k)
@@ -383,9 +368,8 @@ theorem IsProP.hasPrescriptionProperty_iff_forall_exists_continuous_forall_mul_e
     HasPrescriptionProperty χ ↔ ∀ c : ι → ℤ_[p], ∃ F : G → ℤ_[p], Continuous F ∧
       (∀ x y, F (x * y) = (χ x : ℤ_[p]) * F y + F x) ∧ ∀ k, F (g k) = c k :=
   ⟨fun hχ c ↦ hχ.exists_continuous_forall_mul_eq_and_apply_eq hG hfg
-    (by rw [show (fun k ↦ Additive.ofMul ((QuotientGroup.mk' (proPFrattini p G)) (g k))) = b from
-      funext hgb]; exact b.linearIndependent) c,
-    hasPrescriptionProperty_of_forall_exists_continuous_forall_mul_eq
+    (by simpa only [hgb] using b.linearIndependent) c,
+    hasPrescriptionProperty_of_forall_exists_continuous_forall_mul_eq_and_apply_eq
       (topologicallyGenerates_of_basis_frattiniQuotient hG b g hgb)⟩
 
 end PadicInt
