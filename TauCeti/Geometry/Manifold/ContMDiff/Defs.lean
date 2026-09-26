@@ -16,7 +16,7 @@ is `C^n` is open.  This file records that openness.
 
 ## Main results
 
-* `TauCeti.isOpen_setOf_contMDiffAt`: for `n ≠ ∞`, the set of points where a map is `C^n` is
+* `TauCeti.isOpen_setOfPred_contMDiffAt`: for `n ≠ ∞`, the set of points where a map is `C^n` is
   open.
 -/
 
@@ -38,7 +38,7 @@ variable
 
 /-- For `n ≠ ∞`, the set of points where a map is `C^n` is open.  This fails for `n = ∞`, where
 the neighbourhood on which `f` is `C^k` may shrink with `k`. -/
-theorem isOpen_setOf_contMDiffAt [IsManifold I n M] [IsManifold I' n M'] (hn : n ≠ ∞) :
+theorem isOpen_setOfPred_contMDiffAt [IsManifold I n M] [IsManifold I' n M'] (hn : n ≠ ∞) :
     IsOpen {x | ContMDiffAt I I' n f x} :=
   isOpen_iff_mem_nhds.2 fun _ hx ↦ (contMDiffAt_iff_contMDiffAt_nhds hn).1 hx
 

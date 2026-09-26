@@ -78,7 +78,7 @@ theorem exists_isOpen_prod_contMDiffOn [IsManifold I' n (X × Y)] [IsManifold J 
     subst hx'
     exact hf y hy
   obtain ⟨U, V, hUo, hVo, hU, hV, hUV⟩ :=
-    generalized_tube_lemma isCompact_singleton hK (isOpen_setOf_contMDiffAt hn) hsub
+    generalized_tube_lemma isCompact_singleton hK (isOpen_setOfPred_contMDiffAt hn) hsub
   exact ⟨U, V, hUo, hVo, hU (mem_singleton x), hV, fun z hz ↦ (hUV hz).contMDiffWithinAt⟩
 
 end TauCeti

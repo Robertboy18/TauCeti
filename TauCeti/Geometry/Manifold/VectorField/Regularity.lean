@@ -24,7 +24,7 @@ manifold differential of a function to tangent vectors whose base point varies.
   tangent bundle is `C^m` when `m + 1 ≤ n`.
 * `ContMDiffOn.contMDiffOn_mvfderiv_apply`: the derivative of a `C^n` function along a `C^m`
   vector field is `C^m` on an open set, when `m + 1 ≤ n`.
-* `ContMDiffOn.contMDiffOn_mk_mfderiv_apply`: the lifted directional derivative
+* `ContMDiffOn.contMDiffOn_totalSpaceMk_mfderiv_apply`: the lifted directional derivative
   `z ↦ (f z, df_z ξ)` of a `C^n` map from an open subset of a normed space into a manifold is
   `C^m` into the tangent bundle, when `m + 1 ≤ n`.
 
@@ -146,7 +146,7 @@ set `U` of a normed space and `m + 1 ≤ n`, then for every fixed direction `ξ`
 `ContMDiffOn.contMDiffOn_tangentMapWithin` restricted to the constant section `z ↦ (z, ξ)` of
 `TF = F × F`, with the within-set derivative replaced by the unrestricted one because `U` is
 open. -/
-theorem ContMDiffOn.contMDiffOn_mk_mfderiv_apply {f : F → M} {U : Set F}
+theorem ContMDiffOn.contMDiffOn_totalSpaceMk_mfderiv_apply {f : F → M} {U : Set F}
     (hf : ContMDiffOn 𝓘(𝕜, F) I n f U) (hmn : m + 1 ≤ n) (hU : IsOpen U) (ξ : F) :
     ContMDiffOn 𝓘(𝕜, F) I.tangent m
       (fun z ↦ TotalSpace.mk' E (f z) (mfderiv 𝓘(𝕜, F) I f z ξ)) U := by

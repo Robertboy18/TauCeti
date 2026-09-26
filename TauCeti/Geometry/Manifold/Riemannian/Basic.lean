@@ -140,7 +140,7 @@ theorem ContMDiffOn.continuousOn_norm_mfderiv {f : F → M} {U : Set F} {n : ℕ
   -- the lifted directional derivative `z ↦ (f z, df_z ξ)` is continuous into `TM`, and the
   -- Riemannian norm is continuous on `TM`
   (TauCeti.continuous_norm_bundle E (fun x : M ↦ TangentSpace I x)).comp_continuousOn
-    (hf.contMDiffOn_mk_mfderiv_apply (m := 0) (by simpa using hn) hU ξ).continuousOn
+    (hf.contMDiffOn_totalSpaceMk_mfderiv_apply (m := 0) (by simpa using hn) hU ξ).continuousOn
 
 omit [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)] in
 /-- Let `f` be a `C^n` map from an open subset `U` of a real normed space to a manifold whose
@@ -154,7 +154,7 @@ theorem ContMDiffOn.contDiffOn_inner_mfderiv {f : F → M} {U : Set F} {m n : �
   -- the two lifted directional derivatives `z ↦ (f z, df_z ξ)` are `C^m` into `TM`, and the
   -- Riemannian inner product of two `C^m` sections over the same base map is `C^m`
   rw [← contMDiffOn_iff_contDiffOn]
-  exact ContMDiffOn.inner_bundle (hf.contMDiffOn_mk_mfderiv_apply hmn hU ξ)
-    (hf.contMDiffOn_mk_mfderiv_apply hmn hU η)
+  exact ContMDiffOn.inner_bundle (hf.contMDiffOn_totalSpaceMk_mfderiv_apply hmn hU ξ)
+    (hf.contMDiffOn_totalSpaceMk_mfderiv_apply hmn hU η)
 
 end NormMFDeriv

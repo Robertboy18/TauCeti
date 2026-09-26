@@ -8,17 +8,19 @@ module
 public import TauCeti.Analysis.Calculus.ParametricIntegral
 public import TauCeti.Geometry.Manifold.ContMDiff.Prod
 public import TauCeti.Geometry.Manifold.Riemannian.Basic
+public import TauCeti.Geometry.Manifold.Riemannian.Energy
 public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.ConstantSpeed
 public import TauCeti.Geometry.Manifold.Riemannian.VariationField
 
 /-!
-# The energy of a curve and its first variation
+# The first variation of energy
 
-The *energy* of a curve `γ` in a Riemannian manifold between the parameters `a` and `b` is
-`E(γ) = ½ ∫_a^b ‖γ'(t)‖² dt`.  A *variation* of `γ` is a two-parameter family `F` with `F 0 = γ`,
-with *variation field* `V = TauCeti.Manifold.variationField I F`, the transverse velocity
-`V(t) = ∂F/∂s (0, t)`.  This file computes the derivative at `s = 0` of the energy of the curves
-`F s`:
+The *energy* `E(γ) = ½ ∫_a^b ‖γ'(t)‖² dt` of a curve `γ` in a Riemannian manifold between the
+parameters `a` and `b` is `TauCeti.Manifold.energy`, defined in
+`TauCeti.Geometry.Manifold.Riemannian.Energy`.  A *variation* of `γ` is a two-parameter family
+`F` with `F 0 = γ`, with *variation field* `V = TauCeti.Manifold.variationField I F`, the
+transverse velocity `V(t) = ∂F/∂s (0, t)`.  This file computes the derivative at `s = 0` of the
+energy of the curves `F s`:
 
 `d/ds E(F s) |₀ = ⟪V(b), γ'(b)⟫ - ⟪V(a), γ'(a)⟫ - ∫_a^b ⟪V(t), D_t γ'(t)⟫ dt`,
 
@@ -35,7 +37,6 @@ parts.
 
 ## Main definitions and results
 
-* `TauCeti.Manifold.energy`: the energy of a curve between two parameters.
 * `TauCeti.Manifold.IsGeodesicCurveOn.energy_eq`: the energy of a geodesic segment is
   `(b - a) ‖γ'(a)‖² / 2`.
 * `TauCeti.Manifold.hasDerivAt_energy`: **the first variation formula** for the energy, with
@@ -70,37 +71,7 @@ variable
 
 variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 
-/-! ### The energy functional -/
-
-variable (I) in
-/-- The **energy** of a curve `γ` between the parameters `a` and `b`: half the integral of its
-squared Riemannian speed, `E(γ) = ½ ∫_a^b ‖γ'(t)‖² dt`.  It is meant for curves which are `C¹`
-near `[a, b]`; for other curves the integrand may take junk values. -/
-def energy (γ : ℝ → M) (a b : ℝ) : ℝ :=
-  (∫ t in a..b, ‖curveVelocity I γ t‖ ^ 2) / 2
-
-/-- The defining formula for the energy. -/
-theorem energy_def (γ : ℝ → M) (a b : ℝ) :
-    energy I γ a b = (∫ t in a..b, ‖curveVelocity I γ t‖ ^ 2) / 2 :=
-  (rfl)
-
-/-- A constant curve has zero energy. -/
-@[simp]
-theorem energy_const (x : M) (a b : ℝ) : energy I (fun _ : ℝ ↦ x) a b = 0 := by
-  simp [energy_def, curveVelocity_const]
-
-/-- The energy over a degenerate parameter interval vanishes. -/
-@[simp]
-theorem energy_self (γ : ℝ → M) (a : ℝ) : energy I γ a a = 0 := by
-  simp [energy_def]
-
-/-- Reversing the parameter interval changes the sign of the energy. -/
-theorem energy_symm (γ : ℝ → M) (a b : ℝ) : energy I γ b a = -energy I γ a b := by
-  rw [energy_def, energy_def, intervalIntegral.integral_symm, neg_div]
-
-/-- The energy over a positively oriented parameter interval is nonnegative. -/
-theorem energy_nonneg (γ : ℝ → M) {a b : ℝ} (hab : a ≤ b) : 0 ≤ energy I γ a b :=
-  div_nonneg (intervalIntegral.integral_nonneg hab fun _ _ ↦ sq_nonneg _) two_pos.le
+/-! ### The energy of a geodesic segment -/
 
 variable [FiniteDimensional ℝ E] [IsManifold I 2 M]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -180,7 +151,7 @@ private theorem fderiv_inner_mfderiv_fst_eq {t : ℝ}
   -- the family is `C²` on the open set `W` of points where it is `C²`, which contains a product
   -- neighbourhood `U ×ˢ V` of `(0, t)`
   have hWo : IsOpen {z : ℝ × ℝ | ContMDiffAt 𝓘(ℝ, ℝ × ℝ) I 2 (fun z : ℝ × ℝ ↦ F z.1 z.2) z} :=
-    TauCeti.isOpen_setOf_contMDiffAt (by simp)
+    TauCeti.isOpen_setOfPred_contMDiffAt (by simp)
   have hfW : ContMDiffOn 𝓘(ℝ, ℝ × ℝ) I 2 (fun z : ℝ × ℝ ↦ F z.1 z.2)
       {z : ℝ × ℝ | ContMDiffAt 𝓘(ℝ, ℝ × ℝ) I 2 (fun z : ℝ × ℝ ↦ F z.1 z.2) z} :=
     fun _ hz ↦ hz.contMDiffWithinAt
