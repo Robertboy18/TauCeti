@@ -8,6 +8,7 @@ module
 public import TauCeti.NumberTheory.Padics.RingHoms
 public import TauCeti.Topology.Algebra.Group.Profinite.Limit
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Basic
+public import TauCeti.Topology.Algebra.GroupAction.TypeTags
 
 /-!
 # Exponentiation of a pro-`p` group by the `p`-adic integers
@@ -45,10 +46,13 @@ abelian pro-`p` groups is stated.
 * `TauCeti.IsProP.continuous_padicPow`: the action `ℤ_[p] × A → A` is jointly continuous.
 * `TauCeti.IsProP.eq_padicPow_of_continuous`, `TauCeti.IsProP.map_padicPow`: the power is the
   unique continuous extension of the natural powers, and continuous homomorphisms preserve it.
+* `TauCeti.IsProP.padicPow_mem`: a closed subgroup containing `a` contains its `p`-adic powers.
 * `TauCeti.IsProP.padicPow_ofAdd_apply_one`: along a continuous additive homomorphism
   `g : ℤ_[p] →+ X`, the `p`-adic power of `ofAdd (g 1)` in `Multiplicative X` is `ofAdd ∘ g`.
 * `TauCeti.IsProP.module_smul`, `TauCeti.IsProP.continuousSMul_module`: the module structure
   acts by the `p`-adic power, and is topological.
+* `TauCeti.IsProP.smul_padicPow`, `TauCeti.IsProP.smulCommClass_module`: continuous actions
+  by group endomorphisms commute with `p`-adic powers and the resulting scalar action.
 
 ## References
 
@@ -235,6 +239,18 @@ theorem eq_padicPow_of_continuous (hA : IsProP p A) {a : A} {f : ℤ_[p] → A} 
   exact congrFun (PadicInt.denseRange_natCast.equalizer hf hcont
     (funext fun k ↦ by simp [hnat k])) l
 
+/-- A closed subgroup containing `a` contains every `p`-adic power of `a`. -/
+theorem padicPow_mem (hA : IsProP p A) {H : Subgroup A} (hH : IsClosed (H : Set A)) {a : A}
+    (ha : a ∈ H) (l : ℤ_[p]) : hA.padicPow a l ∈ H := by
+  -- The exponents `l` with `a ^ l ∈ H` form a closed set containing the dense subset `ℕ`.
+  have hclosed : IsClosed {l : ℤ_[p] | hA.padicPow a l ∈ H} :=
+    hH.preimage (hA.continuous_padicPow.comp (continuous_id.prodMk continuous_const))
+  have hnat : Set.range (Nat.cast : ℕ → ℤ_[p]) ⊆ {l : ℤ_[p] | hA.padicPow a l ∈ H} := by
+    rintro _ ⟨k, rfl⟩
+    simpa using H.pow_mem ha k
+  exact hclosed.closure_subset_iff.mpr hnat
+    ((PadicInt.denseRange_natCast (p := p)).closure_range ▸ Set.mem_univ l)
+
 /-- Continuous homomorphisms between pro-`p` groups preserve the `p`-adic power. -/
 theorem map_padicPow {B : Type v} [Group B] [TopologicalSpace B] [IsTopologicalGroup B]
     [CompactSpace B] [TotallyDisconnectedSpace B] (hA : IsProP p A) (hB : IsProP p B)
@@ -244,6 +260,12 @@ theorem map_padicPow {B : Type v} [Group B] [TopologicalSpace B] [IsTopologicalG
     (hf.comp (hA.continuous_padicPow.comp (continuous_id.prodMk continuous_const)))
   intro k
   simp
+
+/-- A continuous action by group endomorphisms commutes with `p`-adic powers. -/
+theorem smul_padicPow {Γ : Type*} [Monoid Γ] [MulDistribMulAction Γ A]
+    [ContinuousConstSMul Γ A] (hA : IsProP p A) (γ : Γ) (a : A) (l : ℤ_[p]) :
+    γ • hA.padicPow a l = hA.padicPow (γ • a) l :=
+  hA.map_padicPow hA (MulDistribMulAction.toMonoidHom A γ) (continuous_const_smul γ) a l
 
 /-- The `p`-adic power is multiplicative on commuting base elements. -/
 @[simp]
@@ -292,6 +314,16 @@ theorem continuousSMul_module (hA : IsProP p A) :
   -- `Additive A` carries the topology of `A`, and the action is `TauCeti.IsProP.padicPow`
   -- by `TauCeti.IsProP.module_smul`.
   ⟨hA.continuous_padicPow⟩
+
+/-- **A continuous action by group endomorphisms is `ℤ_p`-linear**: it commutes with the scalar
+action of `TauCeti.IsProP.module`. -/
+theorem smulCommClass_module {Γ : Type*} [Monoid Γ] [MulDistribMulAction Γ A]
+    [ContinuousConstSMul Γ A] (hA : IsProP p A) :
+    letI := hA.module
+    SMulCommClass Γ ℤ_[p] (Additive A) :=
+  letI := hA.module
+  ⟨fun γ l x ↦ by
+    simp only [hA.module_smul, ← Additive.ofMul_smul, Additive.toMul_smul, hA.smul_padicPow]⟩
 
 end CommGroup
 

@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.Module.ZMod
+public import Mathlib.LinearAlgebra.BilinearMap
 public import TauCeti.GroupTheory.QuotientGroup.Basic
 public import TauCeti.Topology.Algebra.Group.LowerCentralSeries
 
@@ -38,7 +39,8 @@ finite; this is proved in `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCe
 * `TauCeti.gradedMk`: the class in `gr_k(G)` of an element of `λ_k`.
 * `TauCeti.gradedPieceInclusion`: the injection of `gr_k(G)` into `G ⧸ λ_{k+1}`, an isomorphism in
   degree zero (`TauCeti.gradedPieceZeroEquiv`).
-* `TauCeti.gradedBracket`: the bracket `gr_j(G) →+ gr_k(G) →+ gr_{j+k+1}(G)`.
+* `TauCeti.gradedBracket`: the bracket `gr_j(G) →+ gr_k(G) →+ gr_{j+k+1}(G)`, and its
+  `ZMod p`-bilinear form `TauCeti.gradedBracketLinear`.
 * `TauCeti.gradedPow`: the `p`-power operator `π : gr_k(G) → gr_{k+1}(G)`.
 * `TauCeti.gradedMap`: the map on graded pieces induced by a continuous homomorphism.
 
@@ -77,13 +79,33 @@ variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGro
 /-! ### Congruences modulo the next term
 
 The image of `λ_k` in `G ⧸ λ_{k+1}` is central, so conjugation acts trivially on it and the
-commutator is bimultiplicative modulo `λ_{j+k+2}`. -/
+commutator is bimultiplicative modulo `λ_{j+k+2}`. Computations combining congruences of different
+degrees need these statements modulo an arbitrary coarser term `λ_{n'}`, `n' ≤ n`, as well. -/
+
+/-- A congruence `mk a = mk b * mk c` modulo `λ_n` holds modulo every `λ_{n'}` with `n' ≤ n`. -/
+theorem mk_eq_mk_mul_mk_of_le {a b c : G} {n : ℕ} (n' : ℕ) (h : n' ≤ n)
+    (habc : ((a : G) : G ⧸ pLowerCentralSeries p G n) = (b : G ⧸ _) * (c : G ⧸ _)) :
+    ((a : G) : G ⧸ pLowerCentralSeries p G n') = (b : G ⧸ _) * (c : G ⧸ _) := by
+  rw [← QuotientGroup.mk_mul] at habc ⊢
+  exact QuotientGroup.eq.mpr (pLowerCentralSeries_antitone h (QuotientGroup.eq.mp habc))
+
+/-- The class in `G ⧸ λ_{n'}` of an element of `λ_n` is trivial as soon as `n' ≤ n`. -/
+theorem mk_eq_one_of_mem_pLowerCentralSeries_of_le {n : ℕ} (n' : ℕ) {c : G}
+    (hc : c ∈ pLowerCentralSeries p G n) (h : n' ≤ n) :
+    ((c : G) : G ⧸ pLowerCentralSeries p G n') = 1 :=
+  (QuotientGroup.eq_one_iff c).mpr (pLowerCentralSeries_antitone h hc)
+
+/-- The class of an element of `λ_n` in `G ⧸ λ_{n'}` is central as soon as `n' ≤ n + 1`. -/
+theorem commute_mk_of_mem_pLowerCentralSeries_of_le {n : ℕ} (n' : ℕ) {c : G}
+    (hc : c ∈ pLowerCentralSeries p G n) (h : n' ≤ n + 1) (g : G) :
+    Commute (g : G ⧸ pLowerCentralSeries p G n') (c : G ⧸ _) :=
+  QuotientGroup.commute_mk_iff.mpr <| commutatorElement_inv c g ▸
+    inv_mem (pLowerCentralSeries_antitone h (commutator_mem_pLowerCentralSeries_succ hc g))
 
 /-- The class of an element of `λ_k` in `G ⧸ λ_{k+1}` commutes with every class. -/
 theorem commute_mk_of_mem_pLowerCentralSeries {k : ℕ} {c : G} (hc : c ∈ pLowerCentralSeries p G k)
     (g : G) : Commute (g : G ⧸ pLowerCentralSeries p G (k + 1)) (c : G ⧸ _) :=
-  QuotientGroup.commute_mk_iff.mpr <|
-    commutatorElement_inv c g ▸ inv_mem (commutator_mem_pLowerCentralSeries_succ hc g)
+  commute_mk_of_mem_pLowerCentralSeries_of_le _ hc le_rfl g
 
 /-- Conjugation acts trivially on the image of `λ_k` in `G ⧸ λ_{k+1}`. -/
 theorem mk_conj_of_mem_pLowerCentralSeries {k : ℕ} {c : G} (hc : c ∈ pLowerCentralSeries p G k)
@@ -168,6 +190,13 @@ variable (p G) in
 def gradedMk (k : ℕ) (x : pLowerCentralSeries p G k) : gradedPiece p G k :=
   Additive.ofMul (QuotientGroup.mk x)
 
+/-- The class of `x ∈ λ_k` in `gr_k(G)` is its class in the quotient `λ_k ⧸ λ_{k+1}`, read
+additively: the unfolding equation of `TauCeti.gradedMk`, whose definition is sealed outside this
+module. -/
+theorem gradedMk_def (k : ℕ) (x : pLowerCentralSeries p G k) :
+    gradedMk p G k x = Additive.ofMul (QuotientGroup.mk x) :=
+  (rfl)
+
 theorem gradedMk_surjective (k : ℕ) : Function.Surjective (gradedMk p G k) := fun x => by
   obtain ⟨y, hy⟩ := QuotientGroup.mk_surjective x.toMul
   exact ⟨y, (congrArg Additive.ofMul hy).trans (ofMul_toMul x)⟩
@@ -225,6 +254,12 @@ theorem nsmul_gradedPiece_eq_zero {k : ℕ} (x : gradedPiece p G k) : p • x = 
   rw [← gradedMk_pow, gradedMk_eq_zero_iff, coe_pow]
   exact pow_mem_pLowerCentralSeries y.2
 
+/-- For odd `p`, the graded pieces are killed by `p choose 2 = p * ((p - 1) / 2)`. -/
+theorem choose_two_nsmul_gradedPiece_eq_zero_of_odd (hp : Odd p) {k : ℕ}
+    (x : gradedPiece p G k) : p.choose 2 • x = 0 := by
+  rw [Nat.choose_two_right, Nat.mul_div_assoc _ (Nat.Odd.sub_odd hp odd_one).two_dvd, mul_nsmul,
+    nsmul_gradedPiece_eq_zero, nsmul_zero]
+
 /-- The graded pieces are `ZMod p`-modules, with the canonical action on an abelian group killed
 by `p`. -/
 instance instModuleZModGradedPiece (k : ℕ) : Module (ZMod p) (gradedPiece p G k) :=
@@ -271,11 +306,71 @@ noncomputable def gradedPieceZeroEquiv :
   AddEquiv.ofBijective (gradedPieceInclusion p G 0)
     ⟨gradedPieceInclusion_injective 0, gradedPieceInclusion_zero_surjective⟩
 
-@[simp]
+-- Not `@[simp]`: `gradedMk_zero` rewrites the argument to a `gradedMkZero`, after which
+-- `gradedPieceZeroEquiv_gradedMkZero` applies, so `simp` proves this lemma.
 theorem gradedPieceZeroEquiv_gradedMk (x : pLowerCentralSeries p G 0) :
     gradedPieceZeroEquiv p G (gradedMk p G 0 x) =
       Additive.ofMul ((x : G) : G ⧸ pLowerCentralSeries p G 1) :=
   gradedPieceInclusion_gradedMk x
+
+/-! ### The class of an element of `G` in degree zero -/
+
+variable (p G) in
+/-- **The class in degree zero** of an element of `G`: every element lies in `λ_0 = G`, and
+`gradedMkZero p G g` is its class in `gr_0(G) = G ⧸ λ_1`. -/
+def gradedMkZero (g : G) : gradedPiece p G 0 :=
+  gradedMk p G 0 ⟨g, mem_pLowerCentralSeries_zero p g⟩
+
+/-- The class in degree zero of an element of `λ_0` is the class of the underlying element. -/
+@[simp]
+theorem gradedMk_zero (x : pLowerCentralSeries p G 0) :
+    gradedMk p G 0 x = gradedMkZero p G x := by
+  rw [gradedMkZero]
+
+theorem gradedMkZero_surjective : Function.Surjective (gradedMkZero p G) := fun x => by
+  obtain ⟨y, rfl⟩ := gradedMk_surjective 0 x
+  exact ⟨y, (gradedMk_zero y).symm⟩
+
+/-- Two elements of `G` have the same class in `gr_0(G)` if and only if they have the same class
+in `G ⧸ λ_1`. -/
+theorem gradedMkZero_eq_gradedMkZero_iff {g h : G} :
+    gradedMkZero p G g = gradedMkZero p G h ↔
+      (g : G ⧸ pLowerCentralSeries p G 1) = (h : G ⧸ pLowerCentralSeries p G 1) := by
+  rw [gradedMkZero, gradedMkZero, gradedMk_eq_gradedMk_iff]
+
+/-- The class of an element in `gr_0(G)` vanishes if and only if the element lies in `λ_1`. -/
+@[simp]
+theorem gradedMkZero_eq_zero_iff {g : G} :
+    gradedMkZero p G g = 0 ↔ g ∈ pLowerCentralSeries p G 1 := by
+  rw [gradedMkZero, gradedMk_eq_zero_iff]
+
+@[simp]
+theorem gradedMkZero_mul (g h : G) :
+    gradedMkZero p G (g * h) = gradedMkZero p G g + gradedMkZero p G h := by
+  rw [← gradedMk_zero ⟨g, mem_pLowerCentralSeries_zero p g⟩,
+    ← gradedMk_zero ⟨h, mem_pLowerCentralSeries_zero p h⟩, ← gradedMk_mul]
+  exact gradedMk_zero _
+
+@[simp]
+theorem gradedMkZero_one : gradedMkZero p G 1 = 0 := by
+  rw [gradedMkZero_eq_zero_iff]
+  exact one_mem _
+
+@[simp]
+theorem gradedMkZero_inv (g : G) : gradedMkZero p G g⁻¹ = -gradedMkZero p G g := by
+  rw [← gradedMk_zero ⟨g, mem_pLowerCentralSeries_zero p g⟩, ← gradedMk_inv]
+  exact gradedMk_zero _
+
+@[simp]
+theorem gradedMkZero_pow (g : G) (n : ℕ) : gradedMkZero p G (g ^ n) = n • gradedMkZero p G g := by
+  rw [← gradedMk_zero ⟨g, mem_pLowerCentralSeries_zero p g⟩, ← gradedMk_pow]
+  exact gradedMk_zero _
+
+@[simp]
+theorem gradedPieceZeroEquiv_gradedMkZero (g : G) :
+    gradedPieceZeroEquiv p G (gradedMkZero p G g) =
+      Additive.ofMul (g : G ⧸ pLowerCentralSeries p G 1) := by
+  rw [gradedMkZero, gradedPieceZeroEquiv_gradedMk]
 
 /-! ### Transport along an equality of degrees -/
 
@@ -417,6 +512,31 @@ theorem gradedBracket_gradedMk {j k : ℕ} (x : pLowerCentralSeries p G j)
     QuotientGroup.lift_mk]
   exact bracketRight_gradedMk p G j k x y
 
+/-- **The bracket of two degree-zero classes**, as the class of the commutator in `gr_1(G)`. -/
+@[simp]
+theorem gradedBracket_gradedMkZero (g h : G) :
+    gradedBracket p G 0 0 (gradedMkZero p G g) (gradedMkZero p G h) =
+      gradedMk p G 1 ⟨⁅g, h⁆, commutator_mem_pLowerCentralSeries (mem_pLowerCentralSeries_zero p g)
+        (mem_pLowerCentralSeries_zero p h)⟩ := by
+  rw [gradedMkZero, gradedMkZero, gradedBracket_gradedMk]
+
+variable (p G) in
+/-- **The bracket as a `ZMod p`-bilinear map**
+`gr_j(G) →ₗ[ZMod p] gr_k(G) →ₗ[ZMod p] gr_{j+k+1}(G)`: the biadditive bracket
+`TauCeti.gradedBracket` is automatically `ZMod p`-bilinear. -/
+def gradedBracketLinear (j k : ℕ) :
+    gradedPiece p G j →ₗ[ZMod p] gradedPiece p G k →ₗ[ZMod p] gradedPiece p G (j + k + 1) :=
+  LinearMap.mk₂ (ZMod p) (fun x y => gradedBracket p G j k x y)
+    (fun x₁ x₂ y => by rw [map_add, AddMonoidHom.add_apply])
+    (fun c x y => map_smul (((gradedBracket p G j k).flip y).toZModLinearMap p) c x)
+    (fun x y₁ y₂ => map_add _ y₁ y₂)
+    (fun c x y => map_smul ((gradedBracket p G j k x).toZModLinearMap p) c y)
+
+@[simp]
+theorem gradedBracketLinear_apply {j k : ℕ} (x : gradedPiece p G j) (y : gradedPiece p G k) :
+    gradedBracketLinear p G j k x y = gradedBracket p G j k x y :=
+  (rfl)
+
 /-- **The bracket is alternating**: `[x, x] = 0` in every degree. -/
 @[simp]
 theorem gradedBracket_self {k : ℕ} (x : gradedPiece p G k) : gradedBracket p G k k x x = 0 := by
@@ -493,6 +613,14 @@ theorem gradedPow_zero (k : ℕ) : gradedPow p G k 0 = 0 := by
     one_pow]
   exact one_mem _
 
+/-- **The `p`-power operator on a degree-zero class**, as the class of the `p`-th power in
+`gr_1(G)`. -/
+@[simp]
+theorem gradedPow_gradedMkZero (g : G) :
+    gradedPow p G 0 (gradedMkZero p G g) =
+      gradedMk p G 1 ⟨g ^ p, pow_mem_pLowerCentralSeries (mem_pLowerCentralSeries_zero p g)⟩ := by
+  rw [gradedMkZero, gradedPow_gradedMk]
+
 /-- **`π` is additive above degree zero**, for every `p`: for `k ≥ 1` the image of `λ_k` in
 `G ⧸ λ_{k+2}` is abelian, because `⁅λ_k, λ_k⁆ ≤ λ_{2k+1} ≤ λ_{k+2}`. -/
 @[simp]
@@ -505,6 +633,17 @@ theorem gradedPow_add_of_one_le {k : ℕ} (hk : 1 ≤ k) (x y : gradedPiece p G 
   simp only [coe_mul, QuotientGroup.mk_pow, QuotientGroup.mk_mul]
   exact (QuotientGroup.commute_mk_iff.mpr (pLowerCentralSeries_antitone (by omega)
     (commutator_mem_pLowerCentralSeries x.2 y.2))).mul_pow p
+
+variable (p G) in
+/-- **The `p`-power operator above degree zero, as an additive map** `gr_k(G) →+ gr_{k+1}(G)`, for
+`k ≥ 1`, where `π` is additive (`TauCeti.gradedPow_add_of_one_le`). -/
+def gradedPowAddMonoidHom {k : ℕ} (hk : 1 ≤ k) : gradedPiece p G k →+ gradedPiece p G (k + 1) :=
+  AddMonoidHom.mk' (gradedPow p G k) (gradedPow_add_of_one_le hk)
+
+@[simp]
+theorem gradedPowAddMonoidHom_apply {k : ℕ} (hk : 1 ≤ k) (x : gradedPiece p G k) :
+    gradedPowAddMonoidHom p G hk x = gradedPow p G k x :=
+  (rfl)
 
 /-- **The defect of additivity in degree zero**: `π (x + y) = π x + π y + (p choose 2) • [y, x]`
 in `gr_1(G)`. This is the binomial formula `(x * y) ^ p = x ^ p * y ^ p * ⁅y, x⁆ ^ (p choose 2)` of
@@ -527,9 +666,7 @@ multiple of `p • [y, x] = 0`. -/
 @[simp]
 theorem gradedPow_add_zero_of_odd (hp : Odd p) (x y : gradedPiece p G 0) :
     gradedPow p G 0 (x + y) = gradedPow p G 0 x + gradedPow p G 0 y := by
-  rw [gradedPow_add_zero, Nat.choose_two_right,
-    Nat.mul_div_assoc _ (Nat.Odd.sub_odd hp odd_one).two_dvd, mul_nsmul,
-    nsmul_gradedPiece_eq_zero, nsmul_zero, add_zero]
+  rw [gradedPow_add_zero, choose_two_nsmul_gradedPiece_eq_zero_of_odd hp, add_zero]
 
 /-- **The dyadic defect of additivity in degree zero.** For `p = 2`,
 `π (x + y) = π x + π y + [x, y]` in `gr_1(G)`: the defect is the `binom(2, 2)` term of the
@@ -548,6 +685,25 @@ theorem gradedPow_add_zero_of_two (hp : p = 2) (x y : gradedPiece p G 0) :
   rw [gradedCast_rfl] at h
   rw [h, neg_eq_iff_add_eq_zero]
   exact (two_nsmul _).symm.trans (nsmul_gradedPiece_eq_zero _)
+
+/-- **`π` commutes with natural multiples in degree zero**, for every `p`: the defect of
+additivity of `π` on `n • x` and `x` is a multiple of `[x, x] = 0`. -/
+@[simp]
+theorem gradedPow_nsmul_zero (n : ℕ) (x : gradedPiece p G 0) :
+    gradedPow p G 0 (n • x) = n • gradedPow p G 0 x := by
+  induction n with
+  | zero => rw [zero_nsmul, zero_nsmul, gradedPow_zero]
+  | succ n ih =>
+    rw [succ_nsmul, gradedPow_add_zero, ih, map_nsmul, gradedBracket_self, nsmul_zero, nsmul_zero,
+      add_zero, succ_nsmul]
+
+/-- **`π` commutes with scalars in degree zero**, for nonzero `p`: the `ZMod p`-action is by natural
+multiples. -/
+@[simp]
+theorem gradedPow_smul_zero [NeZero p] (c : ZMod p) (x : gradedPiece p G 0) :
+    gradedPow p G 0 (c • x) = c • gradedPow p G 0 x := by
+  rw [← ZMod.natCast_zmod_val c, Nat.cast_smul_eq_nsmul, Nat.cast_smul_eq_nsmul,
+    gradedPow_nsmul_zero]
 
 /-- **`π` against the bracket on the left**, away from degree zero: `π [x, y] = [π x, y]` for
 `x ∈ gr_j(G)` with `j ≥ 1`. The correction term `⁅x, ⁅x, y⁆⁆` has degree `2j + k + 2`, which is
@@ -608,6 +764,12 @@ theorem gradedMap_gradedMk (f : G →* H) (hf : Continuous f) {k : ℕ}
   rw [gradedMap, gradedMk, MonoidHom.toAdditive_apply_apply, toMul_ofMul,
     QuotientGroup.map_mk, gradedMk]
   rfl
+
+/-- **The graded map in degree zero**: the class of `g` goes to the class of `f g`. -/
+@[simp]
+theorem gradedMap_gradedMkZero (f : G →* H) (hf : Continuous f) (g : G) :
+    gradedMap p f hf 0 (gradedMkZero p G g) = gradedMkZero p H (f g) := by
+  rw [gradedMkZero, gradedMap_gradedMk, gradedMk_zero]
 
 /-- The identity of `G` induces the identity on every graded piece. -/
 @[simp]
