@@ -405,6 +405,7 @@ def ofContinuousMap (f : C(G, A)) : DiscreteCoind G ⊥ A :=
 theorem ofContinuousMap_apply (f : C(G, A)) (g : G) : ofContinuousMap G A f g = f g := (rfl)
 
 /-- Right translation on `Coind_1^G A` is precomposition with right multiplication. -/
+@[simp]
 theorem smul_ofContinuousMap [ContinuousMul G] (g : G) (f : C(G, A)) :
     g • ofContinuousMap G A f = ofContinuousMap G A (f.comp (ContinuousMap.mulRight g)) :=
   ext fun _ => rfl

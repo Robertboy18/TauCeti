@@ -237,6 +237,7 @@ theorem ρ_coindLevel_const (m : ℕ) (g : G) (Φ : (resolutionX 𝒯 m).V) :
 coinduced resolution of `Coind_1^G A` carries `coindLevel m` of the constant family at `Φ` to
 `coindLevel (m + 1)` of the constant family at `d m Φ`. With `evalLevel_d`, this makes
 `coindLevel` on constant families a chain map, inverse to `evalLevel` on the invariant elements. -/
+@[simp]
 theorem d_coindLevel_const (m : ℕ) (Φ : (resolutionX 𝒯 m).V) :
     (d 𝒞 m).hom (coindLevel G A m (ContinuousMap.const G Φ)) =
       coindLevel G A (m + 1) (ContinuousMap.const G ((d 𝒯 m).hom Φ)) := by

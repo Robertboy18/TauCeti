@@ -35,12 +35,14 @@ variable {k : Type*} [Ring k] [TopologicalSpace k] {G : Type*} [Group G] [Topolo
 
 /-- The action on a successor level of the coinduced resolution, at a point:
 `(g • F) x = g • F (g⁻¹ * x)`. -/
+@[simp]
 theorem resolutionX_succ_ρ_apply_apply (n : ℕ) (g : G) (F : (resolutionX X (n + 1)).V) (x : G) :
     ((resolutionX X (n + 1)).ρ g F) x = (resolutionX X n).ρ g (F (g⁻¹ * x)) :=
   (rfl)
 
 /-- The successor differential of the coinduced resolution, at a point:
 `(d (n + 1) F) x = F - d n (F x)`. -/
+@[simp]
 theorem hom_d_succ_apply_apply (n : ℕ) (F : (resolutionX X (n + 1)).V) (x : G) :
     ((d X (n + 1)).hom F) x = F - (d X n).hom (F x) :=
   (rfl)
