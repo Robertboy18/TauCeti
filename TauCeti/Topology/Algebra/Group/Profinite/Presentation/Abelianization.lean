@@ -8,6 +8,7 @@ module
 public import Mathlib.Topology.Algebra.Module.Compact
 public import TauCeti.LinearAlgebra.Quotient.PiSpanSingleton
 public import TauCeti.RingTheory.Valuation.FinsetDvd
+public import TauCeti.Topology.Algebra.Module.PiSpanSingleton
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Abelianization
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation
 public import TauCeti.Topology.Separation.TypeTags
@@ -60,6 +61,9 @@ order of the torsion subgroup of `G^{ab}`, and it is `0` when `q = 0`.
   `u ↦ ∏ x, x_x ^ (u x)`.
 * `TauCeti.presentedProP.abelianizationHom_ofAdd_eq_one_iff`: for a single relator `r`, the
   kernel is the `ℤ_p`-span of the exponent vector of `r`.
+* `TauCeti.presentedProP.oneRelatorAbelianizationEquiv_abelianizationHom_ofAdd`: the isomorphism
+  composed with `abelianizationHom` is the reduction `TauCeti.LinearMap.piSplitAtQuot` of the
+  exponent vectors.
 * `TauCeti.presentedProP.oneRelatorAbelianizationEquiv_mk_of_ne`,
   `TauCeti.presentedProP.oneRelatorAbelianizationEquiv_mk_of_self`,
   `TauCeti.presentedProP.oneRelatorAbelianizationEquiv_symm_ofAdd_mk`: the values of the
@@ -248,38 +252,17 @@ end Hom
 
 section OneRelator
 
+open TauCeti.ContinuousMonoidHom (piSplitAtQuotMultiplicative piSplitAtQuotMultiplicative_ofAdd)
+
 variable (r : freeProP p X) (x₀ : X) (w : X → ℤ_[p]) (hw : w x₀ = 1) (q : ℤ_[p])
-
-private theorem continuous_piSplitAtQuot : Continuous (LinearMap.piSplitAtQuot x₀ w hw q) := by
-  have h : ⇑(LinearMap.piSplitAtQuot x₀ w hw q) = fun u : X → ℤ_[p] ↦
-      (fun x : {x // x ≠ x₀} ↦ u x - u x₀ * w x,
-        (Submodule.Quotient.mk (u x₀) : ℤ_[p] ⧸ Ideal.span {q})) :=
-    funext (LinearMap.piSplitAtQuot_apply x₀ w hw q)
-  rw [h]
-  refine Continuous.prodMk (continuous_pi fun x ↦ ?_)
-    (continuous_quot_mk.comp (continuous_apply x₀))
-  exact (continuous_apply (x : X)).sub ((continuous_apply x₀).mul continuous_const)
-
-/-- The reduction `ℤ_p^X → ℤ_p^{X ∖ {x₀}} × ℤ_p ⧸ (q)` of `TauCeti.LinearMap.piSplitAtQuot`, as a
-continuous homomorphism of the multiplicative type tags. -/
-private noncomputable def splitQuotHom :
-    Multiplicative (X → ℤ_[p]) →ₜ*
-      Multiplicative (({x // x ≠ x₀} → ℤ_[p]) × (ℤ_[p] ⧸ Ideal.span {q})) where
-  toMonoidHom := (LinearMap.piSplitAtQuot x₀ w hw q).toAddMonoidHom.toMultiplicative
-  continuous_toFun :=
-    continuous_ofAdd.comp ((continuous_piSplitAtQuot x₀ w hw q).comp continuous_toAdd)
-
-private theorem splitQuotHom_ofAdd (u : X → ℤ_[p]) :
-    splitQuotHom x₀ w hw q (ofAdd u) = ofAdd (LinearMap.piSplitAtQuot x₀ w hw q u) :=
-  (rfl)
 
 variable (hr : (freeProP.exponentSum p X r).toAdd = q • w)
 
 include hr in
-private theorem splitQuotHom_exponentSum_relator :
-    splitQuotHom x₀ w hw q (freeProP.exponentSum p X r) = 1 := by
-  rw [← ofAdd_toAdd (freeProP.exponentSum p X r), hr, splitQuotHom_ofAdd, ofAdd_eq_one,
-    ← LinearMap.mem_ker, LinearMap.ker_piSplitAtQuot]
+private theorem piSplitAtQuotMultiplicative_exponentSum_relator :
+    piSplitAtQuotMultiplicative x₀ w hw q (freeProP.exponentSum p X r) = 1 := by
+  rw [← ofAdd_toAdd (freeProP.exponentSum p X r), hr, piSplitAtQuotMultiplicative_ofAdd,
+    ofAdd_eq_one, ← LinearMap.mem_ker, LinearMap.ker_piSplitAtQuot]
   exact Submodule.mem_span_singleton_self _
 
 include hr in
@@ -289,21 +272,23 @@ private noncomputable def toSplitQuot :
     TopologicalAbelianization (presentedProP p X {r}) →ₜ*
       Multiplicative (({x // x ≠ x₀} → ℤ_[p]) × (ℤ_[p] ⧸ Ideal.span {q})) :=
   TopologicalAbelianization.lift
-    (lift ((splitQuotHom x₀ w hw q).comp (freeProP.exponentSum p X)) fun s hs ↦ by
+    (lift ((piSplitAtQuotMultiplicative x₀ w hw q).comp (freeProP.exponentSum p X)) fun s hs ↦ by
       rw [Set.mem_singleton_iff.mp hs, ContinuousMonoidHom.coe_comp, Function.comp_apply]
-      exact splitQuotHom_exponentSum_relator r x₀ w hw q hr)
+      exact piSplitAtQuotMultiplicative_exponentSum_relator r x₀ w hw q hr)
 
 private theorem toSplitQuot_mk (y : freeProP p X) :
     toSplitQuot r x₀ w hw q hr
         ((mk p {r} y : presentedProP p X {r}) : TopologicalAbelianization (presentedProP p X {r})) =
-      splitQuotHom x₀ w hw q (freeProP.exponentSum p X y) := by
+      piSplitAtQuotMultiplicative x₀ w hw q (freeProP.exponentSum p X y) := by
   refine (TopologicalAbelianization.lift_mk _ _).trans ?_
   rw [lift_mk, ContinuousMonoidHom.coe_comp, Function.comp_apply]
 
 private theorem toSplitQuot_abelianizationHom [Fintype X] (u : Multiplicative (X → ℤ_[p])) :
-    toSplitQuot r x₀ w hw q hr (abelianizationHom {r} u) = splitQuotHom x₀ w hw q u := by
+    toSplitQuot r x₀ w hw q hr (abelianizationHom {r} u) =
+      piSplitAtQuotMultiplicative x₀ w hw q u := by
   classical
-  have h : (toSplitQuot r x₀ w hw q hr).comp (abelianizationHom {r}) = splitQuotHom x₀ w hw q :=
+  have h : (toSplitQuot r x₀ w hw q hr).comp (abelianizationHom {r}) =
+      piSplitAtQuotMultiplicative x₀ w hw q :=
     continuousMonoidHom_ext_multiplicative_pi_padicInt p X fun x ↦ by
       rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, abelianizationHom_ofAdd_single,
         ← mk_of, toSplitQuot_mk, freeProP.exponentSum_of]
@@ -319,15 +304,16 @@ private theorem toSplitQuot_bijective : Function.Bijective (toSplitQuot r x₀ w
     obtain ⟨u, rfl⟩ := abelianizationHom_surjective {r} g
     obtain ⟨u', rfl⟩ := abelianizationHom_surjective {r} g'
     rw [toSplitQuot_abelianizationHom, toSplitQuot_abelianizationHom] at hgg'
-    have h1 : splitQuotHom x₀ w hw q (u / u') = 1 := by rw [map_div, hgg', div_self']
-    rw [← ofAdd_toAdd (u / u'), splitQuotHom_ofAdd, ofAdd_eq_one, ← LinearMap.mem_ker,
-      LinearMap.ker_piSplitAtQuot, ← hr] at h1
+    have h1 : piSplitAtQuotMultiplicative x₀ w hw q (u / u') = 1 := by
+      rw [map_div, hgg', div_self']
+    rw [← ofAdd_toAdd (u / u'), piSplitAtQuotMultiplicative_ofAdd, ofAdd_eq_one,
+      ← LinearMap.mem_ker, LinearMap.ker_piSplitAtQuot, ← hr] at h1
     have h2 := (abelianizationHom_ofAdd_eq_one_iff r _).mpr h1
     rwa [ofAdd_toAdd, map_div, div_eq_one] at h2
   · intro t
     obtain ⟨u, hu⟩ := LinearMap.piSplitAtQuot_surjective x₀ w hw q t.toAdd
     exact ⟨abelianizationHom {r} (ofAdd u), by
-      rw [toSplitQuot_abelianizationHom, splitQuotHom_ofAdd, hu, ofAdd_toAdd]⟩
+      rw [toSplitQuot_abelianizationHom, piSplitAtQuotMultiplicative_ofAdd, hu, ofAdd_toAdd]⟩
 
 /-- **The abelianization structure theorem for one-relator pro-`p` groups.** Let
 `G = presentedProP p X {r}` be the pro-`p` group on a finite type `X` with the single relator `r`,
@@ -364,7 +350,18 @@ theorem oneRelatorAbelianizationEquiv_mk (y : freeProP p X) :
     oneRelatorAbelianizationEquiv r x₀ w hw q hr
         ((mk p {r} y : presentedProP p X {r}) : TopologicalAbelianization (presentedProP p X {r})) =
       ofAdd (LinearMap.piSplitAtQuot x₀ w hw q (freeProP.exponentSum p X y).toAdd) := by
-  rw [oneRelatorAbelianizationEquiv_apply, toSplitQuot_mk, ← splitQuotHom_ofAdd, ofAdd_toAdd]
+  rw [oneRelatorAbelianizationEquiv_apply, toSplitQuot_mk, ← piSplitAtQuotMultiplicative_ofAdd,
+    ofAdd_toAdd]
+
+/-- The abelianization isomorphism of a one-relator group composed with the abelianization map of
+the presentation is the reduction `TauCeti.LinearMap.piSplitAtQuot` of the exponent vectors: the
+element `∏ x, x_x ^ (u x)` of `G^{ab}` is sent to the class of `u`. -/
+@[simp]
+theorem oneRelatorAbelianizationEquiv_abelianizationHom_ofAdd [Fintype X] (u : X → ℤ_[p]) :
+    oneRelatorAbelianizationEquiv r x₀ w hw q hr (abelianizationHom {r} (ofAdd u)) =
+      ofAdd (LinearMap.piSplitAtQuot x₀ w hw q u) := by
+  rw [oneRelatorAbelianizationEquiv_apply, toSplitQuot_abelianizationHom,
+    piSplitAtQuotMultiplicative_ofAdd]
 
 /-- The abelianization isomorphism of a one-relator group sends the class of the generator at
 `x ≠ x₀` to the coordinate vector at `x`. -/
@@ -396,8 +393,8 @@ theorem oneRelatorAbelianizationEquiv_symm_ofAdd_mk [Fintype X] (a : {x // x ≠
     (oneRelatorAbelianizationEquiv r x₀ w hw q hr).symm
         (ofAdd (a, (Submodule.Quotient.mk b : ℤ_[p] ⧸ Ideal.span {q}))) =
       abelianizationHom {r} (ofAdd ((LinearEquiv.piSplitAt x₀ w hw).symm (a, b))) := by
-  rw [ContinuousMulEquiv.symm_apply_eq, oneRelatorAbelianizationEquiv_apply,
-    toSplitQuot_abelianizationHom, splitQuotHom_ofAdd, LinearMap.piSplitAtQuot_piSplitAt_symm]
+  rw [ContinuousMulEquiv.symm_apply_eq, oneRelatorAbelianizationEquiv_abelianizationHom_ofAdd,
+    LinearMap.piSplitAtQuot_piSplitAt_symm]
 
 include hw hr in
 /-- **The torsion-free case of the structure theorem.** The coordinate `q` of the exponent vector
