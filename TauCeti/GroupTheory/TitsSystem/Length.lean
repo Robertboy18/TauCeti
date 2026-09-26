@@ -63,6 +63,7 @@ local prefix:100 "ℓ " => T.simpleGenerators.wordLength
 
 /-- A word in the simple reflections and their inverses evaluates to the product of the
 underlying list of simple reflections. -/
+@[simp]
 theorem wordProd_eq_prod (l : List (T.simple × Bool)) :
     T.simpleGenerators.wordProd l = (l.map fun x ↦ (x.1 : T.WeylGroup)).prod := by
   induction l with
@@ -103,6 +104,7 @@ theorem exists_prod_eq_of_wordLength (w : T.WeylGroup) :
   exact ⟨l, hl, le_antisymm hlen (T.wordLength_prod_le hl), rfl⟩
 
 /-- A simple reflection has length one. -/
+@[simp]
 theorem wordLength_simple {s : T.WeylGroup} (hs : s ∈ T.simple) : ℓ s = 1 := by
   refine le_antisymm
     (T.wordLength_le_iff.mpr ⟨[s], by simpa using hs, le_rfl, List.prod_singleton⟩) ?_
@@ -124,11 +126,11 @@ theorem wordLength_mul_simple_le (w : T.WeylGroup) {s : T.WeylGroup} (hs : s ∈
 /-- Left multiplication by a simple reflection decreases the length by at most one. -/
 theorem wordLength_le_wordLength_simple_mul_add_one {s : T.WeylGroup} (hs : s ∈ T.simple)
     (w : T.WeylGroup) : ℓ w ≤ ℓ (s * w) + 1 := by
-  simpa only [T.simple_mul_simple_mul hs] using T.wordLength_simple_mul_le hs (s * w)
+  simpa only [T.simple_mul_simple_cancel_left hs] using T.wordLength_simple_mul_le hs (s * w)
 
 /-- Right multiplication by a simple reflection decreases the length by at most one. -/
 theorem wordLength_le_wordLength_mul_simple_add_one (w : T.WeylGroup) {s : T.WeylGroup}
     (hs : s ∈ T.simple) : ℓ w ≤ ℓ (w * s) + 1 := by
-  simpa only [T.mul_simple_mul_simple w hs] using T.wordLength_mul_simple_le (w * s) hs
+  simpa only [T.simple_mul_simple_cancel_right w hs] using T.wordLength_mul_simple_le (w * s) hs
 
 end TauCeti.TitsSystem

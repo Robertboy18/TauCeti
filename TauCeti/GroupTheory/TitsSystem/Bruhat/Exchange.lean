@@ -98,7 +98,8 @@ theorem exists_eraseIdx_prod_eq_of_bruhatCell_mul_ne {s : T.WeylGroup} (hs : s �
       refine ⟨l'.length, by simp, ?_⟩
       rw [List.eraseIdx_append_of_length_le le_rfl, Nat.sub_self, List.eraseIdx_zero,
         List.tail_cons, List.append_nil, ← mul_assoc,
-        T.simple_mul_eq_mul_simple_of_bruhatCell_mul_ne hs hs' hP h, T.mul_simple_mul_simple _ hs']
+        T.simple_mul_eq_mul_simple_of_bruhatCell_mul_ne hs hs' hP h,
+        T.simple_mul_simple_cancel_right _ hs']
     · -- The letter to delete lies in the shorter word.
       obtain ⟨j, hj, hprod⟩ := ih hl' hP
       refine ⟨j, by simp only [List.length_append, List.length_singleton]; omega, ?_⟩

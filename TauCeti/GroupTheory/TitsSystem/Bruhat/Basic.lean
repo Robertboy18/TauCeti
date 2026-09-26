@@ -36,6 +36,8 @@ simple cells are developed in `TauCeti.GroupTheory.TitsSystem.Bruhat.Subword`.
   a representative in `N`.
 * `TauCeti.TitsSystem.exists_mem_bruhatCell`: every Weyl-indexed Bruhat cell contains a
   representative from `N`.
+* `TauCeti.TitsSystem.subgroupB_mul_bruhatCell` and `TauCeti.TitsSystem.bruhatCell_mul_subgroupB`:
+  the identity cell `B` is absorbed by every cell.
 * `TauCeti.TitsSystem.bruhatCells_eq_univ`: the Bruhat cells cover the ambient group.
 * `TauCeti.TitsSystem.bruhatCell_mul_eq_or_eq_union_of_mem_simple`: multiplication on the left by
   a simple Bruhat cell gives either the adjacent cell or its union with the original cell.
@@ -140,6 +142,24 @@ theorem bruhatCell_one : T.bruhatCell 1 = (T.subgroupB : Set G) := by
       rw [QuotientGroup.mk_one]
     _ = DoubleCoset.doubleCoset (1 : G) T.subgroupB T.subgroupB := T.bruhatCell_mk 1
     _ = T.subgroupB := doubleCoset_one_self T.subgroupB
+
+/-- The identity cell `B` (see `TauCeti.TitsSystem.bruhatCell_one`) is absorbed on the left:
+`B (B w B) = B w B`. -/
+@[simp]
+theorem subgroupB_mul_bruhatCell (w : T.WeylGroup) :
+    (T.subgroupB : Set G) * T.bruhatCell w = T.bruhatCell w := by
+  obtain ⟨n, rfl⟩ := QuotientGroup.mk'_surjective T.intersection w
+  simp only [QuotientGroup.mk'_apply, bruhatCell_mk, DoubleCoset.doubleCoset]
+  rw [← mul_assoc, ← mul_assoc, coe_mul_coe]
+
+/-- The identity cell `B` (see `TauCeti.TitsSystem.bruhatCell_one`) is absorbed on the right:
+`(B w B) B = B w B`. -/
+@[simp]
+theorem bruhatCell_mul_subgroupB (w : T.WeylGroup) :
+    T.bruhatCell w * (T.subgroupB : Set G) = T.bruhatCell w := by
+  obtain ⟨n, rfl⟩ := QuotientGroup.mk'_surjective T.intersection w
+  simp only [QuotientGroup.mk'_apply, bruhatCell_mk, DoubleCoset.doubleCoset]
+  rw [mul_assoc, coe_mul_coe]
 
 /-- The union over `N` defining `bruhatCells` can equivalently be indexed canonically by the Weyl
 group. -/

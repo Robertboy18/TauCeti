@@ -119,13 +119,13 @@ theorem inv_simple {s : T.WeylGroup} (hs : s ∈ T.simple) : s⁻¹ = s :=
 
 /-- Multiplying twice by a simple reflection on the left is the identity. -/
 @[simp]
-theorem simple_mul_simple_mul {s : T.WeylGroup} (hs : s ∈ T.simple) (w : T.WeylGroup) :
+theorem simple_mul_simple_cancel_left {s : T.WeylGroup} (hs : s ∈ T.simple) (w : T.WeylGroup) :
     s * (s * w) = w := by
   rw [← mul_assoc, T.simple_sq_eq_one hs, one_mul]
 
 /-- Multiplying twice by a simple reflection on the right is the identity. -/
 @[simp]
-theorem mul_simple_mul_simple (w : T.WeylGroup) {s : T.WeylGroup} (hs : s ∈ T.simple) :
+theorem simple_mul_simple_cancel_right (w : T.WeylGroup) {s : T.WeylGroup} (hs : s ∈ T.simple) :
     w * s * s = w := by
   rw [mul_assoc, T.simple_sq_eq_one hs, mul_one]
 

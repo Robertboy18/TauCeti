@@ -34,11 +34,6 @@ The right-handed versions follow by inversion, which carries the cell at `w` to 
 
 ## Main declarations
 
-* `TauCeti.TitsSystem.subgroupB_mul_bruhatCell` and `TauCeti.TitsSystem.bruhatCell_mul_subgroupB`:
-  the identity cell `B` is absorbed by every cell.
-* `TauCeti.TitsSystem.subset_bruhatCell_mul_of_mem_simple` and
-  `TauCeti.TitsSystem.bruhatCell_mul_subset_union_of_mem_simple`: the adjacent cell always occurs
-  in the product with a simple cell, and nothing beyond the adjacent and the original cell does.
 * `TauCeti.TitsSystem.bruhatCell_mul_eq_of_wordLength_le`: **length-increasing multiplication**,
   `(B s B)(B w B) = B (s w) B` when `ℓ w ≤ ℓ (s w)`.
 * `TauCeti.TitsSystem.bruhatCell_mul_eq_union_of_wordLength_lt`: **length-decreasing
@@ -68,62 +63,6 @@ universe u
 variable {G : Type u} [Group G] (T : TitsSystem G)
 
 local prefix:100 "ℓ " => T.simpleGenerators.wordLength
-
-/-! ### Absorption of the identity cell and the two-sided rank-one bounds -/
-
-/-- The identity cell `B` (see `TauCeti.TitsSystem.bruhatCell_one`) is absorbed on the left:
-`B (B w B) = B w B`. -/
-@[simp]
-theorem subgroupB_mul_bruhatCell (w : T.WeylGroup) :
-    (T.subgroupB : Set G) * T.bruhatCell w = T.bruhatCell w := by
-  obtain ⟨n, rfl⟩ := QuotientGroup.mk'_surjective T.intersection w
-  simp only [QuotientGroup.mk'_apply, bruhatCell_mk, DoubleCoset.doubleCoset]
-  rw [← mul_assoc, ← mul_assoc, coe_mul_coe]
-
-/-- The identity cell `B` (see `TauCeti.TitsSystem.bruhatCell_one`) is absorbed on the right:
-`(B w B) B = B w B`. -/
-@[simp]
-theorem bruhatCell_mul_subgroupB (w : T.WeylGroup) :
-    T.bruhatCell w * (T.subgroupB : Set G) = T.bruhatCell w := by
-  obtain ⟨n, rfl⟩ := QuotientGroup.mk'_surjective T.intersection w
-  simp only [QuotientGroup.mk'_apply, bruhatCell_mk, DoubleCoset.doubleCoset]
-  rw [mul_assoc, coe_mul_coe]
-
-/-- The adjacent cell always occurs in the product with a simple cell on the left. -/
-theorem subset_bruhatCell_mul_of_mem_simple {s : T.WeylGroup} (hs : s ∈ T.simple)
-    (w : T.WeylGroup) : T.bruhatCell (s * w) ⊆ T.bruhatCell s * T.bruhatCell w := by
-  rcases T.bruhatCell_mul_eq_or_eq_union_of_mem_simple hs w with h | h
-  · rw [h]
-  · rw [h]
-    exact Set.subset_union_left
-
-/-- The adjacent cell always occurs in the product with a simple cell on the right. -/
-theorem subset_bruhatCell_mul_of_mem_simple_right (w : T.WeylGroup) {s : T.WeylGroup}
-    (hs : s ∈ T.simple) : T.bruhatCell (w * s) ⊆ T.bruhatCell w * T.bruhatCell s := by
-  rcases T.bruhatCell_mul_eq_or_eq_union_of_mem_simple_right w hs with h | h
-  · rw [h]
-  · rw [h]
-    exact Set.subset_union_left
-
-/-- The product with a simple cell on the left lies in the union of the adjacent and the original
-cell. -/
-theorem bruhatCell_mul_subset_union_of_mem_simple {s : T.WeylGroup} (hs : s ∈ T.simple)
-    (w : T.WeylGroup) :
-    T.bruhatCell s * T.bruhatCell w ⊆ T.bruhatCell (s * w) ∪ T.bruhatCell w := by
-  rcases T.bruhatCell_mul_eq_or_eq_union_of_mem_simple hs w with h | h
-  · rw [h]
-    exact Set.subset_union_left
-  · rw [h]
-
-/-- The product with a simple cell on the right lies in the union of the adjacent and the original
-cell. -/
-theorem bruhatCell_mul_subset_union_of_mem_simple_right (w : T.WeylGroup) {s : T.WeylGroup}
-    (hs : s ∈ T.simple) :
-    T.bruhatCell w * T.bruhatCell s ⊆ T.bruhatCell (w * s) ∪ T.bruhatCell w := by
-  rcases T.bruhatCell_mul_eq_or_eq_union_of_mem_simple_right w hs with h | h
-  · rw [h]
-    exact Set.subset_union_left
-  · rw [h]
 
 /-! ### The rank-one law decided by the length function -/
 
@@ -178,7 +117,7 @@ theorem bruhatCell_mul_eq_of_wordLength_le {s : T.WeylGroup} (hs : s ∈ T.simpl
     · exact T.simple_ne_one hs (by simpa using h1)
     · -- Then `s w = w'`, whose length is less than `ℓ w`.
       have h2 : s * (l'.prod * s') = l'.prod := by
-        rw [h1, T.simple_mul_simple_mul hs]
+        rw [h1, T.simple_mul_simple_cancel_left hs]
       have h3 := T.wordLength_prod_le hl'
       rw [h2] at hw
       omega
@@ -190,8 +129,8 @@ theorem bruhatCell_mul_eq_union_of_wordLength_lt {s : T.WeylGroup} (hs : s ∈ T
     T.bruhatCell s * T.bruhatCell w = T.bruhatCell (s * w) ∪ T.bruhatCell w := by
   have hkey : T.bruhatCell s * T.bruhatCell (s * w) = T.bruhatCell w := by
     have h := T.bruhatCell_mul_eq_of_wordLength_le hs (w := s * w)
-      (by rw [T.simple_mul_simple_mul hs]; exact hw.le)
-    rwa [T.simple_mul_simple_mul hs] at h
+      (by rw [T.simple_mul_simple_cancel_left hs]; exact hw.le)
+    rwa [T.simple_mul_simple_cancel_left hs] at h
   calc T.bruhatCell s * T.bruhatCell w
       = T.bruhatCell s * (T.bruhatCell s * T.bruhatCell (s * w)) := by rw [hkey]
     _ = (T.bruhatCell 1 ∪ T.bruhatCell s) * T.bruhatCell (s * w) := by
@@ -205,8 +144,8 @@ theorem wordLength_simple_mul_ne {s : T.WeylGroup} (hs : s ∈ T.simple) (w : T.
   intro h
   have h1 := T.bruhatCell_mul_eq_of_wordLength_le hs (w := w) h.ge
   have h2 := T.bruhatCell_mul_eq_of_wordLength_le hs (w := s * w)
-    (by rw [T.simple_mul_simple_mul hs]; exact h.le)
-  rw [T.simple_mul_simple_mul hs] at h2
+    (by rw [T.simple_mul_simple_cancel_left hs]; exact h.le)
+  rw [T.simple_mul_simple_cancel_left hs] at h2
   have h3 : T.bruhatCell (s * w) ⊆ T.bruhatCell w := by
     calc T.bruhatCell (s * w) ⊆ T.bruhatCell w ∪ T.bruhatCell (s * w) := Set.subset_union_right
       _ = (T.bruhatCell 1 ∪ T.bruhatCell s) * T.bruhatCell w := by
