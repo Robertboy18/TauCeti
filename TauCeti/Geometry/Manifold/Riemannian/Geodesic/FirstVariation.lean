@@ -37,8 +37,6 @@ parts.
 
 ## Main definitions and results
 
-* `TauCeti.Manifold.IsGeodesicCurveOn.energy_eq`: the energy of a geodesic segment is
-  `(b - a) ‖γ'(a)‖² / 2`.
 * `TauCeti.Manifold.hasDerivAt_energy`: **the first variation formula** for the energy, with
   boundary terms.
 * `TauCeti.Manifold.hasDerivAt_energy_of_fixed_endpoints`: the first variation formula for a
@@ -71,35 +69,9 @@ variable
 
 variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 
-/-! ### The energy of a geodesic segment -/
-
 variable [FiniteDimensional ℝ E] [IsManifold I 2 M]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
   [IsContMDiffRiemannianBundle I 1 E (fun x : M ↦ TangentSpace I x)]
-
-/-- **The energy of a geodesic segment.** A geodesic has constant speed, so its energy between
-`a` and `b` is `(b - a) ‖γ'(a)‖² / 2`. -/
-theorem IsGeodesicCurveOn.energy_eq {γ : ℝ → M} {s : Set ℝ} (h : IsGeodesicCurveOn I γ s)
-    (hs : IsOpen s) {a b : ℝ} (hsub : uIcc a b ⊆ s) :
-    energy I γ a b = (b - a) * ‖curveVelocity I γ a‖ ^ 2 / 2 := by
-  -- constant speed is a statement about a preconnected parameter set: pass to the connected
-  -- component of `s` containing the segment, which is open and still contains `[a, b]`
-  have hs'o : IsOpen (connectedComponentIn s a) := hs.connectedComponentIn
-  have hsub' : uIcc a b ⊆ connectedComponentIn s a :=
-    isPreconnected_uIcc.subset_connectedComponentIn left_mem_uIcc hsub
-  have h' : IsGeodesicCurveOn I γ (connectedComponentIn s a) :=
-    h.mono hs'o.uniqueDiffOn (connectedComponentIn_subset s a)
-  have ha : a ∈ connectedComponentIn s a := hsub' left_mem_uIcc
-  have key : EqOn (fun t ↦ ‖curveVelocity I γ t‖ ^ 2) (fun _ ↦ ‖curveVelocity I γ a‖ ^ 2)
-      (uIcc a b) := by
-    intro t ht
-    have ht' : t ∈ connectedComponentIn s a := hsub' ht
-    simp only
-    rw [← curveVelocityWithin_of_mem_nhds (hs'o.mem_nhds ht'),
-      ← curveVelocityWithin_of_mem_nhds (hs'o.mem_nhds ha),
-      h'.norm_curveVelocityWithin_eq isPreconnected_connectedComponentIn ht' ha]
-  rw [energy_def, intervalIntegral.integral_congr key, intervalIntegral.integral_const,
-    smul_eq_mul]
 
 /-! ### The first variation of energy -/
 
