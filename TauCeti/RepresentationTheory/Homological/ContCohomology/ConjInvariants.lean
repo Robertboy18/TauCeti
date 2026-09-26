@@ -26,9 +26,10 @@ normal subgroup `N`. For `M = 𝔽_p` the right-hand side is the continuous `�
 quotient, which is worked out in `TauCeti.Topology.Algebra.Group.Profinite.ProP.InvariantDual`.
 
 The invariant classes are the domain of the transgression in the five-term exact sequence of a
-group extension `1 → N → G → G ⧸ N → 1`. For a presentation `1 → R → F → G → 1` of a pro-`p`
-group by a free pro-`p` group, the identification `H¹(R, 𝔽_p)^F ≃ Hom_cont(R ⧸ Rᵖ[R, F], 𝔽_p)` is
-what lets `H²(G, 𝔽_p)` count the generators of `R` as a closed normal subgroup of `F`.
+group extension `1 → N → G → G ⧸ N → 1`. For a minimal presentation `1 → R → F → G → 1` of a
+pro-`p` group by a free pro-`p` group, the transgression is an isomorphism, and the identification
+`H¹(R, 𝔽_p)^F ≃ Hom_cont(R ⧸ Rᵖ[R, F], 𝔽_p)` is what lets `H²(G, 𝔽_p)` count the generators of
+`R` as a closed normal subgroup of `F`.
 
 ## Main results
 
@@ -65,10 +66,12 @@ exactly when the cocycle is constant on the conjugacy classes of `G` in `N`. -/
 theorem mk_mem_H1ConjInvariants_iff_of_smul_eq_self {c : Z1 N M} :
     (c : H1 N M) ∈ H1ConjInvariants G M N ↔
       ∀ (g : G) (n : N), (c : N → M) (MulAut.conjNormal g n) = (c : N → M) n := by
+  have hconj (g : G) (n : N) :
+      Subgroup.inverseConjugationHom N g n = MulAut.conjNormal g⁻¹ n :=
+    Subtype.ext (by simp)
   simp only [mem_H1ConjInvariants_iff, explicitConj1_apply_eq_smul, smul_mk, H1pi_eq_iff,
     B1_eq_bot_of_smul_eq_self (fun (n : N) (m : M) ↦ htriv n m), AddSubgroup.mem_bot,
-    sub_eq_zero, funext_iff, cocyclesMap1_apply, DistribSMul.toAddMonoidHom_apply, htriv,
-    Subgroup.inverseConjugationHom_apply_eq_conjNormal]
+    sub_eq_zero, funext_iff, cocyclesMap1_apply, DistribSMul.toAddMonoidHom_apply, htriv, hconj]
   refine ⟨fun h g n ↦ ?_, fun h g n ↦ h g⁻¹ n⟩
   simpa only [inv_inv] using h g⁻¹ n
 
@@ -153,8 +156,9 @@ theorem H1ConjInvariantsEquivOfSmulEqSelf_symm_apply_coe
     (ψ : Additive ((N ⧸ (pLowerCentralStep p N).subgroupOf N) →ₜ* Multiplicative M)) :
     ((H1ConjInvariantsEquivOfSmulEqSelf htriv p hN hpM).symm ψ : H1 N M) =
       (H1EquivOfSmulEqSelf (fun (n : N) (m : M) ↦ htriv n m)).symm
-        (Additive.ofMul ((Additive.toMul ψ).comp (ContinuousMonoidHom.quotientMk _))) :=
-  (rfl)
+        (Additive.ofMul ((Additive.toMul ψ).comp (ContinuousMonoidHom.quotientMk _))) := by
+  rw [H1ConjInvariantsEquivOfSmulEqSelf]
+  simp only [AddEquiv.symm_mk, AddEquiv.coe_mk, Equiv.coe_fn_symm_mk]
 
 end Quotient
 

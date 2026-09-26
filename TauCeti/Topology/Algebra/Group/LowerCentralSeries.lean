@@ -176,6 +176,7 @@ theorem isClosed_pLowerCentralStep_subgroupOf (N : Subgroup G) :
 
 /-- **Conjugation acts trivially on `N ⧸ Nᵖ[N, G]`.** For a normal subgroup `N`, the class of the
 conjugate `g n g⁻¹` in the quotient of `N` by `pLowerCentralStep p N` is the class of `n`. -/
+@[simp]
 theorem mk_conjNormal_eq {N : Subgroup G} [N.Normal] (g : G) (n : N) :
     ((MulAut.conjNormal g n : N) : N ⧸ (pLowerCentralStep p N).subgroupOf N) = n := by
   rw [QuotientGroup.eq, mem_subgroupOf, coe_mul, coe_inv, MulAut.conjNormal_apply]

@@ -20,8 +20,8 @@ generator rank of that quotient by Burnside's basis theorem. So `H¹(N, 𝔽_p)^
 when `N ⧸ Nᵖ[N, G]` is topologically finitely generated, and then it has `p ^ d(N ⧸ Nᵖ[N, G])`
 elements.
 
-For a presentation `1 → R → F → G → 1` of a pro-`p` group by a free pro-`p` group `F`, the
-transgression identifies `H¹(R, 𝔽_p)^F` with `H²(G, 𝔽_p)`, and `d(R ⧸ Rᵖ[R, F])` is the least
+For a minimal presentation `1 → R → F → G → 1` of a pro-`p` group by a free pro-`p` group `F`,
+the transgression identifies `H¹(R, 𝔽_p)^F` with `H²(G, 𝔽_p)`, and `d(R ⧸ Rᵖ[R, F])` is the least
 number of generators of `R` as a closed normal subgroup of `F`. The count here is therefore what
 makes the dimension of `H²(G, 𝔽_p)` the relation rank of `G`.
 

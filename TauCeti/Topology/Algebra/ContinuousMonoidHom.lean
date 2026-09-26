@@ -118,12 +118,6 @@ theorem _root_.Subgroup.inverseConjugationHom_apply [IsTopologicalGroup G] (N : 
   change ((MulAut.conjNormal g⁻¹ : MulAut N) n : G) = _
   simp
 
-/-- Inverse conjugation by `g` is Mathlib's conjugation automorphism of `N` by `g⁻¹`. -/
-theorem _root_.Subgroup.inverseConjugationHom_apply_eq_conjNormal [IsTopologicalGroup G]
-    (N : Subgroup G) [N.Normal] (g : G) (n : N) :
-    _root_.Subgroup.inverseConjugationHom N g n = MulAut.conjNormal g⁻¹ n :=
-  (rfl)
-
 /-- Inverse conjugation by the identity is the identity continuous homomorphism. -/
 @[simp]
 theorem _root_.Subgroup.inverseConjugationHom_one [IsTopologicalGroup G] (N : Subgroup G)
