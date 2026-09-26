@@ -173,14 +173,14 @@ noncomputable def restrictScalarsIntIso :
     continuousCohomology n (restrictScalarsInt.obj X) ≅
       TopModuleCat.restrictScalarsInt.obj (continuousCohomology n X) :=
   HomologicalComplex.homologyMapIso (homogeneousCochainsRestrictScalarsIntIso X) n ≪≫
-    (homogeneousCochains X).mapHomologyIso TopModuleCat.restrictScalarsInt n
+    ((homogeneousCochains X).sc n).mapHomologyIso TopModuleCat.restrictScalarsInt
 
 /-- The cocycles of the underlying additive representation of `X` are the underlying topological
 abelian group of the cocycles of `X`. -/
 noncomputable def cocyclesRestrictScalarsIntIso :
     cocycles (restrictScalarsInt.obj X) n ≅ TopModuleCat.restrictScalarsInt.obj (cocycles X n) :=
   HomologicalComplex.cyclesMapIso (homogeneousCochainsRestrictScalarsIntIso X) n ≪≫
-    (homogeneousCochains X).mapCyclesIso TopModuleCat.restrictScalarsInt n
+    ((homogeneousCochains X).sc n).mapCyclesIso TopModuleCat.restrictScalarsInt
 
 /-- Under `cocyclesRestrictScalarsIntIso`, a cocycle corresponds to the same homogeneous cochain,
 read through `homogeneousCochainsRestrictScalarsIntIso`. -/
@@ -189,21 +189,27 @@ theorem cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles :
     (cocyclesRestrictScalarsIntIso X n).hom ≫
         TopModuleCat.restrictScalarsInt.map ((homogeneousCochains X).iCycles n) =
       (homogeneousCochains (restrictScalarsInt.obj X)).iCycles n ≫
-        (homogeneousCochainsRestrictScalarsIntIso X).hom.f n := by
-  rw [cocyclesRestrictScalarsIntIso, Iso.trans_hom, Category.assoc,
-    HomologicalComplex.mapCyclesIso_hom_iCycles, HomologicalComplex.cyclesMapIso_hom,
-    HomologicalComplex.cyclesMap_i]
+        (homogeneousCochainsRestrictScalarsIntIso X).hom.f n :=
+  -- The middle object of `cocyclesRestrictScalarsIntIso` is the cycles of the image complex only
+  -- after unfolding `HomologicalComplex.cycles`, so `rw` cannot split the composite and the
+  -- squares are pasted as terms.
+  (Category.assoc _ _ _).trans <|
+    (congrArg (_ ≫ ·) (((homogeneousCochains X).sc n).mapCyclesIso_hom_iCycles
+      TopModuleCat.restrictScalarsInt)).trans
+    (HomologicalComplex.cyclesMap_i (homogeneousCochainsRestrictScalarsIntIso X).hom n)
 
 /-- `restrictScalarsIntIso` carries the class of a cocycle of the underlying additive
 representation to the class of the corresponding cocycle of `X`. -/
 @[reassoc (attr := simp)]
 theorem π_comp_restrictScalarsIntIso_hom :
     π (restrictScalarsInt.obj X) n ≫ (restrictScalarsIntIso X n).hom =
-      (cocyclesRestrictScalarsIntIso X n).hom ≫ TopModuleCat.restrictScalarsInt.map (π X n) := by
-  rw [restrictScalarsIntIso, cocyclesRestrictScalarsIntIso, Iso.trans_hom, Iso.trans_hom,
-    HomologicalComplex.homologyMapIso_hom, HomologicalComplex.cyclesMapIso_hom,
-    HomologicalComplex.homologyπ_naturality_assoc,
-    HomologicalComplex.homologyπ_comp_mapHomologyIso_hom, Category.assoc]
+      (cocyclesRestrictScalarsIntIso X n).hom ≫ TopModuleCat.restrictScalarsInt.map (π X n) :=
+  -- As in `cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles`, the composites only split after
+  -- unfolding, so the squares are pasted as terms.
+  (HomologicalComplex.homologyπ_naturality_assoc
+    (homogeneousCochainsRestrictScalarsIntIso X).hom n _).trans <|
+    (congrArg (_ ≫ ·) (((homogeneousCochains X).sc n).homologyπ_comp_mapHomologyIso_hom
+      TopModuleCat.restrictScalarsInt)).trans (Category.assoc _ _ _).symm
 
 end TauCeti.ContCohomology
 

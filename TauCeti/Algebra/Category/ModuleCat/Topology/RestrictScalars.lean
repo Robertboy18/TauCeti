@@ -42,9 +42,8 @@ topological representation over `ℤ`, on which the explicit low-degree descript
 ## Main results
 
 * `TopModuleCat.restrictScalarsInt.preservesHomology`: forgetting the scalars preserves homology,
-  so that `CategoryTheory.ShortComplex.mapHomologyIso` and `HomologicalComplex.mapHomologyIso`
-  identify the homology computed after forgetting the scalars with the underlying topological
-  abelian group of the homology.
+  so that `CategoryTheory.ShortComplex.mapHomologyIso` identifies the homology computed after
+  forgetting the scalars with the underlying topological abelian group of the homology.
 -/
 
 public section
