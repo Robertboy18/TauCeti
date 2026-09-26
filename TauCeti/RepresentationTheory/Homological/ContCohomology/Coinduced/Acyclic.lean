@@ -285,7 +285,10 @@ private theorem subsingleton_continuousCohomology_discreteCoind_bot_aux (n : ℕ
 omit [TopologicalSpace A] [DiscreteTopology A] in
 /-- **`Coind_1^G A` is acyclic in every positive degree.** For a compact group `G` and an abelian
 group `A`, the continuous cohomology `Hⁿ⁺¹(G, Coind_1^G A)` of the locally constant maps `G → A`
-under right translation vanishes for every `n`. -/
+under right translation vanishes for every `n`. The action of the trivial subgroup `⊥` on `A`
+carried by `Coind_1^G A` is arbitrary, for instance the restriction of an action of `G` on `A`: the
+equivariance condition it imposes is vacuous, so it does not change the underlying group of
+locally constant maps. -/
 instance subsingleton_continuousCohomology_discreteCoind_bot (n : ℕ) :
     Subsingleton (continuousCohomology (n + 1) 𝒞) :=
   -- the proof runs through the coinduced resolution of `A`, which needs `A` discrete
