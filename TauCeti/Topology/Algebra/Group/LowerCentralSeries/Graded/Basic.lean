@@ -254,6 +254,12 @@ theorem nsmul_gradedPiece_eq_zero {k : ℕ} (x : gradedPiece p G k) : p • x = 
   rw [← gradedMk_pow, gradedMk_eq_zero_iff, coe_pow]
   exact pow_mem_pLowerCentralSeries y.2
 
+/-- For odd `p`, the graded pieces are killed by `p choose 2 = p * ((p - 1) / 2)`. -/
+theorem choose_two_nsmul_gradedPiece_eq_zero_of_odd (hp : Odd p) {k : ℕ}
+    (x : gradedPiece p G k) : p.choose 2 • x = 0 := by
+  rw [Nat.choose_two_right, Nat.mul_div_assoc _ (Nat.Odd.sub_odd hp odd_one).two_dvd, mul_nsmul,
+    nsmul_gradedPiece_eq_zero, nsmul_zero]
+
 /-- The graded pieces are `ZMod p`-modules, with the canonical action on an abelian group killed
 by `p`. -/
 instance instModuleZModGradedPiece (k : ℕ) : Module (ZMod p) (gradedPiece p G k) :=
@@ -659,9 +665,7 @@ multiple of `p • [y, x] = 0`. -/
 @[simp]
 theorem gradedPow_add_zero_of_odd (hp : Odd p) (x y : gradedPiece p G 0) :
     gradedPow p G 0 (x + y) = gradedPow p G 0 x + gradedPow p G 0 y := by
-  rw [gradedPow_add_zero, Nat.choose_two_right,
-    Nat.mul_div_assoc _ (Nat.Odd.sub_odd hp odd_one).two_dvd, mul_nsmul,
-    nsmul_gradedPiece_eq_zero, nsmul_zero, add_zero]
+  rw [gradedPow_add_zero, choose_two_nsmul_gradedPiece_eq_zero_of_odd hp, add_zero]
 
 /-- **The dyadic defect of additivity in degree zero.** For `p = 2`,
 `π (x + y) = π x + π y + [x, y]` in `gr_1(G)`: the defect is the `binom(2, 2)` term of the

@@ -240,6 +240,7 @@ theorem gradedDeviation_gradedBracket (hm : 1 ≤ m) {j k : ℕ} (x : gradedPiec
 /-- **The Leibniz rule in degree zero**, in the cast-free form
 `D [x, y] = [D x, y] - [D y, x]` for `x, y ∈ gr_0(G)` and `m ≥ 1`, using skew-symmetry of the
 bracket to put both terms in `gr_{m+1}(G)`. -/
+@[simp]
 theorem gradedDeviation_gradedBracket_zero (hm : 1 ≤ m) (x y : gradedPiece p G 0) :
     gradedDeviation θ hθc hθ 1 (gradedBracket p G 0 0 x y) =
       gradedBracket p G m 0 (gradedDeviation θ hθc hθ 0 x) y -
@@ -342,9 +343,7 @@ theorem gradedDeviation_gradedPow_zero (x : gradedPiece p G 0) :
 theorem gradedDeviation_gradedPow_zero_of_odd (hp : Odd p) (x : gradedPiece p G 0) :
     gradedDeviation θ hθc hθ 1 (gradedPow p G 0 x) =
       gradedPow p G m (gradedDeviation θ hθc hθ 0 x) := by
-  rw [gradedDeviation_gradedPow_zero, Nat.choose_two_right,
-    Nat.mul_div_assoc _ (Nat.Odd.sub_odd hp odd_one).two_dvd, mul_nsmul,
-    nsmul_gradedPiece_eq_zero, nsmul_zero, add_zero]
+  rw [gradedDeviation_gradedPow_zero, choose_two_nsmul_gradedPiece_eq_zero_of_odd hp, add_zero]
 
 /-- **The dyadic defect of the graded deviation against `π` in degree zero.** For `p = 2`,
 `D (π x) = π (D x) + [D x, x]` in `gr_{m+1}(G)`: the square of `x * u` is `x ^ 2 * u ^ 2 * ⁅u, x⁆`

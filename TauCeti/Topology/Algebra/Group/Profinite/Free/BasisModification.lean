@@ -98,9 +98,7 @@ theorem inv_mul_basisModification_mem (w : X → pLowerCentralSeries p (freeProP
         QuotientGroup.continuous_mk⟩ : freeProP p X →ₜ* _).comp (basisModification w) =
       ⟨QuotientGroup.mk' _, QuotientGroup.continuous_mk⟩ :=
     hom_ext fun i ↦ by
-      change ((basisModification w (of i) : freeProP p X) :
-        freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) m) = (of i : freeProP p X)
-      rw [basisModification_of]
+      rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, basisModification_of]
       exact QuotientGroup.mk_mul_of_mem _ (w i).2
   have hg : ((basisModification w g : freeProP p X) :
       freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) m) = g :=
@@ -123,7 +121,7 @@ theorem gradedDeviation_basisModification_gradedMkZero_of
 
 section Delta
 
-variable [Fact p.Prime] [Fintype X] [LinearOrder X]
+variable [Fact p.Prime] [Finite X] [LinearOrder X]
 
 variable (p X) in
 /-- **The basis-modification map `δ`**, for `m ≥ 1`: the `𝔽_p`-bilinear map
@@ -179,7 +177,7 @@ theorem basisModificationDelta_degreeOneBasis_inr (hm : 1 ≤ m)
 /-- **The value of `δ`**: with `ρ = Σ_i c_i π ξ_i + Σ_{i<k} a_{ik} [ξ_i, ξ_k]`,
 `δ_ρ(v) = Σ_i c_i (π v_i + (p choose 2) • [v_i, ξ_i]) + Σ_{i<k} a_{ik} ([v_i, ξ_k] - [v_k, ξ_i])`.
 -/
-theorem basisModificationDelta_apply (hm : 1 ≤ m) (ρ : gradedPiece p (freeProP p X) 1)
+theorem basisModificationDelta_apply [Fintype X] (hm : 1 ≤ m) (ρ : gradedPiece p (freeProP p X) 1)
     (v : X → gradedPiece p (freeProP p X) m) :
     basisModificationDelta p X hm ρ v =
       ∑ i, (degreeOneBasis p X).repr ρ (Sum.inl i) •
