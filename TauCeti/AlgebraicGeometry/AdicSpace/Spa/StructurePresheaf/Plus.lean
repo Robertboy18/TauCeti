@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.AlgebraicGeometry.AdicSpace.Spa.StructurePresheaf.StalkValuation
+public import TauCeti.AlgebraicGeometry.AdicSpace.Spa.StructurePresheaf.Stalk.Valuation
 public import TauCeti.AlgebraicGeometry.AdicSpace.Spa.Localization.CompletedPlus
 
 /-!
