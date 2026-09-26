@@ -364,6 +364,11 @@ theorem d2_comp_d1_apply (f : G → M) : d2 G M (d1 G M f) = 0 :=
 theorem H0_eq_top_of_smul_eq_self (htriv : ∀ (g : G) (m : M), g • m = m) : H0 G M = ⊤ :=
   eq_top_iff.2 fun m _ => (FixedPoints.mem_addSubgroup G M m).2 fun g => htriv g m
 
+/-- For a trivial action `H⁰(G, M)` has the order of `M`. -/
+theorem natCard_H0_of_smul_eq_self (htriv : ∀ (g : G) (m : M), g • m = m) :
+    Nat.card (H0 G M) = Nat.card M := by
+  rw [H0_eq_top_of_smul_eq_self htriv, AddSubgroup.card_top]
+
 end Complex
 
 section CompatiblePairDegreeZero
