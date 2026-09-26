@@ -5,8 +5,10 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.Category.ModuleCat.Topology.EpiMono
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Discrete
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CompactDiscrete
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Resolution
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.SmoothDiscrete
 
 /-!
@@ -30,9 +32,10 @@ The proof does not use Shapiro's lemma. Mathlib computes `Hⁿ(G, X)` as the hom
 is defined recursively by `d (n + 1) F x = F - d n (F x)`. Two observations drive the argument.
 
 * The full, non-invariant, coinduced resolution of *any* representation is contracted by
-  evaluation at `1`: `d n (F 1) + (d (n + 1) F) 1 = F` (`TopRep.d_apply_one_add_d_apply_one`).
-  This is immediate from the recursion, but evaluation at `1` is not equivariant, so it does not
-  act on the invariants.
+  evaluation at `1`: `d n (F 1) + (d (n + 1) F) 1 = F` (`TopRep.d_apply_one_add_d_apply_one`, in
+  `TauCeti/RepresentationTheory/Homological/ContCohomology/Resolution.lean`). This is immediate
+  from the recursion, but evaluation at `1` is not equivariant, so it does not act on the
+  invariants.
 * For the coefficients `X = Coind_1^G A`, an invariant element `F` of level `m` of the resolution
   is determined by *evaluation at `1` inside every level*, `x₁ ↦ ⋯ ↦ xₘ ↦ F x₁ ⋯ xₘ 1`, which lands
   in level `m` of the coinduced resolution of `A` with the trivial action (`evalLevel`). The
@@ -43,7 +46,7 @@ is defined recursively by `d (n + 1) F x = F - d n (F x)`. Two observations driv
 
 A cocycle `F` of degree `n + 1` is thus sent by evaluation to a cocycle `Φ` of the resolution of
 `A`, which is `d (Φ 1)` by the contraction; spreading `Φ 1` back over `G` gives an invariant
-cochain whose differential has the same evaluation as `F`, hence equals `F`.
+cochain whose differential is the spread of `d (Φ 1) = Φ` (`d_coindLevel_const`), which is `F`.
 
 Compactness of `G` enters only through the discreteness of every level of the resolution
 (`TauCeti.discreteTopology_resolutionX`), which makes the maps above continuous. Neither total
@@ -60,11 +63,12 @@ not mention.
 
 ## Main results
 
-* `TopRep.d_apply_one_add_d_apply_one`: evaluation at `1` contracts the coinduced resolution.
 * `TauCeti.ContCohomology.evalLevel_d`: evaluation at `1` is a chain map.
 * `TauCeti.ContCohomology.eq_coindLevel_const_evalLevel` and
   `TauCeti.ContCohomology.eq_of_evalLevel_eq`: an invariant element is recovered from, hence
   determined by, its evaluation at `1`.
+* `TauCeti.ContCohomology.d_coindLevel_const`: spreading a constant family commutes with the
+  differentials.
 * `TauCeti.ContCohomology.subsingleton_continuousCohomology_discreteCoind_bot`:
   **`Hⁿ⁺¹(G, Coind_1^G A) = 0`** for every `n`, for a compact group `G`.
 
@@ -79,34 +83,6 @@ not mention.
 public section
 
 open CategoryTheory TopRep
-
-/-! ### The coinduced resolution is contracted by evaluation at `1` -/
-
-namespace TopRep
-
-variable {k : Type*} [Ring k] [TopologicalSpace k] {G : Type*} [Group G] [TopologicalSpace G]
-  [IsTopologicalGroup G] (X : TopRep k G)
-
-/-- The action on a successor level of the coinduced resolution, at a point:
-`(k • F) x = k • F (k⁻¹ * x)`. -/
-theorem resolutionX_succ_ρ_apply_apply (n : ℕ) (g : G) (F : (resolutionX X (n + 1)).V) (x : G) :
-    ((resolutionX X (n + 1)).ρ g F) x = (resolutionX X n).ρ g (F (g⁻¹ * x)) :=
-  (rfl)
-
-/-- The successor differential of the coinduced resolution, at a point:
-`(d (n + 1) F) x = F - d n (F x)`. -/
-theorem hom_d_succ_apply_apply (n : ℕ) (F : (resolutionX X (n + 1)).V) (x : G) :
-    ((d X (n + 1)).hom F) x = F - (d X n).hom (F x) :=
-  (rfl)
-
-/-- **Evaluation at `1` contracts the coinduced resolution**: every `F` in level `n + 1`
-satisfies `F = d n (F 1) + (d (n + 1) F) 1`. Evaluation at `1` is not `G`-equivariant, so this
-contraction does not descend to the homogeneous cochains. -/
-theorem d_apply_one_add_d_apply_one (n : ℕ) (F : (resolutionX X (n + 1)).V) :
-    (d X n).hom (F 1) + ((d X (n + 1)).hom F) 1 = F := by
-  rw [hom_d_succ_apply_apply, add_sub_cancel]
-
-end TopRep
 
 namespace TauCeti.ContCohomology
 
@@ -257,6 +233,17 @@ theorem ρ_coindLevel_const (m : ℕ) (g : G) (Φ : (resolutionX 𝒯 m).V) :
       coindLevel G A m (ContinuousMap.const G Φ) := by
   rw [ρ_coindLevel, ContinuousMap.const_comp]
 
+/-- **Spreading a constant family commutes with the differentials**: the differential of the
+coinduced resolution of `Coind_1^G A` carries `coindLevel m` of the constant family at `Φ` to
+`coindLevel (m + 1)` of the constant family at `d m Φ`. With `evalLevel_d`, this makes
+`coindLevel` on constant families a chain map, inverse to `evalLevel` on the invariant elements. -/
+theorem d_coindLevel_const (m : ℕ) (Φ : (resolutionX 𝒯 m).V) :
+    (d 𝒞 m).hom (coindLevel G A m (ContinuousMap.const G Φ)) =
+      coindLevel G A (m + 1) (ContinuousMap.const G ((d 𝒯 m).hom Φ)) := by
+  refine (eq_coindLevel_const_evalLevel G A (m + 1) _ fun g => ?_).trans ?_
+  · rw [← TopRep.hom_comm_apply, ρ_coindLevel_const]
+  · rw [evalLevel_d, evalLevel_coindLevel, ContinuousMap.const_apply]
+
 /-! ### Acyclicity -/
 
 /-- The acyclicity theorem, with the discrete topology on `A` available as an instance for the
@@ -285,14 +272,13 @@ private theorem subsingleton_continuousCohomology_discreteCoind_bot_aux (n : ℕ
   refine ⟨⟨coindLevel G A (n + 1) (ContinuousMap.const G
     (evalLevel G A (n + 2) (Subtype.val ((homogeneousCochains 𝒞).iCycles (n + 1) z)) 1)),
     fun g => ρ_coindLevel_const G A (n + 1) g _⟩, ?_⟩
-  -- its differential and the cocycle are invariant elements with the same evaluation at `1`
+  -- its differential spreads `d (Φ 1) = Φ` over `G`, which is the invariant cocycle itself
   refine TopModuleCat.injective_of_mono ((homogeneousCochains 𝒞).iCycles (n + 1)) ?_
   refine (ConcreteCategory.congr_hom ((homogeneousCochains 𝒞).toCycles_i n (n + 1)) _).trans ?_
-  refine Subtype.ext (eq_of_evalLevel_eq G A (n + 2)
-    (((homogeneousCochains 𝒞).d n (n + 1)).hom _).2 ((homogeneousCochains 𝒞).iCycles (n + 1) z).2
-    ?_)
-  rw [homogeneousCochains.d_apply, evalLevel_d, evalLevel_coindLevel, ContinuousMap.const_apply,
-    hΦ']
+  refine Subtype.ext ?_
+  rw [homogeneousCochains.d_apply, d_coindLevel_const, hΦ']
+  exact (eq_coindLevel_const_evalLevel G A (n + 2) _
+    ((homogeneousCochains 𝒞).iCycles (n + 1) z).2).symm
 
 omit [TopologicalSpace A] [DiscreteTopology A] in
 /-- **`Coind_1^G A` is acyclic in every positive degree.** For a compact group `G` and an abelian

@@ -26,8 +26,7 @@ isomorphism below is that the topology is the quotient topology on a cokernel.
 Two consequences are recorded. The first is that the homology really is a quotient of the cycles:
 `ShortComplex.homologyπ_surjective` and `ShortComplex.homologyπ_eq_zero_iff` describe the class map
 elementwise, neither of which follows from `ShortComplex.homologyπ` being an epimorphism, since an
-epimorphism of topological modules need not be surjective. Monomorphisms behave better:
-`TopModuleCat.mono_iff_injective` identifies them with the injective morphisms.
+epimorphism of topological modules need not be surjective.
 
 The second is that homology in `TopModuleCat R` inherits discreteness: a short
 complex whose middle term is discrete has discrete cycles and discrete homology, and likewise
@@ -43,18 +42,6 @@ open CategoryTheory Limits
 namespace TopModuleCat
 
 variable {R : Type*} [Ring R] [TopologicalSpace R]
-
-/-- A morphism of topological modules is a monomorphism exactly when it is injective. The forward
-direction goes through the forgetful functor to modules, which preserves monomorphisms because it
-is a right adjoint. -/
-theorem mono_iff_injective {X Y : TopModuleCat R} (f : X ⟶ Y) : Mono f ↔ Function.Injective f.hom :=
-  ⟨fun _ => (ModuleCat.mono_iff_injective ((forget₂ (TopModuleCat R) (ModuleCat R)).map f)).1
-    inferInstance, fun h => ConcreteCategory.mono_of_injective f h⟩
-
-/-- A monomorphism of topological modules is injective. -/
-theorem injective_of_mono {X Y : TopModuleCat R} (f : X ⟶ Y) [Mono f] :
-    Function.Injective f.hom :=
-  (mono_iff_injective f).1 inferInstance
 
 /-- Exactness of a pair of composable maps of topological modules follows from exactness of the
 maps of modules they become after forgetting topologies, up to conjugation by isomorphisms. -/
