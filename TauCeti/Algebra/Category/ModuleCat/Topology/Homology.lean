@@ -116,17 +116,11 @@ theorem homologyπ_eq_zero_iff {x : S.cycles} :
   exact LinearMap.mem_range
 
 /-- The inclusion of the cycles of a short complex of topological modules into its middle term is
-injective: up to the isomorphism with the concrete kernel `TopModuleCat.ker S.g`, it is the
-inclusion of a submodule. This is the elementwise form of `CategoryTheory.ShortComplex.iCycles`
-being a monomorphism. -/
-theorem iCycles_injective : Function.Injective S.iCycles.hom := fun x y hxy ↦ by
-  set e := S.isoCyclesOfIsLimit (TopModuleCat.isLimitKer S.g)
-  have h : ∀ z : S.cycles, S.iCycles z = (e.inv z : TopModuleCat.ker S.g).1 := fun z ↦ by
-    have := ConcreteCategory.congr_hom (S.isoCyclesOfIsLimit_inv_ι (TopModuleCat.isLimitKer S.g)) z
-    simp only [ConcreteCategory.comp_apply, Limits.KernelFork.ι_ofι] at this
-    exact this.symm
-  refine e.symm.toContinuousLinearEquiv.injective (Subtype.ext ?_)
-  exact (h x).symm.trans (hxy.trans (h y))
+injective. This is the elementwise form of `CategoryTheory.ShortComplex.iCycles` being a
+monomorphism, read through the forgetful functor to `TopCat`, which preserves limits. -/
+theorem iCycles_injective : Function.Injective S.iCycles.hom :=
+  ConcreteCategory.injective_of_mono_of_preservesPullback
+    ((forget₂ (TopModuleCat R) TopCat).map S.iCycles)
 
 /-- The cycles of a short complex of topological modules with discrete middle term are discrete. -/
 theorem discreteTopology_cycles [DiscreteTopology S.X₂] : DiscreteTopology S.cycles :=
