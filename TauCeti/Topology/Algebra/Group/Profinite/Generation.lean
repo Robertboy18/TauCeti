@@ -52,7 +52,7 @@ profinite group.
 * `TauCeti.isTopologicallyFinitelyGenerated_iff_exists_rank_le`: topological finite generation
   is exactly a uniform bound on the ranks of the finite quotients.
 * `TauCeti.ConvergesToOne`: a set has only finitely many elements outside every neighborhood of
-  `1`.
+  `1`; `TauCeti.ConvergesToOne.tendsto_coe` is the defining limit of the inclusion.
 * `TauCeti.convergesToOne_iff_openNormalSubgroup`: in a profinite group, the same holds for
   every open normal subgroup.
 * `TauCeti.ConvergesToOne.image`: a continuous map preserving `1` carries a set converging to one
@@ -98,6 +98,12 @@ every open normal subgroup omits only finitely many elements
 generating sets in the cardinal-valued topological generator rank of a profinite group. -/
 def ConvergesToOne (s : Set G) : Prop :=
   Tendsto ((↑) : s → G) cofinite (𝓝 1)
+
+/-- The inclusion of a set converging to one tends to `1` along the cofinite filter. This is the
+definition of `TauCeti.ConvergesToOne`, which is not unfolded outside this module. -/
+theorem ConvergesToOne.tendsto_coe {s : Set G} (hs : ConvergesToOne s) :
+    Tendsto ((↑) : s → G) cofinite (𝓝 1) :=
+  hs
 
 /-- A set converges to one exactly when only finitely many of its elements lie outside each
 neighborhood of `1`. -/

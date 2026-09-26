@@ -23,12 +23,8 @@ pro-`p` group. This is the condition under which a continuous homomorphic sectio
 presentation an isomorphism (`TauCeti.IsProP.continuousMulEquivOfLeftInverse`); for presentations
 on a finite type it is the condition that the number of generators be the topological generator
 rank (`TauCeti.presentedProP.subset_proPFrattini_iff_card_eq`). Every pro-`p` group has a minimal
-presentation: take `s` to be a dual family of a basis of the continuous `𝔽_p`-dual of `G`. Every
-continuous `𝔽_p`-character of the free pro-`p` group is then a finite combination of the basis
-composed with the presentation, because it vanishes on all but finitely many members of the
-converging set, so the kernel of the presentation is killed by every character and hence lies in
-the Frattini subgroup. The free pro-`p` group of a minimal presentation has the same topological
-generator rank as `G`.
+presentation, on a dual family of a basis of its continuous `𝔽_p`-dual, and the free pro-`p` group
+of a minimal presentation has the same topological generator rank as `G`.
 
 ## Main definitions
 
@@ -37,6 +33,8 @@ generator rank as `G`.
 
 ## Main results
 
+* `TauCeti.topologicalGeneratorRank_freeProPInsertOne_le`: the free pro-`p` group on
+  `(insert 1 s, 1)` has topological generator rank at most the cardinality of `s`.
 * `TauCeti.IsProP.presentation_surjective_iff`: the presentation on `s` is surjective exactly when
   `s` generates `G` topologically.
 * `TauCeti.IsProP.exists_convergesToOne_presentation_surjective`: **every pro-`p` group is a
@@ -70,34 +68,31 @@ group `F_p(insert 1 s, 1)` on a pointed profinite space. -/
 abbrev freeProPInsertOne (p : ℕ) (s : Set G) : Type u :=
   freeProCPointed (finiteGroupClassP.{u} p) (⟨1, Set.mem_insert 1 s⟩ : ↥(insert (1 : G) s))
 
-/-- The free pro-`p` group on `(insert 1 (range g), 1)`, for a family `g` tending to `1`, has
-topological generator rank at most the cardinality of the index type: the generators attached to
-the `g i` converge to `1` and generate it topologically. -/
-theorem topologicalGeneratorRank_freeProPInsertOne_range_le {ι : Type u} {g : ι → G}
-    (hg : Tendsto g cofinite (𝓝 1)) :
-    topologicalGeneratorRank (freeProPInsertOne p (Set.range g)) ≤ #ι := by
-  set x₀ : ↥(insert (1 : G) (Set.range g)) := ⟨1, Set.mem_insert 1 _⟩
-  set e : ι → ↥(insert (1 : G) (Set.range g)) := fun i ↦ ⟨g i, Set.mem_insert_of_mem 1 ⟨i, rfl⟩⟩
-  have he : Tendsto e cofinite (𝓝 x₀) := tendsto_subtype_rng.mpr hg
-  have hconv : Tendsto (fun i ↦ freeProCPointed.of (finiteGroupClassP.{u} p) x₀ (e i))
+/-- The free pro-`p` group on `(insert 1 s, 1)`, for a set `s` converging to `1`, has topological
+generator rank at most the cardinality of `s`: the generators attached to the points of `s`
+converge to `1` and generate it topologically. -/
+theorem topologicalGeneratorRank_freeProPInsertOne_le {s : Set G} (hs : ConvergesToOne s) :
+    topologicalGeneratorRank (freeProPInsertOne p s) ≤ #s := by
+  set x₀ : ↥(insert (1 : G) s) := ⟨1, Set.mem_insert 1 _⟩
+  set e : s → ↥(insert (1 : G) s) := fun x ↦ ⟨x, Set.mem_insert_of_mem 1 x.2⟩
+  have he : Tendsto e cofinite (𝓝 x₀) := tendsto_subtype_rng.mpr hs.tendsto_coe
+  have hconv : Tendsto (fun x ↦ freeProCPointed.of (finiteGroupClassP.{u} p) x₀ (e x))
       cofinite (𝓝 1) := by
     rw [← freeProCPointed.of_basePoint (finiteGroupClassP.{u} p) x₀]
     exact ((freeProCPointed.continuous_of _ x₀).tendsto x₀).comp he
   have hgen : (Subgroup.closure
-      (Set.range fun i ↦ freeProCPointed.of (finiteGroupClassP.{u} p) x₀ (e i))).topologicalClosure
+      (Set.range fun x ↦ freeProCPointed.of (finiteGroupClassP.{u} p) x₀ (e x))).topologicalClosure
         = ⊤ := by
     refine top_unique ?_
     rw [← freeProCPointed.topologicalClosure_closure_range_of_eq_top (finiteGroupClassP.{u} p) x₀]
     refine Subgroup.topologicalClosure_minimal _ ((Subgroup.closure_le _).mpr ?_)
       (Subgroup.isClosed_topologicalClosure _)
     rintro _ ⟨x, rfl⟩
-    rcases x.2 with hx1 | ⟨i, hi⟩
+    rcases x.2 with hx1 | hx
     · have hx₀ : x = x₀ := Subtype.ext hx1
       rw [hx₀, freeProCPointed.of_basePoint]
       exact one_mem _
-    · have hx : x = e i := Subtype.ext hi.symm
-      rw [hx]
-      exact Subgroup.le_topologicalClosure _ (Subgroup.subset_closure ⟨i, rfl⟩)
+    · exact Subgroup.le_topologicalClosure _ (Subgroup.subset_closure ⟨⟨x, hx⟩, rfl⟩)
   exact (topologicalGeneratorRank_le hconv.convergesToOne_range hgen).trans Cardinal.mk_range_le
 
 variable [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G]
@@ -137,8 +132,8 @@ theorem presentation_surjective_iff :
       Subgroup.closure_insert_one] at h
   · intro hgen
     refine freeProCPointed.lift_surjective _ _ _ ?_
-    rw [Subtype.range_coe, Subgroup.closure_insert_one, dense_iff_closure_eq,
-      ← Subgroup.topologicalClosure_coe, hgen, Subgroup.coe_top]
+    rw [Subtype.range_coe, Subgroup.closure_insert_one]
+    exact Subgroup.dense_iff_topologicalClosure_eq_top.mpr hgen
 
 /-- **Every pro-`p` group is a quotient of the free pro-`p` group on a pointed profinite space**:
 some subset `s` of `G` converging to `1` has surjective presentation. -/
@@ -158,14 +153,16 @@ variable {ι : Type u} {g : ι → G} (hg : Tendsto g cofinite (𝓝 1))
 
 include hg hb in
 /-- **Characters factor through the presentation on a dual family.** Let `g` tend to `1` and be a
-dual family of a basis `b` of the continuous `𝔽_p`-dual of `G`. A continuous `𝔽_p`-character `ψ` of
-the free pro-`p` group on `(insert 1 (range g), 1)` vanishes on the generators attached to all but
-finitely many `g i`, so its values on them are the coordinates of a vector of the dual of `G`, and
-that vector composed with the presentation is `ψ`. -/
+dual family of a basis `b` of the continuous `𝔽_p`-dual of `G`. Every continuous `𝔽_p`-character
+of the free pro-`p` group on `(insert 1 (range g), 1)` is a continuous `𝔽_p`-character of `G`
+composed with the presentation on `range g`. This is what makes that presentation minimal. -/
 theorem exists_comp_presentation_eq
     (ψ : freeProPInsertOne p (Set.range g) →ₜ* Multiplicative (ZMod p)) :
     ∃ χ : G →ₜ* Multiplicative (ZMod p), χ.comp (hG.presentation (Set.range g)) = ψ := by
   classical
+  -- `ψ` vanishes on the generators attached to all but finitely many `g i`, so its values on them
+  -- are the coordinates of a vector `χ` of the dual of `G`, and `χ` composed with the presentation
+  -- agrees with `ψ` on every generator.
   set x₀ : ↥(insert (1 : G) (Set.range g)) := ⟨1, Set.mem_insert 1 _⟩
   set e : ι → ↥(insert (1 : G) (Set.range g)) := fun i ↦ ⟨g i, Set.mem_insert_of_mem 1 ⟨i, rfl⟩⟩
   have he : Tendsto e cofinite (𝓝 x₀) := tendsto_subtype_rng.mpr hg
@@ -207,8 +204,10 @@ theorem exists_convergesToOne_presentation_surjective_ker_le_proPFrattini :
   have hsurj : Function.Surjective (hG.presentation (Set.range g)) :=
     (hG.presentation_surjective_iff _).mpr hgen
   refine ⟨Set.range g, hg.convergesToOne_range, hsurj,
-    ker_le_proPFrattini_of_forall_exists_comp_eq _ (hG.exists_comp_presentation_eq hg b hb),
-    le_antisymm ((topologicalGeneratorRank_freeProPInsertOne_range_le hg).trans_eq ?_)
+    (hG.presentation _).ker_le_proPFrattini_of_forall_exists_comp_eq
+      (hG.exists_comp_presentation_eq hg b hb),
+    le_antisymm ((topologicalGeneratorRank_freeProPInsertOne_le hg.convergesToOne_range).trans
+      (Cardinal.mk_range_le.trans_eq ?_))
       (topologicalGeneratorRank_le_of_surjective
         (hG.presentation (Set.range g) : freeProPInsertOne p (Set.range g) →* G)
         (hG.presentation _).continuous hsurj)⟩

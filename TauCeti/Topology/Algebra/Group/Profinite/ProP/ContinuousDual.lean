@@ -33,8 +33,9 @@ Frattini quotient is an isomorphism of `𝔽_p`-vector spaces from the continuou
   of a continuous `𝔽_p`-valued character.
 * `TauCeti.proPFrattini_eq_iInf_ker`: the pro-`p` Frattini subgroup is the intersection of the
   kernels of the continuous `𝔽_p`-valued characters.
-* `TauCeti.ker_le_proPFrattini_of_forall_exists_comp_eq`: a continuous homomorphism through which
-  every continuous `𝔽_p`-valued character factors has kernel inside the pro-`p` Frattini subgroup.
+* `ContinuousMonoidHom.ker_le_proPFrattini_of_forall_exists_comp_eq`: a continuous homomorphism
+  through which every continuous `𝔽_p`-valued character factors has kernel inside the pro-`p`
+  Frattini subgroup.
 * `TauCeti.frattiniQuotientDualEquiv`: the continuous `𝔽_p`-dual of the Frattini quotient is the
   continuous `𝔽_p`-dual of `G`.
 
@@ -102,8 +103,8 @@ theorem proPFrattini_eq_iInf_ker [ContinuousMul G] :
 /-- **The Frattini criterion for a kernel.** If every continuous `𝔽_p`-valued character of `G`
 factors through a continuous homomorphism `φ : G → H`, then the kernel of `φ` lies in the pro-`p`
 Frattini subgroup of `G`. -/
-theorem ker_le_proPFrattini_of_forall_exists_comp_eq [ContinuousMul G] {H : Type*} [Group H]
-    [TopologicalSpace H] (φ : G →ₜ* H)
+theorem _root_.ContinuousMonoidHom.ker_le_proPFrattini_of_forall_exists_comp_eq [ContinuousMul G]
+    {H : Type*} [Group H] [TopologicalSpace H] (φ : G →ₜ* H)
     (h : ∀ ψ : G →ₜ* Multiplicative (ZMod p),
       ∃ χ : H →ₜ* Multiplicative (ZMod p), χ.comp φ = ψ) :
     φ.ker ≤ proPFrattini p G := by
@@ -171,5 +172,13 @@ def frattiniQuotientDualEquiv :
 theorem frattiniQuotientDualEquiv_apply (x : continuousZModDual p (G ⧸ proPFrattini p G)) (g : G) :
     Additive.toMul (frattiniQuotientDualEquiv x) g = Additive.toMul x g := by
   simp [frattiniQuotientDualEquiv, frattiniQuotientHomEquiv_apply]
+
+/-- A continuous `𝔽_p`-valued character of `G`, viewed on the Frattini quotient through the inverse
+of the identification, evaluates on the class of an element as the character itself. -/
+@[simp]
+theorem frattiniQuotientDualEquiv_symm_apply_mk (x : continuousZModDual p G) (g : G) :
+    Additive.toMul ((frattiniQuotientDualEquiv (p := p) (G := G)).symm x)
+      (g : G ⧸ proPFrattini p G) = Additive.toMul x g := by
+  rw [← frattiniQuotientDualEquiv_apply, LinearEquiv.apply_symm_apply]
 
 end TauCeti

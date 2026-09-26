@@ -11,6 +11,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.ContinuousDual
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Rank
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 import TauCeti.Algebra.Module.ZMod.Exponent
+import TauCeti.LinearAlgebra.Basis.Basic
 import TauCeti.Topology.Algebra.Group.Profinite.Section
 
 /-!
@@ -174,7 +175,7 @@ private theorem exists_dual_family {ι : Type u}
     ∃ u : ι → W, Tendsto u cofinite (𝓝 1) ∧
       (Subgroup.closure (Set.range u)).topologicalClosure = ⊤ ∧
       ∀ i (x : continuousZModDual p W),
-        b.coord i x = continuousZModDualToDual x (Additive.ofMul (u i)) := by
+        b.coord i x = Multiplicative.toAdd (Additive.toMul x (u i)) := by
   classical
   choose v hv1 hv0 using fun i ↦ exists_dual_basis b i
   set u : ι → W := fun i ↦ Additive.toMul (v i)
@@ -250,14 +251,16 @@ theorem IsProP.topologicalGeneratorRank_eq_rank_continuousZModDual (hG : IsProP 
 the continuous `𝔽_p`-dual of a profinite pro-`p` group `G` there is a family `g : ι → G` whose
 evaluation functionals are the coordinate functionals of `b`: `b j (g i)` is `1` for `j = i` and
 `0` otherwise. It tends to `1` along the cofinite filter and generates `G` topologically: it is a
-topological generating set converging to `1` whose members are separated by continuous characters.
-It is obtained by lifting a dual family of the Frattini quotient through a continuous section. -/
+topological generating set converging to `1` whose members are separated by continuous characters,
+the generating set of the minimal presentations of `G`. -/
 theorem IsProP.exists_tendsto_cofinite_topologicallyGenerates_coord_eq (hG : IsProP p G)
     {ι : Type u} (b : Module.Basis ι (ZMod p) (continuousZModDual p G)) :
     ∃ g : ι → G, Tendsto g cofinite (𝓝 1) ∧
       (Subgroup.closure (Set.range g)).topologicalClosure = ⊤ ∧
       ∀ i (x : continuousZModDual p G),
         b.coord i x = Multiplicative.toAdd (Additive.toMul x (g i)) := by
+  -- Take a dual family of the transported basis in the Frattini quotient and lift it to `G`
+  -- through a continuous section of the projection sending `1` to `1`.
   set e := frattiniQuotientDualEquiv (p := p) (G := G)
   obtain ⟨u, hu, hgen, hcoord⟩ := exists_dual_family (b.map e.symm)
   obtain ⟨s, hs, hsec, hs1⟩ := exists_continuous_section (proPFrattini p G) isClosed_proPFrattini
@@ -265,18 +268,18 @@ theorem IsProP.exists_tendsto_cofinite_topologicallyGenerates_coord_eq (hG : IsP
     rw [← QuotientGroup.mk_one]
     exact hs1
   set g : ι → G := fun i ↦ s (u i) with hg
-  have hmk : ∀ i, QuotientGroup.mk' (proPFrattini p G) (g i) = u i := fun i ↦ hsec (u i)
+  have hmk : ∀ i, ((g i : G) : G ⧸ proPFrattini p G) = u i := fun i ↦ hsec (u i)
   refine ⟨g, ?_, ?_, fun i x ↦ ?_⟩
   · exact (hs1' ▸ hs.tendsto 1).comp hu
   · rw [topologicallyGenerates_iff_frattiniQuotient hG, ← Set.range_comp]
     have hcomp : ⇑(QuotientGroup.mk' (proPFrattini p G)) ∘ g = u := funext hmk
     rw [hcomp]
     exact hgen
-  · have h := hcoord i (e.symm x)
-    rw [Module.Basis.coord_apply, Module.Basis.map_repr, LinearEquiv.trans_apply,
-      LinearEquiv.symm_symm, LinearEquiv.apply_symm_apply, ← Module.Basis.coord_apply] at h
-    rw [h, continuousZModDualToDual_apply, toMul_ofMul, ← hmk i, QuotientGroup.mk'_apply,
-      ← frattiniQuotientDualEquiv_apply, LinearEquiv.apply_symm_apply]
+  · -- Coordinates against `b.map e.symm` are coordinates against `b`, and evaluating a character
+    -- on the Frattini quotient at the class of `g i` evaluates it on `G` at `g i`.
+    have h := hcoord i (e.symm x)
+    rwa [Module.Basis.coord_map_apply, LinearEquiv.symm_symm, LinearEquiv.apply_symm_apply,
+      ← hmk i, frattiniQuotientDualEquiv_symm_apply_mk] at h
 
 /-- **Burnside's basis theorem, numerical form against the dual.** For a topologically finitely
 generated profinite pro-`p` group the dimension of the continuous `𝔽_p`-dual over `𝔽_p` is the
