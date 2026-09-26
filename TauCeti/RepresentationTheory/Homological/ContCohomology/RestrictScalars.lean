@@ -25,11 +25,15 @@ continuousCohomology n (TopRep.restrictScalarsInt.obj X)
   ≅ TopModuleCat.restrictScalarsInt.obj (continuousCohomology n X).
 ```
 
-The proof is degreewise. The resolution of the underlying additive representation is the
-underlying additive resolution (`TopRep.resolutionXRestrictScalarsIntIso`, compatible with the
-differentials), hence the complex of homogeneous cochains of the underlying additive representation
-is the image of the complex of homogeneous cochains under the functor forgetting the scalars
-(`TopRep.homogeneousCochainsRestrictScalarsIntIso`), and that functor preserves homology.
+The identification is available at every level of the construction, not only on cohomology: the
+coinduced resolution of the underlying additive representation is the underlying additive
+resolution (`TopRep.resolutionXRestrictScalarsIntIso`, compatible with the differentials), the
+complex of homogeneous cochains of the underlying additive representation is the image of the
+complex of homogeneous cochains under the functor forgetting the scalars
+(`TopRep.homogeneousCochainsRestrictScalarsIntIso`), and the cocycles are identified by
+`TauCeti.ContCohomology.cocyclesRestrictScalarsIntIso`. A consumer holding a cocycle of `X` can
+read it as a cocycle of the underlying additive representation and compare the two classes through
+`TauCeti.ContCohomology.π_comp_restrictScalarsIntIso_hom`.
 
 The point of the statement is that the calculus of continuous cohomology, with its explicit low
 degree cocycles, its long exact sequences and its comparison with discrete group cohomology, is

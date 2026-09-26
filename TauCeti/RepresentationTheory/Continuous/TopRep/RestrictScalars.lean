@@ -150,6 +150,10 @@ variable {k : Type*} [Ring k] [TopologicalSpace k] {G : Type*} [Group G] [Topolo
 
 /-- Coinduction commutes with forgetting the scalars: both sides are the representation of `G` on
 `C(G, X.V)` by `g • f = x ↦ ρ(g) (f (g⁻¹ x))`, read over `ℤ`. -/
+-- Both structure maps are the identity of `C(G, X.V)`, and they intertwine by definition:
+-- `ContRepresentation.coind₁` builds the same operators from `X.ρ.restrictScalarsInt` as from
+-- `X.ρ`, because forgetting the scalars keeps the underlying functions
+-- (`ContRepresentation.restrictScalarsInt_apply`).
 def coind₁RestrictScalarsIntIso (X : TopRep k G) :
     (restrictScalarsInt.obj X).coind₁ ≅ restrictScalarsInt.obj X.coind₁ where
   hom := ofHom
@@ -184,6 +188,9 @@ theorem coind₁RestrictScalarsIntIso_inv_apply (X : TopRep k G) (f : C(G, X.V))
 `TopRep.coind₁ι`, the inclusion of a representation as the constant functions. -/
 -- Not a simp lemma: the unit lives in `TopRep.{max v w}`, so the carrier universe of `X` occurs
 -- in every constant of the left-hand side only as `max v w`, which `simp` cannot instantiate.
+-- The equality is definitional: both sides are `ofHom` of the intertwining map
+-- `v ↦ ContinuousMap.const G v`, since the isomorphism is the identity of `C(G, X.V)` and
+-- `restrictScalarsInt.map` keeps the underlying function (`restrictScalarsInt_map_hom_apply`).
 @[reassoc]
 theorem coind₁ι_comp_coind₁RestrictScalarsIntIso_hom (X : TopRep k G) :
     ofHom (restrictScalarsInt.obj X).ρ.coind₁ι ≫ (coind₁RestrictScalarsIntIso X).hom =
@@ -192,6 +199,9 @@ theorem coind₁ι_comp_coind₁RestrictScalarsIntIso_hom (X : TopRep k G) :
 
 /-- The identification of the coinduced representations is compatible with the maps induced by
 `TopRep.coind₁Functor`. -/
+-- The equality is definitional: both sides are `ofHom` of `F ↦ f.hom ∘ F`
+-- (`ContRepresentation.coind₁Map`), since the isomorphism is the identity of `C(G, X.V)` and
+-- `restrictScalarsInt.map` keeps the underlying function (`restrictScalarsInt_map_hom_apply`).
 @[reassoc (attr := simp)]
 theorem coind₁Functor_map_comp_coind₁RestrictScalarsIntIso_hom {X Y : TopRep k G} (f : X ⟶ Y) :
     (coind₁Functor ℤ G).map (restrictScalarsInt.map f) ≫ (coind₁RestrictScalarsIntIso Y).hom =
