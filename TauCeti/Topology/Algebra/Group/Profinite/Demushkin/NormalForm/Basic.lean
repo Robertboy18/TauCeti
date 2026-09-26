@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Tau Ceti contributors
 -/
 module
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.D0
+public import TauCeti.Topology.Algebra.Group.Profinite.ProP.MinimalPresentation
 
 /-!
 # The relator words of the Demushkin normal forms
@@ -24,8 +24,7 @@ pro-`p` group and in any group that receives it, together with the `ℕ`-indexed
 
 Each word is a product of `p`-th powers and commutators, so it lies in the Frattini subgroup of
 the free pro-`p` group. Hence the presentation of a normal form on `n` generators is minimal:
-the presented group has topological generator rank exactly `n`. The standard dyadic group
-`D₀ = ⟨A, S, Y ∣ A²S⁴(S,Y)⟩` is the odd-rank normal form with `n = 3` and `f = 2`.
+the presented group has topological generator rank exactly `n`.
 
 ## Main definitions
 
@@ -44,8 +43,6 @@ the presented group has topological generator rank exactly `n`. The standard dya
   the normal-form presentation on `n` generators is minimal.
 * `TauCeti.map_demushkinWordNeTwo_eq_one` and its two companions: a character into a commutative
   group with the tabulated trivial values on the `p`-power generators kills the word.
-* `TauCeti.d0Relator_eq_demushkinWordTwoOdd`: the relator of `D₀` is the odd-rank word at
-  `n = 3`, `f = 2`.
 
 ## References
 
@@ -84,10 +81,13 @@ theorem map_labuteComm {K F : Type*} [Group K] [FunLike F H K] [MonoidHomClass F
     (x y : H) : f (labuteComm x y) = labuteComm (f x) (f y) := by
   simp only [labuteComm_def, map_mul, map_inv]
 
+/-- Labute's commutator is trivial exactly when the two elements commute. -/
+theorem labuteComm_eq_one_iff_commute (x y : H) : labuteComm x y = 1 ↔ Commute x y := by
+  rw [labuteComm_eq_commutatorElement, commutatorElement_eq_one_iff_commute, Commute.inv_inv_iff]
+
 /-- Labute's commutator of two commuting elements is trivial. -/
-theorem _root_.Commute.labuteComm_eq_one {x y : H} (h : Commute x y) : labuteComm x y = 1 := by
-  rw [labuteComm_eq_commutatorElement, commutatorElement_eq_one_iff_commute]
-  exact h.inv_inv
+theorem _root_.Commute.labuteComm_eq_one {x y : H} (h : Commute x y) : labuteComm x y = 1 :=
+  (labuteComm_eq_one_iff_commute x y).mpr h
 
 /-- Labute's commutator is trivial in a commutative group. -/
 @[simp]
@@ -124,7 +124,7 @@ theorem freeProPGen_of_lt {i : ℕ} (h : i < n) : freeProPGen p n i = freeProP.o
   simp [freeProPGen, h]
 
 /-- Out of range, `freeProPGen p n i` is `1`. -/
-theorem freeProPGen_of_le {i : ℕ} (h : n ≤ i) : freeProPGen p n i = 1 := by
+theorem freeProPGen_eq_one_of_le {i : ℕ} (h : n ≤ i) : freeProPGen p n i = 1 := by
   simp [freeProPGen, not_lt.mpr h]
 
 /-- On the values of `Fin n`, `freeProPGen p n` is the canonical generator. -/
@@ -138,7 +138,7 @@ theorem map_freeProPGen {K F : Type*} [Group K] [FunLike F (freeProP p (Fin n)) 
     φ (freeProPGen p n i) = if h : i < n then φ (freeProP.of ⟨i, h⟩) else 1 := by
   split_ifs with h
   · rw [freeProPGen_of_lt p h]
-  · rw [freeProPGen_of_le p (not_lt.mp h), map_one]
+  · rw [freeProPGen_eq_one_of_le p (not_lt.mp h), map_one]
 
 /-- The value of the universal map on the `ℕ`-indexed generators: the prescribed value in range,
 `1` out of range. -/
@@ -163,9 +163,14 @@ theorem presentedProP.mk_freeProPGen (i : ℕ) :
     presentedProP.mk p rels (freeProPGen p n i) = presentedProPGen p n rels i :=
   (rfl)
 
+/-- In range, `presentedProPGen p n rels i` is the `i`-th canonical generator. -/
+theorem presentedProPGen_of_lt {i : ℕ} (h : i < n) :
+    presentedProPGen p n rels i = presentedProP.of p rels ⟨i, h⟩ := by
+  rw [← presentedProP.mk_freeProPGen, freeProPGen_of_lt p h, presentedProP.mk_of]
+
 /-- Out of range, `presentedProPGen p n rels i` is `1`. -/
-theorem presentedProPGen_of_le {i : ℕ} (h : n ≤ i) : presentedProPGen p n rels i = 1 := by
-  rw [← presentedProP.mk_freeProPGen, freeProPGen_of_le p h, map_one]
+theorem presentedProPGen_eq_one_of_le {i : ℕ} (h : n ≤ i) : presentedProPGen p n rels i = 1 := by
+  rw [← presentedProP.mk_freeProPGen, freeProPGen_eq_one_of_le p h, map_one]
 
 /-- On the values of `Fin n`, `presentedProPGen p n rels` is the canonical generator. -/
 @[simp]
@@ -249,16 +254,19 @@ theorem map_demushkinWordTwoEven (a f n : ℕ) (x : ℕ → H) :
 variable {A : Type*} [CommGroup A]
 
 /-- In a commutative group the `q ≠ 2` word is `x₁^q`. -/
+@[simp]
 theorem demushkinWordNeTwo_eq_of_commGroup (q n : ℕ) (x : ℕ → A) :
     demushkinWordNeTwo q n x = x 0 ^ q := by
   simp [demushkinWordNeTwo_def]
 
 /-- In a commutative group the `q = 2`, `n` odd word is `x₁² x₂^{2^f}`. -/
+@[simp]
 theorem demushkinWordTwoOdd_eq_of_commGroup (f n : ℕ) (x : ℕ → A) :
     demushkinWordTwoOdd f n x = x 0 ^ 2 * x 1 ^ 2 ^ f := by
   simp [demushkinWordTwoOdd_def]
 
 /-- In a commutative group the `q = 2`, `n` even word is `x₁^{2+a} x₃^{2^f}`. -/
+@[simp]
 theorem demushkinWordTwoEven_eq_of_commGroup (a f n : ℕ) (x : ℕ → A) :
     demushkinWordTwoEven a f n x = x 0 ^ (2 + a) * x 2 ^ 2 ^ f := by
   simp [demushkinWordTwoEven_def]
@@ -361,13 +369,5 @@ theorem topologicalGeneratorRankNat_presentedProP_demushkinWordTwoEven {a f : �
     (Set.singleton_subset_iff.mpr (demushkinWordTwoEven_mem_proPFrattini ha hf n _))
 
 end Minimal
-
-/-! ### `D₀` is the odd-rank normal form with `n = 3`, `f = 2` -/
-
-/-- The relator `A²S⁴(S,Y)` of `D₀` is the `q = 2`, `n` odd normal-form word with `n = 3` and
-`f = 2`, read on the free generators. -/
-theorem d0Relator_eq_demushkinWordTwoOdd :
-    d0Relator = demushkinWordTwoOdd 2 3 (freeProPGen 2 3) := by
-  simp [d0Relator_def, demushkinWordTwoOdd_def, labuteComm_def, freeProPGen_of_lt, List.range_succ]
 
 end TauCeti
