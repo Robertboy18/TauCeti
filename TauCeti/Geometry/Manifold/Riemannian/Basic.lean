@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Geometry.Manifold.Riemannian.Basic
 public import TauCeti.Topology.VectorBundle.Riemannian
-import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+import TauCeti.Geometry.Manifold.VectorField.Regularity
 
 /-!
 # Basic Riemannian bundle constructions
@@ -134,17 +134,10 @@ whose tangent spaces carry a continuous Riemannian metric. For each fixed vector
 Riemannian norm of `df_z ξ` depends continuously on `z ∈ U`. -/
 theorem ContMDiffOn.continuousOn_norm_mfderiv {f : F → M} {U : Set F} {n : ℕ∞ω}
     (hf : ContMDiffOn 𝓘(ℝ, F) I n f U) (hn : 1 ≤ n) (hU : IsOpen U) (ξ : F) :
-    ContinuousOn (fun z ↦ ‖mfderiv 𝓘(ℝ, F) I f z ξ‖) U := by
-  -- read `z ↦ df_z ξ` as the bundled differential of `f` evaluated at `(z, ξ)`
-  have hnorm := (TauCeti.continuous_norm_bundle E (fun x : M ↦ TangentSpace I x)).comp_continuousOn
-    (hf.continuousOn_tangentMapWithin hn hU.uniqueMDiffOn)
-  have hmk : Continuous fun z : F ↦ (⟨z, ξ⟩ : TangentBundle 𝓘(ℝ, F) F) :=
-    (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, F)).symm.continuous.comp
-      (continuous_id.prodMk continuous_const)
-  refine (hnorm.comp hmk.continuousOn fun z hz ↦ hz).congr fun z hz ↦ ?_
-  simp only [Function.comp_apply, tangentMapWithin, mfderivWithin_of_isOpen hU hz]
-  -- the two sides differ only in presenting the fibre of `TM` at `f z` as the second component
-  -- of a point of the total space
-  rfl
+    ContinuousOn (fun z ↦ ‖mfderiv 𝓘(ℝ, F) I f z ξ‖) U :=
+  -- the lifted directional derivative `z ↦ (f z, df_z ξ)` is continuous into `TM`, and the
+  -- Riemannian norm is continuous on `TM`
+  (TauCeti.continuous_norm_bundle E (fun x : M ↦ TangentSpace I x)).comp_continuousOn
+    (hf.contMDiffOn_mk_mfderiv_apply (m := 0) (by simpa using hn) hU ξ).continuousOn
 
 end NormMFDeriv

@@ -17,12 +17,13 @@ integration over the compact unit interval preserves differentiation and continu
 differentiability in a normed-space parameter. Continuous differentiability is preserved at every
 finite or infinite order and with independent domain and codomain universes.
 
-It also differentiates a parametrized interval integral `x ↦ ∫ t in a..b, G (x, t)` in a real
-parameter `x` at a point `x₀`, assuming only that `G` is `C¹` on an open set containing the compact
-segment `{x₀} × [a, b]`: the derivative is the integral of the partial derivative of `G` in `x`.
-
 These results supply the analytic regularity used by smooth Hadamard factorization, a prerequisite
 for the point-derivation/tangent-space equivalence in the Lie groups roadmap.
+
+The file also differentiates a parametrized interval integral `x ↦ ∫ t in a..b, G (x, t)` in a
+real parameter `x` at a point `x₀`, assuming only that `G` is `C¹` on an open set containing the
+compact segment `{x₀} × [a, b]`: the derivative is the integral of the partial derivative of `G`
+in `x`.
 
 ## References
 
@@ -163,14 +164,16 @@ theorem hasDerivAt_intervalIntegral_of_contDiffOn {G : ℝ × ℝ → F}
   have hK : Metric.closedBall x₀ (ε / 2) ×ˢ Set.uIcc a b ⊆ U := fun z hz ↦
     huv ⟨hball (Metric.closedBall_subset_ball (half_lt_self hε) hz.1), hv hz.2⟩
   -- the partial derivative in the first variable, continuous on `U`
-  set G' : ℝ × ℝ → F := fun z ↦ fderiv ℝ G z (1, 0) with hG'
+  set G' : ℝ × ℝ → F := fun z ↦ fderiv ℝ G z (1, 0)
   have hG'cont : ContinuousOn G' U :=
     (hG.continuousOn_fderiv_of_isOpen hU le_rfl).clm_apply continuousOn_const
   obtain ⟨C, hC⟩ := ((isCompact_closedBall x₀ (ε / 2)).prod isCompact_uIcc)
     |>.exists_bound_of_continuousOn (hG'cont.mono hK)
   have hslice : ∀ {x : ℝ}, x ∈ u → ∀ {W : ℝ × ℝ → F}, ContinuousOn W U →
-      ContinuousOn (fun t ↦ W (x, t)) (Set.uIcc a b) := fun hx _ hW ↦
-    hW.comp (by fun_prop : Continuous fun t : ℝ ↦ (_, t)).continuousOn
+      ContinuousOn (fun t ↦ W (x, t)) (Set.uIcc a b) := by
+    intro x hx W hW
+    exact hW.comp
+      (continuous_const.prodMk continuous_id : Continuous fun t : ℝ ↦ (x, t)).continuousOn
       fun t ht ↦ huv ⟨hx, hv ht⟩
   have hdiff : ∀ t ∈ Ι a b, ∀ x ∈ Metric.closedBall x₀ (ε / 2),
       HasDerivAt (fun x ↦ G (x, t)) (G' (x, t)) x := by
