@@ -45,7 +45,8 @@ for smooth discrete `X`, so the action of `G` on `X` is required to be continuou
   on tuples from the subgroup, and vanishing on a closed subgroup spreads to an open subgroup.
 * `TauCeti.ContinuousCohomology.resolutionMap_subgroupSubtype_surjective`,
   `TauCeti.ContinuousCohomology.exists_mem_invariants_resolutionMap_subgroupSubtype_eq`: on the
-  coinduced resolution, restriction to a closed subgroup is surjective, also on invariant elements.
+  coinduced resolution, restriction to a closed subgroup is surjective in every degree, and in
+  every positive degree also on invariant elements.
 * `TauCeti.ContinuousCohomology.exists_openSubgroup_le_res_eq_zero`: a class restricting to zero
   on a closed subgroup restricts to zero on an open subgroup containing it.
 * `TauCeti.ContinuousCohomology.exists_openSubgroup_le_resLE_eq`: every class of a closed subgroup
@@ -152,8 +153,9 @@ attribute [local instance] TopRep.distribMulAction
 omit [DiscreteTopology X.V] in
 /-- **An invariant cochain of a closed subgroup extends to an invariant cochain of the group.**
 Over a profinite group and for a smooth discrete representation `X`, every `H`-invariant element
-`w` of the coinduced resolution of the restriction of `X` to a closed subgroup `H` is the
-restriction of a `G`-invariant element of the resolution of `X`. -/
+`w` of the coinduced resolution, in positive degree `n + 1`, of the restriction of `X` to a closed
+subgroup `H` is the restriction of a `G`-invariant element of the resolution of `X`. In degree
+zero the resolution is `X` itself, whose `H`-invariants need not be `G`-invariant. -/
 theorem exists_mem_invariants_resolutionMap_subgroupSubtype_eq (hX : IsSmoothDiscrete k X)
     {H : Subgroup G} (hH : IsClosed (H : Set G)) (n : ℕ)
     {w : (TopRep.resolutionX (TopRep.res (H.subtype : H →* G) X) (n + 1)).V}
