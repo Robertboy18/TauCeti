@@ -22,8 +22,10 @@ The formal infrastructure is Mathlib's relative simplicial chains: the compariso
 quotient natural transformation `SSetPair.chainComplexFunctorπ`, and its invertibility for a
 pair whose subcomplex is empty is Mathlib's `SSetPair.isIso_chainComplexπ`.
 
-Any pair whose subspace happens to be empty is isomorphic to the pair `(X, ∅)` of its ambient
-space (`TopPair.isoIncl`), so the comparison applies to it as well.
+For any pair whose subspace is empty, the singular simplicial set of the subspace has no simplices
+(`TopPair.hasDimensionLT_toSSetPair_left_of_isEmpty`), so by Mathlib's
+`SSetPair.isIso_chainComplexπ` the quotient map `TopPair.singularHomologyπ` from ambient to
+relative singular homology is an isomorphism, found by instance resolution.
 -/
 
 public section
@@ -36,38 +38,19 @@ universe w v u
 
 namespace TopPair
 
-/-- A topological pair whose subspace is empty is isomorphic to the pair `(X, ∅)` of its ambient
-space, through the identity of the ambient space. -/
-def isoIncl (P : TopPair.{w}) [IsEmpty P.snd] : P ≅ incl.obj P.fst where
-  hom := ofHom (𝟙 _) (TopCat.ofHom ⟨isEmptyElim, continuous_of_discreteTopology⟩)
-    (by ext x; exact isEmptyElim x)
-  inv := ofHom (𝟙 _) (TopCat.isInitialPEmpty.to _) (by ext x; cases x)
-  hom_inv_id := by
-    ext x
-    · exact isEmptyElim x
-    · rfl
-  inv_hom_id := by
-    ext x
-    · cases x
-    · rfl
-
-@[simp]
-lemma isoIncl_hom_fst (P : TopPair.{w}) [IsEmpty P.snd] : Hom.fst P.isoIncl.hom = 𝟙 P.fst := by
-  rfl
-
-@[simp]
-lemma isoIncl_inv_fst (P : TopPair.{w}) [IsEmpty P.snd] : Hom.fst P.isoIncl.inv = 𝟙 P.fst := by
-  rfl
-
 variable (C : Type u) [Category.{v} C] [HasCoproducts.{w} C] [Preadditive C] (R : C)
 
-/-- The singular simplicial set of the empty subspace in `(X, ∅)` has no simplices. -/
-lemma hasDimensionLT_toSSetPair_incl_left (X : TopCat.{w}) :
-    (toSSetPair.obj (incl.obj X)).left.HasDimensionLT 0 :=
+/-- The subspace of the pair `(X, ∅)` is empty. -/
+instance isEmpty_incl_obj_snd (X : TopCat.{w}) : IsEmpty (incl.obj X).snd :=
+  inferInstanceAs (IsEmpty PEmpty)
+
+/-- The singular simplicial set of an empty subspace has no simplices. -/
+instance hasDimensionLT_toSSetPair_left_of_isEmpty (P : TopPair.{w}) [IsEmpty P.snd] :
+    (toSSetPair.obj P).left.HasDimensionLT 0 :=
   (SSet.notNonempty_iff_hasDimensionLT_zero _).mp fun h ↦ by
     obtain ⟨σ⟩ := h
     rw [toSSetPair_obj_left] at σ
-    exact PEmpty.elim (TopCat.toSSetObj₀Equiv σ)
+    exact isEmptyElim (TopCat.toSSetObj₀Equiv σ)
 
 /-- Ordinary singular chains are the ambient chains of the singular pair associated to `(X, ∅)`. -/
 lemma singularChainComplexFunctor_eq_incl_chainComplexFunctorRight :
@@ -113,8 +96,6 @@ noncomputable def singularChainComplexInclIso :
     (AlgebraicTopology.singularChainComplexFunctor C).obj R ≅
       incl ⋙ (singularChainComplexFunctor C).obj R :=
   NatIso.ofComponents (fun X ↦ by
-    let _ : (toSSetPair.obj (incl.obj X)).left.HasDimensionLT 0 :=
-      hasDimensionLT_toSSetPair_incl_left X
     letI : IsIso ((singularChainComplexInclComparison C R).app X) := by
       let _ : IsIso (((SSetPair.chainComplexFunctorπ C).app R).app
           (toSSetPair.obj (incl.obj X))) :=

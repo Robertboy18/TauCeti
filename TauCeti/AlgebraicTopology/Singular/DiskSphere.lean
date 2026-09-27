@@ -157,16 +157,27 @@ lemma isZero_singularHomology_diskBoundaryPair_zero {n : ℕ} (hn : 1 ≤ n) :
 
 section HigherDegrees
 
-/-- The pair of the `0`-disk and its empty boundary, compared with the pair `(D⁰, ∅)` of Mathlib's
-`TopPair.incl`: its relative homology is the ordinary homology of the point `D⁰`. -/
+/-- The relative homology of the pair of the `0`-disk and its empty boundary is the ordinary
+homology of the point `D⁰`: the quotient map from ambient to relative singular homology is an
+isomorphism, and this is its inverse (`TauCeti.singularHomologyDiskBoundaryPairZeroIso_inv`). -/
 def singularHomologyDiskBoundaryPairZeroIso (k : ℕ) :
     (diskBoundaryPair.{w} 0).singularHomology R k ≅
       ((AlgebraicTopology.singularHomologyFunctor C k).obj R).obj (TopCat.disk.{w} 0) :=
-  haveI : IsEmpty ((diskBoundaryPair.{w} 0).snd : Type w) :=
-    inferInstanceAs (IsEmpty (TopCat.diskBoundary.{w} 0))
-  (eqToIso (TopPair.singularHomologyFunctor_obj (diskBoundaryPair 0) R k)).symm ≪≫
-    (TopPair.singularHomologyFunctor R k).mapIso (diskBoundaryPair.{w} 0).isoIncl ≪≫
-    ((TopPair.singularHomologyInclIso C R k).app (TopCat.disk.{w} 0)).symm
+  (asIso ((diskBoundaryPair.{w} 0).singularHomologyπ R k)).symm
+
+/-- The comparison from the relative homology of the `0`-disk pair to the ordinary homology of the
+point is the inverse of the quotient map. -/
+@[simp]
+lemma singularHomologyDiskBoundaryPairZeroIso_hom (k : ℕ) :
+    (singularHomologyDiskBoundaryPairZeroIso R k).hom =
+      inv ((diskBoundaryPair.{w} 0).singularHomologyπ R k) := (rfl)
+
+/-- The comparison from the ordinary homology of the point to the relative homology of the
+`0`-disk pair is the quotient map from ambient to relative singular homology. -/
+@[simp]
+lemma singularHomologyDiskBoundaryPairZeroIso_inv (k : ℕ) :
+    (singularHomologyDiskBoundaryPairZeroIso R k).inv =
+      (diskBoundaryPair.{w} 0).singularHomologyπ R k := (rfl)
 
 /-- **The relative homology of a disk modulo its boundary vanishes outside its dimension**:
 `Hₖ(Dⁿ, Sⁿ⁻¹) = 0` for `k ≠ n`. -/
@@ -209,12 +220,12 @@ lemma singularHomologyDiskBoundaryPairIso_succ_hom (m : ℕ) :
         (reducedSingularHomologyTopCatSphereIso R m).hom := by
   rfl
 
-/-- In dimension zero, the identification `H₀(D⁰, ∅) ≅ R` is the comparison with the ordinary
-homology of the point followed by the augmentation. -/
+/-- In dimension zero, the identification `H₀(D⁰, ∅) ≅ R` is the inverse of the quotient map from
+the ordinary homology of the point followed by the augmentation. -/
 @[simp]
 lemma singularHomologyDiskBoundaryPairIso_zero_hom :
     (singularHomologyDiskBoundaryPairIso R 0).hom =
-      (singularHomologyDiskBoundaryPairZeroIso R 0).hom ≫
+      inv ((diskBoundaryPair.{w} 0).singularHomologyπ R 0) ≫
         (TopCat.disk.{w} 0).singularHomology₀ε R := by
   rfl
 

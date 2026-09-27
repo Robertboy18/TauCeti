@@ -230,6 +230,28 @@ def reducedSingularHomologySphereIso {n : ℕ} (h : finrank ℝ E = n + 1) :
     (reducedSingularHomologyFunctor R n).obj (TopCat.of (sphere (0 : E) 1)) ≅ R :=
   reducedSingularHomologySphereIsoAux R n E h
 
+/-- For a one-dimensional space, the chosen generator of `H_red₀(S)` is the zero-sphere
+isomorphism `TauCeti.reducedSingularHomologySphereZeroIso` at the point `Classical.arbitrary` of
+the sphere. -/
+@[simp]
+lemma reducedSingularHomologySphereIso_zero (h : finrank ℝ E = 0 + 1)
+    [Nonempty (sphere (0 : E) 1)] :
+    reducedSingularHomologySphereIso R h =
+      reducedSingularHomologySphereZeroIso R h (Classical.arbitrary _) := (rfl)
+
+/-- For a space of dimension `n + 2`, the chosen generator of `H_redₙ₊₁(S)` is the suspension
+isomorphism at the point `p = Classical.arbitrary` of the sphere, followed by the chosen generator
+of the reduced homology of the equator, the unit sphere of `(ℝ ∙ p)ᗮ`.  The dimension hypothesis
+`hp` on the equator may be any proof of it. -/
+@[simp]
+lemma reducedSingularHomologySphereIso_succ {n : ℕ} (h : finrank ℝ E = n + 1 + 1)
+    [Nonempty (sphere (0 : E) 1)]
+    (hp : finrank ℝ (ℝ ∙ ((Classical.arbitrary (sphere (0 : E) 1) : sphere (0 : E) 1) : E))ᗮ =
+      n + 1) :
+    reducedSingularHomologySphereIso R h =
+      reducedSingularHomologySphereSuccIso R (Classical.arbitrary _) n ≪≫
+        reducedSingularHomologySphereIso R hp := (rfl)
+
 end Dimension
 
 section TopCatSphere
@@ -247,6 +269,20 @@ def reducedSingularHomologyTopCatSphereIso (n : ℕ) :
     (reducedSingularHomologyFunctor R n).obj (TopCat.sphere.{w} n) ≅ R :=
   (diskBoundaryHomeomorph (n + 1)).toHomotopyEquiv.reducedSingularHomologyIso R n ≪≫
     reducedSingularHomologySphereIso R (finrank_euclideanSpace_ulift_fin (n + 1))
+
+/-- The chosen generator of `H_redₙ(TopCat.sphere n)` is the map induced by the homeomorphism
+`TauCeti.diskBoundaryHomeomorph` with the unit sphere of `EuclideanSpace ℝ (ULift (Fin (n + 1)))`,
+followed by the chosen generator `TauCeti.reducedSingularHomologySphereIso` of that sphere. -/
+@[simp]
+lemma reducedSingularHomologyTopCatSphereIso_hom (n : ℕ) :
+    (reducedSingularHomologyTopCatSphereIso R n).hom =
+      (reducedSingularHomologyFunctor R n).map
+          (TopCat.ofHom (diskBoundaryHomeomorph (n + 1)).toHomotopyEquiv.toFun) ≫
+        (reducedSingularHomologySphereIso R (finrank_euclideanSpace_ulift_fin (n + 1))).hom :=
+  -- The source object of the composite is `TopCat.sphere n` only up to unfolding, so `simp` and
+  -- `rw` cannot apply `Iso.trans_hom` here; the equations are chained as terms instead.
+  (Iso.trans_hom _ _).trans
+    (congrArg (· ≫ _) (ContinuousMap.HomotopyEquiv.reducedSingularHomologyIso_hom R _ n))
 
 end TopCatSphere
 
