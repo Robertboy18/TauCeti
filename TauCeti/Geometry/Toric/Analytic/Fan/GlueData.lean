@@ -120,6 +120,10 @@ noncomputable def analyticAffineChartι (σ : Φ.cones) :
     (Φ.analyticAffineChartDiagram hΦ).obj σ ⟶ Φ.analyticRealization hΦ :=
   (Φ.analyticGlueData hΦ).ι σ
 
+/-- The chart inclusion is the inclusion of the gluing data at the cone. -/
+theorem analyticAffineChartι_def (σ : Φ.cones) :
+    Φ.analyticAffineChartι hΦ σ = (Φ.analyticGlueData hΦ).ι σ := (rfl)
+
 /-- Each affine analytic chart is an open subspace of the analytic realization. -/
 theorem isOpenEmbedding_analyticAffineChartι (σ : Φ.cones) :
     IsOpenEmbedding (Φ.analyticAffineChartι hΦ σ) :=
@@ -235,6 +239,7 @@ theorem analyticOverlap_comp_analyticAffineChartι (σ τ : Φ.cones) :
   rw [analyticOverlapLeft_comp_analyticAffineChartι, analyticOverlapRight_comp_analyticAffineChartι]
 
 /-- The preimage in the chart of `τ` of the chart of `σ` is the overlap locus of `τ` with `σ`. -/
+@[simp]
 theorem analyticAffineChartι_preimage_range (σ τ : Φ.cones) :
     Φ.analyticAffineChartι hΦ τ ⁻¹' Set.range (Φ.analyticAffineChartι hΦ σ) =
       Φ.analyticOverlapOpens hΦ τ σ := by
@@ -245,6 +250,7 @@ theorem analyticAffineChartι_preimage_range (σ τ : Φ.cones) :
 
 /-- Two affine analytic charts meet in the realization exactly in the image of the chart of the
 intersection cone. -/
+@[simp]
 theorem range_analyticAffineChartι_inter_range_analyticAffineChartι (σ τ : Φ.cones) :
     Set.range (Φ.analyticAffineChartι hΦ σ) ∩ Set.range (Φ.analyticAffineChartι hΦ τ) =
       Set.range (Φ.analyticAffineChartι hΦ (σ ⊓ τ)) := by
@@ -252,7 +258,7 @@ theorem range_analyticAffineChartι_inter_range_analyticAffineChartι (σ τ : �
   -- `analyticAffineChartι_eq_analyticAffineChartι_iff`.
   refine ((Φ.analyticGlueData hΦ).image_inter σ τ).trans ?_
   rw [← analyticOverlapLeft_comp_analyticAffineChartι, TopCat.coe_comp, TopCat.coe_comp,
-    Set.range_comp, Set.range_comp, analyticAffineChartι]
+    Set.range_comp, Set.range_comp, analyticAffineChartι_def]
   -- The map `f σ τ` of the gluing data is the inclusion of the overlap open set, whose range
   -- is the range of the left overlap inclusion.
   exact congrArg _ ((Opens.set_range_inclusion' _).trans (Φ.coe_analyticOverlapOpens hΦ σ τ))
