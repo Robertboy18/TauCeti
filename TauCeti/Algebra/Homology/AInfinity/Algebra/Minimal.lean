@@ -167,10 +167,11 @@ theorem isQuasiIso_iff_linearPart_bijective (hA : AA.IsMinimal) (hB : BB.IsMinim
     EquivLike.comp_bijective]
 
 /-- Between minimal algebras, an `A∞` morphism is a quasi-isomorphism exactly when it is an
-isomorphism of `A∞` algebras: a minimal model is unique up to `A∞` isomorphism. -/
+isomorphism of `A∞` algebras.  This upgrades a given quasi-isomorphism between minimal models to
+an `A∞` isomorphism; it does not by itself provide the quasi-isomorphism needed for uniqueness. -/
 theorem isQuasiIso_iff_isIso (hA : AA.IsMinimal) (hB : BB.IsMinimal) (f : AInfinityHom AA BB) :
     f.IsQuasiIso ↔ f.IsIso := by
-  rw [isQuasiIso_iff_linearPart_bijective hA hB, isIso_iff_bijective_linearPart]
+  rw [isQuasiIso_iff_linearPart_bijective hA hB, isIso_iff_linearPart_bijective]
 
 /-- A quasi-isomorphism between minimal algebras is an isomorphism of `A∞` algebras. -/
 theorem IsQuasiIso.isIso (hA : AA.IsMinimal) (hB : BB.IsMinimal) {f : AInfinityHom AA BB}

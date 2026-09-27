@@ -189,7 +189,7 @@ theorem IsCoalgHom.isHomogeneous_linearEquiv_symm {G : InternalGrading R M}
   -- total-degree piece and, being the identity up to a filtration-lowering map, maps it onto
   -- itself.
   -- The arity-one component `e₁` is a degree-zero linear equivalence of the letters.
-  set e₁ : M ≃ₗ[R] N := LinearEquiv.ofBijective _ he.bijective_letter_comp_comp_ofLetter
+  set e₁ : M ≃ₗ[R] N := LinearEquiv.ofBijective _ he.letter_comp_comp_ofLetter_bijective
   have he₁ : LinearMap.IsHomogeneous e₁.toLinearMap G.piece H.piece 0 := by
     rw [LinearMap.isHomogeneous_def]
     intro p a ha

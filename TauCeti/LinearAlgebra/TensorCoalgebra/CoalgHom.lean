@@ -49,7 +49,7 @@ correspondence is the one describing `A∞` morphisms through their components `
   coalgebra morphism whose only nonzero Taylor component is that map in arity one.
 * `TauCeti.ReducedTensorWords.IsCoalgHom.mem_filtration`: a coalgebra morphism does not increase
   tensor length.
-* `TauCeti.ReducedTensorWords.IsCoalgHom.bijective_of_bijective_letter_comp_comp_ofLetter`: a
+* `TauCeti.ReducedTensorWords.IsCoalgHom.bijective_of_letter_comp_comp_ofLetter_bijective`: a
   coalgebra morphism with bijective arity-one component is bijective, and
   `TauCeti.ReducedTensorWords.IsCoalgHom.linearEquiv_symm`: the inverse of a bijective coalgebra
   morphism is a coalgebra morphism.
@@ -404,7 +404,7 @@ theorem IsCoalgHom.linearEquiv_symm {e : ReducedTensorWords R M ≃ₗ[R] Reduce
 
 /-- The arity-one Taylor component of a linear equivalence of reduced tensor coalgebras which is a
 coalgebra morphism is bijective, with inverse the arity-one component of the inverse. -/
-theorem IsCoalgHom.bijective_letter_comp_comp_ofLetter
+theorem IsCoalgHom.letter_comp_comp_ofLetter_bijective
     {e : ReducedTensorWords R M ≃ₗ[R] ReducedTensorWords R N} (he : IsCoalgHom R e.toLinearMap) :
     Function.Bijective (letter R N ∘ₗ e.toLinearMap ∘ₗ ofLetter R M) := by
   refine Function.bijective_iff_has_inverse.2
@@ -564,7 +564,7 @@ theorem IsCoalgHom.map_eq_of_map_le
 
 /-- A coalgebra morphism of reduced tensor coalgebras whose arity-one Taylor component is
 bijective is bijective. -/
-theorem IsCoalgHom.bijective_of_bijective_letter_comp_comp_ofLetter
+theorem IsCoalgHom.bijective_of_letter_comp_comp_ofLetter_bijective
     {F : ReducedTensorWords R M →ₗ[R] ReducedTensorWords R N} (hF : IsCoalgHom R F)
     (hf : Function.Bijective (letter R N ∘ₗ F ∘ₗ ofLetter R M)) :
     Function.Bijective F := by
@@ -573,7 +573,7 @@ theorem IsCoalgHom.bijective_of_bijective_letter_comp_comp_ofLetter
       (ReducedTensorWords.map (R := R) e.symm.toLinearMap ∘ₗ F) := by
     rw [← LinearMap.comp_assoc, ← map_comp, LinearEquiv.comp_symm, map_id, LinearMap.id_comp]
   rw [hFeq]
-  exact (bijective_map R e).comp
+  exact (map_bijective R e).comp
     (((isCoalgHom_map _).comp hF).bijective_of_comp_ofLetter_eq (hF.map_symm_comp_comp_ofLetter hf))
 
 end Unipotent

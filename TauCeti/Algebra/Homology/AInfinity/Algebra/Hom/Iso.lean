@@ -13,15 +13,17 @@ public import TauCeti.Algebra.Homology.AInfinity.Algebra.Hom.Cohomology
 A morphism of `A∞` algebras is an *isomorphism* when it has a two-sided inverse `A∞` morphism.
 This happens exactly when its linear part `f₁` is bijective.  Indeed the bar map of an `A∞`
 morphism is a coalgebra morphism of reduced tensor coalgebras whose arity-one component is `f₁`,
-so it is bijective as soon as `f₁` is
-(`TauCeti.ReducedTensorWords.IsCoalgHom.bijective_of_bijective_letter_comp_comp_ofLetter`), and its
-inverse is again a degree-zero coalgebra morphism intertwining the bar differentials.  The inverse
-`A∞` morphism `TauCeti.AInfinityHom.inverse` is that inverse bar map; its linear part is the inverse
-of `f₁`.
+so it is bijective as soon as `f₁` is (see
+`TauCeti.ReducedTensorWords.IsCoalgHom.bijective_of_letter_comp_comp_ofLetter_bijective`), and
+its inverse is again a degree-zero coalgebra morphism intertwining the bar differentials.  The
+inverse `A∞` morphism `TauCeti.AInfinityHom.inverse` is that inverse bar map; its linear part is
+the inverse of `f₁`.
 
 Every isomorphism is a quasi-isomorphism.  Between minimal algebras the converse holds, see
-`TauCeti.Algebra.Homology.AInfinity.Algebra.Minimal`; this is the sense in which the minimal model
-of an `A∞` algebra is unique.
+`TauCeti.Algebra.Homology.AInfinity.Algebra.Minimal`: a quasi-isomorphism between minimal
+algebras is an `A∞` isomorphism.  This is one ingredient of the uniqueness clause of Kadeishvili's
+theorem, which additionally needs the existence of such a quasi-isomorphism between two minimal
+models; that existence is not proved here.
 
 ## Main definitions
 
@@ -33,7 +35,7 @@ of an `A∞` algebra is unique.
 * `TauCeti.AInfinityHom.inverse_comp` and `TauCeti.AInfinityHom.comp_inverse`: the inverse is a
   two-sided inverse, and `TauCeti.AInfinityHom.linearPart_inverse`: its linear part is the inverse
   linear equivalence.
-* `TauCeti.AInfinityHom.isIso_iff_bijective_linearPart`: an `A∞` morphism is an isomorphism exactly
+* `TauCeti.AInfinityHom.isIso_iff_linearPart_bijective`: an `A∞` morphism is an isomorphism exactly
   when its linear part is bijective.
 * `TauCeti.AInfinityHom.IsIso.isQuasiIso`: an isomorphism is a quasi-isomorphism.
 
@@ -59,16 +61,16 @@ variable {AA : AInfinityAlgebra R A} {BB : AInfinityAlgebra R B} {CC : AInfinity
 /-! ### The inverse of a morphism with bijective linear part -/
 
 /-- The bar map of an `A∞` morphism with bijective linear part is bijective. -/
-theorem bijective_barMap_of_bijective_linearPart (f : AInfinityHom AA BB)
+theorem barMap_bijective_of_linearPart_bijective (f : AInfinityHom AA BB)
     (hf : Function.Bijective f.linearPart) : Function.Bijective f.barMap :=
-  f.isCoalgHom_barMap.bijective_of_bijective_letter_comp_comp_ofLetter
+  f.isCoalgHom_barMap.bijective_of_letter_comp_comp_ofLetter_bijective
     (by rwa [letter_comp_barMap_comp_ofLetter])
 
 /-- The bar map of an `A∞` morphism with bijective linear part, as a linear equivalence of reduced
 bar constructions. -/
 noncomputable def barEquiv (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
     ReducedTensorWords R A ≃ₗ[R] ReducedTensorWords R B :=
-  LinearEquiv.ofBijective f.barMap (f.bijective_barMap_of_bijective_linearPart hf)
+  LinearEquiv.ofBijective f.barMap (f.barMap_bijective_of_linearPart_bijective hf)
 
 @[simp]
 theorem barEquiv_apply (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
@@ -115,31 +117,24 @@ theorem barMap_barEquiv_symm (f : AInfinityHom AA BB) (hf : Function.Bijective f
     (w : ReducedTensorWords R B) : f.barMap ((f.barEquiv hf).symm w) = w := by
   rw [← barEquiv_apply f hf, LinearEquiv.apply_symm_apply]
 
-theorem barMap_inverse_barMap (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
-    (z : ReducedTensorWords R A) : (f.inverse hf).barMap (f.barMap z) = z :=
-  f.barEquiv_symm_barMap hf z
-
-theorem barMap_barMap_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
-    (w : ReducedTensorWords R B) : f.barMap ((f.inverse hf).barMap w) = w :=
-  f.barMap_barEquiv_symm hf w
-
 /-- The inverse is a left inverse. -/
 @[simp]
 theorem inverse_comp (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
     (f.inverse hf).comp f = AInfinityHom.id AA :=
   barMap_injective <| by
-    rw [barMap_comp, barMap_id]
-    exact LinearMap.ext (f.barMap_inverse_barMap hf)
+    rw [barMap_comp, barMap_id, barMap_inverse]
+    exact LinearMap.ext (f.barEquiv_symm_barMap hf)
 
 /-- The inverse is a right inverse. -/
 @[simp]
 theorem comp_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
     f.comp (f.inverse hf) = AInfinityHom.id BB :=
   barMap_injective <| by
-    rw [barMap_comp, barMap_id]
-    exact LinearMap.ext (f.barMap_barMap_inverse hf)
+    rw [barMap_comp, barMap_id, barMap_inverse]
+    exact LinearMap.ext (f.barMap_barEquiv_symm hf)
 
 /-- The linear part of the inverse is the inverse of the linear part. -/
+@[simp]
 theorem linearPart_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
     (f.inverse hf).linearPart = (LinearEquiv.ofBijective f.linearPart hf).symm.toLinearMap := by
   have h := congrArg linearPart (f.inverse_comp hf)
@@ -150,7 +145,7 @@ theorem linearPart_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.l
     LinearMap.id_apply]
 
 /-- The linear part of the inverse is bijective. -/
-theorem bijective_linearPart_inverse (f : AInfinityHom AA BB)
+theorem linearPart_inverse_bijective (f : AInfinityHom AA BB)
     (hf : Function.Bijective f.linearPart) : Function.Bijective (f.inverse hf).linearPart := by
   rw [linearPart_inverse]
   exact (LinearEquiv.ofBijective f.linearPart hf).symm.bijective
@@ -161,13 +156,8 @@ theorem bijective_linearPart_inverse (f : AInfinityHom AA BB)
 def IsIso (f : AInfinityHom AA BB) : Prop :=
   ∃ g : AInfinityHom BB AA, g.comp f = AInfinityHom.id AA ∧ f.comp g = AInfinityHom.id BB
 
-/-- An `A∞` morphism is an isomorphism exactly when it has a two-sided inverse. -/
-theorem isIso_def (f : AInfinityHom AA BB) :
-    f.IsIso ↔ ∃ g : AInfinityHom BB AA, g.comp f = AInfinityHom.id AA ∧
-      f.comp g = AInfinityHom.id BB :=
-  Iff.rfl
-
 /-- The identity `A∞` morphism is an isomorphism. -/
+@[simp]
 theorem isIso_id (AA : AInfinityAlgebra R A) : (AInfinityHom.id AA).IsIso :=
   ⟨AInfinityHom.id AA, comp_id _, comp_id _⟩
 
@@ -181,7 +171,7 @@ theorem IsIso.comp {g : AInfinityHom BB CC} {f : AInfinityHom AA BB} (hg : g.IsI
   · rw [comp_assoc, ← comp_assoc f, hf₂, id_comp, hg₂]
 
 /-- An `A∞` morphism with bijective linear part is an isomorphism. -/
-theorem isIso_of_bijective_linearPart (f : AInfinityHom AA BB)
+theorem isIso_of_linearPart_bijective (f : AInfinityHom AA BB)
     (hf : Function.Bijective f.linearPart) : f.IsIso :=
   ⟨f.inverse hf, f.inverse_comp hf, f.comp_inverse hf⟩
 
@@ -191,7 +181,7 @@ theorem isIso_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linear
   ⟨f, f.comp_inverse hf, f.inverse_comp hf⟩
 
 /-- The linear part of an isomorphism is bijective. -/
-theorem IsIso.bijective_linearPart {f : AInfinityHom AA BB} (h : f.IsIso) :
+theorem IsIso.linearPart_bijective {f : AInfinityHom AA BB} (h : f.IsIso) :
     Function.Bijective f.linearPart := by
   obtain ⟨g, hg₁, hg₂⟩ := h
   refine Function.bijective_iff_has_inverse.2 ⟨g.linearPart, fun a ↦ ?_, fun b ↦ ?_⟩
@@ -199,9 +189,9 @@ theorem IsIso.bijective_linearPart {f : AInfinityHom AA BB} (h : f.IsIso) :
   · rw [← LinearMap.comp_apply, ← linearPart_comp, hg₂, linearPart_id, LinearMap.id_apply]
 
 /-- An `A∞` morphism is an isomorphism exactly when its linear part is bijective. -/
-theorem isIso_iff_bijective_linearPart (f : AInfinityHom AA BB) :
+theorem isIso_iff_linearPart_bijective (f : AInfinityHom AA BB) :
     f.IsIso ↔ Function.Bijective f.linearPart :=
-  ⟨IsIso.bijective_linearPart, f.isIso_of_bijective_linearPart⟩
+  ⟨IsIso.linearPart_bijective, f.isIso_of_linearPart_bijective⟩
 
 /-- An isomorphism of `A∞` algebras is a quasi-isomorphism. -/
 theorem IsIso.isQuasiIso {f : AInfinityHom AA BB} (h : f.IsIso) : f.IsQuasiIso := by

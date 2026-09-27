@@ -398,7 +398,7 @@ theorem map_map_symm (e : M ≃ₗ[R] N) (z : ReducedTensorWords R N) :
 
 /-- Applying a linear equivalence to every letter is a bijection of reduced tensor words, with
 inverse the letterwise inverse equivalence. -/
-theorem bijective_map (e : M ≃ₗ[R] N) :
+theorem map_bijective (e : M ≃ₗ[R] N) :
     Function.Bijective (ReducedTensorWords.map (R := R) e.toLinearMap) :=
   Function.bijective_iff_has_inverse.2
     ⟨ReducedTensorWords.map (R := R) e.symm.toLinearMap, map_symm_map R e, map_map_symm R e⟩
