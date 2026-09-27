@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.Gauss.Minimization
 public import TauCeti.Geometry.Manifold.Riemannian.ArcLength
+import TauCeti.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.Convex.StrictConvexSpace
 import Mathlib.Analysis.InnerProductSpace.Convex
 
@@ -19,14 +20,12 @@ equality case: every such minimizer is the radial geodesic `t ↦ exp_p (t • v
 continuous nondecreasing surjection of `[0, 1]` onto itself. A minimizer may pause or vary its
 speed, but its trace is the radial segment.
 
-The argument is pointwise and never inspects the curve almost everywhere. Applying the polar length
-comparison on `[0, t]` and on `[t, 1]` and adding shows that the norm of the logarithm of the curve
-equals the arc length travelled up to `t`, for every `t`. Differentiating this identity gives the
-radial component of the velocity; the Gauss lemma then shows that the curve's velocity realizes
-equality in the Cauchy--Schwarz inequality against the radial direction, and injectivity of the
-differential of `exp_p` makes the logarithm's derivative radial. Finally the chord from the
-logarithm at time `t` to its endpoint is no longer than the remaining arc, which forces equality
-in the triangle inequality and places the logarithm on the ray through `v`.
+Together with the minimization inequality of `Gauss/Minimization.lean`, this identifies the length
+minimizers from the centre of a normal neighbourhood by their length alone: a `C¹` curve in the
+neighbourhood from `p` to `exp_p v` whose length is the radial length `‖v‖` has the radial segment
+as its trace and traverses it monotonically. This is the form in which the minimizing theory
+recognises a distance-realizing curve as a reparametrized geodesic, and it shows that pausing or
+changing speed along a minimizer never yields a different unparametrized minimizer.
 
 ## Main results
 
@@ -53,19 +52,6 @@ open scoped ContDiff ENNReal Manifold Topology
 noncomputable section
 
 namespace TauCeti.Manifold
-
-/-- A function whose norm is the integral of a nonnegative continuous function has nondecreasing
-norm. -/
-private theorem norm_le_norm_of_norm_eq_integral {F : Type*} [NormedAddCommGroup F]
-    {w : ℝ → F} {σ : ℝ → ℝ}
-    (hσ : ContinuousOn σ (Icc 0 1)) (hσ0 : ∀ u ∈ Icc 0 1, 0 ≤ σ u)
-    (hr : ∀ t ∈ Icc 0 1, ‖w t‖ = ∫ u in 0..t, σ u) {s t : ℝ} (hs : s ∈ Icc 0 1)
-    (ht : t ∈ Icc 0 1) (hst : s ≤ t) : ‖w s‖ ≤ ‖w t‖ := by
-  rw [hr s hs, hr t ht]
-  refine intervalIntegral.integral_mono_interval le_rfl hs.1 hst ?_
-    ((hσ.mono (Icc_subset_Icc_right ht.2)).intervalIntegrable_of_Icc ht.1)
-  rw [Filter.EventuallyLE, MeasureTheory.ae_restrict_iff' measurableSet_Ioc]
-  exact Eventually.of_forall fun u hu ↦ hσ0 u ⟨hu.1.le, hu.2.trans ht.2⟩
 
 section RadialNorm
 
@@ -133,7 +119,7 @@ private theorem continuousOn_norm_curveVelocityWithin_riemannianExp_comp
       (Icc 0 1) :=
   have : IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x) :=
     IsContMDiffRiemannianBundle.toIsContinuousRiemannianBundle (IB := I) (n := ∞)
-  ContMDiffOn.continuousOn_norm_curveVelocityWithin (contMDiffOn_riemannianExp_comp h hw hdom)
+  (contMDiffOn_riemannianExp_comp h hw hdom).continuousOn_norm_curveVelocityWithin
     (uniqueMDiffOn_iff_uniqueDiffOn.2 (uniqueDiffOn_Icc zero_lt_one))
 
 /-- **The logarithm of a minimizer moves radially.** For a `C¹` path `w` in a normal domain whose
@@ -235,8 +221,12 @@ private theorem norm_smul_eq_of_norm_eq_integral (h : IsNormalDomain I M p U)
   · rfl
   have hpos : 0 < ‖w t‖ := norm_pos_iff.2 hwt
   -- on `[t, 1]` the radius stays positive, so the radial derivative formula applies
-  have hmono : ∀ s ∈ Icc t 1, ‖w t‖ ≤ ‖w s‖ := fun s hs ↦
-    norm_le_norm_of_norm_eq_integral hσ hσ0 hr ht ⟨ht.1.trans hs.1, hs.2⟩ hs.1
+  have hmono : ∀ s ∈ Icc t 1, ‖w t‖ ≤ ‖w s‖ := fun s hs ↦ by
+    have hs' : s ∈ Icc (0 : ℝ) 1 := ⟨ht.1.trans hs.1, hs.2⟩
+    rw [hr t ht, hr s hs']
+    exact intervalIntegral.monotoneOn_primitive_of_nonneg
+      (MeasureTheory.ae_restrict_of_forall_mem measurableSet_Ioc fun u hu ↦ hσ0 u ⟨hu.1.le, hu.2⟩)
+      (hσ.intervalIntegrable_of_Icc zero_le_one) ht hs' hs.1
   have hne : ∀ s ∈ Icc t 1, ‖w s‖ ≠ 0 := fun s hs ↦ (hpos.trans_le (hmono s hs)).ne'
   have hderiv : ∀ s ∈ Ioo t 1, HasDerivAt w ((σ s / ‖w s‖) • w s) s := fun s hs ↦
     hasDerivAt_of_norm_eq_integral h hw hdom hr ⟨ht.1.trans_lt hs.1, hs.2⟩
@@ -332,9 +322,11 @@ theorem IsNormalDomain.riemannianLog_eq_smul_of_pathELength_eq (h : IsNormalDoma
   have hray := norm_smul_eq_of_norm_eq_integral h hc hdom hr ht
   simp only [Function.comp_apply, hc1] at hray
   by_cases hv0 : v = 0
-  · have hle : ‖(riemannianLog I M p U ∘ γ) t‖ ≤ ‖(riemannianLog I M p U ∘ γ) 1‖ :=
-      norm_le_norm_of_norm_eq_integral hσ (fun _ _ ↦ norm_nonneg _) hr ht ⟨zero_le_one, le_rfl⟩
-        ht.2
+  · have hle : ‖(riemannianLog I M p U ∘ γ) t‖ ≤ ‖(riemannianLog I M p U ∘ γ) 1‖ := by
+      rw [hr t ht, hr 1 ⟨zero_le_one, le_rfl⟩]
+      exact intervalIntegral.monotoneOn_primitive_of_nonneg
+        (MeasureTheory.ae_restrict_of_forall_mem measurableSet_Ioc fun _ _ ↦ norm_nonneg _)
+        (hσ.intervalIntegrable_of_Icc zero_le_one) ht ⟨zero_le_one, le_rfl⟩ ht.2
     simp only [Function.comp_apply, hc1, hv0, norm_zero] at hle
     rw [hv0, smul_zero]
     exact norm_le_zero_iff.1 hle
