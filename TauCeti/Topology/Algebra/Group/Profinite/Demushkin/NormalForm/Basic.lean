@@ -52,7 +52,7 @@ the presented group has topological generator rank exactly `n`.
 ## References
 
 * J. P. Labute, *Classification of Demushkin groups*, Canad. J. Math. 19 (1967), 106–132,
-  Theorems 1–3.
+  Theorems 1–4.
 * J. Neukirch, A. Schmidt, K. Wingberg, *Cohomology of Number Fields*, 2nd ed., Theorem 3.9.19.
 -/
 
@@ -147,8 +147,12 @@ theorem demushkinWordTwoOdd_def (f n : ℕ) (x : ℕ → H) :
 
 /-- The `q = 2`, `n` even normal-form word `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`,
 on an arbitrary tuple `x : ℕ → H`, with `x 0` playing the role of `x₁`. The exponent `2 + a` is
-the natural number representing Labute's `2 + α`, `α ∈ 4ℤ₂`, at a finite level; the word has
-`n / 2 - 1` commutator factors after `(x₁, x₂)`. -/
+a natural number standing for Labute's `2 + α`, `α ∈ 4ℤ₂`: on an arbitrary group only natural
+powers make sense, and no normal form is lost, because the presented pro-`2` group is determined
+up to isomorphism by `n` and the image of its orientation (Labute, Theorem 2), which depends on
+`α` only through `v₂(α)`: it is `{±1} × U^(f)` for `v₂(α) ≥ f` and `U^[v₂(α)]` otherwise
+(corollary to Labute's Theorem 4), so `a = 0` and `a = 2^g` with `2 ≤ g < f` already realize
+every class. The word has `n / 2 - 1` commutator factors after `(x₁, x₂)`. -/
 def demushkinWordTwoEven (a f n : ℕ) (x : ℕ → H) : H :=
   x 0 ^ (2 + a) * labuteComm (x 0) (x 1) * x 2 ^ 2 ^ f *
     ((List.range (n / 2 - 1)).map fun i ↦ labuteComm (x (2 * i + 2)) (x (2 * i + 3))).prod
