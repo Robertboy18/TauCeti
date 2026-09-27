@@ -10,6 +10,7 @@ import TauCeti.Algebra.Group.Units.Basic
 public import TauCeti.LinearAlgebra.QuadraticForm.BaseChange
 public import TauCeti.LinearAlgebra.QuadraticForm.Hyperbolic
 public import TauCeti.LinearAlgebra.QuadraticForm.RegularFormClass.Discriminant
+public import TauCeti.LinearAlgebra.QuadraticForm.RegularFormClass.Semiring
 
 /-!
 # Scalar extension of isometry classes and their discriminants
@@ -116,7 +117,7 @@ theorem RegularFormPresentation.baseChange_baseChange (p : RegularFormPresentati
   refine RegularFormPresentation.ext rfl fun i ↦ Units.ext ?_
   rw [RegularFormPresentation.baseChange_apply, RegularFormPresentation.baseChange_apply,
     RegularFormPresentation.baseChange_apply]
-  simp only [Units.coe_map, RingHom.toMonoidHom_eq_coe, MonoidHom.coe_coe,
+  simp only [Units.coe_map, RingHom.toMonoidHom_eq_coe, MonoidHom.coe_ofClass,
     IsScalarTower.algebraMap_apply K L M]
   -- Both sides now read the weight of `p` at the same index, identified once through the two
   -- ranks of the iterated extension and once through the rank of the composite extension.
@@ -219,7 +220,7 @@ def presentedFormBaseChange (p : RegularFormPresentation K) :
       QuadraticMap.weightedSumSquares L fun i ↦ algebraMap K L (p.2 i : K) := by
     simp only [RegularFormPresentation.baseChange, presentedForm_eq_weightedSumSquares,
       QuadraticMap.weightedSumSquares, Units.coe_map, RingHom.toMonoidHom_eq_coe,
-      MonoidHom.coe_coe, Units.smul_def]
+      MonoidHom.coe_ofClass, Units.smul_def]
     -- The two sums are indexed by `Fin (RegularFormPresentation.baseChange L p).1` and by
     -- `Fin p.1`, which are the same type once the mapped presentation is unfolded.
     rfl
@@ -355,6 +356,36 @@ theorem RegularFormClass.baseChange_mul (x y : RegularFormClass K) :
   rw [RegularFormClass.mk_mul_mk, RegularFormClass.baseChange_mk, RegularFormClass.baseChange_mk,
     RegularFormClass.baseChange_mk, RegularFormClass.mk_mul_mk,
     RegularFormPresentation.baseChange_tmul]
+
+/-- Scalar extension of regular form classes as a ring homomorphism. -/
+def RegularFormClass.baseChangeHom : RegularFormClass K →+* RegularFormClass L where
+  toFun := RegularFormClass.baseChange L
+  map_zero' := RegularFormClass.baseChange_zero L
+  map_one' := RegularFormClass.baseChange_one L
+  map_add' := RegularFormClass.baseChange_add L
+  map_mul' := RegularFormClass.baseChange_mul L
+
+/-- The ring homomorphism acts by the existing scalar extension of form classes. -/
+@[simp]
+theorem RegularFormClass.baseChangeHom_apply (x : RegularFormClass K) :
+    RegularFormClass.baseChangeHom x = RegularFormClass.baseChange L x := by
+  rfl
+
+/-- Scalar extension to the same field is the identity ring homomorphism on form classes. -/
+@[simp]
+theorem RegularFormClass.baseChangeHom_self :
+    RegularFormClass.baseChangeHom (K := K) (L := K) = RingHom.id _ := by
+  ext x
+  simp
+
+/-- Scalar extension through a tower composes as ring homomorphisms on form classes. -/
+@[simp]
+theorem RegularFormClass.baseChangeHom_comp [Invertible (2 : M)] :
+    (RegularFormClass.baseChangeHom (K := L) (L := M)).comp
+      (RegularFormClass.baseChangeHom (K := K) (L := L)) =
+        RegularFormClass.baseChangeHom (K := K) (L := M) := by
+  ext x
+  simp
 
 /-! ### Scalar extension of the discriminant -/
 
