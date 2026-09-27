@@ -9,7 +9,7 @@ public import TauCeti.Analysis.Calculus.ParametricIntegral
 public import TauCeti.Geometry.Manifold.ContMDiff.Prod
 public import TauCeti.Geometry.Manifold.Riemannian.Basic
 public import TauCeti.Geometry.Manifold.Riemannian.Energy
-public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.ConstantSpeed
+public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.Basic
 public import TauCeti.Geometry.Manifold.Riemannian.VariationField
 
 /-!

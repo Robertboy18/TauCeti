@@ -15,8 +15,9 @@ The *energy* of a curve `γ` in a Riemannian manifold between the parameters `a`
 `E(γ) = ½ ∫_a^b ‖γ'(t)‖² dt`, where `γ'` is the velocity `TauCeti.Manifold.curveVelocity`.  This
 file defines it and records its elementary properties: it vanishes on constant curves and on
 degenerate parameter intervals, changes sign under reversal of the parameter interval, and is
-nonnegative on positively oriented ones.  Its first variation, and its value on geodesic
-segments, are in `TauCeti.Geometry.Manifold.Riemannian.Geodesic.FirstVariation`.
+nonnegative on positively oriented ones.  Its first variation is in
+`TauCeti.Geometry.Manifold.Riemannian.Geodesic.FirstVariation`, and its value on geodesic
+segments is in `TauCeti.Geometry.Manifold.Riemannian.Geodesic.ConstantSpeed`.
 
 ## Main definitions and results
 
