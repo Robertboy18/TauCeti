@@ -270,6 +270,7 @@ variable {R} {H : Type v} [Group H] [TopologicalSpace H] [IsTopologicalGroup H]
 /-- The map induced by a compatible pair on the `(i + 1)`-st term of the coinduced resolution,
 evaluated at a point of `H`: it is the map induced on the `i`-th term, applied to the value at the
 image point, `(F ↦ f ∘ F ∘ φ)` read one level down. -/
+@[simp]
 theorem resolutionMap_succ_apply (i : ℕ) (F : (TopRep.resolutionX X (i + 1)).V) (h : H) :
     ((_root_.ContinuousCohomology.resolutionMap φ f (i + 1)) F :
         C(H, (TopRep.resolutionX Y i).V)) h =
@@ -285,6 +286,7 @@ theorem coe_cochainsMap_f_apply (i : ℕ) (v : (TopRep.homogeneousCochains X).X 
 
 /-- The map on continuous cohomology induced by a compatible pair, on the class of a cocycle: it
 is the class of the image of the cocycle. -/
+@[simp]
 theorem map_π_apply (n : ℕ) (a : _root_.ContinuousCohomology.cocycles X n) :
     _root_.ContinuousCohomology.map φ f n (_root_.ContinuousCohomology.π X n a) =
       _root_.ContinuousCohomology.π Y n (_root_.ContinuousCohomology.cocyclesMap φ f n a) := by
@@ -303,6 +305,7 @@ theorem iCycles_cocyclesMap_apply (n : ℕ) (a : _root_.ContinuousCohomology.coc
 
 /-- A coefficient map along an equality of coefficient objects is the transport along the induced
 equality of cohomology groups. -/
+@[simp]
 theorem coeffMap_eqToHom {X Y : TopRep R G} (e : X = Y) (n : ℕ) :
     coeffMap (eqToHom e) n = eqToHom (congrArg (continuousCohomology n) e) := by
   subst e

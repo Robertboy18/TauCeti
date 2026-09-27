@@ -22,12 +22,13 @@ products of `TauCeti.TopPairing.cup`:
 map φ fZ (a ⌣ b) = map φ fX a ⌣ map φ fY b.
 ```
 
-The identity holds already on the coinduced resolution: the map `F ↦ f ∘ F ∘ φ` induced by a
-compatible pair on the resolution takes the Alexander–Whitney pairing `(a ⌣ b) (g₀, …, g_{m+n}) =
-μ (a (g₀, …, g_m)) (b (g_m, …, g_{m+n}))` of `TauCeti.TopPairing.resolutionCup` to the
-Alexander–Whitney pairing of the images, because it acts pointwise on the values and by
-precomposition on the arguments, and both operations commute with the pairing formula. The
-identity then descends through homogeneous cochains and cocycles to cohomology.
+The identity is available at every level of the construction, not only on cohomology classes:
+on the coinduced resolution, for the Alexander–Whitney pairing `TauCeti.TopPairing.resolutionCup`
+and the map `F ↦ f ∘ F ∘ φ` of the compatible pair; on homogeneous cochains, for
+`TauCeti.TopPairing.cupCochain` and `ContinuousCohomology.cochainsMap`; and on cocycles, for
+`TauCeti.TopPairing.cupCocycles` and `ContinuousCohomology.cocyclesMap`. Arguments that work with
+explicit representatives can therefore compare the images of a cup product and the cup product of
+the images before passing to classes.
 
 The three named instances of `ContinuousCohomology.map` give the three compatibilities of the cup
 product with the change-of-group and change-of-coefficient maps: restriction to a subgroup,
@@ -35,10 +36,6 @@ inflation from a quotient, and a coefficient map. In each, the second pairing is
 together with its defining relation to the first, since restriction leaves the coefficient map
 unchanged while inflation compares the pairings after including the invariants into the ambient
 objects. The restricted pairing `TauCeti.TopPairing.res` is the canonical choice in the first case.
-
-## Main definitions
-
-* `TauCeti.TopPairing.res`: the restriction of a coefficient pairing along a monoid homomorphism.
 
 ## Main results
 
@@ -65,28 +62,6 @@ open CategoryTheory _root_.ContinuousCohomology
 universe u v w
 
 namespace TopPairing
-
-/-! ### The restricted pairing -/
-
-section Res
-
-variable {R : Type u} [CommRing R] [TopologicalSpace R] {G : Type v} [Group G]
-  {H : Type*} [Monoid H] {X Y Z : TopRep.{w} R G}
-
-/-- **The restriction of a coefficient pairing** along a monoid homomorphism `φ : H →* G`: the same
-bilinear map, which is `H`-equivariant for the restricted actions. -/
-def res (P : TopPairing X Y Z) (φ : H →* G) :
-    TopPairing (TopRep.res φ X) (TopRep.res φ Y) (TopRep.res φ Z) where
-  bil := P.bil
-  cont := P.cont
-  equivariant h x y := P.equivariant (φ h) x y
-
-/-- The restricted pairing has the same underlying bilinear map. -/
-@[simp]
-theorem res_bil (P : TopPairing X Y Z) (φ : H →* G) : (P.res φ).bil = P.bil :=
-  (rfl)
-
-end Res
 
 /-! ### Naturality in compatible pairs -/
 
@@ -123,10 +98,14 @@ theorem resolutionCup_resolutionMap : ∀ (m n k : ℕ) (hk : k = n + m)
     (resolutionMap φ fZ (k + 1)) (P.resolutionCup m n k hk (a, b)) =
       P'.resolutionCup m n k hk
         ((resolutionMap φ fX (m + 1)) a, (resolutionMap φ fY (n + 1)) b)
+  -- The induced map acts pointwise on the values and by precomposition on the arguments; both
+  -- commute with the Alexander–Whitney formula, so the identity is checked argument by argument
+  -- along the recursion defining `resolutionCup`.
   | 0, n, k, hk, a, b => ContinuousMap.ext fun h ↦ by
-    rw [ContinuousCohomology.resolutionMap_succ_apply, resolutionCup_zero_apply,
-      resolutionCup_zero_apply, P.pointwise_resolutionMap P' φ fX fY fZ hpair,
-      ContinuousCohomology.resolutionMap_succ_apply, ContinuousCohomology.resolutionMap_succ_apply,
+    simp only [ContinuousCohomology.resolutionMap_succ_apply φ fZ,
+      ContinuousCohomology.resolutionMap_succ_apply φ fX,
+      ContinuousCohomology.resolutionMap_succ_apply φ fY, P.resolutionCup_zero_apply,
+      P'.resolutionCup_zero_apply, P.pointwise_resolutionMap P' φ fX fY fZ hpair,
       resolutionMap_zero]
   | m + 1, n, k + 1, hk, a, b => ContinuousMap.ext fun h ↦ by
     rw [ContinuousCohomology.resolutionMap_succ_apply, resolutionCup_succ_apply,

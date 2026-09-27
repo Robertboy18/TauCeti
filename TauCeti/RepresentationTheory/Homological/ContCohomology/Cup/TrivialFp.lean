@@ -95,9 +95,10 @@ theorem eqToHom_res_fpPairing_bil (S : Subgroup G)
     eqToHom (res_trivialFp p G S) (((fpPairing p G).res S.subtype).bil x y) =
       (fpPairing p S).bil (eqToHom (res_trivialFp p G S) x) (eqToHom (res_trivialFp p G S) y) :=
   (trivialFpEquiv p S).injective (by
-    rw [trivialFpEquiv_eqToHom_res_trivialFp, TopPairing.res_bil, fpPairing_bil_apply,
-      LinearEquiv.apply_symm_apply, fpPairing_bil_apply, LinearEquiv.apply_symm_apply,
-      trivialFpEquiv_eqToHom_res_trivialFp, trivialFpEquiv_eqToHom_res_trivialFp])
+    -- the transport lemma is passed with `p G S` fixed: by bare name, `simp` indexes it through
+    -- the unfolded restricted carrier and does not find it in this module
+    simp only [trivialFpEquiv_eqToHom_res_trivialFp p G S, TopPairing.res_bil,
+      fpPairing_bil_apply, LinearEquiv.apply_symm_apply])
 
 variable [TopologicalSpace G] [IsTopologicalGroup G]
 
@@ -121,6 +122,7 @@ theorem cupFp_π (a b : cocycles (trivialFp p G) 1) :
 
 /-- **Restriction preserves the cup product with trivial `ZMod p` coefficients**:
 `res (a ⌣ b) = res a ⌣ res b` for the named restriction `trivialFpResMap`. -/
+@[simp]
 theorem cupFp_res (S : Subgroup G) (a b : cohomFp p G 1) :
     trivialFpResMap p G S 2 (cupFp p G a b) =
       cupFp p S (trivialFpResMap p G S 1 a) (trivialFpResMap p G S 1 b) := by

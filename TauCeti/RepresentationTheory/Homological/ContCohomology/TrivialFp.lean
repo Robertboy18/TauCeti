@@ -122,6 +122,7 @@ open CategoryTheory _root_.ContinuousCohomology
 /-- Transport along `res_trivialFp` is the identity on the underlying values: the restricted
 coefficient object and `trivialFp p S` have the same lifted carrier, and `trivialFpEquiv` reads
 off the same value on both sides. -/
+@[simp]
 theorem trivialFpEquiv_eqToHom_res_trivialFp (S : Subgroup G)
     (x : (TopRep.res (S.subtype : S →* G) (trivialFp p G)).V) :
     trivialFpEquiv p S (eqToHom (res_trivialFp p G S) x) = trivialFpEquiv p G x :=
