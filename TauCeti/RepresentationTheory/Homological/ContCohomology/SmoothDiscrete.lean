@@ -46,6 +46,8 @@ provide the basic examples of smooth discrete objects used by coefficient constr
   `TopRep R G`, read off from its operators.
 * `TauCeti.ofDiscreteModuleMap`: a `G`-equivariant `R`-linear map of discrete modules as a
   morphism of `TopRep R G`.
+* `TauCeti.ofDiscreteModuleIso`: a `G`-equivariant `R`-linear equivalence of discrete modules as an
+  isomorphism of `TopRep R G`.
 * `TauCeti.ofDiscreteModulePair`: a compatible pair `(φ : H →* G, f : M →ₗ[R] N)` as the morphism
   `TopRep.res φ (ofDiscreteModule R G M) ⟶ ofDiscreteModule R H N` that
   `ContinuousCohomology.map` consumes.
@@ -444,6 +446,50 @@ by two `G`-equivariant `R`-linear maps is the morphism named by their composite.
     (congrArg (⇑f') (ofDiscreteModuleMap_hom_apply f hf m).symm).trans <|
       (ofDiscreteModuleMap_hom_apply f' hf' _).symm.trans
         (TopRep.comp_apply (ofDiscreteModuleMap f hf) (ofDiscreteModuleMap f' hf') m).symm).symm
+
+omit [TopologicalSpace R] [TopologicalSpace M] [DiscreteTopology M] [SMulCommClass G R M]
+  [ContinuousSMul R M] [TopologicalSpace N] [DiscreteTopology N] [SMulCommClass G R N]
+  [ContinuousSMul R N] in
+/-- The inverse of a `G`-equivariant linear equivalence is `G`-equivariant. -/
+private theorem symm_apply_smul (e : M ≃ₗ[R] N) (he : ∀ (g : G) (m : M), e (g • m) = g • e m)
+    (g : G) (n : N) : e.symm (g • n) = g • e.symm n :=
+  e.injective <| by rw [e.apply_symm_apply, he, e.apply_symm_apply]
+
+/-- A `G`-equivariant `R`-linear equivalence of discrete modules as an isomorphism of
+`TopRep R G`, with `ofDiscreteModuleMap` of the equivalence and of its inverse as the two
+directions. -/
+def ofDiscreteModuleIso (e : M ≃ₗ[R] N) (he : ∀ (g : G) (m : M), e (g • m) = g • e m) :
+    ofDiscreteModule R G M ≅ ofDiscreteModule R G N where
+  hom := ofDiscreteModuleMap e.toLinearMap he
+  inv := ofDiscreteModuleMap e.symm.toLinearMap (symm_apply_smul e he)
+  hom_inv_id := by
+    -- Both sides fix `m`: the composite sends `m` to `e.symm (e m)`.
+    refine TopRep.hom_ext (DFunLike.ext _ _ fun (m : M) ↦ ?_)
+    exact ((TopRep.comp_apply (ofDiscreteModuleMap e.toLinearMap he)
+        (ofDiscreteModuleMap e.symm.toLinearMap (symm_apply_smul e he)) m).trans <|
+      (ofDiscreteModuleMap_hom_apply (G := G) e.symm.toLinearMap (symm_apply_smul e he) _).trans <|
+      (congrArg e.symm (ofDiscreteModuleMap_hom_apply (G := G) e.toLinearMap he m)).trans
+        (e.symm_apply_apply m)).trans
+      (TopRep.id_apply (ofDiscreteModule R G M) m).symm
+  inv_hom_id := by
+    -- Both sides fix `n`: the composite sends `n` to `e (e.symm n)`.
+    refine TopRep.hom_ext (DFunLike.ext _ _ fun (n : N) ↦ ?_)
+    exact ((TopRep.comp_apply (ofDiscreteModuleMap e.symm.toLinearMap (symm_apply_smul e he))
+        (ofDiscreteModuleMap e.toLinearMap he) n).trans <|
+      (ofDiscreteModuleMap_hom_apply (G := G) e.toLinearMap he _).trans <|
+      (congrArg e (ofDiscreteModuleMap_hom_apply (G := G) e.symm.toLinearMap
+        (symm_apply_smul e he) n)).trans (e.apply_symm_apply n)).trans
+      (TopRep.id_apply (ofDiscreteModule R G N) n).symm
+
+/-- The forward direction of `ofDiscreteModuleIso e he` is `ofDiscreteModuleMap` of `e`. -/
+@[simp] lemma ofDiscreteModuleIso_hom (e : M ≃ₗ[R] N)
+    (he : ∀ (g : G) (m : M), e (g • m) = g • e m) :
+    (ofDiscreteModuleIso e he).hom = ofDiscreteModuleMap e.toLinearMap he := (rfl)
+
+/-- The inverse direction of `ofDiscreteModuleIso e he` acts on underlying modules as `e.symm`. -/
+@[simp] lemma ofDiscreteModuleIso_inv_hom_apply (e : M ≃ₗ[R] N)
+    (he : ∀ (g : G) (m : M), e (g • m) = g • e m) (n : N) :
+    (ofDiscreteModuleIso e he).inv.hom n = e.symm n := (rfl)
 
 variable (R G M N)
 
