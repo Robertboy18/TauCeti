@@ -120,11 +120,13 @@ theorem transEquiv_symm_apply (φ : DiscreteCoind G W A) (g : G) (u : U) :
     (transEquiv hW hsmul).symm φ g u = φ ((u : G) * g) := (rfl)
 
 /-- The transitivity equivalence is `G`-equivariant for the right-translation actions. -/
+@[simp]
 theorem transEquiv_smul (g₀ : G) (f : DiscreteCoind G U (DiscreteCoind U V A)) :
     transEquiv hW hsmul (g₀ • f) = g₀ • transEquiv hW hsmul f := ext fun g => by
   rw [transEquiv_apply, coe_smul, coe_smul, transEquiv_apply]
 
 /-- The inverse of the transitivity equivalence is `G`-equivariant. -/
+@[simp]
 theorem transEquiv_symm_smul (g₀ : G) (φ : DiscreteCoind G W A) :
     (transEquiv hW hsmul).symm (g₀ • φ) = g₀ • (transEquiv hW hsmul).symm φ :=
   (transEquiv hW hsmul).injective <| by
@@ -159,26 +161,13 @@ noncomputable def transIso :
     transEquiv_smul hW hsmul g f
   inv := ofDiscreteModuleMap (transEquiv hW hsmul).symm.toAddMonoidHom.toIntLinearMap fun g φ =>
     transEquiv_symm_smul hW hsmul g φ
+  -- After extensionality both laws are those of `transEquiv` on the underlying modules.
   hom_inv_id := by
-    refine TopRep.hom_ext (DFunLike.ext _ _ fun (f : DiscreteCoind G U (DiscreteCoind U V A)) ↦ ?_)
-    refine (TopRep.comp_apply
-      (A := ofDiscreteModule ℤ G (DiscreteCoind G U (DiscreteCoind U V A))) _ _ f).trans ?_
-    refine ((ofDiscreteModuleMap_hom_apply _ _ _).trans ?_).trans
-      (TopRep.id_apply (ofDiscreteModule ℤ G (DiscreteCoind G U (DiscreteCoind U V A))) f).symm
-    exact (congrArg (transEquiv hW hsmul).symm.toAddMonoidHom.toIntLinearMap
-      (ofDiscreteModuleMap_hom_apply (G := G) (transEquiv hW hsmul).toAddMonoidHom.toIntLinearMap
-        (fun g f => transEquiv_smul hW hsmul g f) f)).trans
-          ((transEquiv hW hsmul).symm_apply_apply f)
+    ext f
+    exact (transEquiv hW hsmul).symm_apply_apply f
   inv_hom_id := by
-    refine TopRep.hom_ext (DFunLike.ext _ _ fun (φ : DiscreteCoind G W A) ↦ ?_)
-    refine (TopRep.comp_apply (A := ofDiscreteModule ℤ G (DiscreteCoind G W A)) _ _ φ).trans ?_
-    refine ((ofDiscreteModuleMap_hom_apply _ _ _).trans ?_).trans
-      (TopRep.id_apply (ofDiscreteModule ℤ G (DiscreteCoind G W A)) φ).symm
-    exact (congrArg (transEquiv hW hsmul).toAddMonoidHom.toIntLinearMap
-      (ofDiscreteModuleMap_hom_apply (G := G)
-        (transEquiv hW hsmul).symm.toAddMonoidHom.toIntLinearMap
-        (fun g φ => transEquiv_symm_smul hW hsmul g φ) φ)).trans
-          ((transEquiv hW hsmul).apply_symm_apply φ)
+    ext φ
+    exact (transEquiv hW hsmul).apply_symm_apply φ
 
 /-- The transitivity isomorphism acts on underlying modules as `transEquiv`. -/
 @[simp]
@@ -203,10 +192,11 @@ theorem bot_smul_eq_bot_smul [DistribMulAction (⊥ : Subgroup U) A]
   rw [Subsingleton.elim v 1, Subsingleton.elim w 1, one_smul, one_smul]
 
 variable (U A) in
-/-- **The coinduction of the acyclic module is the acyclic module**:
+/-- **Transitivity of coinduction for the trivial subgroup**:
 `Coind_U^G (Coind_1^U A) ≅ Coind_1^G A` as topological `G`-representations, the case `V = W = ⊥` of
-`TauCeti.DiscreteCoind.transIso`. This is the identification of coefficient modules on which
-dimension shifting passes Shapiro's lemma from one degree to the next. -/
+`TauCeti.DiscreteCoind.transIso`. Dimension shifting uses this identification of coefficient
+modules together with a separate acyclicity result for `Coind_1^G A` to pass Shapiro's lemma from
+one degree to the next. -/
 noncomputable def transIsoBot [DistribMulAction (⊥ : Subgroup U) A]
     [DistribMulAction (⊥ : Subgroup G) A] :
     ofDiscreteModule ℤ G (DiscreteCoind G U (DiscreteCoind U (⊥ : Subgroup U) A)) ≅

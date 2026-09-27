@@ -87,7 +87,10 @@ variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
 /-- **The canonical Shapiro map** `Hⁿ(G, Coind_U^G A) ⟶ Hⁿ(U, A)` in every degree: the map on
 continuous cohomology induced by the compatible pair of the inclusion `U ↪ G` and the counit
-`Coind_U^G A → A`, evaluation at `1`. Shapiro's lemma says that it is bijective. -/
+`Coind_U^G A → A`, evaluation at `1`. It is defined for any topological group `G` and any subgroup
+`U`; Shapiro's lemma is the statement that it is bijective, proved here in degree `0` in this
+generality (`bijective_shapiroMap_zero`) and in degrees at most `2` for a closed subgroup of a
+profinite group (`bijective_shapiroMap_of_le_two`). -/
 noncomputable def shapiroMap (n : ℕ) :
     continuousCohomology n (ofDiscreteModule ℤ G (DiscreteCoind G U A)) ⟶
       continuousCohomology n (ofDiscreteModule ℤ U A) :=
@@ -243,7 +246,7 @@ namespace TauCeti.ContCohomology.DiscreteShortExact
 open TauCeti.ContinuousCohomology
 
 variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
-  [TotallyDisconnectedSpace G] {U : Subgroup G} [CompactSpace U]
+  [TotallyDisconnectedSpace G] {U : Subgroup G}
   {A : Type u} [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A] [DistribMulAction U A]
   {B : Type u} [AddCommGroup B] [TopologicalSpace B] [DiscreteTopology B] [DistribMulAction U B]
   [ContinuousSMul U B]
@@ -264,9 +267,12 @@ Hⁿ(G, Coind_U^G C) ---δ---> Hⁿ⁺¹(G, Coind_U^G A)
 
 commutes in every degree. This is the naturality of the connecting map in the compatible pair of
 the inclusion and the counit; it is the step that carries bijectivity of the Shapiro map from one
-degree to the next once the middle terms are acyclic. -/
+degree to the next once the middle terms are acyclic. The connecting map of `U` needs `U` compact,
+which follows from its closedness in the compact group `G`. -/
 theorem delta_shapiroMap (hU : IsClosed (U : Set G)) (n : ℕ) :
+    haveI : CompactSpace U := isCompact_iff_compactSpace.mp hU.isCompact
     (coind U hU S).delta n ≫ shapiroMap U A (n + 1) = shapiroMap U C n ≫ S.delta n := by
+  have : CompactSpace U := isCompact_iff_compactSpace.mp hU.isCompact
   rw [shapiroMap_def, shapiroMap_def]
   exact (coind U hU S).delta_map S (ContinuousMonoidHom.subgroupSubtype U)
     (DiscreteCoind.eval G U A) (DiscreteCoind.eval G U B) (DiscreteCoind.eval G U C)
