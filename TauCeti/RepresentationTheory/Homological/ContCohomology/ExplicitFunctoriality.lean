@@ -429,31 +429,44 @@ noncomputable def explicitMap1Equiv
     (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) : H1 G M ≃+ H1 H N := by
   have hequiv' : ∀ (g : G) (n : N), e.symm (φ.symm g • n) = g • e.symm n :=
     AddEquiv.symm_map_smul_of_map_mulEquiv_smul e φ.toMulEquiv hequiv
-  -- The hypotheses are restated at the coerced homomorphisms, so that the goals below are
-  -- type-correct at the transparency `rw` uses.
+  -- The hypotheses are restated at the coerced homomorphisms, and the compatibility of the two
+  -- composite pairs is named, so that the composition laws below rewrite: `rw` checks the goal at
+  -- a transparency that does not unfold the coercions.
   have he₁ : Continuous (e.toAddMonoidHom : M → N) := he
   have he₁' : Continuous (e.symm.toAddMonoidHom : N → M) := he'
   have hequiv₁ : ∀ (h : H) (m : M),
       e.toAddMonoidHom ((φ : H →ₜ* G) h • m) = h • e.toAddMonoidHom m := hequiv
   have hequiv₁' : ∀ (g : G) (n : N),
       e.symm.toAddMonoidHom ((φ.symm : G →ₜ* H) g • n) = g • e.symm.toAddMonoidHom n := hequiv'
+  have hcomp : ∀ (g : G) (m : M),
+      (e.symm.toAddMonoidHom.comp e.toAddMonoidHom)
+          (((φ : H →ₜ* G).comp (φ.symm : G →ₜ* H)) g • m) =
+        g • (e.symm.toAddMonoidHom.comp e.toAddMonoidHom) m :=
+    comp_apply_smul (φ : H →* G) (φ.symm : G →* H) e.toAddMonoidHom e.symm.toAddMonoidHom
+      hequiv₁ hequiv₁'
+  have hcomp' : ∀ (h : H) (n : N),
+      (e.toAddMonoidHom.comp e.symm.toAddMonoidHom)
+          (((φ.symm : G →ₜ* H).comp (φ : H →ₜ* G)) h • n) =
+        h • (e.toAddMonoidHom.comp e.symm.toAddMonoidHom) n :=
+    comp_apply_smul (φ.symm : G →* H) (φ : H →* G) e.symm.toAddMonoidHom e.toAddMonoidHom
+      hequiv₁' hequiv₁
   exact
     { toFun := explicitMap1 G M H N φ e.toAddMonoidHom he₁ hequiv₁
       invFun := explicitMap1 H N G M φ.symm e.symm.toAddMonoidHom he₁' hequiv₁'
       left_inv := fun x => by
-        induction x using QuotientAddGroup.induction_on with
-        | H c =>
-          rw [explicitMap1_mk, explicitMap1_mk]
-          congr 1
-          ext g
-          simp [cocyclesMap1_coe, cochainsMap1_apply]
+        rw [← AddMonoidHom.comp_apply, ← explicitMap1_comp G M H N φ e.toAddMonoidHom he₁ hequiv₁
+          G M φ.symm e.symm.toAddMonoidHom he₁' hequiv₁' hcomp,
+          explicitMap1_congr_of_eq G M G M _ (ContinuousMonoidHom.id G) _ (AddMonoidHom.id M)
+            (hq := continuous_id) (hψ := fun g m => by simp)
+            (ContinuousMonoidHom.ext φ.apply_symm_apply) (AddMonoidHom.ext e.symm_apply_apply),
+          explicitMap1_id, AddMonoidHom.id_apply]
       right_inv := fun x => by
-        induction x using QuotientAddGroup.induction_on with
-        | H c =>
-          rw [explicitMap1_mk, explicitMap1_mk]
-          congr 1
-          ext g
-          simp [cocyclesMap1_coe, cochainsMap1_apply]
+        rw [← AddMonoidHom.comp_apply, ← explicitMap1_comp H N G M φ.symm e.symm.toAddMonoidHom
+          he₁' hequiv₁' H N φ e.toAddMonoidHom he₁ hequiv₁ hcomp',
+          explicitMap1_congr_of_eq H N H N _ (ContinuousMonoidHom.id H) _ (AddMonoidHom.id N)
+            (hq := continuous_id) (hψ := fun g m => by simp)
+            (ContinuousMonoidHom.ext φ.symm_apply_apply) (AddMonoidHom.ext e.apply_symm_apply),
+          explicitMap1_id, AddMonoidHom.id_apply]
       map_add' := map_add (explicitMap1 G M H N φ e.toAddMonoidHom he₁ hequiv₁) }
 
 /-- The equivalence on explicit `H¹` is the pullback along its forward compatible pair. -/

@@ -8,7 +8,6 @@ module
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologyComparison
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.ExplicitFunctoriality
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.H2ZMod
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.RestrictScalars
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp
 public import TauCeti.Topology.Algebra.ContinuousZModDual
 
@@ -21,11 +20,9 @@ of `TauCeti.ContCohomology` is computed from inhomogeneous cochains with values 
 `G`-module, and every rank count of a pro-`p` group is stated for the explicit model. This file
 identifies the two in degrees one and two.
 
-The general statement is for any discrete smooth object `X : TopRep k G`: forgetting the scalars
-does not change continuous cohomology (`TauCeti.ContCohomology.restrictScalarsIntIso`), and the
-underlying additive representation of `X` is the discrete coefficient object attached to `X.V`
-(`TauCeti.ContCohomology.ofDiscreteModule_eq_restrictScalarsInt_obj`), so the explicit comparisons
-over `ℤ` apply. For `X = trivialFp p G` the carrier is the universe lift of `ZMod p`, and a further
+The comparison for a discrete smooth representation over any scalars is
+`TauCeti.ContCohomology.explicitH1AddEquivContinuousCohomologyOfDiscrete` and its degree-two
+counterpart. For `X = trivialFp p G` the carrier is the universe lift of `ZMod p`, and a further
 change of coefficients along `trivialFpEquiv p G` lands in `H1 G (ZMod p)` and `H2 G (ZMod p)`, for
 any trivial action of `G` on `ZMod p`. In degree one, the class group of a trivial action is the
 group of continuous characters, so `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-dual of `G`, as an
@@ -33,10 +30,6 @@ group of continuous characters, so `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-d
 
 ## Main definitions
 
-* `TauCeti.ContCohomology.explicitH1AddEquivContinuousCohomologyOfDiscrete`,
-  `TauCeti.ContCohomology.explicitH2AddEquivContinuousCohomologyOfDiscrete`: the explicit `H¹` and
-  `H²` of the carrier of a discrete smooth representation over any scalars are its continuous
-  cohomology.
 * `TauCeti.cohomFpAddEquivH1`, `TauCeti.cohomFpAddEquivH2`: `cohomFp p G 1` and `cohomFp p G 2` are
   the explicit `H1 G (ZMod p)` and `H2 G (ZMod p)` for a trivial action.
 * `TauCeti.cohomFpLinearEquivH2`: the degree-two identification is `𝔽_p`-linear.
@@ -47,7 +40,6 @@ group of continuous characters, so `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-d
 
 * J.-P. Serre, *Galois Cohomology*, I §2.
 -/
-
 public section
 
 namespace TauCeti
@@ -61,37 +53,9 @@ attribute [local instance] TopRep.distribMulAction
 -- Preferring the ring path keeps a single additive structure on `ZMod p`.
 attribute [local instance 2000] Ring.toAddCommGroup
 
-namespace ContCohomology
-
-variable {k : Type*} [Ring k] [TopologicalSpace k] {G : Type u} [Group G] [TopologicalSpace G]
-  [IsTopologicalGroup G] (X : TopRep k G) [DiscreteTopology X.V] [ContinuousSMul G X.V]
-
-/-- The explicit `H¹` of the carrier of a discrete smooth representation `X` over any scalars, with
-the action read off from `X`, is Mathlib's `continuousCohomology 1 X`. -/
-noncomputable def explicitH1AddEquivContinuousCohomologyOfDiscrete :
-    H1 G X.V ≃+ continuousCohomology 1 X :=
-  (explicitH1AddEquivContinuousCohomology G X.V).trans
-    (eqToIso (congrArg (continuousCohomology 1) (ofDiscreteModule_eq_restrictScalarsInt_obj X)) ≪≫
-      restrictScalarsIntIso X 1).toContinuousLinearEquiv.toAddEquiv
-
-/-- The explicit `H²` of the carrier of a discrete smooth representation `X` over any scalars, with
-the action read off from `X`, is Mathlib's `continuousCohomology 2 X`. -/
-noncomputable def explicitH2AddEquivContinuousCohomologyOfDiscrete [LocallyCompactSpace G] :
-    H2 G X.V ≃+ continuousCohomology 2 X :=
-  (explicitH2AddEquivContinuousCohomology G X.V).trans
-    (eqToIso (congrArg (continuousCohomology 2) (ofDiscreteModule_eq_restrictScalarsInt_obj X)) ≪≫
-      restrictScalarsIntIso X 2).toContinuousLinearEquiv.toAddEquiv
-
-end ContCohomology
-
 section TrivialFp
 
 variable (p : ℕ) (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
-
-/-- The derived action of `G` on the carrier of `trivialFp p G` is continuous, the carrier being
-discrete and the action trivial. -/
-theorem continuousSMul_trivialFp : ContinuousSMul G (trivialFp p G).V :=
-  (isSmoothDiscrete_iff_continuousSMul _).1 (isSmoothDiscrete_trivialFp p G)
 
 attribute [local instance] continuousSMul_trivialFp
 

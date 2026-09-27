@@ -77,10 +77,12 @@ structure IsDemushkin : Prop where
   finite_cohomFp_one : Module.Finite (ZMod p) (cohomFp p G 1)
   /-- `H²(G, 𝔽_p)` is one-dimensional. -/
   finrank_cohomFp_two : Module.finrank (ZMod p) (cohomFp p G 2) = 1
-  /-- The cup product is nondegenerate on the left. -/
-  cup_left : ∀ a : cohomFp p G 1, a ≠ 0 → ∃ b : cohomFp p G 1, cupFp p G a b ≠ 0
-  /-- The cup product is nondegenerate on the right. -/
-  cup_right : ∀ b : cohomFp p G 1, b ≠ 0 → ∃ a : cohomFp p G 1, cupFp p G a b ≠ 0
+  /-- The cup product is left-separating: every nonzero class pairs nontrivially with some
+  class on its right. -/
+  cup_separatingLeft : ∀ a : cohomFp p G 1, a ≠ 0 → ∃ b : cohomFp p G 1, cupFp p G a b ≠ 0
+  /-- The cup product is right-separating: every nonzero class pairs nontrivially with some
+  class on its left. -/
+  cup_separatingRight : ∀ b : cohomFp p G 1, b ≠ 0 → ∃ a : cohomFp p G 1, cupFp p G a b ≠ 0
 
 end Predicate
 
