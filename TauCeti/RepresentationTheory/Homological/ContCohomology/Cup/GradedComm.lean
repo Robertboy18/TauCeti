@@ -95,23 +95,48 @@ variable {R : Type u} [CommRing R] [TopologicalSpace R]
 
 /-! ### The cup-one product of one-cochains -/
 
-/-- **The cup-one product on degree-one elements of the resolution**: for
-`a : C(G, C(G, X.V))` and `b : C(G, C(G, Y.V))`, the pointwise pairing
-`(g₀, g₁) ↦ μ (a g₀ g₁) (b g₀ g₁)`. It is the bidegree-`(1, 1)` case of Steenrod's `∪₁`
-product, and the homotopy behind graded commutativity of the cup product in that bidegree. -/
-def cupOne (a : (TopRep.resolution'X X 1).V) (b : (TopRep.resolution'X Y 1).V) :
+/-- The cup-one product of two degree-one elements of the resolution, as a plain function:
+`(a, b) ↦ ((g₀, g₁) ↦ μ (a g₀ g₁) (b g₀ g₁))`, built from the pointwise pairing so that the value
+is continuous in `(g₀, g₁)`. Its bilinearity is recorded by `TauCeti.TopPairing.cupOne`. -/
+private def cupOneAux (a : (TopRep.resolution'X X 1).V) (b : (TopRep.resolution'X Y 1).V) :
     (TopRep.resolution'X Z 1).V :=
   (⟨fun q : C(G, X.V) × C(G, Y.V) ↦ (P.pointwise 0 0 rfl).comp (q.1.prodMk q.2),
     (continuous_postcomp _).comp ContinuousMap.continuous_prodMk⟩ :
       C(C(G, X.V) × C(G, Y.V), C(G, Z.V))).comp
     ((a : C(G, C(G, X.V))).prodMk (b : C(G, C(G, Y.V))))
 
+private theorem cupOneAux_apply (a : (TopRep.resolution'X X 1).V)
+    (b : (TopRep.resolution'X Y 1).V) (g₀ g₁ : G) :
+    (P.cupOneAux a b : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a g₀ g₁) (b g₀ g₁) := by
+  rw [cupOneAux]
+  exact P.pointwise_zero_apply rfl _ _
+
+/-- **The cup-one product on degree-one elements of the resolution**, as an `R`-bilinear map: for
+`a : C(G, C(G, X.V))` and `b : C(G, C(G, Y.V))`, the pointwise pairing
+`(g₀, g₁) ↦ μ (a g₀ g₁) (b g₀ g₁)`. It is the bidegree-`(1, 1)` case of Steenrod's `∪₁`
+product, and the homotopy behind graded commutativity of the cup product in that bidegree. -/
+def cupOne : (TopRep.resolution'X X 1).V →ₗ[R] (TopRep.resolution'X Y 1).V →ₗ[R]
+    (TopRep.resolution'X Z 1).V :=
+  LinearMap.mk₂ R P.cupOneAux
+    (fun a a' b ↦ ContinuousMap.ext fun g₀ ↦ ContinuousMap.ext fun g₁ ↦ by
+      rw [ContinuousMap.add_apply, ContinuousMap.add_apply, cupOneAux_apply, cupOneAux_apply,
+        cupOneAux_apply, ContinuousMap.add_apply, ContinuousMap.add_apply, map_add,
+        LinearMap.add_apply])
+    (fun r a b ↦ ContinuousMap.ext fun g₀ ↦ ContinuousMap.ext fun g₁ ↦ by
+      rw [ContinuousMap.smul_apply, ContinuousMap.smul_apply, cupOneAux_apply, cupOneAux_apply,
+        ContinuousMap.smul_apply, ContinuousMap.smul_apply, map_smul, LinearMap.smul_apply])
+    (fun a b b' ↦ ContinuousMap.ext fun g₀ ↦ ContinuousMap.ext fun g₁ ↦ by
+      rw [ContinuousMap.add_apply, ContinuousMap.add_apply, cupOneAux_apply, cupOneAux_apply,
+        cupOneAux_apply, ContinuousMap.add_apply, ContinuousMap.add_apply, map_add])
+    (fun r a b ↦ ContinuousMap.ext fun g₀ ↦ ContinuousMap.ext fun g₁ ↦ by
+      rw [ContinuousMap.smul_apply, ContinuousMap.smul_apply, cupOneAux_apply, cupOneAux_apply,
+        ContinuousMap.smul_apply, ContinuousMap.smul_apply, map_smul])
+
 @[simp]
 theorem cupOne_apply (a : (TopRep.resolution'X X 1).V) (b : (TopRep.resolution'X Y 1).V)
     (g₀ g₁ : G) :
     (P.cupOne a b : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a g₀ g₁) (b g₀ g₁) := by
-  rw [cupOne]
-  exact P.pointwise_zero_apply rfl _ _
+  rw [cupOne, LinearMap.mk₂_apply, cupOneAux_apply]
 
 /-- The cup-one product is equivariant. -/
 theorem cupOne_ρ (g : G) (a : (TopRep.resolution'X X 1).V) (b : (TopRep.resolution'X Y 1).V) :
@@ -122,19 +147,34 @@ theorem cupOne_ρ (g : G) (a : (TopRep.resolution'X X 1).V) (b : (TopRep.resolut
   rw [coind₁_apply_apply, coind₁_apply_apply, cupOne_apply, cupOne_apply, coind₁_apply_apply,
     coind₁_apply_apply, coind₁_apply_apply, coind₁_apply_apply, P.equivariant]
 
-/-- **The cup-one product of homogeneous one-cochains**: the cup-one product of the underlying
-elements of the resolution, which is invariant by equivariance. -/
-def cupOneCochain (a : (TopRep.homogeneousCochains X).X 1)
-    (b : (TopRep.homogeneousCochains Y).X 1) : (TopRep.homogeneousCochains Z).X 1 :=
-  ⟨P.cupOne a.1 b.1, fun g ↦ by rw [← P.cupOne_ρ, a.2 g, b.2 g]⟩
+/-- **The cup-one product of homogeneous one-cochains**, as an `R`-bilinear map: the cup-one
+product of the underlying elements of the resolution, which is invariant by equivariance. -/
+def cupOneCochain : (TopRep.homogeneousCochains X).X 1 →ₗ[R]
+    (TopRep.homogeneousCochains Y).X 1 →ₗ[R] (TopRep.homogeneousCochains Z).X 1 :=
+  LinearMap.mk₂ R
+    (fun a b ↦ ⟨P.cupOne a.1 b.1, fun g ↦ by rw [← P.cupOne_ρ, a.2 g, b.2 g]⟩)
+    (fun a a' b ↦ Subtype.ext (LinearMap.map_add₂ _ a.1 a'.1 b.1))
+    (fun r a b ↦ Subtype.ext (LinearMap.map_smul₂ _ r a.1 b.1))
+    (fun a b b' ↦ Subtype.ext (map_add _ b.1 b'.1))
+    (fun r a b ↦ Subtype.ext (LinearMap.map_smul _ r b.1))
 
 /-- The underlying resolution element of the cup-one product of homogeneous cochains is the
 cup-one product of the underlying elements. -/
-@[simp]
+-- Not a `simp` lemma: as for `coe_cupCochain`, `simp` rewrites the implicit carrier
+-- `(TopRep.resolution' Z).X 1` on the left-hand side through
+-- `CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the statement is not in `simp`-normal
+-- form; use it with `rw`.
 theorem coe_cupOneCochain (a : (TopRep.homogeneousCochains X).X 1)
     (b : (TopRep.homogeneousCochains Y).X 1) :
     Subtype.val (P.cupOneCochain a b) = P.cupOne a.1 b.1 := by
-  rw [cupOneCochain]
+  rw [cupOneCochain, LinearMap.mk₂_apply]
+
+/-- The cup-one product of homogeneous one-cochains, evaluated:
+`(a ∪₁ b) g₀ g₁ = μ (a g₀ g₁) (b g₀ g₁)`. -/
+theorem cupOneCochain_apply (a : (TopRep.homogeneousCochains X).X 1)
+    (b : (TopRep.homogeneousCochains Y).X 1) (g₀ g₁ : G) :
+    ((P.cupOneCochain a b).val : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a.val g₀ g₁) (b.val g₀ g₁) := by
+  rw [coe_cupOneCochain, cupOne_apply]
 
 /-! ### The cup product of two one-cochains, evaluated -/
 
@@ -152,6 +192,14 @@ theorem resolutionCupPairing_one_one_apply (a : (TopRep.resolution'X X 1).V)
   change (P.pointwise 1 1 rfl (a g₀ g₁, b g₁) : C(G, Z.V)) g₂ = _
   rw [pointwise_succ_apply, pointwise_zero_apply]
 
+/-- The cup product of two homogeneous one-cochains, evaluated:
+`(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁) (b g₁ g₂)`. -/
+theorem cupCochain_one_one_apply (a : (TopRep.homogeneousCochains X).X 1)
+    (b : (TopRep.homogeneousCochains Y).X 1) (g₀ g₁ g₂ : G) :
+    ((P.cupCochain 1 1 a b).val : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
+      P.bil (a.val g₀ g₁) (b.val g₁ g₂) := by
+  rw [coe_cupCochain, resolutionCupPairing_one_one_apply]
+
 /-! ### The differential of the cup-one product -/
 
 /-- **The differential of the cup-one product of two cocycles** is `-(a ⌣ b) - (b ⌣ᵒᵖ a)`: the
@@ -165,12 +213,14 @@ theorem d_cupOneCochain {a : (TopRep.homogeneousCochains X).X 1}
       -P.cupCochain 1 1 a b - P.flip.cupCochain 1 1 b a := by
   apply Subtype.ext
   ext g₀ g₁ g₂
-  rw [homogeneousCochains.d_one_apply, coe_cupOneCochain, cupOne_apply, cupOne_apply,
-    cupOne_apply, Submodule.coe_sub, Submodule.coe_neg, ContinuousMap.sub_apply,
+  -- evaluate both sides at `(g₀, g₁, g₂)`
+  rw [homogeneousCochains.d_one_apply, cupOneCochain_apply, cupOneCochain_apply,
+    cupOneCochain_apply, Submodule.coe_sub, Submodule.coe_neg, ContinuousMap.sub_apply,
     ContinuousMap.sub_apply, ContinuousMap.sub_apply, ContinuousMap.neg_apply,
-    ContinuousMap.neg_apply, ContinuousMap.neg_apply, coe_cupCochain, coe_cupCochain,
-    resolutionCupPairing_one_one_apply, resolutionCupPairing_one_one_apply, flip_bil,
-    homogeneousCochains.apply_eq_add_of_d_eq_zero ha g₀ g₁ g₂,
+    ContinuousMap.neg_apply, ContinuousMap.neg_apply, cupCochain_one_one_apply,
+    cupCochain_one_one_apply, flip_bil]
+  -- expand `μ (a g₀ g₂) (b g₀ g₂)` along the two cocycle identities
+  rw [homogeneousCochains.apply_eq_add_of_d_eq_zero ha g₀ g₁ g₂,
     homogeneousCochains.apply_eq_add_of_d_eq_zero hb g₀ g₁ g₂]
   simp only [map_add, LinearMap.add_apply]
   abel

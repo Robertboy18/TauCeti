@@ -9,28 +9,30 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Graded
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp
 
 /-!
-# The cup square on `H¹(G, 𝔽_p)`
+# The cup square on `H¹(G, ZMod p)`
 
 For a topological group `G` and a natural number `p`, `TauCeti.trivialFp p G` is the trivial
 representation of `G` on `ZMod p`, and `TauCeti.cohomFp p G n` is its continuous cohomology
-`Hⁿ(G, 𝔽_p)`. Multiplication in `ZMod p` is `ZMod p`-bilinear, jointly continuous because the
+`Hⁿ(G, ZMod p)`. Multiplication in `ZMod p` is `ZMod p`-bilinear, jointly continuous because the
 coefficients are discrete, and equivariant because the action is trivial, so it is a coefficient
 pairing `TauCeti.fpPairing p G` of `trivialFp p G` with itself. Its cup product in bidegree
 `(1, 1)` is the **cup square**
 
 ```text
-cupFp p G : H¹(G, 𝔽_p) →ₗ[𝔽_p] H¹(G, 𝔽_p) →ₗ[𝔽_p] H²(G, 𝔽_p),
+cupFp p G : H¹(G, ZMod p) →ₗ[ZMod p] H¹(G, ZMod p) →ₗ[ZMod p] H²(G, ZMod p).
 ```
 
-the pairing whose nondegeneracy defines Demushkin groups. Because multiplication is commutative the
-opposite pairing of `fpPairing p G` is itself, and graded commutativity of the cup product in
-bidegree `(1, 1)` reads `cupFp p G a b = - cupFp p G b a` (`TauCeti.cupFp_gradedComm`).
+When `p` is prime, `ZMod p` is the field `𝔽_p` and this is the cup square
+`H¹(G, 𝔽_p) × H¹(G, 𝔽_p) → H²(G, 𝔽_p)` whose nondegeneracy defines Demushkin groups. Because
+multiplication is commutative the opposite pairing of `fpPairing p G` is itself, and graded
+commutativity of the cup product in bidegree `(1, 1)` reads `cupFp p G a b = - cupFp p G b a`
+(`TauCeti.cupFp_gradedComm`).
 
 ## Main definitions
 
 * `TauCeti.fpPairing`: multiplication in `ZMod p` as a coefficient pairing of `trivialFp p G`
   with itself.
-* `TauCeti.cupFp`: the cup square `H¹(G, 𝔽_p) × H¹(G, 𝔽_p) → H²(G, 𝔽_p)`.
+* `TauCeti.cupFp`: the cup square `H¹(G, ZMod p) × H¹(G, ZMod p) → H²(G, ZMod p)`.
 
 ## Main results
 
@@ -61,7 +63,7 @@ section Monoid
 
 variable (p : ℕ) (G : Type u) [Monoid G]
 
-/-- **The multiplication pairing on `𝔽_p`**: multiplication in `ZMod p`, read on the carrier of
+/-- **The multiplication pairing on `ZMod p`**: multiplication in `ZMod p`, read on the carrier of
 `trivialFp p G` through the coordinate `trivialFpEquiv p G`, as a coefficient pairing of the trivial
 representation with itself. It is `ZMod p`-bilinear, jointly continuous because the coefficients are
 discrete, and equivariant because the action is trivial. -/
@@ -102,14 +104,13 @@ section Group
 
 variable (p : ℕ) (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
-/-- **The cup square on `H¹(G, 𝔽_p)`**: the cup product `H¹(G, 𝔽_p) × H¹(G, 𝔽_p) → H²(G, 𝔽_p)`
-at the multiplication pairing, as a `ZMod p`-bilinear map. On the classes of two cocycles it is the
-class of their cup product (`cupFp_π`). -/
+/-- **The cup square on `H¹(G, ZMod p)`**: the cup product
+`H¹(G, ZMod p) × H¹(G, ZMod p) → H²(G, ZMod p)` at the multiplication pairing, as a
+`ZMod p`-bilinear map. On the classes of two cocycles it is the class of their cup product
+(`cupFp_π`). When `p` is prime this is the cup square on `H¹(G, 𝔽_p)` of the theory of Demushkin
+groups. -/
 noncomputable def cupFp : cohomFp p G 1 →ₗ[ZMod p] cohomFp p G 1 →ₗ[ZMod p] cohomFp p G 2 :=
   (fpPairing p G).cup 1 1
-
-/-- The cup square is the cup product at the multiplication pairing in bidegree `(1, 1)`. -/
-theorem cupFp_def : cupFp p G = (fpPairing p G).cup 1 1 := (rfl)
 
 /-- **The cup square on classes**: the cup square of the classes of two cocycles is the class of
 their cup product. -/
