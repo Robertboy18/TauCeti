@@ -39,8 +39,17 @@ The same homotopy is already formalized on the explicit inhomogeneous model of
 `(a ⌣_μ b) + (b ⌣_{μᵒᵖ} a) = d¹ (g ↦ -μ (a g) (b g))` for inhomogeneous `1`-cocycles, and
 `TauCeti.ContCohomology.explicitCup11_eq_neg_flip` is its descent to the explicit
 `H¹ × H¹ → H²`. This file is the homogeneous-resolution counterpart of those two declarations,
-with the same pointwise primitive (read on homogeneous cochains) and the same sign convention,
-stated on Mathlib's `continuousCohomology` so that it applies to `TauCeti.TopPairing.cup`.
+stated on Mathlib's `continuousCohomology` so that it applies to `TauCeti.TopPairing.cup`. The
+two primitives differ by a sign: the inhomogeneous one is the negated pointwise pairing
+`g ↦ -μ (a g) (b g)`, whereas `cupOneCochain a b` is the unsigned pointwise pairing
+`(g₀, g₁) ↦ μ (a g₀ g₁) (b g₀ g₁)` and the sign is carried by its differential,
+`d (cupOneCochain a b) = -(a ⌣ b) - (b ⌣ᵒᵖ a)`. Equivalently
+`(a ⌣ b) + (b ⌣ᵒᵖ a) = d (-cupOneCochain a b)`, the homogeneous form of the inhomogeneous
+identity. The two differentials also follow different conventions (the inhomogeneous `d¹` of
+`Cup.Product` against `TopRep.homogeneousCochains.d_one_apply`,
+`(d a) g₀ g₁ g₂ = a g₁ g₂ - a g₀ g₂ + a g₀ g₁`), but the class-level statement only needs that
+the sum `(a ⌣ b) + (b ⌣ᵒᵖ a)` is a coboundary, which neither the sign of the primitive nor the
+convention affects; both descents therefore read `cup a b = - cup b a`.
 
 ## Main definitions
 
