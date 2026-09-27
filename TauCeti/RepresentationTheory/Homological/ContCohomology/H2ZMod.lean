@@ -27,27 +27,9 @@ and scalar multiplication by a natural number is the iterated sum (`Nat.cast_smu
 ## Main results
 
 * `TauCeti.ContCohomology.instModuleZModH2`: `H²(G, M)` is a `ZMod n`-module whenever `M` is.
-* `TauCeti.trivialZModAction`: the trivial action of a monoid on `ZMod n`, the coefficient action
-  a statement about the cohomology of trivial `ZMod n`-coefficients installs when no action appears
-  in its conclusion.
 -/
 
 public section
-
-namespace TauCeti
-
-/-- The trivial action of a monoid `F` on `ZMod n`, with `g • m = m` by definition: its triviality
-hypothesis is `fun _ _ ↦ rfl` and the continuity of the action is `⟨continuous_snd⟩`. A statement
-about the cohomology of trivial `ZMod n`-coefficients whose conclusion mentions no action of `F`
-installs it locally, by `let := trivialZModAction n F`. -/
-abbrev trivialZModAction (n : ℕ) (F : Type*) [Monoid F] : DistribMulAction F (ZMod n) where
-  smul _ m := m
-  one_smul _ := rfl
-  mul_smul _ _ _ := rfl
-  smul_zero _ := rfl
-  smul_add _ _ _ := rfl
-
-end TauCeti
 
 namespace TauCeti.ContCohomology
 

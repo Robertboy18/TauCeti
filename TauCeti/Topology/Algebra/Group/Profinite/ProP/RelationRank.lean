@@ -13,6 +13,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.MinimalPresentation
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.NormalGeneration
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Transgression
 import TauCeti.Data.Set.Finite
+import TauCeti.Data.ZMod.TrivialAction
 import TauCeti.Topology.Algebra.Group.Profinite.ProP.EulerCharacteristic
 
 /-!

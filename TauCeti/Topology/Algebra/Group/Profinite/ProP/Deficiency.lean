@@ -88,6 +88,7 @@ theorem deficiency_def (hfg : IsTopologicallyFinitelyGenerated G)
   (rfl)
 
 /-- **`d(G) = def(G) + r(G)`**: the generator rank is the deficiency plus the relation rank. -/
+@[simp]
 theorem deficiency_add_finrank_cohomFp_two (hfg : IsTopologicallyFinitelyGenerated G)
     (hfin : Module.Finite (ZMod p) (cohomFp p G 2)) :
     deficiency p G hfg hfin + Module.finrank (ZMod p) (cohomFp p G 2) =

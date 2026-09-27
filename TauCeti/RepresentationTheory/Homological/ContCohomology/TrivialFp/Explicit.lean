@@ -10,6 +10,7 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.ExplicitFu
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.H2ZMod
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp
 public import TauCeti.Topology.Algebra.ContinuousZModDual
+import TauCeti.Data.ZMod.TrivialAction
 
 /-!
 # The explicit models of `H¹(G, 𝔽_p)` and `H²(G, 𝔽_p)`
