@@ -876,13 +876,15 @@ theorem transgression_surjective_iff (hN : IsClosed (N : Set G)) :
     Function.Surjective (transgression G M N hN) ↔ explicitInfl2 G M N = 0 := by
   rw [← AddMonoidHom.range_eq_top, fiveTerm_exact_H2Q, AddMonoidHom.ker_eq_top_iff]
 
-/-- **The order count of the five-term sequence.** Exactness at every node of
+/-- **The order count of the five-term sequence.** The sequence
 
 ```text
 0 → H¹(G ⧸ N, M ^ N) → H¹(G, M) → H¹(N, M)^{G ⧸ N} → H²(G ⧸ N, M ^ N) → H²(G, M)
 ```
 
-gives the multiplicative identity `|H¹(G, M)| · |H²(G ⧸ N, M ^ N)| =
+is exact through `H²(G ⧸ N, M ^ N)`; its last map, inflation into `H²(G, M)`, need not be
+surjective, so the count ends in the image of inflation rather than in `H²(G, M)`: the
+multiplicative identity `|H¹(G, M)| · |H²(G ⧸ N, M ^ N)| =
 |H¹(G ⧸ N, M ^ N)| · |H¹(N, M)^{G ⧸ N}| · |im (H²(G ⧸ N, M ^ N) → H²(G, M))|` of natural-number
 cardinalities, with `Nat.card` of an infinite group read as `0`. It is the six-term alternating
 identity `AddMonoidHom.card_mul_card_mul_card_of_exact` for the sequence ending in the range of
