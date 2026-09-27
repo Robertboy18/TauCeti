@@ -153,9 +153,7 @@ theorem IsCoalgHom.comp_eq_comp_of_letter_comp_eq
             simp only [map_add] at hu hv ⊢
             rw [add_add_add_comm, hu, hv, add_add_add_comm]
   refine LinearMap.ext fun z ↦ ?_
-  have hz : z ∈ ⨆ n : ℕ, filtration R M n := by rw [iSup_filtration_eq_top]; trivial
-  obtain ⟨n, hn⟩ :=
-    (Submodule.mem_iSup_of_directed _ (filtration_monotone R M).directed_le).1 hz
+  obtain ⟨n, hn⟩ := exists_mem_filtration R M z
   exact key n z hn
 
 /-- A degree-zero coalgebra morphism intertwines a `q`-twisted graded coderivation of `Tᶜ(M)`

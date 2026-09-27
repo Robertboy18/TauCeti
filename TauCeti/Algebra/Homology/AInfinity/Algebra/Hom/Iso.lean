@@ -32,9 +32,13 @@ models; that existence is not proved here.
 
 ## Main results
 
-* `TauCeti.AInfinityHom.inverse_comp` and `TauCeti.AInfinityHom.comp_inverse`: the inverse is a
-  two-sided inverse, and `TauCeti.AInfinityHom.linearPart_inverse`: its linear part is the inverse
-  linear equivalence.
+* `TauCeti.AInfinityHom.inverse_comp_cancel` and `TauCeti.AInfinityHom.comp_inverse_cancel`: the
+  inverse is a two-sided inverse, and `TauCeti.AInfinityHom.linearPart_inverse`: its linear part is
+  the inverse linear equivalence.
+* `TauCeti.AInfinityHom.eq_inverse_of_comp_eq_id_left` and
+  `TauCeti.AInfinityHom.eq_inverse_of_comp_eq_id_right`: any one-sided inverse is the inverse; hence
+  the normal forms `TauCeti.AInfinityHom.inverse_id`, `TauCeti.AInfinityHom.inverse_inverse` and
+  `TauCeti.AInfinityHom.inverse_comp`.
 * `TauCeti.AInfinityHom.isIso_iff_linearPart_bijective`: an `A∞` morphism is an isomorphism exactly
   when its linear part is bijective.
 * `TauCeti.AInfinityHom.IsIso.isQuasiIso`: an isomorphism is a quasi-isomorphism.
@@ -119,7 +123,7 @@ theorem barMap_barEquiv_symm (f : AInfinityHom AA BB) (hf : Function.Bijective f
 
 /-- The inverse is a left inverse. -/
 @[simp]
-theorem inverse_comp (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
+theorem inverse_comp_cancel (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
     (f.inverse hf).comp f = AInfinityHom.id AA :=
   barMap_injective <| by
     rw [barMap_comp, barMap_id, barMap_inverse]
@@ -127,7 +131,7 @@ theorem inverse_comp (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearP
 
 /-- The inverse is a right inverse. -/
 @[simp]
-theorem comp_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
+theorem comp_inverse_cancel (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
     f.comp (f.inverse hf) = AInfinityHom.id BB :=
   barMap_injective <| by
     rw [barMap_comp, barMap_id, barMap_inverse]
@@ -137,7 +141,7 @@ theorem comp_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearP
 @[simp]
 theorem linearPart_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
     (f.inverse hf).linearPart = (LinearEquiv.ofBijective f.linearPart hf).symm.toLinearMap := by
-  have h := congrArg linearPart (f.inverse_comp hf)
+  have h := congrArg linearPart (f.inverse_comp_cancel hf)
   rw [linearPart_comp, linearPart_id] at h
   refine LinearMap.ext fun b ↦ ?_
   obtain ⟨a, rfl⟩ := hf.2 b
@@ -149,6 +153,43 @@ theorem linearPart_inverse_bijective (f : AInfinityHom AA BB)
     (hf : Function.Bijective f.linearPart) : Function.Bijective (f.inverse hf).linearPart := by
   rw [linearPart_inverse]
   exact (LinearEquiv.ofBijective f.linearPart hf).symm.bijective
+
+/-! ### Uniqueness and normal forms of the inverse -/
+
+/-- A left inverse of an `A∞` morphism with bijective linear part is its inverse. -/
+theorem eq_inverse_of_comp_eq_id_left {f : AInfinityHom AA BB} {g : AInfinityHom BB AA}
+    (hf : Function.Bijective f.linearPart) (h : g.comp f = AInfinityHom.id AA) :
+    g = f.inverse hf := by
+  rw [← comp_id g, ← comp_inverse_cancel f hf, ← comp_assoc, h, id_comp]
+
+/-- A right inverse of an `A∞` morphism with bijective linear part is its inverse. -/
+theorem eq_inverse_of_comp_eq_id_right {f : AInfinityHom AA BB} {g : AInfinityHom BB AA}
+    (hf : Function.Bijective f.linearPart) (h : f.comp g = AInfinityHom.id BB) :
+    g = f.inverse hf := by
+  rw [← id_comp g, ← inverse_comp_cancel f hf, comp_assoc, h, comp_id]
+
+/-- The inverse of the identity is the identity. -/
+@[simp]
+theorem inverse_id (AA : AInfinityAlgebra R A)
+    (h : Function.Bijective (AInfinityHom.id AA).linearPart) :
+    (AInfinityHom.id AA).inverse h = AInfinityHom.id AA :=
+  (eq_inverse_of_comp_eq_id_left h (comp_id _)).symm
+
+/-- The inverse of the inverse is the original morphism. -/
+@[simp]
+theorem inverse_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart)
+    (h : Function.Bijective (f.inverse hf).linearPart) : (f.inverse hf).inverse h = f :=
+  (eq_inverse_of_comp_eq_id_left h (comp_inverse_cancel f hf)).symm
+
+/-- The inverse of a composite is the composite of the inverses in the reverse order. -/
+@[simp]
+theorem inverse_comp (g : AInfinityHom BB CC) (f : AInfinityHom AA BB)
+    (hg : Function.Bijective g.linearPart) (hf : Function.Bijective f.linearPart)
+    (h : Function.Bijective (g.comp f).linearPart) :
+    (g.comp f).inverse h = (f.inverse hf).comp (g.inverse hg) :=
+  (eq_inverse_of_comp_eq_id_left h (by
+    rw [comp_assoc, ← comp_assoc (g.inverse hg), inverse_comp_cancel, id_comp,
+      inverse_comp_cancel])).symm
 
 /-! ### Isomorphisms -/
 
@@ -173,12 +214,12 @@ theorem IsIso.comp {g : AInfinityHom BB CC} {f : AInfinityHom AA BB} (hg : g.IsI
 /-- An `A∞` morphism with bijective linear part is an isomorphism. -/
 theorem isIso_of_linearPart_bijective (f : AInfinityHom AA BB)
     (hf : Function.Bijective f.linearPart) : f.IsIso :=
-  ⟨f.inverse hf, f.inverse_comp hf, f.comp_inverse hf⟩
+  ⟨f.inverse hf, f.inverse_comp_cancel hf, f.comp_inverse_cancel hf⟩
 
 /-- The inverse of an `A∞` morphism with bijective linear part is an isomorphism. -/
 theorem isIso_inverse (f : AInfinityHom AA BB) (hf : Function.Bijective f.linearPart) :
     (f.inverse hf).IsIso :=
-  ⟨f, f.comp_inverse hf, f.inverse_comp hf⟩
+  ⟨f, f.comp_inverse_cancel hf, f.inverse_comp_cancel hf⟩
 
 /-- The linear part of an isomorphism is bijective. -/
 theorem IsIso.linearPart_bijective {f : AInfinityHom AA BB} (h : f.IsIso) :

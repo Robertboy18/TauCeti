@@ -263,9 +263,7 @@ theorem IsCoalgHom.eq_of_letter_comp_eq
             rw [ih _ u.2, ih _ v.2]
         | add u v hu hv => simp only [map_add, hu, hv]
   refine LinearMap.ext fun z ↦ ?_
-  have hz : z ∈ ⨆ n : ℕ, filtration R M n := by rw [iSup_filtration_eq_top]; trivial
-  obtain ⟨n, hn⟩ :=
-    (Submodule.mem_iSup_of_directed _ (filtration_monotone R M).directed_le).1 hz
+  obtain ⟨n, hn⟩ := exists_mem_filtration R M z
   exact key n z hn
 
 /-- A coalgebra morphism is the Taylor expansion of its own Taylor components. -/
