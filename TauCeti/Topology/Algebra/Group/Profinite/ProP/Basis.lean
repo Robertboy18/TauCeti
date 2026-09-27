@@ -22,11 +22,11 @@ of the Frattini quotient lifts to topological generators, even when the quotient
 
 Dually, when the group is topologically finitely generated, a family whose classes in the Frattini
 quotient are linearly independent is separated by continuous characters: for any prescribed values
-in a discrete `𝔽_p`-vector space there is a continuous homomorphism taking them
-(`TauCeti.IsTopologicallyFinitelyGenerated.exists_continuousMonoidHom_apply_eq`). Topological
-finite generation makes the Frattini quotient discrete, so that every linear functional on it is
-continuous; without it the statement fails for infinite families, whose values along a converging
-family would have to converge.
+in an `𝔽_p`-module `A` carrying an arbitrary topology, there is a continuous homomorphism into `A`
+taking them (`TauCeti.IsTopologicallyFinitelyGenerated.exists_continuousMonoidHom_apply_eq`).
+Topological finite generation cannot be dropped: for an infinite linearly independent family the
+statement fails, since a continuous homomorphism into a discrete `A` is eventually trivial along a
+family converging to the identity.
 
 ## References
 
@@ -105,10 +105,9 @@ theorem exists_lift_basis_frattiniQuotient_topologicallyGenerates (hG : IsProP p
 omit [TotallyDisconnectedSpace G] in
 /-- **Continuous `𝔽_p`-characters with prescribed values.** In a topologically finitely generated
 compact group, a family `g` whose classes in the pro-`p` Frattini quotient are linearly independent
-over `𝔽_p` takes any prescribed values `a k` under some continuous homomorphism into a topological
-`𝔽_p`-vector space `A`: the values define a linear functional on the span of the classes, which
-extends to the Frattini quotient, and the Frattini quotient is discrete, so no hypothesis on the
-topology of `A` is needed. -/
+over `𝔽_p` takes any prescribed values `a k` under some continuous homomorphism into `A`, written
+multiplicatively. Here `A` is an `𝔽_p`-module with an arbitrary topology: no compatibility between
+its topology and its module structure is assumed. -/
 theorem IsTopologicallyFinitelyGenerated.exists_continuousMonoidHom_apply_eq
     (hfg : IsTopologicallyFinitelyGenerated G) {ι : Type*} {g : ι → G}
     (hg : LinearIndependent (ZMod p) fun k ↦

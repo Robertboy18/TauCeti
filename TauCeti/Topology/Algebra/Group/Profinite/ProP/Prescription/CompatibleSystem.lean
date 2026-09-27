@@ -22,17 +22,18 @@ a compatible system of continuous crossed homomorphisms `fᵢ : G → I(χ)/pⁱ
 Such a compatible system is the same thing as a continuous crossed homomorphism `F : G → ℤ_p`,
 `F(xy) = χ(x) F(y) + F(x)`, with values `F(gⱼ) = cⱼ`, since `ℤ_p` is the inverse limit of the
 `ℤ/pⁱ`; both forms are proved, and the second is the one downstream applications read: it converts
-Kummer-compatible finite-level data into prescribed values of the canonical character.
+Kummer-compatible finite-level data into prescribed values `F(gⱼ)` of a continuous crossed
+homomorphism `F : G → ℤ_p` for `χ`.
 
-Two facts about the bottom level `I(χ)/p` drive the proofs. A pro-`p` group acts trivially on it,
-because a continuous character of a pro-`p` group takes values in the principal units `1 + pℤ_p`
-(`TauCeti.IsProP.charScalar_one_eq_one`); hence the continuous `1`-cocycles with values in `I(χ)/p`
-are the continuous homomorphisms `G → 𝔽_p`, which are determined by their values on a topological
-generating set and take any prescribed values on a family that is linearly independent in the
+The bottom level `I(χ)/p` is special: a pro-`p` group acts trivially on it, because a continuous
+character of a pro-`p` group takes values in the principal units `1 + pℤ_p`
+(`TauCeti.IsProP.charScalar_one_eq_one`), so the continuous `1`-cocycles with values in `I(χ)/p` are
+the continuous homomorphisms `G → 𝔽_p`. These are determined by their values on a topological
+generating set, and take any prescribed values on a family that is linearly independent in the
 Frattini quotient (`TauCeti.IsTopologicallyFinitelyGenerated.exists_continuousMonoidHom_apply_eq`).
-Going up one level, the prescription property lifts a cocycle from `I(χ)/pⁱ` to `I(χ)/pⁱ⁺¹` up to a
-coboundary, which is removed by lifting its potential; the values on the generators are then
-corrected by a homomorphism into `pⁱ I(χ)/pⁱ⁺¹ ≅ 𝔽_p`, on which `G` acts trivially.
+This is why the hypotheses of the two directions differ: the construction of a compatible system
+with prescribed values needs linear independence of the Frattini classes of `g`, while the converse
+needs only that `g` generates `G` topologically.
 
 ## Main results
 
@@ -80,9 +81,9 @@ variable {χ : G →ₜ* ℤ_[p]ˣ} (hχ : HasPrescriptionProperty χ)
 include hχ
 
 /-- **Cocycles lift exactly under the prescription property.** A continuous `1`-cocycle
-`f : G → I(χ)/pʲ` is the pointwise reduction of a continuous `1`-cocycle `G → I(χ)/pⁿ`, `j ≤ n`, not
-only up to a coboundary: the coboundary by which a lift of the class of `f` misses `f` is removed by
-lifting its potential. -/
+`f : G → I(χ)/pʲ` is the pointwise reduction of a continuous `1`-cocycle `G → I(χ)/pⁿ`, `j ≤ n`,
+exactly and not only up to a coboundary, which is all that the surjectivity on `H¹` defining the
+prescription property provides. -/
 theorem HasPrescriptionProperty.exists_forall_reduce_eq {j n : ℕ} (h : j ≤ n)
     (f : Z1 G (ZModTwist χ j)) :
     ∃ f' : Z1 G (ZModTwist χ n),
@@ -216,8 +217,7 @@ include hg
 /-- **Compatible systems with prescribed values give the prescription property** (Labute,
 Prop. 6, (iii) ⇒ (i)). If `g` generates `G` topologically and every `c : ι → ℤ_p` is the tuple of
 values on `g` of a compatible system of continuous `1`-cocycles `fᵢ : G → I(χ)/pⁱ`, then `χ` has the
-prescription property: a continuous `1`-cocycle with values in `I(χ)/p` is determined by its values
-on `g`, so it is the bottom member of such a system, and the members above reduce onto it. -/
+prescription property. No pro-`p` or finite-generation hypothesis on `G` is needed. -/
 theorem hasPrescriptionProperty_of_forall_exists_forall_reduce_eq_and_val_eq
     (h : ∀ c : ι → ℤ_[p], ∃ f : ∀ i : ℕ, Z1 G (ZModTwist χ i),
       (∀ ⦃i j : ℕ⦄ (h : j ≤ i) (x : G),
@@ -295,9 +295,15 @@ theorem exists_continuous_forall_mul_eq_and_forall_toZModPow_eq_val
     have h := RingHom.congr_fun (PadicInt.toZModPow_fromInverseLimit p i) (r x)
     rwa [RingHom.comp_apply, PadicInt.inverseLimit.proj_apply] at h
   refine ⟨fun x ↦ PadicInt.fromInverseLimit p (r x), ?_, fun x y ↦ ?_, hr⟩
-  · refine (PadicInt.continuous_fromInverseLimit p).comp (Continuous.subtype_mk ?_ _)
-    exact continuous_pi fun i ↦
-      continuous_of_discreteTopology.comp (mem_Z1_iff.1 (f i).2).1
+  · -- `fromInverseLimit` is the inverse of the homeomorphism `inverseLimitHomeomorph`, whose
+    -- underlying equivalence is `inverseLimitRingEquiv`
+    have hcont : Continuous (PadicInt.fromInverseLimit p) :=
+      (PadicInt.inverseLimitHomeomorph p).symm.continuous.congr fun y ↦
+        (congrArg (fun e : ℤ_[p] ≃ PadicInt.inverseLimit p ↦ e.symm y)
+          (PadicInt.inverseLimitHomeomorph_toEquiv p)).trans
+          (PadicInt.inverseLimitRingEquiv_symm_apply p y)
+    exact hcont.comp ((continuous_pi fun i ↦
+      continuous_of_discreteTopology.comp (mem_Z1_iff.1 (f i).2).1).subtype_mk _)
   · refine PadicInt.ext_of_toZModPow.1 fun i ↦ ?_
     have h := congrArg ZModTwist.val ((mem_Z1_iff.1 (f i).2).2 x y)
     rw [ZModTwist.val_add, ZModTwist.val_smul, charScalar_apply] at h
@@ -342,8 +348,8 @@ theorem HasPrescriptionProperty.exists_continuous_forall_mul_eq_and_apply_eq
 omit [CompactSpace G] in
 /-- **`p`-adic crossed homomorphisms with prescribed values give the prescription property.** If `g`
 generates `G` topologically and every `c : ι → ℤ_p` is the tuple of values on `g` of a continuous
-`F : G → ℤ_p` with `F (x * y) = χ x * F y + F x`, then `χ` has the prescription property: the
-reductions of `F` modulo the `pⁱ` form a compatible system of continuous `1`-cocycles. -/
+`F : G → ℤ_p` with `F (x * y) = χ x * F y + F x`, then `χ` has the prescription property. No pro-`p`
+or finite-generation hypothesis on `G` is needed. -/
 theorem hasPrescriptionProperty_of_forall_exists_continuous_forall_mul_eq_and_apply_eq
     (hg : (Subgroup.closure (Set.range g)).topologicalClosure = ⊤)
     (h : ∀ c : ι → ℤ_[p], ∃ F : G → ℤ_[p], Continuous F ∧

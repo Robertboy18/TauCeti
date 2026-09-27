@@ -206,13 +206,6 @@ theorem continuous_toInverseLimit : Continuous (toInverseLimit p) := by
 theorem continuous_inverseLimitRingEquiv : Continuous (inverseLimitRingEquiv p) :=
   (continuous_toInverseLimit p).congr fun x ↦ (inverseLimitRingEquiv_apply p x).symm
 
-/-- Assembling a compatible residue family into a `p`-adic integer is continuous: the inverse
-of a continuous bijection from a compact space to a Hausdorff space is continuous. -/
-theorem continuous_fromInverseLimit : Continuous (fromInverseLimit p) :=
-  ((continuous_inverseLimitRingEquiv p).continuous_symm_of_equiv_compact_to_t2
-    (f := (inverseLimitRingEquiv p).toEquiv)).congr fun x ↦
-      (inverseLimitRingEquiv_symm_apply p x).symm
-
 /-- The ring equivalence from `ℤ_[p]` to its inverse-limit presentation is a homeomorphism. -/
 noncomputable def inverseLimitHomeomorph : ℤ_[p] ≃ₜ inverseLimit p :=
   (continuous_inverseLimitRingEquiv p).homeoOfEquivCompactToT2
