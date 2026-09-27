@@ -313,7 +313,7 @@ theorem IsNormalDomain.riemannianLog_eq_smul_of_pathELength_eq (h : IsNormalDoma
     intro u hu
     have h1 := h.enorm_riemannianLog_eq_pathELength hγ hγU hγ0 hlen' hu
     rw [← pathELength_congr (hEq.mono (Icc_subset_Icc_right hu.2)),
-      pathELength_eq_ofReal_integral_norm_curveVelocityWithin
+      ContMDiffOn.pathELength_eq_ofReal_integral_norm_curveVelocityWithin
         (contMDiffOn_riemannianExp_comp h hc hdom)
         (uniqueMDiffOn_iff_uniqueDiffOn.2 (uniqueDiffOn_Icc zero_lt_one)) hu.1
         (Icc_subset_Icc_right hu.2), ← ofReal_norm] at h1

@@ -32,8 +32,8 @@ unfolding its construction.
 
 * `ContMDiffOn.continuousOn_norm_curveVelocityWithin`: the speed of a `C¹` curve is continuous on
   a parameter set with unique derivatives.
-* `TauCeti.Manifold.pathELength_eq_ofReal_integral_norm_curveVelocityWithin`: the Riemannian length
-  of a `C¹` curve over a compact interval is the integral of its speed.
+* `ContMDiffOn.pathELength_eq_ofReal_integral_norm_curveVelocityWithin`: the Riemannian length of a
+  `C¹` curve over a compact interval is the integral of its speed.
 * `TauCeti.Manifold.exists_unit_speed_reparametrization`: a regular `C¹` curve has a `C¹`,
   unit-speed reparametrization on the interval from zero to its length.
 
@@ -77,7 +77,8 @@ theorem _root_.ContMDiffOn.continuousOn_norm_curveVelocityWithin {γ : ℝ → M
 
 /-- The Riemannian length of a `C¹` curve over a compact interval inside its parameter set is the
 integral of its speed. -/
-theorem pathELength_eq_ofReal_integral_norm_curveVelocityWithin {γ : ℝ → M} {s : Set ℝ}
+theorem _root_.ContMDiffOn.pathELength_eq_ofReal_integral_norm_curveVelocityWithin
+    {γ : ℝ → M} {s : Set ℝ}
     (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s) (hs : UniqueMDiffOn 𝓘(ℝ, ℝ) s)
     {a b : ℝ} (hab : a ≤ b) (hsub : Icc a b ⊆ s) :
     Manifold.pathELength I γ a b =
