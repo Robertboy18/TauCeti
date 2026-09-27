@@ -93,7 +93,9 @@ noncomputable def cocycle0 (m : H0 G M) : cocycles (ofDiscreteModule ℤ G M) 0 
       rw [h, map_zero])
 
 /-- The underlying homogeneous cochain of `cocycle0 m` is `g ↦ g • m`. -/
-@[simp]
+-- Not a `simp` lemma: `simp` rewrites the implicit carrier `(homogeneousCochains _).X 0` on the
+-- left-hand side through `CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the statement
+-- is not in `simp`-normal form; use it with `rw`.
 theorem iCycles_cocycle0 (m : H0 G M) :
     (homogeneousCochains (ofDiscreteModule ℤ G M)).iCycles 0 (cocycle0 G M m) =
       cochainEquiv0 G M m :=
