@@ -154,10 +154,10 @@ a profinite group whose explicit `H²(G, M)` vanishes for every finite discrete 
 `G`-module `M`, and let `U` be an open subgroup. Then `H²(U, A)` vanishes for every finite discrete
 `p`-primary `U`-module `A`, by Shapiro's lemma `H²(U, A) ≅ H²(G, Coind_U^G A)`. -/
 theorem subsingleton_H2_of_isOpen (hU : IsOpen (U : Set G))
-    (h : ∀ (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+    (h : ∀ (M : Type (max u v)) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
       [DistribMulAction G M] [ContinuousSMul G M] [Finite M], IsPPrimaryTorsion p M →
       Subsingleton (H2 G M))
-    (A : Type u) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
+    (A : Type v) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
     [DistribMulAction U A] [ContinuousSMul U A] [Finite A] (hA : IsPPrimaryTorsion p A) :
     Subsingleton (H2 U A) := by
   have : Finite (G ⧸ U) := Subgroup.quotient_finite_of_isOpen U hU

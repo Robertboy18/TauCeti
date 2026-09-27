@@ -57,6 +57,7 @@ half of the pro-`p` Nielsen–Schreier theorem for open subgroups of a free pro-
   subgroup, in `ℕ` and in `ℤ`.
 * `TauCeti.CohomologicalDimensionLE.subsingleton_H2`,
   `TauCeti.CohomologicalDimensionLE.natCard_H1_mul_natCard`,
+  `TauCeti.CohomologicalDimensionLE.finite_H1`,
   `TauCeti.CohomologicalDimensionLE.topologicalGeneratorRankNat_add_index`: the same under the
   hypothesis `cd_p G ≤ 1`.
 
@@ -85,8 +86,8 @@ section DegreeOne
 
 /-- **`H¹` with trivial coefficients of order `p` counts generators.** For a topologically finitely
 generated profinite pro-`p` group `G` and a discrete module `A` of order `p` with trivial action,
-`H¹(G, A)` has `p ^ d(G)` elements: it is the group of continuous characters `G → A`, and `A` is
-`𝔽_p`. -/
+`H¹(G, A)` has `p ^ d(G)` elements: it is the group of continuous characters `G → A`, and the
+additive group `A` is isomorphic to `ZMod p`. -/
 theorem natCard_H1_of_natCard_eq (hG : IsProP p G) (hfg : IsTopologicallyFinitelyGenerated G)
     {A : Type v} [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
     [DistribMulAction G A] [ContinuousSMul G A] (hA : Nat.card A = p)
@@ -291,6 +292,15 @@ theorem natCard_H1_mul_natCard (M : Type u) [AddCommGroup M] [TopologicalSpace M
     Nat.card (H1 G M) * Nat.card M =
       Nat.card (H0 G M) * Nat.card M ^ topologicalGeneratorRankNat G hfg :=
   hG.natCard_H1_mul_natCard hfg (fun A _ _ _ _ _ _ hA _ ↦ hcd.subsingleton_H2 A
+    (isPPrimaryTorsion_of_natCard_eq_pow (hA.trans (pow_one p).symm))) M hM
+
+/-- **Finiteness of `H¹` under `cd_p G ≤ 1`.** For a topologically finitely generated profinite
+pro-`p` group `G` with `cd_p G ≤ 1` and a finite discrete `p`-primary `G`-module `M`, `H¹(G, M)`
+is finite. -/
+theorem finite_H1 (M : Type u) [AddCommGroup M] [TopologicalSpace M]
+    [DiscreteTopology M] [DistribMulAction G M] [ContinuousSMul G M] [Finite M]
+    (hM : IsPPrimaryTorsion p M) : Finite (H1 G M) :=
+  hG.finite_H1 hfg (fun A _ _ _ _ _ _ hA _ ↦ hcd.subsingleton_H2 A
     (isPPrimaryTorsion_of_natCard_eq_pow (hA.trans (pow_one p).symm))) M hM
 
 /-- **The two-term Euler formula under `cd_p G ≤ 1`.** For a topologically finitely generated
