@@ -206,15 +206,45 @@ theorem Hom.residueFieldMap_def (x : X) :
     f.residueFieldMap x = IsLocalRing.ResidueField.map (f.stalkMap x).hom := by
   rfl
 
+/-- The residue square: the residue-field map composed with the residue map at the image of `x`
+is the residue map at `x` composed with the stalk map. -/
+theorem Hom.residueFieldMap_comp_residue (x : X) :
+    (f.residueFieldMap x).comp (IsLocalRing.residue _) =
+      (IsLocalRing.residue _).comp (f.stalkMap x).hom :=
+  IsLocalRing.ResidueField.map_comp_residue _
+
+/-- The residue-field map sends the residue class of a stalk element to the residue class of
+its image under the stalk map. -/
+-- Not `@[simp]`: `Functor.mapPresheaf_obj_presheaf` unfolds the stalk in the type of the
+-- residue map, so the left-hand side is not in simp normal form; use `rw`.
+theorem Hom.residueFieldMap_residue (x : X)
+    (a : Y.toRingPresheafedSpace.presheaf.stalk (f.base x)) :
+    f.residueFieldMap x (IsLocalRing.residue _ a) = IsLocalRing.residue _ (f.stalkMap x a) :=
+  IsLocalRing.ResidueField.map_residue _ a
+
+/-- The residue-field maps of the identity are identities. -/
+@[simp]
+theorem residueFieldMap_id (X : PreAdicSpace.{u}) (x : X) :
+    (𝟙 X : X ⟶ X).residueFieldMap x = RingHom.id _ := by
+  simp only [Hom.residueFieldMap_def, stalkMap_id]
+  exact IsLocalRing.ResidueField.map_id
+
+/-- The residue-field maps of a composite are the composites of the residue-field maps. -/
+@[simp]
+theorem residueFieldMap_comp (x : X) :
+    (f ≫ g : X ⟶ Z).residueFieldMap x =
+      (f.residueFieldMap x).comp (g.residueFieldMap (f.base x)) := by
+  simp only [Hom.residueFieldMap_def, stalkMap_comp]
+  exact IsLocalRing.ResidueField.map_comp (g.stalkMap (f.base x)).hom (f.stalkMap x).hom
+
 /-- The residue-field valuation at the image of `x` is the pullback of the residue-field
 valuation at `x` along the induced map on residue fields. -/
 theorem Hom.valuation_eq_comap (x : X) :
     Y.valuation (f.base x) = ValuationSpectrum.comap (f.residueFieldMap x) (X.valuation x) := by
   refine (Y.valuation_eq_of_comap_residue_eq (f.base x) ?_).symm
-  rw [Hom.residueFieldMap_def, ← Function.comp_apply (f := ValuationSpectrum.comap _),
-    ← ValuationSpectrum.comap_comp, IsLocalRing.ResidueField.map_comp_residue,
-    ValuationSpectrum.comap_comp, Function.comp_apply, comap_residue_valuation,
-    f.stalkValuation_eq_comap x]
+  rw [← Function.comp_apply (f := ValuationSpectrum.comap _), ← ValuationSpectrum.comap_comp,
+    Hom.residueFieldMap_comp_residue, ValuationSpectrum.comap_comp, Function.comp_apply,
+    comap_residue_valuation, f.stalkValuation_eq_comap x]
 
 end Stalks
 
