@@ -6,6 +6,7 @@ Authors: Claude
 module
 
 public import Mathlib.Topology.Separation.Connected
+public import TauCeti.Algebra.Category.ModuleCat.Topology.Iso
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Acyclic
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.HomologySequence
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.LongExact
@@ -50,7 +51,7 @@ Hⁱ⁺¹(G, M) ≅ Hⁱ(G, Coind_1^G M ⧸ M)   (i ≥ 1)
 ```
 
 for every compact group `G` (`TauCeti.ContCohomology.dimensionShiftIso`), inverse to the
-connecting map, which is bijective (`TauCeti.ContCohomology.coindBotShortExact_delta_bijective`).
+connecting map, which is an isomorphism (`TauCeti.ContCohomology.isIso_coindBotShortExact_delta`).
 
 ## Main definitions
 
@@ -71,8 +72,8 @@ connecting map, which is bijective (`TauCeti.ContCohomology.coindBotShortExact_d
 * `TauCeti.ContCohomology.subsingleton_H1_discreteCoind_bot` and
   `subsingleton_H2_discreteCoind_bot`: **acyclicity of `Coind_1^G A`** in degrees one and two,
   for profinite `G`.
-* `TauCeti.ContCohomology.coindBotShortExact_delta_bijective`: the connecting map
-  `Hⁱ(G, Coind_1^G M ⧸ M) → Hⁱ⁺¹(G, M)` is bijective for `i ≥ 1`, for compact `G`.
+* `TauCeti.ContCohomology.isIso_coindBotShortExact_delta`: the connecting map
+  `Hⁱ(G, Coind_1^G M ⧸ M) ⟶ Hⁱ⁺¹(G, M)` is an isomorphism for `i ≥ 1`, for compact `G`.
 
 ## Implementation notes
 
@@ -306,41 +307,49 @@ variable (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Com
   (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
   [DistribMulAction G M] [ContinuousSMul G M]
 
-/-- **The connecting map of the dimension-shifting sequence is bijective in every positive
-degree**: `δ : Hⁱ(G, Coind_1^G M ⧸ M) → Hⁱ⁺¹(G, M)` for `i ≥ 1` and a compact group `G`, because
+open CategoryTheory Limits
+
+/-- **The connecting map of the dimension-shifting sequence is an isomorphism in every positive
+degree**: `δ : Hⁱ(G, Coind_1^G M ⧸ M) ⟶ Hⁱ⁺¹(G, M)` for `i ≥ 1` and a compact group `G`, because
 `Coind_1^G M` is acyclic in degrees `i` and `i + 1`. -/
-theorem coindBotShortExact_delta_bijective (i : ℕ) (hi : 0 < i) :
-    Function.Bijective ((coindBotShortExact G M).delta i).hom := by
+theorem isIso_coindBotShortExact_delta (i : ℕ) (hi : 0 < i) :
+    IsIso ((coindBotShortExact G M).delta i) := by
   obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hi.ne'
-  refine ⟨(LinearMap.injective_iff_eq_zero_of_exact
-      ((coindBotShortExact G M).longExact_exact₃ (n + 1))).2 ?_,
-    (LinearMap.surjective_iff_eq_zero_of_exact
-      ((coindBotShortExact G M).longExact_exact₁ (n + 1))).2 ?_⟩
-  · -- the map into `Hⁿ⁺¹(G, Coind_1^G M ⧸ M)` is zero because its source is
-    exact LinearMap.ext fun x => by rw [Subsingleton.elim x 0, map_zero, map_zero]
-  · -- the map out of `Hⁿ⁺²(G, M)` is zero because its target is
-    exact Subsingleton.elim _ _
+  -- the middle term of the forgotten cochain sequence has zero homology in positive degrees
+  have hzero (m : ℕ) : IsZero (((coindBotShortExact G M).continuousCochainsShortExact.map
+      ((forget₂ (TopModuleCat ℤ) (ModuleCat ℤ)).mapHomologicalComplex _)).X₂.homology (m + 1)) :=
+    ((forget₂ (TopModuleCat ℤ) (ModuleCat ℤ)).map_isZero (TopModuleCat.isZero_of_subsingleton
+      (continuousCohomology (m + 1) (ofDiscreteModule ℤ G (DiscreteCoind G ⊥ M))))).of_iso
+      (((coindBotShortExact G M).continuousCochainsShortExact.X₂.sc (m + 1)).mapHomologyIso
+        (forget₂ (TopModuleCat ℤ) (ModuleCat ℤ)))
+  have : IsIso ((forget₂ (TopModuleCat ℤ) (ModuleCat ℤ)).map
+      ((coindBotShortExact G M).delta (n + 1))) := by
+    rw [(coindBotShortExact G M).forget₂_map_delta]
+    -- the objects of the composite match the ends of the two `mapHomologyIso`s only after
+    -- unfolding, which instance resolution does not do, so the instances are given by hand
+    exact IsIso.comp_isIso' (Iso.isIso_inv _) (IsIso.comp_isIso'
+      ((coindBotShortExact G M).continuousCochainsShortExact_shortExact.isIso_δ (n + 1) (n + 1 + 1)
+        rfl (hzero n) (hzero (n + 1))) (Iso.isIso_hom _))
+  exact TopModuleCat.isIso_of_isIso_forget₂_map _
 
 /-- **Dimension shifting in every positive degree**, `Hⁱ⁺¹(G, M) ≅ Hⁱ(G, Coind_1^G M ⧸ M)` for
 `i ≥ 1` and a compact group `G`, as an isomorphism of Mathlib's canonical continuous cohomology. Its
 inverse is the connecting map of `TauCeti.ContCohomology.coindBotShortExact`
-(`dimensionShiftIso_inv`), which is bijective, and both sides are discrete. The analogous statement
-on the explicit low-degree model, for a profinite `G` and in the direction of the connecting map,
-is `TauCeti.ContCohomology.explicitDimensionShift1 : H¹(G, Coind_1^G M ⧸ M) ≃+ H²(G, M)`. -/
+(`dimensionShiftIso_inv`), an isomorphism by `isIso_coindBotShortExact_delta`. The analogous
+statement on the explicit low-degree model, for a profinite `G` and in the direction of the
+connecting map, is `TauCeti.ContCohomology.explicitDimensionShift1 :
+H¹(G, Coind_1^G M ⧸ M) ≃+ H²(G, M)`. -/
 noncomputable def dimensionShiftIso (i : ℕ) (hi : 0 < i) :
     continuousCohomology (i + 1) (ofDiscreteModule ℤ G M) ≅
       continuousCohomology i (ofDiscreteModule ℤ G (DimensionShiftQuotient G M)) :=
-  (TopModuleCat.ofIso
-    { LinearEquiv.ofBijective ((coindBotShortExact G M).delta i).hom.toLinearMap
-        (coindBotShortExact_delta_bijective G M i hi) with
-      continuous_toFun := continuous_of_discreteTopology
-      continuous_invFun := continuous_of_discreteTopology }).symm
+  (@asIso _ _ _ _ ((coindBotShortExact G M).delta i)
+    (isIso_coindBotShortExact_delta G M i hi)).symm
 
 /-- The inverse of the dimension-shifting isomorphism is the connecting map. -/
 @[simp]
 theorem dimensionShiftIso_inv (i : ℕ) (hi : 0 < i) :
-    (dimensionShiftIso G M i hi).inv = (coindBotShortExact G M).delta i :=
-  (rfl)
+    (dimensionShiftIso G M i hi).inv = (coindBotShortExact G M).delta i := by
+  rw [dimensionShiftIso, Iso.symm_inv, asIso_hom]
 
 end DimensionShiftAll
 
