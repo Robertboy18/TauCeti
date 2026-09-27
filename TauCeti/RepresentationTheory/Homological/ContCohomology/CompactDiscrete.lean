@@ -33,12 +33,12 @@ When the action on `X` is moreover continuous, so that `X` is smooth discrete
 (`TauCeti.IsSmoothDiscrete.resolutionX`), since coinduction from the trivial subgroup preserves
 smoothness over a compact group.
 
-Discreteness also makes the terms `C(G, C(G, …, X))` of the resolution locally constant. The
-predicate `TauCeti.ContinuousCohomology.ResolutionVanishesOn X T n F` records that such an iterated
-map vanishes on all `n`-tuples of points of a subset `T ⊆ G`, and
-`TauCeti.ContinuousCohomology.ResolutionVanishesOn.exists_isOpen` shows that vanishing on a compact
-set spreads to an open neighbourhood of it, because a locally constant map takes finitely many
-values on a compact set.
+The predicate `TauCeti.ContinuousCohomology.ResolutionVanishesOn X T n F` records that a term
+`F` of the resolution `C(G, C(G, …, X))` vanishes on all `n`-tuples of points of a subset `T ⊆ G`,
+and `TauCeti.ContinuousCohomology.ResolutionVanishesOn.exists_isOpen` shows that vanishing on a
+compact set already holds on an open neighbourhood of it. For a profinite `G` this neighbourhood
+can be taken to be an open subgroup, which is how cohomological statements about a closed subgroup
+descend to the open subgroups containing it.
 
 This implements the "category of the comparison" milestone of Layer 3 of the human-authored
 roadmap at `TauCetiRoadmap/ProfiniteCohomology/README.md`.

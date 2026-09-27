@@ -31,10 +31,11 @@ This file proves that description elementwise, in every degree, on Mathlib's can
   `V ⊇ H`. Applied with an open subgroup in place of `G`, this says that two classes of `Hⁿ(V, X)`
   with the same restriction to `H` agree after restriction to some open `V' ⊆ V` containing `H`.
 
-Both statements are established on the homogeneous cochains `C(G, C(G, …, X))` of the coinduced
-resolution, which are locally constant, and then transported to cohomology. Smoothness of `X` is
-used to extend invariant cochains from `H` to `G`: it makes the orbit maps `g ↦ g • v` of the
-resolution continuous.
+Together they identify `Hⁿ(H, X)` with the direct limit of the groups `Hⁿ(V, X)` along the
+restriction maps `resLE`, over the open subgroups `V ⊇ H` ordered by reverse inclusion. In
+particular any question about a class of `Hⁿ(H, X)` — whether it vanishes, whether two classes
+agree — can be settled at some open, hence finite-index, subgroup of `G`. The results are stated
+for smooth discrete `X`, so the action of `G` on `X` is required to be continuous.
 
 ## Main results
 
