@@ -13,45 +13,25 @@ import Mathlib.Tactic.Ring
 
 The order-index formula `Nat.card f.ker * Nat.card f.range = Nat.card G` for a group homomorphism
 `f` (`Subgroup.card_ker_mul_card_range`) turns exactness of a sequence of homomorphisms into
-identities between the orders of its terms. Two are recorded here.
+identities between the orders of its terms. Along a six-term exact sequence
+`1 → A₀ → A₁ → A₂ → A₃ → A₄ → A₅ → 1` the alternating product of the orders is `1`, written
+without division as `|A₀| * |A₂| * |A₄| = |A₁| * |A₃| * |A₅|`: at each inner node the order of
+the term is the product of the orders of the incoming and outgoing ranges.
 
-* At a node `A → B → C` where the range of the first map is the kernel of the second, the order
-  of `B` is the product of the orders of the two ranges.
-* Along a six-term exact sequence `1 → A₀ → A₁ → A₂ → A₃ → A₄ → A₅ → 1` the alternating product
-  of the orders is `1`, written without division as
-  `|A₀| * |A₂| * |A₄| = |A₁| * |A₃| * |A₅|`.
-
-Both hold for `Nat.card` with no finiteness hypothesis, an infinite term contributing the factor
-`0` to both sides; for finite groups they are the usual statements. The six-term identity is the
-shape a long exact cohomology sequence takes once one of its terms vanishes, and it is what turns
-the additivity of an Euler characteristic along a short exact sequence of coefficients into a
+The identity holds for `Nat.card` with no finiteness hypothesis, an infinite term contributing
+the factor `0` to both sides; for finite groups it is the usual statement. It is the shape a long
+exact cohomology sequence takes once one of its terms vanishes, and it is what turns the
+additivity of an Euler characteristic along a short exact sequence of coefficients into a
 statement about orders.
 
 ## Main results
 
-* `MonoidHom.card_eq_card_range_mul_card_range`: `|B| = |f.range| * |g.range|` at an exact node.
 * `MonoidHom.card_mul_card_mul_card_of_exact`: the six-term alternating identity.
 -/
 
 public section
 
 namespace MonoidHom
-
-section Node
-
-variable {A B C : Type*} [Group A] [Group B] [Group C]
-
-/-- At an exact node `A → B → C`, the order of the middle group is the product of the orders of the
-two ranges. -/
-@[to_additive card_eq_card_range_mul_card_range /-- At an exact node `A → B → C`, the order of the
-middle group is the product of the orders of the two ranges. -/]
-theorem card_eq_card_range_mul_card_range (f : A →* B) (g : B →* C) (h : f.range = g.ker) :
-    Nat.card B = Nat.card f.range * Nat.card g.range := by
-  rw [← Subgroup.card_ker_mul_card_range g, h]
-
-end Node
-
-section SixTerm
 
 variable {A₀ A₁ A₂ A₃ A₄ A₅ : Type*} [Group A₀] [Group A₁] [Group A₂] [Group A₃] [Group A₄]
   [Group A₅]
@@ -70,11 +50,10 @@ theorem card_mul_card_mul_card_of_exact (f₀ : A₀ →* A₁) (f₁ : A₁ →
     rw [← Subgroup.card_ker_mul_card_range f₀, (ker_eq_bot_iff f₀).2 h₀, Subgroup.card_bot, one_mul]
   have e₅ : Nat.card A₅ = Nat.card f₄.range := by
     rw [range_eq_top.2 h₅, Subgroup.card_top]
-  rw [e₀, e₅, card_eq_card_range_mul_card_range f₀ f₁ h₁,
-    card_eq_card_range_mul_card_range f₁ f₂ h₂, card_eq_card_range_mul_card_range f₂ f₃ h₃,
-    card_eq_card_range_mul_card_range f₃ f₄ h₄]
+  -- at each inner node, `|Aᵢ| = |ker fᵢ| * |range fᵢ| = |range fᵢ₋₁| * |range fᵢ|`
+  rw [e₀, e₅, ← Subgroup.card_ker_mul_card_range f₁, ← h₁, ← Subgroup.card_ker_mul_card_range f₂,
+    ← h₂, ← Subgroup.card_ker_mul_card_range f₃, ← h₃, ← Subgroup.card_ker_mul_card_range f₄,
+    ← h₄]
   ring
-
-end SixTerm
 
 end MonoidHom

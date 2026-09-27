@@ -6,8 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.GroupTheory.Index.Exact
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologicalDimension.Basic
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologyComparison
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologicalDimension.Comparison
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.FiniteIndex
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Torsion
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.LongExact
@@ -57,8 +56,7 @@ open subgroup, `TauCeti.Topology.Algebra.Group.Profinite.Free.OpenSubgroup`.
 * `TauCeti.IsProP.topologicalGeneratorRankNat_add_index` and
   `TauCeti.IsProP.one_sub_topologicalGeneratorRankNat_eq`: the two-term Euler formula for an open
   subgroup, in `ℕ` and in `ℤ`.
-* `TauCeti.CohomologicalDimensionLE.subsingleton_H2`,
-  `TauCeti.CohomologicalDimensionLE.natCard_H1_mul_natCard`,
+* `TauCeti.CohomologicalDimensionLE.natCard_H1_mul_natCard`,
   `TauCeti.CohomologicalDimensionLE.finite_H1`,
   `TauCeti.CohomologicalDimensionLE.topologicalGeneratorRankNat_add_index`: the same under the
   hypothesis `cd_p G ≤ 1`.
@@ -272,14 +270,6 @@ end OpenSubgroup
 end IsProP
 
 namespace CohomologicalDimensionLE
-
-omit hp [TotallyDisconnectedSpace G] in
-/-- **`cd_p G ≤ 1` kills the explicit `H²`** of every discrete `p`-primary `G`-module. -/
-theorem subsingleton_H2 (hcd : CohomologicalDimensionLE.{u} p G 1) (A : Type u) [AddCommGroup A]
-    [TopologicalSpace A] [DiscreteTopology A] [DistribMulAction G A] [ContinuousSMul G A]
-    (hA : IsPPrimaryTorsion p A) : Subsingleton (H2 G A) :=
-  have := cohomologicalDimensionLE_iff.mp hcd A hA 2 one_lt_two
-  (explicitH2AddEquivContinuousCohomology G A).toEquiv.subsingleton
 
 variable (hG : IsProP p G) (hfg : IsTopologicallyFinitelyGenerated G)
   (hcd : CohomologicalDimensionLE.{u} p G 1)
