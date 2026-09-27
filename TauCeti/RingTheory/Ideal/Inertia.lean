@@ -26,6 +26,8 @@ generator.
 
 * `TauCeti.Ideal.mem_inertia_iff_of_adjoin_eq_top`: membership in `Ideal.inertia G I` is decided
   on a generating set.
+* `TauCeti.eq_one_of_smul_eq_of_adjoin_singleton_eq_top`: for a faithful action, only the
+  identity fixes a single generator of `S` over `R`.
 
 ## References
 
@@ -73,3 +75,20 @@ theorem mem_inertia_iff_of_adjoin_singleton_eq_top {I : Ideal S} {ξ : S}
   simp [mem_inertia_iff_of_adjoin_eq_top hξ]
 
 end TauCeti.Ideal
+
+namespace TauCeti
+
+variable {G : Type*} [Group G] {S : Type*} [CommRing S] [MulSemiringAction G S]
+variable {R : Type*} [CommSemiring R] [Algebra R S] [SMulCommClass G R S]
+
+/-- For a faithful action by `R`-algebra automorphisms on `S = R[ξ]`, an element fixing the
+generator `ξ` is the identity: this is **Serre's criterion** at the zero ideal. -/
+theorem eq_one_of_smul_eq_of_adjoin_singleton_eq_top [FaithfulSMul G S] {ξ : S}
+    (hξ : Algebra.adjoin R {ξ} = ⊤) {σ : G} (h : σ • ξ = ξ) : σ = 1 := by
+  have hσ : σ ∈ (⊥ : Ideal S).inertia G :=
+    (Ideal.mem_inertia_iff_of_adjoin_singleton_eq_top hξ).2 (by rw [h, sub_self]; exact zero_mem _)
+  refine eq_of_smul_eq_smul fun x : S ↦ ?_
+  rw [one_smul, ← sub_eq_zero]
+  exact (Submodule.mem_bot S).1 (Ideal.mem_inertia.1 hσ x)
+
+end TauCeti
