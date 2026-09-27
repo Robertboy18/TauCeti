@@ -216,7 +216,7 @@ theorem analyticFaceMap_comp_analyticAffineChartι_assoc {τ σ : Φ.cones} (f :
 
 /-- The left overlap inclusion followed by its chart inclusion is the inclusion of the chart of
 the intersection cone. -/
-@[reassoc]
+@[reassoc (attr := simp)]
 theorem analyticOverlapLeft_comp_analyticAffineChartι (σ τ : Φ.cones) :
     Φ.analyticOverlapLeft hΦ σ τ ≫ Φ.analyticAffineChartι hΦ σ =
       Φ.analyticAffineChartι hΦ (σ ⊓ τ) := by
@@ -224,7 +224,7 @@ theorem analyticOverlapLeft_comp_analyticAffineChartι (σ τ : Φ.cones) :
 
 /-- The right overlap inclusion followed by its chart inclusion is the inclusion of the chart of
 the intersection cone. -/
-@[reassoc]
+@[reassoc (attr := simp)]
 theorem analyticOverlapRight_comp_analyticAffineChartι (σ τ : Φ.cones) :
     Φ.analyticOverlapRight hΦ σ τ ≫ Φ.analyticAffineChartι hΦ τ =
       Φ.analyticAffineChartι hΦ (σ ⊓ τ) := by
