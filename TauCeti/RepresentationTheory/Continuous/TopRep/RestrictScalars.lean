@@ -243,6 +243,20 @@ noncomputable def invariantsRestrictScalarsIntIso (X : TopRep k G) :
       TopModuleCat.restrictScalarsInt.obj ((invariantsFunctor k G).obj X) :=
   TopModuleCat.ofIso (invariantsRestrictScalarsIntEquiv X)
 
+/-- `invariantsRestrictScalarsIntIso` is the identity on the underlying invariant elements. -/
+@[simp]
+theorem coe_invariantsRestrictScalarsIntIso_hom_apply (X : TopRep k G)
+    (x : (restrictScalarsInt.obj X).invariants) :
+    ((invariantsRestrictScalarsIntIso X).hom x).1 = x.1 :=
+  (rfl)
+
+/-- The inverse of `invariantsRestrictScalarsIntIso` is the identity on the underlying invariant
+elements. -/
+@[simp]
+theorem coe_invariantsRestrictScalarsIntIso_inv_apply (X : TopRep k G) (x : X.invariants) :
+    ((invariantsRestrictScalarsIntIso X).inv x).1 = x.1 :=
+  (rfl)
+
 /-- The identification of the invariants is compatible with the maps induced by
 `TopRep.invariantsFunctor`. -/
 @[reassoc (attr := simp)]
