@@ -584,6 +584,9 @@ theorem coe_cupCochain (m n : ℕ) (a : (TopRep.homogeneousCochains X).X m)
 
 /-- The cup product of two homogeneous one-cochains, evaluated:
 `(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁) (b g₁ g₂)`. -/
+-- Not a `simp` lemma, for the same reason as `coe_cupCochain`: the implicit carrier
+-- `(TopRep.resolution' Z).X (1 + 1)` of the left-hand side is not in `simp`-normal form; use it
+-- with `rw` or `simp only`.
 theorem cupCochain_one_one_apply (a : (TopRep.homogeneousCochains X).X 1)
     (b : (TopRep.homogeneousCochains Y).X 1) (g₀ g₁ g₂ : G) :
     ((P.cupCochain 1 1 a b).val : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =

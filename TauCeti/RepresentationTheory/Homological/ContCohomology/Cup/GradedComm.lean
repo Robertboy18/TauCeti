@@ -97,26 +97,38 @@ private theorem cupOneAux_apply (a : (TopRep.resolution'X X 1).V)
   rw [cupOneAux]
   exact P.pointwise_zero_apply rfl _ _
 
+private theorem cupOneAux_add_left (a a' : (TopRep.resolution'X X 1).V)
+    (b : (TopRep.resolution'X Y 1).V) :
+    P.cupOneAux (a + a') b = P.cupOneAux a b + P.cupOneAux a' b := by
+  ext g₀ g₁
+  simp only [P.cupOneAux_apply, ContinuousMap.add_apply, map_add, LinearMap.add_apply]
+
+private theorem cupOneAux_smul_left (r : R) (a : (TopRep.resolution'X X 1).V)
+    (b : (TopRep.resolution'X Y 1).V) :
+    P.cupOneAux (r • a) b = r • P.cupOneAux a b := by
+  ext g₀ g₁
+  simp only [P.cupOneAux_apply, ContinuousMap.smul_apply, map_smul, LinearMap.smul_apply]
+
+private theorem cupOneAux_add_right (a : (TopRep.resolution'X X 1).V)
+    (b b' : (TopRep.resolution'X Y 1).V) :
+    P.cupOneAux a (b + b') = P.cupOneAux a b + P.cupOneAux a b' := by
+  ext g₀ g₁
+  simp only [P.cupOneAux_apply, ContinuousMap.add_apply, map_add]
+
+private theorem cupOneAux_smul_right (r : R) (a : (TopRep.resolution'X X 1).V)
+    (b : (TopRep.resolution'X Y 1).V) :
+    P.cupOneAux a (r • b) = r • P.cupOneAux a b := by
+  ext g₀ g₁
+  simp only [P.cupOneAux_apply, ContinuousMap.smul_apply, map_smul]
+
 /-- **The cup-one product on degree-one elements of the resolution**, as an `R`-bilinear map: for
 `a : C(G, C(G, X.V))` and `b : C(G, C(G, Y.V))`, the pointwise pairing
 `(g₀, g₁) ↦ μ (a g₀ g₁) (b g₀ g₁)`. It is the bidegree-`(1, 1)` case of Steenrod's `∪₁`
 product, and the homotopy behind graded commutativity of the cup product in that bidegree. -/
 def cupOne : (TopRep.resolution'X X 1).V →ₗ[R] (TopRep.resolution'X Y 1).V →ₗ[R]
     (TopRep.resolution'X Z 1).V :=
-  LinearMap.mk₂ R P.cupOneAux
-    (fun a a' b ↦ ContinuousMap.ext fun g₀ ↦ ContinuousMap.ext fun g₁ ↦ by
-      rw [ContinuousMap.add_apply, ContinuousMap.add_apply, cupOneAux_apply, cupOneAux_apply,
-        cupOneAux_apply, ContinuousMap.add_apply, ContinuousMap.add_apply, map_add,
-        LinearMap.add_apply])
-    (fun r a b ↦ ContinuousMap.ext fun g₀ ↦ ContinuousMap.ext fun g₁ ↦ by
-      rw [ContinuousMap.smul_apply, ContinuousMap.smul_apply, cupOneAux_apply, cupOneAux_apply,
-        ContinuousMap.smul_apply, ContinuousMap.smul_apply, map_smul, LinearMap.smul_apply])
-    (fun a b b' ↦ ContinuousMap.ext fun g₀ ↦ ContinuousMap.ext fun g₁ ↦ by
-      rw [ContinuousMap.add_apply, ContinuousMap.add_apply, cupOneAux_apply, cupOneAux_apply,
-        cupOneAux_apply, ContinuousMap.add_apply, ContinuousMap.add_apply, map_add])
-    (fun r a b ↦ ContinuousMap.ext fun g₀ ↦ ContinuousMap.ext fun g₁ ↦ by
-      rw [ContinuousMap.smul_apply, ContinuousMap.smul_apply, cupOneAux_apply, cupOneAux_apply,
-        ContinuousMap.smul_apply, ContinuousMap.smul_apply, map_smul])
+  LinearMap.mk₂ R P.cupOneAux P.cupOneAux_add_left P.cupOneAux_smul_left P.cupOneAux_add_right
+    P.cupOneAux_smul_right
 
 @[simp]
 theorem cupOne_apply (a : (TopRep.resolution'X X 1).V) (b : (TopRep.resolution'X Y 1).V)
@@ -130,8 +142,7 @@ theorem cupOne_ρ (g : G) (a : (TopRep.resolution'X X 1).V) (b : (TopRep.resolut
       (TopRep.resolution'X Z 1).ρ g (P.cupOne a b) := by
   ext g₀ g₁
   -- both sides evaluated at `(g₀, g₁)` are `μ (g • a (g⁻¹g₀) (g⁻¹g₁)) (g • b (g⁻¹g₀) (g⁻¹g₁))`
-  rw [coind₁_apply_apply, coind₁_apply_apply, cupOne_apply, cupOne_apply, coind₁_apply_apply,
-    coind₁_apply_apply, coind₁_apply_apply, coind₁_apply_apply, P.equivariant]
+  simp only [coind₁_apply_apply, P.cupOne_apply, P.equivariant]
 
 /-- **The cup-one product of homogeneous one-cochains**, as an `R`-bilinear map: the cup-one
 product of the underlying elements of the resolution, which is invariant by equivariance. -/
@@ -157,6 +168,9 @@ theorem coe_cupOneCochain (a : (TopRep.homogeneousCochains X).X 1)
 
 /-- The cup-one product of homogeneous one-cochains, evaluated:
 `(a ∪₁ b) g₀ g₁ = μ (a g₀ g₁) (b g₀ g₁)`. -/
+-- Not a `simp` lemma, for the same reason as `coe_cupOneCochain`: the implicit carrier
+-- `(TopRep.resolution' Z).X 1` of the left-hand side is not in `simp`-normal form; use it with
+-- `rw` or `simp only`.
 theorem cupOneCochain_apply (a : (TopRep.homogeneousCochains X).X 1)
     (b : (TopRep.homogeneousCochains Y).X 1) (g₀ g₁ : G) :
     ((P.cupOneCochain a b).val : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a.val g₀ g₁) (b.val g₀ g₁) := by
@@ -176,11 +190,10 @@ theorem d_cupOneCochain {a : (TopRep.homogeneousCochains X).X 1}
   apply Subtype.ext
   ext g₀ g₁ g₂
   -- evaluate both sides at `(g₀, g₁, g₂)`
-  rw [homogeneousCochains.d_one_apply, cupOneCochain_apply, cupOneCochain_apply,
-    cupOneCochain_apply, Submodule.coe_sub, Submodule.coe_neg, ContinuousMap.sub_apply,
-    ContinuousMap.sub_apply, ContinuousMap.sub_apply, ContinuousMap.neg_apply,
-    ContinuousMap.neg_apply, ContinuousMap.neg_apply, cupCochain_one_one_apply,
-    cupCochain_one_one_apply, flip_bil]
+  rw [Submodule.coe_sub, Submodule.coe_neg]
+  simp only [homogeneousCochains.d_one_apply (X := Z), P.cupOneCochain_apply,
+    ContinuousMap.sub_apply, ContinuousMap.neg_apply, P.cupCochain_one_one_apply,
+    P.flip.cupCochain_one_one_apply, flip_bil]
   -- expand `μ (a g₀ g₂) (b g₀ g₂)` along the two cocycle identities
   rw [homogeneousCochains.apply_eq_add_of_d_eq_zero ha g₀ g₁ g₂,
     homogeneousCochains.apply_eq_add_of_d_eq_zero hb g₀ g₁ g₂]

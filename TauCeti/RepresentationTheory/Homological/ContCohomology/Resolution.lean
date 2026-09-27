@@ -49,6 +49,10 @@ variable {X}
 
 /-- The homogeneous differential of a one-cochain, evaluated:
 `(d a) g₀ g₁ g₂ = a g₁ g₂ - (a g₀ g₂ - a g₀ g₁)`. -/
+-- Not a `simp` lemma: `simp` rewrites the differential `(homogeneousCochains X).d 1 (1 + 1)` on
+-- the left-hand side through `CategoryTheory.Functor.mapHomologicalComplex_obj_d` and
+-- `CochainComplex.of_d`, so the statement is not in `simp`-normal form; use it with `rw` or
+-- `simp only`.
 theorem homogeneousCochains.d_one_apply (a : (homogeneousCochains X).X 1) (g₀ g₁ g₂ : G) :
     ((((homogeneousCochains X).d 1 (1 + 1)).hom a).val : C(G, C(G, C(G, X.V)))) g₀ g₁ g₂ =
       a.val g₁ g₂ - (a.val g₀ g₂ - a.val g₀ g₁) := by
