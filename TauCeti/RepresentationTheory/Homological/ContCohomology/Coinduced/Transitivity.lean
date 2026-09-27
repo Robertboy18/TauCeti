@@ -11,9 +11,9 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.SmoothDisc
 /-!
 # Transitivity of discrete coinduction
 
-Let `G` be a compact topological group, `U ≤ G` a subgroup and `V ≤ U` a subgroup of `U`. For a
-discrete `V`-module `A`, coinducing first to `U` and then to `G` is the same as coinducing to `G`
-in one step:
+Let `G` be a topological group, `U ≤ G` a subgroup with compact closure and `V ≤ U` a subgroup of
+`U`. For a discrete `V`-module `A`, coinducing first to `U` and then to `G` is the same as
+coinducing to `G` in one step:
 
 ```text
 Coind_U^G (Coind_V^U A) ≅ Coind_V^G A,   f ↦ (g ↦ f g 1),
@@ -33,9 +33,11 @@ element of `G`; both hypotheses are explicit arguments rather than a definitiona
 of the two subgroups, whose types differ. The case used by dimension shifting is `V = ⊥` and
 `W = ⊥`, where every action of the trivial group is trivial and the agreement is automatic.
 
-Compactness of `G` is used exactly once: to see that `g ↦ (u ↦ φ (u * g))` is locally constant,
-uniformly in `u`, which is that a locally constant function on a compact group is uniformly locally
-constant under right translation (`TauCeti.exists_isOpen_forall_mul_right_eq`).
+The topological input is that `U` is relatively compact in `G`, `IsCompact (closure U)`: a locally
+constant function on `G` is then locally constant under right translation uniformly in the
+translating element `u ∈ U` (`TauCeti.exists_isOpen_forall_mem_mul_right_eq`), which is what makes
+`g ↦ (u ↦ φ (u * g))` locally constant. In a compact group, as in the profinite setting, every
+subgroup is relatively compact.
 
 ## Main definitions
 
@@ -61,15 +63,17 @@ namespace TauCeti.DiscreteCoind
 
 section Transitivity
 
-variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
+variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   {U : Subgroup G} {V : Subgroup U} {W : Subgroup G}
   {A : Type*} [AddCommGroup A] [DistribMulAction V A] [DistribMulAction W A]
   (hW : V.map U.subtype = W)
   (hsmul : ∀ (v : V) (w : W) (a : A), ((v : U) : G) = (w : G) → w • a = v • a)
+  (hU : IsCompact (closure (U : Set G)))
 
 /-- **Transitivity of discrete coinduction**: `Coind_U^G (Coind_V^U A) ≃+ Coind_W^G A` for
-`V ≤ U ≤ G`, where `W` is `V` regarded as a subgroup of `G`. The forward map evaluates the inner
-coinduced function at `1`, `f ↦ (g ↦ f g 1)`; the inverse is `φ ↦ (g ↦ (u ↦ φ (u * g)))`. -/
+`V ≤ U ≤ G` with `U` relatively compact in `G`, where `W` is `V` regarded as a subgroup of `G`.
+The forward map evaluates the inner coinduced function at `1`, `f ↦ (g ↦ f g 1)`; the inverse is
+`φ ↦ (g ↦ (u ↦ φ (u * g)))`. -/
 def transEquiv : DiscreteCoind G U (DiscreteCoind U V A) ≃+ DiscreteCoind G W A where
   toFun f := mk G W A (fun g => f g 1)
     ((isLocallyConstant f).comp fun ψ : DiscreteCoind U V A => ψ 1)
@@ -88,10 +92,12 @@ def transEquiv : DiscreteCoind G U (DiscreteCoind U V A) ≃+ DiscreteCoind G W 
         rw [Subgroup.coe_mul, mul_assoc, apply_mul φ ⟨_, hvW⟩ ((u : G) * g)]
         exact hsmul v _ _ rfl))
     ((IsLocallyConstant.iff_exists_open _).2 fun g => by
-      -- `φ` is uniformly locally constant under right translation, `G` being compact
+      -- `φ` is locally constant under right translation uniformly in `u ∈ U`, the closure of `U`
+      -- being compact
       obtain ⟨N, hN, hgN, h⟩ :=
-        exists_isOpen_forall_mul_right_eq (isLocallyConstant φ) continuous_id g
-      exact ⟨N, hN, hgN, fun g' hg' => ext fun u => by rw [mk_apply, mk_apply]; exact h g' hg' u⟩)
+        exists_isOpen_forall_mem_mul_right_eq (isLocallyConstant φ) hU continuous_id g
+      exact ⟨N, hN, hgN, fun g' hg' => ext fun u => by
+        rw [mk_apply, mk_apply]; exact h g' hg' u (subset_closure u.2)⟩)
     (fun u₀ g => ext fun u => by
       simp only [mk_apply, coe_smul, Subgroup.coe_mul, mul_assoc])
   left_inv f := ext fun g => ext fun u => by
@@ -104,30 +110,30 @@ def transEquiv : DiscreteCoind G U (DiscreteCoind U V A) ≃+ DiscreteCoind G W 
 /-- The transitivity equivalence evaluates the inner coinduced function at `1`. -/
 @[simp]
 theorem transEquiv_apply (f : DiscreteCoind G U (DiscreteCoind U V A)) (g : G) :
-    transEquiv hW hsmul f g = f g 1 := (rfl)
+    transEquiv hW hsmul hU f g = f g 1 := (rfl)
 
 /-- The inverse of the transitivity equivalence translates the argument by `U`. -/
 @[simp]
 theorem transEquiv_symm_apply (φ : DiscreteCoind G W A) (g : G) (u : U) :
-    (transEquiv hW hsmul).symm φ g u = φ ((u : G) * g) := (rfl)
+    (transEquiv hW hsmul hU).symm φ g u = φ ((u : G) * g) := (rfl)
 
 /-- The transitivity equivalence is `G`-equivariant for the right-translation actions. -/
 @[simp]
 theorem transEquiv_smul (g₀ : G) (f : DiscreteCoind G U (DiscreteCoind U V A)) :
-    transEquiv hW hsmul (g₀ • f) = g₀ • transEquiv hW hsmul f := ext fun g => by
+    transEquiv hW hsmul hU (g₀ • f) = g₀ • transEquiv hW hsmul hU f := ext fun g => by
   rw [transEquiv_apply, coe_smul, coe_smul, transEquiv_apply]
 
 /-- The inverse of the transitivity equivalence is `G`-equivariant. -/
 @[simp]
 theorem transEquiv_symm_smul (g₀ : G) (φ : DiscreteCoind G W A) :
-    (transEquiv hW hsmul).symm (g₀ • φ) = g₀ • (transEquiv hW hsmul).symm φ :=
-  (transEquiv hW hsmul).injective <| by
+    (transEquiv hW hsmul hU).symm (g₀ • φ) = g₀ • (transEquiv hW hsmul hU).symm φ :=
+  (transEquiv hW hsmul hU).injective <| by
     rw [transEquiv_smul, AddEquiv.apply_symm_apply, AddEquiv.apply_symm_apply]
 
 /-- The transitivity equivalence is compatible with the counits: evaluating the one-step coinduced
 function at `1` is evaluating the two-step one at `1` twice. -/
 theorem eval_transEquiv (f : DiscreteCoind G U (DiscreteCoind U V A)) :
-    eval G W A (transEquiv hW hsmul f) = eval U V A (eval G U (DiscreteCoind U V A) f) := by
+    eval G W A (transEquiv hW hsmul hU f) = eval U V A (eval G U (DiscreteCoind U V A) f) := by
   rw [eval_apply, eval_apply, eval_apply, transEquiv_apply]
 
 end Transitivity
@@ -136,11 +142,12 @@ section TopRep
 
 open CategoryTheory
 
-variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
+variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   {U : Subgroup G} {V : Subgroup U} {W : Subgroup G}
   {A : Type*} [AddCommGroup A] [DistribMulAction V A] [DistribMulAction W A]
   (hW : V.map U.subtype = W)
   (hsmul : ∀ (v : V) (w : W) (a : A), ((v : U) : G) = (w : G) → w • a = v • a)
+  (hU : IsCompact (closure (U : Set G)))
 
 /-- **Transitivity of coinduction as an isomorphism of topological representations**: the
 canonical objects of `TopRep ℤ G` attached to `Coind_U^G (Coind_V^U A)` and to `Coind_W^G A` are
@@ -149,32 +156,34 @@ cohomology to it identifies `Hⁿ(G, Coind_U^G (Coind_V^U A))` with `Hⁿ(G, Coi
 noncomputable def transIso :
     ofDiscreteModule ℤ G (DiscreteCoind G U (DiscreteCoind U V A)) ≅
       ofDiscreteModule ℤ G (DiscreteCoind G W A) where
-  hom := ofDiscreteModuleMap (transEquiv hW hsmul).toAddMonoidHom.toIntLinearMap fun g f =>
-    transEquiv_smul hW hsmul g f
-  inv := ofDiscreteModuleMap (transEquiv hW hsmul).symm.toAddMonoidHom.toIntLinearMap fun g φ =>
-    transEquiv_symm_smul hW hsmul g φ
+  hom := ofDiscreteModuleMap (transEquiv hW hsmul hU).toAddMonoidHom.toIntLinearMap fun g f =>
+    transEquiv_smul hW hsmul hU g f
+  inv := ofDiscreteModuleMap (transEquiv hW hsmul hU).symm.toAddMonoidHom.toIntLinearMap fun g φ =>
+    transEquiv_symm_smul hW hsmul hU g φ
   -- After extensionality both laws are those of `transEquiv` on the underlying modules.
   hom_inv_id := by
     ext f
-    exact (transEquiv hW hsmul).symm_apply_apply f
+    exact (transEquiv hW hsmul hU).symm_apply_apply f
   inv_hom_id := by
     ext φ
-    exact (transEquiv hW hsmul).apply_symm_apply φ
+    exact (transEquiv hW hsmul hU).apply_symm_apply φ
 
 /-- The transitivity isomorphism acts on underlying modules as `transEquiv`. -/
 @[simp]
 theorem transIso_hom_apply (f : DiscreteCoind G U (DiscreteCoind U V A)) :
-    (transIso hW hsmul).hom f = transEquiv hW hsmul f := (rfl)
+    (transIso hW hsmul hU).hom f = transEquiv hW hsmul hU f :=
+  ofDiscreteModuleMap_hom_apply _ (fun g f => transEquiv_smul hW hsmul hU g f) f
 
 /-- The inverse of the transitivity isomorphism acts on underlying modules as
 `transEquiv.symm`. -/
 @[simp]
 theorem transIso_inv_apply (φ : DiscreteCoind G W A) :
-    (transIso hW hsmul).inv φ = (transEquiv hW hsmul).symm φ := (rfl)
+    (transIso hW hsmul hU).inv φ = (transEquiv hW hsmul hU).symm φ :=
+  ofDiscreteModuleMap_hom_apply _ (fun g φ => transEquiv_symm_smul hW hsmul hU g φ) φ
 
 /-! ### The trivial subgroup -/
 
-omit [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G] in
+omit [TopologicalSpace G] [IsTopologicalGroup G] in
 variable (U) in
 /-- Two actions of trivial subgroups on the same module agree: a trivial group acts trivially. This
 discharges the agreement hypothesis of `TauCeti.DiscreteCoind.transEquiv` at `V = ⊥` and `W = ⊥`. -/
@@ -184,6 +193,7 @@ theorem bot_smul_eq_bot_smul [DistribMulAction (⊥ : Subgroup U) A]
   rw [Subsingleton.elim v 1, Subsingleton.elim w 1, one_smul, one_smul]
 
 variable (U A) in
+include hU in
 /-- **Transitivity of coinduction for the trivial subgroup**:
 `Coind_U^G (Coind_1^U A) ≅ Coind_1^G A` as topological `G`-representations, the case `V = W = ⊥` of
 `TauCeti.DiscreteCoind.transIso`. Dimension shifting uses this identification of coefficient
@@ -193,7 +203,7 @@ noncomputable def transIsoBot [DistribMulAction (⊥ : Subgroup U) A]
     [DistribMulAction (⊥ : Subgroup G) A] :
     ofDiscreteModule ℤ G (DiscreteCoind G U (DiscreteCoind U (⊥ : Subgroup U) A)) ≅
       ofDiscreteModule ℤ G (DiscreteCoind G (⊥ : Subgroup G) A) :=
-  transIso (Subgroup.map_bot U.subtype) (bot_smul_eq_bot_smul U)
+  transIso (Subgroup.map_bot U.subtype) (bot_smul_eq_bot_smul U) hU
 
 -- The carrier of `ofDiscreteModule ℤ G M` is `M` by definition, but only the `show` makes the
 -- coinduced function applicable to a group element.
@@ -202,15 +212,17 @@ noncomputable def transIsoBot [DistribMulAction (⊥ : Subgroup U) A]
 theorem transIsoBot_hom_apply [DistribMulAction (⊥ : Subgroup U) A]
     [DistribMulAction (⊥ : Subgroup G) A]
     (f : DiscreteCoind G U (DiscreteCoind U (⊥ : Subgroup U) A)) (g : G) :
-    (show DiscreteCoind G (⊥ : Subgroup G) A from (transIsoBot U A).hom f) g = f g 1 := (rfl)
+    (show DiscreteCoind G (⊥ : Subgroup G) A from (transIsoBot U A hU).hom f) g = f g 1 := by
+  rw [transIsoBot, transIso_hom_apply, transEquiv_apply]
 
 /-- The inverse of the trivial-subgroup transitivity isomorphism translates the argument by `U`. -/
 @[simp]
 theorem transIsoBot_inv_apply [DistribMulAction (⊥ : Subgroup U) A]
     [DistribMulAction (⊥ : Subgroup G) A] (φ : DiscreteCoind G (⊥ : Subgroup G) A) (g : G)
     (u : U) :
-    (show DiscreteCoind G U (DiscreteCoind U (⊥ : Subgroup U) A) from (transIsoBot U A).inv φ) g u =
-      φ ((u : G) * g) := (rfl)
+    (show DiscreteCoind G U (DiscreteCoind U (⊥ : Subgroup U) A) from
+      (transIsoBot U A hU).inv φ) g u = φ ((u : G) * g) := by
+  rw [transIsoBot, transIso_inv_apply, transEquiv_symm_apply]
 
 end TopRep
 
