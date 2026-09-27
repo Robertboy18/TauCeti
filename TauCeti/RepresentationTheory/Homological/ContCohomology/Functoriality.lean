@@ -47,7 +47,8 @@ transformations `resNatTrans` and `inflNatTrans`, matching the shape of Mathlib'
   `TauCeti.ContinuousCohomology.infl_comp_infl`: the composition laws of the named maps;
   `TauCeti.ContinuousCohomology.resLe_refl`: restriction along the identity inclusion is the
   identity.
-* `TauCeti.ContinuousCohomology.coeffMap_comp_res` and
+* `TauCeti.ContinuousCohomology.coeffMap_comp_res`,
+  `TauCeti.ContinuousCohomology.coeffMap_comp_resLe` and
   `TauCeti.ContinuousCohomology.coeffMap_comp_infl`: naturality of restriction and of inflation in
   the coefficients.
 * `TauCeti.ContinuousCohomology.map_congr`: two compatible pairs that agree induce the same map.
@@ -206,6 +207,18 @@ theorem resLe_def (h : H ≤ S) (X : TopRep R G) (n : ℕ) :
     resLe h X n = _root_.ContinuousCohomology.map (ContinuousMonoidHom.subgroupInclusion h)
       (𝟙 (TopRep.res (H.subtype : H →* G) X)) n :=
   (rfl)
+
+/-- Restriction along the inclusion `H ↪ S` is natural in the coefficients. -/
+@[reassoc]
+theorem coeffMap_comp_resLe (h : H ≤ S) {X Y : TopRep R G} (f : X ⟶ Y) (n : ℕ) :
+    coeffMap ((TopRep.resFunctor (S.subtype : S →* G)).map f) n ≫ resLe h Y n =
+      resLe h X n ≫ coeffMap ((TopRep.resFunctor (H.subtype : H →* G)).map f) n :=
+  (_root_.ContinuousCohomology.map_comp (X := TopRep.res (S.subtype : S →* G) X)
+        (ContinuousMonoidHom.id S) (ContinuousMonoidHom.subgroupInclusion h)
+        ((TopRep.resFunctor (S.subtype : S →* G)).map f) (𝟙 _) n).symm.trans
+    (_root_.ContinuousCohomology.map_comp (X := TopRep.res (S.subtype : S →* G) X)
+      (ContinuousMonoidHom.subgroupInclusion h) (ContinuousMonoidHom.id H) (𝟙 _)
+      ((TopRep.resFunctor (H.subtype : H →* G)).map f) n)
 
 /-- Restricting to `S` and then to a subgroup `H ≤ S` is restriction to `H`. -/
 @[reassoc (attr := simp)]
