@@ -7,6 +7,8 @@ module
 
 public import TauCeti.RepresentationTheory.CharacterTable.Completeness
 public import TauCeti.RepresentationTheory.CharacterTable.Degree
+-- `FDRep.character_mem_irreducibleCharacters` is stated for a simple object of `FDRep k G`.
+public import TauCeti.RepresentationTheory.Simple.Basic
 import TauCeti.RepresentationTheory.FDRep
 
 /-!
@@ -140,6 +142,15 @@ theorem character_mem_irreducibleCharacters {V : Type w} [AddCommGroup V] [Modul
   have := hirr
   obtain ⟨C, ⟨e⟩⟩ := ClassFunction.exists_nonempty_equiv ρ hind rfl σ
   exact ⟨d C, ρ C, hirr C, (_root_.Representation.char_iso e).symm⟩
+
+/-- **The character of a simple object of `FDRep k G` is an irreducible character**, the bundled
+form of `TauCeti.character_mem_irreducibleCharacters`. -/
+@[simp]
+theorem _root_.FDRep.character_mem_irreducibleCharacters {G : Type u} [Group G] [Finite G]
+    [Invertible (Nat.card G : k)] (X : FDRep k G) [CategoryTheory.Simple X] :
+    X.character ∈ irreducibleCharacters k G :=
+  have := FDRep.isIrreducible_of_simple X
+  TauCeti.character_mem_irreducibleCharacters X.ρ
 
 variable (k G)
 
