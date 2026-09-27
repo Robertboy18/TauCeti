@@ -120,10 +120,6 @@ noncomputable def analyticAffineChartι (σ : Φ.cones) :
     (Φ.analyticAffineChartDiagram hΦ).obj σ ⟶ Φ.analyticRealization hΦ :=
   (Φ.analyticGlueData hΦ).ι σ
 
-/-- The chart inclusion is the canonical map of the gluing data into its glued space. -/
-theorem analyticAffineChartι_def (σ : Φ.cones) :
-    Φ.analyticAffineChartι hΦ σ = (Φ.analyticGlueData hΦ).ι σ := (rfl)
-
 /-- Each affine analytic chart is an open subspace of the analytic realization. -/
 theorem isOpenEmbedding_analyticAffineChartι (σ : Φ.cones) :
     IsOpenEmbedding (Φ.analyticAffineChartι hΦ σ) :=
@@ -171,8 +167,7 @@ theorem analyticAffineChartι_eq_analyticAffineChartι_iff {σ τ : Φ.cones}
 /-- The inclusion of the chart of a face factors through the chart diagram map into the chart of
 the ambient cone. -/
 -- This is not a simp lemma: `analyticAffineChartDiagram_map` rewrites the diagram map to the
--- analytic face map, and the resulting composite with the chart inclusion is only well-typed after
--- unfolding the diagram, so simp cannot use either spelling.
+-- analytic face map first. The simp form is `analyticFaceMap_comp_analyticAffineChartι` below.
 @[reassoc]
 theorem analyticAffineChartDiagram_map_comp_analyticAffineChartι {τ σ : Φ.cones} (f : τ ⟶ σ) :
     (Φ.analyticAffineChartDiagram hΦ).map f ≫ Φ.analyticAffineChartι hΦ σ =
@@ -187,6 +182,33 @@ theorem analyticAffineChartDiagram_map_comp_analyticAffineChartι {τ σ : Φ.co
     have : (homOfLE (le_inf (leOfHom f) le_rfl) : τ ⟶ σ ⊓ τ) ≫ homOfLE inf_le_right = 𝟙 τ :=
       Subsingleton.elim _ _
     rw [this, CategoryTheory.Functor.map_id, TopCat.id_app]
+
+/-- The inclusion of the chart of a face factors through the analytic face map into the chart of
+the ambient cone. -/
+-- The composite is formed on the objects of the chart diagram, which is the form that
+-- `analyticAffineChartDiagram_map` produces; a type ascription on the face map would not survive
+-- elaboration, so the objects are passed explicitly. The face map is well-typed at these objects
+-- only after unfolding the diagram, which `Category.assoc` cannot do while matching, so the
+-- associated form is stated by hand rather than by `reassoc`.
+@[simp]
+theorem analyticFaceMap_comp_analyticAffineChartι {τ σ : Φ.cones} (f : τ ⟶ σ) :
+    CategoryStruct.comp (X := (Φ.analyticAffineChartDiagram hΦ).obj τ)
+        (Y := (Φ.analyticAffineChartDiagram hΦ).obj σ)
+        (Φ.analyticFaceMap ((isRegular_iff.mp hΦ) τ.1 τ.2) ((isRegular_iff.mp hΦ) σ.1 σ.2) f)
+        (Φ.analyticAffineChartι hΦ σ) =
+      Φ.analyticAffineChartι hΦ τ :=
+  Φ.analyticAffineChartDiagram_map_comp_analyticAffineChartι hΦ f
+
+/-- The associated form of `analyticFaceMap_comp_analyticAffineChartι`. -/
+@[simp]
+theorem analyticFaceMap_comp_analyticAffineChartι_assoc {τ σ : Φ.cones} (f : τ ⟶ σ) {Z : TopCat}
+    (h : Φ.analyticRealization hΦ ⟶ Z) :
+    CategoryStruct.comp (X := (Φ.analyticAffineChartDiagram hΦ).obj τ)
+        (Y := (Φ.analyticAffineChartDiagram hΦ).obj σ)
+        (Φ.analyticFaceMap ((isRegular_iff.mp hΦ) τ.1 τ.2) ((isRegular_iff.mp hΦ) σ.1 σ.2) f)
+        (Φ.analyticAffineChartι hΦ σ ≫ h) =
+      Φ.analyticAffineChartι hΦ τ ≫ h :=
+  Φ.analyticAffineChartDiagram_map_comp_analyticAffineChartι_assoc hΦ f h
 
 /-- The left overlap inclusion followed by its chart inclusion is the inclusion of the chart of
 the intersection cone. -/
@@ -222,7 +244,7 @@ theorem range_analyticAffineChartι_inter_range_analyticAffineChartι (σ τ : �
   -- `analyticAffineChartι_eq_analyticAffineChartι_iff`.
   refine ((Φ.analyticGlueData hΦ).image_inter σ τ).trans ?_
   rw [← analyticOverlapLeft_comp_analyticAffineChartι, TopCat.coe_comp, TopCat.coe_comp,
-    Set.range_comp, Set.range_comp, analyticAffineChartι_def]
+    Set.range_comp, Set.range_comp, analyticAffineChartι]
   -- The map `f σ τ` of the gluing data is the inclusion of the overlap open set, whose range
   -- is the range of the left overlap inclusion.
   exact congrArg _ ((Opens.set_range_inclusion' _).trans (Φ.coe_analyticOverlapOpens hΦ σ τ))
