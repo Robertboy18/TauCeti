@@ -21,11 +21,11 @@ of `TauCeti.ContCohomology` is computed from inhomogeneous cochains with values 
 identifies the two in degrees one and two.
 
 The comparison for a discrete smooth representation over any scalars is
-`TauCeti.ContCohomology.explicitH1AddEquivContinuousCohomologyOfDiscrete` and its degree-two
-counterpart. For `X = trivialFp p G` the carrier is the universe lift of `ZMod p`, and a further
-change of coefficients along `trivialFpEquiv p G` lands in `H1 G (ZMod p)` and `H2 G (ZMod p)`, for
-any trivial action of `G` on `ZMod p`. In degree one, the class group of a trivial action is the
-group of continuous characters, so `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-dual of `G`, as an
+`TopRep.explicitH1AddEquivContinuousCohomologyOfDiscrete` and its degree-two counterpart. For
+`X = trivialFp p G` the carrier is the universe lift of `ZMod p`, and a further change of
+coefficients along `trivialFpEquiv p G` lands in `H1 G (ZMod p)` and `H2 G (ZMod p)`, for any
+trivial action of `G` on `ZMod p`. In degree one, the class group of a trivial action is the group
+of continuous characters, so `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-dual of `G`, as an
 `𝔽_p`-vector space.
 
 ## Main definitions
@@ -71,14 +71,14 @@ private theorem trivialFpEquiv_smul (g : G) (x : (trivialFp p G).V) :
 
 /-- **`H¹(G, 𝔽_p)` is the explicit `H1 G (ZMod p)`**, for any trivial action of `G` on `ZMod p`. -/
 noncomputable def cohomFpAddEquivH1 : cohomFp p G 1 ≃+ H1 G (ZMod p) :=
-  (explicitH1AddEquivContinuousCohomologyOfDiscrete (trivialFp p G)).symm.trans
+  (trivialFp p G).explicitH1AddEquivContinuousCohomologyOfDiscrete.symm.trans
     (explicitMap1Equiv G (trivialFp p G).V G (ZMod p) (ContinuousMulEquiv.refl G)
       (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology continuous_of_discreteTopology
       (trivialFpEquiv_smul p G htriv))
 
 /-- **`H²(G, 𝔽_p)` is the explicit `H2 G (ZMod p)`**, for any trivial action of `G` on `ZMod p`. -/
 noncomputable def cohomFpAddEquivH2 [LocallyCompactSpace G] : cohomFp p G 2 ≃+ H2 G (ZMod p) :=
-  (explicitH2AddEquivContinuousCohomologyOfDiscrete (trivialFp p G)).symm.trans
+  (trivialFp p G).explicitH2AddEquivContinuousCohomologyOfDiscrete.symm.trans
     (explicitMap2Equiv G (trivialFp p G).V G (ZMod p) (ContinuousMulEquiv.refl G)
       (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology continuous_of_discreteTopology
       (trivialFpEquiv_smul p G htriv))

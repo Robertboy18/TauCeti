@@ -44,9 +44,10 @@ is why the discrete synonyms exist.
   `explicitH2AddEquivContinuousCohomology`: the comparisons as additive equivalences.
 * `TauCeti.ContCohomology.explicitH1IsoContinuousCohomology` and
   `explicitH2IsoContinuousCohomology`: the comparisons as isomorphisms in `TopModuleCat ℤ`.
-* `TauCeti.ContCohomology.explicitH1AddEquivContinuousCohomologyOfDiscrete` and
-  `explicitH2AddEquivContinuousCohomologyOfDiscrete`: the comparisons for the carrier of a discrete
-  smooth representation over any scalars, obtained from the `ℤ`-comparisons by restricting scalars.
+* `TopRep.explicitH1AddEquivContinuousCohomologyOfDiscrete` and
+  `TopRep.explicitH2AddEquivContinuousCohomologyOfDiscrete`: the comparisons for the carrier of a
+  discrete smooth representation over any scalars, obtained from the `ℤ`-comparisons by restricting
+  scalars.
 
 ## Main results
 
@@ -427,7 +428,7 @@ variable [ContinuousSMul G X.V]
 
 /-- The explicit `H¹` of the carrier of a discrete smooth representation `X` over any scalars, with
 the action read off from `X`, is Mathlib's `continuousCohomology 1 X`. -/
-noncomputable def explicitH1AddEquivContinuousCohomologyOfDiscrete :
+noncomputable def _root_.TopRep.explicitH1AddEquivContinuousCohomologyOfDiscrete :
     H1 G X.V ≃+ continuousCohomology 1 X :=
   (explicitH1AddEquivContinuousCohomology G X.V).trans
     (eqToIso (congrArg (continuousCohomology 1) (ofDiscreteModule_eq_restrictScalarsInt_obj X)) ≪≫
@@ -435,7 +436,8 @@ noncomputable def explicitH1AddEquivContinuousCohomologyOfDiscrete :
 
 /-- The explicit `H²` of the carrier of a discrete smooth representation `X` over any scalars, with
 the action read off from `X`, is Mathlib's `continuousCohomology 2 X`. -/
-noncomputable def explicitH2AddEquivContinuousCohomologyOfDiscrete [LocallyCompactSpace G] :
+noncomputable def _root_.TopRep.explicitH2AddEquivContinuousCohomologyOfDiscrete
+    [LocallyCompactSpace G] :
     H2 G X.V ≃+ continuousCohomology 2 X :=
   (explicitH2AddEquivContinuousCohomology G X.V).trans
     (eqToIso (congrArg (continuousCohomology 2) (ofDiscreteModule_eq_restrictScalarsInt_obj X)) ≪≫
