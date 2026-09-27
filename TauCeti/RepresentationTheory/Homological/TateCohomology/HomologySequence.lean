@@ -24,10 +24,9 @@ isomorphisms in every degree.
 ## Main statements
 
 * `TauCeti.TateCohomology.exact₂`: exactness of `Ĥⁿ(G, X₁) ⟶ Ĥⁿ(G, X₂) ⟶ Ĥⁿ(G, X₃)`.
-* `TauCeti.TateCohomology.surjective_map_f_of_isZero_X₃`,
-  `TauCeti.TateCohomology.injective_map_f_of_isZero_X₃`,
-  `TauCeti.TateCohomology.bijective_map_f_of_isZero_X₃`: vanishing of the Tate cohomology of `X₃`
-  makes the map induced by `X₁ ⟶ X₂` surjective, injective, or bijective.
+* `TauCeti.TateCohomology.map_f_surjective_of_isZero_X₃`,
+  `TauCeti.TateCohomology.map_f_injective_of_isZero_X₃`: vanishing of the Tate cohomology of `X₃`
+  makes the map induced by `X₁ ⟶ X₂` surjective in that degree and injective in the next.
 * `TauCeti.TateCohomology.isZero_X₃_of_surjective_of_injective`: the converse, from two
   consecutive degrees.
 -/
@@ -52,26 +51,19 @@ theorem exact₂ (n : ℤ) :
   (_root_.TateCohomology.map_tateComplexFunctor_shortExact hS).homology_exact₂ n
 
 /-- If `Ĥⁿ(G, X₃) = 0`, the map `Ĥⁿ(G, X₁) ⟶ Ĥⁿ(G, X₂)` induced by `X₁ ⟶ X₂` is surjective. -/
-theorem surjective_map_f_of_isZero_X₃ (n : ℤ) (h : IsZero (tateCohomology S.X₃ n)) :
+theorem map_f_surjective_of_isZero_X₃ (n : ℤ) (h : IsZero (tateCohomology S.X₃ n)) :
     Function.Surjective ((tateCohomologyFunctor n).map S.f) := by
   rw [← ModuleCat.epi_iff_surjective]
   exact (exact₂ hS n).epi_f (h.eq_zero_of_tgt _)
 
 /-- If `Ĥᵐ(G, X₃) = 0`, the map `Ĥⁿ(G, X₁) ⟶ Ĥⁿ(G, X₂)` induced by `X₁ ⟶ X₂` is injective in
 the next degree `n = m + 1`. -/
-theorem injective_map_f_of_isZero_X₃ (m n : ℤ) (hmn : m + 1 = n)
+theorem map_f_injective_of_isZero_X₃ (m n : ℤ) (hmn : m + 1 = n)
     (h : IsZero (tateCohomology S.X₃ m)) :
     Function.Injective ((tateCohomologyFunctor n).map S.f) := by
   subst hmn
   rw [← ModuleCat.mono_iff_injective]
   exact (_root_.TateCohomology.exact₁ hS m).mono_g (h.eq_zero_of_src _)
-
-/-- If the Tate cohomology of `X₃` vanishes in the consecutive degrees `m` and `n = m + 1`, the
-map `Ĥⁿ(G, X₁) ⟶ Ĥⁿ(G, X₂)` induced by `X₁ ⟶ X₂` is bijective. -/
-theorem bijective_map_f_of_isZero_X₃ (m n : ℤ) (hmn : m + 1 = n)
-    (hm : IsZero (tateCohomology S.X₃ m)) (hn : IsZero (tateCohomology S.X₃ n)) :
-    Function.Bijective ((tateCohomologyFunctor n).map S.f) :=
-  ⟨injective_map_f_of_isZero_X₃ hS m n hmn hm, surjective_map_f_of_isZero_X₃ hS n hn⟩
 
 /-- If the map induced by `X₁ ⟶ X₂` on Tate cohomology is surjective in degree `m` and injective
 in degree `n = m + 1`, then `Ĥᵐ(G, X₃) = 0`. -/

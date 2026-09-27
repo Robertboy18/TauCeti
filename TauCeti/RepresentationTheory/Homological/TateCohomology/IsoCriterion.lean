@@ -18,8 +18,8 @@ Let `G` be a finite group and `f : A ⟶ B` a morphism of representations of `G`
 every subgroup `S` of `G` of prime-power order the map induced by `f` on the Tate cohomology of
 `S` is surjective in degree `q - 1`, bijective in degree `q` and injective in degree `q + 1`.
 Then `f` induces isomorphisms `Ĥⁿ(S, A) ≃ Ĥⁿ(S, B)` in every integer degree `n`, for every
-subgroup `S` of `G` (`TauCeti.TateCohomology.bijective_map_res_of_forall_isPGroup`), and in
-particular for `G` itself (`TauCeti.TateCohomology.bijective_map_of_forall_isPGroup`).
+subgroup `S` of `G` (`TauCeti.TateCohomology.map_res_bijective_of_forall_isPGroup`), and in
+particular for `G` itself (`TauCeti.TateCohomology.map_bijective_of_forall_isPGroup`).
 
 This is the heart of Tate's theorem in the form given by Artin and Tate (*Class Field Theory*,
 Preliminaries, §2, Theorem A): once the cohomology class is moved to degree zero by dimension
@@ -41,9 +41,9 @@ consumes.
 
 ## Main statements
 
-* `TauCeti.TateCohomology.bijective_map_res_of_forall_isPGroup`: the criterion, with the
+* `TauCeti.TateCohomology.map_res_bijective_of_forall_isPGroup`: the criterion, with the
   conclusion on every subgroup of `G`.
-* `TauCeti.TateCohomology.bijective_map_of_forall_isPGroup`: the criterion, with the conclusion
+* `TauCeti.TateCohomology.map_bijective_of_forall_isPGroup`: the criterion, with the conclusion
   on `G` itself.
 
 ## References
@@ -72,7 +72,7 @@ private theorem mono_lift_coindBotUnit : Mono (biprod.lift f (coindBotUnit A)) :
 variable (A B) in
 /-- On the Tate cohomology of a finite subgroup, the projection `B ⊞ Coind_⊥^G A ⟶ B` is a
 bijection, because the second summand has no Tate cohomology there. -/
-private theorem bijective_map_res_biprod_fst (S : Subgroup G) [Fintype S] (n : ℤ) :
+private theorem map_res_biprod_fst_bijective (S : Subgroup G) [Fintype S] (n : ℤ) :
     Function.Bijective ((tateCohomologyFunctor n).map
       ((resFunctor S.subtype).map (biprod.fst : B ⊞ coindBot k G A.V ⟶ B))) :=
   haveI := (resFunctor S.subtype ⋙ tateCohomologyFunctor n).isIso_map_biprod_fst_of_isZero
@@ -92,27 +92,27 @@ private theorem coe_map_res_eq (S : Subgroup G) [Fintype S] (n : ℤ) :
 
 /-- `f` and the monomorphism `A ⟶ B ⊞ Coind_⊥^G A` are surjective in the same degrees on the Tate
 cohomology of a finite subgroup. -/
-private theorem surjective_map_res_lift_iff (S : Subgroup G) [Fintype S] (n : ℤ) :
+private theorem map_res_lift_surjective_iff (S : Subgroup G) [Fintype S] (n : ℤ) :
     Function.Surjective ((tateCohomologyFunctor n).map ((resFunctor S.subtype).map
         (biprod.lift f (coindBotUnit A)))) ↔
       Function.Surjective ((tateCohomologyFunctor n).map ((resFunctor S.subtype).map f)) := by
-  rw [coe_map_res_eq f S n, Function.Surjective.of_comp_iff' (bijective_map_res_biprod_fst A B S n)]
+  rw [coe_map_res_eq f S n, Function.Surjective.of_comp_iff' (map_res_biprod_fst_bijective A B S n)]
 
 /-- `f` and the monomorphism `A ⟶ B ⊞ Coind_⊥^G A` are injective in the same degrees on the Tate
 cohomology of a finite subgroup. -/
-private theorem injective_map_res_lift_iff (S : Subgroup G) [Fintype S] (n : ℤ) :
+private theorem map_res_lift_injective_iff (S : Subgroup G) [Fintype S] (n : ℤ) :
     Function.Injective ((tateCohomologyFunctor n).map ((resFunctor S.subtype).map
         (biprod.lift f (coindBotUnit A)))) ↔
       Function.Injective ((tateCohomologyFunctor n).map ((resFunctor S.subtype).map f)) := by
   rw [coe_map_res_eq f S n,
-    Function.Injective.of_comp_iff (bijective_map_res_biprod_fst A B S n).1]
+    Function.Injective.of_comp_iff (map_res_biprod_fst_bijective A B S n).1]
 
 /-- **Tate's isomorphism criterion**, on every subgroup. Let `G` be a finite group and `f : A ⟶ B`
 a morphism of representations of `G`. If, for every subgroup `S` of `G` of prime-power order, the
 map induced by `f` on the Tate cohomology of `S` is surjective in degree `q - 1`, bijective in
 degree `q` and injective in degree `q + 1`, then it is bijective in every degree `n` for every
 subgroup `S` of `G`. -/
-theorem bijective_map_res_of_forall_isPGroup [Finite G] {q : ℤ}
+theorem map_res_bijective_of_forall_isPGroup [Finite G] {q : ℤ}
     (hsurj : ∀ (p : ℕ) [Fact p.Prime] (S : Subgroup G) [Fintype S], IsPGroup p S →
       Function.Surjective ((tateCohomologyFunctor (q - 1)).map ((resFunctor S.subtype).map f)))
     (hbij : ∀ (p : ℕ) [Fact p.Prime] (S : Subgroup G) [Fintype S], IsPGroup p S →
@@ -134,22 +134,23 @@ theorem bijective_map_res_of_forall_isPGroup [Finite G] {q : ℤ}
     refine isZero_of_forall_isPGroup T.X₃ (q := q - 1) (fun p _ P _ hP ↦ ?_)
       (fun p _ P _ hP ↦ ?_) S m
     · exact isZero_X₃_of_surjective_of_injective (hT P) (q - 1) q (sub_add_cancel q 1)
-        ((surjective_map_res_lift_iff f P (q - 1)).2 (hsurj p P hP))
-        ((injective_map_res_lift_iff f P q).2 (hbij p P hP).1)
+        ((map_res_lift_surjective_iff f P (q - 1)).2 (hsurj p P hP))
+        ((map_res_lift_injective_iff f P q).2 (hbij p P hP).1)
     · rw [sub_add_cancel]
       exact isZero_X₃_of_surjective_of_injective (hT P) q (q + 1) rfl
-        ((surjective_map_res_lift_iff f P q).2 (hbij p P hP).2)
-        ((injective_map_res_lift_iff f P (q + 1)).2 (hinj p P hP))
+        ((map_res_lift_surjective_iff f P q).2 (hbij p P hP).2)
+        ((map_res_lift_injective_iff f P (q + 1)).2 (hinj p P hP))
   rw [coe_map_res_eq f S n]
-  exact (bijective_map_res_biprod_fst A B S n).comp
-    (bijective_map_f_of_isZero_X₃ (hT S) (n - 1) n (sub_add_cancel n 1) (hC S (n - 1)) (hC S n))
+  exact (map_res_biprod_fst_bijective A B S n).comp
+    ⟨map_f_injective_of_isZero_X₃ (hT S) (n - 1) n (sub_add_cancel n 1) (hC S (n - 1)),
+      map_f_surjective_of_isZero_X₃ (hT S) n (hC S n)⟩
 
 /-- **Tate's isomorphism criterion.** Let `G` be a finite group and `f : A ⟶ B` a morphism of
 representations of `G`. If, for every subgroup `S` of `G` of prime-power order, the map induced by
 `f` on the Tate cohomology of `S` is surjective in degree `q - 1`, bijective in degree `q` and
 injective in degree `q + 1`, then `f` induces a bijection `Ĥⁿ(G, A) → Ĥⁿ(G, B)` in every
 degree `n`. -/
-theorem bijective_map_of_forall_isPGroup [Fintype G] {q : ℤ}
+theorem map_bijective_of_forall_isPGroup [Fintype G] {q : ℤ}
     (hsurj : ∀ (p : ℕ) [Fact p.Prime] (S : Subgroup G) [Fintype S], IsPGroup p S →
       Function.Surjective ((tateCohomologyFunctor (q - 1)).map ((resFunctor S.subtype).map f)))
     (hbij : ∀ (p : ℕ) [Fact p.Prime] (S : Subgroup G) [Fintype S], IsPGroup p S →
@@ -161,12 +162,12 @@ theorem bijective_map_of_forall_isPGroup [Fintype G] {q : ℤ}
   -- Restriction along `⊤ ≃* G` does not change Tate cohomology, naturally in the coefficients, so
   -- the statement on `G` is the statement on the subgroup `⊤`. The monoid homomorphism underlying
   -- `Subgroup.topEquiv` is `(⊤ : Subgroup G).subtype` by definition, which is how the conclusion
-  -- of `bijective_map_res_of_forall_isPGroup` at `⊤` matches the restriction in `resIso`.
+  -- of `map_res_bijective_of_forall_isPGroup` at `⊤` matches the restriction in `resIso`.
   have hnat := (resIso (Subgroup.topEquiv : (⊤ : Subgroup G) ≃* G) n).hom.naturality f
   have : IsIso ((resFunctor ((Subgroup.topEquiv : (⊤ : Subgroup G) ≃* G) : (⊤ : Subgroup G) →* G) ⋙
       tateCohomologyFunctor n).map f) :=
     (ConcreteCategory.isIso_iff_bijective _).2
-      (bijective_map_res_of_forall_isPGroup f hsurj hbij hinj ⊤ n)
+      (map_res_bijective_of_forall_isPGroup f hsurj hbij hinj ⊤ n)
   rw [(IsIso.eq_inv_comp _).2 hnat.symm]
   exact ConcreteCategory.bijective_of_isIso _
 

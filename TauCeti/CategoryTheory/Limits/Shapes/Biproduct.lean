@@ -129,8 +129,8 @@ sends the first projection to an isomorphism, with inverse the image of the firs
 theorem isIso_map_biprod_fst_of_isZero (X Y : C) [HasBinaryBiproduct X Y]
     (hY : IsZero (F.obj Y)) : IsIso (F.map (biprod.fst : X ⊞ Y ⟶ X)) := by
   refine ⟨F.map biprod.inl, ?_, ?_⟩
-  · rw [← F.map_comp, eq_sub_of_add_eq biprod.total, F.map_sub, F.map_id, F.map_comp,
-      hY.eq_zero_of_tgt (F.map biprod.snd), zero_comp, sub_zero]
+  · rw [← F.map_comp, eq_sub_of_add_eq biprod.total]
+    simp [hY.eq_zero_of_tgt (F.map biprod.snd)]
   · rw [← F.map_comp, biprod.inl_fst, F.map_id]
 
 end CategoryTheory.Functor
