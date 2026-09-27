@@ -38,8 +38,8 @@ The class-level agreement is stated twice. The additive comparisons
 `TauCeti.ContCohomology.explicitH1AddEquivContinuousCohomology` and
 `TauCeti.ContCohomology.explicitH2AddEquivContinuousCohomology` exist for every topological group,
 resp. every locally compact one, and the agreement under them carries exactly these hypotheses.
-The comparison isomorphisms in `TopModuleCat ℤ` need `G` compact, since only then is the canonical
-cohomology discrete, and the agreement under them, in the form the roadmap fixes, is a corollary.
+The comparison isomorphisms in `TopModuleCat ℤ` assume `G` compact, which makes the canonical
+cohomology discrete; the agreement under them is a corollary.
 
 This is what lets a consumer compute the canonical cup product of low-degree classes on explicit
 cocycles, for instance the cup square `H¹(G, 𝔽_p) × H¹(G, 𝔽_p) → H²(G, 𝔽_p)` against which the

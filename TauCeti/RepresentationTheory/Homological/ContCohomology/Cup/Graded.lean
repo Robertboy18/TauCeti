@@ -570,10 +570,7 @@ theorem resolutionCupPairing_one_one_apply (a : (TopRep.resolution'X X 1).V)
   rw [resolutionCupPairing_apply_succ, HomologicalComplex.XIsoOfEq_rfl]
   -- the transport along `0 + 1 + 1 = 0 + 1 + 1` is the identity
   change (P.resolutionCupPairing 0 1 (a g₀) b : C(G, C(G, Z.V))) g₁ g₂ = _
-  rw [resolutionCupPairing_apply_zero, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `1 = 0 + 1` is the identity
-  change (P.pointwise 1 1 rfl (a g₀ g₁, b g₁) : C(G, Z.V)) g₂ = _
-  rw [pointwise_succ_apply, pointwise_zero_apply]
+  rw [resolutionCupPairing_zero_one_apply]
 
 /-- **The resolution pairing is jointly continuous.** -/
 theorem continuous_resolutionCupPairing (m n : ℕ) :
