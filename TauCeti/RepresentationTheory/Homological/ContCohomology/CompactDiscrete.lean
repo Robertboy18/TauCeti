@@ -78,11 +78,12 @@ variable {X}
 attribute [local instance] TopRep.distribMulAction
 
 omit [DiscreteTopology X.V] in
-/-- **Coinduction from the trivial subgroup preserves smoothness** over a compact group: the
-stabilizer of `F : C(G, X)` under `(g • F) x = g • F (g⁻¹ * x)` contains an open neighbourhood of
-`1`, by the tube lemma applied to the locus where the two locally constant maps
-`(g, x) ↦ g • F (g⁻¹ * x)` and `(g, x) ↦ F x` agree. -/
+/-- **Coinduction from the trivial subgroup preserves smoothness** over a compact group: if `X` is
+a smooth discrete representation of the compact group `G`, so is `X.coind₁ = C(G, X)`. -/
 theorem IsSmoothDiscrete.coind₁ (hX : IsSmoothDiscrete k X) : IsSmoothDiscrete k X.coind₁ := by
+  -- The stabilizer of `F : C(G, X)` under `(g • F) x = g • F (g⁻¹ * x)` contains an open
+  -- neighbourhood of `1`, by the tube lemma applied to the locus where the two locally constant
+  -- maps `(g, x) ↦ g • F (g⁻¹ * x)` and `(g, x) ↦ F x` agree.
   have := hX.discreteTopology
   have : ContinuousSMul G X.V := hX.continuousSMul
   refine ⟨inferInstance, fun F ↦ ?_⟩
@@ -158,11 +159,12 @@ theorem ResolutionVanishesOn.mono {T T' : Set G} (h : T' ⊆ T) :
 
 /-- **Vanishing on a compact set spreads to an open neighbourhood.** An element of the coinduced
 resolution of a discrete representation of a compact group that vanishes on a compact set `T`
-vanishes on an open set containing `T`: on `T` it takes finitely many values, each of which
-vanishes on `T` in one degree less. -/
+vanishes on an open set containing `T`. -/
 theorem ResolutionVanishesOn.exists_isOpen {T : Set G} (hT : IsCompact T) (n : ℕ) :
     ∀ {F : (TopRep.resolutionX X n).V}, ResolutionVanishesOn X T n F →
       ∃ W : Set G, IsOpen W ∧ T ⊆ W ∧ ResolutionVanishesOn X W n F := by
+  -- On `T` the locally constant map `F` takes finitely many values, each of which vanishes on `T`
+  -- in one degree less; induct on the degree.
   induction n with
   | zero => exact fun hF ↦ ⟨Set.univ, isOpen_univ, Set.subset_univ _, hF⟩
   | succ n ih =>

@@ -118,11 +118,13 @@ theorem _root_.Subgroup.exists_le_of_iInf_le_of_directed {ι : Type*} [Nonempty 
   exact ⟨i, fun x hx ↦ by_contra fun hxM ↦ hi.notMem_of_mem_left hxM hx⟩
 
 /-- **An open neighbourhood of a closed subgroup contains an open subgroup containing it.** In a
-profinite group, a closed subgroup `H` is the intersection of the open subgroups `H ⊔ U`, `U` open
-normal, so by compactness any open set containing `H` contains one of them. -/
+profinite group, every open set containing a closed subgroup `H` contains an open subgroup
+`V ≥ H`. -/
 theorem _root_.Subgroup.exists_openSubgroup_le_subset_of_isClosed (H : Subgroup G)
     (hH : IsClosed (H : Set G)) {W : Set G} (hW : IsOpen W) (hHW : (H : Set G) ⊆ W) :
     ∃ V : OpenSubgroup G, H ≤ V ∧ (V : Set G) ⊆ W := by
+  -- `H` is the intersection of the open subgroups `H ⊔ U`, `U` open normal, so by compactness of
+  -- `Wᶜ` one of them is already contained in `W`.
   have hopen (U : OpenNormalSubgroup G) : IsOpen ((H ⊔ U.toSubgroup : Subgroup G) : Set G) :=
     Subgroup.isOpen_mono le_sup_right U.toOpenSubgroup.isOpen
   -- the intersection of the `H ⊔ U` is `H`, which misses the compact set `Wᶜ`

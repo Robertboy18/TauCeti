@@ -31,15 +31,10 @@ This file proves that description elementwise, in every degree, on Mathlib's can
   `V ⊇ H`. Applied with an open subgroup in place of `G`, this says that two classes of `Hⁿ(V, X)`
   with the same restriction to `H` agree after restriction to some open `V' ⊆ V` containing `H`.
 
-Both statements are proved on the homogeneous cochains `C(G, C(G, …, X))` of the coinduced
-resolution, where the point is that everything is locally constant. A cochain of `H` extends to a
-cochain of `G`: an invariant cochain is determined by its value at `1`, and a continuous map from
-the closed subspace `H` of the profinite space `G` into a discrete space extends continuously to
-`G`. A cochain of `G` vanishing on `H` vanishes on an open neighbourhood of `H`, since a locally
-constant map on a compact set takes finitely many values, and an open neighbourhood of a closed
-subgroup contains an open subgroup containing it. Smoothness of `X` enters exactly once, to make
-the orbit maps `g ↦ g • v` of the resolution continuous, which is what a cochain determined by its
-value at `1` needs in order to exist.
+Both statements are established on the homogeneous cochains `C(G, C(G, …, X))` of the coinduced
+resolution, which are locally constant, and then transported to cohomology. Smoothness of `X` is
+used to extend invariant cochains from `H` to `G`: it makes the orbit maps `g ↦ g • v` of the
+resolution continuous.
 
 ## Main results
 
@@ -125,11 +120,13 @@ variable (X) in
 /-- **Restriction of the coinduced resolution to a closed subgroup is surjective.** Over a
 profinite group, every element of the coinduced resolution of the restriction of a discrete
 representation to a closed subgroup `H` is the restriction of an element of the resolution of
-`G`: a continuous map from the closed subspace `H` into a discrete space extends to `G`. -/
+`G`. -/
 theorem resolutionMap_subgroupSubtype_surjective {H : Subgroup G} (hH : IsClosed (H : Set G))
     (n : ℕ) :
     Function.Surjective (resolutionMap (ContinuousMonoidHom.subgroupSubtype H)
       (𝟙 (TopRep.res (H.subtype : H →* G) X)) n).hom := by
+  -- A continuous map from the closed subspace `H` of the profinite space `G` into a discrete space
+  -- extends continuously to `G`; induct on the degree.
   induction n with
   | zero => exact fun w ↦ ⟨w, rfl⟩
   | succ n ih =>
@@ -155,9 +152,7 @@ omit [DiscreteTopology X.V] in
 /-- **An invariant cochain of a closed subgroup extends to an invariant cochain of the group.**
 Over a profinite group and for a smooth discrete representation `X`, every `H`-invariant element
 `w` of the coinduced resolution of the restriction of `X` to a closed subgroup `H` is the
-restriction of a `G`-invariant element of the resolution of `X`: an invariant element is
-determined by its value at `1` as `g ↦ g • v`, and that value extends to `G` by
-`resolutionMap_subgroupSubtype_surjective`. -/
+restriction of a `G`-invariant element of the resolution of `X`. -/
 theorem exists_mem_invariants_resolutionMap_subgroupSubtype_eq (hX : IsSmoothDiscrete k X)
     {H : Subgroup G} (hH : IsClosed (H : Set G)) (n : ℕ)
     {w : (TopRep.resolutionX (TopRep.res (H.subtype : H →* G) X) (n + 1)).V}
@@ -165,6 +160,9 @@ theorem exists_mem_invariants_resolutionMap_subgroupSubtype_eq (hX : IsSmoothDis
     ∃ W ∈ (TopRep.resolutionX X (n + 1)).ρ.invariants,
       (resolutionMap (ContinuousMonoidHom.subgroupSubtype H)
         (𝟙 (TopRep.res (H.subtype : H →* G) X)) (n + 1)).hom W = w := by
+  -- An invariant element is determined by its value `v` at `1` as `g ↦ g • v`; lift `w 1` to `G`
+  -- by `resolutionMap_subgroupSubtype_surjective` and take the orbit map of the lift, which is
+  -- continuous because the resolution is smooth.
   have := hX.discreteTopology
   set w' : C(H, (TopRep.resolutionX (TopRep.res (H.subtype : H →* G) X) n).V) := w
   obtain ⟨u, hu⟩ : ∃ u : (TopRep.resolutionX X n).V,
