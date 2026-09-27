@@ -158,10 +158,10 @@ theorem le_add_fenchelConjugate (hx : f x ≠ ⊥) (hy : fenchelConjugate B f y 
 theorem fenchelConjugate_top (y : F) : fenchelConjugate B (⊤ : E → EReal) y = ⊥ :=
   (fenchelConjugate_eq_bot_iff B).2 fun _ => rfl
 
-/-- On a nonempty space, the conjugate of the constant `⊥` is the constant `⊤`. -/
+/-- The conjugate of the constant `⊥` is the constant `⊤`. -/
 @[simp]
-theorem fenchelConjugate_bot [Nonempty E] (y : F) : fenchelConjugate B (⊥ : E → EReal) y = ⊤ :=
-  fenchelConjugate_eq_top_of_eq_bot B (x := Classical.arbitrary E) rfl y
+theorem fenchelConjugate_bot (y : F) : fenchelConjugate B (⊥ : E → EReal) y = ⊤ :=
+  fenchelConjugate_eq_top_of_eq_bot B (x := 0) rfl y
 
 /-! ### The Galois connection and the biconjugate -/
 
@@ -196,16 +196,13 @@ theorem fenchelConjugate_antitone : Antitone (fenchelConjugate B) := fun _ _ h y
 transposed pairing. -/
 theorem fenchelConjugate_flip_fenchelConjugate_le (f : E → EReal) :
     fenchelConjugate B.flip (fenchelConjugate B f) ≤ f :=
-  (fenchelConjugate_le_iff_fenchelConjugate_flip_le B).1 le_rfl
+  (fenchelConjugate_galoisConnection B).l_u_le f
 
 /-- The triple conjugate is the conjugate: `f⋆⋆⋆ = f⋆`. -/
 theorem fenchelConjugate_fenchelConjugate_flip_fenchelConjugate (f : E → EReal) :
     fenchelConjugate B (fenchelConjugate B.flip (fenchelConjugate B f)) =
-      fenchelConjugate B f := by
-  refine le_antisymm ?_
-    (fenchelConjugate_antitone B (fenchelConjugate_flip_fenchelConjugate_le B f))
-  have h := fenchelConjugate_flip_fenchelConjugate_le B.flip (fenchelConjugate B f)
-  rwa [LinearMap.flip_flip] at h
+      fenchelConjugate B f :=
+  OrderDual.toDual.injective ((fenchelConjugate_galoisConnection B).u_l_u_eq_u f)
 
 /-- Adding a real constant to a function subtracts it from the conjugate. -/
 @[simp]

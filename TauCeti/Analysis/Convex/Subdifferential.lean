@@ -73,6 +73,7 @@ def subdifferential (B : E →ₗ[ℝ] F →ₗ[ℝ] ℝ) (f : E → EReal) (x :
 variable (B : E →ₗ[ℝ] F →ₗ[ℝ] ℝ) {f : E → EReal} {x : E} {y : F} {r : ℝ}
 
 /-- The defining condition for a subgradient. -/
+@[simp]
 theorem mem_subdifferential_iff :
     y ∈ subdifferential B f x ↔
       f x ≠ ⊥ ∧ f x ≠ ⊤ ∧ ∀ x', f x + (B (x' - x) y : EReal) ≤ f x' :=
@@ -100,7 +101,8 @@ theorem subdifferential_eq_empty_of_eq_top (h : f x = ⊤) : subdifferential B f
   Set.eq_empty_of_forall_notMem fun _ hy => ne_top_of_mem_subdifferential B hy h
 
 /-- For a real-valued function, a subgradient is a `y` satisfying the subgradient inequality. -/
-@[simp]
+-- Not `@[simp]`: `mem_subdifferential_iff` already rewrites the left-hand side, so this lemma
+-- fails the `simpNF` linter.
 theorem mem_subdifferential_coe_iff (f : E → ℝ) :
     y ∈ subdifferential B (fun x => (f x : EReal)) x ↔ ∀ x', f x + B (x' - x) y ≤ f x' := by
   simp only [mem_subdifferential_iff, ne_eq, EReal.coe_ne_bot, EReal.coe_ne_top,
