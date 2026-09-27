@@ -12,7 +12,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationRank
 /-!
 # The deficiency of a pro-`p` group
 
-Let `G` be a topologically finitely generated pro-`p` group with generator rank `d(G)` and
+Let `G` be a topologically finitely generated pro-`p` group with generator rank `d(G)` and finite
 relation rank `r(G) = dim_{𝔽_p} H²(G, 𝔽_p)`. Its **deficiency** is the integer
 `def(G) = d(G) - r(G)`. The deficiency bounds every finite presentation of `G`: for a presentation
 `G ≅ ⟨X ∣ rels⟩` of `G` by a free pro-`p` group `F` on a finite type `X` and finitely many
@@ -43,7 +43,10 @@ the identity
 
 for every presentation, minimal or not, and `d(R ⧸ Rᵖ[R, F]) ≤ #rels` since the relators generate
 `R` normally. For a minimal presentation, `#X = d(G)` and the identity is the count
-`r(G) = d(R ⧸ Rᵖ[R, F])` of `TauCeti.presentedProP.finrank_H2`.
+`r(G) = d(R ⧸ Rᵖ[R, F])` of `TauCeti.presentedProP.finrank_H2`. The surjectivity of the
+transgression alone shows that `H²(G, 𝔽_p)` is finite as soon as `R ⧸ Rᵖ[R, F]` is topologically
+finitely generated, whatever the rank of `F`, so a finitely presented pro-`p` group has a finite
+relation rank.
 
 The identity is proved first for the explicit model `H2 G (ZMod p)` of the cohomology, with the
 trivial action of `G` on `𝔽_p` carried as an instance together with the hypothesis that it is
@@ -52,7 +55,9 @@ inequality are then stated for `cohomFp p G 2`, the canonical carrier of every d
 
 ## Main definitions
 
-* `TauCeti.deficiency`: the deficiency `def(G) = d(G) - dim_{𝔽_p} H²(G, 𝔽_p)`, in `ℤ`.
+* `TauCeti.deficiency`: the deficiency `def(G) = d(G) - dim_{𝔽_p} H²(G, 𝔽_p)`, in `ℤ`, of a
+  topologically finitely generated group with finite-dimensional `H²(G, 𝔽_p)`; both finiteness
+  proofs are carried, as `TauCeti.topologicalGeneratorRankNat` carries its own.
 
 ## Main results
 
@@ -62,9 +67,9 @@ inequality are then stated for `cohomFp p G 2`, the canonical carrier of every d
 * `TauCeti.presentedProP.card_add_finrank_H2`, `TauCeti.presentedProP.card_add_finrank_cohomFp_two`:
   the same identity for a presentation `⟨X ∣ rels⟩ ≅ G`, on the explicit and on the canonical
   carrier.
-* `TauCeti.presentedProP.finite_H2_of_finite`,
+* `TauCeti.finite_H2_of_isClosed`, `TauCeti.presentedProP.finite_H2_of_finite`,
   `TauCeti.presentedProP.module_finite_cohomFp_two_of_finite`: `H²(G, 𝔽_p)` is finite for a group
-  with a finite presentation.
+  with a finite presentation, on any generating type.
 * `TauCeti.presentedProP.card_sub_card_le_deficiency`: `#X - #rels ≤ def(G)`, and
   `TauCeti.presentedProP.card_sub_card_eq_deficiency_iff`: equality holds exactly when the
   number of relators is the least number of normal generators of the relation subgroup.
@@ -88,6 +93,49 @@ universe u v w
 -- Preferring the ring path keeps a single additive structure on `ZMod p`, so that the trivial
 -- action installed below is the one the explicit `H²(G, 𝔽_p)` is stated against.
 attribute [local instance 2000] Ring.toAddCommGroup
+
+section Deficiency
+
+-- The deficiency needs no primality of `p`, so the section precedes the `Fact p.Prime` variable.
+variable (p : ℕ) (G : Type v) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
+
+/-- **The deficiency** `def(G) = d(G) - r(G)` of a topologically finitely generated topological
+group with finite-dimensional `H²(G, 𝔽_p)`, in `ℤ`: the topological generator rank minus the
+relation rank `dim_{𝔽_p} H²(G, 𝔽_p)`. The subtraction is in `ℤ`, so no natural-number truncation
+occurs, and both finiteness proofs are carried, as `TauCeti.topologicalGeneratorRankNat` carries its
+own, so that the value is never a truncation artefact. For a pro-`p` group with a finite
+presentation `⟨X ∣ rels⟩` the deficiency is an upper bound for `#X - #rels`
+(`TauCeti.presentedProP.card_sub_card_le_deficiency`), attained exactly when
+`#rels = d(R ⧸ Rᵖ[R, F])` (`TauCeti.presentedProP.card_sub_card_eq_deficiency_iff`). -/
+noncomputable def deficiency (hfg : IsTopologicallyFinitelyGenerated G)
+    (_hfin : Module.Finite (ZMod p) (cohomFp p G 2)) : ℤ :=
+  (topologicalGeneratorRankNat G hfg : ℤ) - Module.finrank (ZMod p) (cohomFp p G 2)
+
+/-- The deficiency is the generator rank minus the relation rank. -/
+theorem deficiency_def (hfg : IsTopologicallyFinitelyGenerated G)
+    (hfin : Module.Finite (ZMod p) (cohomFp p G 2)) :
+    deficiency p G hfg hfin =
+      (topologicalGeneratorRankNat G hfg : ℤ) - Module.finrank (ZMod p) (cohomFp p G 2) :=
+  (rfl)
+
+/-- **`d(G) = def(G) + r(G)`**: the generator rank is the deficiency plus the relation rank. -/
+theorem deficiency_add_finrank_cohomFp_two (hfg : IsTopologicallyFinitelyGenerated G)
+    (hfin : Module.Finite (ZMod p) (cohomFp p G 2)) :
+    deficiency p G hfg hfin + Module.finrank (ZMod p) (cohomFp p G 2) =
+      topologicalGeneratorRankNat G hfg := by
+  rw [deficiency_def, sub_add_cancel]
+
+variable {G} in
+/-- **The deficiency is an isomorphism invariant.** -/
+theorem deficiency_congr [LocallyCompactSpace G] {H : Type w} [Group H] [TopologicalSpace H]
+    [IsTopologicalGroup H] (e : G ≃ₜ* H) (hG : IsTopologicallyFinitelyGenerated G)
+    (hGfin : Module.Finite (ZMod p) (cohomFp p G 2)) (hH : IsTopologicallyFinitelyGenerated H)
+    (hHfin : Module.Finite (ZMod p) (cohomFp p H 2)) :
+    deficiency p G hG hGfin = deficiency p H hH hHfin := by
+  rw [deficiency_def, deficiency_def, topologicalGeneratorRankNat_congr e,
+    finrank_cohomFp_two_congr p e]
+
+end Deficiency
 
 variable {p : ℕ} [Fact p.Prime]
 
@@ -121,13 +169,9 @@ theorem natCard_H2_quotient_mul_pow_card_of_isClosed
   have hA : Nat.card (FixedPoints.addSubgroup R (ZMod p)) = p := by
     rw [fixedPoints_addSubgroup_eq_top_of_smul_eq (ZMod p) R htrivF, AddSubgroup.card_top,
       Nat.card_zmod]
-  have hQtriv : ∀ (g : freeProP p X ⧸ R) (m : FixedPoints.addSubgroup R (ZMod p)), g • m = m :=
-    fun g m ↦ by
-      obtain ⟨x, rfl⟩ := QuotientGroup.mk_surjective g
-      rw [coe_quotient_smul_fixedPoints_addSubgroup]
-      exact Subtype.ext ((coe_smul_fixedPoints_addSubgroup x m).trans (htrivF x m))
   have hQ := ((isProP_freeProP p X).quotient R).natCard_H1_of_natCard_eq
-    ((isTopologicallyFinitelyGenerated_freeProP p X).quotient R) hA hQtriv
+    ((isTopologicallyFinitelyGenerated_freeProP p X).quotient R) hA
+    (quotient_smul_fixedPoints_addSubgroup_eq_of_smul_eq htrivF)
   have hC := natCard_H1ConjInvariants hRc htrivF h
   have key := natCard_H1_mul_natCard_H2_quotient_of_subsingleton (freeProP p X) (ZMod p) R hRc
   rw [hF, hQ, hC, ← pow_add] at key
@@ -136,8 +180,26 @@ theorem natCard_H2_quotient_mul_pow_card_of_isClosed
 variable {G : Type v} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [DistribMulAction G (ZMod p)] [ContinuousSMul G (ZMod p)]
   (e : freeProP p X ⧸ R ≃ₜ* G) (htriv : ∀ (g : G) (m : ZMod p), g • m = m)
-  (hfg : IsTopologicallyFinitelyGenerated G)
-include e htriv hfg
+include e htriv
+
+omit [Finite X] in
+/-- **`H²(G, 𝔽_p)` is finite for a finitely presented group.** Let `F` be the free pro-`p` group
+on any type `X`, let `R` be a closed normal subgroup with `R ⧸ Rᵖ[R, F]` topologically finitely
+generated, and let `G ≅ F ⧸ R` act trivially on `𝔽_p`, as does `F`. Then `H²(G, 𝔽_p)` is finite:
+it is the image of the finite `H¹(R, 𝔽_p)^F` under the transgression, which is surjective since
+`H²(F, 𝔽_p) = 0`. -/
+theorem finite_H2_of_isClosed
+    (h : IsTopologicallyFinitelyGenerated (R ⧸ (pLowerCentralStep p R).subgroupOf R)) :
+    Finite (H2 G (ZMod p)) := by
+  have := hRc
+  have := freeProP.subsingleton_H2_zmod (p := p) (X := X)
+  have := (finite_H1ConjInvariants_iff hRc htrivF).2 h
+  rw [← (h2QuotientEquiv e htrivF htriv).toEquiv.finite_iff]
+  exact Finite.of_surjective _ ((transgression_surjective_iff (freeProP p X) (ZMod p) R hRc).2
+    (AddMonoidHom.ext fun _ ↦ Subsingleton.elim _ _))
+
+variable (hfg : IsTopologicallyFinitelyGenerated G)
+include hfg
 
 /-- **The five-term count for a group presented by a free pro-`p` group of finite rank.** Let `F`
 be the free pro-`p` group on a finite type `X`, let `R` be a closed normal subgroup with
@@ -151,18 +213,6 @@ theorem natCard_H2_mul_pow_card_of_isClosed
   have := hRc
   rw [← Nat.card_congr (h2QuotientEquiv e htrivF htriv).toEquiv,
     natCard_H2_quotient_mul_pow_card_of_isClosed hRc htrivF h, topologicalGeneratorRankNat_congr e]
-
-/-- **`H²(G, 𝔽_p)` is finite for a finitely presented group.** Let `F` be the free pro-`p` group
-on a finite type `X`, let `R` be a closed normal subgroup with `R ⧸ Rᵖ[R, F]` topologically finitely
-generated, and let `G ≅ F ⧸ R` act trivially on `𝔽_p`, as does `F`. Then `H²(G, 𝔽_p)` is
-finite. -/
-theorem finite_H2_of_isClosed
-    (h : IsTopologicallyFinitelyGenerated (R ⧸ (pLowerCentralStep p R).subgroupOf R)) :
-    Finite (H2 G (ZMod p)) := by
-  refine Nat.finite_of_card_ne_zero fun h0 ↦ ?_
-  have := natCard_H2_mul_pow_card_of_isClosed hRc htrivF e htriv hfg h
-  rw [h0, zero_mul] at this
-  exact pow_ne_zero _ (Fact.out : p.Prime).ne_zero this.symm
 
 /-- **The generator, relation and normal-generator counts of a presentation.** Let `F` be the free
 pro-`p` group on a finite type `X`, let `R` be a closed normal subgroup with `R ⧸ Rᵖ[R, F]`
@@ -179,7 +229,7 @@ theorem card_add_finrank_H2_of_isClosed
     Nat.card X + Module.finrank (ZMod p) (H2 G (ZMod p)) =
       topologicalGeneratorRankNat G hfg +
         topologicalGeneratorRankNat (R ⧸ (pLowerCentralStep p R).subgroupOf R) h := by
-  have := finite_H2_of_isClosed hRc htrivF e htriv hfg h
+  have := finite_H2_of_isClosed hRc htrivF e htriv h
   have key := natCard_H2_mul_pow_card_of_isClosed hRc htrivF e htriv hfg h
   rw [Module.natCard_eq_pow_finrank (K := ZMod p), Nat.card_zmod, ← pow_add] at key
   have := Nat.pow_right_injective (Fact.out : p.Prime).two_le key
@@ -188,53 +238,6 @@ theorem card_add_finrank_H2_of_isClosed
 end Quotient
 
 namespace presentedProP
-
-section Relators
-
-variable {X : Type u} {rels : Set (freeProP p X)}
-
-omit [Fact p.Prime] in
-/-- The relators, as a finite subset of their closed normal closure. -/
-private theorem exists_finset_image_val_eq (hrels : rels.Finite) :
-    ∃ s : Finset (normalClosure rels).topologicalClosure, s.card = Nat.card rels ∧
-      Subtype.val '' (s : Set (normalClosure rels).topologicalClosure) = rels := by
-  classical
-  have hsub : ∀ x ∈ hrels.toFinset, x ∈ (normalClosure rels).topologicalClosure := fun x hx ↦
-    le_topologicalClosure _ (subset_normalClosure (hrels.mem_toFinset.1 hx))
-  have := hrels.fintype
-  refine ⟨hrels.toFinset.subtype _, ?_, ?_⟩
-  · rw [Finset.card_subtype, Finset.filter_true_of_mem hsub, hrels.card_toFinset,
-      Nat.card_eq_fintype_card]
-  · rw [← Function.Embedding.coe_subtype, ← Finset.coe_map, Finset.subtype_map_of_mem hsub,
-      hrels.coe_toFinset]
-
-/-- **A finite relator set normally generates its relation subgroup finitely.** For a finite set of
-relators `rels`, with closed normal closure `R` in the free pro-`p` group `F`, the quotient
-`R ⧸ Rᵖ[R, F]` is topologically finitely generated. -/
-theorem isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_of_finite
-    (hrels : rels.Finite) :
-    IsTopologicallyFinitelyGenerated ((normalClosure rels).topologicalClosure ⧸
-      (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
-        (normalClosure rels).topologicalClosure) := by
-  obtain ⟨s, -, hs⟩ := exists_finset_image_val_eq hrels
-  exact ((isProP_freeProP p X).isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff
-    Fact.out (isClosed_topologicalClosure _)).2 ⟨s, by rw [hs]⟩
-
-/-- **The relators bound the least number of normal generators.** For a finite set of relators
-`rels` with closed normal closure `R` in the free pro-`p` group `F`, the topological generator rank
-of `R ⧸ Rᵖ[R, F]`, which is the least number of generators of `R` as a closed normal subgroup, is
-at most the number of relators. -/
-theorem topologicalGeneratorRankNat_quotient_pLowerCentralStep_le_card (hrels : rels.Finite) :
-    topologicalGeneratorRankNat ((normalClosure rels).topologicalClosure ⧸
-      (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
-        (normalClosure rels).topologicalClosure)
-      (isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_of_finite hrels) ≤
-      Nat.card rels := by
-  obtain ⟨s, hcard, hs⟩ := exists_finset_image_val_eq hrels
-  exact ((isProP_freeProP p X).topologicalGeneratorRankNat_quotient_pLowerCentralStep_le_iff
-    Fact.out (isClosed_topologicalClosure _) _ _).2 ⟨s, hcard.le, by rw [hs]⟩
-
-end Relators
 
 section Count
 
@@ -264,71 +267,30 @@ theorem card_add_finrank_H2 (hfg : IsTopologicallyFinitelyGenerated G)
           (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
             (normalClosure rels).topologicalClosure) h := by
   -- The count needs an action of `F` on `𝔽_p`; the trivial one is installed.
-  let : DistribMulAction (freeProP p X) (ZMod p) :=
-    DistribMulAction.compHom (ZMod p) (1 : freeProP p X →* (ZMod p)ˣ)
-  have htrivF : ∀ (g : freeProP p X) (m : ZMod p), g • m = m := fun _ m ↦ one_smul (ZMod p)ˣ m
-  have : ContinuousSMul (freeProP p X) (ZMod p) :=
-    ⟨continuous_snd.congr fun x ↦ (htrivF x.1 x.2).symm⟩
-  exact card_add_finrank_H2_of_isClosed (isClosed_topologicalClosure _) htrivF e htriv hfg h
+  let := trivialZModAction p (freeProP p X)
+  have : ContinuousSMul (freeProP p X) (ZMod p) := ⟨continuous_snd⟩
+  exact card_add_finrank_H2_of_isClosed (isClosed_topologicalClosure _) (fun _ _ ↦ rfl) e htriv
+    hfg h
 
+omit [Finite X] in
 /-- **`H²(G, 𝔽_p)` is finite for a finitely presented pro-`p` group.** Let `G ≅ ⟨X ∣ rels⟩` be a
-presentation, on a finite type `X` with finitely many relators, of a group acting trivially on
-`𝔽_p`. Then `H²(G, 𝔽_p)` is finite. -/
+presentation, on any type `X` with finitely many relators, of a group acting trivially on `𝔽_p`.
+Then `H²(G, 𝔽_p)` is finite. -/
 theorem finite_H2_of_finite (hrels : rels.Finite) : Finite (H2 G (ZMod p)) := by
   -- The count needs an action of `F` on `𝔽_p`; the trivial one is installed.
-  let : DistribMulAction (freeProP p X) (ZMod p) :=
-    DistribMulAction.compHom (ZMod p) (1 : freeProP p X →* (ZMod p)ˣ)
-  have htrivF : ∀ (g : freeProP p X) (m : ZMod p), g • m = m := fun _ m ↦ one_smul (ZMod p)ˣ m
-  have : ContinuousSMul (freeProP p X) (ZMod p) :=
-    ⟨continuous_snd.congr fun x ↦ (htrivF x.1 x.2).symm⟩
-  exact finite_H2_of_isClosed (isClosed_topologicalClosure _) htrivF e htriv
-    ((isTopologicallyFinitelyGenerated_congr e).1 isTopologicallyFinitelyGenerated)
+  let := trivialZModAction p (freeProP p X)
+  have : ContinuousSMul (freeProP p X) (ZMod p) := ⟨continuous_snd⟩
+  exact finite_H2_of_isClosed (isClosed_topologicalClosure _) (fun _ _ ↦ rfl) e htriv
     (isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_of_finite hrels)
 
 end Count
 
 end presentedProP
 
-section Deficiency
-
-variable (p) (G : Type v) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
-
-/-- **The deficiency** `def(G) = d(G) - r(G)` of a topologically finitely generated topological
-group, in `ℤ`: the topological generator rank minus the relation rank `dim_{𝔽_p} H²(G, 𝔽_p)`. The
-subtraction is in `ℤ`, so no natural-number truncation occurs; for a pro-`p` group with a finite
-presentation `⟨X ∣ rels⟩` it is the largest value of `#X - #rels`
-(`TauCeti.presentedProP.card_sub_card_le_deficiency`). -/
-noncomputable def deficiency (hfg : IsTopologicallyFinitelyGenerated G) : ℤ :=
-  (topologicalGeneratorRankNat G hfg : ℤ) - Module.finrank (ZMod p) (cohomFp p G 2)
-
-/-- The deficiency is the generator rank minus the relation rank. -/
-theorem deficiency_def (hfg : IsTopologicallyFinitelyGenerated G) :
-    deficiency p G hfg =
-      (topologicalGeneratorRankNat G hfg : ℤ) - Module.finrank (ZMod p) (cohomFp p G 2) :=
-  (rfl)
-
-/-- **`d(G) = def(G) + r(G)`**: the generator rank is the deficiency plus the relation rank. -/
-theorem deficiency_add_finrank_cohomFp_two (hfg : IsTopologicallyFinitelyGenerated G) :
-    deficiency p G hfg + Module.finrank (ZMod p) (cohomFp p G 2) =
-      topologicalGeneratorRankNat G hfg := by
-  rw [deficiency_def, sub_add_cancel]
-
-variable {G} in
-/-- **The deficiency is an isomorphism invariant.** -/
-theorem deficiency_congr [LocallyCompactSpace G] {H : Type w} [Group H] [TopologicalSpace H]
-    [IsTopologicalGroup H] [LocallyCompactSpace H] (e : G ≃ₜ* H)
-    (hG : IsTopologicallyFinitelyGenerated G) (hH : IsTopologicallyFinitelyGenerated H) :
-    deficiency p G hG = deficiency p H hH := by
-  rw [deficiency_def, deficiency_def, topologicalGeneratorRankNat_congr e,
-    finrank_cohomFp_two_congr p e]
-
-end Deficiency
-
 namespace presentedProP
 
 variable {X : Type u} [Finite X] {rels : Set (freeProP p X)} {G : Type v} [Group G]
-  [TopologicalSpace G] [IsTopologicalGroup G] [LocallyCompactSpace G]
-  (e : presentedProP p X rels ≃ₜ* G)
+  [TopologicalSpace G] [IsTopologicalGroup G] (e : presentedProP p X rels ≃ₜ* G)
 include e
 
 /-- **The generator, relation and normal-generator counts of a presentation**, on the canonical
@@ -350,30 +312,34 @@ theorem card_add_finrank_cohomFp_two (hfg : IsTopologicallyFinitelyGenerated G)
         topologicalGeneratorRankNat ((normalClosure rels).topologicalClosure ⧸
           (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
             (normalClosure rels).topologicalClosure) h := by
-  -- The explicit `H²(G, 𝔽_p)` needs an action of `G` on `𝔽_p`; the trivial one is installed.
-  let : DistribMulAction G (ZMod p) := DistribMulAction.compHom (ZMod p) (1 : G →* (ZMod p)ˣ)
-  have htriv : ∀ (g : G) (m : ZMod p), g • m = m := fun _ m ↦ one_smul (ZMod p)ˣ m
-  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd.congr fun x ↦ (htriv x.1 x.2).symm⟩
-  rw [(cohomFpLinearEquivH2 p G htriv).finrank_eq]
-  exact card_add_finrank_H2 e htriv hfg h
+  -- `G` is compact, being isomorphic to a quotient of a free pro-`p` group, and the explicit
+  -- `H²(G, 𝔽_p)` needs an action of `G` on `𝔽_p`; the trivial one is installed.
+  have : LocallyCompactSpace G := e.toHomeomorph.locallyCompactSpace_iff.1 inferInstance
+  let := trivialZModAction p G
+  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
+  rw [(cohomFpLinearEquivH2 p G fun _ _ ↦ rfl).finrank_eq]
+  exact card_add_finrank_H2 e (fun _ _ ↦ rfl) hfg h
 
-/-- **`H²(G, 𝔽_p)` is finite-dimensional for a finitely presented pro-`p` group**, so that the
-relation rank `r(G) = dim_{𝔽_p} H²(G, 𝔽_p)` is a natural number. -/
+omit [Finite X] in
+/-- **`H²(G, 𝔽_p)` is finite-dimensional for a finitely presented pro-`p` group**, on any type of
+generators, so that the relation rank `r(G) = dim_{𝔽_p} H²(G, 𝔽_p)` is a natural number. -/
 theorem module_finite_cohomFp_two_of_finite (hrels : rels.Finite) :
     Module.Finite (ZMod p) (cohomFp p G 2) := by
-  -- The explicit `H²(G, 𝔽_p)` needs an action of `G` on `𝔽_p`; the trivial one is installed.
-  let : DistribMulAction G (ZMod p) := DistribMulAction.compHom (ZMod p) (1 : G →* (ZMod p)ˣ)
-  have htriv : ∀ (g : G) (m : ZMod p), g • m = m := fun _ m ↦ one_smul (ZMod p)ˣ m
-  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd.congr fun x ↦ (htriv x.1 x.2).symm⟩
-  have := finite_H2_of_finite e htriv hrels
-  exact Module.Finite.equiv (cohomFpLinearEquivH2 p G htriv).symm
+  -- `G` is compact, being isomorphic to a quotient of a free pro-`p` group, and the explicit
+  -- `H²(G, 𝔽_p)` needs an action of `G` on `𝔽_p`; the trivial one is installed.
+  have : LocallyCompactSpace G := e.toHomeomorph.locallyCompactSpace_iff.1 inferInstance
+  let := trivialZModAction p G
+  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
+  have := finite_H2_of_finite e (fun _ _ ↦ rfl) hrels
+  exact Module.Finite.equiv (cohomFpLinearEquivH2 p G fun _ _ ↦ rfl).symm
 
 /-- **The deficiency inequality.** For a presentation `G ≅ ⟨X ∣ rels⟩` of a pro-`p` group on a
 finite type `X` with finitely many relators, `#X - #rels ≤ def(G)` in `ℤ`: a presentation with
 `#X` generators needs at least `#X - def(G)` relators. -/
 theorem card_sub_card_le_deficiency (hrels : rels.Finite)
     (hfg : IsTopologicallyFinitelyGenerated G) :
-    (Nat.card X : ℤ) - Nat.card rels ≤ deficiency p G hfg := by
+    (Nat.card X : ℤ) - Nat.card rels ≤
+      deficiency p G hfg (module_finite_cohomFp_two_of_finite e hrels) := by
   have h1 := card_add_finrank_cohomFp_two e hfg
     (isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_of_finite hrels)
   have h2 := topologicalGeneratorRankNat_quotient_pLowerCentralStep_le_card hrels
@@ -387,7 +353,8 @@ normal subgroup, that is `d(R ⧸ Rᵖ[R, F])`. So a presentation whose relators
 normal generators realizes the deficiency. -/
 theorem card_sub_card_eq_deficiency_iff (hrels : rels.Finite)
     (hfg : IsTopologicallyFinitelyGenerated G) :
-    (Nat.card X : ℤ) - Nat.card rels = deficiency p G hfg ↔
+    (Nat.card X : ℤ) - Nat.card rels =
+        deficiency p G hfg (module_finite_cohomFp_two_of_finite e hrels) ↔
       Nat.card rels = topologicalGeneratorRankNat ((normalClosure rels).topologicalClosure ⧸
         (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
           (normalClosure rels).topologicalClosure)

@@ -11,6 +11,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.InvariantDual
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.MinimalPresentation
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.NormalGeneration
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Transgression
+import TauCeti.Data.Set.Finite
 
 /-!
 # `H²(G, 𝔽_p)` counts the relations of a pro-`p` group
@@ -74,6 +75,10 @@ of `G` appears.
   generated as a closed normal subgroup of `F` by at most `n` elements.
 * `TauCeti.presentedProP.finite_H2_iff`: `H²(G, 𝔽_p)` is finite exactly when `R ⧸ Rᵖ[R, F]` is
   topologically finitely generated.
+* `TauCeti.presentedProP.isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_of_finite`:
+  finitely many relators make `R ⧸ Rᵖ[R, F]` topologically finitely generated, and
+  `TauCeti.presentedProP.topologicalGeneratorRankNat_quotient_pLowerCentralStep_le_card`: they
+  bound `d(R ⧸ Rᵖ[R, F])`, the least number of generators of `R` as a closed normal subgroup.
 * `TauCeti.presentedProP.topologicalGeneratorRankNat_quotient_pLowerCentralStep_eq`: the count
   `d(R ⧸ Rᵖ[R, F])` is the same for any two minimal presentations of `G`, and
   `TauCeti.presentedProP.isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff`: so is
@@ -144,7 +149,7 @@ variable {X : Type u} [DistribMulAction (freeProP p X) (ZMod p)]
   [DistribMulAction G (ZMod p)] [ContinuousSMul G (ZMod p)]
 
 /-- Transport of `H²(F ⧸ R, 𝔽_p ^ R)` along a topological isomorphism `F ⧸ R ≃ₜ* G`, when both `F`
-and `G` act trivially on `𝔽_p`. Only its existence is used, to compare orders and dimensions. -/
+and `G` act trivially on `𝔽_p`; `TauCeti.h2QuotientEquiv_apply` reads it on the explicit models. -/
 noncomputable def h2QuotientEquiv (e : freeProP p X ⧸ R ≃ₜ* G)
     (htrivF : ∀ (g : freeProP p X) (m : ZMod p), g • m = m)
     (htriv : ∀ (g : G) (m : ZMod p), g • m = m) :
@@ -155,9 +160,22 @@ noncomputable def h2QuotientEquiv (e : freeProP p X ⧸ R ≃ₜ* G)
         rw [fixedPoints_addSubgroup_eq_top_of_smul_eq (ZMod p) R htrivF]
         exact AddSubgroup.mem_top m⟩, rfl⟩⟩)
     continuous_of_discreteTopology continuous_of_discreteTopology fun g m ↦ by
-      obtain ⟨x, hx⟩ := QuotientGroup.mk_surjective (e.symm g)
-      rw [htriv, ← hx, coe_quotient_smul_fixedPoints_addSubgroup]
-      exact congrArg _ (Subtype.ext ((coe_smul_fixedPoints_addSubgroup x m).trans (htrivF x m)))
+      rw [htriv, quotient_smul_fixedPoints_addSubgroup_eq_of_smul_eq htrivF]
+
+/-- On the explicit models, the transport of `H²(F ⧸ R, 𝔽_p ^ R)` along `e : F ⧸ R ≃ₜ* G` is the
+pullback along `e.symm`, with the coefficients `𝔽_p ^ R = 𝔽_p` read through the inclusion. -/
+@[simp]
+theorem h2QuotientEquiv_apply (e : freeProP p X ⧸ R ≃ₜ* G)
+    (htrivF : ∀ (g : freeProP p X) (m : ZMod p), g • m = m)
+    (htriv : ∀ (g : G) (m : ZMod p), g • m = m)
+    (x : H2 (freeProP p X ⧸ R) (FixedPoints.addSubgroup R (ZMod p))) :
+    h2QuotientEquiv e htrivF htriv x =
+      explicitMap2 (freeProP p X ⧸ R) (FixedPoints.addSubgroup R (ZMod p)) G (ZMod p) e.symm
+        (FixedPoints.addSubgroup R (ZMod p)).subtype continuous_of_discreteTopology
+        (fun g m ↦ (congrArg Subtype.val
+          (quotient_smul_fixedPoints_addSubgroup_eq_of_smul_eq htrivF (e.symm g) m)).trans
+            (htriv g m).symm) x :=
+  explicitMap2Equiv_apply _ _ _ _ _ _ _ _ _ x
 
 variable (hRc : IsClosed (R : Set (freeProP p X))) (hR : R ≤ proPFrattini p (freeProP p X))
   (e : freeProP p X ⧸ R ≃ₜ* G) (htrivF : ∀ (g : freeProP p X) (m : ZMod p), g • m = m)
@@ -236,14 +254,44 @@ end Presentation
 
 namespace presentedProP
 
-/-- The trivial action of a group on `𝔽_p`, used to read the relation subgroup of a presentation
-through the transgression; no statement below mentions it. -/
-private abbrev trivialZModAction (F : Type u) [Monoid F] : DistribMulAction F (ZMod p) where
-  smul _ m := m
-  one_smul _ := rfl
-  mul_smul _ _ _ := rfl
-  smul_zero _ := rfl
-  smul_add _ _ _ := rfl
+section Relators
+
+variable {X : Type u} {rels : Set (freeProP p X)}
+
+/-- **A finite relator set normally generates its relation subgroup finitely.** For a finite set of
+relators `rels`, with closed normal closure `R` in the free pro-`p` group `F`, the quotient
+`R ⧸ Rᵖ[R, F]` is topologically finitely generated. -/
+theorem isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_of_finite
+    (hrels : rels.Finite) :
+    IsTopologicallyFinitelyGenerated ((normalClosure rels).topologicalClosure ⧸
+      (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
+        (normalClosure rels).topologicalClosure) := by
+  obtain ⟨s, -, hs⟩ : ∃ s : Finset (normalClosure rels).topologicalClosure, s.card = Nat.card rels ∧
+      Subtype.val '' (s : Set (normalClosure rels).topologicalClosure) = rels :=
+    hrels.exists_finset_subtype_image_val_eq (S := (normalClosure rels).topologicalClosure)
+      fun x hx ↦ le_topologicalClosure _ (subset_normalClosure hx)
+  exact ((isProP_freeProP p X).isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff
+    Fact.out (isClosed_topologicalClosure _)).2 ⟨s, by rw [hs]⟩
+
+/-- **The relators bound the least number of normal generators.** For a finite set of relators
+`rels` with closed normal closure `R` in the free pro-`p` group `F`, the topological generator rank
+of `R ⧸ Rᵖ[R, F]`, which is the least number of generators of `R` as a closed normal subgroup, is
+at most the number of relators. -/
+theorem topologicalGeneratorRankNat_quotient_pLowerCentralStep_le_card (hrels : rels.Finite) :
+    topologicalGeneratorRankNat ((normalClosure rels).topologicalClosure ⧸
+      (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
+        (normalClosure rels).topologicalClosure)
+      (isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_of_finite hrels) ≤
+      Nat.card rels := by
+  obtain ⟨s, hcard, hs⟩ : ∃ s : Finset (normalClosure rels).topologicalClosure,
+      s.card = Nat.card rels ∧
+        Subtype.val '' (s : Set (normalClosure rels).topologicalClosure) = rels :=
+    hrels.exists_finset_subtype_image_val_eq (S := (normalClosure rels).topologicalClosure)
+      fun x hx ↦ le_topologicalClosure _ (subset_normalClosure hx)
+  exact ((isProP_freeProP p X).topologicalGeneratorRankNat_quotient_pLowerCentralStep_le_iff
+    Fact.out (isClosed_topologicalClosure _) _ _).2 ⟨s, hcard.le, by rw [hs]⟩
+
+end Relators
 
 section MinimalPresentation
 
@@ -262,7 +310,7 @@ theorem finite_H2_iff :
       IsTopologicallyFinitelyGenerated ((normalClosure rels).topologicalClosure ⧸
         (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
           (normalClosure rels).topologicalClosure) := by
-  let := trivialZModAction (p := p) (freeProP p X)
+  let := trivialZModAction p (freeProP p X)
   have : ContinuousSMul (freeProP p X) (ZMod p) := ⟨continuous_snd⟩
   exact finite_H2_iff_of_le_proPFrattini (isClosed_topologicalClosure _)
     ((topologicalClosure_normalClosure_le_iff isClosed_proPFrattini).mpr hrels) e (fun _ _ ↦ rfl)
@@ -281,7 +329,7 @@ theorem natCard_H2
       p ^ topologicalGeneratorRankNat ((normalClosure rels).topologicalClosure ⧸
         (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
           (normalClosure rels).topologicalClosure) h := by
-  let := trivialZModAction (p := p) (freeProP p X)
+  let := trivialZModAction p (freeProP p X)
   have : ContinuousSMul (freeProP p X) (ZMod p) := ⟨continuous_snd⟩
   exact natCard_H2_of_le_proPFrattini (isClosed_topologicalClosure _)
     ((topologicalClosure_normalClosure_le_iff isClosed_proPFrattini).mpr hrels) e (fun _ _ ↦ rfl)
@@ -317,7 +365,7 @@ theorem lift_rank_H2 :
       Cardinal.lift.{v} (topologicalGeneratorRank ((normalClosure rels).topologicalClosure ⧸
         (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
           (normalClosure rels).topologicalClosure)) := by
-  let := trivialZModAction (p := p) (freeProP p X)
+  let := trivialZModAction p (freeProP p X)
   have : ContinuousSMul (freeProP p X) (ZMod p) := ⟨continuous_snd⟩
   exact lift_rank_H2_of_le_proPFrattini (isClosed_topologicalClosure _)
     ((topologicalClosure_normalClosure_le_iff isClosed_proPFrattini).mpr hrels) e (fun _ _ ↦ rfl)
@@ -337,7 +385,7 @@ theorem finrank_H2
       topologicalGeneratorRankNat ((normalClosure rels).topologicalClosure ⧸
         (pLowerCentralStep p (normalClosure rels).topologicalClosure).subgroupOf
           (normalClosure rels).topologicalClosure) h := by
-  let := trivialZModAction (p := p) (freeProP p X)
+  let := trivialZModAction p (freeProP p X)
   have : ContinuousSMul (freeProP p X) (ZMod p) := ⟨continuous_snd⟩
   exact finrank_H2_of_le_proPFrattini (isClosed_topologicalClosure _)
     ((topologicalClosure_normalClosure_le_iff isClosed_proPFrattini).mpr hrels) e (fun _ _ ↦ rfl)
@@ -382,7 +430,7 @@ theorem isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff
       IsTopologicallyFinitelyGenerated ((normalClosure rels').topologicalClosure ⧸
         (pLowerCentralStep p (normalClosure rels').topologicalClosure).subgroupOf
           (normalClosure rels').topologicalClosure) := by
-  let := trivialZModAction (p := p) G
+  let := trivialZModAction p G
   have : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
   rw [← finite_H2_iff rels hrels e (fun _ _ ↦ rfl), ← finite_H2_iff rels' hrels' e' (fun _ _ ↦ rfl)]
 
@@ -406,7 +454,7 @@ theorem topologicalGeneratorRankNat_quotient_pLowerCentralStep_eq
           (normalClosure rels').topologicalClosure)
         ((isTopologicallyFinitelyGenerated_quotient_pLowerCentralStep_iff rels rels' hrels hrels'
           e e').mp h) := by
-  let := trivialZModAction (p := p) G
+  let := trivialZModAction p G
   have : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
   exact Nat.pow_right_injective (Fact.out : p.Prime).two_le
     ((natCard_H2 rels hrels e (fun _ _ ↦ rfl) h).symm.trans

@@ -7,6 +7,7 @@ module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.FiveTerm
 public import TauCeti.Topology.Algebra.Group.Profinite.Section
+import TauCeti.GroupTheory.Index.Exact
 import TauCeti.Topology.Algebra.Group.LocallyConstant
 
 /-!
@@ -883,22 +884,24 @@ theorem transgression_surjective_iff (hN : IsClosed (N : Set G)) :
 
 gives the multiplicative identity `|H¹(G, M)| · |H²(G ⧸ N, M ^ N)| =
 |H¹(G ⧸ N, M ^ N)| · |H¹(N, M)^{G ⧸ N}| · |im (H²(G ⧸ N, M ^ N) → H²(G, M))|` of natural-number
-cardinalities, with `Nat.card` of an infinite group read as `0`. -/
+cardinalities, with `Nat.card` of an infinite group read as `0`. It is the six-term alternating
+identity `AddMonoidHom.card_mul_card_mul_card_of_exact` for the sequence ending in the range of
+inflation. -/
 theorem natCard_H1_mul_natCard_H2_quotient (hN : IsClosed (N : Set G)) :
     Nat.card (H1 G M) * Nat.card (H2 (G ⧸ N) (FixedPoints.addSubgroup N M)) =
       Nat.card (H1 (G ⧸ N) (FixedPoints.addSubgroup N M)) * Nat.card (H1ConjInvariants G M N) *
         Nat.card (explicitInfl2 G M N).range := by
-  have hi := AddSubgroup.card_ker_mul_card_range (explicitInfl1 G M N)
-  have hr := AddSubgroup.card_ker_mul_card_range (explicitResConj1 G M N)
-  have ht := AddSubgroup.card_ker_mul_card_range (transgression G M N hN)
-  have hj := AddSubgroup.card_ker_mul_card_range (explicitInfl2 G M N)
-  rw [(AddMonoidHom.ker_eq_bot_iff _).2 (explicitInfl1_injective G M N), AddSubgroup.card_bot,
-    one_mul] at hi
-  rw [← explicitInfResConj_exact, hi] at hr
-  rw [← fiveTerm_exact_H1N] at ht
-  rw [← fiveTerm_exact_H2Q G M N hN] at hj
-  rw [← hr, ← ht, ← hj]
-  ring
+  have h := AddMonoidHom.card_mul_card_mul_card_of_exact (explicitInfl1 G M N)
+    (explicitResConj1 G M N) (transgression G M N hN) (explicitInfl2 G M N).rangeRestrict
+    (0 : (explicitInfl2 G M N).range →+ Unit) (explicitInfl1_injective G M N)
+    (explicitInfResConj_exact G M N) (fiveTerm_exact_H1N G M N hN)
+    (by rw [AddMonoidHom.ker_rangeRestrict]; exact fiveTerm_exact_H2Q G M N hN)
+    (by rw [AddMonoidHom.range_eq_top.2 (AddMonoidHom.rangeRestrict_surjective _), eq_comm,
+      AddMonoidHom.ker_eq_top_iff])
+    fun _ ↦ ⟨0, Subsingleton.elim _ _⟩
+  have h1 : Nat.card Unit = 1 := Nat.card_unique
+  rw [h1, mul_one] at h
+  exact h.symm
 
 /-- **The order count of the five-term sequence when `H²(G, M) = 0`:**
 `|H¹(G, M)| · |H²(G ⧸ N, M ^ N)| = |H¹(G ⧸ N, M ^ N)| · |H¹(N, M)^{G ⧸ N}|`. -/
