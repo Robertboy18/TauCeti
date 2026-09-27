@@ -143,6 +143,7 @@ theorem GL2Linear_character_injective :
 
 /-- **The linear characters `α ∘ det` are irreducible characters of `GL₂(F)`**, being the
 characters of one-dimensional representations. -/
+@[simp]
 theorem character_GL2Linear_mem_irreducibleCharacters (α : Fˣ →* ℂˣ) :
     (GL2Linear F α).character ∈ irreducibleCharacters ℂ (GL (Fin 2) F) :=
   have : Representation.IsIrreducible (GL2Linear F α).ρ :=

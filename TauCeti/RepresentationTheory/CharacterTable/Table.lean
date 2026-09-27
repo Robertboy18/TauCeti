@@ -130,9 +130,10 @@ theorem mem_irreducibleCharacters_iff {f : G → k} :
       ∃ (n : ℕ) (ρ : Representation k G (Fin n → k)), ρ.IsIrreducible ∧ ρ.character = f :=
   Iff.rfl
 
-/-- **Every irreducible character is an irreducible character**: the character of an irreducible
-representation on an arbitrary finite-dimensional space lies in `TauCeti.irreducibleCharacters`,
-because a basis transports it to an equivalent representation on a coordinate space. -/
+/-- **The character of an irreducible representation is an irreducible character**: the character
+of an irreducible representation on an arbitrary finite-dimensional space lies in
+`TauCeti.irreducibleCharacters`, because a basis transports it to an equivalent representation on a
+coordinate space. -/
 @[simp]
 theorem character_mem_irreducibleCharacters {V : Type w} [AddCommGroup V] [Module k V]
     [FiniteDimensional k V] (σ : Representation k G V) [σ.IsIrreducible] :
@@ -151,7 +152,7 @@ theorem character_mem_irreducibleCharacters {V : Type w} [AddCommGroup V] [Modul
 /-- **The character of a simple object of `FDRep k G` is an irreducible character**, the bundled
 form of `TauCeti.character_mem_irreducibleCharacters`. -/
 @[simp]
-theorem _root_.FDRep.character_mem_irreducibleCharacters {G : Type u} [Group G] (X : FDRep k G)
+theorem _root_.FDRep.character_mem_irreducibleCharacters (X : FDRep k G)
     [CategoryTheory.Simple X] : X.character ∈ irreducibleCharacters k G :=
   have := FDRep.isIrreducible_of_simple X
   TauCeti.character_mem_irreducibleCharacters X.ρ

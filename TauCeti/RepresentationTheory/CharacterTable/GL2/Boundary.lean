@@ -7,8 +7,6 @@ module
 
 -- The three representations in the boundary splitting are defined here.
 public import TauCeti.RepresentationTheory.CharacterTable.GL2.Linear
--- `TauCeti.irreducibleCharacters`, the set the Steinberg twists are shown to belong to.
-public import TauCeti.RepresentationTheory.CharacterTable.Table
 -- Non-public: the determinant twist of a principal-series character is the character identity the
 -- splitting below is read off from, inside a proof only.
 import TauCeti.RepresentationTheory.CharacterTable.GL2.PrincipalSeries.Twist
@@ -130,6 +128,7 @@ theorem simple_GL2SteinbergTwist (α : Fˣ →* ℂˣ) : Simple (GL2SteinbergTwi
     _ = Nat.card (GL (Fin 2) F) := h
 
 /-- **The Steinberg twists are irreducible characters of `GL₂(F)`.** -/
+@[simp]
 theorem character_GL2SteinbergTwist_mem_irreducibleCharacters (α : Fˣ →* ℂˣ) :
     (GL2SteinbergTwist F α).character ∈ irreducibleCharacters ℂ (GL (Fin 2) F) :=
   have := simple_GL2SteinbergTwist F α

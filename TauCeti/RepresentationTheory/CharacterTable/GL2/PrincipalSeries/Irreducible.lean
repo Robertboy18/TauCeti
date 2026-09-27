@@ -22,10 +22,10 @@ public import TauCeti.RepresentationTheory.CharacterTable.Table
 -- Non-public: the permutation-matrix description of the Weyl element is used only to compute
 -- its action on the diagonal coordinates.
 import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Diagonal.Bruhat
--- Non-public: irreducibility of a line and its passage to `CategoryTheory.Simple` are used only
--- inside the proof that the two sides of the Mackey condition are simple.
+-- Non-public: irreducibility of a line is used only inside the proof that the two sides of the
+-- Mackey condition are simple; its passage to `CategoryTheory.Simple` comes with
+-- `TauCeti.RepresentationTheory.CharacterTable.Table` above.
 import TauCeti.RepresentationTheory.Irreducible
-import TauCeti.RepresentationTheory.Simple.Basic
 
 /-!
 # The principal series of `GL₂(𝔽_q)` is irreducible exactly off the diagonal
@@ -310,7 +310,10 @@ theorem simple_GL2PrincipalSeries_iff (α β : Fˣ →* ℂˣ) :
     exact (mackeyDisjoint_mul_left_mul_right_iff _ hb₁ hb₂ _).mpr
       ((GL2Borel.mackeyDisjoint_weyl_iff α β).mpr hne)
 
-/-- **The principal series with `α ≠ β` are irreducible characters of `GL₂(F)`.** -/
+/-- **The principal series with `α ≠ β` are irreducible characters of `GL₂(F)`.** This is not
+`@[simp]`: `simp` already proves it from the `@[simp]` lemmas
+`TauCeti.simple_GL2PrincipalSeries_iff` and `FDRep.character_mem_irreducibleCharacters`, so the
+simpNF linter rejects the attribute. -/
 theorem character_GL2PrincipalSeries_mem_irreducibleCharacters {α β : Fˣ →* ℂˣ} (hαβ : α ≠ β) :
     (GL2PrincipalSeries F α β).character ∈ irreducibleCharacters ℂ (GL (Fin 2) F) :=
   have := (simple_GL2PrincipalSeries_iff F α β).mpr hαβ
