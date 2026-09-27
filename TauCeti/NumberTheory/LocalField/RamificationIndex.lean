@@ -43,6 +43,7 @@ filtration.
 * `TauCeti.normalizedValuation_algebraMap` and `TauCeti.toAdd_normalizedValuation_algebraMap`:
   the characteristic property `v_L(x) = e · v_K(x)` on `Kˣ`, multiplicatively and additively.
 * `TauCeti.normalizedValuationWithZero_algebraMap`: the same identity on all of `K`.
+* `TauCeti.addVal_algebraMap`: the corresponding scaling formula on the integer rings.
 * `TauCeti.ramificationIndex_eq_iff`: `e` is the only natural number with that property.
 * `TauCeti.ramificationIndex_pos`: the ramification index is positive.
 * `TauCeti.normalizedValuation_algebraMap_irreducible` and
@@ -174,7 +175,7 @@ theorem normalizedValuation_algebraMap_eq_one_iff (x : Kˣ) :
     normalizedValuation L (Units.map (algebraMap K L : K →* L) x) = 1 ↔
       normalizedValuation K x = 1 := by
   rw [normalizedValuation_eq_one_iff, normalizedValuation_eq_one_iff, Units.coe_map,
-    MonoidHom.coe_coe, ← ValuativeExtension.mapValueGroupWithZero_valuation,
+    MonoidHom.coe_ofClass, ← ValuativeExtension.mapValueGroupWithZero_valuation,
     ← map_one (ValuativeExtension.mapValueGroupWithZero K L)]
   exact ValuativeExtension.mapValueGroupWithZero_strictMono.injective.eq_iff
 
@@ -189,7 +190,7 @@ private theorem exists_normalizedValuation_algebraMap_eq_zpow :
   refine ⟨(φ πu).toAdd, lt_of_le_of_ne ?_ ?_, ?_⟩
   · -- `π` is integral in `K`, so its image is integral in `L`.
     have hmem : ((Units.map (algebraMap K L : K →* L) πu : Lˣ) : L) ∈ 𝒪[L] := by
-      rw [Valuation.mem_integer_iff, Units.coe_map, MonoidHom.coe_coe,
+      rw [Valuation.mem_integer_iff, Units.coe_map, MonoidHom.coe_ofClass,
         ← ValuativeExtension.mapValueGroupWithZero_valuation,
         ← map_one (ValuativeExtension.mapValueGroupWithZero K L),
         ValuativeExtension.mapValueGroupWithZero_strictMono.le_iff_le]
@@ -251,7 +252,7 @@ theorem normalizedValuationWithZero_algebraMap (x : K) :
       (Units.map (algebraMap K L : K →* L) (Units.mk0 x hx))
     have hK := normalizedValuationWithZero_coe (Units.mk0 x hx)
     have h := normalizedValuation_algebraMap (L := L) (Units.mk0 x hx)
-    simp only [Units.coe_map, MonoidHom.coe_coe, Units.val_mk0] at hL hK h
+    simp only [Units.coe_map, MonoidHom.coe_ofClass, Units.val_mk0] at hL hK h
     rw [hL, hK, h, WithZero.coe_pow]
 
 /-- The ramification index is the only natural number `n` with `v_L(x) = n · v_K(x)` for all
@@ -289,11 +290,58 @@ theorem valuation_algebraMap_irreducible {πK : 𝒪[K]} (hπK : Irreducible πK
     (Units.map (algebraMap K L : K →* L) (Units.mk0 (πK : K) hK))
   have h₂ := valueGroupWithZeroIsoInt_valuation (Units.mk0 (πL : L) hL)
   have h₀ := normalizedValuation_algebraMap_irreducible (L := L) hπK
-  simp only [Units.coe_map, MonoidHom.coe_coe, Units.val_mk0,
+  simp only [Units.coe_map, MonoidHom.coe_ofClass, Units.val_mk0,
     normalizedValuation_irreducible hπL, toAdd_ofAdd] at h₀ h₁ h₂
   rw [h₀, toAdd_ofAdd] at h₁
   rw [h₁, map_pow, h₂, ← WithZero.exp_nsmul]
   simp
+
+/-- The additive valuation on the integer ring scales under the algebra map by the ramification
+index. -/
+@[simp]
+theorem addVal_algebraMap (a : 𝒪[K]) :
+    IsDiscreteValuationRing.addVal 𝒪[L] (algebraMap 𝒪[K] 𝒪[L] a) =
+      ramificationIndex K L • IsDiscreteValuationRing.addVal 𝒪[K] a := by
+  obtain ⟨π, hπ⟩ := IsDiscreteValuationRing.exists_irreducible 𝒪[K]
+  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible 𝒪[L]
+  have hπmap0 : algebraMap 𝒪[K] 𝒪[L] π ≠ 0 := by
+    intro h
+    apply hπ.ne_zero
+    apply FaithfulSMul.algebraMap_injective 𝒪[K] 𝒪[L]
+    simpa using h
+  obtain ⟨q, v, hπmap⟩ :=
+    IsDiscreteValuationRing.eq_unit_mul_pow_irreducible hπmap0 hϖ
+  have hπK : (π : K) ≠ 0 := fun h ↦ hπ.ne_zero (Subtype.ext h)
+  have hϖL : (ϖ : L) ≠ 0 := fun h ↦ hϖ.ne_zero (Subtype.ext h)
+  have hmapUnits : Units.map (algebraMap K L : K →* L) (Units.mk0 (π : K) hπK) =
+      Units.map (Subring.subtype 𝒪[L] : 𝒪[L] →* L) v *
+        (Units.mk0 (ϖ : L) hϖL) ^ q := by
+    apply Units.ext
+    simpa using congrArg ((↑·) : 𝒪[L] → L) hπmap
+  have hq : q = ramificationIndex K L := by
+    have hv : normalizedValuation L
+        (Units.map (Subring.subtype 𝒪[L] : 𝒪[L] →* L) v) = 1 := by
+      rw [normalizedValuation_eq_one_iff]
+      exact (Valuation.integer.integers (valuation L)).one_of_isUnit v.isUnit
+    have hval := normalizedValuation_algebraMap_irreducible (L := L) hπ
+    rw [hmapUnits, map_mul, map_pow, hv,
+      normalizedValuation_irreducible hϖ, one_mul] at hval
+    have hval' := congrArg Multiplicative.toAdd hval
+    simpa [toAdd_pow, nsmul_eq_mul] using hval'
+  rcases eq_or_ne a 0 with rfl | ha
+  · simp [ramificationIndex_pos.ne']
+  · obtain ⟨n, w, ha⟩ :=
+      IsDiscreteValuationRing.eq_unit_mul_pow_irreducible ha hπ
+    have hwval : IsDiscreteValuationRing.addVal 𝒪[L]
+        (algebraMap 𝒪[K] 𝒪[L] (w : 𝒪[K])) = 0 :=
+      IsDiscreteValuationRing.addVal_eq_zero_iff.mpr (IsUnit.map _ w.isUnit)
+    have hπval : IsDiscreteValuationRing.addVal 𝒪[L]
+        (algebraMap 𝒪[K] 𝒪[L] π) = ramificationIndex K L := by
+      rw [IsDiscreteValuationRing.addVal_def _ v hϖ q hπmap, hq]
+    rw [ha, map_mul, map_pow, IsDiscreteValuationRing.addVal_mul,
+      IsDiscreteValuationRing.addVal_pow, hwval, zero_add, hπval,
+      IsDiscreteValuationRing.addVal_def' w hπ n]
+    simp [nsmul_eq_mul, mul_comm]
 
 variable (K L) in
 /-- The maximal ideal of `𝒪[K]` generates the `e(L/K)`-th power of the maximal ideal of `𝒪[L]`.

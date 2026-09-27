@@ -379,7 +379,7 @@ theorem explicitMap1_congr_of_eq
       rw [explicitMap1_mk, explicitMap1_mk]
       apply congrArg (fun z : Z1 H N => (z : H1 H N))
       ext h
-      simp only [cocyclesMap1_coe, cochainsMap1_apply, MonoidHom.coe_coe]
+      simp only [cocyclesMap1_coe, cochainsMap1_apply, MonoidHom.coe_ofClass]
       rw [hφeq, hfeq]
 
 /-- Pullback by the identity compatible pair is the identity on explicit `H¹`. -/
@@ -419,6 +419,75 @@ theorem explicitMap1_comp
       exact congrArg (fun z : Z1 K P => (z : H1 K P))
         (DFunLike.congr_fun
           (cocyclesMap1_comp G M H N φ f hf hequiv K P ψ q hq hequivq hcomp) c)
+
+/-- Pullback along a compatible pair made of a topological group isomorphism and an additive
+equivalence of coefficients is an additive equivalence on explicit first continuous cohomology.
+Both directions of the coefficient equivalence are required to be continuous; for discrete
+coefficient modules this follows automatically from discreteness. -/
+noncomputable def explicitMap1Equiv
+    (φ : H ≃ₜ* G) (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
+    (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) : H1 G M ≃+ H1 H N := by
+  have hequiv' : ∀ (g : G) (n : N), e.symm (φ.symm g • n) = g • e.symm n :=
+    AddEquiv.symm_map_smul_of_map_mulEquiv_smul e φ.toMulEquiv hequiv
+  -- The hypotheses are restated at the coerced homomorphisms, and the compatibility of the two
+  -- composite pairs is named, so that the composition laws below rewrite: `rw` checks the goal at
+  -- a transparency that does not unfold the coercions.
+  have he₁ : Continuous (e.toAddMonoidHom : M → N) := he
+  have he₁' : Continuous (e.symm.toAddMonoidHom : N → M) := he'
+  have hequiv₁ : ∀ (h : H) (m : M),
+      e.toAddMonoidHom ((φ : H →ₜ* G) h • m) = h • e.toAddMonoidHom m := hequiv
+  have hequiv₁' : ∀ (g : G) (n : N),
+      e.symm.toAddMonoidHom ((φ.symm : G →ₜ* H) g • n) = g • e.symm.toAddMonoidHom n := hequiv'
+  have hcomp : ∀ (g : G) (m : M),
+      (e.symm.toAddMonoidHom.comp e.toAddMonoidHom)
+          (((φ : H →ₜ* G).comp (φ.symm : G →ₜ* H)) g • m) =
+        g • (e.symm.toAddMonoidHom.comp e.toAddMonoidHom) m :=
+    comp_apply_smul (φ : H →* G) (φ.symm : G →* H) e.toAddMonoidHom e.symm.toAddMonoidHom
+      hequiv₁ hequiv₁'
+  have hcomp' : ∀ (h : H) (n : N),
+      (e.toAddMonoidHom.comp e.symm.toAddMonoidHom)
+          (((φ.symm : G →ₜ* H).comp (φ : H →ₜ* G)) h • n) =
+        h • (e.toAddMonoidHom.comp e.symm.toAddMonoidHom) n :=
+    comp_apply_smul (φ.symm : G →* H) (φ : H →* G) e.symm.toAddMonoidHom e.toAddMonoidHom
+      hequiv₁' hequiv₁
+  exact
+    { toFun := explicitMap1 G M H N φ e.toAddMonoidHom he₁ hequiv₁
+      invFun := explicitMap1 H N G M φ.symm e.symm.toAddMonoidHom he₁' hequiv₁'
+      left_inv := fun x => by
+        rw [← AddMonoidHom.comp_apply, ← explicitMap1_comp G M H N φ e.toAddMonoidHom he₁ hequiv₁
+          G M φ.symm e.symm.toAddMonoidHom he₁' hequiv₁' hcomp,
+          explicitMap1_congr_of_eq G M G M _ (ContinuousMonoidHom.id G) _ (AddMonoidHom.id M)
+            (hq := continuous_id) (hψ := fun g m => by simp)
+            (ContinuousMonoidHom.ext φ.apply_symm_apply) (AddMonoidHom.ext e.symm_apply_apply),
+          explicitMap1_id, AddMonoidHom.id_apply]
+      right_inv := fun x => by
+        rw [← AddMonoidHom.comp_apply, ← explicitMap1_comp H N G M φ.symm e.symm.toAddMonoidHom
+          he₁' hequiv₁' H N φ e.toAddMonoidHom he₁ hequiv₁ hcomp',
+          explicitMap1_congr_of_eq H N H N _ (ContinuousMonoidHom.id H) _ (AddMonoidHom.id N)
+            (hq := continuous_id) (hψ := fun g m => by simp)
+            (ContinuousMonoidHom.ext φ.symm_apply_apply) (AddMonoidHom.ext e.apply_symm_apply),
+          explicitMap1_id, AddMonoidHom.id_apply]
+      map_add' := map_add (explicitMap1 G M H N φ e.toAddMonoidHom he₁ hequiv₁) }
+
+/-- The equivalence on explicit `H¹` is the pullback along its forward compatible pair. -/
+@[simp]
+theorem explicitMap1Equiv_apply
+    (φ : H ≃ₜ* G) (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
+    (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) (x : H1 G M) :
+    explicitMap1Equiv G M H N φ e he he' hequiv x =
+      explicitMap1 G M H N φ e.toAddMonoidHom he hequiv x :=
+  (rfl)
+
+/-- The inverse of the equivalence on explicit `H¹` is the pullback along the inverse compatible
+pair. -/
+@[simp]
+theorem explicitMap1Equiv_symm_apply
+    (φ : H ≃ₜ* G) (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
+    (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) (x : H1 H N) :
+    (explicitMap1Equiv G M H N φ e he he' hequiv).symm x =
+      explicitMap1 H N G M φ.symm e.symm.toAddMonoidHom he'
+        (AddEquiv.symm_map_smul_of_map_mulEquiv_smul e φ.toMulEquiv hequiv) x :=
+  (rfl)
 
 /-- Pullback on the explicit second continuous cohomology group along a compatible pair. -/
 noncomputable def explicitMap2 [ContinuousMul G] [ContinuousMul H]
@@ -492,6 +561,54 @@ theorem explicitMap2_comp
       exact congrArg (fun z : Z2 K P => (z : H2 K P))
         (DFunLike.congr_fun
           (cocyclesMap2_comp G M H N φ f hf hequiv K P ψ q hq hequivq) c)
+
+/-- Pullback along a compatible pair made of a topological group isomorphism and an additive
+equivalence of coefficients is an additive equivalence on explicit second continuous cohomology.
+Both directions of the coefficient equivalence are required to be continuous; for discrete
+coefficient modules this follows automatically from discreteness. -/
+noncomputable def explicitMap2Equiv [ContinuousMul G] [ContinuousMul H]
+    (φ : H ≃ₜ* G) (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
+    (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) : H2 G M ≃+ H2 H N := by
+  have hequiv' : ∀ (g : G) (n : N), e.symm (φ.symm g • n) = g • e.symm n :=
+    AddEquiv.symm_map_smul_of_map_mulEquiv_smul e φ.toMulEquiv hequiv
+  exact
+    { toFun := explicitMap2 G M H N φ e.toAddMonoidHom he hequiv
+      invFun := explicitMap2 H N G M φ.symm e.symm.toAddMonoidHom he' hequiv'
+      left_inv := fun x => by
+        rw [← AddMonoidHom.comp_apply, ← explicitMap2_comp G M H N φ e.toAddMonoidHom he hequiv G M
+          φ.symm e.symm.toAddMonoidHom he' hequiv',
+          explicitMap2_congr_of_eq G M G M _ (ContinuousMonoidHom.id G) _ (AddMonoidHom.id M)
+            (hq := continuous_id) (hψ := fun g m => by simp)
+            (ContinuousMonoidHom.ext φ.apply_symm_apply) (AddMonoidHom.ext e.symm_apply_apply),
+          explicitMap2_id, AddMonoidHom.id_apply]
+      right_inv := fun x => by
+        rw [← AddMonoidHom.comp_apply, ← explicitMap2_comp H N G M φ.symm e.symm.toAddMonoidHom
+          he' hequiv' H N φ e.toAddMonoidHom he hequiv,
+          explicitMap2_congr_of_eq H N H N _ (ContinuousMonoidHom.id H) _ (AddMonoidHom.id N)
+            (hq := continuous_id) (hψ := fun g m => by simp)
+            (ContinuousMonoidHom.ext φ.symm_apply_apply) (AddMonoidHom.ext e.apply_symm_apply),
+          explicitMap2_id, AddMonoidHom.id_apply]
+      map_add' := map_add (explicitMap2 G M H N φ e.toAddMonoidHom he hequiv) }
+
+/-- The equivalence on explicit `H²` is the pullback along its forward compatible pair. -/
+@[simp]
+theorem explicitMap2Equiv_apply [ContinuousMul G] [ContinuousMul H]
+    (φ : H ≃ₜ* G) (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
+    (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) (x : H2 G M) :
+    explicitMap2Equiv G M H N φ e he he' hequiv x =
+      explicitMap2 G M H N φ e.toAddMonoidHom he hequiv x :=
+  (rfl)
+
+/-- The inverse of the equivalence on explicit `H²` is the pullback along the inverse compatible
+pair. -/
+@[simp]
+theorem explicitMap2Equiv_symm_apply [ContinuousMul G] [ContinuousMul H]
+    (φ : H ≃ₜ* G) (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
+    (hequiv : ∀ (h : H) (m : M), e (φ h • m) = h • e m) (x : H2 H N) :
+    (explicitMap2Equiv G M H N φ e he he' hequiv).symm x =
+      explicitMap2 H N G M φ.symm e.symm.toAddMonoidHom he'
+        (AddEquiv.symm_map_smul_of_map_mulEquiv_smul e φ.toMulEquiv hequiv) x :=
+  (rfl)
 
 end Cohomology
 
