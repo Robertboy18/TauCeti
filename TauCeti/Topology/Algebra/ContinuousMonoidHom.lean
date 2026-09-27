@@ -105,8 +105,11 @@ theorem _root_.ContinuousMonoidHom.coe_mk {A B : Type*} [Monoid A] [TopologicalS
     [TopologicalSpace B] (f : A →* B) (hf : Continuous f) : ⇑(⟨f, hf⟩ : A →ₜ* B) = f :=
   rfl
 
--- Both definitions below are exposed: downstream, `TopRep.res` objects taken along them have to
--- be definitionally the ones taken along the bare `Subgroup.subtype` and `QuotientGroup.mk'`.
+-- The three definitions below are exposed: downstream, `TopRep.res` objects taken along them have
+-- to be definitionally the ones taken along the bare `Subgroup.subtype`, `Subgroup.inclusion` and
+-- `QuotientGroup.mk'`. For `subgroupInclusion h` with `h : H ≤ S` this is what lets the identity
+-- of `TopRep.res H.subtype X` serve as the coefficient map of `ContinuousCohomology.map` along the
+-- inclusion `H ↪ S` (the restriction `TauCeti.ContinuousCohomology.resLe`).
 /-- The inclusion of a subgroup, carrying the subspace topology, as a continuous homomorphism. -/
 @[expose] def subgroupSubtype (S : Subgroup G) : S →ₜ* G where
   __ := S.subtype
@@ -134,6 +137,19 @@ theorem coe_subgroupInclusion {H S : Subgroup G} (h : H ≤ S) :
 @[simp]
 theorem subgroupInclusion_apply {H S : Subgroup G} (h : H ≤ S) (x : H) :
     subgroupInclusion h x = Subgroup.inclusion h x :=
+  (rfl)
+
+/-- The inclusion of a subgroup into itself is the identity. -/
+@[simp]
+theorem subgroupInclusion_refl (H : Subgroup G) :
+    subgroupInclusion (le_refl H) = ContinuousMonoidHom.id H :=
+  (rfl)
+
+/-- Inclusions of subgroups compose: including `H` into `S` and then `S` into `T` is including `H`
+into `T`. -/
+@[simp]
+theorem subgroupInclusion_comp_subgroupInclusion {H S T : Subgroup G} (hHS : H ≤ S) (hST : S ≤ T) :
+    (subgroupInclusion hST).comp (subgroupInclusion hHS) = subgroupInclusion (hHS.trans hST) :=
   (rfl)
 
 /-- The inclusion of a subgroup factors through any larger subgroup. -/

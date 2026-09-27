@@ -49,7 +49,7 @@ value at `1` needs in order to exist.
   `TauCeti.ContinuousCohomology.exists_openSubgroup_le_resolutionMap_subgroupSubtype_eq_zero`:
   on the coinduced resolution, restriction to a subgroup vanishes exactly when the cochain vanishes
   on tuples from the subgroup, and vanishing on a closed subgroup spreads to an open subgroup.
-* `TauCeti.ContinuousCohomology.surjective_resolutionMap_subgroupSubtype`,
+* `TauCeti.ContinuousCohomology.resolutionMap_subgroupSubtype_surjective`,
   `TauCeti.ContinuousCohomology.exists_mem_invariants_resolutionMap_subgroupSubtype_eq`: on the
   coinduced resolution, restriction to a closed subgroup is surjective, also on invariant elements.
 * `TauCeti.ContinuousCohomology.exists_openSubgroup_le_res_eq_zero`: a class restricting to zero
@@ -199,7 +199,7 @@ variable (X) in
 profinite group, every element of the coinduced resolution of the restriction of a discrete
 representation to a closed subgroup `H` is the restriction of an element of the resolution of
 `G`: a continuous map from the closed subspace `H` into a discrete space extends to `G`. -/
-theorem surjective_resolutionMap_subgroupSubtype {H : Subgroup G} (hH : IsClosed (H : Set G))
+theorem resolutionMap_subgroupSubtype_surjective {H : Subgroup G} (hH : IsClosed (H : Set G))
     (n : ℕ) :
     Function.Surjective (resolutionMap (ContinuousMonoidHom.subgroupSubtype H)
       (𝟙 (TopRep.res (H.subtype : H →* G) X)) n).hom := by
@@ -220,13 +220,17 @@ theorem surjective_resolutionMap_subgroupSubtype {H : Subgroup G} (hH : IsClosed
     exact (congrArg (resolutionMap (ContinuousMonoidHom.subgroupSubtype H)
       (𝟙 (TopRep.res (H.subtype : H →* G) X)) n).hom hWs).trans (Function.surjInv_eq ih (w' s))
 
+section Invariants
+
+attribute [local instance] TopRep.distribMulAction
+
 omit [DiscreteTopology X.V] in
 /-- **An invariant cochain of a closed subgroup extends to an invariant cochain of the group.**
 Over a profinite group and for a smooth discrete representation `X`, every `H`-invariant element
 `w` of the coinduced resolution of the restriction of `X` to a closed subgroup `H` is the
 restriction of a `G`-invariant element of the resolution of `X`: an invariant element is
 determined by its value at `1` as `g ↦ g • v`, and that value extends to `G` by
-`surjective_resolutionMap_subgroupSubtype`. -/
+`resolutionMap_subgroupSubtype_surjective`. -/
 theorem exists_mem_invariants_resolutionMap_subgroupSubtype_eq (hX : IsSmoothDiscrete k X)
     {H : Subgroup G} (hH : IsClosed (H : Set G)) (n : ℕ)
     {w : (TopRep.resolutionX (TopRep.res (H.subtype : H →* G) X) (n + 1)).V}
@@ -239,19 +243,18 @@ theorem exists_mem_invariants_resolutionMap_subgroupSubtype_eq (hX : IsSmoothDis
   obtain ⟨u, hu⟩ : ∃ u : (TopRep.resolutionX X n).V,
       (resolutionMap (ContinuousMonoidHom.subgroupSubtype H)
         (𝟙 (TopRep.res (H.subtype : H →* G) X)) n).hom u = w' 1 :=
-    surjective_resolutionMap_subgroupSubtype X hH n (w' 1)
+    resolutionMap_subgroupSubtype_surjective X hH n (w' 1)
   -- the orbit map of `u` is continuous because the resolution is smooth
   have hcont : Continuous fun g : G ↦ (TopRep.resolutionX X n).ρ g u := by
-    let _ := TopRep.distribMulAction (TopRep.resolutionX X n)
     have : ContinuousSMul G (TopRep.resolutionX X n).V := (hX.resolutionX n).continuousSMul
-    -- `g • u` is `ρ g u` by definition of the derived action
-    exact (continuous_id.smul continuous_const : Continuous fun g : G ↦ g • u)
+    have h : Continuous fun g : G ↦ g • u := continuous_id.smul continuous_const
+    simpa only [TopRep.distribMulAction_smul] using h
   -- the invariant element with value `u` at `1`
   let W : C(G, (TopRep.resolutionX X n).V) := ⟨fun g ↦ (TopRep.resolutionX X n).ρ g u, hcont⟩
   refine ⟨W, fun g ↦ ContinuousMap.ext fun x ↦ ?_, ContinuousMap.ext fun s ↦ ?_⟩
   · -- invariance: `ρ g (ρ (g⁻¹ * x) u) = ρ x u`
-    change (TopRep.resolutionX X n).ρ g (W (g⁻¹ * x)) = W x
-    simp only [W, ContinuousMap.coe_mk, ← mul_apply_eq_comp, ← map_mul, mul_inv_cancel_left]
+    simp only [ContRepresentation.coind₁_apply_apply, W, ContinuousMap.coe_mk,
+      ← mul_apply_eq_comp, ← map_mul, mul_inv_cancel_left]
   · -- the left-hand side is, by definition, the restriction of `W s = ρ s u`; restriction is
     -- equivariant, and `w` is invariant with value `w' 1` at `1`
     have h₁ := TopRep.hom_comm_apply (resolutionMap (ContinuousMonoidHom.subgroupSubtype H)
@@ -259,6 +262,8 @@ theorem exists_mem_invariants_resolutionMap_subgroupSubtype_eq (hX : IsSmoothDis
     have h₂ := congr($(hw s) s)
     simp only [ContRepresentation.coind₁_apply_apply, inv_mul_cancel] at h₂
     exact (h₁.trans (by rw [hu])).trans h₂
+
+end Invariants
 
 /-! ### The colimit description -/
 

@@ -42,8 +42,11 @@ transformations `resNatTrans` and `inflNatTrans`, matching the shape of Mathlib'
 ## Main results
 
 * `TauCeti.ContinuousCohomology.coeffMap_comp`,
-  `TauCeti.ContinuousCohomology.res_comp_res`, `TauCeti.ContinuousCohomology.res_comp_resLe` and
-  `TauCeti.ContinuousCohomology.infl_comp_infl`: the composition laws of the named maps.
+  `TauCeti.ContinuousCohomology.res_comp_res`, `TauCeti.ContinuousCohomology.res_comp_resLe`,
+  `TauCeti.ContinuousCohomology.resLe_comp_resLe` and
+  `TauCeti.ContinuousCohomology.infl_comp_infl`: the composition laws of the named maps;
+  `TauCeti.ContinuousCohomology.resLe_refl`: restriction along the identity inclusion is the
+  identity.
 * `TauCeti.ContinuousCohomology.coeffMap_comp_res` and
   `TauCeti.ContinuousCohomology.coeffMap_comp_infl`: naturality of restriction and of inflation in
   the coefficients.
@@ -211,6 +214,26 @@ theorem res_comp_resLe (h : H ≤ S) (X : TopRep R G) (n : ℕ) :
   refine (_root_.ContinuousCohomology.map_comp (X := X) (ContinuousMonoidHom.subgroupSubtype S)
       (ContinuousMonoidHom.subgroupInclusion h) (𝟙 _) (𝟙 _) n).symm.trans
     (map_congr (ContinuousMonoidHom.subgroupSubtype_comp_subgroupInclusion h) (heq_of_eq ?_) n)
+  ext v
+  rfl
+
+/-- Restriction along the inclusion of a subgroup into itself is the identity. -/
+@[simp]
+theorem resLe_refl (X : TopRep R G) (n : ℕ) : resLe (le_refl H) X n = 𝟙 _ :=
+  (map_congr (ContinuousMonoidHom.subgroupInclusion_refl H) (heq_of_eq rfl) n).trans
+    (_root_.ContinuousCohomology.map_id _ n)
+
+/-- Restricting from `T` to `S` and then to `H`, for subgroups `H ≤ S ≤ T`, is restricting from
+`T` to `H`: the transition maps of the system of the `Hⁿ(S, X)` over the subgroups containing `H`
+compose. -/
+@[reassoc (attr := simp)]
+theorem resLe_comp_resLe {T : Subgroup G} (hHS : H ≤ S) (hST : S ≤ T) (X : TopRep R G) (n : ℕ) :
+    resLe hST X n ≫ resLe hHS X n = resLe (hHS.trans hST) X n := by
+  refine (_root_.ContinuousCohomology.map_comp (X := TopRep.res (T.subtype : T →* G) X)
+      (ContinuousMonoidHom.subgroupInclusion hST) (ContinuousMonoidHom.subgroupInclusion hHS)
+      (𝟙 _) (𝟙 _) n).symm.trans
+    (map_congr (ContinuousMonoidHom.subgroupInclusion_comp_subgroupInclusion hHS hST)
+      (heq_of_eq ?_) n)
   ext v
   rfl
 
