@@ -18,19 +18,20 @@ relator word:
 * `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`, for `q = 2` and `n` even,
 
 where `(x, y) = x⁻¹y⁻¹xy` is Labute's commutator. This file defines the commutator and the three
-words on an arbitrary tuple of group elements, so that the same word can be read in a free
-pro-`p` group and in any group that receives it, together with the `ℕ`-indexed generators of
-`freeProP p (Fin n)` and of a group presented on them, which carry no index-bound side conditions.
+words on an arbitrary tuple `x : ℕ → H` of group elements, so that the same word can be read in a
+free pro-`p` group and in any group that receives it. Read on the `ℕ`-indexed generators
+`TauCeti.freeProPGen` and `TauCeti.presentedProPGen`, which are `1` out of range, the words carry
+no index-bound side conditions.
 
-Each word is a product of `p`-th powers and commutators, so it lies in the Frattini subgroup of
-the free pro-`p` group. Hence the presentation of a normal form on `n` generators is minimal:
+Under the conditions `p ∣ q` for the first word, `0 < f` for the second, and `2 ∣ a` together with
+`0 < f` for the third, each word is a product of `p`-th powers and commutators, so it lies in the
+pro-`p` Frattini subgroup of every topological group, in particular of the free pro-`p` group.
+Hence, under the same conditions, the presentation of a normal form on `n` generators is minimal:
 the presented group has topological generator rank exactly `n`.
 
 ## Main definitions
 
 * `TauCeti.labuteComm`: Labute's commutator `(x, y) = x⁻¹y⁻¹xy`.
-* `TauCeti.freeProPGen`, `TauCeti.presentedProPGen`: the generators of `freeProP p (Fin n)` and
-  of a group presented on them, indexed by `ℕ` with value `1` out of range.
 * `TauCeti.demushkinWordNeTwo`, `TauCeti.demushkinWordTwoOdd`, `TauCeti.demushkinWordTwoEven`:
   the three normal-form relator words, on an arbitrary tuple.
 
@@ -40,11 +41,13 @@ the presented group has topological generator rank exactly `n`.
   normal-form presentation satisfy its defining relation.
 * `TauCeti.demushkinWordNeTwo_mem_proPFrattini`, `TauCeti.demushkinWordTwoOdd_mem_proPFrattini`,
   `TauCeti.demushkinWordTwoEven_mem_proPFrattini`: each word lies in the pro-`p` Frattini
-  subgroup.
+  subgroup, for `p ∣ q`, resp. `0 < f`, resp. `2 ∣ a` and `0 < f`.
 * `TauCeti.topologicalGeneratorRankNat_presentedProP_demushkinWordNeTwo` and its two companions:
-  the normal-form presentation on `n` generators is minimal.
+  under the same conditions, the normal-form presentation on `n` generators is minimal.
 * `TauCeti.map_demushkinWordNeTwo_eq_one` and its two companions: a character into a commutative
-  group with the tabulated trivial values on the `p`-power generators kills the word.
+  group kills the word as soon as its values on the generators carrying a power have trivial
+  power: `χ(x₁)^q = 1`, resp. `χ(x₁)² = 1` and `χ(x₂)^{2^f} = 1`, resp. `χ(x₁)^{2+a} = 1` and
+  `χ(x₃)^{2^f} = 1`.
 
 ## References
 
@@ -109,97 +112,6 @@ theorem labuteComm_mem_proPFrattini [TopologicalSpace H] {p : ℕ} (hp : p.Prime
   commutator_le_proPFrattini hp (labuteComm_mem_commutator x y)
 
 end LabuteComm
-
-/-! ### The generators, indexed by `ℕ` -/
-
-section Generators
-
-variable (p : ℕ) {n : ℕ}
-
-variable (n) in
-/-- The generators of the free pro-`p` group on `Fin n`, indexed by `ℕ`, with value `1` out of
-range. The normal-form words below are written on such tuples, so that they carry no index-bound
-side conditions. -/
-noncomputable def freeProPGen (i : ℕ) : freeProP p (Fin n) :=
-  if h : i < n then freeProP.of ⟨i, h⟩ else 1
-
-/-- In range, `freeProPGen p n i` is the `i`-th free generator. -/
-theorem freeProPGen_of_lt {i : ℕ} (h : i < n) : freeProPGen p n i = freeProP.of ⟨i, h⟩ := by
-  simp [freeProPGen, h]
-
-/-- Out of range, `freeProPGen p n i` is `1`. -/
-theorem freeProPGen_eq_one_of_le {i : ℕ} (h : n ≤ i) : freeProPGen p n i = 1 := by
-  simp [freeProPGen, not_lt.mpr h]
-
-/-- On the values of `Fin n`, `freeProPGen p n` is the canonical generator. -/
-@[simp]
-theorem freeProPGen_val (i : Fin n) : freeProPGen p n i = freeProP.of i :=
-  freeProPGen_of_lt p i.isLt
-
-/-- The value of a homomorphism on the `ℕ`-indexed generators. -/
-theorem map_freeProPGen {K F : Type*} [Group K] [FunLike F (freeProP p (Fin n)) K]
-    [MonoidHomClass F (freeProP p (Fin n)) K] (φ : F) (i : ℕ) :
-    φ (freeProPGen p n i) = if h : i < n then φ (freeProP.of ⟨i, h⟩) else 1 := by
-  split_ifs with h
-  · rw [freeProPGen_of_lt p h]
-  · rw [freeProPGen_eq_one_of_le p (not_lt.mp h), map_one]
-
-/-- The value of the universal map on the `ℕ`-indexed generators: the prescribed value in range,
-`1` out of range. -/
-theorem freeProP.lift_freeProPGen {P : Type} [Group P] [TopologicalSpace P] [IsTopologicalGroup P]
-    [CompactSpace P] [TotallyDisconnectedSpace P] (hP : IsProP p P) (g : Fin n → P) (i : ℕ) :
-    freeProP.lift hP g (freeProPGen p n i) = if h : i < n then g ⟨i, h⟩ else 1 := by
-  rw [map_freeProPGen]
-  split_ifs
-  · rw [freeProP.lift_of]
-  · rfl
-
-variable (n) (rels : Set (freeProP p (Fin n)))
-
-/-- The generators of a pro-`p` group presented on `Fin n`, indexed by `ℕ` with value `1` out of
-range: the images of `TauCeti.freeProPGen`. -/
-noncomputable def presentedProPGen (i : ℕ) : presentedProP p (Fin n) rels :=
-  presentedProP.mk p rels (freeProPGen p n i)
-
-/-- The quotient map carries `freeProPGen` to `presentedProPGen`. -/
-@[simp]
-theorem presentedProP.mk_freeProPGen (i : ℕ) :
-    presentedProP.mk p rels (freeProPGen p n i) = presentedProPGen p n rels i :=
-  (rfl)
-
-/-- In range, `presentedProPGen p n rels i` is the `i`-th canonical generator. -/
-theorem presentedProPGen_of_lt {i : ℕ} (h : i < n) :
-    presentedProPGen p n rels i = presentedProP.of p rels ⟨i, h⟩ := by
-  rw [← presentedProP.mk_freeProPGen, freeProPGen_of_lt p h, presentedProP.mk_of]
-
-/-- Out of range, `presentedProPGen p n rels i` is `1`. -/
-theorem presentedProPGen_eq_one_of_le {i : ℕ} (h : n ≤ i) : presentedProPGen p n rels i = 1 := by
-  rw [← presentedProP.mk_freeProPGen, freeProPGen_eq_one_of_le p h, map_one]
-
-/-- On the values of `Fin n`, `presentedProPGen p n rels` is the canonical generator. -/
-@[simp]
-theorem presentedProPGen_val (i : Fin n) :
-    presentedProPGen p n rels i = presentedProP.of p rels i := by
-  rw [← presentedProP.mk_freeProPGen, freeProPGen_val, presentedProP.mk_of]
-
-/-- The value of a homomorphism on the `ℕ`-indexed generators of a presented group. -/
-theorem map_presentedProPGen {K F : Type*} [Group K] [FunLike F (presentedProP p (Fin n) rels) K]
-    [MonoidHomClass F (presentedProP p (Fin n) rels) K] (φ : F) (i : ℕ) :
-    φ (presentedProPGen p n rels i) =
-      if h : i < n then φ (presentedProP.of p rels ⟨i, h⟩) else 1 := by
-  split_ifs with h
-  · rw [presentedProPGen_of_lt p n rels h]
-  · rw [presentedProPGen_eq_one_of_le p n rels (not_lt.mp h), map_one]
-
-/-- The quotient map carries the tuple `freeProPGen` to the tuple `presentedProPGen`: the
-function-level form of `TauCeti.presentedProP.mk_freeProPGen`, which lets a word read on
-`presentedProPGen` be pulled back through `map_demushkinWordNeTwo` and its companions. -/
-@[simp]
-theorem presentedProP.mk_comp_freeProPGen :
-    ⇑(presentedProP.mk p rels) ∘ freeProPGen p n = presentedProPGen p n rels :=
-  funext (presentedProP.mk_freeProPGen p n rels)
-
-end Generators
 
 /-! ### The three normal-form words -/
 
@@ -294,25 +206,25 @@ theorem demushkinWordTwoEven_eq_of_commGroup (a f n : ℕ) (x : ℕ → A) :
 
 variable {G : Type*} [Group G] {F' : Type*} [FunLike F' G A] [MonoidHomClass F' G A] (χ : F')
 
-/-- A character into a commutative group that is trivial on `x₁` kills the `q ≠ 2` word. -/
-theorem map_demushkinWordNeTwo_eq_one (q n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) = 1) :
+/-- A character into a commutative group whose value on `x₁` has trivial `q`-th power kills the
+`q ≠ 2` word. -/
+theorem map_demushkinWordNeTwo_eq_one (q n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ q = 1) :
     χ (demushkinWordNeTwo q n x) = 1 := by
-  rw [map_demushkinWordNeTwo, demushkinWordNeTwo_eq_of_commGroup, Function.comp_apply, h₀,
-    one_pow]
+  rw [map_demushkinWordNeTwo, demushkinWordNeTwo_eq_of_commGroup, Function.comp_apply, h₀]
 
-/-- A character into a commutative group whose value on `x₁` squares to `1` and which is trivial
-on `x₂` kills the `q = 2`, `n` odd word. -/
+/-- A character into a commutative group whose value on `x₁` squares to `1` and whose value on
+`x₂` has trivial `2^f`-th power kills the `q = 2`, `n` odd word. -/
 theorem map_demushkinWordTwoOdd_eq_one (f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ 2 = 1)
-    (h₁ : χ (x 1) = 1) : χ (demushkinWordTwoOdd f n x) = 1 := by
+    (h₁ : χ (x 1) ^ 2 ^ f = 1) : χ (demushkinWordTwoOdd f n x) = 1 := by
   rw [map_demushkinWordTwoOdd, demushkinWordTwoOdd_eq_of_commGroup, Function.comp_apply,
-    Function.comp_apply, h₀, h₁, one_pow, one_mul]
+    Function.comp_apply, h₀, h₁, one_mul]
 
-/-- A character into a commutative group that is trivial on `x₁` and `x₃` kills the `q = 2`, `n`
-even word. -/
-theorem map_demushkinWordTwoEven_eq_one (a f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) = 1)
-    (h₂ : χ (x 2) = 1) : χ (demushkinWordTwoEven a f n x) = 1 := by
+/-- A character into a commutative group whose value on `x₁` has trivial `(2 + a)`-th power and
+whose value on `x₃` has trivial `2^f`-th power kills the `q = 2`, `n` even word. -/
+theorem map_demushkinWordTwoEven_eq_one (a f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ (2 + a) = 1)
+    (h₂ : χ (x 2) ^ 2 ^ f = 1) : χ (demushkinWordTwoEven a f n x) = 1 := by
   rw [map_demushkinWordTwoEven, demushkinWordTwoEven_eq_of_commGroup, Function.comp_apply,
-    Function.comp_apply, h₀, h₂, one_pow, one_pow, one_mul]
+    Function.comp_apply, h₀, h₂, one_mul]
 
 end Words
 
