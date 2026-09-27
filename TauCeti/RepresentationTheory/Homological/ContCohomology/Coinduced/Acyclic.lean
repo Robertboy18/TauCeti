@@ -296,14 +296,17 @@ variable (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Com
 `AddCommGroup.toIntModule` on `Coind_1^G A` and an abelian group `A` carrying no topology. This is
 `subsingleton_continuousCohomology_discreteCoind_bot` at `R = ℤ`, restated for the module structure
 that instance search produces for `Coind_1^G A`, which is the one the long exact sequence of
-`TauCeti.ContCohomology.DiscreteShortExact` uses: it agrees with the scalar module structure of
-`TauCeti.DiscreteCoind` only up to unfolding, which instance search does not perform. -/
+`TauCeti.ContCohomology.DiscreteShortExact` uses: it is transported from the scalar module structure
+of `TauCeti.DiscreteCoind` along the equality of the two `ℤ`-module structures. -/
 instance subsingleton_continuousCohomology_discreteCoind_bot_int (n : ℕ) :
-    Subsingleton (continuousCohomology (n + 1) (ofDiscreteModule ℤ G (DiscreteCoind G ⊥ A))) :=
+    Subsingleton (continuousCohomology (n + 1) (ofDiscreteModule ℤ G (DiscreteCoind G ⊥ A))) := by
   -- the resolution of `A` in the general theorem needs `A` discrete
-  letI : TopologicalSpace A := ⊥
-  haveI : DiscreteTopology A := ⟨rfl⟩
-  subsingleton_continuousCohomology_discreteCoind_bot ℤ G A n
+  let : TopologicalSpace A := ⊥
+  have : DiscreteTopology A := ⟨rfl⟩
+  convert subsingleton_continuousCohomology_discreteCoind_bot ℤ G A n
+  -- the remaining goal compares `AddCommGroup.toIntModule` with the scalar module structure of
+  -- `Coind_1^G A`; all `ℤ`-module structures on an abelian group are equal
+  exact Subsingleton.elim _ _
 
 end Int
 
@@ -327,9 +330,7 @@ theorem coindAcyclic (A : SmoothDiscreteTopRep.{v, u, u} R (⊥ : Subgroup G)) (
     Limits.IsZero (continuousCohomology n ((smoothDiscreteι R G).obj (coindTopRep R G ⊥ A))) := by
   obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn.ne'
   have : DiscreteTopology A.obj.V := A.property.discreteTopology
-  have : Subsingleton
-      (continuousCohomology (n + 1) ((smoothDiscreteι R G).obj (coindTopRep R G ⊥ A))) :=
-    subsingleton_continuousCohomology_discreteCoind_bot R G A.obj.V n
+  rw [ObjectProperty.ι_obj, toSmoothDiscrete_obj_obj]
   exact TopModuleCat.isZero_of_subsingleton _
 
 end Bundled

@@ -27,6 +27,17 @@ namespace TopModuleCat
 
 variable {R : Type*} [Ring R] [TopologicalSpace R]
 
+/-- The forgetful functor to `ModuleCat R` acts on a morphism as its underlying linear map, the
+counterpart of Mathlib's `TopModuleCat.hom_forget₂_TopCat_map` for the other forgetful functor. -/
+@[simp]
+theorem hom_forget₂_ModuleCat_map {X Y : TopModuleCat R} (f : X ⟶ Y) :
+    ((forget₂ _ (ModuleCat R)).map f).hom = f.hom := rfl
+
+/-- The forward morphism of `TopModuleCat.ofIso e` is `e` as a continuous linear map. -/
+@[simp]
+theorem ofIso_hom {X Y : TopModuleCat R} (e : X ≃L[R] Y) :
+    (ofIso e).hom = ofHom e.toContinuousLinearMap := rfl
+
 /-- A morphism of topological modules into a discrete module is an isomorphism as soon as its
 underlying morphism of modules is one: the inverse is continuous because its source is discrete. -/
 theorem isIso_of_isIso_forget₂_map {X Y : TopModuleCat R} [DiscreteTopology Y] (f : X ⟶ Y)
@@ -37,7 +48,9 @@ theorem isIso_of_isIso_forget₂_map {X Y : TopModuleCat R} [DiscreteTopology Y]
       continuous_invFun := continuous_of_discreteTopology }
   have hf : f = (ofIso e).hom := by
     ext x
-    rfl
+    simp only [ofIso_hom, hom_ofHom, ContinuousLinearEquiv.coe_coe]
+    rw [← ContinuousLinearEquiv.coe_toLinearEquiv]
+    simp [e]
   rw [hf]
   infer_instance
 
