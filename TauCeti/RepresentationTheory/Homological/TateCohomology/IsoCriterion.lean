@@ -17,7 +17,7 @@ public import TauCeti.RepresentationTheory.Homological.TateCohomology.Triviality
 Let `G` be a finite group and `f : A ⟶ B` a morphism of representations of `G`. Suppose that for
 every subgroup `S` of `G` of prime-power order the map induced by `f` on the Tate cohomology of
 `S` is surjective in degree `q - 1`, bijective in degree `q` and injective in degree `q + 1`.
-Then `f` induces isomorphisms `Ĥⁿ(S, A) ≃ Ĥⁿ(S, B)` in every integer degree `n`, for every
+Then `f` induces isomorphisms `Ĥⁿ(S, A) ≃ Ĥⁿ(S, B)` in every integer degree `n`, for every
 subgroup `S` of `G` (`TauCeti.TateCohomology.bijective_map_res_of_forall_isPGroup`), and in
 particular for `G` itself (`TauCeti.TateCohomology.bijective_map_of_forall_isPGroup`).
 
@@ -147,7 +147,7 @@ theorem bijective_map_res_of_forall_isPGroup [Finite G] {q : ℤ}
 /-- **Tate's isomorphism criterion.** Let `G` be a finite group and `f : A ⟶ B` a morphism of
 representations of `G`. If, for every subgroup `S` of `G` of prime-power order, the map induced by
 `f` on the Tate cohomology of `S` is surjective in degree `q - 1`, bijective in degree `q` and
-injective in degree `q + 1`, then `f` induces a bijection `Ĥⁿ(G, A) → Ĥⁿ(G, B)` in every
+injective in degree `q + 1`, then `f` induces a bijection `Ĥⁿ(G, A) → Ĥⁿ(G, B)` in every
 degree `n`. -/
 theorem bijective_map_of_forall_isPGroup [Fintype G] {q : ℤ}
     (hsurj : ∀ (p : ℕ) [Fact p.Prime] (S : Subgroup G) [Fintype S], IsPGroup p S →
