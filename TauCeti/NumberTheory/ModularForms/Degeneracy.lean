@@ -429,6 +429,14 @@ lemma _root_.CuspForm.levelRaise_one [𝒢'.HasDetOne]
   _root_.CuspForm.ext fun τ ↦ (levelRaise_one_apply h f τ).trans
     (congrFun (_root_.CuspForm.coe_ofLe _ f) τ).symm
 
+-- Not `@[simp]`: `CuspForm.levelRaise_one` already rewrites the left-hand side to `ofLe _ f`, so
+-- the `simpNF` linter reports that the left-hand side is not in simp normal form.
+/-- **`V₁` at an unchanged level is the identity.** When the invariance group stays `𝒢`, the
+level-raising operator at `d = 1` fixes every cusp form. -/
+lemma _root_.CuspForm.levelRaise_one_self [𝒢.HasDetOne]
+    (h : 𝒢 ≤ ConjAct.toConjAct (scaleGL 1)⁻¹ • 𝒢) (f : CuspForm 𝒢 k) : levelRaise 1 h f = f :=
+  _root_.CuspForm.ext fun τ ↦ levelRaise_one_apply h f τ
+
 /-- The level-raising operators compose: `V_d ∘ V_e = V_{de}`. -/
 @[simp]
 lemma levelRaise_levelRaise {d e : ℕ} [𝒢'.HasDetOne] [𝒢''.HasDetOne] [NeZero d] [NeZero e]

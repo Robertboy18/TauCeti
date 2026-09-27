@@ -91,6 +91,20 @@ theorem heckeTCuspNat_eq_smul_of_heckeRingHomCuspCharSpace_heckeTCompositeGamma0
   simpa [heckeTCompositeGamma0_prime N hp,
     heckeRingHomCuspCharSpace_heckeTGeneratorGamma0 k χ hp] using congrArg Subtype.val hF
 
+/-- **An eigenvector of the classical `T_p` at a good prime is a ring eigenvector**, on
+`S_k(N, χ)`: the converse of
+`heckeTCuspNat_eq_smul_of_heckeRingHomCuspCharSpace_heckeTCompositeGamma0_eq_smul`, the same
+equation read back through the coercion. -/
+theorem heckeRingHomCuspCharSpace_heckeTCompositeGamma0_eq_smul_of_heckeTCuspNat_eq_smul
+    [NeZero p] (hp : p.Prime) {F : cuspFormCharSpace k χ} {c : ℂ}
+    (hF : heckeTCuspNat k p (F : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) =
+      c • (F : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)) :
+    heckeRingHomCuspCharSpace k χ (heckeTCompositeGamma0 N p) F = c • F :=
+  Subtype.ext <| by
+    rw [heckeTCompositeGamma0_prime N hp,
+      coe_heckeRingHomCuspCharSpace_heckeTGeneratorGamma0 k χ hp, Submodule.coe_smul]
+    exact hF
+
 /-! ### The recurrence characterises the eigen-relation -/
 
 /-- **The coefficient recurrence characterises the eigen-relation `Tₚ F = c • F` at a good
