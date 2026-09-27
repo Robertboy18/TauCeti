@@ -16,6 +16,9 @@ public import TauCeti.RepresentationTheory.CharacterTable.GL2.PrincipalSeries.Ba
 -- The Mackey irreducibility criterion `TauCeti.simple_indFDRep_iff`, its predicate
 -- `TauCeti.MackeyDisjoint`, and the Mackey subgroup the predicate is stated on.
 public import TauCeti.RepresentationTheory.Induction.Mackey.Irreducible
+-- `TauCeti.irreducibleCharacters`, the set the off-diagonal principal series are shown to belong
+-- to.
+public import TauCeti.RepresentationTheory.CharacterTable.Table
 -- Non-public: the permutation-matrix description of the Weyl element is used only to compute
 -- its action on the diagonal coordinates.
 import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Diagonal.Bruhat
@@ -64,6 +67,8 @@ to `(γ, δ) = (α, β)` gives the required criterion `α ≠ β`.
   holds exactly when `α ≠ β`.
 * `TauCeti.simple_GL2PrincipalSeries_iff`: **the principal series `Ind_B^{GL₂}(α ⊗ β)` is
   irreducible if and only if `α ≠ β`.**
+* `TauCeti.character_GL2PrincipalSeries_mem_irreducibleCharacters`: for `α ≠ β`, its character is
+  an irreducible character of `GL₂(F)`.
 
 ## Implementation notes
 
@@ -304,6 +309,12 @@ theorem simple_GL2PrincipalSeries_iff (α β : Fˣ →* ℂˣ) :
       DoubleCoset.mem_doubleCoset.mp (GL2Borel.mem_doubleCoset_weyl_of_notMem hs)
     exact (mackeyDisjoint_mul_left_mul_right_iff _ hb₁ hb₂ _).mpr
       ((GL2Borel.mackeyDisjoint_weyl_iff α β).mpr hne)
+
+/-- **The principal series with `α ≠ β` are irreducible characters of `GL₂(F)`.** -/
+theorem character_GL2PrincipalSeries_mem_irreducibleCharacters {α β : Fˣ →* ℂˣ} (hαβ : α ≠ β) :
+    (GL2PrincipalSeries F α β).character ∈ irreducibleCharacters ℂ (GL (Fin 2) F) :=
+  have := (simple_GL2PrincipalSeries_iff F α β).mpr hαβ
+  FDRep.character_mem_irreducibleCharacters (GL2PrincipalSeries F α β)
 
 end FiniteField
 

@@ -7,6 +7,8 @@ module
 
 -- The three representations in the boundary splitting are defined here.
 public import TauCeti.RepresentationTheory.CharacterTable.GL2.Linear
+-- `TauCeti.irreducibleCharacters`, the set the Steinberg twists are shown to belong to.
+public import TauCeti.RepresentationTheory.CharacterTable.Table
 -- Non-public: the determinant twist of a principal-series character is the character identity the
 -- splitting below is read off from, inside a proof only.
 import TauCeti.RepresentationTheory.CharacterTable.GL2.PrincipalSeries.Twist
@@ -45,7 +47,8 @@ linear representations have dimension `1`, while their Steinberg twists have dim
   linear and Steinberg-twist characters.
 * `TauCeti.simple_GL2Steinberg` and `TauCeti.simple_GL2SteinbergTwist`: the Steinberg
   representation and all its determinant twists are irreducible (for universe-small finite
-  fields).
+  fields); `TauCeti.character_GL2SteinbergTwist_mem_irreducibleCharacters` records that the
+  Steinberg twists are irreducible characters of `GL₂(F)`.
 * `TauCeti.nonempty_iso_GL2PrincipalSeries_self`: the boundary principal series is the biproduct
   of those two representations.
 
@@ -125,6 +128,12 @@ theorem simple_GL2SteinbergTwist (α : Fˣ →* ℂˣ) : Simple (GL2SteinbergTwi
           simp only [character_GL2SteinbergTwist, map_inv]
           simp [mul_assoc, mul_left_comm]
     _ = Nat.card (GL (Fin 2) F) := h
+
+/-- **The Steinberg twists are irreducible characters of `GL₂(F)`.** -/
+theorem character_GL2SteinbergTwist_mem_irreducibleCharacters (α : Fˣ →* ℂˣ) :
+    (GL2SteinbergTwist F α).character ∈ irreducibleCharacters ℂ (GL (Fin 2) F) :=
+  have := simple_GL2SteinbergTwist F α
+  FDRep.character_mem_irreducibleCharacters (GL2SteinbergTwist F α)
 
 end SmallUniverse
 
