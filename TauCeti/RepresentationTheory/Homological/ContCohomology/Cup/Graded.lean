@@ -70,7 +70,7 @@ hypothesis beyond `IsTopologicalGroup G` is needed anywhere in the file.
 
 * `TauCeti.TopPairing`: an equivariant jointly continuous bilinear pairing of topological
   representations, with `TauCeti.ofDiscreteModulePairing` for an equivariant biadditive map of
-  discrete modules.
+  discrete modules, and `TauCeti.TopPairing.flip` for the opposite pairing `(y, x) ↦ μ x y`.
 * `TauCeti.TopPairing.pointwise`: pairing a coefficient with every value of an iterated map.
 * `TauCeti.TopPairing.resolutionCup`: the Alexander–Whitney pairing on the coinduced resolution,
   with explicit total degree.
@@ -85,6 +85,9 @@ hypothesis beyond `IsTopologicalGroup G` is needed anywhere in the file.
   the resolution pairing is equivariant and jointly continuous.
 * `TauCeti.TopPairing.resolutionCup_leibniz`, `TauCeti.TopPairing.resolutionCupPairing_leibniz`,
   `TauCeti.TopPairing.cupCochain_leibniz`: the **Leibniz rule**.
+* `TauCeti.TopPairing.resolutionCupPairing_one_one_apply`,
+  `TauCeti.TopPairing.cupCochain_one_one_apply`: in bidegree `(1, 1)` the cup product is
+  `(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁) (b g₁ g₂)`, with no transport.
 
 ## References
 
@@ -120,6 +123,25 @@ structure TopPairing (X Y Z : TopRep.{w} R G) where
   cont : Continuous fun p : X.V × Y.V ↦ bil p.1 p.2
   /-- equivariance -/
   equivariant (g : G) (x : X.V) (y : Y.V) : bil (X.ρ g x) (Y.ρ g y) = Z.ρ g (bil x y)
+
+namespace TopPairing
+
+variable {X Y Z : TopRep.{w} R G} (P : TopPairing X Y Z)
+
+/-- **The opposite pairing** `Y × X → Z`, `(y, x) ↦ μ x y`, of a coefficient pairing
+`μ : X × Y → Z`. -/
+def flip : TopPairing Y X Z where
+  bil := P.bil.flip
+  cont := P.cont.comp continuous_swap
+  equivariant g y x := P.equivariant g x y
+
+@[simp]
+theorem flip_bil (y : Y.V) (x : X.V) : P.flip.bil y x = P.bil x y := (rfl)
+
+@[simp]
+theorem flip_flip : P.flip.flip = P := (rfl)
+
+end TopPairing
 
 variable {M N P : Type w} [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
   [DistribMulAction G M] [AddCommGroup N] [TopologicalSpace N] [DiscreteTopology N]
@@ -612,6 +634,17 @@ theorem coe_cupCochain (m n : ℕ) (a : (TopRep.homogeneousCochains X).X m)
     (b : (TopRep.homogeneousCochains Y).X n) :
     Subtype.val (P.cupCochain m n a b) = P.resolutionCupPairing m n a.1 b.1 := by
   rw [cupCochain, LinearMap.mk₂_apply]
+
+/-- The cup product of two homogeneous one-cochains, evaluated:
+`(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁) (b g₁ g₂)`. -/
+-- Not a `simp` lemma, for the same reason as `coe_cupCochain`: the implicit carrier
+-- `(TopRep.resolution' Z).X (1 + 1)` of the left-hand side is not in `simp`-normal form; use it
+-- with `rw` or `simp only`.
+theorem cupCochain_one_one_apply (a : (TopRep.homogeneousCochains X).X 1)
+    (b : (TopRep.homogeneousCochains Y).X 1) (g₀ g₁ g₂ : G) :
+    ((P.cupCochain 1 1 a b).val : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
+      P.bil (a.val g₀ g₁) (b.val g₁ g₂) := by
+  rw [coe_cupCochain, resolutionCupPairing_one_one_apply]
 
 /-- **The Leibniz rule for the cup product of homogeneous cochains**,
 `d (a ⌣ b) = d a ⌣ b + (-1)^m (a ⌣ d b)`, where the term `d a ⌣ b` lives in degree `m + 1 + n`
