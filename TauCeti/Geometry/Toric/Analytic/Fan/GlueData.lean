@@ -230,14 +230,6 @@ theorem analyticOverlapRight_comp_analyticAffineChartι (σ τ : Φ.cones) :
       Φ.analyticAffineChartι hΦ (σ ⊓ τ) := by
   rw [analyticOverlapRight_def, analyticAffineChartDiagram_map_comp_analyticAffineChartι]
 
-/-- The two overlap inclusions of the chart of `σ ⊓ τ` into the charts of `σ` and `τ` agree after
-inclusion into the analytic realization. -/
-@[reassoc]
-theorem analyticOverlap_comp_analyticAffineChartι (σ τ : Φ.cones) :
-    Φ.analyticOverlapLeft hΦ σ τ ≫ Φ.analyticAffineChartι hΦ σ =
-      Φ.analyticOverlapRight hΦ σ τ ≫ Φ.analyticAffineChartι hΦ τ := by
-  rw [analyticOverlapLeft_comp_analyticAffineChartι, analyticOverlapRight_comp_analyticAffineChartι]
-
 /-- The preimage in the chart of `τ` of the chart of `σ` is the overlap locus of `τ` with `σ`. -/
 @[simp]
 theorem analyticAffineChartι_preimage_range (σ τ : Φ.cones) :
