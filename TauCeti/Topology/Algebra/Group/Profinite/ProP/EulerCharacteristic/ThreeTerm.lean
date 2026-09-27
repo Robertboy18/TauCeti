@@ -5,8 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.FinitelyGenerated
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.ConnectingMapComparison
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.H2ZMod
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.TopologicallyFinitelyGenerated
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.EulerCharacteristic.Basic
 
 /-!
@@ -47,8 +48,9 @@ formula**: if `H²(G, 𝔽_p)` is finite then so is `H²(U, 𝔽_p)`, and in `�
 Here `1 = dim H⁰` and `d = dim H¹` for the trivial module `𝔽_p`, so this is the identity
 `χ(U) = [G : U] * χ(G)` for the truncated Euler characteristic
 `χ = Σ_{i ≤ 2} (-1)^i dim Hⁱ(-, 𝔽_p)`.
-For a Demushkin group, where `dim H² = 1`, it becomes the rank formula
-`d(U) - 2 = [G : U] * (d(G) - 2)` for its open subgroups.
+When `H²(G, 𝔽_p)` and `H²(U, 𝔽_p)` are both one-dimensional, as for a Demushkin group `G` and an
+open subgroup `U` that is again Demushkin, it becomes the rank formula
+`d(U) - 2 = [G : U] * (d(G) - 2)`.
 
 ## Main results
 
@@ -160,8 +162,8 @@ theorem natCard_H0_mul_natCard_H2_mul_pow (M : Type u) [AddCommGroup M] [Topolog
       S.explicitCoeff2_proj_surjective_of_subsingleton
     -- the orders of the terms attached to `N`: `H²(G, N)` is `H²(G, 𝔽_p)` through `N ≃+ ZMod p`
     have hH2N : Nat.card (H2 G N) = Nat.card (H2 G (ZMod p)) := by
-      let e : N ≃+ ZMod p := ((ZMod.ringEquivCongr hNcard.symm).toAddEquiv.trans
-        (zmodAddCyclicAddEquiv (isAddCyclic_of_prime_card hNcard))).symm
+      have : IsAddCyclic N := isAddCyclic_of_prime_card hNcard
+      let e : N ≃+ ZMod p := addEquivOfAddCyclicCardEq (hNcard.trans (Nat.card_zmod p).symm)
       exact Nat.card_congr (explicitMap2Equiv G N G (ZMod p) (ContinuousMulEquiv.refl G) e
         continuous_of_discreteTopology continuous_of_discreteTopology
         (fun g n ↦ by rw [ContinuousMulEquiv.refl_apply, hNtriv, htriv])).toEquiv
@@ -287,7 +289,7 @@ omit hp [CompactSpace G] [TotallyDisconnectedSpace G] [DistribMulAction G (ZMod 
 /-- `cd_p G ≤ 2` kills the canonical `H³` of every discrete module of order `p`. -/
 private theorem subsingleton_continuousCohomology_three (A : Type u) [AddCommGroup A]
     [TopologicalSpace A] [DiscreteTopology A] [DistribMulAction G A] [ContinuousSMul G A]
-    (hA : Nat.card A = p) (_ : ∀ (g : G) (a : A), g • a = a) :
+    (hA : Nat.card A = p) :
     Subsingleton (continuousCohomology 3 (ofDiscreteModule ℤ G A)) :=
   cohomologicalDimensionLE_iff.mp hcd A
     (isPPrimaryTorsion_of_natCard_eq_pow (hA.trans (pow_one p).symm)) 3 (by norm_num)
@@ -304,7 +306,7 @@ theorem natCard_H0_mul_natCard_H2_mul_pow (M : Type u) [AddCommGroup M] [Topolog
     Nat.card (H0 G M) * Nat.card (H2 G M) * p ^ (k * topologicalGeneratorRankNat G hfg) =
       Nat.card (H1 G M) * p ^ k * Nat.card (H2 G (ZMod p)) ^ k :=
   hG.natCard_H0_mul_natCard_H2_mul_pow hfg htriv
-    (fun A _ _ _ _ _ _ hA h ↦ subsingleton_continuousCohomology_three hcd A hA h) M hk
+    (fun A _ _ _ _ _ _ hA _ ↦ subsingleton_continuousCohomology_three hcd A hA) M hk
 
 variable (U : OpenSubgroup G)
 
@@ -318,7 +320,7 @@ theorem natCard_H2_openSubgroup_mul_pow :
       p ^ topologicalGeneratorRankNat U.toSubgroup (hfg.of_openSubgroup U) *
         p ^ U.toSubgroup.index * Nat.card (H2 G (ZMod p)) ^ U.toSubgroup.index :=
   hG.natCard_H2_openSubgroup_mul_pow hfg htriv
-    (fun A _ _ _ _ _ _ hA h ↦ subsingleton_continuousCohomology_three hcd A hA h) U
+    (fun A _ _ _ _ _ _ hA _ ↦ subsingleton_continuousCohomology_three hcd A hA) U
 
 variable [Finite (H2 G (ZMod p))]
 
@@ -327,7 +329,7 @@ generated profinite pro-`p` group `G` with `cd_p G ≤ 2` and `H²(G, 𝔽_p)` f
 finite for every open subgroup `U`. -/
 theorem finite_H2_openSubgroup : Finite (H2 U.toSubgroup (ZMod p)) :=
   hG.finite_H2_openSubgroup hfg htriv
-    (fun A _ _ _ _ _ _ hA h ↦ subsingleton_continuousCohomology_three hcd A hA h) U
+    (fun A _ _ _ _ _ _ hA _ ↦ subsingleton_continuousCohomology_three hcd A hA) U
 
 /-- **The three-term Euler formula under `cd_p G ≤ 2`.** For a topologically finitely generated
 profinite pro-`p` group `G` with `cd_p G ≤ 2` and `H²(G, 𝔽_p)` finite, and an open subgroup `U`,
@@ -338,7 +340,7 @@ theorem one_sub_topologicalGeneratorRankNat_add_finrank_H2 :
       U.toSubgroup.index * (1 - topologicalGeneratorRankNat G hfg +
         Module.finrank (ZMod p) (H2 G (ZMod p))) :=
   hG.one_sub_topologicalGeneratorRankNat_add_finrank_H2 hfg htriv
-    (fun A _ _ _ _ _ _ hA h ↦ subsingleton_continuousCohomology_three hcd A hA h) U
+    (fun A _ _ _ _ _ _ hA _ ↦ subsingleton_continuousCohomology_three hcd A hA) U
 
 end CohomologicalDimensionLE
 

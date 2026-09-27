@@ -93,8 +93,8 @@ theorem natCard_H1_of_natCard_eq (hG : IsProP p G) (hfg : IsTopologicallyFinitel
     (htriv : ∀ (g : G) (a : A), g • a = a) :
     Nat.card (H1 G A) = p ^ topologicalGeneratorRankNat G hfg := by
   -- `A` is cyclic of order `p`, hence isomorphic to `ZMod p`
-  let e₀ : ZMod p ≃+ A := (ZMod.ringEquivCongr hA.symm).toAddEquiv.trans
-    (zmodAddCyclicAddEquiv (isAddCyclic_of_prime_card hA))
+  have : IsAddCyclic A := isAddCyclic_of_prime_card hA
+  let e₀ : ZMod p ≃+ A := addEquivOfAddCyclicCardEq ((Nat.card_zmod p).trans hA.symm)
   let e : Multiplicative A ≃* Multiplicative (ZMod p) := AddEquiv.toMultiplicative e₀.symm
   -- composing with `e` identifies the continuous characters of `G` valued in `A` and in `ZMod p`
   let φ : (G →ₜ* Multiplicative A) ≃ (G →ₜ* Multiplicative (ZMod p)) :=
