@@ -20,13 +20,11 @@ fails: the image of `G_u` in `Gal(L/K)` is the lower ramification group at the i
 
 `(G/H)_{φ_{M/L}(u)} = G_u H / H`  for every `u ≥ -1`.
 
-The proof is Serre's. For `σ : G` of largest lower index in its coset `σ H`, every `τ ∈ H`
-satisfies `i_G(σ τ) = min (i_H(τ), i_G(σ))`, so Serre's quotient formula
-`e(M/L) · i_{G/H}(σ|_L) = ∑_{τ ∈ H} i_G(σ τ)` becomes the truncated count
-`∑_{τ ∈ H} min (i_H(τ), i_G(σ)) = ∑_{k < i_G(σ)} #H_k`. Since `e(M/L) = #H_0`, the finite-sum
-formula for the Herbrand function of `M/L` turns this into
-`i_{G/H}(σ|_L) - 1 = φ_{M/L}(i_G(σ) - 1)`, and the theorem follows by reading both memberships
-off the lower indices.
+This is the statement through which the Herbrand function passes to quotients: the
+transitivity `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}` and the upper-numbering compatibility
+`(G/H)^v = G^v H / H` both rest on it. The file also records Serre's lemma comparing the lower
+indices of a lift `σ` of largest lower index in its coset and of its restriction `σ|_L`, which is
+the finite-index content of the theorem.
 
 ## Main results
 
@@ -90,8 +88,8 @@ theorem exists_forall_lowerIndex_mul_restrictScalars_le (σ : M ≃ₐ[K] M) :
     (fun τ ↦ lowerIndex 𝒪[M] (σ * τ.restrictScalars K)) Finset.univ_nonempty
   refine ⟨τ₀, fun τ ↦ ?_⟩
   have := hτ₀ (τ₀ * τ) (Finset.mem_univ _)
-  rwa [show (τ₀ * τ).restrictScalars K = τ₀.restrictScalars K * τ.restrictScalars K from
-    map_mul (AlgEquiv.restrictScalarsHom K) τ₀ τ, ← mul_assoc] at this
+  rwa [← AlgEquiv.restrictScalarsHom_apply K (τ₀ * τ), map_mul, AlgEquiv.restrictScalarsHom_apply,
+    AlgEquiv.restrictScalarsHom_apply, ← mul_assoc] at this
 
 /-- **Serre's lemma on the lower index of a quotient**, in counting form. If `σ` has the
 largest lower index in its coset `σ H`, and `i_G(σ) = j` is finite, then
@@ -142,9 +140,8 @@ theorem coe_herbrand_lowerIndex_sub_one (σ : M ≃ₐ[K] M) {j : ℕ}
     simp [hsum]
   · -- `j = m + 1`: `#H_0 · n = #H_0 + (#H_1 + ⋯ + #H_m)` and `φ(m) = (#H_1 + ⋯ + #H_m) / #H_0`.
     rw [coe_herbrand_of_coe_eq_natCast L M m (by push_cast; ring), div_eq_iff h0]
-    rw [Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (Nat.succ_pos m), Nat.cast_zero,
-      show Finset.Ico (0 + 1) (m + 1) = Finset.Icc 1 m from Finset.Ico_succ_right_eq_Icc 1 m]
-      at hsum
+    rw [Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (Nat.add_one_pos m), Nat.cast_zero,
+      zero_add, Finset.Ico_add_one_right_eq_Icc] at hsum
     have hsumR : (Nat.card (lowerRamificationGroup L M 0) : ℝ) * n =
         Nat.card (lowerRamificationGroup L M 0) +
           ∑ i ∈ Finset.Icc 1 m, (Nat.card (lowerRamificationGroup L M i) : ℝ) := by
@@ -162,8 +159,7 @@ theorem restrictNormal_mem_lowerRamificationGroupReal_herbrand_iff (σ : M ≃�
   · -- `i_G(σ) = ⊤` means `σ = 1`, and both sides hold.
     rw [TauCeti.IsLocalRing.lowerIndex_eq_top_iff] at htop
     subst htop
-    rw [show (1 : M ≃ₐ[K] M).restrictNormal L = 1 from
-      map_one (AlgEquiv.restrictNormalHom (F := K) (K₁ := M) L)]
+    rw [← AlgEquiv.restrictNormalHom_apply_eq_restrictNormal K L M, map_one]
     exact iff_of_true (one_mem _) (one_mem _)
   obtain ⟨j, hj⟩ := ENat.ne_top_iff_exists.1 htop
   rw [mem_lowerRamificationGroupReal_iff_of_lowerIndex_eq
@@ -176,6 +172,7 @@ theorem restrictNormal_mem_lowerRamificationGroupReal_herbrand_iff (σ : M ≃�
 `H = Gal(M/L)`, the image of the lower ramification group `G_u` of `M/K` under restriction to
 `L` is the lower ramification group of `L/K` at `φ_{M/L}(u)`:
 `(G/H)_{φ_{M/L}(u)} = G_u H / H`. -/
+@[simp]
 theorem map_restrictNormalHom_lowerRamificationGroupReal [Normal K M]
     (u : RamificationIndexDomain) :
     (lowerRamificationGroupReal K M u).map (AlgEquiv.restrictNormalHom L) =

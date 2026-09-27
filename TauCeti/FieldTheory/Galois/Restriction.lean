@@ -123,6 +123,7 @@ theorem AlgEquiv.mem_range_restrictScalarsHom_iff_restrictNormal_eq_one
     exact ⟨τ, AlgEquiv.ext fun x ↦ by simp [τ]⟩
 
 /-- Multiplying by an automorphism of `M/L` does not change the restriction to `L`. -/
+@[simp]
 theorem AlgEquiv.restrictNormal_mul_restrictScalars (σ : M ≃ₐ[K] M) (τ : M ≃ₐ[L] M) :
     (σ * τ.restrictScalars K).restrictNormal L = σ.restrictNormal L := by
   rw [← AlgEquiv.restrictNormalHom_apply_eq_restrictNormal K L M, map_mul,

@@ -608,8 +608,8 @@ variable [MulSemiringAction G S]
 theorem mem_ramificationGroupReal_iff_of_lowerIndex_eq {u : ℝ} {σ : G} {n : ℕ}
     (hn : lowerIndex S σ = n) :
     σ ∈ ramificationGroupReal G S u ↔ u ≤ (n : ℝ) - 1 := by
-  rw [ramificationGroupReal_def, mem_ramificationGroup_iff_of_lowerIndex_eq hn,
-    show ⌈u⌉ + 1 ≤ (n : ℤ) ↔ ⌈u⌉ ≤ (n : ℤ) - 1 by omega, Int.ceil_le]
+  rw [ramificationGroupReal_def, mem_ramificationGroup_iff_of_lowerIndex_eq hn, Int.add_one_le_iff,
+    ← Int.le_sub_one_iff, Int.ceil_le]
   push_cast
   exact Iff.rfl
 

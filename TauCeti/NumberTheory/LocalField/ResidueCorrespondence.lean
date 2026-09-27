@@ -7,9 +7,7 @@ module
 
 public import Mathlib.FieldTheory.Finite.Basic
 public import TauCeti.NumberTheory.LocalField.Unramified
-public import TauCeti.NumberTheory.LocalField.GaloisAction
 public import TauCeti.NumberTheory.LocalField.RamificationGroup
-public import TauCeti.NumberTheory.RamificationInertia.Galois
 
 /-!
 # Residue correspondence for unramified local extensions
