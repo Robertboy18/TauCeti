@@ -30,7 +30,7 @@ uniformizer `π` of `K`, in the form that decides the norm equation one element 
 The inclusion `N_{L/K}(U(L,i)) ⊆ U(K,i)` is the case `e(L/K) = 1` of the general inclusion
 `N_{L/K}(U(L, e i)) ⊆ U(K, i)`. Surjectivity is Hensel's lemma for the norm
 (`TauCeti.Algebra.exists_norm_eq_of_norm_sub_mem`), applied to the finite free `𝒪[K]`-algebra
-`𝒪[L]`, which is Henselian at every power of `𝓂[K]`. Its residual inputs hold because
+`𝒪[L]`, which is Henselian at every positive power of `𝓂[K]`. Its residual inputs hold because
 `𝓂[K] 𝒪[L] = 𝓂[L]`, so that `𝒪[L] ⧸ 𝓂[K] 𝒪[L]` is the residue field of `L`, a finite extension
 of the finite residue field of `K`: the norm of a finite extension of finite fields is surjective,
 which supplies the approximate solution at depth `0`, and its trace is surjective because the
@@ -126,7 +126,7 @@ variable (K L) in
 theorem map_normUnits_unitFiltration (i : ℕ) :
     (unitFiltration L i).map (Algebra.normUnits K) = unitFiltration K i := by
   refine le_antisymm ?_ fun x hx ↦ ?_
-  · have h := map_normUnits_unitFiltration_mul_le K L i
+  · have h := map_normUnits_unitFiltration_le K L i
     rwa [IsUnramified.ramificationIndex_eq_one, one_mul] at h
   obtain ⟨w, hw, htr⟩ := exists_isUnit_trace (K := K) (L := L)
   obtain ⟨u, hu, hux⟩ := mem_unitFiltration_iff_exists.mp hx

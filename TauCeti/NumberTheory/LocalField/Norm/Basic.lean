@@ -54,7 +54,7 @@ Herbrand shift instead.
 * `TauCeti.normalizedValuationWithZero_norm`: the same formula for arbitrary field elements,
   including zero.
 * `TauCeti.normUnits_mem_unitFiltration_of_mem` and
-  `TauCeti.map_normUnits_unitFiltration_mul_le`: the norm carries `U(L, e(L/K) i)` into `U(K,i)`.
+  `TauCeti.map_normUnits_unitFiltration_le`: the norm carries `U(L, e(L/K) i)` into `U(K,i)`.
 
 ## References
 
@@ -296,7 +296,7 @@ omit [FiniteDimensional K L] in
 variable (K L) in
 /-- **The norm carries `U(L, e(L/K) i)` into `U(K, i)`**, as an inclusion of subgroups of `Kˣ`. At
 `i = 0` this says that the norm of a unit of `𝒪[L]` is a unit of `𝒪[K]`. -/
-theorem map_normUnits_unitFiltration_mul_le (i : ℕ) :
+theorem map_normUnits_unitFiltration_le (i : ℕ) :
     (unitFiltration L (ramificationIndex K L * i)).map (Algebra.normUnits K) ≤
       unitFiltration K i :=
   Subgroup.map_le_iff_le_comap.mpr fun _ hy ↦ normUnits_mem_unitFiltration_of_mem L hy
