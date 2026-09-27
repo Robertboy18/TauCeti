@@ -178,7 +178,7 @@ theorem natCard_H1_mul_natCard (M : Type v) [AddCommGroup M] [TopologicalSpace M
     S.explicitLongExact_H0A S.explicitLongExact_H0B S.explicitLongExact_H0C
     S.explicitLongExact_H1A S.explicitLongExact_H1B hsurj
   -- the orders of the terms attached to `N`, and the induction hypothesis for `M ⧸ N`
-  rw [natCard_H0_of_smul_eq_self hNtriv, hNcard,
+  rw [H0_eq_top_of_smul_eq_self hNtriv, AddSubgroup.card_top, hNcard,
     hG.natCard_H1_of_natCard_eq hfg hNcard hNtriv] at hex
   have hQ := ih _ ?_ (M ⧸ N)
     (hM.of_surjective (QuotientAddGroup.mk' N) (QuotientAddGroup.mk'_surjective N)) rfl
@@ -251,8 +251,8 @@ theorem topologicalGeneratorRankNat_add_index (U : OpenSubgroup G) :
   rw [Nat.card_congr (explicitShapiro1 G U.toSubgroup (ZMod p) hUc).toEquiv,
     Nat.card_congr (explicitShapiro0 G U.toSubgroup (ZMod p)).toEquiv,
     DiscreteCoind.natCard_of_isOpen U.isOpen htriv, Nat.card_zmod,
-    hU.natCard_H1_of_natCard_eq hUfg (Nat.card_zmod p) htriv, natCard_H0_of_smul_eq_self htriv,
-    Nat.card_zmod, ← pow_mul, ← pow_add, ← pow_succ'] at key
+    hU.natCard_H1_of_natCard_eq hUfg (Nat.card_zmod p) htriv, H0_eq_top_of_smul_eq_self htriv,
+    AddSubgroup.card_top, Nat.card_zmod, ← pow_mul, ← pow_add, ← pow_succ'] at key
   have := Nat.pow_right_injective hp.out.two_le key
   omega
 
