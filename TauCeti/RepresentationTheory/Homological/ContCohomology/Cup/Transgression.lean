@@ -29,16 +29,16 @@ particular whenever `H²(G, P) = 0`, for instance for a free pro-`p` group and `
 
 The main theorem is the computation of the transgression through a Heisenberg cochain. Let `N` be a
 closed normal subgroup of a profinite group `G` on which `a` and `b` vanish, so that they descend to
-cocycles `ā` and `b̄` on `G ⧸ N` with values in the `N`-invariants. Then `-h` is a transgression
+cocycles `a'` and `b'` on `G ⧸ N` with values in the `N`-invariants. Then `-h` is a transgression
 lift of its restriction `-h|_N`, which is a conjugation-invariant continuous `1`-cocycle on `N`, and
 
 ```text
-tg [-h|_N] = ā ⌣ b̄   in H²(G ⧸ N, P ^ N).
+tg [-h|_N] = a' ⌣ b'   in H²(G ⧸ N, P ^ N).
 ```
 
 When the transgression is bijective, for instance for a minimal presentation `1 → R → F → G → 1` of
 a pro-`p` group by a free pro-`p` group `F` and `𝔽_p`-coefficients, this identifies the cup
-product `ā ⌣ b̄ ∈ H²(G, 𝔽_p)` with the character `r ↦ -h r` of `R`; so the value of the cup
+product `a' ⌣ b' ∈ H²(G, 𝔽_p)` with the character `r ↦ -h r` of `R`; so the value of the cup
 product on a relator `r` is `-h r`. The values of `h` on commutators and on powers are recorded for
 trivial actions, `h ⁅g, g'⁆ = μ (a g) (b g') - μ (a g') (b g)` and
 `h (g ^ n) = n • h g + (n.choose 2) • μ (a g) (b g)`; these are what reads the cup product off the
@@ -283,10 +283,10 @@ variable {G : Type uG} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Co
 include hμ hequiv hh hN haN hbN
 
 /-- **The transgression of `-h|_N` is the cup product.** Let `N` be a closed normal subgroup of a
-profinite group `G`, let `a` and `b` be continuous `1`-cocycles vanishing on `N`, with descents `ā`
-and `b̄` to `G ⧸ N` valued in the `N`-invariants, and let `h` be a Heisenberg cochain for `(a, b)`.
+profinite group `G`, let `a` and `b` be continuous `1`-cocycles vanishing on `N`, with descents `a'`
+and `b'` to `G ⧸ N` valued in the `N`-invariants, and let `h` be a Heisenberg cochain for `(a, b)`.
 Then the transgression `H¹(N, P)^{G ⧸ N} → H²(G ⧸ N, P ^ N)` sends the class of `-h|_N` to the
-explicit `(1,1)` cup product `ā ⌣ b̄` for the pairing induced by `μ` on the invariants. -/
+explicit `(1,1)` cup product `a' ⌣ b'` for the pairing induced by `μ` on the invariants. -/
 theorem IsHeisenbergCochain.transgression_negRestrict :
     transgression G P N hN
         ⟨hh.negRestrict haN hbN, hh.negRestrict_mem_H1ConjInvariants haN hbN⟩ =
