@@ -21,6 +21,9 @@ chain construction in Eilenberg--Steenrod, *Foundations of Algebraic Topology*, 
 The formal infrastructure is Mathlib's relative simplicial chains: the comparison is the
 quotient natural transformation `SSetPair.chainComplexFunctorπ`, and its invertibility for a
 pair whose subcomplex is empty is Mathlib's `SSetPair.isIso_chainComplexπ`.
+
+Any pair whose subspace happens to be empty is isomorphic to the pair `(X, ∅)` of its ambient
+space (`TopPair.isoIncl`), so the comparison applies to it as well.
 -/
 
 public section
@@ -32,6 +35,29 @@ open CategoryTheory Limits
 universe w v u
 
 namespace TopPair
+
+/-- A topological pair whose subspace is empty is isomorphic to the pair `(X, ∅)` of its ambient
+space, through the identity of the ambient space. -/
+def isoIncl (P : TopPair.{w}) [IsEmpty P.snd] : P ≅ incl.obj P.fst where
+  hom := ofHom (𝟙 _) (TopCat.ofHom ⟨isEmptyElim, continuous_of_discreteTopology⟩)
+    (by ext x; exact isEmptyElim x)
+  inv := ofHom (𝟙 _) (TopCat.isInitialPEmpty.to _) (by ext x; cases x)
+  hom_inv_id := by
+    ext x
+    · exact isEmptyElim x
+    · rfl
+  inv_hom_id := by
+    ext x
+    · cases x
+    · rfl
+
+@[simp]
+lemma isoIncl_hom_fst (P : TopPair.{w}) [IsEmpty P.snd] : Hom.fst P.isoIncl.hom = 𝟙 P.fst := by
+  rfl
+
+@[simp]
+lemma isoIncl_inv_fst (P : TopPair.{w}) [IsEmpty P.snd] : Hom.fst P.isoIncl.inv = 𝟙 P.fst := by
+  rfl
 
 variable (C : Type u) [Category.{v} C] [HasCoproducts.{w} C] [Preadditive C] (R : C)
 
