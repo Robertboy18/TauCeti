@@ -197,6 +197,14 @@ theorem inverse_comp (g : AInfinityHom BB CC) (f : AInfinityHom AA BB)
 def IsIso (f : AInfinityHom AA BB) : Prop :=
   ∃ g : AInfinityHom BB AA, g.comp f = AInfinityHom.id AA ∧ f.comp g = AInfinityHom.id BB
 
+-- The body of `IsIso` is not exposed, so later modules can neither destructure an `IsIso`
+-- hypothesis nor build one by anonymous constructor; this restatement is their access to it.
+/-- An `A∞` morphism is an isomorphism exactly when it has a two-sided inverse. -/
+theorem isIso_def (f : AInfinityHom AA BB) :
+    f.IsIso ↔ ∃ g : AInfinityHom BB AA, g.comp f = AInfinityHom.id AA ∧
+      f.comp g = AInfinityHom.id BB :=
+  Iff.rfl
+
 /-- The identity `A∞` morphism is an isomorphism. -/
 @[simp]
 theorem isIso_id (AA : AInfinityAlgebra R A) : (AInfinityHom.id AA).IsIso :=
