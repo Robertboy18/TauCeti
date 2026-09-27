@@ -100,9 +100,8 @@ private theorem inner_mfderiv_fst_snd_eq_inner_variationField_curveVelocity {t :
 /-- **The integrand of the first variation.** At a parameter `t` where the family is `C²`, half
 the `s`-derivative at `s = 0` of the squared speed `‖∂_t F (s, t)‖²` is the `t`-derivative of
 `⟪∂_s F (0, t), ∂_t F (0, t)⟫ = ⟪V(t), γ'(t)⟫` minus `⟪V(t), D_t γ'(t)⟫`.  This is the pointwise
-form of the integration by parts in the first variation formula; the partial velocities are
-written through the differential of the uncurried family, so that both sides are functions of
-`(s, t)` to which the calculus of `fderiv` and `deriv` applies. -/
+form of the integration by parts in the first variation formula, with the partial velocities
+written through the differential of the uncurried family. -/
 private theorem fderiv_inner_mfderiv_fst_eq {t : ℝ}
     (hf : ContMDiffAt 𝓘(ℝ, ℝ × ℝ) I 2 (fun z : ℝ × ℝ ↦ F z.1 z.2) (0, t)) :
     fderiv ℝ (fun z : ℝ × ℝ ↦
