@@ -34,14 +34,16 @@ transformations `resNatTrans` and `inflNatTrans`, matching the shape of Mathlib'
 
 * `TauCeti.ContinuousCohomology.coeffMap`, `TauCeti.ContinuousCohomology.res`,
   `TauCeti.ContinuousCohomology.infl`: the three named instances of `ContinuousCohomology.map`.
+* `TauCeti.ContinuousCohomology.resLe`: restriction along the inclusion of a subgroup into a
+  larger subgroup.
 * `TauCeti.ContinuousCohomology.continuousCohomologyFunctor`: `Hⁿ(G, -)` as a functor.
 * `TauCeti.ContinuousCohomology.resNatTrans`, `TauCeti.ContinuousCohomology.inflNatTrans`.
 
 ## Main results
 
 * `TauCeti.ContinuousCohomology.coeffMap_comp`,
-  `TauCeti.ContinuousCohomology.res_comp_res` and
-  `TauCeti.ContinuousCohomology.infl_comp_infl`: the composition laws of the three named maps.
+  `TauCeti.ContinuousCohomology.res_comp_res`, `TauCeti.ContinuousCohomology.res_comp_resLe` and
+  `TauCeti.ContinuousCohomology.infl_comp_infl`: the composition laws of the named maps.
 * `TauCeti.ContinuousCohomology.coeffMap_comp_res` and
   `TauCeti.ContinuousCohomology.coeffMap_comp_infl`: naturality of restriction and of inflation in
   the coefficients.
@@ -180,6 +182,39 @@ theorem res_comp_res (T : Subgroup S) (X : TopRep R G) (n : ℕ) :
   rfl
 
 end Res
+
+section ResLe
+
+variable {R} {H S : Subgroup G}
+
+/-- Restriction along the inclusion of a subgroup `H` into a larger subgroup `S`, from the
+cohomology of `S` to that of `H`; the instance of `ContinuousCohomology.map` at the inclusion
+`H ↪ S` and the identity of the coefficients, both subgroups carrying the subspace topology. -/
+noncomputable def resLe (h : H ≤ S) (X : TopRep R G) (n : ℕ) :
+    continuousCohomology n (TopRep.res (S.subtype : S →* G) X) ⟶
+      continuousCohomology n (TopRep.res (H.subtype : H →* G) X) :=
+  _root_.ContinuousCohomology.map (ContinuousMonoidHom.subgroupInclusion h)
+    (𝟙 (TopRep.res (H.subtype : H →* G) X)) n
+
+-- Not `@[simp]`: `resLe` is the intended normal form, and this lemma unfolds it.
+/-- The defining equation of `resLe`: it is `ContinuousCohomology.map` for the compatible pair
+consisting of the inclusion `H ↪ S` and the identity of the coefficients. -/
+theorem resLe_def (h : H ≤ S) (X : TopRep R G) (n : ℕ) :
+    resLe h X n = _root_.ContinuousCohomology.map (ContinuousMonoidHom.subgroupInclusion h)
+      (𝟙 (TopRep.res (H.subtype : H →* G) X)) n :=
+  (rfl)
+
+/-- Restricting to `S` and then to a subgroup `H ≤ S` is restriction to `H`. -/
+@[reassoc (attr := simp)]
+theorem res_comp_resLe (h : H ≤ S) (X : TopRep R G) (n : ℕ) :
+    res S X n ≫ resLe h X n = res H X n := by
+  refine (_root_.ContinuousCohomology.map_comp (X := X) (ContinuousMonoidHom.subgroupSubtype S)
+      (ContinuousMonoidHom.subgroupInclusion h) (𝟙 _) (𝟙 _) n).symm.trans
+    (map_congr (ContinuousMonoidHom.subgroupSubtype_comp_subgroupInclusion h) (heq_of_eq ?_) n)
+  ext v
+  rfl
+
+end ResLe
 
 section Infl
 

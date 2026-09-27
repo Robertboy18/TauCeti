@@ -120,6 +120,28 @@ theorem coe_subgroupSubtype (S : Subgroup G) : (subgroupSubtype S : S →* G) = 
 theorem subgroupSubtype_apply (S : Subgroup G) (s : S) : subgroupSubtype S s = (s : G) :=
   (rfl)
 
+/-- The inclusion of a subgroup into a larger subgroup, both carrying the subspace topology, as a
+continuous homomorphism. -/
+@[expose] def subgroupInclusion {H S : Subgroup G} (h : H ≤ S) : H →ₜ* S where
+  __ := Subgroup.inclusion h
+  continuous_toFun := continuous_subtype_val.subtype_mk _
+
+@[simp]
+theorem coe_subgroupInclusion {H S : Subgroup G} (h : H ≤ S) :
+    (subgroupInclusion h : H →* S) = Subgroup.inclusion h :=
+  (rfl)
+
+@[simp]
+theorem subgroupInclusion_apply {H S : Subgroup G} (h : H ≤ S) (x : H) :
+    subgroupInclusion h x = Subgroup.inclusion h x :=
+  (rfl)
+
+/-- The inclusion of a subgroup factors through any larger subgroup. -/
+@[simp]
+theorem subgroupSubtype_comp_subgroupInclusion {H S : Subgroup G} (h : H ≤ S) :
+    (subgroupSubtype S).comp (subgroupInclusion h) = subgroupSubtype H :=
+  (rfl)
+
 end ContinuousMonoidHom
 
 /-- The inverse conjugation homomorphism of a normal subgroup, with the subspace topology. -/
