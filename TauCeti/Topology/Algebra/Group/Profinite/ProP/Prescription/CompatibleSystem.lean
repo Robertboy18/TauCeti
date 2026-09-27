@@ -37,9 +37,6 @@ needs only that `g` generates `G` topologically.
 
 ## Main results
 
-* `TauCeti.HasPrescriptionProperty.exists_forall_reduce_eq`: under the prescription property a
-  continuous `1`-cocycle with values in `I(χ)/pʲ` is the pointwise reduction of one with values in
-  `I(χ)/pⁿ`, for `j ≤ n`.
 * `TauCeti.HasPrescriptionProperty.exists_forall_reduce_eq_and_val_eq`: under the prescription
   property, every tuple `c : ι → ℤ_p` is realized on a family `g` with linearly independent
   Frattini classes by a compatible system of continuous `1`-cocycles `fᵢ : G → I(χ)/pⁱ`.
@@ -72,43 +69,6 @@ universe u
 open ContCohomology
 
 variable {p : ℕ} [Fact p.Prime] {G : Type u} [Group G] [TopologicalSpace G]
-
-/-! ### Exact lifting of cocycles between levels -/
-
-section Lift
-
-variable {χ : G →ₜ* ℤ_[p]ˣ} (hχ : HasPrescriptionProperty χ)
-include hχ
-
-/-- **Cocycles lift exactly under the prescription property.** A continuous `1`-cocycle
-`f : G → I(χ)/pʲ` is the pointwise reduction of a continuous `1`-cocycle `G → I(χ)/pⁿ`, `j ≤ n`,
-exactly and not only up to a coboundary, which is all that the surjectivity on `H¹` defining the
-prescription property provides. -/
-theorem HasPrescriptionProperty.exists_forall_reduce_eq {j n : ℕ} (h : j ≤ n)
-    (f : Z1 G (ZModTwist χ j)) :
-    ∃ f' : Z1 G (ZModTwist χ n),
-      ∀ x, ZModTwist.reduce χ h ((f' : G → ZModTwist χ n) x) = (f : G → ZModTwist χ j) x := by
-  obtain ⟨y, hy⟩ := hχ.surjective_explicitCoeff1_reduce h (f : H1 G (ZModTwist χ j))
-  induction y using QuotientAddGroup.induction_on with
-  | _ f₁ =>
-  rw [explicitCoeff1_mk, H1pi_eq_iff, mem_B1_iff] at hy
-  obtain ⟨m, hm⟩ := hy
-  obtain ⟨m', rfl⟩ := ZModTwist.reduce_surjective χ h m
-  refine ⟨f₁ - ⟨d0 G (ZModTwist χ n) m', B1_le_Z1 G _ (d0_mem_B1 m')⟩, fun x ↦ ?_⟩
-  -- `cocyclesMap1_apply` is used as a term: its continuity argument is stated for the coerced
-  -- additive homomorphism, which `rw` cannot match against the bundled equivariant one.
-  have hx : x • ZModTwist.reduce χ h m' - ZModTwist.reduce χ h m' =
-      ZModTwist.reduce χ h ((f₁ : G → ZModTwist χ n) x) - (f : G → ZModTwist χ j) x :=
-    (hm x).trans (congrArg (· - (f : G → ZModTwist χ j) x)
-      (cocyclesMap1_apply G _ G _ (ContinuousMonoidHom.id G) _ continuous_of_discreteTopology
-        (fun g m ↦ (ZModTwist.reduce χ h).map_smul g m) f₁ x))
-  have hd : ((⟨d0 G (ZModTwist χ n) m', B1_le_Z1 G _ (d0_mem_B1 m')⟩ :
-      Z1 G (ZModTwist χ n)) : G → ZModTwist χ n) = d0 G (ZModTwist χ n) m' :=
-    rfl
-  rw [AddSubgroup.coe_sub, Pi.sub_apply, hd, d0_apply, map_sub, map_sub, map_smul, hx,
-    sub_sub_cancel]
-
-end Lift
 
 /-! ### Compatible systems with prescribed values -/
 
