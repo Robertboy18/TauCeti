@@ -69,14 +69,22 @@ theorem aeval_derivative_minpoly_eq_prod_of_adjoin_eq_top [DecidableEq (L ≃ₐ
     (hx : K⟮x⟯ = ⊤) :
     aeval x (derivative (minpoly K x)) =
       ∏ σ ∈ Finset.univ.erase (1 : L ≃ₐ[K] L), (x - σ x) := by
+  classical
+  -- `x` is the root of the linear factor indexed by the identity automorphism.
+  have hmem : x ∈ Multiset.map (fun σ : L ≃ₐ[K] L ↦ σ x) Finset.univ.val :=
+    Multiset.mem_map.2 ⟨1, Finset.mem_univ _, AlgEquiv.one_apply x⟩
+  -- Erasing that root from the multiset of conjugates erases the identity from the index set.
+  have herase : (Multiset.map (fun σ : L ≃ₐ[K] L ↦ σ x) Finset.univ.val).erase x =
+      Multiset.map (fun σ : L ≃ₐ[K] L ↦ σ x) (Finset.univ.erase (1 : L ≃ₐ[K] L)).val := by
+    rw [Finset.erase_val, Multiset.map_erase_of_mem _ _ (Finset.mem_univ 1), AlgEquiv.one_apply]
+  -- The product over the Galois group is the product of `X - C a` over the multiset of conjugates.
+  have hprod : ∏ σ : L ≃ₐ[K] L, (X - C (σ x)) =
+      (Multiset.map (fun a : L ↦ X - C a)
+        (Multiset.map (fun σ : L ≃ₐ[K] L ↦ σ x) Finset.univ.val)).prod := by
+    rw [Multiset.map_map]; rfl
   rw [aeval_def, eval₂_eq_eval_map, ← derivative_map,
-    minpoly_map_eq_prod_X_sub_C_of_adjoin_eq_top hx, derivative_prod_finset, eval_finsetSum,
-    Finset.sum_eq_single (1 : L ≃ₐ[K] L)]
-  · simp [eval_prod]
-  · intro σ _ hσ
-    rw [eval_mul, eval_prod]
-    refine mul_eq_zero_of_left (Finset.prod_eq_zero (i := 1) ?_ (by simp)) _
-    exact Finset.mem_erase.2 ⟨hσ.symm, Finset.mem_univ _⟩
-  · exact fun h ↦ absurd (Finset.mem_univ _) h
+    minpoly_map_eq_prod_X_sub_C_of_adjoin_eq_top hx, hprod,
+    eval_multiset_prod_X_sub_C_derivative hmem, herase, Multiset.map_map]
+  rfl
 
 end TauCeti
