@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Topology.Separation.Connected
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.LongExact
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Shapiro
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Shapiro.Basic
 
 /-!
 # Acyclicity of `Coind_1^G` and dimension shifting in low degrees
