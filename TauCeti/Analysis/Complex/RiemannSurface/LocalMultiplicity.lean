@@ -33,10 +33,11 @@ biholomorphism precisely at its points of multiplicity one. On the model space `
 multiplicity is the order of vanishing of `f - f z` at `z`, and the power map `z ↦ z ^ m` has
 local multiplicity `m` at the origin.
 
-The local multiplicity is the ramification index of the map at the point: near a point of
-multiplicity `m` a holomorphic map is `z ↦ z ^ m` in suitable coordinates, and the degree of a
-nonconstant holomorphic map between compact connected Riemann surfaces is the sum of the local
-multiplicities over any fibre. Neither the local normal form nor the degree is part of this file.
+For a map holomorphic and nonconstant near `x`, the local multiplicity `m ≥ 1` is the
+ramification index of the map at `x`: near such a point the map is `z ↦ z ^ m` in suitable
+coordinates, and the degree of a nonconstant holomorphic map between compact connected Riemann
+surfaces is the sum of the local multiplicities over any fibre. Neither the local normal form nor
+the degree is part of this file.
 
 ## Main declarations
 
