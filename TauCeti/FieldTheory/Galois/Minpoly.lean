@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.FieldTheory.Galois.Basic
+import Mathlib.FieldTheory.Minpoly.ConjRootClass
 
 /-!
 # The minimal polynomial of a primitive element of a Galois extension
@@ -49,32 +50,18 @@ extension `L/K` is `∏ σ : Gal(L/K), (X - C (σ x))`. -/
 theorem minpoly_map_eq_prod_X_sub_C_of_adjoin_eq_top {x : L} (hx : K⟮x⟯ = ⊤) :
     (minpoly K x).map (algebraMap K L) = ∏ σ : L ≃ₐ[K] L, (X - C (σ x)) := by
   classical
-  have hint : IsIntegral K x := .of_finite K x
   -- An automorphism is determined by its value at the generator `x`.
   have hinj : Function.Injective fun σ : L ≃ₐ[K] L ↦ σ x := fun σ τ h ↦
     AlgEquiv.coe_toAlgHom_injective <| AlgHom.ext_of_adjoin_eq_top
       ((adjoin_eq_top_iff_of_isAlgebraic fun y _ ↦ IsAlgebraic.of_finite K y).1 hx)
       (Set.eqOn_singleton.2 h)
-  have hmonic : (∏ σ : L ≃ₐ[K] L, (X - C (σ x) : L[X])).Monic :=
-    monic_prod_of_monic _ _ fun σ _ ↦ monic_X_sub_C _
-  have hdeg : ((minpoly K x).map (algebraMap K L)).natDegree ≤
-      (∏ σ : L ≃ₐ[K] L, (X - C (σ x) : L[X])).natDegree := by
-    rw [natDegree_prod_of_monic _ _ fun σ _ ↦ monic_X_sub_C _, (minpoly.monic hint).natDegree_map]
-    simp only [natDegree_X_sub_C, Finset.sum_const, Finset.card_univ, smul_eq_mul, mul_one]
-    rw [← adjoin.finrank hint, hx, finrank_top', ← IsGalois.card_aut_eq_finrank,
-      Nat.card_eq_fintype_card]
-  refine eq_of_monic_of_dvd_of_natDegree_le hmonic ((minpoly.monic hint).map _) ?_ hdeg
-  -- The conjugates `σ x` are distinct roots of the minimal polynomial.
-  have hmap : (Finset.univ.val.map fun σ : L ≃ₐ[K] L ↦ (X - C (σ x) : L[X])) =
-      (Finset.univ.val.map fun σ : L ≃ₐ[K] L ↦ σ x).map fun a ↦ X - C a := by
-    rw [Multiset.map_map, Function.comp_def]
-  rw [Finset.prod_eq_multiset_prod, hmap,
-    Multiset.prod_X_sub_C_dvd_iff_le_roots ((minpoly.monic hint).map _).ne_zero,
-    Multiset.le_iff_subset (Finset.univ.nodup.map hinj)]
-  intro r hr
-  obtain ⟨σ, -, rfl⟩ := Multiset.mem_map.1 hr
-  rw [mem_roots ((minpoly.monic hint).map _).ne_zero, IsRoot, eval_map, ← aeval_def,
-    ← minpoly.algEquiv_eq σ x, minpoly.aeval]
+  -- The conjugacy class of `x` is its Galois orbit.
+  have hcarrier : (ConjRootClass.mk K x).carrier.toFinset =
+      Finset.univ.image fun σ : L ≃ₐ[K] L ↦ σ x := by
+    ext y
+    simp [ConjRootClass.mem_carrier, isConjRoot_iff_exists_algEquiv]
+  rw [← ConjRootClass.minpoly_mk, ConjRootClass.minpoly.map_eq_prod, hcarrier,
+    Finset.prod_image fun σ _ τ _ h ↦ hinj h]
 
 /-- The derivative of the minimal polynomial of a primitive element `x` of a finite Galois
 extension, evaluated at `x`, is `∏_{σ ≠ 1} (x - σ x)`. -/

@@ -29,6 +29,7 @@ variable {R Γ₀ : Type*} [CommRing R] [LinearOrderedAddCommMonoidWithTop Γ₀
   (v : AddValuation R Γ₀)
 
 /-- An additive valuation of a finite product is the sum of the valuations of the factors. -/
+@[simp]
 theorem map_prod {ι : Type*} (s : Finset ι) (f : ι → R) :
     v (∏ i ∈ s, f i) = ∑ i ∈ s, v (f i) := by
   classical

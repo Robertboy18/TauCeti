@@ -85,10 +85,9 @@ variable {R : Type*} [CommSemiring R] [Algebra R S] [SMulCommClass G R S]
 generator `ξ` is the identity: this is **Serre's criterion** at the zero ideal. -/
 theorem eq_one_of_smul_eq_of_adjoin_singleton_eq_top [FaithfulSMul G S] {ξ : S}
     (hξ : Algebra.adjoin R {ξ} = ⊤) {σ : G} (h : σ • ξ = ξ) : σ = 1 := by
-  have hσ : σ ∈ (⊥ : Ideal S).inertia G :=
-    (Ideal.mem_inertia_iff_of_adjoin_singleton_eq_top hξ).2 (by rw [h, sub_self]; exact zero_mem _)
   refine eq_of_smul_eq_smul fun x : S ↦ ?_
-  rw [one_smul, ← sub_eq_zero]
-  exact (Submodule.mem_bot S).1 (Ideal.mem_inertia.1 hσ x)
+  have hx : x ∈ Algebra.adjoin R {ξ} := hξ ▸ Algebra.mem_top
+  rw [one_smul]
+  exact (Algebra.forall_mem_adjoin_smul_eq_self_iff {ξ} σ).2 (Set.forall_mem_singleton.2 h) x hx
 
 end TauCeti
