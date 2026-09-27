@@ -19,10 +19,11 @@ the induction step: `Hⁱ⁺¹(G, M) ≅ Hⁱ(G, Coind_1^G M ⧸ M)` for `i ≥ 
 discrete `p`-primary torsion module
 (`TauCeti.ContCohomology.isPPrimaryTorsion_dimensionShiftQuotient`), so vanishing in degree `i` for
 every module of the class gives vanishing in degree `i + 1` for every module of the class. The
-shifted module is not finite even when `M` is, which is why the statement quantifies over all
-discrete `p`-primary torsion modules; the finite-coefficient test of
-`TauCeti.cohomologicalDimensionLE_iff_forall_finite` then restricts the single-degree test to the
-finite modules.
+shifted module need not be finite even when `M` is, which is why the statement quantifies over all
+discrete `p`-primary torsion modules; the single-degree test on the finite modules then follows
+because, in each fixed degree, the vanishing of `Hⁱ(G, M)` for a discrete `p`-primary torsion `M`
+is detected on the finite discrete `p`-primary `G`-modules
+(`TauCeti.ContinuousCohomology.subsingleton_continuousCohomology_of_forall_finite`).
 
 The two tests are recorded for the predicate and for the invariant `cd_p G`. They are the standard
 reductions of Serre, *Galois Cohomology*, I §3.2, Prop. 11, and of Neukirch–Schmidt–Wingberg,
@@ -90,12 +91,8 @@ theorem cohomologicalDimensionLE_iff_forall_finite_subsingleton_succ (hp : p ≠
         [DistribMulAction G M] [ContinuousSMul G M] [Finite M], IsPPrimaryTorsion p M →
         Subsingleton (continuousCohomology (n + 1) (ofDiscreteModule ℤ G M)) := by
   rw [cohomologicalDimensionLE_iff_forall_subsingleton_succ]
-  refine ⟨fun h M _ _ _ _ _ _ hM ↦ h M hM, fun h M _ _ _ _ _ hM ↦ ?_⟩
-  refine ContinuousCohomology.subsingleton_continuousCohomology_of_forall_finite_addSubgroup
-    (hM.isAddTorsion hp) (n + 1) fun N hN hfin ↦ ?_
-  let := N.restrictDistribMulAction hN
-  have : ContinuousSMul G N := N.restrictDistribMulAction_continuousSMul hN
-  exact h N (hM.of_injective N.subtype N.subtype_injective)
+  exact ⟨fun h M _ _ _ _ _ _ hM ↦ h M hM, fun h M _ _ _ _ _ hM ↦
+    ContinuousCohomology.subsingleton_continuousCohomology_of_forall_finite hp hM (n + 1) h⟩
 
 variable (p G)
 

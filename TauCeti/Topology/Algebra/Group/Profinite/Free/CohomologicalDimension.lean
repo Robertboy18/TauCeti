@@ -13,10 +13,12 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Free.Cohomology
 
 Let `F = freeProP p X` be the free pro-`p` group on a type `X`. Its second continuous cohomology
 vanishes on every finite discrete `p`-primary `F`-module, because every profinite extension of `F`
-by such a module splits (`TauCeti.freeProP.subsingleton_H2_of_isPPrimaryTorsion`). Since the
-`p`-cohomological dimension of a compact group is detected in a single degree on finite
-coefficients (`TauCeti.cohomologicalDimensionAt_le_iff_forall_finite_subsingleton_succ`), this
-vanishing in degree two is the statement `cd_p F ≤ 1`.
+by such a module splits
+(`TauCeti.freeProP.subsingleton_continuousCohomology_two_of_isPPrimaryTorsion`, in
+`TauCeti.Topology.Algebra.Group.Profinite.Free.Cohomology`). Since the `p`-cohomological dimension
+of a compact group is detected in a single degree on finite coefficients
+(`TauCeti.cohomologicalDimensionAt_le_iff_forall_finite_subsingleton_succ`), this vanishing in
+degree two is the statement `cd_p F ≤ 1`.
 
 No finiteness of `X` is needed. This is the converse direction, for the free pro-`p` groups
 themselves, of Serre's theorem
@@ -25,9 +27,6 @@ recovers a topologically finitely generated pro-`p` group with `cd_p ≤ 1` as a
 
 ## Main results
 
-* `TauCeti.freeProP.subsingleton_continuousCohomology_two_of_isPPrimaryTorsion`: `H²(F, M) = 0`
-  for a finite discrete `p`-primary `F`-module `M`, written additively, in Mathlib's continuous
-  cohomology.
 * `TauCeti.freeProP.cohomologicalDimensionLE_one`: the vanishing predicate `cd_p F ≤ 1`.
 * `TauCeti.freeProP.cohomologicalDimensionAt_le_one`: **`cd_p F ≤ 1`** for a free pro-`p` group.
 
@@ -42,24 +41,11 @@ public section
 
 namespace TauCeti
 
-open ContCohomology
-
 universe u
 
 variable {p : ℕ} {X : Type u}
 
 namespace freeProP
-
-/-- **`H²` of a free pro-`p` group vanishes on finite additive coefficients**, in Mathlib's
-continuous cohomology: for a finite discrete `p`-primary torsion abelian group `M`, written
-additively, with a continuous action of `F = freeProP p X`, the canonical `continuousCohomology 2`
-of the topological representation attached to `M` is zero. -/
-theorem subsingleton_continuousCohomology_two_of_isPPrimaryTorsion (M : Type u) [AddCommGroup M]
-    [TopologicalSpace M] [DiscreteTopology M] [Finite M] [DistribMulAction (freeProP p X) M]
-    [ContinuousSMul (freeProP p X) M] (hM : IsPPrimaryTorsion p M) :
-    Subsingleton (continuousCohomology 2 (ofDiscreteModule ℤ (freeProP p X) M)) :=
-  haveI := subsingleton_H2_of_isPPrimaryTorsion (X := X) hM
-  (explicitH2AddEquivContinuousCohomology (freeProP p X) M).toEquiv.symm.subsingleton
 
 /-- **A free pro-`p` group has `cd_p ≤ 1`**, as the vanishing predicate: for `p ≠ 0`, `Hⁱ(F, M)`
 vanishes for every `i ≥ 2` and every discrete `p`-primary torsion `F`-module `M`. -/
