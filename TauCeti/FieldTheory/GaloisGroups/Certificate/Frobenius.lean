@@ -59,11 +59,11 @@ theorem hasSexticRoot_X_pow_five_sub_C {a : ℤ} (ha : a ≠ 0) :
   rw [(monic_resolventSextic _).discr_ne_zero_iff_separable_map ℚ, algebraMap_int_eq]
   exact separable_map_resolventSextic_X_pow_five_sub_C ha
 
-/-- The discriminant of a pure quintic `X⁵ - a` over `ℚ`, with `a ≠ 0`, is `3125a⁴ = 5(25a²)²`,
-which is not a square in `ℚ` because `5` is not. -/
+/-- The discriminant `3125a⁴` of a pure quintic `X⁵ - a` over `ℚ`, with `a ≠ 0`, is not a
+square in `ℚ`. -/
 theorem not_isSquare_discr_X_pow_five_sub_C {a : ℚ} (ha : a ≠ 0) :
     ¬ IsSquare (X ^ 5 - C a : ℚ[X]).discr := by
-  rw [discr_X_pow_sub_C _ (by norm_num)]
+  rw [discr_X_pow_sub_C]
   rintro ⟨r, hr⟩
   have h5 : IsSquare (5 : ℚ) := ⟨r / (25 * a ^ 2), by
     rw [div_mul_div_comm, eq_div_iff (by positivity)]
@@ -96,7 +96,7 @@ theorem hasGaloisLabel_X_pow_five_sub_C {a : ℤ} (hirr : Irreducible (X ^ 5 - C
 
 /-- The discriminant of `X⁵ - 2` is `50000 = 2⁴ · 5⁵`. -/
 theorem discr_X_pow_five_sub_two : (X ^ 5 - 2 : ℤ[X]).discr = 50000 := by
-  rw [← C_ofNat, discr_X_pow_sub_C _ (by norm_num)]
+  rw [← C_ofNat, discr_X_pow_sub_C]
   norm_num
 
 end TauCeti

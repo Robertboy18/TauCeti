@@ -120,12 +120,14 @@ theorem _root_.Polynomial.Monic.resultant_deriv {f : R[X]} (hf : f.Monic) :
   · rw [_root_.Polynomial.resultant_deriv (natDegree_pos_iff_degree_pos.mp h), hf.leadingCoeff,
       mul_one]
 
-/-- **The discriminant of a binomial.** For `n ≠ 0`,
-`discr (X ^ n - C a) = (-1) ^ (n (n - 1) / 2) · nⁿ · (-a) ^ (n - 1)`: the derivative is
-`n X ^ (n - 1)`, whose resultant with `X ^ n - C a` is `nⁿ` times the `(n - 1)`-st power of the
-constant coefficient `-a`. -/
-theorem _root_.Polynomial.discr_X_pow_sub_C (a : R) {n : ℕ} (hn : n ≠ 0) :
+/-- **The discriminant of a binomial.** Over any commutative ring,
+`discr (X ^ n - C a) = (-1) ^ (n (n - 1) / 2) · nⁿ · (-a) ^ (n - 1)`; for `n = 0` both sides
+are `1`. -/
+theorem _root_.Polynomial.discr_X_pow_sub_C (a : R) (n : ℕ) :
     (X ^ n - C a).discr = (-1) ^ (n * (n - 1) / 2) * (n : R) ^ n * (-a) ^ (n - 1) := by
+  rcases eq_or_ne n 0 with rfl | hn
+  · rw [pow_zero, ← C_1, ← C_sub, discr_C]
+    simp
   nontriviality R
   have hf : (X ^ n - C a).Monic := monic_X_pow_sub_C a hn
   have h := hf.resultant_deriv

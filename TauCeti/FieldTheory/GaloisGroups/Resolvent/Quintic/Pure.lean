@@ -125,7 +125,7 @@ private theorem galResolvent_quinticF20Invariant_pow_mul {ζ : ℂ} (hζ : IsPri
   rw [← MvPolynomial.map_universalResolvent_eq_galResolvent,
     universalResolvent_quinticF20Invariant, Polynomial.map_prod]
   simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C, MvPolynomial.coe_eval₂Hom]
-  rw [X_pow_sub_C_eq_prod hζ (by norm_num) rfl, quinticF20OrbitRepresentatives_def]
+  rw [X_pow_sub_C_eq_prod hζ (by norm_num) rfl, quinticF20OrbitRepresentatives]
   simp only [Finset.prod_range_succ, Finset.prod_range_zero]
   rw [Finset.prod_insert (by decide), Finset.prod_insert (by decide),
     Finset.prod_insert (by decide), Finset.prod_insert (by decide),
@@ -153,15 +153,16 @@ theorem resolventSextic_X_pow_five_sub_C (a : ℤ) :
   rw [resolventSextic_def, quinticF20Spec.map_specialize_eq_galResolvent _
     (monic_X_pow_sub_C a (by norm_num)) natDegree_X_pow_sub_C hroots, quinticF20Spec_Φ,
     galResolvent_quinticF20Invariant_pow_mul hζ θ]
+  -- The constant term `(5θ⁴)⁵` of the orbit product equals `3125a⁴` since `θ⁵ = a`.
+  have hconst : ((5 : ℂ) * θ ^ 4) ^ 5 = 3125 * (a : ℂ) ^ 4 := by rw [← hθ]; ring
   simp only [Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_X,
-    Polynomial.map_C]
-  rw [show ((5 : ℂ) * θ ^ 4) ^ 5 = 3125 * (θ ^ 5) ^ 4 by ring, hθ,
-    show (Int.castRingHom ℂ) (3125 * a ^ 4) = 3125 * (a : ℂ) ^ 4 by simp]
+    Polynomial.map_C, hconst]
+  rw [eq_intCast]
+  push_cast
   ring
 
 /-- Over `ℚ`, the resolvent sextic `X⁶ - 3125a⁴X` of a pure quintic `X⁵ - a` with `a ≠ 0` is
-separable: it is the product of `X` and the separable binomial `X⁵ - 3125a⁴`, which are
-coprime. -/
+separable, so its root `0` is separation evidence for the quintic certificate. -/
 theorem separable_map_resolventSextic_X_pow_five_sub_C {a : ℤ} (ha : a ≠ 0) :
     ((resolventSextic (X ^ 5 - C a)).map (Int.castRingHom ℚ)).Separable := by
   rw [resolventSextic_X_pow_five_sub_C]
