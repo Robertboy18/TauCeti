@@ -13,7 +13,7 @@ public import TauCeti.LinearAlgebra.Quotient.PiSpanSingleton
 /-!
 # Continuity of the reduction of `X → R` modulo one vector with a unit coordinate
 
-Over a topological commutative ring `R`, the reduction
+Over a topological ring `R`, the reduction
 
 `LinearMap.piSplitAtQuot x₀ w hw q : (X → R) →ₗ[R] ({x // x ≠ x₀} → R) × R ⧸ (q)`
 
@@ -45,7 +45,7 @@ namespace TauCeti
 
 open Multiplicative
 
-variable {R : Type*} [CommRing R] [TopologicalSpace R] [ContinuousSub R] [ContinuousMul R]
+variable {R : Type*} [Ring R] [TopologicalSpace R] [ContinuousSub R] [ContinuousMul R]
   {X : Type*} (x₀ : X) (w : X → R) (hw : w x₀ = 1) (q : R)
 
 /-- The reduction `(X → R) → ({x // x ≠ x₀} → R) × R ⧸ (q)` of `TauCeti.LinearMap.piSplitAtQuot`

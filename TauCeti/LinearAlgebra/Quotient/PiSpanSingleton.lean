@@ -8,12 +8,11 @@ module
 public import Mathlib.LinearAlgebra.Isomorphisms
 public import Mathlib.RingTheory.Ideal.Quotient.Defs
 public import Mathlib.RingTheory.Ideal.Span
-import Mathlib.Tactic.LinearCombination
 
 /-!
 # The quotient of `X → R` by one vector with a unit coordinate
 
-Let `R` be a commutative ring, `X` a type with a distinguished point `x₀`, and `w : X → R` a
+Let `R` be a ring, `X` a type with a distinguished point `x₀`, and `w : X → R` a
 vector with `w x₀ = 1`. Every `u : X → R` decomposes uniquely as `u x₀ • w` plus a vector
 vanishing at `x₀`, which gives a change of coordinates on the product module `X → R`: the new
 coordinates of `u` are `u x - u x₀ * w x` for `x ≠ x₀` together with `u x₀`. (For finite `X` this
@@ -69,7 +68,7 @@ theorem exists_eq_smul_of_forall_dvd {R X : Type*} [Monoid R] {v : X → R} {x�
     simp
   · simp [Function.update_of_ne hx, hc x]
 
-variable {R : Type*} [CommRing R] {X : Type*}
+variable {R : Type*} [Ring R] {X : Type*}
 
 namespace LinearEquiv
 
@@ -86,13 +85,12 @@ noncomputable def piSplitAt : (X → R) ≃ₗ[R] ({x // x ≠ x₀} → R) × R
   invFun a x := (if h : x = x₀ then 0 else a.1 ⟨x, h⟩) + a.2 * w x
   map_add' u v := by
     ext x
-    · simp only [Prod.fst_add, Pi.add_apply]
-      ring
+    · simp only [Prod.fst_add, Pi.add_apply, add_mul]
+      abel
     · simp only [Prod.snd_add, Pi.add_apply]
   map_smul' c u := by
     ext x
-    · simp only [Prod.smul_fst, Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
-      ring
+    · simp only [Prod.smul_fst, Pi.smul_apply, smul_eq_mul, RingHom.id_apply, mul_sub, mul_assoc]
     · simp only [Prod.smul_snd, Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
   left_inv u := funext fun x ↦ by
     by_cases h : x = x₀
@@ -187,12 +185,11 @@ theorem ker_piSplitAtQuot : LinearMap.ker (piSplitAtQuot x₀ w hw q) = Submodul
       simp [hw, ha]
     · have hx' := congr_fun h ⟨x, hx⟩
       rw [Pi.zero_apply, ← ha] at hx'
-      simp only [Pi.smul_apply, smul_eq_mul]
-      linear_combination (-1 : R) * hx'
+      simp only [Pi.smul_apply, smul_eq_mul, ← mul_assoc]
+      exact (sub_eq_zero.mp hx').symm
   · rintro ⟨a, rfl⟩
     refine ⟨funext fun x ↦ ?_, a, ?_⟩
-    · simp only [Pi.smul_apply, smul_eq_mul, hw, Pi.zero_apply]
-      ring
+    · simp only [Pi.smul_apply, smul_eq_mul, hw, Pi.zero_apply, mul_one, mul_assoc, sub_self]
     · simp [hw]
 
 end LinearMap
