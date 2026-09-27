@@ -52,6 +52,7 @@ depressed specialization of that formula is used to compare a quartic with its c
   discriminant of a minimal polynomial is a norm.
 * `Polynomial.Monic.discr_mul`: the product formula for discriminants, with the square of the
   resultant as its cross term.
+* `Polynomial.discr_X_pow_sub_C`: the discriminant of a binomial `X ^ n - C a`.
 * `TauCeti.discr_C_mul`, `TauCeti.isSquare_discr_iff_mem_range`: the scaling law and
   square-root criterion for a not-necessarily-monic polynomial over a field.
 * `Polynomial.discr_map_of_natDegree_eq`, `Polynomial.Monic.discr_map`: base change whenever the
@@ -118,6 +119,27 @@ theorem _root_.Polynomial.Monic.resultant_deriv {f : R[X]} (hf : f.Monic) :
     simp [h1]
   · rw [_root_.Polynomial.resultant_deriv (natDegree_pos_iff_degree_pos.mp h), hf.leadingCoeff,
       mul_one]
+
+/-- **The discriminant of a binomial.** For `n ≠ 0`,
+`discr (X ^ n - C a) = (-1) ^ (n (n - 1) / 2) · nⁿ · (-a) ^ (n - 1)`: the derivative is
+`n X ^ (n - 1)`, whose resultant with `X ^ n - C a` is `nⁿ` times the `(n - 1)`-st power of the
+constant coefficient `-a`. -/
+theorem _root_.Polynomial.discr_X_pow_sub_C (a : R) {n : ℕ} (hn : n ≠ 0) :
+    (X ^ n - C a).discr = (-1) ^ (n * (n - 1) / 2) * (n : R) ^ n * (-a) ^ (n - 1) := by
+  nontriviality R
+  have hf : (X ^ n - C a).Monic := monic_X_pow_sub_C a hn
+  have h := hf.resultant_deriv
+  rw [natDegree_X_pow_sub_C, derivative_sub, derivative_X_pow, derivative_C, sub_zero,
+    resultant_C_mul_right, resultant_X_pow_right _ _ _ natDegree_X_pow_sub_C.le,
+    coeff_sub, coeff_X_pow, coeff_C_zero, (Nat.even_mul_pred_self n).neg_one_pow, one_mul] at h
+  simp only [Ne.symm hn, ↓reduceIte, zero_sub] at h
+  -- The sign `(-1) ^ (n (n - 1) / 2)` squares to `1`, so it can be moved across the identity.
+  have hsq : ((-1 : R) ^ (n * (n - 1) / 2)) ^ 2 = 1 := by
+    rw [← pow_mul, mul_comm, pow_mul, neg_one_sq, one_pow]
+  calc (X ^ n - C a).discr
+      = ((-1 : R) ^ (n * (n - 1) / 2)) ^ 2 * (X ^ n - C a).discr := by rw [hsq, one_mul]
+    _ = (-1) ^ (n * (n - 1) / 2) * ((-1) ^ (n * (n - 1) / 2) * (X ^ n - C a).discr) := by ring
+    _ = _ := by rw [← h]; ring
 
 private noncomputable def Polynomial.sylvesterDerivIndexEquiv {f : R[X]} (φ : R →+* S)
     (hdeg : (f.map φ).natDegree = f.natDegree) :
