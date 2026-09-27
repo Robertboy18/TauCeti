@@ -32,8 +32,9 @@ The proof does not use Shapiro's lemma. Mathlib computes `Hⁿ(G, X)` as the hom
 is defined recursively by `d (n + 1) F x = F - d n (F x)`. Two observations drive the argument.
 
 * The full, non-invariant, coinduced resolution of *any* representation is contracted by
-  evaluation at `1`: `d n (F 1) + (d (n + 1) F) 1 = F` (`TopRep.d_apply_one_add_d_apply_one`, in
-  `TauCeti/RepresentationTheory/Homological/ContCohomology/Resolution.lean`). This is immediate
+  evaluation at `1`: `d n (F 1) + (d (n + 1) F) 1 = F`, the single-point case of
+  `TopRep.d_sum_apply_add_sum_d_apply` in
+  `TauCeti/RepresentationTheory/Homological/ContCohomology/Resolution.lean`. This is immediate
   from the recursion, but evaluation at `1` is not equivariant, so it does not act on the
   invariants.
 * For the coefficients `X = Coind_1^G A`, an invariant element `F` of level `m` of the resolution
@@ -51,7 +52,8 @@ cochain whose differential is the spread of `d (Φ 1) = Φ` (`d_coindLevel_const
 Compactness of `G` enters in two places. Every level of the resolution is discrete
 (`TauCeti.discreteTopology_resolutionX`), which makes `evalLevel` and `coindLevel` continuous, and
 `G` is locally compact, which makes evaluation `C(G, Z) × G → Z` continuous and hence lets the
-two-variable family `ContinuousMap.shear` be curried. Neither total disconnectedness of `G` nor
+two-variable family `ContinuousMap.compSwapShearMulRight` be curried. Neither total
+disconnectedness of `G` nor
 any continuity of the action is needed. The coefficient ring `R` is arbitrary: evaluation at `1` is
 `R`-linear, and nothing else in the argument depends on the scalars.
 
@@ -60,7 +62,7 @@ any continuity of the action is needed. The coefficient ring `R` is arbitrary: e
 * `TauCeti.ContCohomology.evalLevel`: evaluation at `1` inside every level of the coinduced
   resolution of `Coind_1^G A`.
 * `TauCeti.ContCohomology.coindLevel`: spreading a level of the resolution of `A` over `G`, built
-  from the family `ContinuousMap.shear`, `x ↦ (y ↦ Ψ y (y * x))`.
+  from the family `ContinuousMap.compSwapShearMulRight`, `x ↦ (y ↦ Ψ y (y * x))`.
 
 ## Main results
 
@@ -155,7 +157,8 @@ noncomputable def coindLevel : (m : ℕ) → C(G, (resolutionX 𝒯 m).V) → (r
   | 0 => DiscreteCoind.ofContinuousMap G A
   | m + 1 => fun Ψ =>
     (⟨coindLevel m, continuous_of_discreteTopology⟩ :
-      C(C(G, (resolutionX 𝒯 m).V), (resolutionX 𝒞 m).V)).comp (ContinuousMap.shear Ψ)
+      C(C(G, (resolutionX 𝒯 m).V), (resolutionX 𝒞 m).V)).comp
+        (ContinuousMap.compSwapShearMulRight Ψ)
 
 @[simp]
 theorem coindLevel_zero (Ψ : C(G, A)) :
@@ -164,7 +167,7 @@ theorem coindLevel_zero (Ψ : C(G, A)) :
 
 @[simp]
 theorem coindLevel_succ_apply (m : ℕ) (Ψ : C(G, (resolutionX 𝒯 (m + 1)).V)) (x : G) :
-    coindLevel R G A (m + 1) Ψ x = coindLevel R G A m (ContinuousMap.shear Ψ x) :=
+    coindLevel R G A (m + 1) Ψ x = coindLevel R G A m (ContinuousMap.compSwapShearMulRight Ψ x) :=
   (rfl)
 
 /-- Evaluation at `1` recovers the parameter of `coindLevel` at `1`. -/
@@ -175,7 +178,7 @@ theorem evalLevel_coindLevel : ∀ (m : ℕ) (Ψ : C(G, (resolutionX 𝒯 m).V))
     (DiscreteCoind.evalLinear_apply (R := R) _).trans (DiscreteCoind.ofContinuousMap_apply G A Ψ 1)
   | m + 1, Ψ => ContinuousMap.ext fun x => by
     rw [evalLevel_succ_apply, coindLevel_succ_apply, evalLevel_coindLevel m,
-      ContinuousMap.shear_apply_apply, one_mul]
+      ContinuousMap.compSwapShearMulRight_apply_apply, one_mul]
 
 /-- The action of `G` on the coinduced resolution translates the parameter of `coindLevel`:
 `g • coindLevel m Ψ = coindLevel m (y ↦ Ψ (y * g))`. -/
@@ -200,10 +203,11 @@ theorem eq_coindLevel_of_forall_evalLevel_ρ : ∀ (m : ℕ) (F : (resolutionX �
   | 0, F, Ψ, h => eq_ofContinuousMap_of_forall_evalLevel_smul R G A F Ψ h
   | m + 1, F, Ψ, h => ContinuousMap.ext fun x => by
     rw [coindLevel_succ_apply]
-    refine eq_coindLevel_of_forall_evalLevel_ρ m (F x) (ContinuousMap.shear Ψ x) fun y => ?_
+    refine eq_coindLevel_of_forall_evalLevel_ρ m (F x) (ContinuousMap.compSwapShearMulRight Ψ x)
+      fun y => ?_
     have hy := congrArg (fun Φ : (resolutionX 𝒯 (m + 1)).V => Φ (y * x)) (h y)
     rw [evalLevel_succ_apply, TopRep.resolutionX_succ_ρ_apply_apply, inv_mul_cancel_left] at hy
-    rw [ContinuousMap.shear_apply_apply]
+    rw [ContinuousMap.compSwapShearMulRight_apply_apply]
     exact hy
 
 /-- **An invariant level is recovered from its evaluation at `1`**: an invariant `F` is
@@ -262,9 +266,11 @@ instance subsingleton_continuousCohomology_discreteCoind_bot (n : ℕ) :
   have hΦ : (d 𝒯 (n + 2)).hom
       (evalLevel R G A (n + 2) (Subtype.val ((homogeneousCochains 𝒞).iCycles (n + 1) z))) = 0 := by
     rw [← evalLevel_d, hF, map_zero]
-  have hΦ' := TopRep.d_apply_one_add_d_apply_one 𝒯 (n + 1)
+  -- the contraction of the resolution of `A` by evaluation at the single point `1`
+  have hΦ' := TopRep.d_sum_apply_add_sum_d_apply 𝒯 (fun _ : Unit => 1) (n + 1)
     (evalLevel R G A (n + 2) (Subtype.val ((homogeneousCochains 𝒞).iCycles (n + 1) z)))
-  rw [hΦ, ContinuousMap.zero_apply, add_zero] at hΦ'
+  simp only [Fintype.sum_unique, Fintype.card_unique, one_smul, hΦ, ContinuousMap.zero_apply,
+    add_zero] at hΦ'
   -- spread that value back over `G`: an invariant cochain of degree `n`
   refine ⟨⟨coindLevel R G A (n + 1) (ContinuousMap.const G
     (evalLevel R G A (n + 2) (Subtype.val ((homogeneousCochains 𝒞).iCycles (n + 1) z)) 1)),

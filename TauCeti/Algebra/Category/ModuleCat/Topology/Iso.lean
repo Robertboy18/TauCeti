@@ -35,7 +35,10 @@ theorem isIso_of_isIso_forget₂_map {X Y : TopModuleCat R} [DiscreteTopology Y]
     { (asIso ((forget₂ (TopModuleCat R) (ModuleCat R)).map f)).toLinearEquiv with
       continuous_toFun := f.hom.continuous
       continuous_invFun := continuous_of_discreteTopology }
-  change IsIso (ofIso e).hom
+  have hf : f = (ofIso e).hom := by
+    ext x
+    rfl
+  rw [hf]
   infer_instance
 
 end TopModuleCat

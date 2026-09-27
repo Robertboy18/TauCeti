@@ -16,8 +16,10 @@ Mathlib's `ContinuousMap.mulLeft` and `ContinuousMap.mulRight`.
 
 ## Main definitions
 
-* `ContinuousMap.shear`: the family `x ↦ (y ↦ Ψ y (y * x))` attached to a two-variable continuous
-  map `Ψ`, with `ContinuousMap.shear_apply_apply` its pointwise formula.
+* `ContinuousMap.compSwapShearMulRight`: the family `x ↦ (y ↦ Ψ y (y * x))` attached to a
+  two-variable continuous map `Ψ`, that is, `Ψ` precomposed with the coordinate swap followed by
+  the shear `(a, b) ↦ (a, a * b)` of `Homeomorph.shearMulRight`, with
+  `ContinuousMap.compSwapShearMulRight_apply_apply` its pointwise formula.
 -/
 
 public section
@@ -27,14 +29,17 @@ namespace ContinuousMap
 variable {X : Type*} [TopologicalSpace X] [Mul X] [ContinuousMul X] [LocallyCompactSpace X]
   {Z : Type*} [TopologicalSpace Z]
 
-/-- The family `x ↦ (y ↦ Ψ y (y * x))` attached to a two-variable continuous map `Ψ`. Local
-compactness makes evaluation continuous, which is what makes the family jointly continuous. -/
-noncomputable def shear (Ψ : C(X, C(X, Z))) : C(X, C(X, Z)) :=
+/-- The family `x ↦ (y ↦ Ψ y (y * x))` attached to a two-variable continuous map `Ψ`: the
+uncurried `Ψ` precomposed with the coordinate swap `(x, y) ↦ (y, x)` followed by the shear
+`(a, b) ↦ (a, a * b)` of `Homeomorph.shearMulRight`, curried again. Local compactness makes
+evaluation continuous, which is what makes the family jointly continuous. -/
+noncomputable def compSwapShearMulRight (Ψ : C(X, C(X, Z))) : C(X, C(X, Z)) :=
   curry ⟨fun p : X × X => Ψ p.2 (p.2 * p.1),
     continuous_eval.comp ((Ψ.continuous.comp continuous_snd).prodMk
       (continuous_snd.mul continuous_fst))⟩
 
 @[simp]
-theorem shear_apply_apply (Ψ : C(X, C(X, Z))) (x y : X) : shear Ψ x y = Ψ y (y * x) := (rfl)
+theorem compSwapShearMulRight_apply_apply (Ψ : C(X, C(X, Z))) (x y : X) :
+    compSwapShearMulRight Ψ x y = Ψ y (y * x) := (rfl)
 
 end ContinuousMap

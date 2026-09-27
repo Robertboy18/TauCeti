@@ -15,16 +15,15 @@ resolution `TopRep.resolutionX X n`, the iterated function space `C(G, C(G, …,
 differential `TopRep.d` is defined recursively by `d (n + 1) F x = F - d n (F x)`. This file
 records the pointwise formulas that the recursion gives for the action and for the differential on
 a successor level, and their consequence that evaluation at any point `x : G` contracts the
-resolution: `d n (F x) + (d (n + 1) F) x = F`. Evaluation at a point is not `G`-equivariant, so the
-contraction does not descend to the invariants, which are the homogeneous cochains; it is
-nevertheless what drives the acyclicity of coinduced modules, and a sum of such contractions over
-suitably chosen points can descend.
+resolution: `d n (F x) + (d (n + 1) F) x = F`, summed over finitely many points. Evaluation at a
+point is not `G`-equivariant, so the contraction does not descend to the invariants, which are the
+homogeneous cochains; it is nevertheless what drives the acyclicity of coinduced modules, and a sum
+of such contractions over suitably chosen points can descend.
 
 ## Main results
 
 * `TopRep.resolutionX_succ_ρ_apply_apply` and `TopRep.hom_d_succ_apply_apply`: the action and
   the differential on a successor level of the resolution, at a point.
-* `TopRep.d_apply_one_add_d_apply_one`: evaluation at `1` contracts the coinduced resolution.
 * `TopRep.d_sum_apply_add_sum_d_apply`: evaluation at finitely many points, summed, contracts the
   coinduced resolution up to the number of points.
 -/
@@ -49,13 +48,6 @@ theorem resolutionX_succ_ρ_apply_apply (n : ℕ) (g : G) (F : (resolutionX X (n
 theorem hom_d_succ_apply_apply (n : ℕ) (F : (resolutionX X (n + 1)).V) (x : G) :
     ((d X (n + 1)).hom F) x = F - (d X n).hom (F x) :=
   (rfl)
-
-/-- **Evaluation at `1` contracts the coinduced resolution**: every `F` in level `n + 1`
-satisfies `F = d n (F 1) + (d (n + 1) F) 1`. Evaluation at `1` is not `G`-equivariant, so this
-contraction does not descend to the homogeneous cochains. -/
-theorem d_apply_one_add_d_apply_one (n : ℕ) (F : (resolutionX X (n + 1)).V) :
-    (d X n).hom (F 1) + ((d X (n + 1)).hom F) 1 = F := by
-  rw [hom_d_succ_apply_apply, add_sub_cancel]
 
 /-- **Summed evaluations contract the coinduced resolution up to a multiple.** For an element
 `F : C(G, Xₘ)` of the degree `m + 1` term of the coinduced resolution and finitely many points

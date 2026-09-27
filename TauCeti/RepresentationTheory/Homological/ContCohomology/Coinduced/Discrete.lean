@@ -5,6 +5,7 @@ Authors: Claude, Codex
 -/
 module
 
+public import Mathlib.Topology.ContinuousMap.Algebra
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced
 
 import Mathlib.Algebra.BigOperators.GroupWithZero.Action
@@ -41,9 +42,10 @@ and the one Shapiro's lemma is stated against.
 * `TauCeti.DiscreteCoind.trace_apply`, `TauCeti.DiscreteCoind.trace_eq_sum_transversal` and
   `TauCeti.DiscreteCoind.trace_map`: the trace formula, along any transversal, and its naturality
   in the coefficients;
-* `TauCeti.DiscreteCoind.ofContinuousMap`: a continuous map into a discrete group as an element of
-  `Coind_1^G A`, with `TauCeti.DiscreteCoind.smul_ofContinuousMap` computing the translation
-  action on it.
+* `TauCeti.DiscreteCoind.ofContinuousMap` and `TauCeti.DiscreteCoind.toContinuousMap`: a
+  continuous map into a discrete group as an element of `Coind_1^G A`, and conversely, packaged as
+  the additive equivalence `TauCeti.DiscreteCoind.addEquivContinuousMap : Coind_1^G A ≃+ C(G, A)`,
+  with `TauCeti.DiscreteCoind.smul_ofContinuousMap` computing the translation action.
 -/
 
 public section
@@ -417,6 +419,44 @@ def ofContinuousMap (f : C(G, A)) : DiscreteCoind G ⊥ A :=
 
 @[simp]
 theorem ofContinuousMap_apply (f : C(G, A)) (g : G) : ofContinuousMap G A f g = f g := (rfl)
+
+/-- An element of `Coind_1^G A`, as a continuous map `G → A`: it is locally constant, and `A` is
+discrete. -/
+def toContinuousMap (f : DiscreteCoind G ⊥ A) : C(G, A) :=
+  ⟨f, (IsLocallyConstant.iff_continuous _).1 f.isLocallyConstant⟩
+
+@[simp]
+theorem coe_toContinuousMap (f : DiscreteCoind G ⊥ A) : ⇑(toContinuousMap G A f) = ⇑f := (rfl)
+
+@[simp]
+theorem toContinuousMap_ofContinuousMap (f : C(G, A)) :
+    toContinuousMap G A (ofContinuousMap G A f) = f :=
+  ContinuousMap.ext fun _ => rfl
+
+@[simp]
+theorem ofContinuousMap_toContinuousMap (f : DiscreteCoind G ⊥ A) :
+    ofContinuousMap G A (toContinuousMap G A f) = f :=
+  ext fun _ => rfl
+
+/-- **`Coind_1^G A` is the group of continuous maps `G → A`**: the locally constant maps into the
+discrete group `A` are the continuous ones, and the equivariance condition for the trivial
+subgroup is empty. -/
+def addEquivContinuousMap : DiscreteCoind G ⊥ A ≃+ C(G, A) where
+  toFun := toContinuousMap G A
+  invFun := ofContinuousMap G A
+  left_inv := ofContinuousMap_toContinuousMap G A
+  right_inv := toContinuousMap_ofContinuousMap G A
+  map_add' _ _ := rfl
+
+@[simp]
+theorem addEquivContinuousMap_apply (f : DiscreteCoind G ⊥ A) :
+    addEquivContinuousMap G A f = toContinuousMap G A f :=
+  (rfl)
+
+@[simp]
+theorem addEquivContinuousMap_symm_apply (f : C(G, A)) :
+    (addEquivContinuousMap G A).symm f = ofContinuousMap G A f :=
+  (rfl)
 
 /-- Right translation on `Coind_1^G A` is precomposition with right multiplication. -/
 @[simp]
