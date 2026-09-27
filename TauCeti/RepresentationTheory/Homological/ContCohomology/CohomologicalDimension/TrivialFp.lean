@@ -71,7 +71,7 @@ variable {p G} [TopologicalSpace G] [IsTopologicalGroup G]
 cyclic of order `p`, hence `G`-equivariantly isomorphic to the carrier of `trivialFp p G`. -/
 theorem subsingleton_continuousCohomology_iff_subsingleton_cohomFp_of_natCard_eq [Fact p.Prime]
     (A : Type u) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A] [DistribMulAction G A]
-    [ContinuousSMul G A] (hA : Nat.card A = p) (htriv : ∀ (g : G) (a : A), g • a = a) (n : ℕ) :
+    (hA : Nat.card A = p) (htriv : ∀ (g : G) (a : A), g • a = a) (n : ℕ) :
     Subsingleton (continuousCohomology n (ofDiscreteModule ℤ G A)) ↔
       Subsingleton (cohomFp p G n) := by
   obtain ⟨a, ha⟩ := (isAddCyclic_of_prime_card hA).exists_generator

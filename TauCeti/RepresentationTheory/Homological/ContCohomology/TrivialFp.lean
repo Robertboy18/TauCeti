@@ -113,8 +113,8 @@ theorem trivialFp_ρ_apply_apply (g : G) (x : (trivialFp p G).V) :
   ContRepresentation.trivial_apply g x
 
 attribute [local instance] TopRep.distribMulAction in
-/-- The derived action of `G` on the carrier of `trivialFp p G` is trivial. -/
-@[simp]
+/-- The derived action of `G` on the carrier of `trivialFp p G` is trivial. Not a simp lemma:
+`simp` already proves it from `TopRep.distribMulAction_smul` and `trivialFp_ρ_apply_apply`. -/
 theorem smul_trivialFp_V (g : G) (x : (trivialFp p G).V) : g • x = x :=
   (TopRep.distribMulAction_smul _ g x).trans (trivialFp_ρ_apply_apply p G g x)
 
