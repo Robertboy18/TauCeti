@@ -50,7 +50,7 @@ namespace PreAdicSpace
 -- ringed spaces: a morphism `X ⟶ Y` of pre-adic spaces must unfold to a `PreAdicSpace.Hom X Y`,
 -- and identities and composites are used through their definitional components. The stalk and
 -- residue-field maps below are used through their `_def` lemmas, so their bodies stay hidden.
-@[expose] public section
+@[expose] public section Category
 
 variable {X Y Z : PreAdicSpace.{u}}
 
@@ -141,7 +141,7 @@ instance : forgetToPresheafedSpace.Faithful where
 def forgetToTop : PreAdicSpace.{u} ⥤ TopCat.{u} :=
   forgetToPresheafedSpace ⋙ PresheafedSpace.forget _
 
-end
+end Category
 
 variable {X Y Z : PreAdicSpace.{u}}
 

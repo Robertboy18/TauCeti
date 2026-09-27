@@ -206,15 +206,12 @@ section Quotient
 
 /-- Pullback along a quotient map preserves and reflects whether the support of a valuation is
 open. -/
-@[simp]
+-- Not `@[simp]`: `supp_comap` and `Ideal.coe_comap` rewrite the left-hand side to
+-- `IsOpen (Ideal.Quotient.mk J ⁻¹' ↑v.supp)`, so the lemma is not in simp normal form.
 theorem isOpen_supp_comap_quotientMk_iff (J : Ideal A) (v : Spv (A ⧸ J)) :
     IsOpen ((comap (Ideal.Quotient.mk J) v).supp : Set A) ↔
       IsOpen (v.supp : Set (A ⧸ J)) := by
-  have hsupp : Ideal.Quotient.mk J ⁻¹' (v.supp : Set (A ⧸ J)) =
-      ((comap (Ideal.Quotient.mk J) v).supp : Set A) := by
-    ext a
-    simp only [Set.mem_preimage, SetLike.mem_coe, mem_supp_iff, comap_vle, map_zero]
-  rw [← hsupp]
+  rw [supp_comap, Ideal.coe_comap]
   exact isOpen_coinduced.symm
 
 /-- The map on sub-unit valuation loci for a quotient homomorphism and the image plus ring is a
