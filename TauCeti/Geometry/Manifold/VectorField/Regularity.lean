@@ -142,14 +142,15 @@ theorem ContMDiffOn.contMDiffOn_mvfderiv_apply {f : M → F} {s : Set M}
 
 /-- **The lifted directional derivative of a `C^(m+1)` map is `C^m`.** If `f` is `C^n` on an open
 set `U` of a normed space and `m + 1 ≤ n`, then for every fixed direction `ξ` the map
-`z ↦ (f z, df_z ξ)` into the tangent bundle is `C^m` on `U`.  This is the bundled derivative
-`ContMDiffOn.contMDiffOn_tangentMapWithin` restricted to the constant section `z ↦ (z, ξ)` of
-`TF = F × F`, with the within-set derivative replaced by the unrestricted one because `U` is
-open. -/
+`z ↦ (f z, df_z ξ)` into the tangent bundle is `C^m` on `U`.  This is the regularity input for
+composing `df_z ξ` with `C^m` maps on the tangent bundle, such as a Riemannian metric. -/
 theorem ContMDiffOn.contMDiffOn_totalSpaceMk_mfderiv_apply {f : F → M} {U : Set F}
     (hf : ContMDiffOn 𝓘(𝕜, F) I n f U) (hmn : m + 1 ≤ n) (hU : IsOpen U) (ξ : F) :
     ContMDiffOn 𝓘(𝕜, F) I.tangent m
       (fun z ↦ TotalSpace.mk' E (f z) (mfderiv 𝓘(𝕜, F) I f z ξ)) U := by
+  -- restrict the bundled derivative `ContMDiffOn.contMDiffOn_tangentMapWithin` to the constant
+  -- section `z ↦ (z, ξ)` of `TF = F × F`; the within-set derivative is the unrestricted one
+  -- because `U` is open
   have hconst : ContMDiff 𝓘(𝕜, F) 𝓘(𝕜, F).tangent m
       (fun z : F ↦ (TotalSpace.mk' F z ξ : TangentBundle 𝓘(𝕜, F) F)) :=
     (contMDiff_vectorSpace_iff_contDiff (V := fun _ : F ↦ ξ)).2 contDiff_const

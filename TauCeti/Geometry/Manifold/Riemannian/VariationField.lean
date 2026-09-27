@@ -10,26 +10,24 @@ public import TauCeti.Geometry.Manifold.VectorBundle.CovariantDerivative.AlongCu
 public import TauCeti.Geometry.Manifold.VectorBundle.CovariantDerivative.AlongCurve.Surface
 
 /-!
-# The variation field of a family of curves
+# The transverse derivatives of the metric pairings along a variation
 
 A *variation* of a curve `γ` in a manifold is a two-parameter family `F : ℝ → ℝ → M` with
 `F 0 = γ`, whose first argument is the variation parameter `s` and whose second argument is the
-curve parameter `t`.  Its *variation field* is the transverse velocity `V(t) = ∂F/∂s (0, t)`, a
+curve parameter `t`.  Its *variation field* `V = TauCeti.Manifold.variationField I F`, defined in
+`TauCeti.Geometry.Manifold.MFDeriv.Curve`, is the transverse velocity `V(t) = ∂F/∂s (0, t)`, a
 tangent vector at `γ t`.  Hypotheses on a variation are stated on the uncurried map
 `fun z : ℝ × ℝ ↦ F z.1 z.2`.
 
-In a Riemannian manifold, metric compatibility of the Levi-Civita connection along the transverse
-curves and along `γ`, together with the symmetry lemma for the mixed covariant derivatives of a
-parametrized surface, give the two pointwise derivative formulas that variational arguments
-consume: the transverse derivative of the squared speed of the curves `F s`, and the product rule
-for `⟪V, γ'⟫` along `γ`.  They are the pointwise content of the Gauss lemma and of the first
-variation of energy.
+In a Riemannian manifold with its Levi-Civita connection, this file records the two pointwise
+derivative formulas that variational arguments consume, valid at every parameter where the family
+is `C²`: the transverse derivative of the squared speed of the curves `F s`, and the product rule
+for `⟪V, γ'⟫` along `γ`.  They are the pointwise content of the Gauss lemma
+(`TauCeti.Geometry.Manifold.Riemannian.Geodesic.Gauss.Basic`) and of the first variation of energy
+(`TauCeti.Geometry.Manifold.Riemannian.FirstVariation`).
 
-## Main definitions and results
+## Main results
 
-* `TauCeti.Manifold.variationField`: the variation field of a two-parameter family.
-* `TauCeti.Manifold.variationField_eq_mfderiv`: the variation field is the differential of the
-  uncurried family in the direction of the first parameter.
 * `TauCeti.Manifold.hasDerivAt_norm_sq_curveVelocity`: the transverse derivative of the squared
   speed is `2 ⟪D_t V, γ'⟫`.
 * `TauCeti.Manifold.hasDerivAt_inner_variationField_curveVelocity`: the product rule
@@ -58,49 +56,14 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   {F : ℝ → ℝ → M}
 
-variable (I) in
-/-- The **variation field** of a two-parameter family `F`: the velocity at `s = 0` of the
-transverse curve `s ↦ F s t`, a tangent vector at `F 0 t`.  In the classical notation it is
-`V(t) = ∂F/∂s (0, t)`. -/
-def variationField (F : ℝ → ℝ → M) (t : ℝ) : TangentSpace I (F 0 t) :=
-  curveVelocity I (fun s ↦ F s t) 0
-
-/-- The defining formula for the variation field. -/
-theorem variationField_apply (F : ℝ → ℝ → M) (t : ℝ) :
-    variationField I F t = curveVelocity I (fun s ↦ F s t) 0 :=
-  (rfl)
-
-/-- The variation field as a function of the curve parameter: the unapplied form of
-`variationField_apply`. -/
-theorem variationField_def (F : ℝ → ℝ → M) :
-    variationField I F = fun t ↦ curveVelocity I (fun s ↦ F s t) 0 :=
-  (rfl)
-
-/-- At a parameter where every curve of the family passes through the same point, the variation
-field vanishes. -/
-theorem variationField_eq_zero {t : ℝ} (h : ∀ s, F s t = F 0 t) :
-    variationField I F t = 0 := by
-  have hfun : (fun s ↦ F s t) = fun _ ↦ F 0 t := funext h
-  rw [variationField_apply, hfun, curveVelocity_const]
-
-/-- The variation field is the differential of the uncurried family in the direction of the
-first parameter. -/
-theorem variationField_eq_mfderiv {t : ℝ}
-    (hf : MDifferentiableAt 𝓘(ℝ, ℝ × ℝ) I (fun z : ℝ × ℝ ↦ F z.1 z.2) (0, t)) :
-    variationField I F t =
-      mfderiv 𝓘(ℝ, ℝ × ℝ) I (fun z : ℝ × ℝ ↦ F z.1 z.2) (0, t) ((1 : ℝ), (0 : ℝ)) := by
-  rw [variationField_apply, curveVelocity_eq_mfderiv_fst hf]
-
-/-! ### The transverse derivatives of the metric pairings -/
-
 variable [FiniteDimensional ℝ E] [IsManifold I 2 M]
   [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
   [IsContMDiffRiemannianBundle I 1 E (fun x : M ↦ TangentSpace I x)]
 
-/-- **The transverse derivative of the squared speed.** At a parameter where the family is `C²`,
-the derivative at `s = 0` of the squared speed of `F s` at `t` is `2 ⟪D_t V, γ'⟫`, where `V` is
-the variation field and `γ = F 0`: metric compatibility along the transverse curve gives
-`2 ⟪D_s ∂_t F, ∂_t F⟫`, and the symmetry lemma exchanges the two covariant derivatives. -/
+/-- **The transverse derivative of the squared speed.** At a parameter `t` where the family is
+`C²`, the function `s ↦ ‖∂_t F (s, t)‖²` has derivative `2 ⟪D_t V(t), γ'(t)⟫` at `s = 0`, where
+`V` is the variation field and `γ = F 0`.  Integrated over `[a, b]`, this is the derivative of
+the energy of the curves `F s` in the first variation formula. -/
 theorem hasDerivAt_norm_sq_curveVelocity {t : ℝ}
     (hf : ContMDiffAt 𝓘(ℝ, ℝ × ℝ) I 2 (fun z : ℝ × ℝ ↦ F z.1 z.2) (0, t)) :
     HasDerivAt (fun s ↦ ‖curveVelocity I (F s) t‖ ^ 2)

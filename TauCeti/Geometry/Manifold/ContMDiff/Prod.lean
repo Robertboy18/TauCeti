@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Geometry.Manifold.ContMDiff.Defs
 public import TauCeti.Geometry.Manifold.ContMDiff.Defs
 
 /-!

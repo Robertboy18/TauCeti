@@ -15,8 +15,8 @@ The *energy* of a curve `γ` in a Riemannian manifold between the parameters `a`
 `E(γ) = ½ ∫_a^b ‖γ'(t)‖² dt`, where `γ'` is the velocity `TauCeti.Manifold.curveVelocity`.  This
 file defines it and records its elementary properties: it vanishes on constant curves and on
 degenerate parameter intervals, changes sign under reversal of the parameter interval, and is
-nonnegative on positively oriented ones.  Its first variation is in
-`TauCeti.Geometry.Manifold.Riemannian.Geodesic.FirstVariation`, and its value on geodesic
+nonnegative on positively oriented ones, and adds over adjacent parameter intervals.  Its first
+variation is in `TauCeti.Geometry.Manifold.Riemannian.FirstVariation`, and its value on geodesic
 segments is in `TauCeti.Geometry.Manifold.Riemannian.Geodesic.ConstantSpeed`.
 
 ## Main definitions and results
@@ -26,6 +26,8 @@ segments is in `TauCeti.Geometry.Manifold.Riemannian.Geodesic.ConstantSpeed`.
   constant curve and on a degenerate parameter interval.
 * `TauCeti.Manifold.energy_symm`, `TauCeti.Manifold.energy_nonneg`: the energy is odd in the
   orientation of the parameter interval and nonnegative on positively oriented ones.
+* `TauCeti.Manifold.energy_add_adjacent`: the energy is additive over adjacent parameter
+  intervals.
 
 ## References
 
@@ -79,6 +81,15 @@ theorem energy_symm (γ : ℝ → M) (a b : ℝ) : energy I γ b a = -energy I �
 /-- The energy over a positively oriented parameter interval is nonnegative. -/
 theorem energy_nonneg (γ : ℝ → M) {a b : ℝ} (hab : a ≤ b) : 0 ≤ energy I γ a b :=
   div_nonneg (intervalIntegral.integral_nonneg hab fun _ _ ↦ sq_nonneg _) two_pos.le
+
+/-- The energy is additive over adjacent parameter intervals, provided the squared speed is
+integrable on both. -/
+theorem energy_add_adjacent (γ : ℝ → M) {a b c : ℝ}
+    (hab : IntervalIntegrable (fun t ↦ ‖curveVelocity I γ t‖ ^ 2) MeasureTheory.volume a b)
+    (hbc : IntervalIntegrable (fun t ↦ ‖curveVelocity I γ t‖ ^ 2) MeasureTheory.volume b c) :
+    energy I γ a b + energy I γ b c = energy I γ a c := by
+  rw [energy_def, energy_def, energy_def, ← add_div,
+    intervalIntegral.integral_add_adjacent_intervals hab hbc]
 
 end TauCeti.Manifold
 
