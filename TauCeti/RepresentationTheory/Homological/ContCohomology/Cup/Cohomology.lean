@@ -25,8 +25,7 @@ cup P m n : Hᵐ(G, X) →ₗ[R] Hⁿ(G, Y) →ₗ[R] Hᵐ⁺ⁿ(G, Z),
 
 determined by `cup P m n [a] [b] = [a ⌣ b]` on classes of cocycles (`TauCeti.TopPairing.cup_π`).
 Biadditivity, and more generally `R`-bilinearity, is carried by the type: additivity in either
-argument is `LinearMap.map_add₂` and `map_add`. The unit, associativity, graded commutativity and
-the compatibilities with change of groups are separate developments on top of this one.
+argument is `LinearMap.map_add₂` and `map_add`.
 
 The descent runs through `HomologicalComplex.descHomologyₗ`, the elementwise universal property of
 homology in `TopModuleCat R`: a linear map out of the cycles that vanishes on the kernel of the

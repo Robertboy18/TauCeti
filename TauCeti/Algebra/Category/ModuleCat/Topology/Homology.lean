@@ -70,6 +70,13 @@ theorem exact_of_forget₂_map_eq {X₁ X₂ X₃ : TopModuleCat R} {f : X₁ �
     (congrArg ModuleCat.Hom.hom ((Iso.inv_comp_eq e₁).1 hf.symm).symm)
     (congrArg ModuleCat.Hom.hom ((Iso.inv_comp_eq e₂).1 hg.symm).symm) h
 
+/-- The continuous linear equivalence underlying an isomorphism of topological modules acts as the
+forward morphism of the isomorphism. -/
+@[simp]
+theorem _root_.CategoryTheory.Iso.toContinuousLinearEquiv_apply {X Y : TopModuleCat R} (e : X ≅ Y)
+    (x : X) : e.toContinuousLinearEquiv x = e.hom x :=
+  rfl
+
 end TopModuleCat
 
 namespace CategoryTheory.ShortComplex
@@ -192,10 +199,8 @@ theorem descHomologyₗ_π (k : S.cycles →ₗ[R] W) (hk : ∀ z, S.homologyπ 
   have h := ConcreteCategory.congr_hom (homologyπ_comp_homologyIsoCoker_hom S) z
   simp only [ConcreteCategory.comp_apply] at h
   rw [descHomologyₗ, LinearMap.comp_apply, LinearEquiv.coe_coe,
-    ContinuousLinearEquiv.coe_toLinearEquiv]
-  -- the underlying function of `homologyIsoCoker.toContinuousLinearEquiv` is that of its `hom`
-  change S.toCycles.hom.range.liftQ k _ ((homologyIsoCoker S).hom (S.homologyπ z)) = k z
-  rw [h, TopModuleCat.hom_cokerπ, Submodule.mkQ_apply]
+    ContinuousLinearEquiv.coe_toLinearEquiv, Iso.toContinuousLinearEquiv_apply, h,
+    TopModuleCat.hom_cokerπ, Submodule.mkQ_apply]
   exact Submodule.liftQ_apply _ k z
 
 end descHomology
@@ -264,11 +269,13 @@ theorem iCycles_cyclesMkOfEq (x : K.X n) (j : ι) (hj : c.next n = j) (hx : (K.d
   exact (K.sc n).iCycles_cyclesMkOfEq x _
 
 /-- The differential vanishes on the underlying element of a cycle. -/
+@[simp]
 theorem d_iCycles_apply (j : ι) (z : K.cycles n) : (K.d n j).hom (K.iCycles n z) = 0 := by
   have h := ConcreteCategory.congr_hom (K.iCycles_d n j) z
   simpa only [ConcreteCategory.comp_apply, TopModuleCat.hom_zero_apply] using h
 
 /-- The underlying element of the cycle `K.toCycles i n x` is the differential of `x`. -/
+@[simp]
 theorem iCycles_toCycles_apply (i : ι) [K.HasHomology n] (x : K.X i) :
     K.iCycles n (K.toCycles i n x) = (K.d i n).hom x := by
   have h := ConcreteCategory.congr_hom (K.toCycles_i i n) x
