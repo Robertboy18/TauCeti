@@ -34,8 +34,9 @@ statement that `M` is finite projective exactly when the identity of `M` is a fi
 `φᵢ ⊗ mᵢ`, that is, exactly when `M` admits a dual basis.
 
 For sheaves of modules the comparison is `𝓔ᵛ ⊗ 𝓕 ⟶ 𝓗om(𝓔, 𝓕)`. Whether it is an isomorphism can be
-checked locally, whereas a coevaluation cannot be glued directly; so this criterion is the route
-by which finite locally free sheaves are shown to be dualizable, with dual `𝓗om(𝓔, 𝒪)`.
+checked on an open cover, and once it is known to be invertible this criterion produces the
+coevaluation; so it is the route by which finite locally free sheaves are shown to be dualizable,
+with dual `𝓗om(𝓔, 𝒪)`.
 
 ## Main declarations
 
