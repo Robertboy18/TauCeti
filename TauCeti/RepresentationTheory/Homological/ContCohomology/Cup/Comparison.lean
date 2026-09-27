@@ -32,17 +32,18 @@ is `(g₀, g₁) ↦ g₀ • a (g₀⁻¹ g₁)`, that of a two-cocycle is
 `g ↦ g • m` (`TauCeti.ContCohomology.cocycle0`). The Alexander–Whitney product of homogeneous
 cochains is `μ (A (g₀, …, g_m)) (B (g_m, …, g_{m+n}))`, and equivariance of `μ` turns it into the
 homogeneous form of the explicit cochain formula. Passing to classes is then the compatibility of
-the comparison isomorphisms with the class maps on both sides.
+the comparisons with the class maps on both sides.
+
+The class-level agreement is stated twice. The additive comparisons
+`TauCeti.ContCohomology.explicitH1AddEquivContinuousCohomology` and
+`TauCeti.ContCohomology.explicitH2AddEquivContinuousCohomology` exist for every topological group,
+resp. every locally compact one, and the agreement under them carries exactly these hypotheses.
+The comparison isomorphisms in `TopModuleCat ℤ` need `G` compact, since only then is the canonical
+cohomology discrete, and the agreement under them, in the form the roadmap fixes, is a corollary.
 
 This is what lets a consumer compute the canonical cup product of low-degree classes on explicit
 cocycles, for instance the cup square `H¹(G, 𝔽_p) × H¹(G, 𝔽_p) → H²(G, 𝔽_p)` against which the
 Demushkin condition on a pro-`p` group is stated.
-
-## Main definitions
-
-* `TauCeti.ContCohomology.cocycle0`: the homogeneous `0`-cocycle `g ↦ g • m` of an invariant
-  element `m`, with `TauCeti.ContCohomology.explicitH0IsoContinuousCohomology_hom_eq_π` saying
-  that the degree-zero comparison sends `m` to its class.
 
 ## Main results
 
@@ -51,6 +52,11 @@ Demushkin condition on a pro-`p` group is stated.
   `TauCeti.ContCohomology.cocycleEquiv2_cup11`, `TauCeti.ContCohomology.cocycleEquiv2_cup20`: on
   cocycles, the homogeneous form of each explicit cup product is the Alexander–Whitney product of
   the homogeneous forms.
+* `TauCeti.ContCohomology.explicitAddEquiv_cup01`, `TauCeti.ContCohomology.explicitAddEquiv_cup10`,
+  `TauCeti.ContCohomology.explicitAddEquiv_cup02`, `TauCeti.ContCohomology.explicitAddEquiv_cup11`,
+  `TauCeti.ContCohomology.explicitAddEquiv_cup20`: the canonical and the explicit cup products
+  agree under the additive comparisons, for every topological group in total degree one and every
+  locally compact one in total degree two.
 * `TauCeti.ContCohomology.explicitIso_cup00`, `TauCeti.ContCohomology.explicitIso_cup01`,
   `TauCeti.ContCohomology.explicitIso_cup10`, `TauCeti.ContCohomology.explicitIso_cup02`,
   `TauCeti.ContCohomology.explicitIso_cup`, `TauCeti.ContCohomology.explicitIso_cup20`: **the
@@ -74,43 +80,6 @@ open CategoryTheory TopRep _root_.ContinuousCohomology
 universe u
 
 variable (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
-
-/-! ### Invariant elements as homogeneous `0`-cocycles -/
-
-section Cocycle0
-
-variable (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
-  [DistribMulAction G M] [ContinuousSMul G M]
-
-/-- **The homogeneous `0`-cocycle of an invariant element**: `g ↦ g • m`, which is the constant
-cochain `m` since `m` is invariant. -/
-noncomputable def cocycle0 (m : H0 G M) : cocycles (ofDiscreteModule ℤ G M) 0 :=
-  (homogeneousCochains (ofDiscreteModule ℤ G M)).cyclesMkOfEq (cochainEquiv0 G M m) 1
-    (CochainComplex.next ℕ 0) (by
-      rw [d_cochainEquiv0]
-      have h : (⟨d0 G M (m : M), mem_C1_iff.mpr (continuous_d0_apply (m : M))⟩ : C1 G M) = 0 :=
-        Subtype.ext (funext fun g ↦ by simp [d0_apply, m.2 g])
-      rw [h, map_zero])
-
-/-- The underlying homogeneous cochain of `cocycle0 m` is `g ↦ g • m`. -/
--- Not a `simp` lemma: `simp` rewrites the implicit carrier `(homogeneousCochains _).X 0` on the
--- left-hand side through `CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the statement
--- is not in `simp`-normal form; use it with `rw`.
-theorem iCycles_cocycle0 (m : H0 G M) :
-    (homogeneousCochains (ofDiscreteModule ℤ G M)).iCycles 0 (cocycle0 G M m) =
-      cochainEquiv0 G M m :=
-  HomologicalComplex.iCycles_cyclesMkOfEq _ _ _ _ _
-
-/-- The degree-zero comparison sends an invariant element to the class of its homogeneous
-`0`-cocycle. -/
-theorem explicitH0IsoContinuousCohomology_hom_eq_π (m : H0 G M) :
-    (explicitH0IsoContinuousCohomology G M).hom m =
-      π (ofDiscreteModule ℤ G M) 0 (cocycle0 G M m) := by
-  rw [explicitH0IsoContinuousCohomology_hom_eq_degreeZeroClass]
-  exact TauCeti.ContinuousCohomology.degreeZeroClass_eq_π _ _ _
-    (by rw [iCycles_cocycle0, cochainEquiv0_apply, one_smul])
-
-end Cocycle0
 
 variable (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
     [DistribMulAction G M] [ContinuousSMul G M]
@@ -272,7 +241,7 @@ theorem cocycleEquiv2_cup20 (a : Z2 G M) (n : H0 G N) :
 
 end LocallyCompact
 
-/-! ### Agreement on classes -/
+/-! ### Agreement on classes, under the additive comparisons -/
 
 /-- **The canonical and the explicit `(0,0)` cup products agree** under the degree-zero
 comparison isomorphism: the cup product of two invariant elements is their pairing `μ m n`. -/
@@ -284,10 +253,106 @@ theorem explicitIso_cup00 (m : H0 G M) (n : H0 G N) :
   rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH0IsoContinuousCohomology_hom_eq_π,
     explicitH0IsoContinuousCohomology_hom_eq_π, cocycle0_cup00, TopPairing.cup_π]
 
+/-- **The canonical and the explicit `(0,1)` cup products agree** under the additive comparisons,
+for every topological group `G`: the canonical cup product `TauCeti.TopPairing.cup` in bidegree
+`(0, 1)` at the coefficient pairing attached to `μ` is `TauCeti.ContCohomology.explicitCup01`,
+`(m ⌣ b) g = μ m (b g)`. -/
+theorem explicitAddEquiv_cup01 (m : H0 G M) (y : H1 G N) :
+    (ofDiscreteModulePairing μ hequiv).cup 0 1
+        ((explicitH0IsoContinuousCohomology G M).hom m)
+        (explicitH1AddEquivContinuousCohomology G N y) =
+      explicitH1AddEquivContinuousCohomology G P
+        (explicitCup01 G M N P μ continuous_of_discreteTopology hequiv m y) := by
+  induction y using QuotientAddGroup.induction_on with
+  | H b =>
+    rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH1AddEquivContinuousCohomology_apply,
+      explicitCup01_mk, explicitH1AddEquivContinuousCohomology_apply, cocycleEquiv1_cup01,
+      TopPairing.cup_π]
+
+/-- **The canonical and the explicit `(1,0)` cup products agree** under the additive comparisons,
+for every topological group `G`: the canonical cup product `TauCeti.TopPairing.cup` in bidegree
+`(1, 0)` at the coefficient pairing attached to `μ` is `TauCeti.ContCohomology.explicitCup10`,
+`(a ⌣ n) g = μ (a g) (g • n)`. -/
+theorem explicitAddEquiv_cup10 (x : H1 G M) (n : H0 G N) :
+    (ofDiscreteModulePairing μ hequiv).cup 1 0
+        (explicitH1AddEquivContinuousCohomology G M x)
+        ((explicitH0IsoContinuousCohomology G N).hom n) =
+      explicitH1AddEquivContinuousCohomology G P
+        (explicitCup10 G M N P μ continuous_of_discreteTopology hequiv x n) := by
+  induction x using QuotientAddGroup.induction_on with
+  | H a =>
+    rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH1AddEquivContinuousCohomology_apply,
+      explicitCup10_mk, explicitH1AddEquivContinuousCohomology_apply, cocycleEquiv1_cup10,
+      TopPairing.cup_π]
+
+section LocallyCompact
+
+/-! The degree-two additive comparison
+`TauCeti.ContCohomology.explicitH2AddEquivContinuousCohomology` needs `G` locally compact, as does
+the cocycle comparison it is built from. -/
+
+variable [LocallyCompactSpace G]
+
+/-- **The canonical and the explicit `(0,2)` cup products agree** under the additive comparisons,
+for every locally compact group `G`: the canonical cup product `TauCeti.TopPairing.cup` in bidegree
+`(0, 2)` at the coefficient pairing attached to `μ` is `TauCeti.ContCohomology.explicitCup02`,
+`(m ⌣ b) (g, h) = μ m (b (g, h))`. -/
+theorem explicitAddEquiv_cup02 (m : H0 G M) (y : H2 G N) :
+    (ofDiscreteModulePairing μ hequiv).cup 0 2
+        ((explicitH0IsoContinuousCohomology G M).hom m)
+        (explicitH2AddEquivContinuousCohomology G N y) =
+      explicitH2AddEquivContinuousCohomology G P
+        (explicitCup02 G M N P μ continuous_of_discreteTopology hequiv m y) := by
+  induction y using QuotientAddGroup.induction_on with
+  | H b =>
+    rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH2AddEquivContinuousCohomology_apply,
+      explicitCup02_mk, explicitH2AddEquivContinuousCohomology_apply, cocycleEquiv2_cup02,
+      TopPairing.cup_π]
+
+/-- **The canonical and the explicit `(1,1)` cup products agree** under the additive comparisons,
+for every locally compact group `G`: the canonical cup product `TauCeti.TopPairing.cup` in bidegree
+`(1, 1)` at the coefficient pairing attached to `μ` is `TauCeti.ContCohomology.explicitCup11`,
+`(a ⌣ b) (g, h) = μ (a g) (g • b h)`. -/
+theorem explicitAddEquiv_cup11 (x : H1 G M) (y : H1 G N) :
+    (ofDiscreteModulePairing μ hequiv).cup 1 1
+        (explicitH1AddEquivContinuousCohomology G M x)
+        (explicitH1AddEquivContinuousCohomology G N y) =
+      explicitH2AddEquivContinuousCohomology G P
+        (explicitCup11 G M N P μ continuous_of_discreteTopology hequiv x y) := by
+  induction x using QuotientAddGroup.induction_on with
+  | H a =>
+    induction y using QuotientAddGroup.induction_on with
+    | H b =>
+      rw [explicitH1AddEquivContinuousCohomology_apply,
+        explicitH1AddEquivContinuousCohomology_apply, explicitCup11_mk,
+        explicitH2AddEquivContinuousCohomology_apply, cocycleEquiv2_cup11, TopPairing.cup_π]
+
+/-- **The canonical and the explicit `(2,0)` cup products agree** under the additive comparisons,
+for every locally compact group `G`: the canonical cup product `TauCeti.TopPairing.cup` in bidegree
+`(2, 0)` at the coefficient pairing attached to `μ` is `TauCeti.ContCohomology.explicitCup20`,
+`(a ⌣ n) (g, h) = μ (a (g, h)) ((g * h) • n)`. -/
+theorem explicitAddEquiv_cup20 (x : H2 G M) (n : H0 G N) :
+    (ofDiscreteModulePairing μ hequiv).cup 2 0
+        (explicitH2AddEquivContinuousCohomology G M x)
+        ((explicitH0IsoContinuousCohomology G N).hom n) =
+      explicitH2AddEquivContinuousCohomology G P
+        (explicitCup20 G M N P μ continuous_of_discreteTopology hequiv x n) := by
+  induction x using QuotientAddGroup.induction_on with
+  | H a =>
+    rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH2AddEquivContinuousCohomology_apply,
+      explicitCup20_mk, explicitH2AddEquivContinuousCohomology_apply, cocycleEquiv2_cup20,
+      TopPairing.cup_π]
+
+end LocallyCompact
+
+/-! ### Agreement on classes, under the comparison isomorphisms -/
+
 section Compact
 
 /-! Compactness of `G` enters only through the comparison isomorphisms in degrees one and two,
-which need the canonical cohomology to be discrete. -/
+which need the canonical cohomology to be discrete; each statement here is the one under the
+additive comparisons above, read on the discrete carriers `TauCeti.ContCohomology.DiscreteH1` and
+`TauCeti.ContCohomology.DiscreteH2`. -/
 
 variable [CompactSpace G]
 
@@ -303,11 +368,8 @@ theorem explicitIso_cup01 (m : H0 G M) (y : DiscreteH1 G N) :
         ((discreteH1Equiv G P).symm
           (explicitCup01 G M N P μ continuous_of_discreteTopology hequiv m
             (discreteH1Equiv G N y))) := by
-  obtain ⟨b, hb⟩ := QuotientAddGroup.mk_surjective (discreteH1Equiv G N y)
-  rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH1IsoContinuousCohomology_hom_apply,
-    explicitH1IsoContinuousCohomology_hom_apply, AddEquiv.apply_symm_apply, ← hb,
-    explicitH1AddEquivContinuousCohomology_apply, explicitCup01_mk,
-    explicitH1AddEquivContinuousCohomology_apply, cocycleEquiv1_cup01, TopPairing.cup_π]
+  rw [explicitH1IsoContinuousCohomology_hom_apply, explicitH1IsoContinuousCohomology_hom_apply,
+    AddEquiv.apply_symm_apply, explicitAddEquiv_cup01]
 
 /-- **The canonical and the explicit `(1,0)` cup products agree** under the comparison
 isomorphisms: the canonical cup product `TauCeti.TopPairing.cup` in bidegree `(1, 0)` at the
@@ -321,11 +383,8 @@ theorem explicitIso_cup10 (x : DiscreteH1 G M) (n : H0 G N) :
         ((discreteH1Equiv G P).symm
           (explicitCup10 G M N P μ continuous_of_discreteTopology hequiv
             (discreteH1Equiv G M x) n)) := by
-  obtain ⟨a, ha⟩ := QuotientAddGroup.mk_surjective (discreteH1Equiv G M x)
-  rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH1IsoContinuousCohomology_hom_apply,
-    explicitH1IsoContinuousCohomology_hom_apply, AddEquiv.apply_symm_apply, ← ha,
-    explicitH1AddEquivContinuousCohomology_apply, explicitCup10_mk,
-    explicitH1AddEquivContinuousCohomology_apply, cocycleEquiv1_cup10, TopPairing.cup_π]
+  rw [explicitH1IsoContinuousCohomology_hom_apply, explicitH1IsoContinuousCohomology_hom_apply,
+    AddEquiv.apply_symm_apply, explicitAddEquiv_cup10]
 
 /-- **The canonical and the explicit `(0,2)` cup products agree** under the comparison
 isomorphisms: the canonical cup product `TauCeti.TopPairing.cup` in bidegree `(0, 2)` at the
@@ -339,11 +398,8 @@ theorem explicitIso_cup02 (m : H0 G M) (y : DiscreteH2 G N) :
         ((discreteH2Equiv G P).symm
           (explicitCup02 G M N P μ continuous_of_discreteTopology hequiv m
             (discreteH2Equiv G N y))) := by
-  obtain ⟨b, hb⟩ := QuotientAddGroup.mk_surjective (discreteH2Equiv G N y)
-  rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH2IsoContinuousCohomology_hom_apply,
-    explicitH2IsoContinuousCohomology_hom_apply, AddEquiv.apply_symm_apply, ← hb,
-    explicitH2AddEquivContinuousCohomology_apply, explicitCup02_mk,
-    explicitH2AddEquivContinuousCohomology_apply, cocycleEquiv2_cup02, TopPairing.cup_π]
+  rw [explicitH2IsoContinuousCohomology_hom_apply, explicitH2IsoContinuousCohomology_hom_apply,
+    AddEquiv.apply_symm_apply, explicitAddEquiv_cup02]
 
 /-- **The canonical and the explicit `(1,1)` cup products agree.** Under the comparison
 isomorphisms of `H¹` and `H²` with Mathlib's continuous cohomology, the canonical cup product
@@ -358,13 +414,8 @@ theorem explicitIso_cup (x : DiscreteH1 G M) (y : DiscreteH1 G N) :
         ((discreteH2Equiv G P).symm
           (explicitCup11 G M N P μ continuous_of_discreteTopology hequiv
             (discreteH1Equiv G M x) (discreteH1Equiv G N y))) := by
-  obtain ⟨a, ha⟩ := QuotientAddGroup.mk_surjective (discreteH1Equiv G M x)
-  obtain ⟨b, hb⟩ := QuotientAddGroup.mk_surjective (discreteH1Equiv G N y)
   rw [explicitH1IsoContinuousCohomology_hom_apply, explicitH1IsoContinuousCohomology_hom_apply,
-    explicitH2IsoContinuousCohomology_hom_apply, AddEquiv.apply_symm_apply, ← ha, ← hb,
-    explicitH1AddEquivContinuousCohomology_apply, explicitH1AddEquivContinuousCohomology_apply,
-    explicitCup11_mk, explicitH2AddEquivContinuousCohomology_apply, cocycleEquiv2_cup11,
-    TopPairing.cup_π]
+    explicitH2IsoContinuousCohomology_hom_apply, AddEquiv.apply_symm_apply, explicitAddEquiv_cup11]
 
 /-- **The canonical and the explicit `(2,0)` cup products agree** under the comparison
 isomorphisms: the canonical cup product `TauCeti.TopPairing.cup` in bidegree `(2, 0)` at the
@@ -378,11 +429,8 @@ theorem explicitIso_cup20 (x : DiscreteH2 G M) (n : H0 G N) :
         ((discreteH2Equiv G P).symm
           (explicitCup20 G M N P μ continuous_of_discreteTopology hequiv
             (discreteH2Equiv G M x) n)) := by
-  obtain ⟨a, ha⟩ := QuotientAddGroup.mk_surjective (discreteH2Equiv G M x)
-  rw [explicitH0IsoContinuousCohomology_hom_eq_π, explicitH2IsoContinuousCohomology_hom_apply,
-    explicitH2IsoContinuousCohomology_hom_apply, AddEquiv.apply_symm_apply, ← ha,
-    explicitH2AddEquivContinuousCohomology_apply, explicitCup20_mk,
-    explicitH2AddEquivContinuousCohomology_apply, cocycleEquiv2_cup20, TopPairing.cup_π]
+  rw [explicitH2IsoContinuousCohomology_hom_apply, explicitH2IsoContinuousCohomology_hom_apply,
+    AddEquiv.apply_symm_apply, explicitAddEquiv_cup20]
 
 end Compact
 

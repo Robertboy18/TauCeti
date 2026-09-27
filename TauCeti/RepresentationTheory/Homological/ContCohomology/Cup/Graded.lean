@@ -505,6 +505,7 @@ the same numeral. -/
 
 /-- **The Alexander–Whitney pairing of two degree-zero elements of the resolution, evaluated**:
 `(a ⌣ b) g = μ (a g) (b g)`. -/
+@[simp]
 theorem resolutionCupPairing_zero_zero_apply (a : (TopRep.resolution'X X 0).V)
     (b : (TopRep.resolution'X Y 0).V) (g : G) :
     (P.resolutionCupPairing 0 0 a b : C(G, Z.V)) g = P.bil (a g) (b g) := by
@@ -515,6 +516,7 @@ theorem resolutionCupPairing_zero_zero_apply (a : (TopRep.resolution'X X 0).V)
 
 /-- **The Alexander–Whitney pairing of a degree-zero and a degree-one element of the resolution,
 evaluated**: `(a ⌣ b) g₀ g₁ = μ (a g₀) (b g₀ g₁)`. -/
+@[simp]
 theorem resolutionCupPairing_zero_one_apply (a : (TopRep.resolution'X X 0).V)
     (b : (TopRep.resolution'X Y 1).V) (g₀ g₁ : G) :
     (P.resolutionCupPairing 0 1 a b : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a g₀) (b g₀ g₁) := by
@@ -525,6 +527,7 @@ theorem resolutionCupPairing_zero_one_apply (a : (TopRep.resolution'X X 0).V)
 
 /-- **The Alexander–Whitney pairing of a degree-zero and a degree-two element of the resolution,
 evaluated**: `(a ⌣ b) g₀ g₁ g₂ = μ (a g₀) (b g₀ g₁ g₂)`. -/
+@[simp]
 theorem resolutionCupPairing_zero_two_apply (a : (TopRep.resolution'X X 0).V)
     (b : (TopRep.resolution'X Y 2).V) (g₀ g₁ g₂ : G) :
     (P.resolutionCupPairing 0 2 a b : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
@@ -536,6 +539,7 @@ theorem resolutionCupPairing_zero_two_apply (a : (TopRep.resolution'X X 0).V)
 
 /-- **The Alexander–Whitney pairing of a degree-one and a degree-zero element of the resolution,
 evaluated**: `(a ⌣ b) g₀ g₁ = μ (a g₀ g₁) (b g₁)`. -/
+@[simp]
 theorem resolutionCupPairing_one_zero_apply (a : (TopRep.resolution'X X 1).V)
     (b : (TopRep.resolution'X Y 0).V) (g₀ g₁ : G) :
     (P.resolutionCupPairing 1 0 a b : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a g₀ g₁) (b g₁) := by
@@ -546,6 +550,7 @@ theorem resolutionCupPairing_one_zero_apply (a : (TopRep.resolution'X X 1).V)
 
 /-- **The Alexander–Whitney pairing of a degree-two and a degree-zero element of the resolution,
 evaluated**: `(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁ g₂) (b g₂)`. -/
+@[simp]
 theorem resolutionCupPairing_two_zero_apply (a : (TopRep.resolution'X X 2).V)
     (b : (TopRep.resolution'X Y 0).V) (g₀ g₁ g₂ : G) :
     (P.resolutionCupPairing 2 0 a b : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
@@ -557,6 +562,7 @@ theorem resolutionCupPairing_two_zero_apply (a : (TopRep.resolution'X X 2).V)
 
 /-- **The Alexander–Whitney pairing of two degree-one elements of the resolution, evaluated**:
 `(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁) (b g₁ g₂)`. -/
+@[simp]
 theorem resolutionCupPairing_one_one_apply (a : (TopRep.resolution'X X 1).V)
     (b : (TopRep.resolution'X Y 1).V) (g₀ g₁ g₂ : G) :
     (P.resolutionCupPairing 1 1 a b : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
