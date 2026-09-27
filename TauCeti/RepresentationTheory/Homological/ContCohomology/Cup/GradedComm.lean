@@ -12,10 +12,10 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Resolution
 # Graded commutativity of the cup product in bidegree `(1, 1)`
 
 Let `P : TopPairing X Y Z` be a coefficient pairing of topological representations of a
-topological group `G`, and let `P.flip : TopPairing Y X Z` be the opposite pairing,
-`P.flip.bil y x = P.bil x y`. On continuous cohomology the cup products in the two orders are
-related by graded commutativity, `a ⌣_P b = (-1)^{mn} (b ⌣_{P.flip} a)`. This file proves the
-case of bidegree `(1, 1)`,
+topological group `G`, and let `P.flip : TopPairing Y X Z` be the opposite pairing
+`TauCeti.TopPairing.flip`, `P.flip.bil y x = P.bil x y`. On continuous cohomology the cup
+products in the two orders are related by graded commutativity,
+`a ⌣_P b = (-1)^{mn} (b ⌣_{P.flip} a)`. This file proves the case of bidegree `(1, 1)`,
 
 ```text
 cup P 1 1 a b = - cup P.flip 1 1 b a,
@@ -33,9 +33,17 @@ identities `a g₀ g₂ = a g₀ g₁ + a g₁ g₂` and `b g₀ g₂ = b g₀ g
 cross terms `μ (a g₀ g₁) (b g₁ g₂)` and `μ (a g₁ g₂) (b g₀ g₁)`. The class-level statement follows
 because the descended cup product is the class of the cup product of cocycles.
 
+The same homotopy is already formalized on the explicit inhomogeneous model of
+`TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Product`:
+`TauCeti.ContCohomology.cup11_add_cup11_flip_eq_d1` is the cochain identity
+`(a ⌣_μ b) + (b ⌣_{μᵒᵖ} a) = d¹ (g ↦ -μ (a g) (b g))` for inhomogeneous `1`-cocycles, and
+`TauCeti.ContCohomology.explicitCup11_eq_neg_flip` is its descent to the explicit
+`H¹ × H¹ → H²`. This file is the homogeneous-resolution counterpart of those two declarations,
+with the same pointwise primitive (read on homogeneous cochains) and the same sign convention,
+stated on Mathlib's `continuousCohomology` so that it applies to `TauCeti.TopPairing.cup`.
+
 ## Main definitions
 
-* `TauCeti.TopPairing.flip`: the opposite pairing.
 * `TauCeti.TopPairing.cupOne`, `TauCeti.TopPairing.cupOneCochain`: the cup-one product of two
   degree-one elements of the resolution, and of two homogeneous one-cochains.
 
@@ -63,29 +71,7 @@ open CategoryTheory ContRepresentation TopRep _root_.ContinuousCohomology Contin
 
 universe u v w
 
-/-! ### The opposite pairing -/
-
 namespace TopPairing
-
-section flip
-
-variable {R : Type u} [CommRing R] [TopologicalSpace R] {G : Type v} [Monoid G]
-  {X Y Z : TopRep.{w} R G} (P : TopPairing X Y Z)
-
-/-- **The opposite pairing** `Y × X → Z`, `(y, x) ↦ μ x y`, of a coefficient pairing
-`μ : X × Y → Z`. -/
-def flip : TopPairing Y X Z where
-  bil := P.bil.flip
-  cont := P.cont.comp continuous_swap
-  equivariant g y x := P.equivariant g x y
-
-@[simp]
-theorem flip_bil (y : Y.V) (x : X.V) : P.flip.bil y x = P.bil x y := (rfl)
-
-@[simp]
-theorem flip_flip : P.flip.flip = P := (rfl)
-
-end flip
 
 section cupOne
 
@@ -175,30 +161,6 @@ theorem cupOneCochain_apply (a : (TopRep.homogeneousCochains X).X 1)
     (b : (TopRep.homogeneousCochains Y).X 1) (g₀ g₁ : G) :
     ((P.cupOneCochain a b).val : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a.val g₀ g₁) (b.val g₀ g₁) := by
   rw [coe_cupOneCochain, cupOne_apply]
-
-/-! ### The cup product of two one-cochains, evaluated -/
-
-/-- The Alexander–Whitney pairing of two degree-one elements of the resolution, evaluated:
-`(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁) (b g₁ g₂)`. -/
-theorem resolutionCupPairing_one_one_apply (a : (TopRep.resolution'X X 1).V)
-    (b : (TopRep.resolution'X Y 1).V) (g₀ g₁ g₂ : G) :
-    (P.resolutionCupPairing 1 1 a b : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
-      P.bil (a g₀ g₁) (b g₁ g₂) := by
-  rw [resolutionCupPairing_apply_succ, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `0 + 1 + 1 = 0 + 1 + 1` is the identity
-  change (P.resolutionCupPairing 0 1 (a g₀) b : C(G, C(G, Z.V))) g₁ g₂ = _
-  rw [resolutionCupPairing_apply_zero, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `1 = 0 + 1` is the identity
-  change (P.pointwise 1 1 rfl (a g₀ g₁, b g₁) : C(G, Z.V)) g₂ = _
-  rw [pointwise_succ_apply, pointwise_zero_apply]
-
-/-- The cup product of two homogeneous one-cochains, evaluated:
-`(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁) (b g₁ g₂)`. -/
-theorem cupCochain_one_one_apply (a : (TopRep.homogeneousCochains X).X 1)
-    (b : (TopRep.homogeneousCochains Y).X 1) (g₀ g₁ g₂ : G) :
-    ((P.cupCochain 1 1 a b).val : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
-      P.bil (a.val g₀ g₁) (b.val g₁ g₂) := by
-  rw [coe_cupCochain, resolutionCupPairing_one_one_apply]
 
 /-! ### The differential of the cup-one product -/
 
