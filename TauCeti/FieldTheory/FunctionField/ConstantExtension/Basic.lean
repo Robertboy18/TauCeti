@@ -16,11 +16,11 @@ the compositum is again an algebraic function field over the enlarged constant f
 gives the function-field structure needed to discuss its places, divisors, and genus.
 Separability and exactness of the original constant field are not needed for this.
 
-The enlarged constant field is then the exact constant field of the compositum, under the
-hypotheses that make constant field extensions well behaved: the original constant field `k` is
-exact in `F` and `k' / k` is separable.  Then no element of `F · k'` outside `k'` is separable over
-`k'`, and over a perfect `k` — where every algebraic element is separable — `k'` is the full field
-of constants of `F · k'`.  Perfectness cannot simply be dropped: over an imperfect `k` an
+Under the hypotheses that make constant field extensions well behaved — the original constant
+field `k` is exact in `F` and `k' / k` is separable — the compositum acquires no new separable
+constants: no element of `F · k'` outside `k'` is separable over `k'`.  Perfectness of `k` upgrades
+this to exactness: over a perfect `k`, where every algebraic element is separable, `k'` is the
+full field of constants of `F · k'`.  Perfectness cannot simply be dropped: over an imperfect `k` an
 inseparable constant field extension can enlarge the field of constants beyond `k'`.  For instance,
 `k = 𝔽_p(t, u)` is exact in `F = k(x, y)` with `y ^ p = t * x ^ p + u`, but for `k' = k(t ^ (1/p))`
 the element `y - t ^ (1/p) * x` of `F · k'` is a `p`-th root of `u`, and `u ^ (1/p) ∉ k'`.
