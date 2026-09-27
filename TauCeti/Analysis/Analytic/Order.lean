@@ -12,8 +12,8 @@ public import Mathlib.Analysis.Analytic.Order
 
 Extensions of Mathlib's `analyticOrderAt` calculus: the order is additive over finite products,
 composing with `q ↦ q ^ N` at `0` multiplies the order by `N`, the power map `w ↦ w ^ m` recentred
-at `0` has order `m` there, and the recentred function `f · - f x` has order `1` at `x` exactly
-when `deriv f x ≠ 0`. The finiteness a zero count also needs is
+at `0` has order `m` there for `m ≠ 0`, and the recentred function `f · - f x` has order `1` at
+`x` exactly when `deriv f x ≠ 0`. The finiteness a zero count also needs is
 `TauCeti.finite_setOf_mem_and_eq_zero_of_isCompact`, provided by
 `TauCeti.Analysis.Analytic.IsolatedZeros`, which mentions no order.
 
