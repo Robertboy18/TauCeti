@@ -36,7 +36,9 @@ of continuous characters, so `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-dual of
 * `TauCeti.cohomFpLinearEquivContinuousZModDual`: `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-dual of
   `G`, as an `𝔽_p`-vector space.
 * `TauCeti.cohomFpTwoLinearEquivOfContinuousMulEquiv`: a topological isomorphism `G ≃ₜ* H` induces
-  `H²(G, 𝔽_p) ≃ₗ[𝔽_p] H²(H, 𝔽_p)`, the pullback along `e.symm` on the explicit models, so
+  `H²(G, 𝔽_p) ≃ₗ[𝔽_p] H²(H, 𝔽_p)`, with no action of either group in its statement; on the
+  explicit models it is the pullback along `e.symm` for any trivial actions
+  (`TauCeti.cohomFpTwoLinearEquivOfContinuousMulEquiv_apply`), so
   `TauCeti.finrank_cohomFp_two_congr`: the dimension of `H²(-, 𝔽_p)` is an isomorphism invariant.
 
 ## References
@@ -119,50 +121,52 @@ section Transport
 variable (p : ℕ) {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [LocallyCompactSpace G] {H : Type v} [Group H] [TopologicalSpace H] [IsTopologicalGroup H]
 
-section Explicit
-
-variable [DistribMulAction G (ZMod p)] [ContinuousSMul G (ZMod p)] [DistribMulAction H (ZMod p)]
-  [ContinuousSMul H (ZMod p)] (e : G ≃ₜ* H) (htG : ∀ (g : G) (m : ZMod p), g • m = m)
-  (htH : ∀ (h : H) (m : ZMod p), h • m = m)
-
 /-- **`H²(-, 𝔽_p)` is invariant under topological isomorphism**: a topological isomorphism
-`G ≃ₜ* H` induces an `𝔽_p`-linear isomorphism `H²(G, 𝔽_p) ≃ₗ[𝔽_p] H²(H, 𝔽_p)`, the pullback along
-`e.symm` on the explicit models `H2 G (ZMod p)` and `H2 H (ZMod p)` for trivial actions of `G` and
-`H` on `ZMod p` (`TauCeti.cohomFpTwoLinearEquivOfContinuousMulEquiv_apply`). -/
-noncomputable def cohomFpTwoLinearEquivOfContinuousMulEquiv :
+`G ≃ₜ* H` induces an `𝔽_p`-linear isomorphism `H²(G, 𝔽_p) ≃ₗ[𝔽_p] H²(H, 𝔽_p)`. On the explicit
+models `H2 G (ZMod p)` and `H2 H (ZMod p)`, for any trivial actions of `G` and `H` on `ZMod p`, it
+is the pullback along `e.symm` (`TauCeti.cohomFpTwoLinearEquivOfContinuousMulEquiv_apply`). -/
+noncomputable def cohomFpTwoLinearEquivOfContinuousMulEquiv (e : G ≃ₜ* H) :
     cohomFp p G 2 ≃ₗ[ZMod p] cohomFp p H 2 :=
+  -- The explicit models need actions of `G` and `H` on `ZMod p`; the trivial ones are installed
+  -- for the duration of the construction and do not appear in the statement.
   haveI : LocallyCompactSpace H := e.toHomeomorph.locallyCompactSpace_iff.1 inferInstance
+  letI := trivialZModAction p G
+  letI := trivialZModAction p H
+  haveI : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
+  haveI : ContinuousSMul H (ZMod p) := ⟨continuous_snd⟩
   let f : H2 G (ZMod p) ≃+ H2 H (ZMod p) :=
     explicitMap2Equiv G (ZMod p) H (ZMod p) e.symm (AddEquiv.refl (ZMod p)) continuous_id
-      continuous_id fun h m ↦ (htG (e.symm h) m).trans (htH h m).symm
-  (cohomFpLinearEquivH2 p G htG).trans
+      continuous_id fun _ _ ↦ rfl
+  (cohomFpLinearEquivH2 p G fun _ _ ↦ rfl).trans
     ((LinearEquiv.ofBijective (f.toAddMonoidHom.toZModLinearMap p) f.bijective).trans
-      (cohomFpLinearEquivH2 p H htH).symm)
+      (cohomFpLinearEquivH2 p H fun _ _ ↦ rfl).symm)
 
-/-- On the explicit models, the transport of `H²(-, 𝔽_p)` along `e : G ≃ₜ* H` is the pullback
-along `e.symm`. -/
+/-- On the explicit models, for any trivial actions of `G` and `H` on `ZMod p`, the transport of
+`H²(-, 𝔽_p)` along `e : G ≃ₜ* H` is the pullback along `e.symm`. -/
 @[simp]
 theorem cohomFpTwoLinearEquivOfContinuousMulEquiv_apply [LocallyCompactSpace H]
-    (x : cohomFp p G 2) :
-    cohomFpTwoLinearEquivOfContinuousMulEquiv p e htG htH x =
+    [DistribMulAction G (ZMod p)] [ContinuousSMul G (ZMod p)] [DistribMulAction H (ZMod p)]
+    [ContinuousSMul H (ZMod p)] (e : G ≃ₜ* H) (htG : ∀ (g : G) (m : ZMod p), g • m = m)
+    (htH : ∀ (h : H) (m : ZMod p), h • m = m) (x : cohomFp p G 2) :
+    cohomFpTwoLinearEquivOfContinuousMulEquiv p e x =
       (cohomFpLinearEquivH2 p H htH).symm (explicitMap2 G (ZMod p) H (ZMod p) e.symm
         (AddMonoidHom.id (ZMod p)) continuous_id (fun h m ↦ (htG (e.symm h) m).trans (htH h m).symm)
-        (cohomFpLinearEquivH2 p G htG x)) :=
-  congrArg (cohomFpLinearEquivH2 p H htH).symm
+        (cohomFpLinearEquivH2 p G htG x)) := by
+  -- Both actions are the trivial one, so the explicit models are those of the construction.
+  obtain rfl : ‹DistribMulAction G (ZMod p)› = trivialZModAction p G :=
+    DistribMulAction.ext (funext fun g ↦ funext fun m ↦ htG g m)
+  obtain rfl : ‹DistribMulAction H (ZMod p)› = trivialZModAction p H :=
+    DistribMulAction.ext (funext fun h ↦ funext fun m ↦ htH h m)
+  let := trivialZModAction p G
+  let := trivialZModAction p H
+  exact congrArg (cohomFpLinearEquivH2 p H htH).symm
     (explicitMap2Equiv_apply G (ZMod p) H (ZMod p) e.symm (AddEquiv.refl (ZMod p)) continuous_id
       continuous_id _ (cohomFpLinearEquivH2 p G htG x))
 
-end Explicit
-
 /-- **The dimension of `H²(-, 𝔽_p)` is invariant under topological isomorphism.** -/
 theorem finrank_cohomFp_two_congr (e : G ≃ₜ* H) :
-    Module.finrank (ZMod p) (cohomFp p G 2) = Module.finrank (ZMod p) (cohomFp p H 2) := by
-  -- The explicit models need actions of `G` and `H` on `ZMod p`; the trivial ones are installed.
-  let := trivialZModAction p G
-  let := trivialZModAction p H
-  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
-  have : ContinuousSMul H (ZMod p) := ⟨continuous_snd⟩
-  exact (cohomFpTwoLinearEquivOfContinuousMulEquiv p e (fun _ _ ↦ rfl) fun _ _ ↦ rfl).finrank_eq
+    Module.finrank (ZMod p) (cohomFp p G 2) = Module.finrank (ZMod p) (cohomFp p H 2) :=
+  (cohomFpTwoLinearEquivOfContinuousMulEquiv p e).finrank_eq
 
 end Transport
 

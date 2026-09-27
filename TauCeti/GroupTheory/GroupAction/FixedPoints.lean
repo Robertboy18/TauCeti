@@ -167,6 +167,7 @@ theorem coe_quotient_smul_fixedPoints_addSubgroup (g : G)
   rfl
 
 /-- If `G` acts trivially on `M`, then `G ⧸ H` acts trivially on `M ^ H`. -/
+@[simp]
 theorem quotient_smul_fixedPoints_addSubgroup_eq_of_smul_eq (h : ∀ (g : G) (m : M), g • m = m)
     (q : G ⧸ H) (m : FixedPoints.addSubgroup H M) : q • m = m := by
   obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective q
