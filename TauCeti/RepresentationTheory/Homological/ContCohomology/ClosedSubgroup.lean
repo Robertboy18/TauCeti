@@ -88,6 +88,7 @@ exactly when the cochain does (`ResolutionVanishesOn`). -/
 
 /-- The restriction of an element of the coinduced resolution to a subgroup `S` is zero exactly
 when the element vanishes on `S`. -/
+@[simp]
 theorem resolutionMap_subgroupSubtype_eq_zero_iff (S : Subgroup G) :
     ∀ (n : ℕ) (F : (TopRep.resolutionX X n).V),
       (resolutionMap (ContinuousMonoidHom.subgroupSubtype S)
