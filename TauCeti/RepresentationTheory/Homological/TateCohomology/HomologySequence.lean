@@ -13,7 +13,8 @@ public import TauCeti.RepresentationTheory.Homological.TateCohomology.Linear
 Let `G` be a finite group and `0 ⟶ X₁ ⟶ X₂ ⟶ X₃ ⟶ 0` a short exact sequence of representations
 of `G`. Mathlib provides the connecting homomorphism `TateCohomology.δ` and the exactness of the
 long exact sequence at the terms `Ĥⁿ(G, X₁)` (`TateCohomology.exact₁`) and `Ĥⁿ(G, X₃)`
-(`TateCohomology.exact₃`). This file adds the exactness at `Ĥⁿ(G, X₂)` and records how the
+(`TateCohomology.exact₃`). This file adds the exactness at `Ĥⁿ(G, X₂)`
+(`TateCohomology.exact₂`, in the same namespace as its two Mathlib siblings) and records how the
 vanishing of the Tate cohomology of `X₃` controls the map induced by `X₁ ⟶ X₂`: if `Ĥⁿ(G, X₃)`
 vanishes the induced map is surjective in degree `n` and injective in degree `n + 1`, and
 conversely surjectivity in degree `n` together with injectivity in degree `n + 1` forces
@@ -23,7 +24,7 @@ isomorphisms in every degree.
 
 ## Main statements
 
-* `TauCeti.TateCohomology.exact₂`: exactness of `Ĥⁿ(G, X₁) ⟶ Ĥⁿ(G, X₂) ⟶ Ĥⁿ(G, X₃)`.
+* `TateCohomology.exact₂`: exactness of `Ĥⁿ(G, X₁) ⟶ Ĥⁿ(G, X₂) ⟶ Ĥⁿ(G, X₃)`.
 * `TauCeti.TateCohomology.map_f_surjective_of_isZero_X₃`,
   `TauCeti.TateCohomology.map_f_injective_of_isZero_X₃`: vanishing of the Tate cohomology of `X₃`
   makes the map induced by `X₁ ⟶ X₂` surjective in that degree and injective in the next.
@@ -45,7 +46,7 @@ include hS
 
 /-- Exactness of `Ĥⁿ(G, X₁) ⟶ Ĥⁿ(G, X₂) ⟶ Ĥⁿ(G, X₃)`, the middle term of the long exact
 sequence in Tate cohomology of a short exact sequence of representations. -/
-theorem exact₂ (n : ℤ) :
+theorem _root_.TateCohomology.exact₂ (n : ℤ) :
     (ShortComplex.mk ((tateCohomologyFunctor n).map S.f) ((tateCohomologyFunctor n).map S.g)
       (by rw [← Functor.map_comp, S.zero, Functor.map_zero])).Exact :=
   (_root_.TateCohomology.map_tateComplexFunctor_shortExact hS).homology_exact₂ n
@@ -54,7 +55,7 @@ theorem exact₂ (n : ℤ) :
 theorem map_f_surjective_of_isZero_X₃ (n : ℤ) (h : IsZero (tateCohomology S.X₃ n)) :
     Function.Surjective ((tateCohomologyFunctor n).map S.f) := by
   rw [← ModuleCat.epi_iff_surjective]
-  exact (exact₂ hS n).epi_f (h.eq_zero_of_tgt _)
+  exact (_root_.TateCohomology.exact₂ hS n).epi_f (h.eq_zero_of_tgt _)
 
 /-- If `Ĥᵐ(G, X₃) = 0`, the map `Ĥⁿ(G, X₁) ⟶ Ĥⁿ(G, X₂)` induced by `X₁ ⟶ X₂` is injective in
 the next degree `n = m + 1`. -/

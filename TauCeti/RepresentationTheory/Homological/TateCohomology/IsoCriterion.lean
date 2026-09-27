@@ -65,7 +65,8 @@ namespace TauCeti.TateCohomology
 variable {k G : Type u} [CommRing k] [Group G] {A B : Rep k G} (f : A ⟶ B)
 
 /-- The morphism `A ⟶ B ⊞ Coind_⊥^G A` with components `f` and the coinduction unit is a
-monomorphism, because its second component is one. -/
+monomorphism, because its second component `coindBotUnit A` is a monomorphism
+(`coindBotUnit_mono`). -/
 private theorem mono_lift_coindBotUnit : Mono (biprod.lift f (coindBotUnit A)) :=
   mono_of_mono_fac (biprod.lift_snd f (coindBotUnit A))
 
