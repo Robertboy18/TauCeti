@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Cohomology
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Functoriality
 
 /-!
 # The cup product with trivial `ZMod p` coefficients
@@ -22,6 +22,10 @@ prime, `ZMod p` is the field `𝔽_p`.
 * `TauCeti.fpPairing`: multiplication on the trivial coefficient representation.
 * `TauCeti.cupFp`: the resulting cup product `H¹(G, ZMod p) × H¹(G, ZMod p) → H²(G, ZMod p)`.
 
+## Main results
+
+* `TauCeti.cupFp_res`: restriction to a subgroup preserves `cupFp`.
+
 ## References
 
 * J. Neukirch, A. Schmidt, K. Wingberg, *Cohomology of Number Fields*, I §1.4.
@@ -31,7 +35,7 @@ public section
 
 namespace TauCeti
 
-open _root_.ContinuousCohomology
+open CategoryTheory _root_.ContinuousCohomology
 
 universe u
 
@@ -68,6 +72,17 @@ section Group
 
 variable (p : ℕ) (G : Type u) [Group G]
 
+/-- Transport along `res_trivialFp` intertwines the restricted multiplication pairing of `G` with
+the multiplication pairing of `S`. -/
+theorem eqToHom_res_fpPairing_bil (S : Subgroup G)
+    (x y : (TopRep.res (S.subtype : S →* G) (trivialFp p G)).V) :
+    eqToHom (res_trivialFp p G S) (((fpPairing p G).res S.subtype).bil x y) =
+      (fpPairing p S).bil (eqToHom (res_trivialFp p G S) x) (eqToHom (res_trivialFp p G S) y) :=
+  (trivialFpEquiv p S).injective (by
+    rw [trivialFpEquiv_eqToHom_res_trivialFp, TopPairing.res_bil, fpPairing_bil_apply,
+      LinearEquiv.apply_symm_apply, fpPairing_bil_apply, LinearEquiv.apply_symm_apply,
+      trivialFpEquiv_eqToHom_res_trivialFp, trivialFpEquiv_eqToHom_res_trivialFp])
+
 variable [TopologicalSpace G] [IsTopologicalGroup G]
 
 /-- The degree-`(1,1)` cup product on continuous cohomology with trivial `ZMod p` coefficients. -/
@@ -87,6 +102,26 @@ theorem cupFp_π (a b : cocycles (trivialFp p G) 1) :
       (π (trivialFp p G) 1 b) =
         π (trivialFp p G) 2 ((fpPairing p G).cupCocycles 1 1 a b) := by
   simpa [cupFp_def] using (fpPairing p G).cup_π 1 1 a b
+
+/-- **Restriction preserves the cup product with trivial `ZMod p` coefficients**:
+`res (a ⌣ b) = res a ⌣ res b` for the named restriction `trivialFpResMap`. -/
+theorem cupFp_res (S : Subgroup G) (a b : cohomFp p G 1) :
+    trivialFpResMap p G S 2 (cupFp p G a b) =
+      cupFp p S (trivialFpResMap p G S 1 a) (trivialFpResMap p G S 1 b) := by
+  -- restriction preserves the cup square, as a cup for the restricted pairing
+  have h₁ := (fpPairing p G).cup_res S ((fpPairing p G).res S.subtype)
+    (TopPairing.res_bil _ _) 1 1 a b
+  -- the transport along `res_trivialFp` carries that cup to the cup square of `S`
+  have h₂ := ((fpPairing p G).res S.subtype).cup_coeffMap (fpPairing p S)
+    (eqToHom (res_trivialFp p G S)) (eqToHom (res_trivialFp p G S))
+    (eqToHom (res_trivialFp p G S)) (eqToHom_res_fpPairing_bil p G S) 1 1
+    (ContinuousCohomology.res S (trivialFp p G) 1 a)
+    (ContinuousCohomology.res S (trivialFp p G) 1 b)
+  rw [ContinuousCohomology.coeffMap_eqToHom, ContinuousCohomology.coeffMap_eqToHom] at h₂
+  simp only [trivialFpResMap_def, cupFp_def, ConcreteCategory.comp_apply]
+  -- the degree of the cup square is `1 + 1`, that of the restriction `2`
+  exact (congrArg (fun z ↦ eqToHom (congrArg (continuousCohomology 2) (res_trivialFp p G S)) z)
+    h₁).trans h₂
 
 end Group
 
