@@ -28,9 +28,12 @@ while `Φ(G)` has index `p ^ d(G)`, so `d(H) = d(G)` holds exactly when `ker f �
 * `TauCeti.IsProP.topologicalGeneratorRankNat_eq_finrank_quotient_proPFrattini`: the generator
   rank is the dimension of the Frattini quotient.
 * `TauCeti.IsProP.natCard_quotient_proPFrattini`: the Frattini quotient has order `p ^ d(G)`.
-* `TauCeti.isProP_of_proPFrattini_eq_bot`, `TauCeti.natCard_of_proPFrattini_eq_bot`: a profinite
-  group with trivial pro-`p` Frattini subgroup is pro-`p`, and has order `p ^ d(G)` when
-  topologically finitely generated.
+* `TauCeti.isProP_of_proPFrattini_eq_bot`: a topological group with trivial pro-`p` Frattini
+  subgroup is pro-`p`.
+* `TauCeti.natCard_of_proPFrattini_eq_bot`,
+  `TauCeti.topologicalGeneratorRankNat_eq_of_natCard_eq_pow`: a topologically finitely generated
+  profinite group with trivial pro-`p` Frattini subgroup has order `p ^ d(G)`, so its order
+  determines `d(G)`.
 * `TauCeti.IsProP.topologicalGeneratorRank_quotient_proPFrattini`: a pro-`p` group and its
   Frattini quotient have the same cardinal topological generator rank.
 * `TauCeti.IsProP.index_proPFrattini_sup_ker`: along a continuous surjection `f : G ↠ H` onto a
@@ -56,11 +59,12 @@ variable {p : ℕ} [hp : Fact p.Prime]
 variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [CompactSpace G] [TotallyDisconnectedSpace G]
 
-/-- A profinite group with trivial pro-`p` Frattini subgroup is commutative of exponent dividing
-`p`, in particular a `p`-group, hence pro-`p`. -/
+omit hp [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] in
+/-- A topological group with trivial pro-`p` Frattini subgroup is a `p`-group, since the `p`-th
+power of every element lies in the pro-`p` Frattini subgroup, hence it is pro-`p`. -/
 theorem isProP_of_proPFrattini_eq_bot (hΦ : proPFrattini p G = ⊥) : IsProP p G :=
-  (IsPGroup.of_exponent_dvd_pow (n := 1)
-    (by rw [pow_one]; exact ((proPFrattini_eq_bot_iff hp.out).mp hΦ).2)).isProP
+  IsPGroup.isProP fun g ↦
+    ⟨1, by rw [pow_one, ← Subgroup.mem_bot, ← hΦ]; exact pow_mem_proPFrattini g⟩
 
 namespace IsProP
 
@@ -197,5 +201,12 @@ theorem natCard_of_proPFrattini_eq_bot (hfg : IsTopologicallyFinitelyGenerated G
     (hΦ : proPFrattini p G = ⊥) : Nat.card G = p ^ topologicalGeneratorRankNat G hfg := by
   rw [← (isProP_of_proPFrattini_eq_bot hΦ).natCard_quotient_proPFrattini hfg,
     ← Subgroup.index_eq_card, hΦ, Subgroup.index_bot]
+
+/-- A topologically finitely generated profinite group with trivial pro-`p` Frattini subgroup and
+`p ^ n` elements has natural-number topological generator rank `n`. -/
+theorem topologicalGeneratorRankNat_eq_of_natCard_eq_pow (hfg : IsTopologicallyFinitelyGenerated G)
+    (hΦ : proPFrattini p G = ⊥) {n : ℕ} (h : Nat.card G = p ^ n) :
+    topologicalGeneratorRankNat G hfg = n :=
+  Nat.pow_right_injective hp.out.two_le ((natCard_of_proPFrattini_eq_bot hfg hΦ).symm.trans h)
 
 end TauCeti

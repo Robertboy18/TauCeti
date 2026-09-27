@@ -46,6 +46,9 @@ finite; this is proved in `TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCe
 
 ## Main results
 
+* `TauCeti.quotientPLowerCentralSeriesSuccMulEquiv`: `λ_k ⧸ λ_{k+1}` is the quotient
+  `λ_k ⧸ λ_kᵖ[λ_k, G]` of `λ_k` by one step of the lower `p`-series, through which `gr_k(G)`
+  inherits its commutativity and its exponent.
 * `TauCeti.natCard_quotient_pLowerCentralStep_eq_natCard_gradedPiece`: for a normal subgroup
   `R = λ_k`, the quotient `R ⧸ Rᵖ[R, G]` has as many elements as `gr_k(G)`.
 * `TauCeti.gradedBracket_self`, `TauCeti.gradedBracket_jacobi`: the bracket is alternating and
@@ -236,25 +239,43 @@ theorem gradedMk_pow {k : ℕ} (x : pLowerCentralSeries p G k) (n : ℕ) :
     gradedMk p G k (x ^ n) = n • gradedMk p G k x := by
   rw [gradedMk, gradedMk, QuotientGroup.mk_pow, ofMul_pow]
 
-/-- The quotient `λ_k ⧸ λ_{k+1}` is an abelian group, with its existing quotient operations:
-`⁅λ_k, λ_k⁆ ≤ λ_{2k+1} ≤ λ_{k+1}`. -/
+variable (p G) in
+/-- The quotient `λ_k ⧸ λ_{k+1}` is the quotient `λ_k ⧸ λ_kᵖ[λ_k, G]` of `λ_k` by one step of
+the lower `p`-series, since `λ_{k+1} = λ_kᵖ[λ_k, G]`: the identity of `λ_k` descends to a group
+isomorphism. Through it `gr_k(G)` inherits the commutativity and the exponent of `N ⧸ Nᵖ[N, G]`
+(`TauCeti.instIsMulCommutativeQuotientPLowerCentralStep`,
+`TauCeti.exponent_quotient_pLowerCentralStep_subgroupOf_dvd`). -/
+def quotientPLowerCentralSeriesSuccMulEquiv (k : ℕ) :
+    (pLowerCentralSeries p G k ⧸
+        (pLowerCentralSeries p G (k + 1)).subgroupOf (pLowerCentralSeries p G k)) ≃*
+      (pLowerCentralSeries p G k ⧸
+        (pLowerCentralStep p (pLowerCentralSeries p G k)).subgroupOf (pLowerCentralSeries p G k)) :=
+  QuotientGroup.quotientMulEquivOfEq
+    (congrArg (Subgroup.subgroupOf · _) (pLowerCentralSeries_succ p G k))
+
+@[simp]
+theorem quotientPLowerCentralSeriesSuccMulEquiv_mk (k : ℕ) (x : pLowerCentralSeries p G k) :
+    quotientPLowerCentralSeriesSuccMulEquiv p G k (QuotientGroup.mk x) = QuotientGroup.mk x :=
+  (rfl)
+
+open scoped IsMulCommutative in
+/-- The quotient `λ_k ⧸ λ_{k+1}` is an abelian group, with its existing quotient operations: it is
+the commutative quotient `λ_k ⧸ λ_kᵖ[λ_k, G]`. -/
 instance instCommGroupQuotientPLowerCentralSeries (k : ℕ) :
     CommGroup (pLowerCentralSeries p G k ⧸
       (pLowerCentralSeries p G (k + 1)).subgroupOf (pLowerCentralSeries p G k)) where
-  mul_comm a b := by
-    obtain ⟨x, rfl⟩ := QuotientGroup.mk_surjective a
-    obtain ⟨y, rfl⟩ := QuotientGroup.mk_surjective b
-    rw [← QuotientGroup.mk_mul, ← QuotientGroup.mk_mul, QuotientGroup.eq_subgroupOf, coe_mul,
-      coe_mul, QuotientGroup.mk_mul, QuotientGroup.mk_mul]
-    exact (QuotientGroup.commute_mk_iff.mpr
-      (pLowerCentralSeries_antitone (by omega) (commutator_mem_pLowerCentralSeries x.2 y.2))).eq
+  mul_comm a b :=
+    (quotientPLowerCentralSeriesSuccMulEquiv p G k).injective <| by
+      rw [map_mul, map_mul]
+      exact mul_comm _ _
 
-/-- **The graded pieces are killed by `p`.** -/
+/-- **The graded pieces are killed by `p`**: the exponent of `λ_k ⧸ λ_kᵖ[λ_k, G]` divides `p`. -/
 @[simp]
 theorem nsmul_gradedPiece_eq_zero {k : ℕ} (x : gradedPiece p G k) : p • x = 0 := by
-  obtain ⟨y, rfl⟩ := gradedMk_surjective k x
-  rw [← gradedMk_pow, gradedMk_eq_zero_iff, coe_pow]
-  exact pow_mem_pLowerCentralSeries y.2
+  rw [← ofMul_toMul x, ← ofMul_pow, ofMul_eq_zero]
+  exact Monoid.exponent_dvd_iff_forall_pow_eq_one.mp
+    ((Monoid.exponent_eq_of_mulEquiv (quotientPLowerCentralSeriesSuccMulEquiv p G k)).dvd.trans
+      (exponent_quotient_pLowerCentralStep_subgroupOf_dvd _)) _
 
 /-- For odd `p`, the graded pieces are killed by `p choose 2 = p * ((p - 1) / 2)`. -/
 theorem choose_two_nsmul_gradedPiece_eq_zero_of_odd (hp : Odd p) {k : ℕ}
@@ -324,9 +345,8 @@ theorem natCard_quotient_pLowerCentralStep_eq_natCard_gradedPiece {R : Subgroup 
     {k : ℕ} (hR : R = pLowerCentralSeries p G k) :
     Nat.card (R ⧸ (pLowerCentralStep p R).subgroupOf R) = Nat.card (gradedPiece p G k) := by
   subst hR
-  exact Nat.card_congr ((QuotientGroup.quotientMulEquivOfEq
-    (congrArg (Subgroup.subgroupOf · _) (pLowerCentralSeries_succ p G k).symm)).toEquiv.trans
-      Additive.ofMul)
+  exact Nat.card_congr
+    ((quotientPLowerCentralSeriesSuccMulEquiv p G k).symm.toEquiv.trans Additive.ofMul)
 
 /-! ### The class of an element of `G` in degree zero -/
 

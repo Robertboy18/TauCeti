@@ -56,6 +56,13 @@ open ContCohomology Subgroup
 
 universe u
 
+-- For prime `p`, `AddCommGroup (ZMod p)` is also derivable from `[IsSimpleAddGroup (ZMod p)]
+-- [AddGroup.IsNilpotent (ZMod p)]`; that structure is not reducibly the ring one, so the
+-- `DistribMulAction` hypotheses below would not match what the cohomology API expects.
+-- Preferring the ring path locally keeps a single additive structure on `ZMod p`, as in
+-- `TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationRank`.
+attribute [local instance 2000] Ring.toAddCommGroup
+
 variable {p : ℕ}
 
 section ElementaryAbelian
@@ -98,8 +105,8 @@ theorem natCard_H2_of_proPFrattini_eq_bot (hfg : IsTopologicallyFinitelyGenerate
   have hK := isClosed_pLowerCentralStep_subgroupOf (p := p) R
   have hrank : topologicalGeneratorRankNat (R ⧸ (pLowerCentralStep p R).subgroupOf R) hQfg =
       d + d.choose 2 :=
-    Nat.pow_right_injective hp.two_le ((natCard_of_proPFrattini_eq_bot hQfg
-      (proPFrattini_quotient_pLowerCentralStep_eq_bot hp R hRc)).symm.trans hcard)
+    topologicalGeneratorRankNat_eq_of_natCard_eq_pow hQfg
+      (proPFrattini_quotient_pLowerCentralStep_eq_bot hp R hRc) hcard
   have harith : d + d.choose 2 = d * (d + 1) / 2 := by
     rw [Nat.choose_two_right, add_comm, ← Nat.triangle_succ, Nat.add_sub_cancel, mul_comm]
   rw [presentedProP.natCard_H2 rels hrels e htriv hQfg, hrank, harith]
@@ -135,8 +142,9 @@ theorem proPFrattini_pi_multiplicative_zmod_eq_bot :
     proPFrattini p (X → Multiplicative (ZMod p)) = ⊥ := by
   refine (proPFrattini_eq_bot_iff Fact.out).mpr ⟨⟨⟨mul_comm⟩⟩,
     Monoid.exponent_dvd_iff_forall_pow_eq_one.mpr fun f ↦ funext fun x ↦ ?_⟩
-  rw [Pi.pow_apply, Pi.one_apply, ← ofAdd_toAdd (f x), ← ofAdd_nsmul, nsmul_eq_mul,
-    ZMod.natCast_self, zero_mul, ofAdd_zero]
+  have h := Monoid.pow_exponent_eq_one (f x)
+  rw [Monoid.exponent_multiplicative, ZMod.exponent] at h
+  rwa [Pi.pow_apply, Pi.one_apply]
 
 /-- **`d((ℤ/p)^X) = #X`.** The topological generator rank of the finite elementary abelian group
 `(ℤ/p)^X` is `#X`. -/
@@ -144,9 +152,8 @@ theorem proPFrattini_pi_multiplicative_zmod_eq_bot :
 theorem topologicalGeneratorRankNat_pi_multiplicative_zmod
     (h : IsTopologicallyFinitelyGenerated (X → Multiplicative (ZMod p))) :
     topologicalGeneratorRankNat (X → Multiplicative (ZMod p)) h = Nat.card X :=
-  Nat.pow_right_injective (Fact.out : p.Prime).two_le
-    ((natCard_of_proPFrattini_eq_bot h (proPFrattini_pi_multiplicative_zmod_eq_bot p X)).symm.trans
-      (natCard_pi_multiplicative_zmod p X))
+  topologicalGeneratorRankNat_eq_of_natCard_eq_pow h
+    (proPFrattini_pi_multiplicative_zmod_eq_bot p X) (natCard_pi_multiplicative_zmod p X)
 
 variable [DistribMulAction (X → Multiplicative (ZMod p)) (ZMod p)]
   [ContinuousSMul (X → Multiplicative (ZMod p)) (ZMod p)]
