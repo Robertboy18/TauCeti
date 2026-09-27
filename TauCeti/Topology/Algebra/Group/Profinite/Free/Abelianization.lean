@@ -86,20 +86,21 @@ as a continuous homomorphism `ℤ_p^X → F^{ab}`; it is the inverse of the abel
 isomorphism. -/
 private noncomputable def abelianizationInv :
     Multiplicative (X → ℤ_[p]) →ₜ* TopologicalAbelianization (freeProP p X) where
-  toFun u := ∏ x, (isProP_freeProP p X).topologicalAbelianization.padicPow
+  toFun u := ∏ x, (isProP_freeProP p X).topologicalAbelianization_self.padicPow
     ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u.toAdd x)
   map_one' := by simp
   map_mul' u v := by
     simp only [toAdd_mul, Pi.add_apply, IsProP.padicPow_add, Finset.prod_mul_distrib]
   continuous_toFun := continuous_finsetProd _ fun x _ ↦
-    (isProP_freeProP p X).topologicalAbelianization.continuous_padicPow.comp
+    (isProP_freeProP p X).topologicalAbelianization_self.continuous_padicPow.comp
       (f := fun u : Multiplicative (X → ℤ_[p]) ↦
         (u.toAdd x, ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X))))
       (((continuous_apply x).comp continuous_toAdd).prodMk continuous_const)
 
 private theorem abelianizationInv_ofAdd (u : X → ℤ_[p]) :
-    abelianizationInv p X (ofAdd u) = ∏ x, (isProP_freeProP p X).topologicalAbelianization.padicPow
-      ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u x) :=
+    abelianizationInv p X (ofAdd u) =
+      ∏ x, (isProP_freeProP p X).topologicalAbelianization_self.padicPow
+        ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u x) :=
   (rfl)
 
 private theorem abelianizationInv_ofAdd_single [DecidableEq X] (x : X) :
@@ -161,7 +162,7 @@ theorem abelianizationEquiv_mk_of [DecidableEq X] (x : X) :
 product of the `p`-adic powers of the classes of the generators. -/
 theorem abelianizationEquiv_symm_ofAdd (u : X → ℤ_[p]) :
     (abelianizationEquiv p X).symm (ofAdd u) =
-      ∏ x, (isProP_freeProP p X).topologicalAbelianization.padicPow
+      ∏ x, (isProP_freeProP p X).topologicalAbelianization_self.padicPow
         ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u x) :=
   (rfl)
 

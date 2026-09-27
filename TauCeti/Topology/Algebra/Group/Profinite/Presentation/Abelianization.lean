@@ -165,13 +165,13 @@ theorem abelianizationHom_surjective : Function.Surjective (abelianizationHom re
 `p`-adic powers of the classes of the generators in the abelian pro-`p` group `G^{ab}`. -/
 theorem abelianizationHom_ofAdd (u : X → ℤ_[p]) :
     abelianizationHom rels (ofAdd u) =
-      ∏ x, (isProP p X rels).topologicalAbelianization.padicPow
+      ∏ x, (isProP p X rels).topologicalAbelianization_self.padicPow
         ((of p rels x : presentedProP p X rels) :
           TopologicalAbelianization (presentedProP p X rels)) (u x) := by
   rw [abelianizationHom_apply, freeProP.abelianizationEquiv_symm_ofAdd, map_prod]
   refine Finset.prod_congr rfl fun x _ ↦ ?_
-  rw [(isProP_freeProP p X).topologicalAbelianization.map_padicPow
-    (isProP p X rels).topologicalAbelianization
+  rw [(isProP_freeProP p X).topologicalAbelianization_self.map_padicPow
+    (isProP p X rels).topologicalAbelianization_self
     (TopologicalAbelianization.map (mk p rels : freeProP p X →* presentedProP p X rels)
       (show Continuous ⇑(mk p rels : freeProP p X →* presentedProP p X rels) from
         (mk p rels).continuous))
@@ -187,8 +187,8 @@ theorem abelianizationHom_ofAdd_eq_one_iff (u : X → ℤ_[p]) :
     abelianizationHom {r} (ofAdd u) = 1 ↔
       u ∈ Submodule.span ℤ_[p] {(freeProP.exponentSum p X r).toAdd} := by
   set v := (freeProP.exponentSum p X r).toAdd with hv
-  have hF := (isProP_freeProP p X).topologicalAbelianization
-  have hG := (isProP p X {r}).topologicalAbelianization
+  have hF := (isProP_freeProP p X).topologicalAbelianization_self
+  have hG := (isProP p X {r}).topologicalAbelianization_self
   set ρ : TopologicalAbelianization (freeProP p X) := (r : TopologicalAbelianization (freeProP p X))
     with hρ
   have hερ : freeProP.abelianizationEquiv p X ρ = ofAdd v := by
@@ -200,7 +200,7 @@ theorem abelianizationHom_ofAdd_eq_one_iff (u : X → ℤ_[p]) :
       (freeProP.abelianizationEquiv p X : TopologicalAbelianization (freeProP p X) →*
         Multiplicative (X → ℤ_[p]))
       (freeProP.abelianizationEquiv p X).continuous ρ l
-    rw [MonoidHom.coe_coe] at h
+    rw [MonoidHom.coe_ofClass] at h
     rw [h, hερ, IsProP.padicPow_ofAdd_pi]
   constructor
   · intro h
@@ -226,14 +226,14 @@ theorem abelianizationHom_ofAdd_eq_one_iff (u : X → ℤ_[p]) :
       refine Subgroup.topologicalClosure_minimal _ (Subgroup.normalClosure_le_normal ?_) ?_
       · rw [Set.singleton_subset_iff, SetLike.mem_coe, Subgroup.mem_comap, MonoidHom.mem_range]
         exact ⟨ofAdd 1, by
-          rw [MonoidHom.coe_coe, hF.padicPowHom_ofAdd_one, QuotientGroup.mk'_apply, hρ]⟩
-      · rw [Subgroup.coe_comap, MonoidHom.coe_range, MonoidHom.coe_coe]
+          rw [MonoidHom.coe_ofClass, hF.padicPowHom_ofAdd_one, QuotientGroup.mk'_apply, hρ]⟩
+      · rw [Subgroup.coe_comap, MonoidHom.coe_range, MonoidHom.coe_ofClass]
         exact ((isCompact_range (hF.padicPowHom ρ).continuous).isClosed).preimage
           continuous_quot_mk
     obtain ⟨l, hl⟩ := MonoidHom.mem_range.mp (Subgroup.mem_comap.mp (hK hy))
     refine Submodule.mem_span_singleton.mpr ⟨l.toAdd, ?_⟩
     have h' := congrArg (freeProP.abelianizationEquiv p X) hyu
-    rw [ContinuousMulEquiv.apply_symm_apply, ← hl, MonoidHom.coe_coe, hF.padicPowHom_apply,
+    rw [ContinuousMulEquiv.apply_symm_apply, ← hl, MonoidHom.coe_ofClass, hF.padicPowHom_apply,
       hpow] at h'
     exact ofAdd.injective h'
   · intro hu

@@ -140,7 +140,7 @@ theorem quotient (hG : IsProP p G) (N : Subgroup G) [N.Normal] : IsProP p (G ⧸
     (QuotientGroup.mk'_surjective N)
 
 /-- The topological abelianization of a pro-`p` group is pro-`p`. -/
-theorem topologicalAbelianization [IsTopologicalGroup G] (hG : IsProP p G) :
+theorem topologicalAbelianization_self [IsTopologicalGroup G] (hG : IsProP p G) :
     IsProP p (TopologicalAbelianization G) :=
   hG.quotient _
 
