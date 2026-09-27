@@ -34,12 +34,14 @@ cochains is `μ (A (g₀, …, g_m)) (B (g_m, …, g_{m+n}))`, and equivariance 
 homogeneous form of the explicit cochain formula. Passing to classes is then the compatibility of
 the comparisons with the class maps on both sides.
 
-The class-level agreement is stated twice. The additive comparisons
+In bidegree `(0, 0)` the class-level agreement is stated once, under the degree-zero comparison
+isomorphism `explicitH0IsoContinuousCohomology`, which exists for every topological group. In the
+other five bidegrees it is stated twice. The additive comparisons
 `TauCeti.ContCohomology.explicitH1AddEquivContinuousCohomology` and
 `TauCeti.ContCohomology.explicitH2AddEquivContinuousCohomology` exist for every topological group,
 resp. every locally compact one, and the agreement under them carries exactly these hypotheses.
-The comparison isomorphisms in `TopModuleCat ℤ` assume `G` compact, which makes the canonical
-cohomology discrete; the agreement under them is a corollary.
+The degree-one and degree-two comparison isomorphisms in `TopModuleCat ℤ` assume `G` compact,
+which makes the canonical cohomology discrete; the agreement under them is a corollary.
 
 This is what lets a consumer compute the canonical cup product of low-degree classes on explicit
 cocycles, for instance the cup square `H¹(G, 𝔽_p) × H¹(G, 𝔽_p) → H²(G, 𝔽_p)` against which the
@@ -61,7 +63,8 @@ Demushkin condition on a pro-`p` group is stated.
   `TauCeti.ContCohomology.explicitIso_cup10`, `TauCeti.ContCohomology.explicitIso_cup02`,
   `TauCeti.ContCohomology.explicitIso_cup`, `TauCeti.ContCohomology.explicitIso_cup20`: **the
   canonical and the explicit cup products agree** under the comparison isomorphisms, in each
-  bidegree `(m, n)` with `m + n ≤ 2`; `explicitIso_cup` is the bidegree `(1, 1)`.
+  bidegree `(m, n)` with `m + n ≤ 2`; `explicitIso_cup` is the bidegree `(1, 1)`. Only the
+  bidegree `(0, 0)` holds for every topological group; the other five assume `G` compact.
 
 ## References
 
