@@ -52,7 +52,7 @@ value at `1` needs in order to exist.
   coinduced resolution, restriction to a closed subgroup is surjective, also on invariant elements.
 * `TauCeti.ContinuousCohomology.exists_openSubgroup_le_res_eq_zero`: a class restricting to zero
   on a closed subgroup restricts to zero on an open subgroup containing it.
-* `TauCeti.ContinuousCohomology.exists_openSubgroup_le_resLe_eq`: every class of a closed subgroup
+* `TauCeti.ContinuousCohomology.exists_openSubgroup_le_resLE_eq`: every class of a closed subgroup
   is restricted from an open subgroup containing it.
 
 ## References
@@ -77,62 +77,14 @@ namespace ContinuousCohomology
 
 open _root_.ContinuousCohomology
 
-variable (X : TopRep k G)
+variable {X : TopRep k G}
 
 /-! ### Restriction on the coinduced resolution
 
 The restriction of a homogeneous cochain to a subgroup `S` is, on the coinduced resolution,
 `ContinuousCohomology.resolutionMap` along the inclusion of `S` with the identity of the
-coefficients: it reads the iterated map `C(G, C(G, …, X))` on tuples from `S`. -/
-
-/-- Restricting the coinduced resolution to a subgroup `S` and then to a subgroup `H ≤ S` is
-restricting it to `H`. -/
-private theorem resolutionMap_subgroupInclusion_resolutionMap_subgroupSubtype {H S : Subgroup G}
-    (h : H ≤ S) : ∀ (n : ℕ) (F : (TopRep.resolutionX X n).V),
-    (resolutionMap (ContinuousMonoidHom.subgroupInclusion h)
-        (𝟙 (TopRep.res (H.subtype : H →* G) X)) n).hom
-        ((resolutionMap (ContinuousMonoidHom.subgroupSubtype S)
-          (𝟙 (TopRep.res (S.subtype : S →* G) X)) n).hom F) =
-      (resolutionMap (ContinuousMonoidHom.subgroupSubtype H)
-        (𝟙 (TopRep.res (H.subtype : H →* G) X)) n).hom F
-  | 0, _ => rfl
-  | n + 1, F => ContinuousMap.ext fun x ↦
-    -- in degree `n + 1` the restrictions evaluate at `x` to the restrictions of `F x`, so both
-    -- sides are, by definition, the degree-`n` statement at `F x`
-    resolutionMap_subgroupInclusion_resolutionMap_subgroupSubtype h n
-      ((F : C(G, (TopRep.resolutionX X n).V)) x)
-
-/-! ### Vanishing on a subset
-
-`ResolutionVanishesOn X T n F` says that the iterated map `F : C(G, C(G, …, X))` of degree `n`
-vanishes on all `n`-tuples of points of `T`. For a subgroup `S` it is the vanishing of the
-restriction of `F` to `S`. -/
-
-/-- An element `F` of the `n`-th term `C(G, C(G, …, X))` of the coinduced resolution **vanishes on
-`T`** when it is zero on every `n`-tuple of points of `T`. -/
-def ResolutionVanishesOn (T : Set G) : (n : ℕ) → (TopRep.resolutionX X n).V → Prop
-  | 0, v => v = 0
-  | n + 1, F => ∀ g ∈ T, ResolutionVanishesOn T n ((F : C(G, (TopRep.resolutionX X n).V)) g)
-
-@[simp]
-theorem resolutionVanishesOn_zero (T : Set G) (v : (TopRep.resolutionX X 0).V) :
-    ResolutionVanishesOn X T 0 v ↔ v = 0 :=
-  Iff.rfl
-
-@[simp]
-theorem resolutionVanishesOn_succ (T : Set G) (n : ℕ) (F : (TopRep.resolutionX X (n + 1)).V) :
-    ResolutionVanishesOn X T (n + 1) F ↔
-      ∀ g ∈ T, ResolutionVanishesOn X T n ((F : C(G, (TopRep.resolutionX X n).V)) g) :=
-  Iff.rfl
-
-variable {X}
-
-/-- Vanishing on a set implies vanishing on every subset. -/
-theorem ResolutionVanishesOn.mono {T T' : Set G} (h : T' ⊆ T) :
-    ∀ (n : ℕ) {F : (TopRep.resolutionX X n).V},
-      ResolutionVanishesOn X T n F → ResolutionVanishesOn X T' n F
-  | 0, _, hF => hF
-  | n + 1, _, hF => fun g hg ↦ (hF g (h hg)).mono h n
+coefficients: it reads the iterated map `C(G, C(G, …, X))` on tuples from `S`, so it vanishes
+exactly when the cochain does (`ResolutionVanishesOn`). -/
 
 /-- The restriction of an element of the coinduced resolution to a subgroup `S` is zero exactly
 when the element vanishes on `S`. -/
@@ -141,7 +93,7 @@ theorem resolutionMap_subgroupSubtype_eq_zero_iff (S : Subgroup G) :
       (resolutionMap (ContinuousMonoidHom.subgroupSubtype S)
           (𝟙 (TopRep.res (S.subtype : S →* G) X)) n).hom F = 0 ↔
         ResolutionVanishesOn X S n F
-  | 0, F => Iff.rfl
+  | 0, F => (resolutionVanishesOn_zero X S F).symm
   | n + 1, F => by
     rw [resolutionVanishesOn_succ, ContinuousMap.ext_iff]
     -- at a point `s : S` the restriction is, by definition, the restriction of `F s`, so both
@@ -149,31 +101,7 @@ theorem resolutionMap_subgroupSubtype_eq_zero_iff (S : Subgroup G) :
     exact ⟨fun h g hg ↦ (resolutionMap_subgroupSubtype_eq_zero_iff S n _).1 (h ⟨g, hg⟩),
       fun h s ↦ (resolutionMap_subgroupSubtype_eq_zero_iff S n _).2 (h s s.2)⟩
 
-variable [CompactSpace G] [DiscreteTopology X.V]
-
-/-- **Vanishing on a compact set spreads to an open neighbourhood.** An element of the coinduced
-resolution of a discrete representation of a compact group that vanishes on a compact set `T`
-vanishes on an open set containing `T`: on `T` it takes finitely many values, each of which
-vanishes on `T` in one degree less. -/
-theorem ResolutionVanishesOn.exists_isOpen {T : Set G} (hT : IsCompact T) (n : ℕ) :
-    ∀ {F : (TopRep.resolutionX X n).V}, ResolutionVanishesOn X T n F →
-      ∃ W : Set G, IsOpen W ∧ T ⊆ W ∧ ResolutionVanishesOn X W n F := by
-  induction n with
-  | zero => exact fun hF ↦ ⟨Set.univ, isOpen_univ, Set.subset_univ _, hF⟩
-  | succ n ih =>
-    intro F hF
-    set F' : C(G, (TopRep.resolutionX X n).V) := F
-    have : Finite (F' '' T) := ((hT.image F'.continuous).finite_of_discrete).to_subtype
-    -- each of the finitely many values of `F'` on `T` vanishes on an open set containing `T`
-    choose W hWopen hTW hW using fun v : F' '' T ↦
-      ih (F := v) (by obtain ⟨g, hg, hgv⟩ := v.2; exact hgv ▸ hF g hg)
-    refine ⟨F' ⁻¹' (F' '' T) ∩ ⋂ v, W v, ((isOpen_discrete _).preimage F'.continuous).inter
-      (isOpen_iInter_of_finite fun v ↦ hWopen v),
-      Set.subset_inter (Set.subset_preimage_image _ _) (Set.subset_iInter fun v ↦ hTW v),
-      fun g hg ↦ ?_⟩
-    exact (hW ⟨F' g, hg.1⟩).mono (Set.inter_subset_right.trans (Set.iInter_subset _ _)) n
-
-variable [TotallyDisconnectedSpace G]
+variable [CompactSpace G] [DiscreteTopology X.V] [TotallyDisconnectedSpace G]
 
 /-- **Vanishing on a closed subgroup spreads to an open subgroup.** An element of the coinduced
 resolution of a discrete representation of a profinite group whose restriction to a closed
@@ -337,12 +265,12 @@ profinite group `G`, a smooth discrete representation `X` and a closed subgroup 
 of `Hⁿ(H, X)` is the restriction of a class of `Hⁿ(V, X)` for some open subgroup `V ⊇ H`. This is
 the surjectivity half of the description of `Hⁿ(H, X)` as the filtered colimit of the `Hⁿ(V, X)`
 over the open subgroups `V ⊇ H`. -/
-theorem exists_openSubgroup_le_resLe_eq (hX : IsSmoothDiscrete k X) {H : Subgroup G}
+theorem exists_openSubgroup_le_resLE_eq (hX : IsSmoothDiscrete k X) {H : Subgroup G}
     (hH : IsClosed (H : Set G))
     (y : continuousCohomology n (TopRep.res (H.subtype : H →* G) X)) :
     ∃ (V : OpenSubgroup G) (hHV : H ≤ V)
       (x : continuousCohomology n (TopRep.res ((V : Subgroup G).subtype : V →* G) X)),
-        (resLe hHV X n).hom x = y := by
+        (resLE hHV X n).hom x = y := by
   have := hX.discreteTopology
   set K := TopRep.homogeneousCochains X
   set KH := TopRep.homogeneousCochains (TopRep.res (H.subtype : H →* G) X)
@@ -383,13 +311,19 @@ theorem exists_openSubgroup_le_resLe_eq (hX : IsSmoothDiscrete k X) {H : Subgrou
       (ContinuousMonoidHom.subgroupInclusion hHV) (𝟙 (TopRep.res (H.subtype : H →* G) X)) n) zV
   have h₁ := ConcreteCategory.congr_hom (HomologicalComplex.cyclesMap_i φHV n) zV
   simp only [ConcreteCategory.comp_apply] at h h₁
-  rw [resLe_def]
+  rw [resLE_def]
   refine h.trans (congrArg (KH.homologyπ n).hom (KH.iCycles_injective n ?_))
   refine (h₁.trans (congrArg (φHV.f n).hom
     (KV.iCycles_cyclesMkOfEq (φV.f n Cc) (n + 1) (CochainComplex.next ℕ n) hdV))).trans ?_
   rw [← hCc]
-  exact Subtype.ext
-    (resolutionMap_subgroupInclusion_resolutionMap_subgroupSubtype X hHV (n + 1) C)
+  -- restricting to `V` and then to `H` is restricting to `H`: `cochainsMap_comp` for the pairs
+  -- `(subgroupSubtype V, 𝟙)` and `(subgroupInclusion hHV, 𝟙)`, whose composite pair is by
+  -- definition `(subgroupSubtype H, 𝟙)` (`subgroupSubtype_comp_subgroupInclusion` is `rfl`)
+  have h₂ := ConcreteCategory.congr_hom (congr($(cochainsMap_comp (X := X)
+    (ContinuousMonoidHom.subgroupSubtype (V : Subgroup G))
+    (ContinuousMonoidHom.subgroupInclusion hHV) (𝟙 _) (𝟙 _)).f n)) Cc
+  simp only [HomologicalComplex.comp_f, ConcreteCategory.comp_apply] at h₂
+  exact h₂.symm
 
 end ContinuousCohomology
 

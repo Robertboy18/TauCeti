@@ -109,7 +109,7 @@ theorem _root_.ContinuousMonoidHom.coe_mk {A B : Type*} [Monoid A] [TopologicalS
 -- to be definitionally the ones taken along the bare `Subgroup.subtype`, `Subgroup.inclusion` and
 -- `QuotientGroup.mk'`. For `subgroupInclusion h` with `h : H ≤ S` this is what lets the identity
 -- of `TopRep.res H.subtype X` serve as the coefficient map of `ContinuousCohomology.map` along the
--- inclusion `H ↪ S` (the restriction `TauCeti.ContinuousCohomology.resLe`).
+-- inclusion `H ↪ S` (the restriction `TauCeti.ContinuousCohomology.resLE`).
 /-- The inclusion of a subgroup, carrying the subspace topology, as a continuous homomorphism. -/
 @[expose] def subgroupSubtype (S : Subgroup G) : S →ₜ* G where
   __ := S.subtype

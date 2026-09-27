@@ -33,6 +33,13 @@ When the action on `X` is moreover continuous, so that `X` is smooth discrete
 (`TauCeti.IsSmoothDiscrete.resolutionX`), since coinduction from the trivial subgroup preserves
 smoothness over a compact group.
 
+Discreteness also makes the terms `C(G, C(G, …, X))` of the resolution locally constant. The
+predicate `TauCeti.ContinuousCohomology.ResolutionVanishesOn X T n F` records that such an iterated
+map vanishes on all `n`-tuples of points of a subset `T ⊆ G`, and
+`TauCeti.ContinuousCohomology.ResolutionVanishesOn.exists_isOpen` shows that vanishing on a compact
+set spreads to an open neighbourhood of it, because a locally constant map takes finitely many
+values on a compact set.
+
 This implements the "category of the comparison" milestone of Layer 3 of the human-authored
 roadmap at `TauCetiRoadmap/ProfiniteCohomology/README.md`.
 -/
@@ -108,6 +115,72 @@ theorem IsSmoothDiscrete.resolutionX (hX : IsSmoothDiscrete k X) :
   | n + 1 => (hX.resolutionX n).coind₁
 
 end Smooth
+
+section Vanishing
+
+namespace ContinuousCohomology
+
+/-! ### Vanishing on a subset
+
+`ResolutionVanishesOn X T n F` says that the iterated map `F : C(G, C(G, …, X))` of degree `n`
+vanishes on all `n`-tuples of points of `T`. For a subgroup `S` it is the vanishing of the
+restriction of `F` to `S`. -/
+
+omit [CompactSpace G] [DiscreteTopology X.V] in
+/-- An element `F` of the `n`-th term `C(G, C(G, …, X))` of the coinduced resolution **vanishes on
+`T`** when it is zero on every `n`-tuple of points of `T`. -/
+def ResolutionVanishesOn (T : Set G) : (n : ℕ) → (TopRep.resolutionX X n).V → Prop
+  | 0, v => v = 0
+  | n + 1, F => ∀ g ∈ T, ResolutionVanishesOn T n ((F : C(G, (TopRep.resolutionX X n).V)) g)
+
+omit [CompactSpace G] [DiscreteTopology X.V] in
+@[simp]
+theorem resolutionVanishesOn_zero (T : Set G) (v : (TopRep.resolutionX X 0).V) :
+    ResolutionVanishesOn X T 0 v ↔ v = 0 :=
+  Iff.rfl
+
+omit [CompactSpace G] [DiscreteTopology X.V] in
+@[simp]
+theorem resolutionVanishesOn_succ (T : Set G) (n : ℕ) (F : (TopRep.resolutionX X (n + 1)).V) :
+    ResolutionVanishesOn X T (n + 1) F ↔
+      ∀ g ∈ T, ResolutionVanishesOn X T n ((F : C(G, (TopRep.resolutionX X n).V)) g) :=
+  Iff.rfl
+
+variable {X}
+
+omit [CompactSpace G] [DiscreteTopology X.V] in
+/-- Vanishing on a set implies vanishing on every subset. -/
+theorem ResolutionVanishesOn.mono {T T' : Set G} (h : T' ⊆ T) :
+    ∀ (n : ℕ) {F : (TopRep.resolutionX X n).V},
+      ResolutionVanishesOn X T n F → ResolutionVanishesOn X T' n F
+  | 0, _, hF => hF
+  | n + 1, _, hF => fun g hg ↦ (hF g (h hg)).mono h n
+
+/-- **Vanishing on a compact set spreads to an open neighbourhood.** An element of the coinduced
+resolution of a discrete representation of a compact group that vanishes on a compact set `T`
+vanishes on an open set containing `T`: on `T` it takes finitely many values, each of which
+vanishes on `T` in one degree less. -/
+theorem ResolutionVanishesOn.exists_isOpen {T : Set G} (hT : IsCompact T) (n : ℕ) :
+    ∀ {F : (TopRep.resolutionX X n).V}, ResolutionVanishesOn X T n F →
+      ∃ W : Set G, IsOpen W ∧ T ⊆ W ∧ ResolutionVanishesOn X W n F := by
+  induction n with
+  | zero => exact fun hF ↦ ⟨Set.univ, isOpen_univ, Set.subset_univ _, hF⟩
+  | succ n ih =>
+    intro F hF
+    set F' : C(G, (TopRep.resolutionX X n).V) := F
+    have : Finite (F' '' T) := ((hT.image F'.continuous).finite_of_discrete).to_subtype
+    -- each of the finitely many values of `F'` on `T` vanishes on an open set containing `T`
+    choose W hWopen hTW hW using fun v : F' '' T ↦
+      ih (F := v) (by obtain ⟨g, hg, hgv⟩ := v.2; exact hgv ▸ hF g hg)
+    refine ⟨F' ⁻¹' (F' '' T) ∩ ⋂ v, W v, ((isOpen_discrete _).preimage F'.continuous).inter
+      (isOpen_iInter_of_finite fun v ↦ hWopen v),
+      Set.subset_inter (Set.subset_preimage_image _ _) (Set.subset_iInter fun v ↦ hTW v),
+      fun g hg ↦ ?_⟩
+    exact (hW ⟨F' g, hg.1⟩).mono (Set.inter_subset_right.trans (Set.iInter_subset _ _)) n
+
+end ContinuousCohomology
+
+end Vanishing
 
 /-- The continuous cohomology of a discrete representation of a compact group is discrete.
 
