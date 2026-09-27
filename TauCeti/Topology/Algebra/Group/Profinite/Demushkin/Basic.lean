@@ -60,14 +60,16 @@ attribute [local instance 2000] Ring.toAddCommGroup
 
 section Predicate
 
-variable (p : ℕ) (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
+variable (p : ℕ) [Fact p.Prime] (G : Type u) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
+  [CompactSpace G] [TotallyDisconnectedSpace G]
 
-/-- **The Demushkin predicate** (Labute, p. 106): a pro-`p` group whose `H¹(G, 𝔽_p)` is
-finite-dimensional, whose `H²(G, 𝔽_p)` is one-dimensional, and on which the cup product
-`H¹(G, 𝔽_p) × H¹(G, 𝔽_p) → H²(G, 𝔽_p)` is nondegenerate on both sides. The pro-`p` hypothesis is a
-field, so that no theorem about Demushkin groups applies to a group that satisfies only the
-cohomological clauses. Finite generation is a consequence,
-`IsDemushkin.isTopologicallyFinitelyGenerated`, and is not assumed. -/
+/-- **The Demushkin predicate** (Labute, p. 106), for a prime `p` and a profinite group `G`: a
+pro-`p` group whose `H¹(G, 𝔽_p)` is finite-dimensional, whose `H²(G, 𝔽_p)` is one-dimensional, and
+on which the cup product `H¹(G, 𝔽_p) × H¹(G, 𝔽_p) → H²(G, 𝔽_p)` is nondegenerate on both sides.
+The primality and profiniteness of the ambient data are hypotheses of the predicate, so that it is
+only stated on its mathematical domain, and the pro-`p` hypothesis is a field, so that no theorem
+about Demushkin groups applies to a group that satisfies only the cohomological clauses. Finite
+generation is a consequence, `IsDemushkin.isTopologicallyFinitelyGenerated`, and is not assumed. -/
 structure IsDemushkin : Prop where
   /-- `G` is a pro-`p` group. -/
   isProP : IsProP p G
