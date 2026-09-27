@@ -11,17 +11,21 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.MinimalPresentation
 
 Labute's classification of Demushkin groups puts every finite-rank Demushkin group in one of
 three normal forms, each a pro-`p` group presented on `n` generators `x₁, …, xₙ` by a single
-relator word:
+relator word. This file covers the forms with finite `f`, presented by the words
 
 * `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`, for `q ≠ 2` and `n` even;
 * `x₁² x₂^{2^f} (x₂, x₃)(x₄, x₅) ⋯ (x_{n-1}, x_n)`, for `q = 2` and `n` odd;
 * `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`, for `q = 2` and `n` even,
 
-where `(x, y) = x⁻¹y⁻¹xy` is Labute's commutator. This file defines the commutator and the three
-words on an arbitrary tuple `x : ℕ → H` of group elements, so that the same word can be read in a
-free pro-`p` group and in any group that receives it. Read on the `ℕ`-indexed generators
-`TauCeti.freeProPGen` and `TauCeti.presentedProPGen`, which are `1` out of range, the words carry
-no index-bound side conditions.
+where `(x, y) = x⁻¹y⁻¹xy` is Labute's commutator. In the two `q = 2` forms Labute also allows
+`f = ∞`, meaning that the factor `x₂^{2^f}`, resp. `x₃^{2^f}`, is absent. The words below take a
+natural number `f` and do not define those forms; only the rank-two even form is reached, since
+on its two generators `x₃ = 1` and the even word reads as the `f = ∞` relator `x₁^{2+α} (x₁, x₂)`.
+This file defines the commutator and the three words on an arbitrary tuple `x : ℕ → H` of group
+elements, so that the same word can be read in a free pro-`p` group and in any group that
+receives it. Read on the `ℕ`-indexed generators `TauCeti.freeProPGen` and
+`TauCeti.presentedProPGen`, which are `1` out of range, the words carry no index-bound side
+conditions.
 
 Under the conditions `p ∣ q` for the first word, `0 < f` for the second, and `2 ∣ a` together with
 `0 < f` for the third, each word is a product of `p`-th powers and commutators, so it lies in the

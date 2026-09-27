@@ -13,8 +13,10 @@ import TauCeti.NumberTheory.Padics.PadicIntegers
 /-!
 # The orientations of the Demushkin normal forms
 
-Each Demushkin normal form carries a marked continuous character to `ℤ_pˣ`, its **standard
-orientation**, with the values that Labute's Theorem 4 tabulates on the normal-form basis:
+Each Demushkin normal form with finite `f`, the forms whose relator words
+`TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Basic` defines, carries a marked
+continuous character to `ℤ_pˣ`, its **standard orientation**, with the values that Labute's
+Theorem 4 tabulates on the normal-form basis:
 
 * `q ≠ 2`, `n` even: `χ(x₂) = (1 - q)⁻¹` and `χ(x_i) = 1` otherwise;
 * `q = 2`, `n` odd: `χ(x₁) = -1`, `χ(x₃) = (1 - 2^f)⁻¹` and `χ(x_i) = 1` otherwise;
@@ -22,8 +24,8 @@ orientation**, with the values that Labute's Theorem 4 tabulates on the normal-f
 
 These characters exist because the values kill the relator: the commutators die in the
 commutative group `ℤ_pˣ`, and the remaining factors are powers of generators sent to `1` or to
-`-1` with even exponent. This file constructs, on the presented pro-`p` group of each normal form,
-the continuous characters of this shape with the marked values left as parameters:
+`-1` with even exponent. This file constructs, on the presented pro-`p` group of each of these
+normal forms, the continuous characters of this shape with the marked values left as parameters:
 `orientationNeTwo q n u` with `χ(x₂) = u`, `orientationTwoOdd f n u` with `χ(x₁) = -1`,
 `χ(x₃) = u`, and `orientationTwoEven a f n v u` with `χ(x₂) = v`, `χ(x₄) = u`, each trivial on
 the other generators. The standard orientation is the member of the family with the tabulated
@@ -44,7 +46,9 @@ image. Under these rank bounds and the equations on `u`, `v`, the images are the
 computed in `TauCeti.NumberTheory.Padics.GeneratedClosedSubgroups`: `1 + qℤ_p` in the first case,
 `{±1} × U^(f)` in the second, and in the third, for `3 < n`, `{±1} × U^(f)` when `2^f ∣ α` and
 the twisted subgroup `U^[v₂(α)]` otherwise; for `1 < n ≤ 3`, `{±1}` when `α = 0` and `U^[v₂(α)]`
-otherwise. In rank two, where `x₃^{2^f}` is absent, these are the `f = ∞` endpoint of the table.
+otherwise. In rank two, where `x₃^{2^f}` is absent, these are the `f = ∞` endpoint of the table;
+the other `f = ∞` forms, whose relators drop the `x₂^{2^f}`, resp. `x₃^{2^f}` factor, are not
+presented here and have no character in this file.
 
 ## Main definitions
 
