@@ -287,7 +287,7 @@ omit hp [CompactSpace G] [TotallyDisconnectedSpace G] [DistribMulAction G (ZMod 
 /-- `cd_p G ≤ 2` kills the canonical `H³` of every discrete module of order `p`. -/
 private theorem subsingleton_continuousCohomology_three (A : Type u) [AddCommGroup A]
     [TopologicalSpace A] [DiscreteTopology A] [DistribMulAction G A] [ContinuousSMul G A]
-    [Finite A] (hA : Nat.card A = p) (_ : ∀ (g : G) (a : A), g • a = a) :
+    (hA : Nat.card A = p) (_ : ∀ (g : G) (a : A), g • a = a) :
     Subsingleton (continuousCohomology 3 (ofDiscreteModule ℤ G A)) :=
   cohomologicalDimensionLE_iff.mp hcd A
     (isPPrimaryTorsion_of_natCard_eq_pow (hA.trans (pow_one p).symm)) 3 (by norm_num)
