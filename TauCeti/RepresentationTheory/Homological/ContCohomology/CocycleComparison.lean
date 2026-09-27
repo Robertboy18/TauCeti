@@ -54,10 +54,22 @@ noncomputable def cocycle0 (m : H0 G M) :
         Subtype.ext (funext fun g ↦ by simp [d0_apply, m.2 g])
       rw [h, map_zero])
 
-/-- The underlying homogeneous cochain of `cocycle0 m` is `g ↦ g • m`. -/
+/-- The inclusion of the homogeneous `0`-cocycle `cocycle0 m` is the cochain `g ↦ g • m`, read
+through the short complex in degree zero as `iCycles_cocycleEquiv1` and `iCycles_cocycleEquiv2` do
+in degrees one and two. -/
+@[simp]
+theorem sc_iCycles_cocycle0 (m : H0 G M) :
+    ((TopRep.homogeneousCochains (ofDiscreteModule ℤ G M)).sc 0).iCycles.hom (cocycle0 G M m) =
+      cochainEquiv0 G M m :=
+  HomologicalComplex.iCycles_cyclesMkOfEq _ _ _ _ _
+
+/-- The underlying homogeneous cochain of `cocycle0 m` is `g ↦ g • m`, stated on the inclusion of
+the homogeneous complex itself. -/
 -- Not a `simp` lemma: `simp` rewrites the implicit carrier `(homogeneousCochains _).X 0` on the
 -- left-hand side through `CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the statement
--- is not in `simp`-normal form; use it with `rw`.
+-- is not in `simp`-normal form; `sc_iCycles_cocycle0` is the `simp` spelling. This one is for
+-- `rw`: `HomologicalComplex.iCycles` is not unfolded to the short-complex inclusion by `rw`, so
+-- goals produced by `HomologicalComplex.iCycles_injective` are rewritten with this form.
 theorem iCycles_cocycle0 (m : H0 G M) :
     (TopRep.homogeneousCochains (ofDiscreteModule ℤ G M)).iCycles 0 (cocycle0 G M m) =
       cochainEquiv0 G M m :=

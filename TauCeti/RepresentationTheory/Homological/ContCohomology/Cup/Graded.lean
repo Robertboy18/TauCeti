@@ -499,9 +499,10 @@ theorem resolutionCupPairing_apply_succ (m n : ℕ) (a : (TopRep.resolution'X X 
 /-! ### The Alexander–Whitney pairing evaluated in low bidegrees
 
 In each bidegree `(m, n)` with `m + n ≤ 2` the recursion unfolds to the Alexander–Whitney formula
-`(a ⌣ b) (g₀, …, g_{m+n}) = μ (a (g₀, …, g_m)) (b (g_m, …, g_{m+n}))`; the transports along the
-degree equalities `0 + n = n` and `m + n + 1 = m + 1 + n` are identities because both sides are
-the same numeral. -/
+`(a ⌣ b) (g₀, …, g_{m+n}) = μ (a (g₀, …, g_m)) (b (g_m, …, g_{m+n}))`. The transports along the
+degree equalities `0 + n = n` and `m + n + 1 = m + 1 + n` are between the same numeral, so
+`HomologicalComplex.XIsoOfEq_rfl` turns each into the identity morphism, which
+`TopRep.hom_id` and `ContIntertwiningMap.id_apply` remove. -/
 
 /-- **The Alexander–Whitney pairing of two degree-zero elements of the resolution, evaluated**:
 `(a ⌣ b) g = μ (a g) (b g)`. -/
@@ -509,10 +510,8 @@ the same numeral. -/
 theorem resolutionCupPairing_zero_zero_apply (a : (TopRep.resolution'X X 0).V)
     (b : (TopRep.resolution'X Y 0).V) (g : G) :
     (P.resolutionCupPairing 0 0 a b : C(G, Z.V)) g = P.bil (a g) (b g) := by
-  rw [resolutionCupPairing_apply_zero, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `0 = 0 + 0` is the identity
-  change P.pointwise 0 0 rfl (a g, b g) = _
-  rw [pointwise_zero_apply]
+  rw [resolutionCupPairing_apply_zero, HomologicalComplex.XIsoOfEq_rfl, Iso.refl_hom,
+    TopRep.hom_id, ContIntertwiningMap.id_apply, pointwise_zero_apply]
 
 /-- **The Alexander–Whitney pairing of a degree-zero and a degree-one element of the resolution,
 evaluated**: `(a ⌣ b) g₀ g₁ = μ (a g₀) (b g₀ g₁)`. -/
@@ -520,10 +519,8 @@ evaluated**: `(a ⌣ b) g₀ g₁ = μ (a g₀) (b g₀ g₁)`. -/
 theorem resolutionCupPairing_zero_one_apply (a : (TopRep.resolution'X X 0).V)
     (b : (TopRep.resolution'X Y 1).V) (g₀ g₁ : G) :
     (P.resolutionCupPairing 0 1 a b : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a g₀) (b g₀ g₁) := by
-  rw [resolutionCupPairing_apply_zero, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `1 = 0 + 1` is the identity
-  change (P.pointwise 1 1 rfl (a g₀, b g₀) : C(G, Z.V)) g₁ = _
-  rw [pointwise_succ_apply, pointwise_zero_apply]
+  rw [resolutionCupPairing_apply_zero, HomologicalComplex.XIsoOfEq_rfl, Iso.refl_hom,
+    TopRep.hom_id, ContIntertwiningMap.id_apply, pointwise_succ_apply, pointwise_zero_apply]
 
 /-- **The Alexander–Whitney pairing of a degree-zero and a degree-two element of the resolution,
 evaluated**: `(a ⌣ b) g₀ g₁ g₂ = μ (a g₀) (b g₀ g₁ g₂)`. -/
@@ -532,10 +529,9 @@ theorem resolutionCupPairing_zero_two_apply (a : (TopRep.resolution'X X 0).V)
     (b : (TopRep.resolution'X Y 2).V) (g₀ g₁ g₂ : G) :
     (P.resolutionCupPairing 0 2 a b : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
       P.bil (a g₀) (b g₀ g₁ g₂) := by
-  rw [resolutionCupPairing_apply_zero, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `2 = 0 + 2` is the identity
-  change (P.pointwise 2 2 rfl (a g₀, b g₀) : C(G, C(G, Z.V))) g₁ g₂ = _
-  rw [pointwise_succ_apply, pointwise_succ_apply, pointwise_zero_apply]
+  rw [resolutionCupPairing_apply_zero, HomologicalComplex.XIsoOfEq_rfl, Iso.refl_hom,
+    TopRep.hom_id, ContIntertwiningMap.id_apply, pointwise_succ_apply, pointwise_succ_apply,
+    pointwise_zero_apply]
 
 /-- **The Alexander–Whitney pairing of a degree-one and a degree-zero element of the resolution,
 evaluated**: `(a ⌣ b) g₀ g₁ = μ (a g₀ g₁) (b g₁)`. -/
@@ -543,10 +539,8 @@ evaluated**: `(a ⌣ b) g₀ g₁ = μ (a g₀ g₁) (b g₁)`. -/
 theorem resolutionCupPairing_one_zero_apply (a : (TopRep.resolution'X X 1).V)
     (b : (TopRep.resolution'X Y 0).V) (g₀ g₁ : G) :
     (P.resolutionCupPairing 1 0 a b : C(G, C(G, Z.V))) g₀ g₁ = P.bil (a g₀ g₁) (b g₁) := by
-  rw [resolutionCupPairing_apply_succ, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `0 + 0 + 1 = 0 + 1 + 0` is the identity
-  change (P.resolutionCupPairing 0 0 (a g₀) b : C(G, Z.V)) g₁ = _
-  rw [resolutionCupPairing_zero_zero_apply]
+  rw [resolutionCupPairing_apply_succ, HomologicalComplex.XIsoOfEq_rfl, Iso.refl_hom,
+    TopRep.hom_id, ContIntertwiningMap.id_apply, resolutionCupPairing_zero_zero_apply]
 
 /-- **The Alexander–Whitney pairing of a degree-two and a degree-zero element of the resolution,
 evaluated**: `(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁ g₂) (b g₂)`. -/
@@ -555,10 +549,8 @@ theorem resolutionCupPairing_two_zero_apply (a : (TopRep.resolution'X X 2).V)
     (b : (TopRep.resolution'X Y 0).V) (g₀ g₁ g₂ : G) :
     (P.resolutionCupPairing 2 0 a b : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
       P.bil (a g₀ g₁ g₂) (b g₂) := by
-  rw [resolutionCupPairing_apply_succ, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `1 + 0 + 1 = 1 + 1 + 0` is the identity
-  change (P.resolutionCupPairing 1 0 (a g₀) b : C(G, C(G, Z.V))) g₁ g₂ = _
-  rw [resolutionCupPairing_one_zero_apply]
+  rw [resolutionCupPairing_apply_succ, HomologicalComplex.XIsoOfEq_rfl, Iso.refl_hom,
+    TopRep.hom_id, ContIntertwiningMap.id_apply, resolutionCupPairing_one_zero_apply]
 
 /-- **The Alexander–Whitney pairing of two degree-one elements of the resolution, evaluated**:
 `(a ⌣ b) g₀ g₁ g₂ = μ (a g₀ g₁) (b g₁ g₂)`. -/
@@ -567,10 +559,8 @@ theorem resolutionCupPairing_one_one_apply (a : (TopRep.resolution'X X 1).V)
     (b : (TopRep.resolution'X Y 1).V) (g₀ g₁ g₂ : G) :
     (P.resolutionCupPairing 1 1 a b : C(G, C(G, C(G, Z.V)))) g₀ g₁ g₂ =
       P.bil (a g₀ g₁) (b g₁ g₂) := by
-  rw [resolutionCupPairing_apply_succ, HomologicalComplex.XIsoOfEq_rfl]
-  -- the transport along `0 + 1 + 1 = 0 + 1 + 1` is the identity
-  change (P.resolutionCupPairing 0 1 (a g₀) b : C(G, C(G, Z.V))) g₁ g₂ = _
-  rw [resolutionCupPairing_zero_one_apply]
+  rw [resolutionCupPairing_apply_succ, HomologicalComplex.XIsoOfEq_rfl, Iso.refl_hom,
+    TopRep.hom_id, ContIntertwiningMap.id_apply, resolutionCupPairing_zero_one_apply]
 
 /-- **The resolution pairing is jointly continuous.** -/
 theorem continuous_resolutionCupPairing (m n : ℕ) :
