@@ -35,6 +35,9 @@ of continuous characters, so `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-dual of
 * `TauCeti.cohomFpLinearEquivH2`: the degree-two identification is `𝔽_p`-linear.
 * `TauCeti.cohomFpLinearEquivContinuousZModDual`: `H¹(G, 𝔽_p)` is the continuous `𝔽_p`-dual of
   `G`, as an `𝔽_p`-vector space.
+* `TauCeti.cohomFpTwoLinearEquivOfContinuousMulEquiv`: a topological isomorphism `G ≃ₜ* H` induces
+  `H²(G, 𝔽_p) ≃ₗ[𝔽_p] H²(H, 𝔽_p)`, so `TauCeti.finrank_cohomFp_two_congr`: the dimension of
+  `H²(-, 𝔽_p)` is an isomorphism invariant.
 
 ## References
 
@@ -46,7 +49,7 @@ namespace TauCeti
 
 open CategoryTheory TauCeti.ContCohomology _root_.ContinuousCohomology
 
-universe u
+universe u v
 
 attribute [local instance] TopRep.distribMulAction
 
@@ -111,5 +114,38 @@ noncomputable def cohomFpLinearEquivContinuousZModDual :
   LinearEquiv.ofBijective (e.toAddMonoidHom.toZModLinearMap p) e.bijective
 
 end TrivialFp
+
+section Transport
+
+variable (p : ℕ) {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
+  [LocallyCompactSpace G] {H : Type v} [Group H] [TopologicalSpace H] [IsTopologicalGroup H]
+  [LocallyCompactSpace H]
+
+/-- **`H²(-, 𝔽_p)` is invariant under topological isomorphism**: a topological isomorphism
+`G ≃ₜ* H` induces an `𝔽_p`-linear isomorphism `H²(G, 𝔽_p) ≃ₗ[𝔽_p] H²(H, 𝔽_p)`, the pullback
+along `e` on the explicit models. -/
+noncomputable def cohomFpTwoLinearEquivOfContinuousMulEquiv (e : G ≃ₜ* H) :
+    cohomFp p G 2 ≃ₗ[ZMod p] cohomFp p H 2 :=
+  -- The explicit models need actions of `G` and `H` on `ZMod p`; the trivial ones are installed
+  -- for the duration of the construction and do not appear in the statement.
+  let _ : DistribMulAction G (ZMod p) := DistribMulAction.compHom (ZMod p) (1 : G →* (ZMod p)ˣ)
+  let _ : DistribMulAction H (ZMod p) := DistribMulAction.compHom (ZMod p) (1 : H →* (ZMod p)ˣ)
+  have htG : ∀ (g : G) (m : ZMod p), g • m = m := fun _ m ↦ one_smul (ZMod p)ˣ m
+  have htH : ∀ (g : H) (m : ZMod p), g • m = m := fun _ m ↦ one_smul (ZMod p)ˣ m
+  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd.congr fun x ↦ (htG x.1 x.2).symm⟩
+  have : ContinuousSMul H (ZMod p) := ⟨continuous_snd.congr fun x ↦ (htH x.1 x.2).symm⟩
+  let f : H2 H (ZMod p) ≃+ H2 G (ZMod p) :=
+    explicitMap2Equiv H (ZMod p) G (ZMod p) e (AddEquiv.refl (ZMod p)) continuous_id continuous_id
+      fun g m ↦ by simp only [AddEquiv.refl_apply, htG, htH]
+  (cohomFpLinearEquivH2 p G htG).trans
+    ((LinearEquiv.ofBijective (f.symm.toAddMonoidHom.toZModLinearMap p) f.symm.bijective).trans
+      (cohomFpLinearEquivH2 p H htH).symm)
+
+/-- **The dimension of `H²(-, 𝔽_p)` is invariant under topological isomorphism.** -/
+theorem finrank_cohomFp_two_congr (e : G ≃ₜ* H) :
+    Module.finrank (ZMod p) (cohomFp p G 2) = Module.finrank (ZMod p) (cohomFp p H 2) :=
+  (cohomFpTwoLinearEquivOfContinuousMulEquiv p e).finrank_eq
+
+end Transport
 
 end TauCeti

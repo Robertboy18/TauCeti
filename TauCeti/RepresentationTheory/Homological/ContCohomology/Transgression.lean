@@ -93,6 +93,11 @@ continuous.
 * `TauCeti.ContCohomology.transgression_injective_iff` and
   `TauCeti.ContCohomology.transgression_surjective_iff`: the transgression is injective exactly
   when restriction to `N` vanishes, and surjective exactly when inflation to `H²(G, M)` vanishes.
+* `TauCeti.ContCohomology.natCard_H1_mul_natCard_H2_quotient`: the order count of the five-term
+  sequence,
+  `|H¹(G, M)| · |H²(G ⧸ N, M ^ N)| = |H¹(G ⧸ N, M ^ N)| · |H¹(N, M)^{G ⧸ N}| · |im infl₂|`, and
+  its form `TauCeti.ContCohomology.natCard_H1_mul_natCard_H2_quotient_of_subsingleton` when
+  `H²(G, M) = 0`.
 
 ## Implementation notes
 
@@ -869,6 +874,40 @@ theorem transgression_injective_iff (hN : IsClosed (N : Set G)) :
 theorem transgression_surjective_iff (hN : IsClosed (N : Set G)) :
     Function.Surjective (transgression G M N hN) ↔ explicitInfl2 G M N = 0 := by
   rw [← AddMonoidHom.range_eq_top, fiveTerm_exact_H2Q, AddMonoidHom.ker_eq_top_iff]
+
+/-- **The order count of the five-term sequence.** Exactness at every node of
+
+```text
+0 → H¹(G ⧸ N, M ^ N) → H¹(G, M) → H¹(N, M)^{G ⧸ N} → H²(G ⧸ N, M ^ N) → H²(G, M)
+```
+
+gives the multiplicative identity `|H¹(G, M)| · |H²(G ⧸ N, M ^ N)| =
+|H¹(G ⧸ N, M ^ N)| · |H¹(N, M)^{G ⧸ N}| · |im (H²(G ⧸ N, M ^ N) → H²(G, M))|` of natural-number
+cardinalities, with `Nat.card` of an infinite group read as `0`. -/
+theorem natCard_H1_mul_natCard_H2_quotient (hN : IsClosed (N : Set G)) :
+    Nat.card (H1 G M) * Nat.card (H2 (G ⧸ N) (FixedPoints.addSubgroup N M)) =
+      Nat.card (H1 (G ⧸ N) (FixedPoints.addSubgroup N M)) * Nat.card (H1ConjInvariants G M N) *
+        Nat.card (explicitInfl2 G M N).range := by
+  have hi := AddSubgroup.card_ker_mul_card_range (explicitInfl1 G M N)
+  have hr := AddSubgroup.card_ker_mul_card_range (explicitResConj1 G M N)
+  have ht := AddSubgroup.card_ker_mul_card_range (transgression G M N hN)
+  have hj := AddSubgroup.card_ker_mul_card_range (explicitInfl2 G M N)
+  rw [(AddMonoidHom.ker_eq_bot_iff _).2 (explicitInfl1_injective G M N), AddSubgroup.card_bot,
+    one_mul] at hi
+  rw [← explicitInfResConj_exact, hi] at hr
+  rw [← fiveTerm_exact_H1N] at ht
+  rw [← fiveTerm_exact_H2Q G M N hN] at hj
+  rw [← hr, ← ht, ← hj]
+  ring
+
+/-- **The order count of the five-term sequence when `H²(G, M) = 0`:**
+`|H¹(G, M)| · |H²(G ⧸ N, M ^ N)| = |H¹(G ⧸ N, M ^ N)| · |H¹(N, M)^{G ⧸ N}|`. -/
+theorem natCard_H1_mul_natCard_H2_quotient_of_subsingleton (hN : IsClosed (N : Set G))
+    [Subsingleton (H2 G M)] :
+    Nat.card (H1 G M) * Nat.card (H2 (G ⧸ N) (FixedPoints.addSubgroup N M)) =
+      Nat.card (H1 (G ⧸ N) (FixedPoints.addSubgroup N M)) * Nat.card (H1ConjInvariants G M N) := by
+  have h1 : Nat.card (explicitInfl2 G M N).range = 1 := Nat.card_unique
+  rw [natCard_H1_mul_natCard_H2_quotient G M N hN, h1, mul_one]
 
 end Transgression
 

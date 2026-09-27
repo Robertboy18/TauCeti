@@ -144,8 +144,8 @@ variable {X : Type u} [DistribMulAction (freeProP p X) (ZMod p)]
   [DistribMulAction G (ZMod p)] [ContinuousSMul G (ZMod p)]
 
 /-- Transport of `H²(F ⧸ R, 𝔽_p ^ R)` along a topological isomorphism `F ⧸ R ≃ₜ* G`, when both `F`
-and `G` act trivially on `𝔽_p`. Only its existence is used, to compare orders. -/
-private noncomputable def h2QuotientEquiv (e : freeProP p X ⧸ R ≃ₜ* G)
+and `G` act trivially on `𝔽_p`. Only its existence is used, to compare orders and dimensions. -/
+noncomputable def h2QuotientEquiv (e : freeProP p X ⧸ R ≃ₜ* G)
     (htrivF : ∀ (g : freeProP p X) (m : ZMod p), g • m = m)
     (htriv : ∀ (g : G) (m : ZMod p), g • m = m) :
     H2 (freeProP p X ⧸ R) (FixedPoints.addSubgroup R (ZMod p)) ≃+ H2 G (ZMod p) :=
