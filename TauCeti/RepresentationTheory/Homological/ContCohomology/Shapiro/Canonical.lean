@@ -167,7 +167,7 @@ variable [CompactSpace G] [ContinuousSMul U A]
 
 /-- In degree one the canonical Shapiro map is the explicit forward Shapiro map
 `TauCeti.ContCohomology.explicitShapiroMap1` under the comparisons with the canonical carrier. -/
-theorem explicitH1AddEquivContinuousCohomology_shapiroMap [CompactSpace U]
+theorem explicitH1AddEquivContinuousCohomology_shapiroMap
     (x : H1 G (DiscreteCoind G U A)) :
     shapiroMap U A 1 (explicitH1AddEquivContinuousCohomology G (DiscreteCoind G U A) x) =
       explicitH1AddEquivContinuousCohomology U A (explicitShapiroMap1 G U A x) := by
@@ -193,7 +193,6 @@ variable [TotallyDisconnectedSpace G]
 profinite group `G`, the canonical Shapiro map `H¹(G, Coind_U^G A) ⟶ H¹(U, A)` is bijective. -/
 theorem bijective_shapiroMap_one (hU : IsClosed (U : Set G)) :
     Function.Bijective (shapiroMap U A 1) := by
-  have : CompactSpace U := isCompact_iff_compactSpace.mp hU.isCompact
   have h : (shapiroMap U A 1 : continuousCohomology 1 (ofDiscreteModule ℤ G (DiscreteCoind G U A)) →
       continuousCohomology 1 (ofDiscreteModule ℤ U A)) =
       explicitH1AddEquivContinuousCohomology U A ∘ explicitShapiroMap1 G U A ∘
