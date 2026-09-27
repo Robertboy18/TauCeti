@@ -5,8 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Torsion
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Shapiro
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Discrete
 
 /-!
 # Coinduction along a subgroup of finite index
@@ -19,12 +18,6 @@ coset space extends: `Coind_U^G A` is the module of *all* functions `G ⧸ U →
 `g ↦ g⁻¹` because the coinduced functions are constant on right cosets while `G ⧸ U` is the space
 of left cosets. This is the permutation module `A[G ⧸ U]`, of order `|A| ^ [G : U]`.
 
-Through Shapiro's lemma the finiteness statement makes cohomological vanishing hereditary: if
-`H²(G, M)` vanishes for every finite discrete `p`-primary `G`-module `M`, then `H²(U, A)` vanishes
-for every finite discrete `p`-primary `U`-module `A` and every open subgroup `U` of a profinite
-group `G`, because `H²(U, A) ≅ H²(G, Coind_U^G A)` and `Coind_U^G A` is again finite and
-`p`-primary.
-
 ## Main definitions
 
 * `TauCeti.DiscreteCoind.quotientPiAddEquiv`: for an open `U` acting trivially on `A`, the
@@ -33,13 +26,10 @@ group `G`, because `H²(U, A) ≅ H²(G, Coind_U^G A)` and `Coind_U^G A` is agai
 
 ## Main results
 
-* `TauCeti.DiscreteCoind.apply_out_inv_injective` and `TauCeti.DiscreteCoind.instFinite`:
-  restriction to a right transversal is injective, so `Coind_U^G A` is finite for finite `A` and
-  finite-index `U`.
+* `TauCeti.DiscreteCoind.instFinite`: `Coind_U^G A` is finite for finite `A` and finite-index
+  `U`, since restriction to a right transversal is injective.
 * `TauCeti.DiscreteCoind.natCard_of_isOpen`: `|Coind_U^G A| = |A| ^ [G : U]` for an open
   finite-index `U` acting trivially on `A`.
-* `TauCeti.ContCohomology.subsingleton_H2_of_isOpen`: vanishing of `H²` on finite discrete
-  `p`-primary modules passes to open subgroups of a profinite group.
 -/
 
 public section
@@ -58,7 +48,7 @@ variable {G : Type u} [Group G] [TopologicalSpace G] {U : Subgroup G}
 /-- **Restriction to a right transversal is injective.** An element of `Coind_U^G A` is determined
 by its values at the representatives `(Quotient.out x)⁻¹`, `x : G ⧸ U`, which form a right
 transversal of `U` in `G`. -/
-theorem apply_out_inv_injective :
+private theorem apply_out_inv_injective :
     Function.Injective fun (f : DiscreteCoind G U A) (x : G ⧸ U) => f (Quotient.out x)⁻¹ := by
   intro f f' h
   ext g
@@ -143,28 +133,5 @@ theorem natCard_of_isOpen [U.FiniteIndex] :
 end Trivial
 
 end DiscreteCoind
-
-namespace ContCohomology
-
-variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
-  [TotallyDisconnectedSpace G] {U : Subgroup G} {p : ℕ}
-
-/-- **Vanishing of `H²` on finite `p`-primary coefficients passes to open subgroups.** Let `G` be
-a profinite group whose explicit `H²(G, M)` vanishes for every finite discrete `p`-primary
-`G`-module `M`, and let `U` be an open subgroup. Then `H²(U, A)` vanishes for every finite discrete
-`p`-primary `U`-module `A`, by Shapiro's lemma `H²(U, A) ≅ H²(G, Coind_U^G A)`. -/
-theorem subsingleton_H2_of_isOpen (hU : IsOpen (U : Set G))
-    (h : ∀ (M : Type (max u v)) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
-      [DistribMulAction G M] [ContinuousSMul G M] [Finite M], IsPPrimaryTorsion p M →
-      Subsingleton (H2 G M))
-    (A : Type v) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
-    [DistribMulAction U A] [ContinuousSMul U A] [Finite A] (hA : IsPPrimaryTorsion p A) :
-    Subsingleton (H2 U A) := by
-  have : Finite (G ⧸ U) := Subgroup.quotient_finite_of_isOpen U hU
-  have : U.FiniteIndex := Subgroup.finiteIndex_of_finite_quotient
-  have := h (DiscreteCoind G U A) (isPPrimaryTorsion_discreteCoind G U A hA)
-  exact (explicitShapiro2 G U A (Subgroup.isClosed_of_isOpen U hU)).toEquiv.symm.subsingleton
-
-end ContCohomology
 
 end TauCeti

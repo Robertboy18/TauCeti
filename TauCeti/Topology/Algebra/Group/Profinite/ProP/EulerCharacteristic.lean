@@ -9,7 +9,9 @@ public import TauCeti.GroupTheory.Index.Exact
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologicalDimension.Basic
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologyComparison
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.FiniteIndex
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Torsion
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.LongExact
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Shapiro
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.DualRank
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.FixedPoints
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Subgroup
@@ -42,9 +44,9 @@ Applied to the permutation module `Coind_U^G 𝔽_p` of an open subgroup `U`, wh
 d(U) + [G : U] = 1 + [G : U] * d(G),   that is   1 - d(U) = [G : U] * (1 - d(G)) in ℤ,
 ```
 
-the case `cd_p G ≤ 1` of the Euler characteristic formula `χ(U) = [G : U] * χ(G)`. It is the rank
-half of the pro-`p` Nielsen–Schreier theorem for open subgroups of a free pro-`p` group, proved in
-`TauCeti.Topology.Algebra.Group.Profinite.Free.OpenSubgroup`.
+the case `cd_p G ≤ 1` of the Euler characteristic formula `χ(U) = [G : U] * χ(G)`. For a free
+pro-`p` group of finite rank it becomes the Schreier index formula for the generator rank of an
+open subgroup, `TauCeti.Topology.Algebra.Group.Profinite.Free.OpenSubgroup`.
 
 ## Main results
 
