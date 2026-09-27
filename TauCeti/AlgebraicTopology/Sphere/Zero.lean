@@ -76,7 +76,8 @@ distinct path components. -/
 theorem zerothHomotopy_mk_neg_ne (h : finrank ℝ E = 1) (p : sphere (0 : E) 1) :
     ZerothHomotopy.mk (-p) ≠ ZerothHomotopy.mk p :=
   have := discreteTopology_sphere_of_finrank_eq_one h
-  fun hc ↦ ne_neg_of_mem_unit_sphere ℝ p (ZerothHomotopy.mk_injective_of_discreteTopology hc).symm
+  fun hc ↦ ne_neg_of_mem_unit_sphere ℝ p
+    (ZerothHomotopy.mk_injective_of_totallyDisconnectedSpace hc).symm
 
 /-- On the unit sphere of a one-dimensional real normed space, the path component of `-p` is the
 unique path component other than that of `p`. -/

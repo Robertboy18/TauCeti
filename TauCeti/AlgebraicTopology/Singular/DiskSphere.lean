@@ -5,12 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.AlgebraicTopology.Singular.Relative
-public import TauCeti.AlgebraicTopology.Singular.Reduced
-public import TauCeti.AlgebraicTopology.Singular.Contractible
 public import TauCeti.AlgebraicTopology.Singular.Empty
 public import TauCeti.AlgebraicTopology.Singular.Sphere
-public import TauCeti.AlgebraicTopology.Disk
 
 /-!
 # The relative homology of a disk and its boundary
