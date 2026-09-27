@@ -36,9 +36,12 @@ smoothness over a compact group.
 The predicate `TauCeti.ContinuousCohomology.ResolutionVanishesOn X T n F` records that a term
 `F` of the resolution `C(G, C(G, …, X))` vanishes on all `n`-tuples of points of a subset `T ⊆ G`,
 and `TauCeti.ContinuousCohomology.ResolutionVanishesOn.exists_isOpen` shows that vanishing on a
-compact set already holds on an open neighbourhood of it. For a profinite `G` this neighbourhood
-can be taken to be an open subgroup, which is how cohomological statements about a closed subgroup
-descend to the open subgroups containing it.
+compact set already holds on an open neighbourhood of it. For an arbitrary compact set that is
+all one gets; when the compact set is a closed subgroup of a profinite `G`, the neighbourhood
+contains an open subgroup, so the vanishing holds on an open subgroup containing the closed one
+(`TauCeti.ContinuousCohomology.exists_openSubgroup_le_resolutionMap_subgroupSubtype_eq_zero` in
+`ClosedSubgroup.lean`). This is how cohomological statements about a closed subgroup descend to the
+open subgroups containing it.
 
 This implements the "category of the comparison" milestone of Layer 3 of the human-authored
 roadmap at `TauCetiRoadmap/ProfiniteCohomology/README.md`.
