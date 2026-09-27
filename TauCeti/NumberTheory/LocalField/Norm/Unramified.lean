@@ -122,6 +122,7 @@ variable (K L) in
 /-- **The norm is surjective on every step of the unit filtration in an unramified extension.** If
 `L/K` is unramified, the norm maps `U(L,i)` onto `U(K,i)` for every `i : ℕ`:
 `N_{L/K}(U(L,i)) = U(K,i)`. At `i = 0` this is the surjectivity of the norm on units. -/
+@[simp]
 theorem map_normUnits_unitFiltration (i : ℕ) :
     (unitFiltration L i).map (Algebra.normUnits K) = unitFiltration K i := by
   refine le_antisymm ?_ fun x hx ↦ ?_
