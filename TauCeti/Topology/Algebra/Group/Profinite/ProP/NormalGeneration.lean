@@ -79,15 +79,8 @@ theorem proPFrattini_quotient_pLowerCentralStep_eq_bot (hp : p.Prime) (R : Subgr
     proPFrattini p (R ⧸ (pLowerCentralStep p R).subgroupOf R) = ⊥ := by
   have : CompactSpace R := isCompact_iff_compactSpace.mp hR.isCompact
   have hK := isClosed_pLowerCentralStep_subgroupOf (p := p) R
-  refine (proPFrattini_eq_bot_iff hp).mpr ⟨⟨⟨fun a b ↦ ?_⟩⟩,
-    Monoid.exponent_dvd_iff_forall_pow_eq_one.mpr fun q ↦ ?_⟩
-  · obtain ⟨x, rfl⟩ := QuotientGroup.mk_surjective a
-    obtain ⟨y, rfl⟩ := QuotientGroup.mk_surjective b
-    refine (QuotientGroup.commute_mk_iff.mpr (mem_subgroupOf.mpr ?_)).eq
-    simpa [commutatorElement_def] using commutator_mem_pLowerCentralStep x.2 (y : F)
-  · obtain ⟨n, rfl⟩ := QuotientGroup.mk_surjective q
-    rw [← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff, mem_subgroupOf, coe_pow]
-    exact pow_mem_pLowerCentralStep n.2
+  exact (proPFrattini_eq_bot_iff hp).mpr
+    ⟨inferInstance, exponent_quotient_pLowerCentralStep_subgroupOf_dvd R⟩
 
 namespace IsProP
 

@@ -78,7 +78,7 @@ theorem natCard_H2_of_proPFrattini_eq_bot (hfg : IsTopologicallyFinitelyGenerate
   -- subgroup is `R = Φ(F) = λ_1(F)`.
   obtain ⟨rels, hrels, ⟨e⟩⟩ :=
     (isProP_of_proPFrattini_eq_bot hΦ).exists_subset_proPFrattini_continuousMulEquiv_presentedProP
-      hfg (ULift.{u} (Fin d)) (by rw [Nat.card_ulift, Nat.card_eq_fintype_card, Fintype.card_fin])
+      hfg (ULift.{u} (Fin d)) (by rw [Nat.card_ulift, Nat.card_fin])
   set R := (normalClosure rels).topologicalClosure
   have hR1 : R = pLowerCentralSeries p (freeProP p (ULift.{u} (Fin d))) 1 :=
     (presentedProP.topologicalClosure_normalClosure_eq_proPFrattini hrels e hΦ).trans
@@ -86,7 +86,7 @@ theorem natCard_H2_of_proPFrattini_eq_bot (hfg : IsTopologicallyFinitelyGenerate
   -- The quotient `R ⧸ Rᵖ[R, F]` is `gr_1(F)`, of order `p ^ (d + (d choose 2))`.
   have hcard : Nat.card (R ⧸ (pLowerCentralStep p R).subgroupOf R) = p ^ (d + d.choose 2) := by
     rw [natCard_quotient_pLowerCentralStep_eq_natCard_gradedPiece hR1,
-      freeProP.natCard_gradedPiece_one, Nat.card_ulift, Nat.card_eq_fintype_card, Fintype.card_fin]
+      freeProP.natCard_gradedPiece_one, Nat.card_ulift, Nat.card_fin]
   have hfin : Finite (R ⧸ (pLowerCentralStep p R).subgroupOf R) :=
     Nat.finite_of_card_ne_zero (hcard ▸ pow_ne_zero _ hp.ne_zero)
   have hQfg : IsTopologicallyFinitelyGenerated (R ⧸ (pLowerCentralStep p R).subgroupOf R) :=
@@ -135,11 +135,8 @@ theorem proPFrattini_pi_multiplicative_zmod_eq_bot :
     proPFrattini p (X → Multiplicative (ZMod p)) = ⊥ := by
   refine (proPFrattini_eq_bot_iff Fact.out).mpr ⟨⟨⟨mul_comm⟩⟩,
     Monoid.exponent_dvd_iff_forall_pow_eq_one.mpr fun f ↦ funext fun x ↦ ?_⟩
-  have hcard : Nat.card (Multiplicative (ZMod p)) = p :=
-    (Nat.card_congr Multiplicative.ofAdd.symm).trans (Nat.card_zmod p)
-  have hpow := pow_card_eq_one' (x := f x)
-  rw [hcard] at hpow
-  rw [Pi.pow_apply, hpow, Pi.one_apply]
+  rw [Pi.pow_apply, Pi.one_apply, ← ofAdd_toAdd (f x), ← ofAdd_nsmul, nsmul_eq_mul,
+    ZMod.natCast_self, zero_mul, ofAdd_zero]
 
 /-- **`d((ℤ/p)^X) = #X`.** The topological generator rank of the finite elementary abelian group
 `(ℤ/p)^X` is `#X`. -/
