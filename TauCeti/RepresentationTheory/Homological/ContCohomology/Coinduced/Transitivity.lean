@@ -34,8 +34,8 @@ of the two subgroups, whose types differ. The case used by dimension shifting is
 `W = ⊥`, where every action of the trivial group is trivial and the agreement is automatic.
 
 Compactness of `G` is used exactly once: to see that `g ↦ (u ↦ φ (u * g))` is locally constant,
-uniformly in `u`, which is that the right-translation stabilizer of a locally constant function on
-a compact group is open (`TauCeti.isOpen_rightTranslationStabilizer`).
+uniformly in `u`, which is that a locally constant function on a compact group is uniformly locally
+constant under right translation (`TauCeti.exists_isOpen_forall_mul_right_eq`).
 
 ## Main definitions
 
@@ -76,30 +76,22 @@ def transEquiv : DiscreteCoind G U (DiscreteCoind U V A) ≃+ DiscreteCoind G W 
     (fun w g => by
       -- `w` is the image of some `v : V`, and `f` is `U`-equivariant while `f g` is `V`-equivariant
       obtain ⟨x, hx, hv⟩ := Subgroup.mem_map.1 (hW ▸ w.2 : (w : G) ∈ V.map U.subtype)
-      rw [← show ((x : U) : G) = (w : G) from hv, apply_mul f x g, coe_smul, one_mul,
-        apply_coe (f g) ⟨x, hx⟩, hsmul ⟨x, hx⟩ w _ hv])
+      rw [Subgroup.subtype_apply] at hv
+      rw [← hv, apply_mul f x g, coe_smul, one_mul, apply_coe (f g) ⟨x, hx⟩,
+        hsmul ⟨x, hx⟩ w _ hv])
   invFun φ := mk G U (DiscreteCoind U V A)
     (fun g => mk U V A (fun u => φ ((u : G) * g))
       ((isLocallyConstant φ).comp_continuous (continuous_subtype_val.mul continuous_const))
       (fun v u => by
-        have h := apply_mul φ (⟨((v : U) : G), hW ▸ Subgroup.mem_map_of_mem U.subtype v.2⟩ : W)
-          ((u : G) * g)
-        rw [Subgroup.coe_mul, mul_assoc, h]
+        have hvW : ((v : U) : G) ∈ W :=
+          hW ▸ Subgroup.mem_map.2 ⟨v, v.2, Subgroup.subtype_apply (v : U)⟩
+        rw [Subgroup.coe_mul, mul_assoc, apply_mul φ ⟨_, hvW⟩ ((u : G) * g)]
         exact hsmul v _ _ rfl))
-    (by
-      -- the right-translation stabilizer of `φ` is an open neighbourhood `N` of `1`, and on the
-      -- neighbourhood `g * N` of `g` the function `g' ↦ (u ↦ φ (u * g'))` is constant
-      rw [IsLocallyConstant.iff_eventually_eq]
-      intro g
-      have hopen : IsOpen {g' : G | g⁻¹ * g' ∈ rightTranslationStabilizer ⇑φ} :=
-        (isOpen_rightTranslationStabilizer (isLocallyConstant φ)).preimage
-          (continuous_const.mul continuous_id)
-      have hg : g ∈ {g' : G | g⁻¹ * g' ∈ rightTranslationStabilizer ⇑φ} := by
-        simp only [Set.mem_ofPred_eq, inv_mul_cancel]
-        exact one_mem _
-      refine Filter.eventually_of_mem (hopen.mem_nhds hg) fun g' hg' => ext fun u => ?_
-      rw [mk_apply, mk_apply, ← mem_rightTranslationStabilizer.1 hg' ((u : G) * g), mul_assoc,
-        mul_inv_cancel_left])
+    ((IsLocallyConstant.iff_exists_open _).2 fun g => by
+      -- `φ` is uniformly locally constant under right translation, `G` being compact
+      obtain ⟨N, hN, hgN, h⟩ :=
+        exists_isOpen_forall_mul_right_eq (isLocallyConstant φ) continuous_id g
+      exact ⟨N, hN, hgN, fun g' hg' => ext fun u => by rw [mk_apply, mk_apply]; exact h g' hg' u⟩)
     (fun u₀ g => ext fun u => by
       simp only [mk_apply, coe_smul, Subgroup.coe_mul, mul_assoc])
   left_inv f := ext fun g => ext fun u => by
