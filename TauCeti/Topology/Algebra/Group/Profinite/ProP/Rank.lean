@@ -28,8 +28,8 @@ while `Φ(G)` has index `p ^ d(G)`, so `d(H) = d(G)` holds exactly when `ker f �
 * `TauCeti.IsProP.topologicalGeneratorRankNat_eq_finrank_quotient_proPFrattini`: the generator
   rank is the dimension of the Frattini quotient.
 * `TauCeti.IsProP.natCard_quotient_proPFrattini`: the Frattini quotient has order `p ^ d(G)`.
-* `TauCeti.isProP_of_proPFrattini_eq_bot`: a topological group with trivial pro-`p` Frattini
-  subgroup is pro-`p`.
+* `TauCeti.isPGroup_of_proPFrattini_eq_bot`, `TauCeti.isProP_of_proPFrattini_eq_bot`: a
+  topological group with trivial pro-`p` Frattini subgroup is a `p`-group, hence pro-`p`.
 * `TauCeti.natCard_of_proPFrattini_eq_bot`,
   `TauCeti.topologicalGeneratorRankNat_eq_of_natCard_eq_pow`: a topologically finitely generated
   profinite group with trivial pro-`p` Frattini subgroup has order `p ^ d(G)`, so its order
@@ -61,10 +61,14 @@ variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
 omit hp [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] in
 /-- A topological group with trivial pro-`p` Frattini subgroup is a `p`-group, since the `p`-th
-power of every element lies in the pro-`p` Frattini subgroup, hence it is pro-`p`. -/
+power of every element lies in the pro-`p` Frattini subgroup. -/
+theorem isPGroup_of_proPFrattini_eq_bot (hΦ : proPFrattini p G = ⊥) : IsPGroup p G := fun g ↦
+  ⟨1, by rw [pow_one, ← Subgroup.mem_bot, ← hΦ]; exact pow_mem_proPFrattini g⟩
+
+omit hp [IsTopologicalGroup G] [CompactSpace G] [TotallyDisconnectedSpace G] in
+/-- A topological group with trivial pro-`p` Frattini subgroup is pro-`p`. -/
 theorem isProP_of_proPFrattini_eq_bot (hΦ : proPFrattini p G = ⊥) : IsProP p G :=
-  IsPGroup.isProP fun g ↦
-    ⟨1, by rw [pow_one, ← Subgroup.mem_bot, ← hΦ]; exact pow_mem_proPFrattini g⟩
+  (isPGroup_of_proPFrattini_eq_bot hΦ).isProP
 
 namespace IsProP
 

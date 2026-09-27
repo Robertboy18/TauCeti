@@ -280,6 +280,7 @@ theorem finrank_gradedPiece_one [Fintype X] :
 omit [LinearOrder X] in
 /-- The degree-one graded piece of the free pro-`p` group on a finite type `X` has
 `p ^ (#X + (#X choose 2))` elements. -/
+@[simp]
 theorem natCard_gradedPiece_one :
     Nat.card (gradedPiece p (freeProP p X) 1) = p ^ (Nat.card X + (Nat.card X).choose 2) := by
   have := Fintype.ofFinite X

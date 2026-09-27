@@ -29,15 +29,16 @@ is its `𝔽_p`-dimension `d + (d choose 2) = d (d + 1) / 2`.
 
 This is the value against which the normalisation of `H²` is checked: an `H²` counting `d choose 2`
 or `d ^ 2` classes for `(ℤ/p)^d` would be wrong. The statements are about the order of the explicit
-continuous cohomology `H2 G (ZMod p)` for the trivial `G`-module `𝔽_p`, with the action carried as
-an instance together with the hypothesis that it is trivial, as in
-`TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationRank`.
+continuous cohomology `H2 G (ZMod p)`, with the action of `G` on `𝔽_p` carried as an instance as in
+`TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationRank`; no triviality hypothesis is needed,
+since `G` is a `p`-group (`TauCeti.isPGroup_of_proPFrattini_eq_bot`) and a `p`-group can only act
+trivially on `𝔽_p` (`IsPGroup.smul_zmod_eq_self`).
 
 ## Main results
 
 * `TauCeti.natCard_H2_of_proPFrattini_eq_bot`: for a topologically finitely generated profinite
-  group `G` with `Φ(G) = 1` acting trivially on `𝔽_p`, `H²(G, 𝔽_p)` has `p ^ (d(G) (d(G) + 1) / 2)`
-  elements; `TauCeti.finite_H2_of_proPFrattini_eq_bot` records its finiteness.
+  group `G` with `Φ(G) = 1`, `H²(G, 𝔽_p)` has `p ^ (d(G) (d(G) + 1) / 2)` elements;
+  `TauCeti.finite_H2_of_proPFrattini_eq_bot` records its finiteness.
 * `TauCeti.topologicalGeneratorRankNat_pi_multiplicative_zmod`: `d((ℤ/p)^X) = #X`.
 * `TauCeti.natCard_H2_pi_multiplicative_zmod`: `H²((ℤ/p)^X, 𝔽_p)` has `p ^ (#X (#X + 1) / 2)`
   elements.
@@ -72,14 +73,16 @@ variable [Fact p.Prime] {G : Type u} [Group G] [TopologicalSpace G] [IsTopologic
   [ContinuousSMul G (ZMod p)]
 
 /-- **The relation rank of a finite elementary abelian `p`-group.** Let `G` be a topologically
-finitely generated profinite group with trivial pro-`p` Frattini subgroup, acting trivially on
-`𝔽_p`. Then `H²(G, 𝔽_p)` has `p ^ (d (d + 1) / 2)` elements, where `d = d(G)` is the
-topological generator rank: the relation rank of `G` is `d (d + 1) / 2`. -/
+finitely generated profinite group with trivial pro-`p` Frattini subgroup. Then `H²(G, 𝔽_p)` has
+`p ^ (d (d + 1) / 2)` elements for every continuous action of `G` on `𝔽_p` (which is necessarily
+trivial), where `d = d(G)` is the topological generator rank: the relation rank of `G` is
+`d (d + 1) / 2`. -/
 theorem natCard_H2_of_proPFrattini_eq_bot (hfg : IsTopologicallyFinitelyGenerated G)
-    (hΦ : proPFrattini p G = ⊥) (htriv : ∀ (g : G) (m : ZMod p), g • m = m) :
+    (hΦ : proPFrattini p G = ⊥) :
     Nat.card (H2 G (ZMod p)) =
       p ^ (topologicalGeneratorRankNat G hfg * (topologicalGeneratorRankNat G hfg + 1) / 2) := by
   have hp : p.Prime := Fact.out
+  have htriv := (isPGroup_of_proPFrattini_eq_bot hΦ).smul_zmod_eq_self
   set d := topologicalGeneratorRankNat G hfg
   -- A minimal presentation `G ≅ ⟨X ∣ rels⟩` on a type `X` with `d` elements; its relation
   -- subgroup is `R = Φ(F) = λ_1(F)`.
@@ -112,12 +115,11 @@ theorem natCard_H2_of_proPFrattini_eq_bot (hfg : IsTopologicallyFinitelyGenerate
   rw [presentedProP.natCard_H2 rels hrels e htriv hQfg, hrank, harith]
 
 /-- `H²(G, 𝔽_p)` is finite for a topologically finitely generated profinite group `G` with trivial
-pro-`p` Frattini subgroup, acting trivially on `𝔽_p`. -/
+pro-`p` Frattini subgroup. -/
 theorem finite_H2_of_proPFrattini_eq_bot (hfg : IsTopologicallyFinitelyGenerated G)
-    (hΦ : proPFrattini p G = ⊥) (htriv : ∀ (g : G) (m : ZMod p), g • m = m) :
-    Finite (H2 G (ZMod p)) :=
+    (hΦ : proPFrattini p G = ⊥) : Finite (H2 G (ZMod p)) :=
   Nat.finite_of_card_ne_zero <|
-    (natCard_H2_of_proPFrattini_eq_bot hfg hΦ htriv) ▸ pow_ne_zero _ (Fact.out : p.Prime).ne_zero
+    (natCard_H2_of_proPFrattini_eq_bot hfg hΦ) ▸ pow_ne_zero _ (Fact.out : p.Prime).ne_zero
 
 end ElementaryAbelian
 
@@ -127,7 +129,7 @@ section PiZMod
 
 variable (p) (X : Type u) [Finite X]
 
-/-- The elementary abelian group `(ℤ/p)^X` has `p ^ #X` elements. -/
+/-- The group `(ℤ/p)^X`, a product of `#X` copies of `ℤ/p`, has `p ^ #X` elements. -/
 @[simp]
 theorem natCard_pi_multiplicative_zmod :
     Nat.card (X → Multiplicative (ZMod p)) = p ^ Nat.card X := by
@@ -158,14 +160,14 @@ theorem topologicalGeneratorRankNat_pi_multiplicative_zmod
 variable [DistribMulAction (X → Multiplicative (ZMod p)) (ZMod p)]
   [ContinuousSMul (X → Multiplicative (ZMod p)) (ZMod p)]
 
-/-- **`r((ℤ/p)^X) = #X (#X + 1) / 2`.** For the finite elementary abelian group `(ℤ/p)^X` acting
-trivially on `𝔽_p`, `H²((ℤ/p)^X, 𝔽_p)` has `p ^ (#X (#X + 1) / 2)` elements. -/
-theorem natCard_H2_pi_multiplicative_zmod
-    (htriv : ∀ (g : X → Multiplicative (ZMod p)) (m : ZMod p), g • m = m) :
+/-- **`r((ℤ/p)^X) = #X (#X + 1) / 2`.** For the finite elementary abelian group `(ℤ/p)^X`,
+`H²((ℤ/p)^X, 𝔽_p)` has `p ^ (#X (#X + 1) / 2)` elements. -/
+@[simp]
+theorem natCard_H2_pi_multiplicative_zmod :
     Nat.card (H2 (X → Multiplicative (ZMod p)) (ZMod p)) =
       p ^ (Nat.card X * (Nat.card X + 1) / 2) := by
   rw [natCard_H2_of_proPFrattini_eq_bot isTopologicallyFinitelyGenerated_of_fg
-    (proPFrattini_pi_multiplicative_zmod_eq_bot p X) htriv,
+    (proPFrattini_pi_multiplicative_zmod_eq_bot p X),
     topologicalGeneratorRankNat_pi_multiplicative_zmod]
 
 end PiZMod
