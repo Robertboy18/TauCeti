@@ -42,6 +42,9 @@ trivially on `𝔽_p` (`IsPGroup.smul_zmod_eq_self`).
 * `TauCeti.topologicalGeneratorRankNat_pi_multiplicative_zmod`: `d((ℤ/p)^X) = #X`.
 * `TauCeti.natCard_H2_pi_multiplicative_zmod`: `H²((ℤ/p)^X, 𝔽_p)` has `p ^ (#X (#X + 1) / 2)`
   elements.
+* `TauCeti.proPFrattini_multiplicative_zmod_eq_bot` and
+  `TauCeti.topologicalGeneratorRankNat_multiplicative_zmod`: the cyclic group `ℤ/p` itself has
+  trivial pro-`p` Frattini subgroup and `d(ℤ/p) = 1`.
 
 ## References
 
@@ -171,5 +174,27 @@ theorem natCard_H2_pi_multiplicative_zmod :
     topologicalGeneratorRankNat_pi_multiplicative_zmod]
 
 end PiZMod
+
+/-! ### The example `ℤ/p` -/
+
+section ZMod
+
+variable (p : ℕ) [Fact p.Prime]
+
+/-- The pro-`p` Frattini subgroup of the cyclic group `ℤ/p` is trivial. -/
+@[simp]
+theorem proPFrattini_multiplicative_zmod_eq_bot : proPFrattini p (Multiplicative (ZMod p)) = ⊥ :=
+  (proPFrattini_eq_bot_iff Fact.out).mpr
+    ⟨⟨⟨mul_comm⟩⟩, by rw [Monoid.exponent_multiplicative, ZMod.exponent]⟩
+
+/-- **`d(ℤ/p) = 1`.** The topological generator rank of the cyclic group `ℤ/p` is `1`. -/
+@[simp]
+theorem topologicalGeneratorRankNat_multiplicative_zmod
+    (h : IsTopologicallyFinitelyGenerated (Multiplicative (ZMod p))) :
+    topologicalGeneratorRankNat (Multiplicative (ZMod p)) h = 1 :=
+  topologicalGeneratorRankNat_eq_of_natCard_eq_pow h (proPFrattini_multiplicative_zmod_eq_bot p)
+    (by rw [Nat.card_congr Multiplicative.ofAdd.symm, Nat.card_zmod, pow_one])
+
+end ZMod
 
 end TauCeti
