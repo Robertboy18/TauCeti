@@ -12,7 +12,7 @@ import Mathlib.Tactic.Ring
 # Orders along an exact sequence of groups
 
 The order-index formula `Nat.card f.ker * Nat.card f.range = Nat.card G` for a group homomorphism
-`f` (`MonoidHom.card_ker_mul_card_range`) turns exactness of a sequence of homomorphisms into
+`f` (`Subgroup.card_ker_mul_card_range`) turns exactness of a sequence of homomorphisms into
 identities between the orders of its terms. Two are recorded here.
 
 * At a node `A → B → C` where the range of the first map is the kernel of the second, the order

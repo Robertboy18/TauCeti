@@ -28,11 +28,12 @@ group `G`, because `H²(U, A) ≅ H²(G, Coind_U^G A)` and `Coind_U^G A` is agai
 ## Main definitions
 
 * `TauCeti.DiscreteCoind.quotientPiAddEquiv`: for an open `U` acting trivially on `A`, the
-  additive equivalence `Coind_U^G A ≃+ (G ⧸ U → A)`.
+  additive equivalence `Coind_U^G A ≃+ (G ⧸ U → A)`; `quotientPiAddEquiv_smul_apply` records that
+  it carries the action of `G` on `Coind_U^G A` to the permutation action on `G ⧸ U → A`.
 
 ## Main results
 
-* `TauCeti.DiscreteCoind.injective_apply_out_inv` and `TauCeti.DiscreteCoind.instFinite`:
+* `TauCeti.DiscreteCoind.apply_out_inv_injective` and `TauCeti.DiscreteCoind.instFinite`:
   restriction to a right transversal is injective, so `Coind_U^G A` is finite for finite `A` and
   finite-index `U`.
 * `TauCeti.DiscreteCoind.natCard_of_isOpen`: `|Coind_U^G A| = |A| ^ [G : U]` for an open
@@ -57,7 +58,7 @@ variable {G : Type u} [Group G] [TopologicalSpace G] {U : Subgroup G}
 /-- **Restriction to a right transversal is injective.** An element of `Coind_U^G A` is determined
 by its values at the representatives `(Quotient.out x)⁻¹`, `x : G ⧸ U`, which form a right
 transversal of `U` in `G`. -/
-theorem injective_apply_out_inv :
+theorem apply_out_inv_injective :
     Function.Injective fun (f : DiscreteCoind G U A) (x : G ⧸ U) => f (Quotient.out x)⁻¹ := by
   intro f f' h
   ext g
@@ -70,7 +71,7 @@ theorem injective_apply_out_inv :
 
 /-- `Coind_U^G A` is finite when `A` is finite and `U` has finite index. -/
 instance instFinite [Finite A] [U.FiniteIndex] : Finite (DiscreteCoind G U A) :=
-  Finite.of_injective _ injective_apply_out_inv
+  Finite.of_injective _ apply_out_inv_injective
 
 end Transversal
 
@@ -119,6 +120,18 @@ theorem quotientPiAddEquiv_apply_mk (f : DiscreteCoind G U A) (g : G) :
 @[simp]
 theorem quotientPiAddEquiv_symm_apply (φ : G ⧸ U → A) (g : G) :
     (quotientPiAddEquiv G U A hU htriv).symm φ g = φ (QuotientGroup.mk g⁻¹) := (rfl)
+
+/-- **`quotientPiAddEquiv` is `G`-equivariant.** The action `(g • f) x = f (x * g)` of `G` on
+`Coind_U^G A` corresponds to the permutation action `(g • φ) y = φ (g⁻¹ • y)` on `G ⧸ U → A`, for
+the translation action of `G` on the coset space `G ⧸ U`. -/
+@[simp]
+theorem quotientPiAddEquiv_smul_apply (g : G) (f : DiscreteCoind G U A) (y : G ⧸ U) :
+    quotientPiAddEquiv G U A hU htriv (g • f) y =
+      quotientPiAddEquiv G U A hU htriv f (g⁻¹ • y) := by
+  induction y using QuotientGroup.induction_on with
+  | H x =>
+    rw [MulAction.Quotient.smul_mk, smul_eq_mul, quotientPiAddEquiv_apply_mk,
+      quotientPiAddEquiv_apply_mk, coe_smul, mul_inv_rev, inv_inv]
 
 include hU htriv in
 /-- **The order of the coinduced module of a trivial module.** For an open subgroup `U` of finite
