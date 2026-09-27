@@ -16,7 +16,8 @@ Two newforms of level `N`, weight `k` and the same nebentypus whose eigenvalues 
 index coprime to `N` outside a finite set are equal (Miyake, Theorem 4.6.12). The finite slack is
 what makes the statement *strong*: nothing at all is assumed at the indices dividing the level.
 
-The same argument, run on `f - V₁ g` instead of `f - g`, rigidifies the level across divisors: a
+The same argument, run on `f - a₁(g)⁻¹ V₁ g` (the level-raise of `g` renormalised to `a₁ = 1`)
+instead of `f - g`, rigidifies the level across divisors: a
 good Hecke eigenform `g` of a level `M ∣ N` with `a₁(g) ≠ 0` whose nebentypus induces that of a
 newform `f` of level `N`, and whose eigenvalues agree with those of `f` at every prime `p ∤ N`,
 has `M = N` (`Newform.level_eq_of_dvd_of_forall_prime_eigenvalue_eq`). This is the divisor-level
@@ -76,22 +77,18 @@ namespace HeckeRing.GL2
 
 variable {N : ℕ} [NeZero N] {k : ℤ}
 
-/-- **The difference of two newforms with the same eigenvalue at a good prime is a ring
-eigenvector there**, with that shared eigenvalue. At a prime the ring generator acts as the
-classical operator on each of `f` and `g`, and the two eigenvalues agree by hypothesis, so the
-difference is scaled by the common value. -/
-private theorem exists_heckeRingHomCuspCharSpace_sub_eq_smul {f g : Newform N k} {p : ℕ}
-    (hp : p.Prime) (hpN : Nat.Coprime p N)
-    (hfg : f.eigenvalue ⟨p, hp.pos⟩ hpN = g.eigenvalue ⟨p, hp.pos⟩ hpN)
-    {d : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hd : d = f.toCuspForm - g.toCuspForm)
-    (hdχ : d ∈ cuspFormCharSpace k f.χ) :
-    ∃ c : ℂ, heckeRingHomCuspCharSpace k f.χ (heckeTCompositeGamma0 N p) ⟨d, hdχ⟩
-      = c • ⟨d, hdχ⟩ := by
+/-- **The difference of two eigenvectors of the classical `T_p` with a common eigenvalue is a
+ring eigenvector there**, on `S_k(N, χ)`: at a prime the ring generator acts as the classical
+operator, which scales `F` and `G`, hence `F - G`, by the common value. -/
+private theorem exists_heckeRingHomCuspCharSpace_sub_eq_smul {χ : (ZMod N)ˣ →* ℂˣ} {p : ℕ}
+    (hp : p.Prime) {F G : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} {c : ℂ}
+    (hF : heckeTCuspNat k p (_hn := ⟨hp.ne_zero⟩) F = c • F)
+    (hG : heckeTCuspNat k p (_hn := ⟨hp.ne_zero⟩) G = c • G)
+    {d : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hd : d = F - G) (hdχ : d ∈ cuspFormCharSpace k χ) :
+    ∃ c : ℂ, heckeRingHomCuspCharSpace k χ (heckeTCompositeGamma0 N p) ⟨d, hdχ⟩ = c • ⟨d, hdχ⟩ :=
   have : NeZero p := ⟨hp.ne_zero⟩
-  refine ⟨f.eigenvalue ⟨p, hp.pos⟩ hpN,
-    heckeRingHomCuspCharSpace_heckeTCompositeGamma0_eq_smul_of_heckeTCuspNat_eq_smul hp ?_⟩
-  simp only [hd, map_sub, f.heckeTCuspNat_eq_eigenvalue_smul hp hpN,
-    g.heckeTCuspNat_eq_eigenvalue_smul hp hpN, ← hfg, smul_sub]
+  ⟨c, heckeRingHomCuspCharSpace_heckeTCompositeGamma0_eq_smul_of_heckeTCuspNat_eq_smul hp <| by
+    simp only [hd, map_sub, hF, hG, smul_sub]⟩
 
 /-- **A newform is determined by its eigenvalues at the good primes**: two newforms of level
 `N`, weight `k` and the same nebentypus with the same eigenvalue at every prime not dividing `N`
@@ -104,8 +101,9 @@ theorem Newform.eq_of_forall_prime_eigenvalue_eq {f g : Newform N k} (hχ : f.χ
   set d : CuspForm ((Gamma1 N).map (mapGL ℝ)) k := f.toCuspForm - g.toCuspForm with hd
   have hdχ : d ∈ cuspFormCharSpace k f.χ :=
     Submodule.sub_mem _ f.mem_charSpace (hχ ▸ g.mem_charSpace)
-  have heig := fun p hp hpN ↦
-    exists_heckeRingHomCuspCharSpace_sub_eq_smul hp hpN (h p hp hpN) hd hdχ
+  have heig := fun (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N) ↦
+    exists_heckeRingHomCuspCharSpace_sub_eq_smul hp (f.heckeTCuspNat_eq_eigenvalue_smul hp hpN)
+      (by rw [g.heckeTCuspNat_eq_eigenvalue_smul hp hpN, h p hp hpN]) hd hdχ
   have h1 : (qExpansion 1 d).coeff 1 = 0 := by
     rw [hd, FunLike.coe_sub,
       ModularForm.qExpansion_sub one_pos (one_mem_strictPeriods_Gamma1_map _), map_sub, f.isNorm,
@@ -187,13 +185,9 @@ theorem Newform.level_eq_of_dvd_of_forall_prime_eigenvalue_eq {M : ℕ} [NeZero 
   -- the difference `f - G` is a good Hecke eigenvector of `S_k(N, χ)` with `a₁ = 0`
   set d : CuspForm ((Gamma1 N).map (mapGL ℝ)) k := f.toCuspForm - G with hd
   have hdχ : d ∈ cuspFormCharSpace k f.χ := Submodule.sub_mem _ f.mem_charSpace hGχ
-  have hdeig : ∀ p : ℕ, p.Prime → Nat.Coprime p N → ∃ c : ℂ,
-      heckeRingHomCuspCharSpace k f.χ (heckeTCompositeGamma0 N p) ⟨d, hdχ⟩ = c • ⟨d, hdχ⟩ := by
-    intro p hp hpN
-    have : NeZero p := ⟨hp.ne_zero⟩
-    refine ⟨f.eigenvalue ⟨p, hp.pos⟩ hpN,
-      heckeRingHomCuspCharSpace_heckeTCompositeGamma0_eq_smul_of_heckeTCuspNat_eq_smul hp ?_⟩
-    simp only [hd, map_sub, f.heckeTCuspNat_eq_eigenvalue_smul hp hpN, hGeig p hp hpN, smul_sub]
+  have hdeig := fun (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N) ↦
+    exists_heckeRingHomCuspCharSpace_sub_eq_smul hp (f.heckeTCuspNat_eq_eigenvalue_smul hp hpN)
+      (hGeig p hp hpN) hd hdχ
   have hd1 : (qExpansion 1 d).coeff 1 = 0 := by
     rw [hd, FunLike.coe_sub,
       ModularForm.qExpansion_sub one_pos (one_mem_strictPeriods_Gamma1_map _), map_sub, f.isNorm,

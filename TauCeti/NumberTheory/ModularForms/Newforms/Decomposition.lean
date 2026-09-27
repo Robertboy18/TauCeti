@@ -116,13 +116,13 @@ newforms with its eigenvalues.** If a cusp form `F` of level `Γ₁(N)` satisfie
 every prime `p ∤ N`, then `F` is a combination of forms `V_d g`, `d * M ∣ N`, with `g` a newform
 of level `M` whose eigenvalue at every prime `p ∤ N` is `aₚ`. -/
 theorem mem_span_levelRaise_of_forall_heckeTCuspNat_eq_smul [NeZero N]
-    {F : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} {a : ℕ → ℂ}
-    (hF : ∀ (p : ℕ) (hp : p.Prime), Nat.Coprime p N →
-      heckeTCuspNat k p (_hn := ⟨hp.ne_zero⟩) F = a p • F) :
+    {F : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} {a : ∀ p : ℕ, p.Prime → Nat.Coprime p N → ℂ}
+    (hF : ∀ (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N),
+      heckeTCuspNat k p (_hn := ⟨hp.ne_zero⟩) F = a p hp hpN • F) :
     F ∈ Submodule.span ℂ {G : CuspForm ((Gamma1 N).map (mapGL ℝ)) k |
       ∃ (M d : ℕ) (_ : NeZero M) (_ : NeZero d) (h : d * M ∣ N) (g : Newform M k),
         (∀ (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N),
-          g.eigenvalue ⟨p, hp.pos⟩ (hpN.coprime_dvd_right (dvd_of_mul_left_dvd h)) = a p) ∧
+          g.eigenvalue ⟨p, hp.pos⟩ (hpN.coprime_dvd_right (dvd_of_mul_left_dvd h)) = a p hp hpN) ∧
         CuspForm.levelRaise d (Gamma1_map_le_conjAct_scaleGL_of_dvd h) g.toCuspForm = G} := by
   -- the good primes, the operators `Tₚ` on them, and the level-raised newforms with a
   -- prescribed eigenvalue system on them
@@ -150,7 +150,7 @@ theorem mem_span_levelRaise_of_forall_heckeTCuspNat_eq_smul [NeZero N]
       (Submodule.subset_span ⟨M, d, inferInstance, inferInstance, h, g, fun _ ↦ rfl, rfl⟩)
   -- split off the component of `F` with the eigenvalues `a`; the rest is an eigenvector for `a`
   -- lying in the span of the other joint eigenspaces, hence zero
-  let a' : ι → ℂ := fun p ↦ a p
+  let a' : ι → ℂ := fun p ↦ a p.1 p.2.1 p.2.2
   have hFmem : F ∈ ⨆ χ, S χ := htop ▸ Submodule.mem_top
   rw [iSup_split_single S a'] at hFmem
   obtain ⟨s, hs, t, ht, rfl⟩ := Submodule.mem_sup.mp hFmem
@@ -170,12 +170,13 @@ newform of divisor level.** If a nonzero cusp form `F` of level `Γ₁(N)` satis
 at every prime `p ∤ N`, then some newform `g` of some level `M ∣ N` has eigenvalue `aₚ` at every
 prime `p ∤ N`. -/
 theorem exists_newform_eigenvalue_eq_of_forall_heckeTCuspNat_eq_smul [NeZero N]
-    {F : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hF0 : F ≠ 0) {a : ℕ → ℂ}
-    (hF : ∀ (p : ℕ) (hp : p.Prime), Nat.Coprime p N →
-      heckeTCuspNat k p (_hn := ⟨hp.ne_zero⟩) F = a p • F) :
+    {F : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hF0 : F ≠ 0)
+    {a : ∀ p : ℕ, p.Prime → Nat.Coprime p N → ℂ}
+    (hF : ∀ (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N),
+      heckeTCuspNat k p (_hn := ⟨hp.ne_zero⟩) F = a p hp hpN • F) :
     ∃ (M : ℕ) (_ : NeZero M) (hM : M ∣ N) (g : Newform M k),
       ∀ (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N),
-        g.eigenvalue ⟨p, hp.pos⟩ (hpN.coprime_dvd_right hM) = a p := by
+        g.eigenvalue ⟨p, hp.pos⟩ (hpN.coprime_dvd_right hM) = a p hp hpN := by
   by_contra hne
   -- with no such newform, the span containing `F` is spanned by the empty set
   refine hF0 ((Submodule.mem_bot ℂ).mp ?_)
@@ -195,14 +196,9 @@ theorem EigenformAwayFromLevel.exists_newform_eigenvalue_eq [NeZero N]
     (f : EigenformAwayFromLevel N k) :
     ∃ (M : ℕ) (_ : NeZero M) (hM : M ∣ N) (g : Newform M k),
       ∀ (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N),
-        g.eigenvalue ⟨p, hp.pos⟩ (hpN.coprime_dvd_right hM) = f.eigenvalue ⟨p, hp.pos⟩ hpN := by
-  classical
-  -- the eigenvalues of `f`, extended by `0` to the indices where they are not defined
-  obtain ⟨M, _, hM, g, hg⟩ := Newform.exists_newform_eigenvalue_eq_of_forall_heckeTCuspNat_eq_smul
-    f.ne_zero (a := fun p ↦
-      if hp : p.Prime ∧ Nat.Coprime p N then f.eigenvalue ⟨p, hp.1.pos⟩ hp.2 else 0)
-    fun p hp hpN ↦ by rw [f.heckeTCuspNat_eq_eigenvalue_smul hp hpN, dite_eq_left ⟨hp, hpN⟩]
-  exact ⟨M, inferInstance, hM, g, fun p hp hpN ↦ by rw [hg p hp hpN, dite_eq_left ⟨hp, hpN⟩]⟩
+        g.eigenvalue ⟨p, hp.pos⟩ (hpN.coprime_dvd_right hM) = f.eigenvalue ⟨p, hp.pos⟩ hpN :=
+  Newform.exists_newform_eigenvalue_eq_of_forall_heckeTCuspNat_eq_smul f.ne_zero
+    fun _ hp hpN ↦ f.heckeTCuspNat_eq_eigenvalue_smul hp hpN
 
 /-! ### The good eigensystem of a newform spans a line in its nebentypus space -/
 
@@ -217,30 +213,23 @@ theorem Newform.eq_qExpansion_coeff_one_smul_of_forall_prime_heckeTCuspNat_eq_sm
     (h : ∀ (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N),
       heckeTCuspNat k p (_hn := ⟨hp.ne_zero⟩) F = f.eigenvalue ⟨p, hp.pos⟩ hpN • F) :
     F = (qExpansion 1 F).coeff 1 • f.toCuspForm := by
-  classical
-  -- `F` is a combination of level-raised newforms with the eigenvalues of `f`
-  have hspan := Newform.mem_span_levelRaise_of_forall_heckeTCuspNat_eq_smul (a := fun p ↦
-    if hp : p.Prime ∧ Nat.Coprime p N then f.eigenvalue ⟨p, hp.1.pos⟩ hp.2 else 0)
-    fun p hp hpN ↦ by rw [h p hp hpN, dite_eq_left ⟨hp, hpN⟩]
-  -- each generator is a multiple of `f`, or lies in another nebentypus space
+  -- `F` is a combination of level-raised newforms with the eigenvalues of `f`; each generator is
+  -- a multiple of `f`, or lies in another nebentypus space
   have hFmem : F ∈ (ℂ ∙ f.toCuspForm) ⊔
       ⨆ (ψ : (ZMod N)ˣ →* ℂˣ) (_ : ψ ≠ f.χ), cuspFormCharSpace k ψ := by
-    refine Submodule.span_le.mpr ?_ hspan
+    refine Submodule.span_le.mpr ?_ (Newform.mem_span_levelRaise_of_forall_heckeTCuspNat_eq_smul h)
     rintro _ ⟨M, d, _, _, hdM, g, hg, rfl⟩
     have hMN : M ∣ N := dvd_of_mul_left_dvd hdM
     by_cases hgχ : g.χ.comp (ZMod.unitsMap hMN) = f.χ
     · -- compatible nebentypus: `g` has level `N`, so `g = f` and the generator is `V₁ f = f`
       refine Submodule.mem_sup_left ?_
-      have hg' : ∀ (p : ℕ) (hp : p.Prime) (hpN : Nat.Coprime p N),
-          g.eigenvalue ⟨p, hp.pos⟩ (hpN.coprime_dvd_right hMN) = f.eigenvalue ⟨p, hp.pos⟩ hpN :=
-        fun p hp hpN ↦ by rw [hg p hp hpN, dite_eq_left ⟨hp, hpN⟩]
       obtain rfl := f.level_eq_of_dvd_of_forall_prime_eigenvalue_eq g.toEigenformAwayFromLevel
-        (ne_of_eq_of_ne g.isNorm one_ne_zero) hMN hgχ hg'
+        (ne_of_eq_of_ne g.isNorm one_ne_zero) hMN hgχ hg
       obtain rfl : d = 1 :=
         (mul_left_eq_self₀.mp (Nat.dvd_antisymm hdM (dvd_mul_left _ _))).resolve_right
           (NeZero.ne _)
       rw [ZMod.unitsMap_self, MonoidHom.comp_id] at hgχ
-      rw [_root_.CuspForm.levelRaise_one_self, Newform.eq_of_forall_prime_eigenvalue_eq hgχ hg']
+      rw [_root_.CuspForm.levelRaise_one_self, Newform.eq_of_forall_prime_eigenvalue_eq hgχ hg]
       exact Submodule.mem_span_singleton_self _
     · -- otherwise the generator lies in the nebentypus space of `g`, which is not `χ_f`
       exact Submodule.mem_sup_right (Submodule.mem_iSup_of_mem _ (Submodule.mem_iSup_of_mem hgχ
