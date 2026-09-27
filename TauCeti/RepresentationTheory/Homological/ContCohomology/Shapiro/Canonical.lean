@@ -40,10 +40,12 @@ bijective. This file defines the map on the canonical carrier and proves three t
 
 Shapiro's lemma in every degree follows from the low-degree bijectivity and the commuting square
 with the connecting maps by induction on the degree, given
-the acyclicity of `Coind_1^G A` in every positive degree: the connecting maps of
-`0 → A → Coind_1^U A → Q → 0` and of its coinduction to `G` are then bijective, transitivity of
-coinduction identifies `Coind_U^G (Coind_1^U A)` with `Coind_1^G A`, and the commuting square
-carries bijectivity of the Shapiro map in degree `n` to bijectivity in degree `n + 1`.
+the acyclicity of `Coind_1^G A` in every positive degree: for `n ≥ 1` the connecting maps
+`Hⁿ(-, Q) → Hⁿ⁺¹(-, A)` of `0 → A → Coind_1^U A → Q → 0` and of its coinduction to `G` are then
+bijective (in degree `0` they are only surjective, since `H⁰` of the middle term need not vanish),
+transitivity of coinduction identifies `Coind_U^G (Coind_1^U A)` with `Coind_1^G A`, and the
+commuting square carries bijectivity of the Shapiro map in degree `n ≥ 1` to bijectivity in degree
+`n + 1`. The degrees `0` and `1` proved here directly are the base cases of this induction.
 
 ## Main definitions
 
@@ -300,9 +302,11 @@ Hⁿ(G, Coind_U^G C) ---δ---> Hⁿ⁺¹(G, Coind_U^G A)
 ```
 
 commutes in every degree. This is the naturality of the connecting map in the compatible pair of
-the inclusion and the counit; it is the step that carries bijectivity of the Shapiro map from one
-degree to the next once the middle terms are acyclic. The connecting map of `U` needs `U` compact,
-which follows from its closedness in the compact group `G`. -/
+the inclusion and the counit; once the middle terms are acyclic in every positive degree, it is
+the step that carries bijectivity of the Shapiro map from degree `n ≥ 1` to degree `n + 1` (both
+connecting maps are then bijective; in degree `0` they are only surjective, so the degrees `0` and
+`1` are separate base cases). The connecting map of `U` needs `U` compact, which follows from its
+closedness in the compact group `G`. -/
 theorem delta_shapiroMap (hU : IsClosed (U : Set G)) (n : ℕ) :
     haveI : CompactSpace U := isCompact_iff_compactSpace.mp hU.isCompact
     (coind U hU S).delta n ≫ shapiroMap U A (n + 1) = shapiroMap U C n ≫ S.delta n := by
