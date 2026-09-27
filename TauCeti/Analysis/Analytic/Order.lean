@@ -70,8 +70,8 @@ lemma analyticOrderAt_comp_pow_zero {E : Type*} [NormedAddCommGroup E] [NormedSp
 /-- The power map `w ↦ w ^ m`, recentred at `0`, has analytic order `m` at `0` when `m ≠ 0`. -/
 theorem analyticOrderAt_pow_sub_zero_pow {m : ℕ} (hm : m ≠ 0) :
     analyticOrderAt (fun w : 𝕜 ↦ w ^ m - 0 ^ m) 0 = m := by
-  rw [show (fun w : 𝕜 ↦ w ^ m - 0 ^ m) = (· - 0) ^ m from funext fun w ↦ by simp [zero_pow hm],
-    analyticOrderAt_centeredMonomial]
+  have hpow : (fun w : 𝕜 ↦ w ^ m - 0 ^ m) = (· - 0) ^ m := funext fun w ↦ by simp [zero_pow hm]
+  rw [hpow, analyticOrderAt_centeredMonomial]
 
 /-- A function analytic at `x` has a simple zero of `f · - f x` at `x` exactly when its
 derivative at `x` does not vanish: the `iff` form of Mathlib's

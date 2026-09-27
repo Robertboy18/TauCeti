@@ -21,11 +21,10 @@ order of vanishing of `e' ∘ f ∘ e.symm - e' (f x)` at `e x`, computed with M
 `analyticOrderNatAt`. This file defines `TauCeti.RiemannSurface.localMultiplicity` using the
 preferred charts `chartAt ℂ x` and `chartAt ℂ (f x)`, and proves that any two charts of the
 maximal atlases give the same value when `f` is holomorphic near `x`
-(`TauCeti.RiemannSurface.localMultiplicity_eq_analyticOrderNatAt`): a transition map is a
-holomorphic injection of an open set, so its derivative vanishes nowhere
-(`TauCeti.deriv_symm_trans_ne_zero`), and Mathlib's `analyticOrderAt_comp_of_deriv_ne_zero` and
-`AnalyticAt.analyticOrderAt_comp` show that reparametrising either the source or the target
-leaves the order unchanged.
+(`TauCeti.RiemannSurface.localMultiplicity_eq_analyticOrderNatAt`). Chart independence makes the
+local multiplicity an invariant of the map rather than of the coordinates used to read it, so it
+may be computed in whichever charts are convenient; every result below is obtained by choosing
+suitable charts.
 
 For a map holomorphic near `x`, the local multiplicity vanishes exactly when `f` is constant
 near `x`, and otherwise it is positive; it multiplies under composition; and it equals `1`
@@ -127,6 +126,10 @@ theorem localMultiplicity_eq_analyticOrderNatAt {e : OpenPartialHomeomorph X ℂ
     (he' : e' ∈ maximalAtlas 𝓘(ℂ) 1 Y) (hx : x ∈ e.source) (hfx : f x ∈ e'.source)
     (hf : ∀ᶠ y in 𝓝 x, MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) f y) :
     localMultiplicity f x = analyticOrderNatAt (fun z ↦ e' (f (e.symm z)) - e' (f x)) (e x) := by
+  -- A transition map between charts of the maximal atlas is a holomorphic injection of an open
+  -- set, so its derivative vanishes nowhere (`deriv_symm_trans_ne_zero`); Mathlib's
+  -- `analyticOrderAt_comp_of_deriv_ne_zero` and `AnalyticAt.analyticOrderAt_comp` then show that
+  -- reparametrising the source or the target leaves the order unchanged.
   rw [localMultiplicity_def]
   set c := chartAt ℂ x
   set c' := chartAt ℂ (f x)
