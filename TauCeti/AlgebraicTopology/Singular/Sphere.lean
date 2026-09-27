@@ -94,7 +94,9 @@ def reducedSingularHomologySphereZeroIso (h : finrank ℝ E = 1) (p : sphere (0 
 
 /-- The generator of the reduced homology of the zero-sphere `{p, -p}` is the class
 `[-p] - [p]`. -/
-@[reassoc (attr := simp)]
+-- Not a simp lemma: `reducedSingularHomologyι_zero_app` rewrites the degree-zero inclusion
+-- inside the left-hand side first, so this would fail the `simpNF` linter.
+@[reassoc]
 lemma reducedSingularHomologySphereZeroIso_inv_ι (h : finrank ℝ E = 1) (p : sphere (0 : E) 1) :
     (reducedSingularHomologySphereZeroIso R h p).inv ≫
         (reducedSingularHomologyι R 0).app (TopCat.of (sphere (0 : E) 1)) =

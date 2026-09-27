@@ -225,7 +225,9 @@ def reducedSingularHomology₀Iso {X : TopCat.{w}} (x : X) :
 
 /-- The generator of `TauCeti.reducedSingularHomology₀Iso` at the path component of `y` is the
 class `[y] - [x]` in ordinary zeroth homology. -/
-@[reassoc (attr := simp)]
+-- Not a simp lemma: `reducedSingularHomologyι_zero_app` rewrites the degree-zero inclusion
+-- inside the left-hand side first, so this would fail the `simpNF` linter.
+@[reassoc]
 lemma ι_reducedSingularHomology₀Iso_inv_ι {X : TopCat.{w}} (x y : X)
     (h : ZerothHomotopy.mk y ≠ ZerothHomotopy.mk x) :
     Sigma.ι (fun _ : {c : ZerothHomotopy X // c ≠ ZerothHomotopy.mk x} ↦ R) ⟨.mk y, h⟩ ≫
