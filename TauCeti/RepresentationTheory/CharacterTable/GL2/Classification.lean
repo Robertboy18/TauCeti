@@ -332,8 +332,8 @@ private theorem count_arith {q : ℕ} (hq : 2 ≤ q) :
   obtain ⟨m, rfl⟩ : ∃ m, q = m + 2 := ⟨q - 2, by omega⟩
   have h1 : m + 2 - 1 = m + 1 := by omega
   have h2 : m + 2 - 2 = m := by omega
-  have h3 : (m + 2) ^ 2 - 1 = m * m + 4 * m + 3 := by
-    rw [show (m + 2) ^ 2 = m * m + 4 * m + 3 + 1 by ring, Nat.add_sub_cancel]
+  have hsq : (m + 2) ^ 2 = m * m + 4 * m + 3 + 1 := by ring
+  have h3 : (m + 2) ^ 2 - 1 = m * m + 4 * m + 3 := by omega
   have h4 : (m + 1) * m = m * m + m := by ring
   have h5 : 2 ∣ m * m + m := by
     rw [← h4, mul_comm]

@@ -310,10 +310,10 @@ theorem simple_GL2PrincipalSeries_iff (α β : Fˣ →* ℂˣ) :
     exact (mackeyDisjoint_mul_left_mul_right_iff _ hb₁ hb₂ _).mpr
       ((GL2Borel.mackeyDisjoint_weyl_iff α β).mpr hne)
 
-/-- **The principal series with `α ≠ β` are irreducible characters of `GL₂(F)`.** This is not
-`@[simp]`: `simp` already proves it from the `@[simp]` lemmas
-`TauCeti.simple_GL2PrincipalSeries_iff` and `FDRep.character_mem_irreducibleCharacters`, so the
-simpNF linter rejects the attribute. -/
+/-- **The principal series with `α ≠ β` are irreducible characters of `GL₂(F)`.** -/
+-- Not `@[simp]`: `simp` already proves this from the `@[simp]` lemmas
+-- `TauCeti.simple_GL2PrincipalSeries_iff` and `FDRep.character_mem_irreducibleCharacters`, so the
+-- simpNF linter rejects the attribute.
 theorem character_GL2PrincipalSeries_mem_irreducibleCharacters {α β : Fˣ →* ℂˣ} (hαβ : α ≠ β) :
     (GL2PrincipalSeries F α β).character ∈ irreducibleCharacters ℂ (GL (Fin 2) F) :=
   have := (simple_GL2PrincipalSeries_iff F α β).mpr hαβ
