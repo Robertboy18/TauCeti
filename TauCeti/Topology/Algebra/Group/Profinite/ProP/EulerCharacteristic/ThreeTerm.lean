@@ -35,11 +35,12 @@ sequence
 of the explicit long exact sequence, exact on the right because `H³(G, N) = 0`, and read through the
 alternating identity `AddMonoidHom.card_mul_card_mul_card_mul_card_mul_card_of_exact`. The
 cancellation in the induction step uses that `H¹(G, M ⧸ N)` is finite, which holds over any
-topologically finitely generated group.
+topologically finitely generated group. The same finiteness of `H¹` shows that the identity forces
+`H²(G, M)` to be finite whenever `H²(G, 𝔽_p)` is.
 
 Applied to the permutation module `Coind_U^G 𝔽_p` of an open subgroup `U`, of order `p ^ [G : U]`,
 Shapiro's lemma in degrees `0`, `1` and `2` turns the identity into the **three-term Euler
-formula**: if `H²(G, 𝔽_p)` is finite then so is `H²(U, 𝔽_p)`, and in `ℤ`
+formula**: if `H²(G, 𝔽_p)` is finite then so is `H²(U, 𝔽_p) ≅ H²(G, Coind_U^G 𝔽_p)`, and in `ℤ`
 
 ```text
 1 - d(U) + dim H²(U, 𝔽_p) = [G : U] * (1 - d(G) + dim H²(G, 𝔽_p)).
@@ -56,6 +57,8 @@ open subgroup `U` that is again Demushkin, it becomes the rank formula
 
 * `TauCeti.IsProP.natCard_H0_mul_natCard_H2_mul_pow`: the multiplicative three-term Euler identity
   for a finite `p`-primary module of order `p ^ k`.
+* `TauCeti.IsProP.finite_H2`: `H²(G, M)` is finite for every finite `p`-primary module `M` when
+  `H²(G, 𝔽_p)` is.
 * `TauCeti.IsProP.natCard_H2_openSubgroup_mul_pow`: the identity for `Coind_U^G 𝔽_p`, read through
   Shapiro's lemma as an identity between `|H²(U, 𝔽_p)|`, `d(U)`, `[G : U]`, `d(G)` and
   `|H²(G, 𝔽_p)|`.
@@ -63,6 +66,7 @@ open subgroup `U` that is again Demushkin, it becomes the rank formula
 * `TauCeti.IsProP.one_sub_topologicalGeneratorRankNat_add_finrank_H2`: the three-term Euler
   formula in `ℤ`.
 * `TauCeti.CohomologicalDimensionLE.natCard_H0_mul_natCard_H2_mul_pow`,
+  `TauCeti.CohomologicalDimensionLE.finite_H2`,
   `TauCeti.CohomologicalDimensionLE.natCard_H2_openSubgroup_mul_pow`,
   `TauCeti.CohomologicalDimensionLE.finite_H2_openSubgroup`,
   `TauCeti.CohomologicalDimensionLE.one_sub_topologicalGeneratorRankNat_add_finrank_H2`: the same
@@ -193,6 +197,20 @@ theorem natCard_H0_mul_natCard_H2_mul_pow (M : Type u) [AddCommGroup M] [Topolog
       _ = p ^ d * Nat.card (H1 G (M ⧸ N)) *
             (Nat.card (H1 G M) * p ^ (k + 1) * Nat.card (H2 G (ZMod p)) ^ (k + 1)) := by ring
 
+/-- **Finiteness of `H²` on finite `p`-primary modules.** Under the hypotheses of
+`TauCeti.IsProP.natCard_H0_mul_natCard_H2_mul_pow`, if `H²(G, 𝔽_p)` is finite then so is
+`H²(G, M)` for every finite discrete `G`-module `M` of `p`-power order. -/
+theorem finite_H2 (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+    [DistribMulAction G M] [ContinuousSMul G M] {k : ℕ} (hk : Nat.card M = p ^ k)
+    [Finite (H2 G (ZMod p))] : Finite (H2 G M) := by
+  have : Finite M := Nat.finite_of_card_ne_zero (hk ▸ pow_ne_zero _ hp.out.ne_zero)
+  have : Finite (H1 G M) := hfg.finite_H1
+  have key := hG.natCard_H0_mul_natCard_H2_mul_pow hfg htriv h3 M hk
+  refine Nat.finite_of_card_ne_zero fun h0 ↦ ?_
+  rw [h0, mul_zero, zero_mul] at key
+  exact Nat.mul_ne_zero (Nat.mul_ne_zero Nat.card_pos.ne' (pow_ne_zero _ hp.out.ne_zero))
+    (pow_ne_zero _ Nat.card_pos.ne') key.symm
+
 section OpenSubgroup
 
 variable (U : OpenSubgroup G)
@@ -233,13 +251,14 @@ variable [Finite (H2 G (ZMod p))]
 
 /-- **Finiteness of `H²` on open subgroups.** Under the hypotheses of
 `TauCeti.IsProP.natCard_H2_openSubgroup_mul_pow`, if `H²(G, 𝔽_p)` is finite then so is
-`H²(U, 𝔽_p)` for every open subgroup `U`. -/
+`H²(U, 𝔽_p)` for every open subgroup `U`: this is `TauCeti.IsProP.finite_H2` for `Coind_U^G 𝔽_p`,
+read through Shapiro's lemma in degree `2`. -/
 theorem finite_H2_openSubgroup : Finite (H2 U.toSubgroup (ZMod p)) := by
-  have key := hG.natCard_H2_openSubgroup_mul_pow hfg htriv h3 U
-  refine Nat.finite_of_card_ne_zero fun h0 ↦ ?_
-  rw [h0, mul_zero, zero_mul] at key
-  exact Nat.mul_ne_zero (Nat.mul_ne_zero (pow_ne_zero _ hp.out.ne_zero)
-    (pow_ne_zero _ hp.out.ne_zero)) (pow_ne_zero _ Nat.card_pos.ne') key.symm
+  have htrivU : ∀ (u : U.toSubgroup) (m : ZMod p), u • m = m := fun u m ↦ htriv u m
+  have := hG.finite_H2 hfg htriv h3 (DiscreteCoind G U.toSubgroup (ZMod p))
+    (k := U.toSubgroup.index)
+    (by rw [DiscreteCoind.natCard_of_isOpen U.isOpen htrivU, Nat.card_zmod])
+  exact Finite.of_equiv _ (explicitShapiro2 G U.toSubgroup (ZMod p) U.isClosed).toEquiv
 
 /-- **The three-term Euler formula.** Let `G` be a topologically finitely generated profinite
 pro-`p` group whose canonical `H³` vanishes on the discrete modules of order `p` with trivial
@@ -306,6 +325,16 @@ theorem natCard_H0_mul_natCard_H2_mul_pow (M : Type u) [AddCommGroup M] [Topolog
     Nat.card (H0 G M) * Nat.card (H2 G M) * p ^ (k * topologicalGeneratorRankNat G hfg) =
       Nat.card (H1 G M) * p ^ k * Nat.card (H2 G (ZMod p)) ^ k :=
   hG.natCard_H0_mul_natCard_H2_mul_pow hfg htriv
+    (fun A _ _ _ _ _ _ hA _ ↦ subsingleton_continuousCohomology_three hcd A hA) M hk
+
+/-- **Finiteness of `H²` on finite `p`-primary modules under `cd_p G ≤ 2`.** For a topologically
+finitely generated profinite pro-`p` group `G` with `cd_p G ≤ 2`, the trivial action on `𝔽_p`, and
+`H²(G, 𝔽_p)` finite, `H²(G, M)` is finite for every finite discrete `G`-module `M` of `p`-power
+order. -/
+theorem finite_H2 (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+    [DistribMulAction G M] [ContinuousSMul G M] {k : ℕ} (hk : Nat.card M = p ^ k)
+    [Finite (H2 G (ZMod p))] : Finite (H2 G M) :=
+  hG.finite_H2 hfg htriv
     (fun A _ _ _ _ _ _ hA _ ↦ subsingleton_continuousCohomology_three hcd A hA) M hk
 
 variable (U : OpenSubgroup G)
