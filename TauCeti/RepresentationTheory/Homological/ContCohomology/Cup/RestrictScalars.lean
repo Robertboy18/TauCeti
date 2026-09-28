@@ -119,11 +119,11 @@ theorem cupCocycles_one_one_restrictScalarsInt (a : cocycles (TopRep.restrictSca
   ext g₀ g₁ g₂
   -- both sides evaluated at `(g₀, g₁, g₂)` are `μ (a g₀ g₁) (b g₁ g₂)`: the identifications do not
   -- change the values of the cocycles, and both cup products are the Alexander–Whitney formula
-  rw [iCycles_cocyclesRestrictScalarsIntEquiv_apply_two, iCycles_cupCocycles, iCycles_cupCocycles,
+  rw [iCycles_cocyclesRestrictScalarsIntEquiv_two_apply, iCycles_cupCocycles, iCycles_cupCocycles,
     coe_cupCochain, coe_cupCochain, resolutionCupPairing_one_one_apply,
     resolutionCupPairing_one_one_apply, restrictScalarsInt_bil,
-    iCycles_cocyclesRestrictScalarsIntEquiv_apply_one,
-    iCycles_cocyclesRestrictScalarsIntEquiv_apply_one]
+    iCycles_cocyclesRestrictScalarsIntEquiv_one_apply,
+    iCycles_cocyclesRestrictScalarsIntEquiv_one_apply]
 
 /-- **The cup product in bidegree `(1, 1)` does not see the scalars**: under
 `TauCeti.ContCohomology.restrictScalarsIntEquiv`, the cup product of the pairing of the underlying

@@ -78,7 +78,7 @@ what lets every result of the first kind be applied to coefficients of the secon
   `TauCeti.ContCohomology.ofDiscreteModuleRestrictScalarsIntEquiv` between the carriers are the
   isomorphisms on elements; they act through the values of the iterated function spaces
   (`TopRep.resolutionXRestrictScalarsIntIso_succ_hom_apply`,
-  `TauCeti.ContCohomology.iCycles_cocyclesRestrictScalarsIntEquiv_apply_one`,
+  `TauCeti.ContCohomology.iCycles_cocyclesRestrictScalarsIntEquiv_one_apply`,
   `TauCeti.ContCohomology.restrictScalarsIntEquiv_π`).
 * `TauCeti.ContCohomology.coeffMap_comp_restrictScalarsIntIso_hom`: the isomorphism is natural in
   the representation, with respect to the coefficient maps
@@ -380,7 +380,7 @@ theorem coe_iCycles_cocyclesRestrictScalarsIntEquiv (v : cocycles (restrictScala
 cocycle: both sides are the function `C(G, C(G, X.V))` underlying the cocycle. -/
 -- Not a `simp` lemma: the carriers of the cocycles sit in the implicit arguments of `Subtype.val`,
 -- where `simp` unfolds `(homogeneousCochains _).X 1` before matching; use it with `rw`.
-theorem iCycles_cocyclesRestrictScalarsIntEquiv_apply_one
+theorem iCycles_cocyclesRestrictScalarsIntEquiv_one_apply
     (v : cocycles (restrictScalarsInt.obj X) 1) (g₀ g₁ : G) :
     ((homogeneousCochains X).iCycles 1 (cocyclesRestrictScalarsIntEquiv X 1 v)).val g₀ g₁ =
       ((homogeneousCochains (restrictScalarsInt.obj X)).iCycles 1 v).val g₀ g₁ :=
@@ -394,19 +394,9 @@ theorem iCycles_cocyclesRestrictScalarsIntEquiv_apply_one
       ((resolutionXRestrictScalarsIntIso_succ_hom_apply X 0 _ g₁).trans
         (resolutionXRestrictScalarsIntIso_zero_hom_apply X _)))
 
-/-- In degree one, `cocyclesRestrictScalarsIntIso` does not change the values of a homogeneous
-cocycle: `iCycles_cocyclesRestrictScalarsIntEquiv_apply_one` on the isomorphism, whose values are
-typed in `TopModuleCat ℤ`. -/
--- Not a `simp` lemma, for the same reason as `iCycles_cocyclesRestrictScalarsIntEquiv_apply_one`.
-theorem iCycles_cocyclesRestrictScalarsIntIso_hom_apply
-    (v : cocycles (restrictScalarsInt.obj X) 1) (g₀ g₁ : G) :
-    ((homogeneousCochains X).iCycles 1 ((cocyclesRestrictScalarsIntIso X 1).hom v)).val g₀ g₁ =
-      ((homogeneousCochains (restrictScalarsInt.obj X)).iCycles 1 v).val g₀ g₁ :=
-  iCycles_cocyclesRestrictScalarsIntEquiv_apply_one X v g₀ g₁
-
 /-- In degree two, `cocyclesRestrictScalarsIntEquiv` does not change the values of a homogeneous
 cocycle. -/
-theorem iCycles_cocyclesRestrictScalarsIntEquiv_apply_two
+theorem iCycles_cocyclesRestrictScalarsIntEquiv_two_apply
     (v : cocycles (restrictScalarsInt.obj X) (1 + 1)) (g₀ g₁ g₂ : G) :
     ((homogeneousCochains X).iCycles (1 + 1) (cocyclesRestrictScalarsIntEquiv X (1 + 1) v)).val
         g₀ g₁ g₂ =
@@ -585,14 +575,15 @@ theorem ofDiscreteModuleRestrictScalarsIntEquiv_π (w : cocycles (ofDiscreteModu
 
 /-- In degree one, `ofDiscreteModuleCocyclesRestrictScalarsIntIso` does not change the values of
 a homogeneous cocycle. -/
--- Not a `simp` lemma, for the same reason as `iCycles_cocyclesRestrictScalarsIntIso_hom_apply`.
+-- Not a `simp` lemma, for the same reason as `iCycles_cocyclesRestrictScalarsIntEquiv_one_apply`.
 theorem iCycles_ofDiscreteModuleCocyclesRestrictScalarsIntIso_hom_apply
     (w : cocycles (ofDiscreteModule ℤ G X.V) 1) (g₀ g₁ : G) :
     ((homogeneousCochains X).iCycles 1
         ((ofDiscreteModuleCocyclesRestrictScalarsIntIso X 1).hom w)).val g₀ g₁ =
       ((homogeneousCochains (ofDiscreteModule ℤ G X.V)).iCycles 1 w).val g₀ g₁ := by
   rw [ofDiscreteModuleCocyclesRestrictScalarsIntIso, Iso.trans_hom, eqToIso.hom,
-    CategoryTheory.comp_apply, iCycles_cocyclesRestrictScalarsIntIso_hom_apply]
+    CategoryTheory.comp_apply, ← cocyclesRestrictScalarsIntEquiv_apply,
+    iCycles_cocyclesRestrictScalarsIntEquiv_one_apply]
   -- Both representations are `TopRep.of` an operator on `X.V`, so the transport along the
   -- equality of operators is the identity on values once that equality has a variable side.
   have key : ∀ (ρ : ContRepresentation ℤ G X.V) (h : (ofDiscreteModule ℤ G X.V).ρ = ρ),
