@@ -164,33 +164,36 @@ theorem mem_subdifferential_iff_add_fenchelConjugate_eq :
 
 /-! ### Convexity and closedness -/
 
-/-- The subdifferential is a convex set. -/
+/-- Where `f x = r` is real, the subdifferential is the intersection over `x'` of the affine
+constraints `r + B (x' - x) y ≤ f x'`. -/
+theorem subdifferential_eq_iInter (hr : f x = r) :
+    subdifferential B f x = ⋂ x', {y | ((r + B (x' - x) y : ℝ) : EReal) ≤ f x'} := by
+  ext y
+  simp only [mem_subdifferential_iff, hr, ne_eq, EReal.coe_ne_bot, EReal.coe_ne_top,
+    not_false_eq_true, true_and, Set.mem_iInter, Set.mem_ofPred_eq, EReal.coe_add]
+
+/-- The subdifferential is a convex set: it is an intersection of half-spaces, or empty. -/
 theorem convex_subdifferential (f : E → EReal) (x : E) : Convex ℝ (subdifferential B f x) := by
-  intro y₁ h₁ y₂ h₂ a b ha hb hab
-  have hbot := ne_bot_of_mem_subdifferential B h₁
-  have htop := ne_top_of_mem_subdifferential B h₁
+  rcases eq_or_ne (f x) ⊥ with hbot | hbot
+  · rw [subdifferential_eq_empty_of_eq_bot B hbot]
+    exact convex_empty
+  rcases eq_or_ne (f x) ⊤ with htop | htop
+  · rw [subdifferential_eq_empty_of_eq_top B htop]
+    exact convex_empty
   obtain ⟨r, hr⟩ : ∃ r : ℝ, f x = r := ⟨(f x).toReal, (EReal.coe_toReal htop hbot).symm⟩
-  rw [mem_subdifferential_iff_forall_sub_le B hr] at h₁ h₂ ⊢
-  intro x'
-  rcases eq_or_ne (f x') ⊤ with hx' | hx'
-  · rw [hx', EReal.sub_top]
-    exact bot_le
-  rcases eq_or_ne (f x') ⊥ with hx'' | hx''
-  · have h := h₁ x'
-    rw [hx'', EReal.coe_sub_bot] at h
-    exact absurd h (not_le.2 (EReal.coe_lt_top _))
-  obtain ⟨s, hs⟩ : ∃ s : ℝ, f x' = s := ⟨(f x').toReal, (EReal.coe_toReal hx' hx'').symm⟩
-  have h₁' : B x' y₁ - s ≤ B x y₁ - r := by
-    have h := h₁ x'
-    rwa [hs, ← EReal.coe_sub, EReal.coe_le_coe_iff] at h
-  have h₂' : B x' y₂ - s ≤ B x y₂ - r := by
-    have h := h₂ x'
-    rwa [hs, ← EReal.coe_sub, EReal.coe_le_coe_iff] at h
-  have hs' : a * s + b * s = s := by rw [← add_mul, hab, one_mul]
-  have hr' : a * r + b * r = r := by rw [← add_mul, hab, one_mul]
-  rw [hs, ← EReal.coe_sub, EReal.coe_le_coe_iff]
-  simp only [map_add, map_smul, smul_eq_mul]
-  linarith [mul_le_mul_of_nonneg_left h₁' ha, mul_le_mul_of_nonneg_left h₂' hb]
+  rw [subdifferential_eq_iInter B hr]
+  refine convex_iInter fun x' => ?_
+  generalize f x' = z
+  induction z with
+  | bot =>
+    simp only [le_bot_iff, EReal.coe_ne_bot, Set.ofPred_false]
+    exact convex_empty
+  | coe s =>
+    simp only [EReal.coe_le_coe_iff, ← le_sub_iff_add_le']
+    exact convex_halfSpace_le (B (x' - x)).isLinear (s - r)
+  | top =>
+    simp only [le_top, Set.ofPred_true]
+    exact convex_univ
 
 /-- The subdifferential is closed for every topology on `F` in which each functional `B x` is
 continuous: it is an intersection of closed half-spaces, or empty. -/
@@ -203,14 +206,9 @@ theorem isClosed_subdifferential [TopologicalSpace F] (hB : ∀ x, Continuous (B
   · rw [subdifferential_eq_empty_of_eq_top B htop]
     exact isClosed_empty
   obtain ⟨r, hr⟩ : ∃ r : ℝ, f x = r := ⟨(f x).toReal, (EReal.coe_toReal htop hbot).symm⟩
-  have hset : subdifferential B f x =
-      ⋂ x', (fun y => ((r + B (x' - x) y : ℝ) : EReal)) ⁻¹' Set.Iic (f x') := by
-    ext y
-    simp only [mem_subdifferential_iff, hr, ne_eq, EReal.coe_ne_bot, EReal.coe_ne_top,
-      not_false_eq_true, true_and, Set.mem_iInter, Set.mem_preimage, Set.mem_Iic, EReal.coe_add]
-  rw [hset]
+  rw [subdifferential_eq_iInter B hr]
   exact isClosed_iInter fun x' =>
-    isClosed_Iic.preimage (continuous_coe_real_ereal.comp (continuous_const.add (hB _)))
+    isClosed_le (continuous_coe_real_ereal.comp (continuous_const.add (hB _))) continuous_const
 
 end
 

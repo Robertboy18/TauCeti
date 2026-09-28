@@ -214,31 +214,29 @@ theorem fenchelConjugate_add_const (f : E → EReal) (r : ℝ) (y : F) :
 
 /-! ### Convexity and lower semicontinuity -/
 
-/-- The real epigraph `{(y, r) | f⋆ y ≤ r}` of a conjugate is convex: the conjugate is a supremum
-of affine functions of `y`. -/
+/-- The real epigraph `{(y, r) | f⋆ y ≤ r}` of a conjugate is convex: it is the intersection over
+`x` of the half-spaces `{(y, r) | B x y - r ≤ f x}`, each of which is the whole space when
+`f x = ⊤` and empty when `f x = ⊥`. -/
 theorem convex_epigraph_fenchelConjugate (f : E → EReal) :
     Convex ℝ {p : F × ℝ | fenchelConjugate B f p.1 ≤ (p.2 : EReal)} := by
-  intro p hp q hq a b ha hb hab
-  simp only [Set.mem_ofPred_eq] at hp hq ⊢
-  refine fenchelConjugate_le B fun x => ?_
-  rcases eq_or_ne (f x) ⊤ with hx | hx
-  · rw [hx, EReal.sub_top]
-    exact bot_le
-  rcases eq_or_ne (f x) ⊥ with hx' | hx'
-  · rw [fenchelConjugate_eq_top_of_eq_bot B hx'] at hp
-    exact absurd hp (not_le.2 (EReal.coe_lt_top _))
-  obtain ⟨s, hs⟩ : ∃ s : ℝ, f x = s := ⟨(f x).toReal, (EReal.coe_toReal hx hx').symm⟩
-  have h₁ : B x p.1 - s ≤ p.2 := by
-    have h := (sub_le_fenchelConjugate B f x p.1).trans hp
-    rwa [hs, ← EReal.coe_sub, EReal.coe_le_coe_iff] at h
-  have h₂ : B x q.1 - s ≤ q.2 := by
-    have h := (sub_le_fenchelConjugate B f x q.1).trans hq
-    rwa [hs, ← EReal.coe_sub, EReal.coe_le_coe_iff] at h
-  have hs' : a * s + b * s = s := by rw [← add_mul, hab, one_mul]
-  rw [hs, ← EReal.coe_sub, EReal.coe_le_coe_iff]
-  simp only [Prod.fst_add, Prod.snd_add, Prod.smul_fst, Prod.smul_snd, map_add, map_smul,
-    smul_eq_mul]
-  linarith [mul_le_mul_of_nonneg_left h₁ ha, mul_le_mul_of_nonneg_left h₂ hb]
+  have hset : {p : F × ℝ | fenchelConjugate B f p.1 ≤ (p.2 : EReal)} =
+      ⋂ x, {p : F × ℝ | ((B x p.1 - p.2 : ℝ) : EReal) ≤ f x} := by
+    ext p
+    simp only [Set.mem_ofPred_eq, Set.mem_iInter, fenchelConjugate_le_iff, EReal.coe_sub,
+      EReal.coe_sub_le_comm]
+  rw [hset]
+  refine convex_iInter fun x => ?_
+  generalize f x = z
+  induction z with
+  | bot =>
+    simp only [le_bot_iff, EReal.coe_ne_bot, Set.ofPred_false]
+    exact convex_empty
+  | coe s =>
+    simp only [EReal.coe_le_coe_iff]
+    exact convex_halfSpace_le ((B x).comp (LinearMap.fst ℝ F ℝ) - LinearMap.snd ℝ F ℝ).isLinear s
+  | top =>
+    simp only [le_top, Set.ofPred_true]
+    exact convex_univ
 
 /-- A conjugate is lower semicontinuous for every topology on `F` in which each functional `B x`
 is continuous, since it is a supremum of continuous or constant extended-real functions. -/
