@@ -125,7 +125,7 @@ private theorem galResolvent_quinticF20Invariant_pow_mul {ζ : ℂ} (hζ : IsPri
   rw [← MvPolynomial.map_universalResolvent_eq_galResolvent,
     universalResolvent_quinticF20Invariant, Polynomial.map_prod]
   simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C, MvPolynomial.coe_eval₂Hom]
-  rw [X_pow_sub_C_eq_prod hζ (by norm_num) rfl, quinticF20OrbitRepresentatives]
+  rw [X_pow_sub_C_eq_prod hζ (by norm_num) rfl, quinticF20OrbitRepresentatives_def]
   simp only [Finset.prod_range_succ, Finset.prod_range_zero]
   rw [Finset.prod_insert (by decide), Finset.prod_insert (by decide),
     Finset.prod_insert (by decide), Finset.prod_insert (by decide),
@@ -136,6 +136,8 @@ private theorem galResolvent_quinticF20Invariant_pow_mul {ζ : ℂ} (hζ : IsPri
 /-- **The resolvent sextic of a pure quintic.** For every integer `a`,
 `resolventSextic (X⁵ - a) = X⁶ - 3125a⁴X`. This is Dummit's closed formula for the resolvent
 sextic of `X⁵ + aX + b` in the case `a = 0`, and it exhibits `0` as an integral root. -/
+-- Not `@[simp]`: over `ℤ`, simp rewrites `C a` to `↑a` first (`eq_intCast`), so the left-hand
+-- side is not in simp normal form and the `simpNF` linter rejects the attribute.
 theorem resolventSextic_X_pow_five_sub_C (a : ℤ) :
     resolventSextic (X ^ 5 - C a) = X ^ 6 - C (3125 * a ^ 4) * X := by
   apply Polynomial.map_injective (Int.castRingHom ℂ) Int.cast_injective

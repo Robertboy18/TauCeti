@@ -9,7 +9,7 @@ public import TauCeti.FieldTheory.GaloisGroups.Certificate.Check
 
 import Mathlib.FieldTheory.KummerPolynomial
 import Mathlib.Tactic.NormNum.IsSquare
-import TauCeti.FieldTheory.GaloisGroups.Quintic
+import TauCeti.FieldTheory.GaloisGroups.Certificate.Routes
 import TauCeti.FieldTheory.GaloisGroups.Resolvent.Quintic.Pure
 
 /-!
@@ -81,16 +81,13 @@ theorem hasGaloisLabel_X_pow_five_sub_C {a : ℤ} (hirr : Irreducible (X ^ 5 - C
     simp only [Int.cast_zero, C_0, sub_zero] at hirr
     exact not_irreducible_pow (by norm_num) hirr
   have hmap : (X ^ 5 - C a : ℤ[X]).map (Int.castRingHom ℚ) = X ^ 5 - C (a : ℚ) := by simp
-  have hres : quinticF20Spec.specialize ℚ (X ^ 5 - C (a : ℚ)) =
-      (resolventSextic (X ^ 5 - C a)).map (Int.castRingHom ℚ) := by
-    rw [resolventSextic_def, ResolventSpec.specialize_map, hmap]
-  refine hasGaloisLabel_five_two_of_not_isSquare_discr_of_isRoot
-    (monic_X_pow_sub_C _ (by norm_num)) (by simp) hirr natDegree_X_pow_sub_C
-    (not_isSquare_discr_X_pow_five_sub_C (by exact_mod_cast ha)) ?_ (a := 0) ?_
-  · rw [hres]
-    exact separable_map_resolventSextic_X_pow_five_sub_C ha
-  · rw [hres, resolventSextic_X_pow_five_sub_C]
-    simp
+  have hf : (X ^ 5 - C a : ℤ[X]).Monic := monic_X_pow_sub_C a (by norm_num)
+  rw [← hmap] at hirr ⊢
+  refine hasGaloisLabel_five_two_of_not_isSquare_discr_of_hasSexticRoot hf hirr
+    natDegree_X_pow_sub_C (hf.isSquare_discr_map_rat_iff.not.mp ?_)
+    (hasSexticRoot_X_pow_five_sub_C ha)
+  rw [hmap]
+  exact not_isSquare_discr_X_pow_five_sub_C (by exact_mod_cast ha)
 
 /-! ### The Kummer quintic `X⁵ - 2` -/
 
