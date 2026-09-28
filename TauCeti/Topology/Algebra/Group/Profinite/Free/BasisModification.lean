@@ -11,6 +11,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Free.Graded
 import Mathlib.Algebra.Module.Projective
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 import Mathlib.LinearAlgebra.Dimension.Constructions
+import Mathlib.LinearAlgebra.Dimension.OrzechProperty
 
 /-!
 # Basis modifications of a free pro-`p` group and the maps `δ`
@@ -304,11 +305,15 @@ noncomputable def degreeOneDeriv (i : X) :
     fun jk ↦ (if jk.1.1 = i then gradedMkZero p (freeProP p X) (of jk.1.2) else 0) -
       if jk.1.2 = i then gradedMkZero p (freeProP p X) (of jk.1.1) else 0
 
+/-- `∂_i` on the `p`-power basis vectors: `∂_i (π ξ_i) = (p choose 2) • ξ_i` and `∂_i (π ξ_j) = 0`
+for `j ≠ i`. -/
 theorem degreeOneDeriv_degreeOneBasis_inl (i j : X) :
     degreeOneDeriv p X i (degreeOneBasis p X (Sum.inl j)) =
       if j = i then p.choose 2 • gradedMkZero p (freeProP p X) (of i) else 0 := by
   rw [degreeOneDeriv, Module.Basis.constr_basis, Sum.elim_inl]
 
+/-- `∂_i` on the bracket basis vectors: `∂_i [ξ_j, ξ_k] = ξ_k` if `j = i`, `-ξ_j` if `k = i`, and
+`0` otherwise, for `j < k`. -/
 theorem degreeOneDeriv_degreeOneBasis_inr (i : X) (jk : {ij : X × X // ij.1 < ij.2}) :
     degreeOneDeriv p X i (degreeOneBasis p X (Sum.inr jk)) =
       (if jk.1.1 = i then gradedMkZero p (freeProP p X) (of jk.1.2) else 0) -
@@ -639,37 +644,6 @@ theorem range_basisModificationDelta_sup_basisModificationTail_eq_top (hm : 1 �
       (f := (gradedPowAddMonoidHom p (freeProP p X) (by omega : 1 ≤ m + 1)).toZModLinearMap p) ht
     rwa [AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply] at h'
 
-/-- **The image of `δ_ρ` is everything when some family kills the derivatives but not the
-`p`-power coefficients**: if the partial derivatives `∂_i ρ` span `gr_0(F)` and there is
-`b : X → 𝔽_p` with `Σ_i b_i ∂_i ρ = 0` and `Σ_i b_i c_i ≠ 0`, then `δ_ρ` is onto `gr_{m+1}(F)` for
-every `m ≥ 1`: the family `b • v` produces the `p`-power `π v`, and the brackets `[v, y]` follow
-from the surjectivity of the derivatives. -/
-theorem range_basisModificationDelta_eq_top_of_exists_sum_smul_degreeOneDeriv_eq_zero
-    [Fintype X] (hm : 1 ≤ m) {ρ : gradedPiece p (freeProP p X) 1}
-    (hρ : span (ZMod p) (Set.range fun i ↦ degreeOneDeriv p X i ρ) = ⊤)
-    (hb : ∃ b : X → ZMod p, ∑ i, b i • degreeOneDeriv p X i ρ = 0 ∧
-      ∑ i, b i * (degreeOneBasis p X).repr ρ (Sum.inl i) ≠ 0) :
-    LinearMap.range (basisModificationDelta p X hm ρ) = ⊤ := by
-  obtain ⟨b, hb0, hbc⟩ := hb
-  have hpow (v : gradedPiece p (freeProP p X) m) :
-      gradedPow p (freeProP p X) m v ∈ LinearMap.range (basisModificationDelta p X hm ρ) := by
-    have h : basisModificationDelta p X hm ρ (fun i ↦ b i • v) ∈
-        LinearMap.range (basisModificationDelta p X hm ρ) := ⟨_, rfl⟩
-    rw [basisModificationDelta_smul, hb0, map_zero, add_zero] at h
-    simpa only [inv_smul_smul₀ hbc] using
-      (LinearMap.range (basisModificationDelta p X hm ρ)).smul_mem
-        (∑ i, b i * (degreeOneBasis p X).repr ρ (Sum.inl i))⁻¹ h
-  refine eq_top_of_forall_gradedPow_mem_of_forall_gradedBracket_mem
-    ((isTopologicallyFinitelyGenerated_freeProP p X).isOpen_pLowerCentralSeries Fact.out _)
-    hpow fun v y ↦ ?_
-  obtain ⟨b', hb'⟩ := (mem_span_range_iff_exists_fun (ZMod p)).mp (hρ ▸ Submodule.mem_top :
-    y ∈ span (ZMod p) (Set.range fun i ↦ degreeOneDeriv p X i ρ))
-  have h : basisModificationDelta p X hm ρ (fun i ↦ b' i • v) ∈
-      LinearMap.range (basisModificationDelta p X hm ρ) := ⟨_, rfl⟩
-  rw [basisModificationDelta_smul, hb'] at h
-  simpa only [add_sub_cancel_left] using
-    sub_mem h (Submodule.smul_mem _ (∑ i, b' i * (degreeOneBasis p X).repr ρ (Sum.inl i)) (hpow v))
-
 /-- The odd-`p` span statement, in the form in which it is proved: a linear functional `φ` on
 `gr_0(F)` with a value `1` at `y₀` such that `φ(y) • π v + [v, y] ∈ Im δ_ρ` for every `v` and `y`
 forces `Im δ_ρ = gr_{m+1}(F)` for every `m ≥ 1`. -/
@@ -801,32 +775,39 @@ theorem range_basisModificationDelta_eq_top_of_odd (hp : Odd p) (hm : 1 ≤ m)
     rw [basisModificationDelta_smul, hcdef, hD, Fintype.linearCombination_apply,
       Fintype.linearCombination_apply]
     simp only [smul_eq_mul]
-  by_cases hB : ∃ b, D b = 0 ∧ c b ≠ 0
-  · obtain ⟨b, hb0, hbc⟩ := hB
-    refine range_basisModificationDelta_eq_top_of_exists_sum_smul_degreeOneDeriv_eq_zero hm hρ
-      ⟨b, ?_, ?_⟩
-    · rwa [hD, Fintype.linearCombination_apply] at hb0
-    · simpa only [hcdef, Fintype.linearCombination_apply, smul_eq_mul] using hbc
-  · push Not at hB
-    -- `c` factors through `D`: `c = φ ∘ D` for `φ := c ∘ s`, with `s` a linear section of `D`.
-    obtain ⟨s, hs⟩ := LinearMap.exists_rightInverse_of_surjective D hDtop
-    have hφ (b : X → ZMod p) : c b = (c ∘ₗ s) (D b) := by
-      have h0 : D (b - s (D b)) = 0 := by
-        rw [map_sub, ← LinearMap.comp_apply, hs, LinearMap.id_apply, sub_self]
-      have h := hB _ h0
-      rw [map_sub] at h
-      have h' : c b = c (s (D b)) := sub_eq_zero.mp h
-      rw [LinearMap.comp_apply]
-      exact h'
-    obtain ⟨i, hi⟩ := hc
-    have hne : (c ∘ₗ s) (D (Pi.single i 1)) ≠ 0 := by
-      rw [← hφ, hcdef, Fintype.linearCombination_apply_single, one_smul]
-      exact hi
-    refine range_basisModificationDelta_eq_top_of_forall_smul_gradedPow_add_mem hp (c ∘ₗ s)
-      (y₀ := ((c ∘ₗ s) (D (Pi.single i 1)))⁻¹ • D (Pi.single i 1)) ?_ (fun m hm v y ↦ ?_) hm
-    · rw [map_smul, smul_eq_mul, inv_mul_cancel₀ hne]
-    · refine ⟨fun j ↦ s y j • v, ?_⟩
-      rw [hδ, hφ, ← LinearMap.comp_apply D s, hs, LinearMap.id_apply]
+  -- `gr_0(F)` has dimension `#X`: the `#X` derivatives span it and the `#X` generator classes are
+  -- linearly independent in it. So the spanning derivatives are a basis and `D` is injective.
+  have hfin : Module.finrank (ZMod p) (gradedPiece p (freeProP p X) 0) = Fintype.card X := by
+    have : Module.Finite (ZMod p) (gradedPiece p (freeProP p X) 0) :=
+      Module.Finite.of_surjective D (LinearMap.range_eq_top.mp hDtop)
+    refine le_antisymm ?_ (LinearIndependent.fintype_card_le_finrank
+      (linearIndependent_gradedPowIter_gradedMkZero_of p X 0))
+    rw [← finrank_top (R := ZMod p), ← hρ]
+    exact finrank_range_le_card _
+  have hB (b : X → ZMod p) (hb : D b = 0) : c b = 0 := by
+    have hli : LinearIndependent (ZMod p) fun i ↦ degreeOneDeriv p X i ρ :=
+      linearIndependent_of_top_le_span_of_card_eq_finrank hρ.ge hfin.symm
+    rw [hD, Fintype.linearCombination_apply] at hb
+    rw [show b = 0 from funext (Fintype.linearIndependent_iff.mp hli b hb), map_zero]
+  -- `c` factors through `D`: `c = φ ∘ D` for `φ := c ∘ s`, with `s` a linear section of `D`.
+  obtain ⟨s, hs⟩ := LinearMap.exists_rightInverse_of_surjective D hDtop
+  have hφ (b : X → ZMod p) : c b = (c ∘ₗ s) (D b) := by
+    have h0 : D (b - s (D b)) = 0 := by
+      rw [map_sub, ← LinearMap.comp_apply, hs, LinearMap.id_apply, sub_self]
+    have h := hB _ h0
+    rw [map_sub] at h
+    have h' : c b = c (s (D b)) := sub_eq_zero.mp h
+    rw [LinearMap.comp_apply]
+    exact h'
+  obtain ⟨i, hi⟩ := hc
+  have hne : (c ∘ₗ s) (D (Pi.single i 1)) ≠ 0 := by
+    rw [← hφ, hcdef, Fintype.linearCombination_apply_single, one_smul]
+    exact hi
+  refine range_basisModificationDelta_eq_top_of_forall_smul_gradedPow_add_mem hp (c ∘ₗ s)
+    (y₀ := ((c ∘ₗ s) (D (Pi.single i 1)))⁻¹ • D (Pi.single i 1)) ?_ (fun m hm v y ↦ ?_) hm
+  · rw [map_smul, smul_eq_mul, inv_mul_cancel₀ hne]
+  · refine ⟨fun j ↦ s y j • v, ?_⟩
+    rw [hδ, hφ, ← LinearMap.comp_apply D s, hs, LinearMap.id_apply]
 
 end Span
 
