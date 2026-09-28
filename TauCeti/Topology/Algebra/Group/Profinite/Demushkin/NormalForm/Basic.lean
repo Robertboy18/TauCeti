@@ -263,26 +263,23 @@ theorem map_demushkinWordTwoEven_eq_one (a f n : ℕ) {x : ℕ → G} (h₀ : χ
     Function.comp_apply, h₀, h₂, one_mul]
 
 /-- The `q ≠ 2` word lies in the kernel of a character into a commutative group that is trivial
-on every generator other than `x₂`. -/
-theorem demushkinWordNeTwo_mem_ker (q n : ℕ) {x : ℕ → G} (hx : ∀ i, i ≠ 1 → χ (x i) = 1) :
+on `x₁`. -/
+theorem demushkinWordNeTwo_mem_ker (q n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) = 1) :
     demushkinWordNeTwo q n x ∈ MonoidHom.ker (χ : G →* A) :=
-  MonoidHom.mem_ker.mpr (map_demushkinWordNeTwo_eq_one χ q n (by rw [hx 0 zero_ne_one, one_pow]))
+  MonoidHom.mem_ker.mpr (map_demushkinWordNeTwo_eq_one χ q n (by rw [h₀, one_pow]))
 
 /-- The `q = 2`, `n` odd word lies in the kernel of a character into a commutative group whose
-value on `x₁` squares to `1` and which is trivial on every generator other than `x₁` and `x₃`. -/
+value on `x₁` squares to `1` and which is trivial on `x₂`. -/
 theorem demushkinWordTwoOdd_mem_ker (f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ 2 = 1)
-    (hx : ∀ i, i ≠ 0 → i ≠ 2 → χ (x i) = 1) :
-    demushkinWordTwoOdd f n x ∈ MonoidHom.ker (χ : G →* A) :=
-  MonoidHom.mem_ker.mpr (map_demushkinWordTwoOdd_eq_one χ f n h₀
-    (by rw [hx 1 one_ne_zero (by decide), one_pow]))
+    (h₁ : χ (x 1) = 1) : demushkinWordTwoOdd f n x ∈ MonoidHom.ker (χ : G →* A) :=
+  MonoidHom.mem_ker.mpr (map_demushkinWordTwoOdd_eq_one χ f n h₀ (by rw [h₁, one_pow]))
 
 /-- The `q = 2`, `n` even word lies in the kernel of a character into a commutative group that is
-trivial on every generator other than `x₂` and `x₄`. -/
-theorem demushkinWordTwoEven_mem_ker (a f n : ℕ) {x : ℕ → G}
-    (hx : ∀ i, i ≠ 1 → i ≠ 3 → χ (x i) = 1) :
-    demushkinWordTwoEven a f n x ∈ MonoidHom.ker (χ : G →* A) :=
-  MonoidHom.mem_ker.mpr (map_demushkinWordTwoEven_eq_one χ a f n
-    (by rw [hx 0 zero_ne_one (by decide), one_pow]) (by rw [hx 2 (by decide) (by decide), one_pow]))
+trivial on `x₁` and `x₃`. -/
+theorem demushkinWordTwoEven_mem_ker (a f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) = 1)
+    (h₂ : χ (x 2) = 1) : demushkinWordTwoEven a f n x ∈ MonoidHom.ker (χ : G →* A) :=
+  MonoidHom.mem_ker.mpr
+    (map_demushkinWordTwoEven_eq_one χ a f n (by rw [h₀, one_pow]) (by rw [h₂, one_pow]))
 
 end Words
 
