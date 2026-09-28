@@ -7,20 +7,20 @@ module
 
 public import Mathlib.LinearAlgebra.CliffordAlgebra.Grading
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Filtration
-import Mathlib.Tactic.NoncommRing
 -- Private: the homogeneity of the powers of the vectors is used only in the parity bookkeeping.
 import TauCeti.LinearAlgebra.CliffordAlgebra.Grading
+-- Private: the reversal of a product of three vectors is used only in the odd-part computation.
+import TauCeti.LinearAlgebra.CliffordAlgebra.Reversal.Basic
 
 /-!
 # Reversal on odd elements in dimension at most four
 
-Reversal fixes every vector and, up to a vector, negates every product of three vectors: the sum
-`ι a * ι b * ι c + reverse (ι a * ι b * ι c)` is the vector
-`polar b c • a - polar a c • b + polar a b • c` (`CliffordAlgebra.ι_mul_ι_mul_ι_add_reverse`),
-the analogue one degree up of Mathlib's `CliffordAlgebra.ι_mul_ι_add_swap`. In dimension at most
-four the odd part of the Clifford algebra is spanned by the vectors and the products of three
-vectors, so for every odd element `y` the sum `y + reverse y` is a vector, and an odd element fixed
-by reversal is a vector as soon as `2` is invertible.
+Reversal fixes every vector and, up to a vector, negates every product of three vectors
+(`CliffordAlgebra.ι_mul_ι_mul_ι_add_reverse` in
+`TauCeti/LinearAlgebra/CliffordAlgebra/Reversal/Basic.lean`). In dimension at most four the odd
+part of the Clifford algebra is spanned by the vectors and the products of three vectors, so for
+every odd element `y` the sum `y + reverse y` is a vector, and an odd element fixed by reversal is
+a vector as soon as `2` is invertible.
 
 This is the odd counterpart of `TauCeti/LinearAlgebra/CliffordAlgebra/Reversal/Three.lean`, where
 an even element plus its reversal is a scalar in dimension three. Its use is the low-dimensional
@@ -31,8 +31,6 @@ which reversal fixes.
 
 ## Main results
 
-* `CliffordAlgebra.ι_mul_ι_mul_ι_add_reverse`: a product of three vectors plus its reversal is a
-  vector, over any commutative ring.
 * `CliffordAlgebra.add_reverse_mem_range_ι_of_mem_evenOdd_one_of_finrank_le_four`: in dimension
   at most four, an odd element plus its reversal is a vector.
 * `CliffordAlgebra.mem_range_ι_of_mem_evenOdd_one_of_reverse_eq_of_finrank_le_four`: in
@@ -45,36 +43,9 @@ which reversal fixes.
 
 public section
 
-open QuadraticMap
-
 namespace CliffordAlgebra
 
 universe u v
-
-section CommRing
-
-variable {R : Type u} {M : Type v} [CommRing R] [AddCommGroup M] [Module R M]
-  (Q : QuadraticForm R M)
-
-/-- **A product of three vectors plus its reversal is a vector**, namely
-`polar b c • a - polar a c • b + polar a b • c`: reversing the product costs three transpositions
-of adjacent generators, each of which contributes a polarization term. -/
-theorem ι_mul_ι_mul_ι_add_reverse (a b c : M) :
-    ι Q a * ι Q b * ι Q c + reverse (ι Q a * ι Q b * ι Q c) =
-      ι Q (polar Q b c • a - polar Q a c • b + polar Q a b • c) := by
-  calc ι Q a * ι Q b * ι Q c + reverse (ι Q a * ι Q b * ι Q c)
-      = (ι Q c * ι Q b + ι Q b * ι Q c) * ι Q a - ι Q b * (ι Q c * ι Q a + ι Q a * ι Q c) +
-          (ι Q b * ι Q a + ι Q a * ι Q b) * ι Q c := by
-        simp only [reverse.map_mul, reverse_ι]
-        noncomm_ring
-    _ = algebraMap R _ (polar Q c b) * ι Q a - ι Q b * algebraMap R _ (polar Q c a) +
-          algebraMap R _ (polar Q b a) * ι Q c := by
-        simp only [ι_mul_ι_add_swap]
-    _ = ι Q (polar Q b c • a - polar Q a c • b + polar Q a b • c) := by
-        simp only [map_add, map_sub, map_smul, Algebra.smul_def, Algebra.commutes, polar_comm Q c b,
-          polar_comm Q c a, polar_comm Q b a]
-
-end CommRing
 
 section Field
 
