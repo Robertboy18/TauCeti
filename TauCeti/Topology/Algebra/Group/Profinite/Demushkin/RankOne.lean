@@ -20,9 +20,9 @@ If `a` has infinite order the group is `ℤ_p`, the free pro-`p` group on one ge
 `H²(-, 𝔽_p)` vanishes, so it is not Demushkin. Otherwise the group is a finite cyclic `p`-group
 `ℤ/pᵏ`. The rank is odd, so `p = 2` by the parity constraint. For `k ≥ 2` the mod-`2` character
 of `ℤ/2ᵏ` lifts to `ℤ/4`, so its cup square vanishes
-(`TauCeti.cupFp_zmodFourReductionClass_self_eq_zero`); but in a Demushkin group of rank one
-`H¹(G, 𝔽_p)` is a line, so nondegeneracy of the cup pairing forces the cup square of every nonzero
-class to be nonzero. Hence `k = 1`, and the group is `ℤ/2`, which is Demushkin
+(`ContinuousMonoidHom.cupFp_zmodFourReductionClass_self_eq_zero`); but in a Demushkin group of
+rank one `H¹(G, 𝔽_p)` is a line, so nondegeneracy of the cup pairing forces the cup square of every
+nonzero class to be nonzero. Hence `k = 1`, and the group is `ℤ/2`, which is Demushkin
 (`TauCeti.isDemushkin_multiplicative_zmod_two`).
 
 Along the way, a group topologically isomorphic to `ℤ/n` is shown not to be Demushkin at `p = 2`
@@ -78,8 +78,8 @@ theorem IsDemushkin.demushkinRank_ne_one_of_zmod_four_reduction_ne_zero (hG : Is
     (φ : G →ₜ* Multiplicative (ZMod 4)) {g : G}
     (hg : ZMod.castHom (by norm_num : (2 : ℕ) ∣ 4) (ZMod 2) (Multiplicative.toAdd (φ g)) ≠ 0) :
     demushkinRank hG ≠ 1 := fun h ↦
-  hG.cupFp_self_ne_zero_of_demushkinRank_eq_one h (zmodFourReductionClass_ne_zero φ hg)
-    (cupFp_zmodFourReductionClass_self_eq_zero φ)
+  hG.cupFp_self_ne_zero_of_demushkinRank_eq_one h (φ.zmodFourReductionClass_ne_zero hg)
+    φ.cupFp_zmodFourReductionClass_self_eq_zero
 
 /-- **A profinite group topologically isomorphic to `ℤ/n` with `4 ∣ n` is not Demushkin at
 `p = 2`**: it has rank one, and its mod-`2` character lifts to `ℤ/4`. -/
@@ -146,7 +146,7 @@ theorem IsDemushkin.nonempty_continuousMulEquiv_multiplicative_zmod_two_of_demus
   obtain ⟨a, rfl⟩ := hcard
   rw [Finset.coe_singleton] at hgen
   by_cases hfin : IsOfFinOrder a
-  · obtain ⟨k, ⟨e⟩⟩ :=
+  · obtain ⟨k, e, -⟩ :=
       hG.isProP.exists_continuousMulEquiv_multiplicative_zmod_pow_of_isOfFinOrder hgen hfin
     rcases k with _ | _ | k
     · -- `k = 0`: the group would be trivial, of rank zero.

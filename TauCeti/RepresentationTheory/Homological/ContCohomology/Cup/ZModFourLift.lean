@@ -14,7 +14,7 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Trivia
 
 Let `G` be a topological group and `φ : G →ₜ* ℤ/4` a continuous character. Its reduction modulo
 `2` is a continuous character `G → 𝔽₂`, whose class in `H¹(G, 𝔽₂)` is
-`TauCeti.zmodFourReductionClass φ`, the class of the homogeneous cocycle
+`φ.zmodFourReductionClass`, the class of the homogeneous cocycle
 `(g₀, g₁) ↦ φ(g₀⁻¹ g₁) mod 2`. The cup square of this class vanishes: the carry
 `ZMod.carryFour = ⌊·/2⌋ : ℤ/4 → 𝔽₂` satisfies `⌊(u + v)/2⌋ = ⌊u/2⌋ + ⌊v/2⌋ + (u mod 2)(v mod 2)`
 (`ZMod.carryFour_add`), so the cup square `(g₀, g₁, g₂) ↦ (φ(g₀⁻¹ g₁) mod 2)(φ(g₁⁻¹ g₂) mod 2)` is
@@ -29,10 +29,12 @@ distinguishes `ℤ/2` from the cyclic groups `ℤ/2ᵏ`, `k ≥ 2`, whose mod-`2
 
 ## Main declarations
 
-* `TauCeti.zmodFourReductionClass`: the class in `H¹(G, 𝔽₂)` of the reduction modulo `2` of a
-  continuous character `φ : G →ₜ* ℤ/4`.
-* `TauCeti.zmodFourReductionClass_ne_zero`: the class is nonzero when `φ` takes an odd value.
-* `TauCeti.cupFp_zmodFourReductionClass_self_eq_zero`: **the cup square of the class vanishes**.
+* `ContinuousMonoidHom.zmodFourReductionClass`: the class in `H¹(G, 𝔽₂)` of the reduction
+  modulo `2` of a continuous character `φ : G →ₜ* ℤ/4`.
+* `ContinuousMonoidHom.zmodFourReductionClass_ne_zero`: the class is nonzero when `φ` takes an
+  odd value.
+* `ContinuousMonoidHom.cupFp_zmodFourReductionClass_self_eq_zero`: **the cup square of the class
+  vanishes**.
 
 ## References
 
@@ -130,15 +132,15 @@ private theorem iCycles_zmodFourCocycle :
 
 /-- **The class in `H¹(G, 𝔽₂)` of the reduction modulo `2` of a continuous character
 `φ : G →ₜ* ℤ/4`**: the class of the homogeneous cocycle `(g₀, g₁) ↦ φ (g₀⁻¹ g₁) mod 2`. -/
-noncomputable def zmodFourReductionClass : cohomFp 2 G 1 :=
+noncomputable def _root_.ContinuousMonoidHom.zmodFourReductionClass : cohomFp 2 G 1 :=
   π (trivialFp 2 G) 1 (zmodFourCocycle φ)
 
 /-- **The class of the reduction of `φ` is nonzero when `φ` takes an odd value**: a homogeneous
 zero-cochain is a constant function, so its coboundary vanishes, while the cocycle takes the
 value `φ g mod 2 ≠ 0` at `(1, g)`. -/
-theorem zmodFourReductionClass_ne_zero {g : G}
+theorem _root_.ContinuousMonoidHom.zmodFourReductionClass_ne_zero {g : G}
     (hg : ZMod.castHom (by norm_num : (2 : ℕ) ∣ 4) (ZMod 2) (Multiplicative.toAdd (φ g)) ≠ 0) :
-    zmodFourReductionClass φ ≠ 0 := by
+    φ.zmodFourReductionClass ≠ 0 := by
   intro hzero
   obtain ⟨b, hb⟩ :=
     ((homogeneousCochains (trivialFp 2 G)).homologyπ_eq_zero_iff 1 (m := 0)
@@ -165,9 +167,9 @@ theorem zmodFourReductionClass_ne_zero {g : G}
 the cocycle `(g₀, g₁) ↦ φ (g₀⁻¹ g₁) mod 2` is the coboundary of the homogeneous one-cochain
 `(g₀, g₁) ↦ ⌊φ (g₀⁻¹ g₁) / 2⌋`, by the carry identity `ZMod.carryFour_add`. -/
 @[simp]
-theorem cupFp_zmodFourReductionClass_self_eq_zero :
-    cupFp 2 G (zmodFourReductionClass φ) (zmodFourReductionClass φ) = 0 := by
-  rw [zmodFourReductionClass, cupFp_π,
+theorem _root_.ContinuousMonoidHom.cupFp_zmodFourReductionClass_self_eq_zero :
+    cupFp 2 G φ.zmodFourReductionClass φ.zmodFourReductionClass = 0 := by
+  rw [_root_.ContinuousMonoidHom.zmodFourReductionClass, cupFp_π,
     (homogeneousCochains (trivialFp 2 G)).homologyπ_eq_zero_iff 2 (m := 1)
       (CochainComplex.prev_nat_succ 1)]
   refine ⟨zmodFourCochain φ ZMod.carryFour, ?_⟩
