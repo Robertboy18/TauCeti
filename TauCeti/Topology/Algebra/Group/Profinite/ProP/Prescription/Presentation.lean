@@ -129,7 +129,7 @@ theorem hasPrescriptionProperty_of_forall_isCrossedHom_eq_zero
   refine hasPrescriptionProperty_of_forall_exists_continuous_forall_mul_eq_and_apply_eq
     topologicalClosure_closure_range_of_eq_top fun c ↦ ?_
   obtain ⟨F, hFc, hF, hFv⟩ :=
-    freeProP.exists_continuous_isCrossedHom_forall_of_eq (χ.comp (mk p rels)) c
+    freeProP.exists_continuous_isCrossedHom_forall_apply_of_eq (χ.comp (mk p rels)) c
   obtain ⟨F', hF'c, hF', hF'F⟩ := exists_continuous_isCrossedHom_comp_mk_eq hFc hF (h F hFc hF)
   exact ⟨F', hF'c, hF'.map_mul, fun x ↦ by rw [← mk_of, ← hFv x, ← hF'F, Function.comp_apply]⟩
 

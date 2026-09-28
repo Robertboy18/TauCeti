@@ -7,8 +7,6 @@ module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Rank
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation.Basic
-import Mathlib.LinearAlgebra.Dimension.OrzechProperty
-import TauCeti.Topology.Algebra.Group.Profinite.ProP.Basis
 
 /-!
 # Minimal presentations of pro-`p` groups
@@ -72,25 +70,40 @@ theorem topologicalGeneratorRankNat_eq_card_iff :
       (map_continuous (mk p rels)) (mk_surjective p rels),
     ker_mk, Subgroup.topologicalClosure_normalClosure_le_iff isClosed_proPFrattini]
 
+omit [Finite X] in
 /-- **The generators of a minimal presentation are linearly independent in the Frattini
-quotient.** If every relator lies in the Frattini subgroup of the free pro-`p` group on the finite
-type `X`, the classes of the canonical generators of `⟨X ∣ rels⟩` in its Frattini quotient are
-linearly independent over `𝔽_p`: they span a space of dimension `Nat.card X`. -/
+quotient.** If every relator lies in the Frattini subgroup of the free pro-`p` group on `X`, the
+classes of the canonical generators of `⟨X ∣ rels⟩` in its Frattini quotient are linearly
+independent over `𝔽_p`, for a generating type `X` of any cardinality: the relation subgroup lies in
+the Frattini subgroup, so `mk` induces an injection of Frattini quotients. -/
 theorem linearIndependent_frattiniQuotient_of (hrels : rels ⊆ proPFrattini p (freeProP p X)) :
     LinearIndependent (ZMod p) fun x : X ↦
       Additive.ofMul
         (QuotientGroup.mk' (proPFrattini p (presentedProP p X rels)) (of p rels x)) := by
-  cases nonempty_fintype X
-  have := isTopologicallyFinitelyGenerated.finite_quotient_proPFrattini p
-    (G := presentedProP p X rels)
-  refine linearIndependent_of_top_le_span_of_card_eq_finrank ?_ ?_
-  · have hspan := (topologicallyGenerates_iff_frattiniQuotient_span_eq_top (isProP p X rels)
-      (Set.range (of p rels))).mp topologicalClosure_closure_range_of_eq_top
-    rw [← Set.range_comp] at hspan
-    exact hspan.ge
-  · rw [← (isProP p X rels).topologicalGeneratorRankNat_eq_finrank_quotient_proPFrattini
-      isTopologicallyFinitelyGenerated, (topologicalGeneratorRankNat_eq_card_iff rels).mpr hrels,
-      Nat.card_eq_fintype_card]
+  have hker : (mk p rels : freeProP p X →* presentedProP p X rels).ker ≤
+      proPFrattini p (freeProP p X) := by
+    rw [ker_mk, Subgroup.topologicalClosure_normalClosure_le_iff isClosed_proPFrattini]
+    exact hrels
+  have hle : proPFrattini p (freeProP p X) ≤
+      (proPFrattini p (presentedProP p X rels)).comap (mk p rels : freeProP p X →* _) :=
+    (mk p rels : freeProP p X →* presentedProP p X rels).proPFrattini_le_comap
+      (map_continuous (mk p rels)) (mk_surjective p rels)
+  -- The map of Frattini quotients induced by `mk` is injective, because the kernel of `mk` lies
+  -- in the Frattini subgroup.
+  have hinj : Function.Injective (QuotientGroup.map _ _ _ hle) := by
+    rw [← MonoidHom.ker_eq_bot_iff, QuotientGroup.ker_map,
+      comap_proPFrattini_eq_of_surjective Fact.out
+        (mk p rels : freeProP p X →* presentedProP p X rels) (map_continuous (mk p rels))
+        (mk_surjective p rels),
+      sup_eq_left.2 hker, Subgroup.map_eq_bot_iff, QuotientGroup.ker_mk']
+  let φ : Additive (freeProP p X ⧸ proPFrattini p (freeProP p X)) →ₗ[ZMod p]
+      Additive (presentedProP p X rels ⧸ proPFrattini p (presentedProP p X rels)) :=
+    (MonoidHom.toAdditive (QuotientGroup.map _ _ _ hle)).toZModLinearMap p
+  have hφ : LinearMap.ker φ = ⊥ := LinearMap.ker_eq_bot.2 fun a b hab ↦
+    Additive.toMul.injective (hinj (Additive.ofMul.injective hab))
+  convert (freeProP.linearIndependent_frattiniQuotient_of p X).map' φ hφ using 1
+  funext x
+  simp [φ, mk_of]
 
 variable {G : Type v} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 

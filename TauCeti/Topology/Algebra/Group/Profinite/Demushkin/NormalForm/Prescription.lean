@@ -210,7 +210,7 @@ private theorem exists_isCrossedHom_forall_freeProPGen_eq_ite
     ∃ F : freeProP p (Fin n) → ℤ_[p], IsCrossedHom (χ.comp (presentedProP.mk p rels)) F ∧
       (∀ i, F (freeProPGen p n i) = if i = j then 1 else 0) ∧ ∀ r ∈ rels, F r = 0 := by
   rw [presentedProP.hasPrescriptionProperty_iff_forall_isCrossedHom_eq_zero hrels] at hχ
-  obtain ⟨F, hFc, hF, hFv⟩ := freeProP.exists_continuous_isCrossedHom_forall_of_eq
+  obtain ⟨F, hFc, hF, hFv⟩ := freeProP.exists_continuous_isCrossedHom_forall_apply_of_eq
     (χ.comp (presentedProP.mk p rels)) fun i : Fin n ↦ if (i : ℕ) = j then (1 : ℤ_[p]) else 0
   refine ⟨F, hF, fun i ↦ ?_, hχ F hFc hF⟩
   by_cases hi : i < n
