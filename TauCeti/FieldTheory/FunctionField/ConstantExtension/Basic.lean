@@ -18,10 +18,11 @@ Separability and exactness of the original constant field are not needed for thi
 
 Under the hypotheses that make constant field extensions well behaved — the original constant
 field `k` is exact in `F` and `k' / k` is separable — the compositum acquires no new separable
-constants: no element of `F · k'` outside `k'` is separable over `k'`.  Perfectness of `k` upgrades
-this to exactness: over a perfect `k`, where every algebraic element is separable, `k'` is the
-full field of constants of `F · k'`.  Perfectness cannot simply be dropped: over an imperfect `k` an
-inseparable constant field extension can enlarge the field of constants beyond `k'`.  For instance,
+constants: no element of `F · k'` outside `k'` is separable over `k'`.  Perfectness of `k'` upgrades
+this to exactness: when `k'` is perfect — for instance when `k` is perfect and `k' / k` is
+algebraic — every algebraic element is separable over `k'`, so `k'` is the full field of constants
+of `F · k'`.  Perfectness cannot simply be dropped: over an imperfect `k` an inseparable constant
+field extension can enlarge the field of constants beyond `k'`.  For instance,
 `k = 𝔽_p(t, u)` is exact in `F = k(x, y)` with `y ^ p = t * x ^ p + u`, but for `k' = k(t ^ (1/p))`
 the element `y - t ^ (1/p) * x` of `F · k'` is a `p`-th root of `u`, and `u ^ (1/p) ∉ k'`.
 
@@ -31,8 +32,9 @@ the element `y - t ^ (1/p) * x` of `F · k'` is a `p`-th root of `u`, and `u ^ (
   field extension is a function field over the enlarged constant field.
 * `TauCeti.separableClosure_eq_bot_of_constantCompositum_eq_top`: for a separable constant field
   extension of an exact constant field, `k'` is separably closed in `F · k'`.
-* `TauCeti.isIntegrallyClosedIn_of_constantCompositum_eq_top`: over a perfect `k`, `k'` is the
-  exact constant field of `F · k'` (Stichtenoth, Proposition 3.6.1(a)).
+* `TauCeti.isIntegrallyClosedIn_of_constantCompositum_eq_top`: for a separable constant field
+  extension by a perfect `k'`, in particular over a perfect `k`, `k'` is the exact constant field
+  of `F · k'` (Stichtenoth, Proposition 3.6.1(a)).
 
 ## Reference
 
@@ -103,17 +105,18 @@ theorem separableClosure_eq_bot_of_constantCompositum_eq_top [Algebra.IsSeparabl
   exact IntermediateField.mem_top
 
 /-- **The constant field of a constant field extension** (Stichtenoth, Proposition 3.6.1(a)):
-if `k` is the exact constant field of `F` and `k` is perfect, then for every algebraic extension
-`k' / k` the compositum `F · k'` has exact constant field `k'`.
+if `k` is the exact constant field of `F`, `k' / k` is separable and `k'` is perfect, then the
+compositum `F · k'` has exact constant field `k'`.  Stichtenoth's hypotheses — `k` perfect and
+`k' / k` algebraic — are the special case in which `Algebra.IsSeparable k k'` is inferred and
+`PerfectField k'` is `Algebra.IsAlgebraic.perfectField k`.
 
 Together with `TauCeti.IsFunctionField.of_constantCompositum_eq_top`, this makes `F · k' / k'` a
 function field with exact constant field for a finite `k' / k`, so that its genus, its places and
 their degrees are the ones the theory of constant field extensions compares with those of
 `F / k`. -/
-theorem isIntegrallyClosedIn_of_constantCompositum_eq_top [PerfectField k]
-    [Algebra.IsAlgebraic k k'] (hex : IsIntegrallyClosedIn k F)
+theorem isIntegrallyClosedIn_of_constantCompositum_eq_top [Algebra.IsSeparable k k']
+    [PerfectField k'] (hex : IsIntegrallyClosedIn k F)
     (h : constantCompositum F k' F' = ⊤) : IsIntegrallyClosedIn k' F' := by
-  have : PerfectField k' := Algebra.IsAlgebraic.perfectField k
   refine isIntegrallyClosedIn_iff_forall_isAlgebraic.2 fun z hz ↦ IntermediateField.mem_bot.1 ?_
   rw [← separableClosure_eq_bot_of_constantCompositum_eq_top hex h]
   exact PerfectField.separable_of_irreducible (minpoly.irreducible hz.isIntegral)
