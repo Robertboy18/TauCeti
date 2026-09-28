@@ -23,7 +23,7 @@ lower `p`-series. Two continuous characters `χ, ψ : F → 𝔽_p` lift to a co
 `TauCeti.freeProP.heisenbergFunctional χ ψ : gr_1(F) →ₗ[𝔽_p] 𝔽_p`. It is the unique linear
 functional with
 
-  `[ū, v̄] ↦ χ u · ψ v - χ v · ψ u`   and   `π ū ↦ (p choose 2) · χ u · ψ u`
+  `[⟦u⟧, ⟦v⟧] ↦ χ u · ψ v - χ v · ψ u`   and   `π ⟦u⟧ ↦ (p choose 2) · χ u · ψ u`
 
 on the brackets and `p`-power classes of degree-zero classes. Assembling these functionals gives
 the **degree-one form** `TauCeti.freeProP.degreeOneForm ρ`, an `𝔽_p`-bilinear form on the
@@ -31,8 +31,8 @@ continuous `𝔽_p`-dual `H¹(F, 𝔽_p) = Hom_cont(F, 𝔽_p)` attached linearl
 `ρ ∈ gr_1(F)`. In the basis of the dual which is dual to the generators
 (`TauCeti.freeProP.dualBasis`), its matrix has the commutator coordinates of `ρ` in the standard
 basis of `gr_1(F)` above the diagonal and `(p choose 2)` times the `p`-power coordinates on the
-diagonal: for the class `ρ = r̄` of a relator `r ∈ λ_1(F)` this is the matrix of the cup product
-on `H¹(F ⧸ ⟪r⟫, 𝔽_p)`, whose entries Labute reads off `r̄` (Labute, Proposition 3).
+diagonal: for the class `ρ = ⟦r⟧` of a relator `r ∈ λ_1(F)` this is the matrix of the cup product
+on `H¹(F ⧸ ⟪r⟫, 𝔽_p)`, whose entries Labute reads off `⟦r⟧` (Labute, Proposition 3).
 
 Its transformation law is the change-of-basis law of that matrix: a continuous homomorphism
 `φ : F → F'` between free pro-`p` groups carries the form of `ρ` to the form of `φ_* ρ` pulled back
@@ -188,8 +188,8 @@ private theorem heisenbergZ_eq_one_of_mem {y : pLowerCentralSeries p (freeProP p
 /-- **The Heisenberg functional** of two continuous `𝔽_p`-characters `χ, ψ` of the free pro-`p`
 group `F`: the `𝔽_p`-linear functional on `gr_1(F)` induced on `λ_1(F)` by the `(1, 3)`-entry of
 the continuous homomorphism `F → H(𝔽_p)`, `x_i ↦ (χ x_i, ψ x_i, 0)`, into the Heisenberg group over
-`𝔽_p`. It is characterized by its values `[ū, v̄] ↦ χ u · ψ v - χ v · ψ u` and
-`π ū ↦ (p choose 2) · χ u · ψ u` (`TauCeti.freeProP.heisenbergFunctional_unique`). -/
+`𝔽_p`. It is characterized by its values `[⟦u⟧, ⟦v⟧] ↦ χ u · ψ v - χ v · ψ u` and
+`π ⟦u⟧ ↦ (p choose 2) · χ u · ψ u` (`TauCeti.freeProP.heisenbergFunctional_unique`). -/
 noncomputable def heisenbergFunctional : gradedPiece p (freeProP p X) 1 →ₗ[ZMod p] ZMod p :=
   (QuotientGroup.lift ((pLowerCentralSeries p (freeProP p X) 2).subgroupOf
       (pLowerCentralSeries p (freeProP p X) 1)) (heisenbergZ χ ψ) fun _ hy ↦
@@ -201,7 +201,7 @@ private theorem heisenbergFunctional_gradedMk (y : pLowerCentralSeries p (freePr
   rw [gradedMk_def]
   rfl
 
-/-- **The Heisenberg functional on a bracket**: `[ū, v̄] ↦ χ u · ψ v - χ v · ψ u`. -/
+/-- **The Heisenberg functional on a bracket**: `[⟦u⟧, ⟦v⟧] ↦ χ u · ψ v - χ v · ψ u`. -/
 theorem heisenbergFunctional_gradedBracket_gradedMkZero (u v : freeProP p X) :
     heisenbergFunctional χ ψ (gradedBracket p (freeProP p X) 0 0
         (gradedMkZero p (freeProP p X) u) (gradedMkZero p (freeProP p X) v)) =
@@ -214,7 +214,7 @@ theorem heisenbergFunctional_gradedBracket_gradedMkZero (u v : freeProP p X) :
   rw [h, HeisenbergGroup.commutatorElement_eq, heisenbergHom_x, heisenbergHom_y, heisenbergHom_x,
     heisenbergHom_y]
 
-/-- **The Heisenberg functional on a `p`-power class**: `π ū ↦ (p choose 2) · χ u · ψ u`. -/
+/-- **The Heisenberg functional on a `p`-power class**: `π ⟦u⟧ ↦ (p choose 2) · χ u · ψ u`. -/
 theorem heisenbergFunctional_gradedPow_gradedMkZero (u : freeProP p X) :
     heisenbergFunctional χ ψ (gradedPow p (freeProP p X) 0 (gradedMkZero p (freeProP p X) u)) =
       p.choose 2 • ((χ u).toAdd * (ψ u).toAdd) := by
@@ -244,7 +244,7 @@ private theorem linearMap_ext {M : Type*} [AddCommMonoid M] [Module (ZMod p) M]
     (fun u _ ↦ hpow u) fun u _ v _ ↦ hbr u v
 
 /-- **Uniqueness of the Heisenberg functional**: a linear functional on `gr_1(F)` with the values
-`[ū, v̄] ↦ χ u · ψ v - χ v · ψ u` and `π ū ↦ (p choose 2) · χ u · ψ u` is the Heisenberg
+`[⟦u⟧, ⟦v⟧] ↦ χ u · ψ v - χ v · ψ u` and `π ⟦u⟧ ↦ (p choose 2) · χ u · ψ u` is the Heisenberg
 functional of `χ` and `ψ`. -/
 theorem heisenbergFunctional_unique {f : gradedPiece p (freeProP p X) 1 →ₗ[ZMod p] ZMod p}
     (hbr : ∀ u v : freeProP p X,
@@ -368,7 +368,7 @@ private theorem degreeOneFormAux_apply (ρ : gradedPiece p (freeProP p X) 1)
 `(χ, ψ) ↦ heisenbergFunctional χ ψ ρ` on the continuous `𝔽_p`-dual of `F`, attached
 `𝔽_p`-linearly to a class `ρ ∈ gr_1(F)`. For the class of a relator `r ∈ λ_1(F)` it is the cup
 matrix of the one-relator group `F ⧸ ⟪r⟫` read on `gr_1(F)`: its matrix in the dual basis of the
-generators has the commutator coordinates of `r̄` above the diagonal and `(p choose 2)` times the
+generators has the commutator coordinates of `⟦r⟧` above the diagonal and `(p choose 2)` times the
 `p`-power coordinates on it (`TauCeti.freeProP.degreeOneForm_dualBasis_of_lt`,
 `TauCeti.freeProP.degreeOneForm_dualBasis_self`). -/
 noncomputable def degreeOneForm : gradedPiece p (freeProP p X) 1 →ₗ[ZMod p]
@@ -389,7 +389,7 @@ theorem degreeOneForm_apply (ρ : gradedPiece p (freeProP p X) 1)
   rw [degreeOneForm, AddMonoidHom.coe_toZModLinearMap, AddMonoidHom.coe_mk, ZeroHom.coe_mk,
     degreeOneFormAux_apply]
 
-/-- **The degree-one form on a bracket**: `[ū, v̄] ↦ χ u · ψ v - χ v · ψ u`. -/
+/-- **The degree-one form on a bracket**: `[⟦u⟧, ⟦v⟧] ↦ χ u · ψ v - χ v · ψ u`. -/
 theorem degreeOneForm_gradedBracket_gradedMkZero (u v : freeProP p X)
     (χ ψ : continuousZModDual p (freeProP p X)) :
     degreeOneForm (gradedBracket p (freeProP p X) 0 0
@@ -397,7 +397,7 @@ theorem degreeOneForm_gradedBracket_gradedMkZero (u v : freeProP p X)
       (χ.toMul u).toAdd * (ψ.toMul v).toAdd - (χ.toMul v).toAdd * (ψ.toMul u).toAdd :=
   heisenbergFunctional_gradedBracket_gradedMkZero _ _ u v
 
-/-- **The degree-one form on a `p`-power class**: `π ū ↦ (p choose 2) · χ u · ψ u`. -/
+/-- **The degree-one form on a `p`-power class**: `π ⟦u⟧ ↦ (p choose 2) · χ u · ψ u`. -/
 theorem degreeOneForm_gradedPow_gradedMkZero (u : freeProP p X)
     (χ ψ : continuousZModDual p (freeProP p X)) :
     degreeOneForm (gradedPow p (freeProP p X) 0 (gradedMkZero p (freeProP p X) u)) χ ψ =
@@ -467,7 +467,7 @@ private theorem evalDegreeOneForm_apply (χ ψ : continuousZModDual p (freeProP 
 variable [LinearOrder X]
 
 /-- **The degree-one form reads off the commutator coordinates**: for `i < j`, the value of the
-form of `ρ` on the `i`-th and `j`-th coordinate characters is the coefficient of `[x̄_i, x̄_j]` in
+form of `ρ` on the `i`-th and `j`-th coordinate characters is the coefficient of `[⟦x_i⟧, ⟦x_j⟧]` in
 the expansion of `ρ` in the standard basis of `gr_1(F)`. -/
 theorem degreeOneForm_dualBasis_of_lt (ρ : gradedPiece p (freeProP p X) 1) {i j : X}
     (hij : i < j) :
@@ -508,7 +508,7 @@ theorem degreeOneForm_dualBasis_of_lt (ρ : gradedPiece p (freeProP p X) 1) {i j
   exact (evalDegreeOneForm_apply _ _ ρ).symm.trans (LinearMap.congr_fun h ρ)
 
 /-- **The degree-one form reads off the `p`-power coordinates**: the value of the form of `ρ` on
-the `i`-th coordinate character twice is `(p choose 2)` times the coefficient of `π x̄_i` in the
+the `i`-th coordinate character twice is `(p choose 2)` times the coefficient of `π ⟦x_i⟧` in the
 expansion of `ρ` in the standard basis of `gr_1(F)`. -/
 theorem degreeOneForm_dualBasis_self (ρ : gradedPiece p (freeProP p X) 1) (i : X) :
     degreeOneForm ρ (dualBasis p X i) (dualBasis p X i) =

@@ -187,8 +187,8 @@ theorem span_gradedPow_gradedMkZero_union_gradedBracket_eq_top [NeZero p]
   exact gradedPieceInclusion_injective 1 hwy ▸ hw
 
 /-- **Linear maps out of `gr_1(G)` are determined on a topological generating set**, when `λ_2`
-is open: two `ZMod p`-linear maps agreeing on the `p`-power classes `π x̄` and the brackets
-`[x̄, ȳ]` of the elements `x, y` of a topological generating set are equal. -/
+is open: two `ZMod p`-linear maps agreeing on the `p`-power classes `π ⟦x⟧` and the brackets
+`[⟦x⟧, ⟦y⟧]` of the elements `x, y` of a topological generating set are equal. -/
 theorem linearMap_ext_gradedPiece_one [NeZero p] {M : Type*} [AddCommMonoid M]
     [Module (ZMod p) M] (h₂ : IsOpen (pLowerCentralSeries p G 2 : Set G)) {s : Set G}
     (hs : (Subgroup.closure s).topologicalClosure = ⊤) {f g : gradedPiece p G 1 →ₗ[ZMod p] M}
