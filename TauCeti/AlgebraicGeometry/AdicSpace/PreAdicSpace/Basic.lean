@@ -83,7 +83,8 @@ theorem stalkValuation_def (X : PreAdicSpace.{u}) (x : X) :
   rfl
 
 /-- The residue-field valuation pulled back along the residue map is the stalk valuation. -/
-@[simp]
+-- Not `@[simp]`: `Functor.mapPresheaf_obj_presheaf` unfolds the stalk in the type of the
+-- residue map, so the left-hand side is not in simp normal form; use `rw`.
 theorem comap_residue_valuation (X : PreAdicSpace.{u}) (x : X) :
     ValuationSpectrum.comap (IsLocalRing.residue _) (X.valuation x) = X.stalkValuation x := by
   rfl
