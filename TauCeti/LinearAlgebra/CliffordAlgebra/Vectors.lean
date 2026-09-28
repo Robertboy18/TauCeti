@@ -145,13 +145,13 @@ theorem ι_eq_zero_iff (m : M) : ι Q m = 0 ↔ m = 0 := by
 /-! ### Commuting vectors are proportional -/
 
 /-- **Two vectors commute in the Clifford algebra exactly when they are proportional**, provided
-the first has unit value under `Q`. The product `ι Q u * ι Q w * ι Q u` is the vector
-`polar Q u w • u - Q u • w` (`CliffordAlgebra.ι_mul_ι_mul_ι`); when the two vectors commute it is
-also `Q u • w`, and comparing the two expressions solves for `w`. -/
+the first has unit value under `Q`. -/
 theorem commute_ι_iff_exists_eq_smul {u w : M} (hu : IsUnit (Q u)) :
     Commute (ι Q u) (ι Q w) ↔ ∃ c : R, w = c • u := by
   constructor
   · intro h
+    -- `ι Q u * ι Q w * ι Q u` is the vector `polar Q u w • u - Q u • w` (`ι_mul_ι_mul_ι`); when the
+    -- two vectors commute it is also `Q u • w`, and comparing the two expressions solves for `w`.
     obtain ⟨q, hq⟩ := hu
     have h1 : Q u • w = QuadraticMap.polar Q u w • u - Q u • w := by
       apply ι_injective Q
@@ -295,14 +295,17 @@ theorem finrank_filtration_one [FiniteDimensional K V] :
 
 variable {Q} in
 /-- **A nonzero element anticommuting with two orthogonal anisotropic companions of an anisotropic
-vector `v` sends `ι Q v` outside the vectors.** If `ω * ι Q v` were a vector `ι Q w`, each
-companion `u` would commute with it, since `u` anticommutes with both `ω` and `ι Q v`, so `w` would
-be proportional to `u` (`CliffordAlgebra.commute_ι_iff_exists_eq_smul`); two orthogonal
-anisotropic companions then force `w = 0`, and `ω * ι Q v * ι Q v = Q v • ω` forces `ω = 0`. -/
+vector `v` sends `ι Q v` outside the vectors.** Only the two anticommutation relations are
+required of `ω`; the volume element of an orthogonal list of even length containing `u₁` and `u₂`
+satisfies them. -/
 theorem mul_ι_notMem_range_ι_of_mul_ι_eq_neg {ω : CliffordAlgebra Q} (hω : ω ≠ 0) {v u₁ u₂ : V}
     (hv : Q v ≠ 0) (hu₁ : Q u₁ ≠ 0) (hu₂ : Q u₂ ≠ 0) (hvu₁ : Q.IsOrtho v u₁)
     (hvu₂ : Q.IsOrtho v u₂) (hu₁u₂ : Q.IsOrtho u₁ u₂) (h₁ : ω * ι Q u₁ = -(ι Q u₁ * ω))
     (h₂ : ω * ι Q u₂ = -(ι Q u₂ * ω)) : ω * ι Q v ∉ LinearMap.range (ι Q) := by
+  -- If `ω * ι Q v` were a vector `ι Q w`, each companion `u` would commute with it, since `u`
+  -- anticommutes with both `ω` and `ι Q v`, so `w` would be proportional to `u`
+  -- (`commute_ι_iff_exists_eq_smul`); two orthogonal anisotropic companions then force `w = 0`,
+  -- and `ω * ι Q v * ι Q v = Q v • ω` forces `ω = 0`.
   rintro ⟨w, hw⟩
   -- A companion `u` of `v` commutes with `ω * ι Q v`, so `w` is proportional to `u`.
   have key : ∀ u : V, Q u ≠ 0 → Q.IsOrtho v u → ω * ι Q u = -(ι Q u * ω) → ∃ c : K, w = c • u := by

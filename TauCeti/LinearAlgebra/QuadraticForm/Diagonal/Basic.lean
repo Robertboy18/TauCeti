@@ -250,11 +250,12 @@ theorem _root_.QuadraticForm.discr'_weightedSumSquares [DecidableEq ι] (w : ι 
   rw [QuadraticForm.discr', QuadraticForm.toMatrix'_weightedSumSquares, Matrix.det_diagonal]
 
 /-- **A diagonal form with nonzero weights over a domain is nondegenerate** when two is
-invertible: its associated bilinear form is the diagonal matrix of the weights
-(`QuadraticForm.toMatrix'_weightedSumSquares`), whose determinant is their product. -/
+invertible. -/
 theorem _root_.QuadraticMap.nondegenerate_weightedSumSquares [IsDomain R] {w : ι → R}
     (hw : ∀ i, w i ≠ 0) : (QuadraticMap.weightedSumSquares R w).Nondegenerate := by
   classical
+  -- The associated bilinear form has Gram matrix the diagonal matrix of the weights
+  -- (`QuadraticForm.toMatrix'_weightedSumSquares`), whose determinant is their product.
   rw [← QuadraticMap.nondegenerate_associated_iff]
   have h : QuadraticMap.associated (R := R) (QuadraticMap.weightedSumSquares R w) =
       Matrix.toLinearMap₂' R (Matrix.diagonal w) := by

@@ -281,9 +281,10 @@ theorem prod_map_ι_sq_scalar {l : List M} (hl : l.Pairwise Q.IsOrtho) :
           ring
 
 /-- **Reversal multiplies the volume element of a pairwise orthogonal list by
-`(-1) ^ (n.choose 2)`**: reversing the order of the `n` factors takes `n.choose 2` transpositions,
-each costing a sign. In particular the volume element is reverse-symmetric for `n ≡ 0, 1 (mod 4)`
-and reverse-antisymmetric for `n ≡ 2, 3 (mod 4)`. -/
+`(-1) ^ (n.choose 2)`**, the same sign as in its square `CliffordAlgebra.prod_map_ι_sq_scalar`. In
+particular the volume element is reverse-symmetric for `n ≡ 0, 1 (mod 4)` and reverse-antisymmetric
+for `n ≡ 2, 3 (mod 4)`. -/
+@[simp]
 theorem reverse_prod_map_ι_of_pairwise_isOrtho {l : List M} (hl : l.Pairwise Q.IsOrtho) :
     reverse (l.map (ι Q)).prod = ((-1 : R) ^ l.length.choose 2) • (l.map (ι Q)).prod := by
   induction l with
@@ -327,8 +328,7 @@ variable {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V]
 /-! ### The volume element moves its factors out of the vectors -/
 
 /-- Two members of a pairwise orthogonal list of length at least three, orthogonal to a given
-member and to each other. The list is split at the given member and the two are its first two
-other entries. -/
+member and to each other. -/
 private theorem exists_isOrtho_pair_of_mem {l : List V} (hl : l.Pairwise Q.IsOrtho)
     (h3 : 3 ≤ l.length) {v : V} (hv : v ∈ l) :
     ∃ u₁ ∈ l, ∃ u₂ ∈ l, Q.IsOrtho v u₁ ∧ Q.IsOrtho v u₂ ∧ Q.IsOrtho u₁ u₂ := by
@@ -360,14 +360,14 @@ private theorem exists_isOrtho_pair_of_mem {l : List V} (hl : l.Pairwise Q.IsOrt
 variable [Invertible (2 : K)]
 
 /-- **The volume element of an orthogonal anisotropic list of even length at least three moves each
-member of the list out of the vectors.** The volume element anticommutes with every member
-(`CliffordAlgebra.prod_map_ι_mul_ι_of_even_length`), is a unit
-(`CliffordAlgebra.isUnit_prod_map_ι`), and every member has two orthogonal anisotropic companions
-in the list, so `CliffordAlgebra.mul_ι_notMem_range_ι_of_mul_ι_eq_neg` applies. Length two is
-genuinely excluded: there the volume element sends each member to a multiple of the other. -/
+member of the list out of the vectors.** Length two is genuinely excluded: there the volume element
+sends each member to a multiple of the other. -/
 theorem prod_map_ι_mul_ι_notMem_range_ι {l : List V} (hl : l.Pairwise Q.IsOrtho)
     (hlen : Even l.length) (h3 : 3 ≤ l.length) (haniso : ∀ v ∈ l, Q v ≠ 0) {v : V}
     (hv : v ∈ l) : (l.map (ι Q)).prod * ι Q v ∉ LinearMap.range (ι Q) := by
+  -- The volume element is a nonzero unit anticommuting with every member of the list
+  -- (`prod_map_ι_mul_ι_of_even_length`), and `v` has two orthogonal anisotropic companions in the
+  -- list, so `mul_ι_notMem_range_ι_of_mul_ι_eq_neg` applies.
   obtain ⟨u₁, hu₁, u₂, hu₂, hvu₁, hvu₂, hu₁u₂⟩ := exists_isOrtho_pair_of_mem hl h3 hv
   have hunit : IsUnit ((l.map Q).prod) :=
     List.prod_isUnit fun x hx => by

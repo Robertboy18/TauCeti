@@ -20,8 +20,8 @@ For a nondegenerate quadratic form in dimensions one to five, the Spin group is 
 unitary group `U(C₀, σ)` of the Clifford algebra: every even Clifford unit `x` with
 `reverse x * x = 1` lies in the Lipschitz group. The sibling files prove this in dimensions one
 and two. This file shows that the equality stops in dimension six, where `U(C₀, σ)` is a unitary
-group of degree four and the Spin group is only its reduced-norm-one subgroup, and that it fails in
-every dimension from six on.
+group of degree four and the Spin group is only its reduced-norm-one subgroup, and that, for
+nondegenerate forms over fields of characteristic zero, it fails in every dimension from six on.
 
 The witness is explicit. Let `v₁, …, v₆` be six pairwise orthogonal anisotropic vectors and
 `ω = ι v₁ ⋯ ι v₆` their volume element. It is even, it anticommutes with each of the six `ι vᵢ`,
@@ -48,8 +48,8 @@ H. B. Lawson and M.-L. Michelsohn, *Spin Geometry* (1989), Chapter I, §2.
 ## Main results
 
 * `CliffordAlgebra.exists_mem_evenUnitaryGroup_coe_eq_algebraMap_add_smul_prod_map_ι`: for `ω`
-  the volume element of six orthogonal anisotropic vectors, in any quadratic space containing
-  them, `a + b • ω` is an even unitary unit when `a² + b² ∏ Q vᵢ = 1`.
+  the volume element of six orthogonal vectors, in any quadratic space containing them,
+  `a + b • ω` is an even unitary unit when `a² + b² ∏ Q vᵢ = 1`.
 * `CliffordAlgebra.notMem_lipschitzGroup_of_mem_evenUnitaryGroup_of_coe_eq`: such a unit with
   `a b ≠ 0` is not in the Lipschitz group.
 * `CliffordAlgebra.range_spinGroup_toUnits_ne_evenUnitaryGroup_of_six_le_finrank`: over a field
@@ -119,18 +119,19 @@ private theorem reverse_prod_map_ι_of_length_eq_six (hl : l.Pairwise Q.IsOrtho)
   rw [reverse_prod_map_ι_of_pairwise_isOrtho hl, hlen, (by decide : Nat.choose 6 2 = 15),
     Odd.neg_one_pow (by decide : Odd 15), neg_one_smul]
 
-/-! ### The witness `a + b • ω` built from six orthogonal anisotropic vectors -/
+/-! ### The witness `a + b • ω` built from six orthogonal vectors -/
 
-/-- **The even unitary units `a + b • ω` built from six orthogonal anisotropic vectors.** For `ω`
-the volume element of an orthogonal anisotropic list of length six, in any quadratic space
-containing the list, `ω` is even, `reverse ω = -ω` and `ω² = -∏ Q vᵢ`, so `a + b • ω` is an even
-unit of reverse norm `a² + b² ∏ Q vᵢ`. When that norm is `1` it lies in the even unitary
-group. -/
+/-- **The even unitary units `a + b • ω` built from six orthogonal vectors.** For `ω` the volume
+element of an orthogonal list of length six, in any quadratic space containing the list,
+`a + b • ω` is an even unitary unit as soon as `a² + b² ∏ Q vᵢ = 1`. No anisotropy is needed at
+this stage; it enters only when the unit is shown to lie outside the Lipschitz group. -/
 theorem exists_mem_evenUnitaryGroup_coe_eq_algebraMap_add_smul_prod_map_ι
     (hl : l.Pairwise Q.IsOrtho) (hlen : l.length = 6) {a b : K}
     (hab : a ^ 2 + b ^ 2 * (l.map Q).prod = 1) :
     ∃ x : (CliffordAlgebra Q)ˣ, x ∈ evenUnitaryGroup Q ∧
       (x : CliffordAlgebra Q) = algebraMap K _ a + b • (l.map (ι Q)).prod := by
+  -- `ω` is even, `reverse ω = -ω` and `ω² = -∏ Q vᵢ`, so `a + b • ω` is an even unit with inverse
+  -- `a - b • ω` and reverse norm `a² + b² ∏ Q vᵢ = 1`.
   obtain ⟨h₁, h₂⟩ := algebraMap_add_smul_mul_algebraMap_sub_smul
     (prod_map_ι_sq_of_length_eq_six hl hlen) a b
   have hnorm : a ^ 2 - b ^ 2 * -(l.map Q).prod = 1 := by rw [← hab]; ring
@@ -154,17 +155,17 @@ variable [Invertible (2 : K)]
 /-! ### The witness is not in the Lipschitz group -/
 
 /-- **An even unitary unit `a + b • ω` with `a b ≠ 0` is not in the Lipschitz group**, for `ω` the
-volume element of an orthogonal anisotropic list of length six. Twisted conjugation by it sends a
-member `v` of the list to `(a² + b² ω²) • v + 2ab • ω v`, and `ω v` is not a vector
-(`CliffordAlgebra.prod_map_ι_mul_ι_notMem_range_ι`), whereas the Lipschitz group preserves the
-vectors (`CliffordAlgebra.lipschitzGroup.involute_act_ι_mem_range_ι`). The list need not span:
-the witness lives in the Clifford algebra of any quadratic space containing six orthogonal
-anisotropic vectors. -/
+volume element of an orthogonal anisotropic list of length six. The list need not span: the
+witness lives in the Clifford algebra of any quadratic space containing six orthogonal anisotropic
+vectors. -/
 theorem notMem_lipschitzGroup_of_mem_evenUnitaryGroup_of_coe_eq (hl : l.Pairwise Q.IsOrtho)
     (hlen : l.length = 6) (haniso : ∀ v ∈ l, Q v ≠ 0) {x : (CliffordAlgebra Q)ˣ}
     (hx : x ∈ evenUnitaryGroup Q)
     {a b : K} (hcoe : (x : CliffordAlgebra Q) = algebraMap K _ a + b • (l.map (ι Q)).prod)
     (ha : a ≠ 0) (hb : b ≠ 0) : x ∉ lipschitzGroup Q := by
+  -- Twisted conjugation by `x` sends a member `v` of the list to `(a² + b² ω²) • v + 2ab • ω v`,
+  -- and `ω v` is not a vector (`prod_map_ι_mul_ι_notMem_range_ι`), whereas the Lipschitz group
+  -- preserves the vectors (`lipschitzGroup.involute_act_ι_mem_range_ι`).
   intro hxL
   obtain ⟨v, hv⟩ := List.exists_mem_of_length_pos (l := l) (by omega)
   have heven : Even l.length := by rw [hlen]; exact ⟨3, rfl⟩
@@ -211,12 +212,12 @@ section CharZero
 variable [CharZero K] (Q : QuadraticForm K V)
 
 /-- **Over a field of characteristic zero, the even unitary group of a nondegenerate quadratic form
-of dimension at least six is not contained in the Lipschitz group.** Six members of an orthogonal
-anisotropic basis have `∏ Q vᵢ = δ`, the conic `a² + b² δ = 1` has a point with `a b ≠ 0`
-(`TauCeti.exists_sq_add_sq_mul_eq_one`), and `a + b • ω` is the witness, `ω` their volume
-element. -/
+of dimension at least six is not contained in the Lipschitz group.** The witness is `a + b • ω` for
+`ω` the volume element of six members of an orthogonal basis. -/
 theorem not_evenUnitaryGroup_le_lipschitzGroup_of_six_le_finrank (hQ : Q.Nondegenerate)
     (hV : 6 ≤ finrank K V) : ¬ evenUnitaryGroup Q ≤ lipschitzGroup Q := by
+  -- Six members of an orthogonal anisotropic basis have `∏ Q vᵢ = δ`, and the conic
+  -- `a² + b² δ = 1` has a point with `a b ≠ 0` (`TauCeti.exists_sq_add_sq_mul_eq_one`).
   have : FiniteDimensional K V := Module.finite_of_finrank_pos (by omega)
   obtain ⟨l, hl, hlen, -, haniso⟩ := hQ.exists_list_pairwise_isOrtho
   have hl' : (l.take 6).Pairwise Q.IsOrtho := hl.sublist (List.take_sublist 6 l)
@@ -240,11 +241,10 @@ end CharZero
 
 /-! ### The split rational witness -/
 
-/-- **A split rational witness: the diagonal form `⟨1, -1, 1, -1, 1, -1⟩` on `Fin 6 → ℚ`** is a
-nondegenerate form of dimension six (`QuadraticMap.nondegenerate_weightedSumSquares`), the
-diagonalisation of the split form `H ⟂ H ⟂ H`, so its Spin group is a proper subgroup of its even
-unitary group (`CliffordAlgebra.range_spinGroup_toUnits_ne_evenUnitaryGroup_of_six_le_finrank`).
-This is the classical example where `U(C₀, σ) ≅ GL₄(ℚ)` and `Spin(Q) ≅ SL₄(ℚ)`. -/
+/-- **A split rational witness: the diagonal form `⟨1, -1, 1, -1, 1, -1⟩` on `Fin 6 → ℚ`**, the
+diagonalisation of the split form `H ⟂ H ⟂ H`, is a nondegenerate form of dimension six whose Spin
+group is a proper subgroup of its even unitary group. This is the classical example where
+`U(C₀, σ) ≅ GL₄(ℚ)` and `Spin(Q) ≅ SL₄(ℚ)`. -/
 theorem exists_spinGroup_ne_evenUnitaryGroup_finrank_six :
     ∃ Q : QuadraticForm ℚ (Fin 6 → ℚ), Q.Nondegenerate ∧
       (spinGroup.toUnits : spinGroup Q →* (CliffordAlgebra Q)ˣ).range ≠ evenUnitaryGroup Q := by

@@ -37,11 +37,11 @@ public section
 namespace TauCeti
 
 /-- **The conic `a² + b² δ = 1` has a point with both coordinates nonzero over every field of
-characteristic zero.** The rational parametrisation `t ↦ ((1 - δt²)/(1 + δt²), 2t/(1 + δt²))` at
-`t = 1` works unless `δ = ±1`, and those two conics carry the points `(3/5, 4/5)` and
-`(5/4, 3/4)`. -/
+characteristic zero.** -/
 theorem exists_sq_add_sq_mul_eq_one {K : Type*} [Field K] [CharZero K] (δ : K) :
     ∃ a b : K, a ≠ 0 ∧ b ≠ 0 ∧ a ^ 2 + b ^ 2 * δ = 1 := by
+  -- The rational parametrisation `t ↦ ((1 - δt²)/(1 + δt²), 2t/(1 + δt²))` at `t = 1` works
+  -- unless `δ = ±1`; those two conics carry the points `(3/5, 4/5)` and `(5/4, 3/4)`.
   by_cases h₁ : δ = 1
   · exact ⟨3 / 5, 4 / 5, by norm_num, by norm_num, by rw [h₁]; norm_num⟩
   by_cases h₂ : δ = -1
