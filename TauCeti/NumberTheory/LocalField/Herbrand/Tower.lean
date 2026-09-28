@@ -34,6 +34,8 @@ ramification group of `L/K` at the same index, `(G/H)^v = G^v H / H`.
   the filtration of `L/K` is constant on `(φ_{M/L}(a), φ_{M/L}(b)]` when that of `M/K` is
   constant on `(a, b]`.
 * `TauCeti.LocalFieldsRamification.herbrand_tower`: `φ_{M/K}(u) = φ_{L/K}(φ_{M/L}(u))`.
+* `TauCeti.LocalFieldsRamification.herbrandOrderIso_tower`: the same identity for the bundled
+  order isomorphisms, `herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L)`.
 * `TauCeti.LocalFieldsRamification.inverseHerbrand_tower`:
   `ψ_{M/K}(v) = ψ_{M/L}(ψ_{L/K}(v))`.
 * `TauCeti.LocalFieldsRamification.psiNat_tower`: `ψℕ_{M/K}(n) = ψℕ_{M/L}(ψℕ_{L/K}(n))`.
@@ -182,13 +184,20 @@ theorem herbrand_tower (u : RamificationIndexDomain) :
   · exact herbrand_tower_of_mem_Icc K L M ⌊(u : ℝ)⌋₊ u (Nat.floor_le hu.le)
       (Nat.lt_floor_add_one _).le
 
+/-- **Transitivity of the Herbrand function** for the bundled order isomorphisms of
+`RamificationIndexDomain`: `φ_{M/K}` is the composite of `φ_{M/L}` followed by `φ_{L/K}`. -/
+theorem herbrandOrderIso_tower :
+    herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L) :=
+  OrderIso.ext <| funext fun u ↦ by
+    rw [OrderIso.trans_apply, herbrandOrderIso_apply, herbrandOrderIso_apply,
+      herbrandOrderIso_apply, herbrand_tower K L M]
+
 /-- **Transitivity of the inverse Herbrand function** in a tower `M/L/K` of Galois extensions:
 `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`. Inverting the composite `φ_{L/K} ∘ φ_{M/L}` reverses its order. -/
 theorem inverseHerbrand_tower (v : RamificationIndexDomain) :
     inverseHerbrand K M v = inverseHerbrand L M (inverseHerbrand K L v) := by
-  apply (herbrand_strictMono K M).injective
-  rw [herbrand_inverseHerbrand, herbrand_tower K L M, herbrand_inverseHerbrand,
-    herbrand_inverseHerbrand]
+  rw [← herbrandOrderIso_symm_apply, herbrandOrderIso_tower K L M, OrderIso.symm_trans_apply,
+    herbrandOrderIso_symm_apply, herbrandOrderIso_symm_apply]
 
 /-- **Transitivity of the integral inverse Herbrand function**: `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`. -/
 theorem psiNat_tower (n : ℕ) : psiNat K M n = psiNat L M (psiNat K L n) := by
