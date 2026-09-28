@@ -126,13 +126,6 @@ theorem resolutionXRestrictScalarsIntIso_succ (X : TopRep k G) (n : ℕ) :
         coind₁RestrictScalarsIntIso (resolutionX X n) :=
   (rfl)
 
-/-- In degree zero the identification of the resolutions is the identity on elements. -/
-@[simp]
-theorem resolutionXRestrictScalarsIntIso_zero_hom_apply (X : TopRep k G)
-    (v : (resolutionX (restrictScalarsInt.obj X) 0).V) :
-    (resolutionXRestrictScalarsIntIso X 0).hom.hom v = v :=
-  (rfl)
-
 /-- In degree `n + 1` the identification of the resolutions acts on an element of the iterated
 function space `C(G, C(G, …, X.V))` by applying the identification in degree `n` to its values. -/
 -- The value of the identification lies in the carrier of `restrictScalarsInt.obj _`, which is the
