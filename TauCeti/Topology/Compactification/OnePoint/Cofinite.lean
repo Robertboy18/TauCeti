@@ -14,8 +14,8 @@ public import Mathlib.Topology.DiscreteSubset
 Let `s` be a subset of a Hausdorff space `X` whose inclusion tends to a point `a` along the
 cofinite filter: every neighbourhood of `a` contains all but finitely many points of `s`. Away
 from `a` the set `s` is then discrete (`Filter.Tendsto.discreteTopology_diff_singleton`), and
-adding `a` to it produces a compact space in which `a` is the only non-isolated point, so
-`insert a s` is the one-point compactification of the discrete space `s \ {a}`, with `a` as the
+adding `a` to it produces a compact space in which `a` is the only point that may be non-isolated,
+so `insert a s` is the one-point compactification of the discrete space `s \ {a}`, with `a` as the
 point at infinity (`Filter.Tendsto.onePointHomeomorphInsert`).
 
 This is the topological form of a set converging to `1` in a profinite group: for such a set `s`,
@@ -40,9 +40,8 @@ namespace TauCeti
 
 variable {X : Type*} [TopologicalSpace X] [T2Space X] {s : Set X} {a : X}
 
-/-- A set whose inclusion tends to `a` along the cofinite filter is discrete once `a` is removed:
-a point `x ≠ a` of it has a neighbourhood disjoint from a neighbourhood of `a`, which therefore
-contains only finitely many points of the set. -/
+/-- A set whose inclusion tends to `a` along the cofinite filter is discrete once `a` is
+removed. -/
 theorem _root_.Filter.Tendsto.discreteTopology_diff_singleton
     (h : Tendsto ((↑) : s → X) cofinite (𝓝 a)) : DiscreteTopology ↥(s \ {a}) := by
   refine discreteTopology_iff_isOpen_singleton.mpr fun x ↦ ?_
@@ -81,5 +80,22 @@ theorem _root_.Filter.Tendsto.onePointHomeomorphInsert_apply_infty
     (h : Tendsto ((↑) : s → X) cofinite (𝓝 a)) :
     h.onePointHomeomorphInsert ∞ = ⟨a, mem_insert a s⟩ :=
   (rfl)
+
+/-- The inverse of the homeomorphism `(s \ {a})⁺ ≃ₜ insert a s` sends `a` to the point at
+infinity. -/
+@[simp]
+theorem _root_.Filter.Tendsto.onePointHomeomorphInsert_symm_apply_left
+    (h : Tendsto ((↑) : s → X) cofinite (𝓝 a)) :
+    h.onePointHomeomorphInsert.symm ⟨a, mem_insert a s⟩ = ∞ := by
+  rw [Homeomorph.symm_apply_eq, h.onePointHomeomorphInsert_apply_infty]
+
+/-- The inverse of the homeomorphism `(s \ {a})⁺ ≃ₜ insert a s` is the inclusion on the points
+other than `a`. -/
+@[simp]
+theorem _root_.Filter.Tendsto.onePointHomeomorphInsert_symm_apply_of_ne
+    (h : Tendsto ((↑) : s → X) cofinite (𝓝 a)) (y : ↥(insert a s)) (hy : (y : X) ≠ a) :
+    h.onePointHomeomorphInsert.symm y =
+      ((⟨y, y.2.resolve_left hy, hy⟩ : ↥(s \ {a})) : OnePoint ↥(s \ {a})) := by
+  rw [Homeomorph.symm_apply_eq, h.onePointHomeomorphInsert_apply_coe]
 
 end TauCeti
