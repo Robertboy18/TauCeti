@@ -7,6 +7,8 @@ module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Rank
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation.Basic
+import Mathlib.LinearAlgebra.Dimension.OrzechProperty
+import TauCeti.Topology.Algebra.Group.Profinite.ProP.Basis
 
 /-!
 # Minimal presentations of pro-`p` groups
@@ -30,6 +32,8 @@ from the presentation, and it is the normalization a Demushkin relator satisfies
   the free pro-`p` group on `X`.
 * `TauCeti.presentedProP.subset_proPFrattini_iff_card_eq`: a presentation of `G` on a finite type
   `X` has its relators in the Frattini subgroup exactly when `Nat.card X = d(G)`.
+* `TauCeti.presentedProP.linearIndependent_frattiniQuotient_of`: the classes of the generators of a
+  minimal presentation are linearly independent in the Frattini quotient.
 * `TauCeti.presentedProP.topologicalClosure_normalClosure_eq_proPFrattini`: the relation subgroup
   of a minimal presentation of a group with trivial pro-`p` Frattini subgroup is `Φ(F)`.
 * `TauCeti.IsProP.exists_subset_proPFrattini_continuousMulEquiv_presentedProP`: every
@@ -67,6 +71,26 @@ theorem topologicalGeneratorRankNat_eq_card_iff :
       (isTopologicallyFinitelyGenerated_freeProP p X) (mk p rels : freeProP p X →* _)
       (map_continuous (mk p rels)) (mk_surjective p rels),
     ker_mk, Subgroup.topologicalClosure_normalClosure_le_iff isClosed_proPFrattini]
+
+/-- **The generators of a minimal presentation are linearly independent in the Frattini
+quotient.** If every relator lies in the Frattini subgroup of the free pro-`p` group on the finite
+type `X`, the classes of the canonical generators of `⟨X ∣ rels⟩` in its Frattini quotient are
+linearly independent over `𝔽_p`: they span a space of dimension `Nat.card X`. -/
+theorem linearIndependent_frattiniQuotient_of (hrels : rels ⊆ proPFrattini p (freeProP p X)) :
+    LinearIndependent (ZMod p) fun x : X ↦
+      Additive.ofMul
+        (QuotientGroup.mk' (proPFrattini p (presentedProP p X rels)) (of p rels x)) := by
+  cases nonempty_fintype X
+  have := isTopologicallyFinitelyGenerated.finite_quotient_proPFrattini p
+    (G := presentedProP p X rels)
+  refine linearIndependent_of_top_le_span_of_card_eq_finrank ?_ ?_
+  · have hspan := (topologicallyGenerates_iff_frattiniQuotient_span_eq_top (isProP p X rels)
+      (Set.range (of p rels))).mp topologicalClosure_closure_range_of_eq_top
+    rw [← Set.range_comp] at hspan
+    exact hspan.ge
+  · rw [← (isProP p X rels).topologicalGeneratorRankNat_eq_finrank_quotient_proPFrattini
+      isTopologicallyFinitelyGenerated, (topologicalGeneratorRankNat_eq_card_iff rels).mpr hrels,
+      Nat.card_eq_fintype_card]
 
 variable {G : Type v} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
