@@ -29,7 +29,7 @@ For `a ≠ 0` the sextic is separable over `ℚ`, being the product of `X` and t
 ## Main results
 
 * `TauCeti.resolventSextic_X_pow_five_sub_C`: the resolvent sextic of `X⁵ - a` is
-  `X⁶ - 3125a⁴X`.
+  `X⁶ - 3125a⁴X`; `TauCeti.resolventSextic_X_pow_five_sub_intCast` is its simp normal form.
 * `TauCeti.separable_map_resolventSextic_X_pow_five_sub_C`: for `a ≠ 0`, that sextic is
   separable over `ℚ`.
 
@@ -71,57 +71,46 @@ private theorem galResolvent_quinticF20Invariant_pow_mul {ζ : ℂ} (hζ : IsPri
     (θ : ℂ) :
     galResolvent quinticF20Invariant (fun i : Fin 5 => ζ ^ (i : ℕ) * θ) =
       X * (X ^ 5 - C ((5 * θ ^ 4) ^ 5)) := by
-  have hsum : 1 + ζ + ζ ^ 2 + ζ ^ 3 + ζ ^ 4 = 0 := by
-    have := hζ.geom_sum_eq_zero (by norm_num)
-    simpa [Finset.sum_range_succ, add_assoc] using this
   have hval := eval₂_rename_quinticF20Invariant_pow_mul ζ θ hζ.pow_eq_one
-  have e3 : ((3 : Fin 5) : ℕ) = 3 := rfl
-  have e4 : ((4 : Fin 5) : ℕ) = 4 := rfl
-  -- The six orbit values, one for each coset representative: each is `θ⁴` times a sum of ten
-  -- fifth roots of unity, and `1 + ζ + ζ² + ζ³ + ζ⁴ = 0` collapses that sum to `0` or `5ζʲ`.
+  -- Each orbit value is `θ⁴` times the sum of `ζʲ` over the multiset of the ten exponents read
+  -- off from the coset representative; that multiset is a finite computation (`decide`).
+  have hkey : ∀ (σ : Perm (Fin 5)) (m : Multiset (Fin 5)),
+      Finset.univ.val.map (fun a : Fin 5 => (σ a + σ a + σ (a + 1) + σ (a - 1) : Fin 5)) +
+        Finset.univ.val.map (fun a : Fin 5 => (σ a + σ a + σ (a + 2) + σ (a - 2) : Fin 5)) = m →
+      MvPolynomial.eval₂ (Int.castRingHom ℂ) (fun i : Fin 5 => ζ ^ (i : ℕ) * θ)
+        (MvPolynomial.rename (⇑σ) quinticF20Invariant) =
+      θ ^ 4 * (m.map fun j : Fin 5 => ζ ^ (j : ℕ)).sum := by
+    rintro σ m rfl
+    rw [hval, Finset.sum_add_distrib, Finset.sum_eq_multiset_sum, Finset.sum_eq_multiset_sum,
+      Multiset.map_add, Multiset.sum_add, Multiset.map_map, Multiset.map_map]
+    rfl
+  -- The fifth roots of unity sum to zero.
+  have hfull : ((Finset.univ.val : Multiset (Fin 5)).map fun j : Fin 5 => ζ ^ (j : ℕ)).sum = 0 := by
+    rw [← Finset.sum_eq_multiset_sum, Fin.sum_univ_eq_sum_range (fun i => ζ ^ i) 5]
+    exact hζ.geom_sum_eq_zero (by norm_num)
+  -- For the five non-identity representatives the exponent multiset consists of five copies of
+  -- one residue `j` together with one copy of every residue, so the value is `5θ⁴ζʲ`.
+  have hrep : ∀ (σ : Perm (Fin 5)) (j : ℕ),
+      Finset.univ.val.map (fun a : Fin 5 => (σ a + σ a + σ (a + 1) + σ (a - 1) : Fin 5)) +
+        Finset.univ.val.map (fun a : Fin 5 => (σ a + σ a + σ (a + 2) + σ (a - 2) : Fin 5)) =
+        Multiset.replicate 5 (Fin.ofNat 5 j) + Finset.univ.val →
+      MvPolynomial.eval₂ (Int.castRingHom ℂ) (fun i : Fin 5 => ζ ^ (i : ℕ) * θ)
+        (MvPolynomial.rename (⇑σ) quinticF20Invariant) = ζ ^ j * (5 * θ ^ 4) := by
+    intro σ j h
+    rw [hkey σ _ h, Multiset.map_add, Multiset.sum_add, Multiset.map_replicate,
+      Multiset.sum_replicate, hfull, add_zero, nsmul_eq_mul, Fin.val_ofNat,
+      ← pow_eq_pow_mod _ hζ.pow_eq_one]
+    push_cast
+    ring
   have h1 : MvPolynomial.eval₂ (Int.castRingHom ℂ) (fun i : Fin 5 => ζ ^ (i : ℕ) * θ)
       (MvPolynomial.rename (⇑(1 : Perm (Fin 5))) quinticF20Invariant) = 0 := by
-    rw [hval]
-    simp only [Fin.sum_univ_five, Perm.coe_one, id_eq, Fin.isValue, Fin.reduceAdd, Fin.reduceSub,
-      Fin.val_zero, Fin.val_one, Fin.val_two, e3, e4, pow_zero, pow_one]
-    linear_combination (2 * θ ^ 4) * hsum
-  have h2 : MvPolynomial.eval₂ (Int.castRingHom ℂ) (fun i : Fin 5 => ζ ^ (i : ℕ) * θ)
-      (MvPolynomial.rename (⇑(swap 2 3 : Perm (Fin 5))) quinticF20Invariant) =
-      ζ ^ 0 * (5 * θ ^ 4) := by
-    rw [hval]
-    simp only [Fin.sum_univ_five, Fin.isValue, Fin.reduceAdd, Fin.reduceSub, swap_apply_def,
-      Fin.reduceEq, ↓reduceIte, Fin.val_zero, Fin.val_one, Fin.val_two, e3, e4, pow_zero, pow_one]
-    linear_combination θ ^ 4 * hsum
-  have h3 : MvPolynomial.eval₂ (Int.castRingHom ℂ) (fun i : Fin 5 => ζ ^ (i : ℕ) * θ)
-      (MvPolynomial.rename (⇑(swap 3 4 : Perm (Fin 5))) quinticF20Invariant) =
-      ζ ^ 4 * (5 * θ ^ 4) := by
-    rw [hval]
-    simp only [Fin.sum_univ_five, Fin.isValue, Fin.reduceAdd, Fin.reduceSub, swap_apply_def,
-      Fin.reduceEq, ↓reduceIte, Fin.val_zero, Fin.val_one, Fin.val_two, e3, e4, pow_zero, pow_one]
-    linear_combination θ ^ 4 * hsum
-  have h4 : MvPolynomial.eval₂ (Int.castRingHom ℂ) (fun i : Fin 5 => ζ ^ (i : ℕ) * θ)
-      (MvPolynomial.rename (⇑(swap 2 4 : Perm (Fin 5))) quinticF20Invariant) =
-      ζ ^ 2 * (5 * θ ^ 4) := by
-    rw [hval]
-    simp only [Fin.sum_univ_five, Fin.isValue, Fin.reduceAdd, Fin.reduceSub, swap_apply_def,
-      Fin.reduceEq, ↓reduceIte, Fin.val_zero, Fin.val_one, Fin.val_two, e3, e4, pow_zero, pow_one]
-    linear_combination θ ^ 4 * hsum
-  have h5 : MvPolynomial.eval₂ (Int.castRingHom ℂ) (fun i : Fin 5 => ζ ^ (i : ℕ) * θ)
-      (MvPolynomial.rename (⇑(swap 2 3 * swap 3 4 : Perm (Fin 5))) quinticF20Invariant) =
-      ζ ^ 3 * (5 * θ ^ 4) := by
-    rw [hval]
-    simp only [Fin.sum_univ_five, Fin.isValue, Fin.reduceAdd, Fin.reduceSub, swap_apply_def,
-      Fin.reduceEq, ↓reduceIte, Perm.coe_mul, Function.comp_apply, Fin.val_zero, Fin.val_one,
-      Fin.val_two, e3, e4, pow_zero, pow_one]
-    linear_combination θ ^ 4 * hsum
-  have h6 : MvPolynomial.eval₂ (Int.castRingHom ℂ) (fun i : Fin 5 => ζ ^ (i : ℕ) * θ)
-      (MvPolynomial.rename (⇑(swap 3 4 * swap 2 3 : Perm (Fin 5))) quinticF20Invariant) =
-      ζ ^ 1 * (5 * θ ^ 4) := by
-    rw [hval]
-    simp only [Fin.sum_univ_five, Fin.isValue, Fin.reduceAdd, Fin.reduceSub, swap_apply_def,
-      Fin.reduceEq, ↓reduceIte, Perm.coe_mul, Function.comp_apply, Fin.val_zero, Fin.val_one,
-      Fin.val_two, e3, e4, pow_zero, pow_one]
-    linear_combination θ ^ 4 * hsum
+    rw [hkey 1 (Finset.univ.val + Finset.univ.val) (by decide), Multiset.map_add,
+      Multiset.sum_add, hfull, add_zero, mul_zero]
+  have h2 := hrep (swap 2 3) 0 (by decide)
+  have h3 := hrep (swap 3 4) 4 (by decide)
+  have h4 := hrep (swap 2 4) 2 (by decide)
+  have h5 := hrep (swap 2 3 * swap 3 4) 3 (by decide)
+  have h6 := hrep (swap 3 4 * swap 2 3) 1 (by decide)
   rw [← MvPolynomial.map_universalResolvent_eq_galResolvent,
     universalResolvent_quinticF20Invariant, Polynomial.map_prod]
   simp only [Polynomial.map_sub, Polynomial.map_X, Polynomial.map_C, MvPolynomial.coe_eval₂Hom]
@@ -136,8 +125,8 @@ private theorem galResolvent_quinticF20Invariant_pow_mul {ζ : ℂ} (hζ : IsPri
 /-- **The resolvent sextic of a pure quintic.** For every integer `a`,
 `resolventSextic (X⁵ - a) = X⁶ - 3125a⁴X`. This is Dummit's closed formula for the resolvent
 sextic of `X⁵ + aX + b` in the case `a = 0`, and it exhibits `0` as an integral root. -/
--- Not `@[simp]`: over `ℤ`, simp rewrites `C a` to `↑a` first (`eq_intCast`), so the left-hand
--- side is not in simp normal form and the `simpNF` linter rejects the attribute.
+-- Not `@[simp]`: over `ℤ`, simp rewrites `C a` to `↑a` first (`eq_intCast`), so this left-hand
+-- side is not in simp normal form; `resolventSextic_X_pow_five_sub_intCast` is the simp form.
 theorem resolventSextic_X_pow_five_sub_C (a : ℤ) :
     resolventSextic (X ^ 5 - C a) = X ^ 6 - C (3125 * a ^ 4) * X := by
   apply Polynomial.map_injective (Int.castRingHom ℂ) Int.cast_injective
@@ -162,6 +151,12 @@ theorem resolventSextic_X_pow_five_sub_C (a : ℤ) :
   rw [eq_intCast]
   push_cast
   ring
+
+/-- The resolvent sextic of a pure quintic in simp normal form: over `ℤ`, the constant `C a` is
+the cast `↑a`, and `resolventSextic (X⁵ - a) = X⁶ - 3125a⁴X`. -/
+@[simp] theorem resolventSextic_X_pow_five_sub_intCast (a : ℤ) :
+    resolventSextic (X ^ 5 - (a : ℤ[X])) = X ^ 6 - 3125 * (a : ℤ[X]) ^ 4 * X := by
+  simpa using resolventSextic_X_pow_five_sub_C a
 
 /-- Over `ℚ`, the resolvent sextic `X⁶ - 3125a⁴X` of a pure quintic `X⁵ - a` with `a ≠ 0` is
 separable, so its root `0` is separation evidence for the quintic certificate. -/

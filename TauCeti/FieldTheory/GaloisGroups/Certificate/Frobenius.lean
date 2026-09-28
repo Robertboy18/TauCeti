@@ -15,11 +15,11 @@ import TauCeti.FieldTheory.GaloisGroups.Resolvent.Quintic.Pure
 /-!
 # Pure quintics and the Frobenius certificate for `X⁵ - 2`
 
-A pure quintic `X⁵ - a` over `ℚ` that is irreducible has the Frobenius group `F₂₀ = AGL(1, 5)` of
-order `20` as Galois group, the label `5T3`: its splitting field is `ℚ(ζ₅, ⁵√a)`. This module
-proves that from the resolvent data alone. The discriminant `3125a⁴ = 5(25a²)²` is not a square
-in `ℚ`, and the resolvent sextic `X⁶ - 3125a⁴X` is separable with the rational root `0`, which
-is the third row of the quintic decision table.
+A pure quintic `X⁵ - a` with `a : ℤ` that is irreducible over `ℚ` has the Frobenius group
+`F₂₀ = AGL(1, 5)` of order `20` as Galois group, the label `5T3`. This module proves that from
+the resolvent data alone. The discriminant `3125a⁴ = 5(25a²)²` is not a square in `ℚ`, and the
+resolvent sextic `X⁶ - 3125a⁴X` is separable with the rational root `0`, which is the third row
+of the quintic decision table.
 
 The Kummer example `X⁵ - 2` is then certified by the Frobenius route: it is irreducible modulo
 `11`, which does not divide its discriminant `50000 = 2⁴5⁵`, that discriminant is not a square,
@@ -29,8 +29,8 @@ and `0` is a root of its separable resolvent sextic `X⁶ - 50000X`.
 
 * `TauCeti.hasSexticRoot_X_pow_five_sub_C`: for `a ≠ 0`, the integer `0` is a root of the
   separable resolvent sextic of `X⁵ - a`.
-* `TauCeti.hasGaloisLabel_X_pow_five_sub_C`: an irreducible pure quintic over `ℚ` has the label
-  `5T3`.
+* `TauCeti.hasGaloisLabel_X_pow_five_sub_C`: for `a : ℤ`, a pure quintic `X⁵ - a` that is
+  irreducible over `ℚ` has the label `5T3`.
 * `Polynomial.factorDegrees_X_pow_five_sub_two_eleven`: `X⁵ - 2` is irreducible modulo `11`.
 * `TauCeti.QuinticCertificate.check_X_pow_five_sub_two`: the Frobenius-route certificate for
   `X⁵ - 2` checks.
@@ -55,7 +55,7 @@ namespace TauCeti
 quintic `X⁵ - a`, and that sextic has nonzero discriminant. -/
 theorem hasSexticRoot_X_pow_five_sub_C {a : ℤ} (ha : a ≠ 0) :
     HasSexticRoot (X ^ 5 - C a) 0 := by
-  refine HasSexticRoot.mk (by rw [resolventSextic_X_pow_five_sub_C]; simp) ?_
+  refine HasSexticRoot.mk (by simp) ?_
   rw [(monic_resolventSextic _).discr_ne_zero_iff_separable_map ℚ, algebraMap_int_eq]
   exact separable_map_resolventSextic_X_pow_five_sub_C ha
 
@@ -70,10 +70,10 @@ theorem not_isSquare_discr_X_pow_five_sub_C {a : ℚ} (ha : a ≠ 0) :
     linear_combination hr⟩
   exact absurd h5 (by norm_num)
 
-/-- **An irreducible pure quintic over `ℚ` has the label `5T3`.** For an integer `a` with
-`X⁵ - a` irreducible over `ℚ`, the Galois group of `X⁵ - a` acting on its five roots is the
-Frobenius group `F₂₀ = AGL(1, 5)` of order `20`: the discriminant `3125a⁴` is not a square, and
-the resolvent sextic `X⁶ - 3125a⁴X` is separable with the rational root `0`. -/
+/-- **An irreducible pure quintic `X⁵ - a` with `a : ℤ` has the label `5T3`.** For an integer
+`a` with `X⁵ - a` irreducible over `ℚ`, the Galois group of `X⁵ - a` acting on its five roots is
+the Frobenius group `F₂₀ = AGL(1, 5)` of order `20`: the discriminant `3125a⁴` is not a square,
+and the resolvent sextic `X⁶ - 3125a⁴X` is separable with the rational root `0`. -/
 theorem hasGaloisLabel_X_pow_five_sub_C {a : ℤ} (hirr : Irreducible (X ^ 5 - C (a : ℚ))) :
     HasGaloisLabel (X ^ 5 - C (a : ℚ)) (⟨2, by simp⟩ : TransitiveGroupIndex 5) := by
   have ha : a ≠ 0 := by
@@ -135,7 +135,7 @@ its separable resolvent sextic `X⁶ - 50000X`. -/
     exact hasSexticRoot_X_pow_five_sub_C two_ne_zero
 
 /-- **`X⁵ - 2` has Galois label `5T3`**: its Galois group over `ℚ` is the Frobenius group `F₂₀`.
-This is the Kummer example, with splitting field `ℚ(ζ₅, ⁵√2)`. -/
+This is the Kummer example. -/
 theorem hasGaloisLabel_X_pow_five_sub_two :
     HasGaloisLabel ((X ^ 5 - 2 : ℤ[X]).map (Int.castRingHom ℚ))
       (⟨2, by simp⟩ : TransitiveGroupIndex 5) := by
