@@ -17,10 +17,11 @@ endomorphisms, a homotopy `h : M → M` with
 `proj ∘ incl = 1`,   `dM h + h dM = 1 - incl ∘ proj`,
 
 and the three side conditions `h ∘ incl = 0`, `proj ∘ h = 0`, `h ∘ h = 0`.  When `dM` and `dN`
-square to zero this is the classical strong deformation retract of differential modules; the
+square to zero this is the classical strong deformation retract of differential modules.  The
 square of `dN` is in any case the compression of the square of `dM` to the retract
-(`LinearSpecialContraction.dN_comp_dN`), so requiring square-zero endomorphisms as part of the
-data would be redundant.
+(`LinearSpecialContraction.dN_comp_dN`), so once `dM` squares to zero a separate requirement
+that `dN` square to zero would be redundant; nothing in the data forces `dM` itself to square to
+zero.
 
 `TauCeti.SpecialContraction` packages the same notion degreewise, for cochain complexes in a
 preadditive category.  The present total-module form is the one homological perturbation theory
