@@ -316,7 +316,6 @@ theorem degreeOneDeriv_degreeOneBasis_inr (i : X) (jk : {ij : X × X // ij.1 < i
   rw [degreeOneDeriv, Module.Basis.constr_basis, Sum.elim_inr]
 
 /-- `∂_i (π ξ_i) = (p choose 2) • ξ_i`. -/
-@[simp]
 theorem degreeOneDeriv_gradedPow_gradedMkZero_of_self (i : X) :
     degreeOneDeriv p X i (gradedPow p (freeProP p X) 0 (gradedMkZero p (freeProP p X) (of i))) =
       p.choose 2 • gradedMkZero p (freeProP p X) (of i) := by
