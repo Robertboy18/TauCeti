@@ -104,10 +104,10 @@ theorem add_reverse_mem_range_ι_of_mem_evenOdd_one_of_finrank_le_four
     · exact Submodule.mem_sup_right (Submodule.mem_sup_right hp)
     · exact Submodule.mem_sup_left (Submodule.mem_sup_right hp)
   have hE : E ≤ evenOdd Q 0 :=
-    sup_le (sup_le (range_ι_pow_le_evenOdd 0) (range_ι_pow_le_evenOdd 2))
-      (range_ι_pow_le_evenOdd 4)
+    sup_le (sup_le (ι_range_pow_le_evenOdd 0) (ι_range_pow_le_evenOdd 2))
+      (ι_range_pow_le_evenOdd 4)
   have hO : O ≤ evenOdd Q 1 :=
-    sup_le (range_ι_pow_le_evenOdd 1) (range_ι_pow_le_evenOdd 3)
+    sup_le (ι_range_pow_le_evenOdd 1) (ι_range_pow_le_evenOdd 3)
   -- Reversal fixes a vector and sends a product of three vectors to a vector minus itself.
   have hA1P : A ^ 1 ≤ P := by
     rw [pow_one]

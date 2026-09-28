@@ -53,8 +53,8 @@ theorem exists_add_reverseEven_eq_smul_one_of_finrank_eq_three
     · exact Submodule.mem_sup_right (Submodule.mem_sup_left hp)
     · exact Submodule.mem_sup_left (Submodule.mem_sup_right hp)
     · exact Submodule.mem_sup_right (Submodule.mem_sup_right hp)
-  have hEeven : E ≤ evenOdd Q 0 := sup_le (range_ι_pow_le_evenOdd 0) (range_ι_pow_le_evenOdd 2)
-  have hOodd : O ≤ evenOdd Q 1 := sup_le (range_ι_pow_le_evenOdd 1) (range_ι_pow_le_evenOdd 3)
+  have hEeven : E ≤ evenOdd Q 0 := sup_le (ι_range_pow_le_evenOdd 0) (ι_range_pow_le_evenOdd 2)
+  have hOodd : O ≤ evenOdd Q 1 := sup_le (ι_range_pow_le_evenOdd 1) (ι_range_pow_le_evenOdd 3)
   -- Reversal fixes degree zero and turns a degree-two generator pair into its polarization.
   have hA0P : A ^ 0 ≤ scalarAddReverseSubmodule Q := by
     intro y hy
