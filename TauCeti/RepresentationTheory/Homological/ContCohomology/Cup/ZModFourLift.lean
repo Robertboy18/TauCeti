@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+import TauCeti.Data.ZMod.Four
 import TauCeti.RepresentationTheory.Homological.ContCohomology.Resolution
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.TrivialFp
 
@@ -14,13 +15,13 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Trivia
 Let `G` be a topological group and `φ : G →ₜ* ℤ/4` a continuous character. Its reduction modulo
 `2` is a continuous character `G → 𝔽₂`, whose class in `H¹(G, 𝔽₂)` is
 `TauCeti.zmodFourReductionClass φ`, the class of the homogeneous cocycle
-`(g₀, g₁) ↦ φ(g₀⁻¹ g₁) mod 2`. The cup square of this class vanishes: for `u, v ∈ ℤ/4` the carry
-function `⌊·/2⌋ : ℤ/4 → 𝔽₂` satisfies `⌊(u + v)/2⌋ = ⌊u/2⌋ + ⌊v/2⌋ + (u mod 2)(v mod 2)`, so
-the cup square `(g₀, g₁, g₂) ↦ (φ(g₀⁻¹ g₁) mod 2)(φ(g₁⁻¹ g₂) mod 2)` is the coboundary of the
-homogeneous one-cochain `(g₀, g₁) ↦ ⌊φ(g₀⁻¹ g₁)/2⌋`. This is the vanishing half of the classical
-identification of the cup square on `H¹(G, 𝔽₂)` with the Bockstein of `0 → 𝔽₂ → ℤ/4 → 𝔽₂ → 0`,
-which kills exactly the classes that lift to `ℤ/4`; only the vanishing on lifted classes is proved
-here. The class is nonzero as soon as `φ` takes an odd value.
+`(g₀, g₁) ↦ φ(g₀⁻¹ g₁) mod 2`. The cup square of this class vanishes: the carry
+`ZMod.carryFour = ⌊·/2⌋ : ℤ/4 → 𝔽₂` satisfies `⌊(u + v)/2⌋ = ⌊u/2⌋ + ⌊v/2⌋ + (u mod 2)(v mod 2)`
+(`ZMod.carryFour_add`), so the cup square `(g₀, g₁, g₂) ↦ (φ(g₀⁻¹ g₁) mod 2)(φ(g₁⁻¹ g₂) mod 2)` is
+the coboundary of the homogeneous one-cochain `(g₀, g₁) ↦ ⌊φ(g₀⁻¹ g₁)/2⌋`. This is the vanishing
+half of the classical identification of the cup square on `H¹(G, 𝔽₂)` with the Bockstein of
+`0 → 𝔽₂ → ℤ/4 → 𝔽₂ → 0`, which kills exactly the classes that lift to `ℤ/4`; only the vanishing on
+lifted classes is proved here. The class is nonzero as soon as `φ` takes an odd value.
 
 Together with the nonvanishing of the cup square of the generator of `H¹(ℤ/2, 𝔽₂)`, this is what
 distinguishes `ℤ/2` from the cyclic groups `ℤ/2ᵏ`, `k ≥ 2`, whose mod-`2` character lifts to
@@ -31,7 +32,7 @@ distinguishes `ℤ/2` from the cyclic groups `ℤ/2ᵏ`, `k ≥ 2`, whose mod-`2
 * `TauCeti.zmodFourReductionClass`: the class in `H¹(G, 𝔽₂)` of the reduction modulo `2` of a
   continuous character `φ : G →ₜ* ℤ/4`.
 * `TauCeti.zmodFourReductionClass_ne_zero`: the class is nonzero when `φ` takes an odd value.
-* `TauCeti.cupFp_zmodFourReductionClass_self`: **the cup square of the class vanishes**.
+* `TauCeti.cupFp_zmodFourReductionClass_self_eq_zero`: **the cup square of the class vanishes**.
 
 ## References
 
@@ -55,20 +56,6 @@ attribute [local instance 2000] Ring.toAddCommGroup
 
 variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   (φ : G →ₜ* Multiplicative (ZMod 4))
-
-/-! ### The carry identity in `ℤ/4` -/
-
-/-- The carry function `⌊x / 2⌋ : ℤ/4 → 𝔽₂`. -/
-private def zmodFourHalf (x : ZMod 4) : ZMod 2 := ((x.val / 2 : ℕ) : ZMod 2)
-
-/-- **The carry identity**: `⌊v/2⌋ - (⌊(u + v)/2⌋ - ⌊u/2⌋) = (u mod 2)(v mod 2)` in `𝔽₂`. This is
-the coboundary equation of the cochain computation below. -/
-private theorem zmodFourHalf_sub_sub (u v : ZMod 4) :
-    zmodFourHalf v - (zmodFourHalf (u + v) - zmodFourHalf u) =
-      ZMod.castHom (by norm_num : (2 : ℕ) ∣ 4) (ZMod 2) u *
-        ZMod.castHom (by norm_num : (2 : ℕ) ∣ 4) (ZMod 2) v := by
-  revert u v
-  decide
 
 /-! ### The homogeneous cochains attached to `φ` -/
 
@@ -176,14 +163,14 @@ theorem zmodFourReductionClass_ne_zero {g : G}
 
 /-- **The cup square of a class of `H¹(G, 𝔽₂)` that lifts to `ℤ/4` vanishes.** The cup square of
 the cocycle `(g₀, g₁) ↦ φ (g₀⁻¹ g₁) mod 2` is the coboundary of the homogeneous one-cochain
-`(g₀, g₁) ↦ ⌊φ (g₀⁻¹ g₁) / 2⌋`, by the carry identity in `ℤ/4`. -/
+`(g₀, g₁) ↦ ⌊φ (g₀⁻¹ g₁) / 2⌋`, by the carry identity `ZMod.carryFour_add`. -/
 @[simp]
-theorem cupFp_zmodFourReductionClass_self :
+theorem cupFp_zmodFourReductionClass_self_eq_zero :
     cupFp 2 G (zmodFourReductionClass φ) (zmodFourReductionClass φ) = 0 := by
   rw [zmodFourReductionClass, cupFp_π,
     (homogeneousCochains (trivialFp 2 G)).homologyπ_eq_zero_iff 2 (m := 1)
       (CochainComplex.prev_nat_succ 1)]
-  refine ⟨zmodFourCochain φ zmodFourHalf, ?_⟩
+  refine ⟨zmodFourCochain φ ZMod.carryFour, ?_⟩
   apply (homogeneousCochains (trivialFp 2 G)).iCycles_injective (n := 1 + 1)
   rw [HomologicalComplex.iCycles_toCycles_apply, TopPairing.iCycles_cupCocycles,
     iCycles_zmodFourCocycle]
@@ -198,7 +185,10 @@ theorem cupFp_zmodFourReductionClass_self :
   rw [← map_sub (trivialFpEquiv 2 G).symm, ← map_sub (trivialFpEquiv 2 G).symm]
   have hmul : g₀⁻¹ * g₂ = (g₀⁻¹ * g₁) * (g₁⁻¹ * g₂) := by group
   refine congrArg (trivialFpEquiv 2 G).symm ?_
-  rw [hmul, toAdd_mul_of_hom φ (g₀⁻¹ * g₁) (g₁⁻¹ * g₂)]
-  exact zmodFourHalf_sub_sub _ _
+  -- The identity `carryFour_add` differs from the coboundary equation by a sign, which is
+  -- invisible in `𝔽₂`.
+  rw [hmul, toAdd_mul_of_hom φ (g₀⁻¹ * g₁) (g₁⁻¹ * g₂),
+    ← ZMod.neg_eq_self_mod_two (ZMod.castHom _ (ZMod 2) _ * _), ZMod.carryFour_add]
+  abel
 
 end TauCeti
