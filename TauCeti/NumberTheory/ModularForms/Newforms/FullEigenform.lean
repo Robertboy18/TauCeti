@@ -34,6 +34,8 @@ of `f` (`Newform.eq_qExpansion_coeff_one_smul_of_forall_prime_heckeTCuspNat_eq_s
 
 ## Main results
 
+* `HeckeRing.GL2.Newform.heckeUCuspNat_eq_qExpansion_coeff_smul`: `U_p f = a_p(f) • f` for a
+  newform `f` and a prime `p ∣ N`, the bad-prime eigenvector equation.
 * `HeckeRing.GL2.Newform.heckeTCuspNat_eq_qExpansion_coeff_smul`: `T_p f = a_p(f) • f` at every
   prime `p`, the primes dividing the level (where `T_p = U_p`) included.
 * `HeckeRing.GL2.Newform.toEigenform_eigenvalue_eq_qExpansion_coeff`: the eigenvalue of a newform
@@ -74,10 +76,12 @@ variable {N : ℕ} [NeZero N] {k : ℤ}
 /-! ### The bad-prime eigenvalues -/
 
 /-- **A newform is an eigenvector of `U_p` at every prime `p` dividing the level, with eigenvalue
-`a_p(f)`.** Together with the good eigensystem this makes a newform a full Hecke eigenform
-(`Newform.toEigenform`); the public statement is `Newform.heckeTCuspNat_eq_qExpansion_coeff_smul`,
-at every prime. -/
-private theorem heckeUCuspNat_eq_qExpansion_coeff_smul (f : Newform N k) {p : ℕ} (hp : p.Prime)
+`a_p(f)`** (Atkin–Lehner; Li; Diamond–Shurman, Theorem 5.8.2; Miyake, Theorem 4.6.13). Together
+with the good eigensystem this makes a newform a full Hecke eigenform (`Newform.toEigenform`).
+The statement is on the bad-prime operator `heckeUCuspNat`, matching the `U_p`-spelled API of
+`HeckeSlash/BadPrime`; `Newform.heckeTCuspNat_eq_qExpansion_coeff_smul` is the statement at
+every prime. -/
+theorem heckeUCuspNat_eq_qExpansion_coeff_smul (f : Newform N k) {p : ℕ} (hp : p.Prime)
     (hpN : p ∣ N) :
     heckeUCuspNat k p hp hpN f.toCuspForm =
       (qExpansion 1 f.toCuspForm).coeff p • f.toCuspForm := by
@@ -148,10 +152,9 @@ theorem toEigenform_eigenvalue_eq_qExpansion_coeff (f : Newform N k) (n : ℕ+) 
   rw [toEigenform_toCuspForm] at h
   exact h.symm
 
-/-- **`Tₚ f = aₚ(f) • f` at every prime `p`**, whether or not `p` divides the level (Atkin–Lehner;
-Li; Diamond–Shurman, Theorem 5.8.2; Miyake, Theorem 4.6.13). At a prime `p ∣ N` the operator is
-`U_p` (`heckeUCuspNat_eq_heckeTCuspNat`), so this is the bad-prime eigenvector equation
-`U_p f = a_p(f) • f` of the Atkin–Lehner–Li theory. -/
+/-- **`Tₚ f = aₚ(f) • f` at every prime `p`**, whether or not `p` divides the level: the good
+eigensystem of `f` and the bad-prime equation `Newform.heckeUCuspNat_eq_qExpansion_coeff_smul`
+(at a prime `p ∣ N` the operator is `U_p`, `heckeUCuspNat_eq_heckeTCuspNat`) in one statement. -/
 theorem heckeTCuspNat_eq_qExpansion_coeff_smul (f : Newform N k) {p : ℕ} (hp : p.Prime) :
     heckeTCuspNat k p (_hn := ⟨hp.ne_zero⟩) f.toCuspForm =
       (qExpansion 1 f.toCuspForm).coeff p • f.toCuspForm := by
