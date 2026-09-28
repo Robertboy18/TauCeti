@@ -56,6 +56,8 @@ the scalars and the vectors, the disjointness of the two pins that step down to 
 
 * `CliffordAlgebra.ι_injective`, `CliffordAlgebra.ι_inj` and
   `CliffordAlgebra.ι_eq_zero_iff`: the generators are a faithful copy of `M`.
+* `CliffordAlgebra.commute_ι_iff_exists_eq_smul`: two vectors commute exactly when they are
+  proportional, once the first has unit value under `Q`.
 * `CliffordAlgebra.ι_eq_algebraMap_iff`, `CliffordAlgebra.ι_ne_one` and
   `CliffordAlgebra.ι_range_disjoint_one`: a vector is a scalar only when both vanish.
 * `CliffordAlgebra.mem_range_ι_iff`: membership of `range (ι Q)` is detected by the vector
@@ -136,6 +138,32 @@ theorem ι_inj (m n : M) : ι Q m = ι Q n ↔ m = n := (ι_injective Q).eq_iff
 @[simp]
 theorem ι_eq_zero_iff (m : M) : ι Q m = 0 ↔ m = 0 := by
   rw [← ι_inj Q m 0, map_zero]
+
+/-! ### Commuting vectors are proportional -/
+
+/-- **Two vectors commute in the Clifford algebra exactly when they are proportional**, provided
+the first has unit value under `Q`. The product `ι Q u * ι Q w * ι Q u` is the vector
+`polar Q u w • u - Q u • w` (`CliffordAlgebra.ι_mul_ι_mul_ι`); when the two vectors commute it is
+also `Q u • w`, and comparing the two expressions solves for `w`. -/
+theorem commute_ι_iff_exists_eq_smul {u w : M} (hu : IsUnit (Q u)) :
+    Commute (ι Q u) (ι Q w) ↔ ∃ c : R, w = c • u := by
+  constructor
+  · intro h
+    obtain ⟨q, hq⟩ := hu
+    have h1 : Q u • w = QuadraticMap.polar Q u w • u - Q u • w := by
+      apply ι_injective Q
+      rw [← ι_mul_ι_mul_ι, h.eq, mul_assoc, ι_sq_scalar, ← Algebra.commutes, ← Algebra.smul_def,
+        map_smul]
+    have h2 : (2 * Q u) • w = QuadraticMap.polar Q u w • u := by
+      rw [mul_smul, two_smul, eq_sub_iff_add_eq.mp h1]
+    refine ⟨⅟2 * (q⁻¹ : Rˣ) * QuadraticMap.polar Q u w, ?_⟩
+    calc w = (⅟2 * (q⁻¹ : Rˣ) * (2 * Q u)) • w := by
+          rw [← hq, mul_mul_mul_comm, invOf_mul_self, Units.inv_mul, one_mul, one_smul]
+      _ = (⅟2 * (q⁻¹ : Rˣ) * QuadraticMap.polar Q u w) • u := by
+          rw [mul_smul, h2, ← mul_smul]
+  · rintro ⟨c, rfl⟩
+    rw [map_smul]
+    exact (Commute.refl (ι Q u)).smul_right c
 
 /-! ### Vectors are not scalars -/
 

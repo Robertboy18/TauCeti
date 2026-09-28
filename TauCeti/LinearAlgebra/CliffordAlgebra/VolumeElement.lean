@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.LinearAlgebra.CliffordAlgebra.Basic
+public import Mathlib.LinearAlgebra.CliffordAlgebra.Conjugation
 
 import Mathlib.LinearAlgebra.CliffordAlgebra.Inversion
 
@@ -13,8 +14,8 @@ import Mathlib.LinearAlgebra.CliffordAlgebra.Inversion
 # The volume element of a Clifford algebra
 
 The **volume element** (or pseudoscalar) of a quadratic space is the ordered Clifford product
-`ι Q v₁ * ⋯ * ι Q vₙ` of an orthogonal basis. This file proves the two facts that make it useful:
-how it commutes past a vector, and what its square is.
+`ι Q v₁ * ⋯ * ι Q vₙ` of an orthogonal basis. This file proves the facts that make it useful:
+how it commutes past a vector, how reversal acts on it, and what its square is.
 
 The ordered product is spelled `(l.map (ι Q)).prod` for a list `l` of vectors, the spelling Mathlib
 already uses for it (`CliffordAlgebra.involute_prod_map_ι`, `CliffordAlgebra.reverse_prod_map_ι`)
@@ -77,6 +78,8 @@ the values `Q vᵢ` is a unit.
   generator in the span instead.
 * `CliffordAlgebra.prod_map_ι_sq_scalar`: the square of the volume element of a pairwise
   orthogonal list is the scalar `(-1) ^ (n.choose 2) * ∏ᵢ Q vᵢ`.
+* `CliffordAlgebra.reverse_prod_map_ι_of_pairwise_isOrtho`: reversal multiplies the volume
+  element of a pairwise orthogonal list by the same sign `(-1) ^ (n.choose 2)`.
 * `CliffordAlgebra.ι_mul_ι_mul_self_of_isOrtho`: the two-factor case, the square of the product
   of two orthogonal generators being the scalar `-(Q a * Q b)`.
 * `CliffordAlgebra.isUnit_prod_map_ι`: an ordered product of generators — orthogonal or not — is
@@ -270,6 +273,23 @@ theorem prod_map_ι_sq_scalar {l : List M} (hl : l.Pairwise Q.IsOrtho) :
           congr 1
           rw [hchoose, List.map_cons, List.prod_cons, pow_add]
           ring
+
+/-- **Reversal multiplies the volume element of a pairwise orthogonal list by
+`(-1) ^ (n.choose 2)`**: reversing the order of the `n` factors takes `n.choose 2` transpositions,
+each costing a sign. In particular the volume element is reverse-symmetric for `n ≡ 0, 1 (mod 4)`
+and reverse-antisymmetric for `n ≡ 2, 3 (mod 4)`. -/
+theorem reverse_prod_map_ι_of_pairwise_isOrtho {l : List M} (hl : l.Pairwise Q.IsOrtho) :
+    reverse (l.map (ι Q)).prod = ((-1 : R) ^ l.length.choose 2) • (l.map (ι Q)).prod := by
+  induction l with
+  | nil => simp
+  | cons a l ih =>
+    rw [List.pairwise_cons] at hl
+    obtain ⟨ha, hl'⟩ := hl
+    have hsym : ∀ x ∈ l, Q.IsOrtho x a := fun x hx => (ha x hx).symm
+    have hchoose : (a :: l).length.choose 2 = l.length + l.length.choose 2 := by
+      rw [List.length_cons, Nat.choose_succ_succ, Nat.choose_one_right]
+    rw [List.map_cons, List.prod_cons, reverse.map_mul, reverse_ι, ih hl', smul_mul_assoc,
+      prod_map_ι_mul_ι_of_forall_isOrtho hsym, smul_smul, hchoose, pow_add, mul_comm]
 
 /-- **The square of the product of two orthogonal generators is the scalar `-(Q a * Q b)`.** This
 is `CliffordAlgebra.prod_map_ι_sq_scalar` at the two-element list `[a, b]`, whose sign
