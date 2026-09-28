@@ -16,12 +16,16 @@ public import TauCeti.Algebra.Central.BaseChange
 public import TauCeti.Algebra.CentralSimple.Degree
 public import TauCeti.Algebra.TensorProduct.BaseChange
 -- Non-public: none of these appears in the type of an exported declaration.
--- `Module.finrank_baseChange` is used only inside the proof of `TauCeti.Algebra.deg_baseChange`,
--- and the complex numbers and the real quaternions only by the worked examples at the end of the
--- file (`TauCeti.Algebra.Central.Quaternion` re-exports `Mathlib.Algebra.Quaternion`, hence the
--- `ℍ[·]` notation there).
+-- `Module.finrank_baseChange` is used only inside the proof of `TauCeti.Algebra.deg_baseChange`;
+-- the quotient algebra `RingCon.mkₐ` and the injectivity of `Algebra.TensorProduct.includeRight`
+-- only inside the proof of `TauCeti.IsSimpleRing.of_baseChange`; and the complex numbers and the
+-- real quaternions only by the worked examples at the end of the file
+-- (`TauCeti.Algebra.Central.Quaternion` re-exports `Mathlib.Algebra.Quaternion`, hence the `ℍ[·]`
+-- notation there).
 import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 import Mathlib.LinearAlgebra.Dimension.Constructions
+import Mathlib.RingTheory.Congruence.Basic
+import Mathlib.RingTheory.Flat.Basic
 import TauCeti.Algebra.Central.Quaternion
 
 /-!
@@ -41,6 +45,10 @@ a central simple `L`-algebra with no glue at all.
 
 * `TauCeti.Algebra.deg_baseChange`: base change **preserves the degree**,
   `deg L (L ⊗[K] A) = deg K A`.
+* `TauCeti.IsSimpleRing.of_baseChange`: base change **detects simplicity**: if `L ⊗[K] A` is a
+  simple ring for some nontrivial commutative `K`-algebra `L`, then `A` is a simple ring. With
+  `TauCeti.Algebra.IsCentral.of_baseChange` this makes central simplicity of `A` over `K`
+  equivalent to central simplicity of `L ⊗[K] A` over a field extension `L`.
 
 Together with the centrality of `TauCeti/Algebra/Central/BaseChange.lean` and the two compatibility
 equivalences of `TauCeti/Algebra/TensorProduct/BaseChange.lean`, both re-exported here, this is what
@@ -99,6 +107,53 @@ theorem deg_baseChange : deg L (L ⊗[K] A) = deg K A :=
 end Degree
 
 end Algebra
+
+/-! ### Base change detects simplicity -/
+
+section Descent
+
+variable {K : Type*} [Field K] {L : Type*} [CommRing L] [Nontrivial L] [Algebra K L]
+  {A : Type*} [Ring A] [Algebra K A]
+
+/-- **Base change detects simplicity.** Over a field `K`, if the scalar extension `L ⊗[K] A` along
+a nontrivial commutative `K`-algebra `L` is a simple ring, then `A` is a simple ring.
+
+This is the converse of `TauCeti.IsSimpleRing.tensorProduct_of_isCentral_right`, with no centrality
+hypothesis at all: a proper two-sided ideal `I` of `A` gives a nontrivial quotient `A ⧸ I`, hence a
+surjection `L ⊗[K] A → L ⊗[K] (A ⧸ I)` onto a nontrivial ring, which simplicity of `L ⊗[K] A` forces
+to be injective; every `x ∈ I` then has `1 ⊗ₜ x = 0`, and `x = 0` because `A` embeds in
+`L ⊗[K] A`. Together with `TauCeti.Algebra.IsCentral.of_baseChange` this says that central
+simplicity over `K` is detected by central simplicity of `L ⊗[K] A` over `L`. -/
+theorem _root_.TauCeti.IsSimpleRing.of_baseChange [IsSimpleRing (L ⊗[K] A)] : IsSimpleRing A := by
+  have hinj : Function.Injective (algebraMap K L) := (algebraMap K L).injective
+  have hA : Nontrivial A := by
+    by_contra h
+    rw [not_nontrivial_iff_subsingleton] at h
+    refine zero_ne_one (α := L ⊗[K] A) ?_
+    rw [Algebra.TensorProduct.one_def, Subsingleton.elim (1 : A) 0, TensorProduct.tmul_zero]
+  refine IsSimpleRing.of_eq_bot_or_eq_top fun I => ?_
+  rw [or_iff_not_imp_right, ← I.one_mem_iff]
+  intro h1
+  -- The quotient `A ⧸ I` is nontrivial because `1 ∉ I`.
+  have hQ : Nontrivial I.ringCon.Quotient :=
+    ⟨⟨((1 : A) : I.ringCon.Quotient), ((0 : A) : I.ringCon.Quotient),
+      fun h => h1 ((I.mem_iff 1).mpr ((RingCon.eq _).mp h))⟩⟩
+  -- Hence so is its scalar extension, and the extended quotient map is injective by simplicity.
+  have hQL : Nontrivial (L ⊗[K] I.ringCon.Quotient) :=
+    (Algebra.TensorProduct.includeRight_injective (R := K) (A := L) hinj).nontrivial
+  have hF : Function.Injective
+      (Algebra.TensorProduct.map (AlgHom.id K L) (I.ringCon.mkₐ K)).toRingHom :=
+    RingHom.injective _
+  refine le_antisymm (fun x hx => ?_) bot_le
+  have hxq : ((x : A) : I.ringCon.Quotient) = ((0 : A) : I.ringCon.Quotient) :=
+    (RingCon.eq _).mpr ((I.mem_iff x).mp hx)
+  have hx0 : ((1 : L) ⊗ₜ[K] x : L ⊗[K] A) = 1 ⊗ₜ[K] (0 : A) := by
+    refine hF ?_
+    simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, Algebra.TensorProduct.map_tmul,
+      AlgHom.id_apply, RingCon.mkₐ_apply, hxq]
+  exact Algebra.TensorProduct.includeRight_injective (R := K) (A := L) (B := A) hinj hx0
+
+end Descent
 
 /-! ### Worked examples -/
 
