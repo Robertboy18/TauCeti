@@ -71,7 +71,7 @@ include htriv
 
 omit [IsTopologicalGroup G] [ContinuousSMul G (ZMod p)] in
 /-- The universe lift `trivialFpEquiv p G` is compatible with the trivial actions on both sides. -/
-private theorem trivialFpEquiv_smul (g : G) (x : (trivialFp p G).V) :
+theorem trivialFpEquiv_smul (g : G) (x : (trivialFp p G).V) :
     trivialFpEquiv p G ((ContinuousMulEquiv.refl G) g • x) = g • trivialFpEquiv p G x := by
   rw [smul_trivialFp_V, htriv]
 
@@ -82,12 +82,34 @@ noncomputable def cohomFpAddEquivH1 : cohomFp p G 1 ≃+ H1 G (ZMod p) :=
       (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology continuous_of_discreteTopology
       (trivialFpEquiv_smul p G htriv))
 
+/-- On the comparison of the carrier of `trivialFp p G`, the identification `cohomFpAddEquivH1` is
+the change of coefficients along the universe lift `trivialFpEquiv p G`. -/
+theorem cohomFpAddEquivH1_explicitH1AddEquivContinuousCohomologyOfDiscrete
+    (x : H1 G (trivialFp p G).V) :
+    cohomFpAddEquivH1 p G htriv
+        ((trivialFp p G).explicitH1AddEquivContinuousCohomologyOfDiscrete x) =
+      explicitMap1Equiv G (trivialFp p G).V G (ZMod p) (ContinuousMulEquiv.refl G)
+        (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology
+        continuous_of_discreteTopology (trivialFpEquiv_smul p G htriv) x := by
+  rw [cohomFpAddEquivH1, AddEquiv.trans_apply, AddEquiv.symm_apply_apply]
+
 /-- **`H²(G, 𝔽_p)` is the explicit `H2 G (ZMod p)`**, for any trivial action of `G` on `ZMod p`. -/
 noncomputable def cohomFpAddEquivH2 [LocallyCompactSpace G] : cohomFp p G 2 ≃+ H2 G (ZMod p) :=
   (trivialFp p G).explicitH2AddEquivContinuousCohomologyOfDiscrete.symm.trans
     (explicitMap2Equiv G (trivialFp p G).V G (ZMod p) (ContinuousMulEquiv.refl G)
       (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology continuous_of_discreteTopology
       (trivialFpEquiv_smul p G htriv))
+
+/-- On the comparison of the carrier of `trivialFp p G`, the identification `cohomFpAddEquivH2` is
+the change of coefficients along the universe lift `trivialFpEquiv p G`. -/
+theorem cohomFpAddEquivH2_explicitH2AddEquivContinuousCohomologyOfDiscrete [LocallyCompactSpace G]
+    (x : H2 G (trivialFp p G).V) :
+    cohomFpAddEquivH2 p G htriv
+        ((trivialFp p G).explicitH2AddEquivContinuousCohomologyOfDiscrete x) =
+      explicitMap2Equiv G (trivialFp p G).V G (ZMod p) (ContinuousMulEquiv.refl G)
+        (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology
+        continuous_of_discreteTopology (trivialFpEquiv_smul p G htriv) x := by
+  rw [cohomFpAddEquivH2, AddEquiv.trans_apply, AddEquiv.symm_apply_apply]
 
 /-- **`H²(G, 𝔽_p)` is the explicit `H2 G (ZMod p)` as an `𝔽_p`-vector space**, for any trivial
 action of `G` on `ZMod p`. -/

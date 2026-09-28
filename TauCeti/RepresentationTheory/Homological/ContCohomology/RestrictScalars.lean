@@ -67,7 +67,14 @@ what lets every result of the first kind be applied to coefficients of the secon
 * `TauCeti.ContCohomology.π_comp_restrictScalarsIntIso_hom`: the isomorphism carries the class of
   a cocycle to the class of the corresponding cocycle, and
   `TauCeti.ContCohomology.cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles` identifies the
-  corresponding cocycle as the same homogeneous cochain.
+  corresponding cocycle as the same homogeneous cochain. The additive equivalences
+  `TauCeti.ContCohomology.restrictScalarsIntEquiv`,
+  `TauCeti.ContCohomology.cocyclesRestrictScalarsIntEquiv` and
+  `TauCeti.ContCohomology.ofDiscreteModuleRestrictScalarsIntEquiv` between the carriers are the
+  isomorphisms on elements; they act through the values of the iterated function spaces
+  (`TopRep.resolutionXRestrictScalarsIntIso_succ_hom_apply`,
+  `TauCeti.ContCohomology.iCycles_cocyclesRestrictScalarsIntEquiv_apply_one`,
+  `TauCeti.ContCohomology.restrictScalarsIntEquiv_π`).
 * `TauCeti.ContCohomology.coeffMap_comp_restrictScalarsIntIso_hom`: the isomorphism is natural in
   the representation, with respect to the coefficient maps
   `TauCeti.ContinuousCohomology.coeffMap`;
@@ -118,6 +125,29 @@ theorem resolutionXRestrictScalarsIntIso_succ (X : TopRep k G) (n : ℕ) :
       (coind₁Functor ℤ G).mapIso (resolutionXRestrictScalarsIntIso X n) ≪≫
         coind₁RestrictScalarsIntIso (resolutionX X n) :=
   (rfl)
+
+/-- In degree zero the identification of the resolutions is the identity on elements. -/
+@[simp]
+theorem resolutionXRestrictScalarsIntIso_zero_hom_apply (X : TopRep k G)
+    (v : (resolutionX (restrictScalarsInt.obj X) 0).V) :
+    (resolutionXRestrictScalarsIntIso X 0).hom.hom v = v :=
+  (rfl)
+
+/-- In degree `n + 1` the identification of the resolutions acts on an element of the iterated
+function space `C(G, C(G, …, X.V))` by applying the identification in degree `n` to its values. -/
+-- The value of the identification lies in the carrier of `restrictScalarsInt.obj _`, which is the
+-- function space `C(G, (resolutionX X n).V)` only after unfolding the functor, so the coercion to
+-- a function is spelled out.
+@[simp]
+theorem resolutionXRestrictScalarsIntIso_succ_hom_apply (X : TopRep k G) (n : ℕ)
+    (f : (resolutionX (restrictScalarsInt.obj X) (n + 1)).V) (g : G) :
+    DFunLike.coe (F := C(G, (resolutionX X n).V))
+        ((resolutionXRestrictScalarsIntIso X (n + 1)).hom.hom f) g =
+      (resolutionXRestrictScalarsIntIso X n).hom.hom (f g) := by
+  simp only [resolutionXRestrictScalarsIntIso_succ, Iso.trans_hom, CategoryTheory.comp_apply,
+    Functor.mapIso_hom, hom_ofHom]
+  rw [coind₁RestrictScalarsIntIso_hom_apply]
+  rfl
 
 /-- The identification of the resolutions commutes with the differentials of the resolution. -/
 @[reassoc]
@@ -171,6 +201,15 @@ theorem homogeneousCochainsRestrictScalarsIntIso_hom_f (X : TopRep k G) (n : ℕ
       ((invariantsFunctor ℤ G).mapIso (resolutionXRestrictScalarsIntIso X (n + 1)) ≪≫
         invariantsRestrictScalarsIntIso (resolutionX X (n + 1))).hom :=
   (rfl)
+
+/-- On elements, the identification of the homogeneous cochains in degree `n` is the identification
+of the resolutions in degree `n + 1` on the underlying invariant elements. -/
+theorem coe_homogeneousCochainsRestrictScalarsIntIso_hom_f (X : TopRep k G) (n : ℕ)
+    (u : (homogeneousCochains (restrictScalarsInt.obj X)).X n) :
+    ((homogeneousCochainsRestrictScalarsIntIso X).hom.f n u).val =
+      (resolutionXRestrictScalarsIntIso X (n + 1)).hom.hom u.val := by
+  rw [homogeneousCochainsRestrictScalarsIntIso_hom_f, Iso.trans_hom, CategoryTheory.comp_apply]
+  exact coe_invariantsRestrictScalarsIntIso_hom_apply _ _
 
 /-! ### Naturality -/
 
@@ -283,6 +322,80 @@ theorem π_comp_restrictScalarsIntIso_hom :
     (congrArg (_ ≫ ·) (((homogeneousCochains X).sc n).homologyπ_comp_mapHomologyIso_hom
       TopModuleCat.restrictScalarsInt)).trans (Category.assoc _ _ _).symm
 
+/-- The cocycles of the underlying additive representation of `X` are the cocycles of `X`, as an
+additive equivalence between the carriers. -/
+noncomputable def cocyclesRestrictScalarsIntEquiv :
+    cocycles (restrictScalarsInt.obj X) n ≃+ cocycles X n :=
+  (cocyclesRestrictScalarsIntIso X n).toContinuousLinearEquiv.toAddEquiv
+
+/-- The additive equivalence `cocyclesRestrictScalarsIntEquiv` is `cocyclesRestrictScalarsIntIso`
+on elements. -/
+theorem cocyclesRestrictScalarsIntEquiv_apply (v : cocycles (restrictScalarsInt.obj X) n) :
+    cocyclesRestrictScalarsIntEquiv X n v = (cocyclesRestrictScalarsIntIso X n).hom v :=
+  (rfl)
+
+/-- The continuous cohomology of the underlying additive representation of `X` is the continuous
+cohomology of `X`, as an additive equivalence between the carriers. -/
+noncomputable def restrictScalarsIntEquiv :
+    continuousCohomology n (restrictScalarsInt.obj X) ≃+ continuousCohomology n X :=
+  (restrictScalarsIntIso X n).toContinuousLinearEquiv.toAddEquiv
+
+/-- The additive equivalence `restrictScalarsIntEquiv` is `restrictScalarsIntIso` on elements. -/
+theorem restrictScalarsIntEquiv_apply (a : continuousCohomology n (restrictScalarsInt.obj X)) :
+    restrictScalarsIntEquiv X n a = (restrictScalarsIntIso X n).hom a :=
+  (rfl)
+
+/-- `restrictScalarsIntEquiv` carries the class of a cocycle of the underlying additive
+representation to the class of the corresponding cocycle of `X`. -/
+theorem restrictScalarsIntEquiv_π (v : cocycles (restrictScalarsInt.obj X) n) :
+    restrictScalarsIntEquiv X n (π (restrictScalarsInt.obj X) n v) =
+      π X n (cocyclesRestrictScalarsIntEquiv X n v) :=
+  congr($(π_comp_restrictScalarsIntIso_hom X n) v)
+
+/-- Under `cocyclesRestrictScalarsIntEquiv`, the underlying homogeneous cochain of a cocycle is
+carried by the identification of the resolutions. -/
+theorem coe_iCycles_cocyclesRestrictScalarsIntEquiv (v : cocycles (restrictScalarsInt.obj X) n) :
+    ((homogeneousCochains X).iCycles n (cocyclesRestrictScalarsIntEquiv X n v)).val =
+      (resolutionXRestrictScalarsIntIso X (n + 1)).hom.hom
+        ((homogeneousCochains (restrictScalarsInt.obj X)).iCycles n v).val := by
+  have h : (homogeneousCochains X).iCycles n (cocyclesRestrictScalarsIntEquiv X n v) =
+      (homogeneousCochainsRestrictScalarsIntIso X).hom.f n
+        ((homogeneousCochains (restrictScalarsInt.obj X)).iCycles n v) :=
+    congr($(cocyclesRestrictScalarsIntIso_hom_comp_map_iCycles X n) v)
+  rw [h, coe_homogeneousCochainsRestrictScalarsIntIso_hom_f]
+
+omit n in
+/-- In degree one, `cocyclesRestrictScalarsIntEquiv` does not change the values of a homogeneous
+cocycle. -/
+theorem iCycles_cocyclesRestrictScalarsIntEquiv_apply_one
+    (v : cocycles (restrictScalarsInt.obj X) 1) (g₀ g₁ : G) :
+    ((homogeneousCochains X).iCycles 1 (cocyclesRestrictScalarsIntEquiv X 1 v)).val g₀ g₁ =
+      ((homogeneousCochains (restrictScalarsInt.obj X)).iCycles 1 v).val g₀ g₁ :=
+  -- The identification of the resolutions is the identity on values, one function-space level at
+  -- a time; the composite is assembled as a term because the intermediate values live in the
+  -- carriers of `restrictScalarsInt.obj _`, which `rw` does not see as function spaces.
+  (congrArg (fun w : C(G, C(G, X.V)) ↦ w g₀ g₁)
+    (coe_iCycles_cocyclesRestrictScalarsIntEquiv X 1 v)).trans
+    ((congrArg (fun w : C(G, X.V) ↦ w g₁)
+      (resolutionXRestrictScalarsIntIso_succ_hom_apply X 1 _ g₀)).trans
+      (resolutionXRestrictScalarsIntIso_succ_hom_apply X 0 _ g₁))
+
+omit n in
+/-- In degree two, `cocyclesRestrictScalarsIntEquiv` does not change the values of a homogeneous
+cocycle. -/
+theorem iCycles_cocyclesRestrictScalarsIntEquiv_apply_two
+    (v : cocycles (restrictScalarsInt.obj X) (1 + 1)) (g₀ g₁ g₂ : G) :
+    ((homogeneousCochains X).iCycles (1 + 1) (cocyclesRestrictScalarsIntEquiv X (1 + 1) v)).val
+        g₀ g₁ g₂ =
+      ((homogeneousCochains (restrictScalarsInt.obj X)).iCycles (1 + 1) v).val g₀ g₁ g₂ :=
+  (congrArg (fun w : C(G, C(G, C(G, X.V))) ↦ w g₀ g₁ g₂)
+    (coe_iCycles_cocyclesRestrictScalarsIntEquiv X (1 + 1) v)).trans
+    ((congrArg (fun w : C(G, C(G, X.V)) ↦ w g₁ g₂)
+      (resolutionXRestrictScalarsIntIso_succ_hom_apply X (1 + 1) _ g₀)).trans
+      ((congrArg (fun w : C(G, X.V) ↦ w g₂)
+        (resolutionXRestrictScalarsIntIso_succ_hom_apply X 1 _ g₁)).trans
+        (resolutionXRestrictScalarsIntIso_succ_hom_apply X 0 _ g₂)))
+
 variable {X} {Y : TopRep k G} (f : X ⟶ Y)
 
 /-- The identification of the cocycles is natural in the representation: on cocycles, the map
@@ -387,6 +500,21 @@ noncomputable def ofDiscreteModuleRestrictScalarsIntIso :
       TopModuleCat.restrictScalarsInt.obj (continuousCohomology n X) :=
   eqToIso (congrArg (continuousCohomology n) (ofDiscreteModule_eq_restrictScalarsInt_obj X)) ≪≫
     restrictScalarsIntIso X n
+
+/-- The continuous cohomology of the carrier of a discrete `X` as a discrete `ℤ`-module is the
+continuous cohomology of `X`, as an additive equivalence between the carriers. -/
+noncomputable def ofDiscreteModuleRestrictScalarsIntEquiv :
+    continuousCohomology n (ofDiscreteModule ℤ G X.V) ≃+ continuousCohomology n X :=
+  (ofDiscreteModuleRestrictScalarsIntIso X n).toContinuousLinearEquiv.toAddEquiv
+
+/-- `ofDiscreteModuleRestrictScalarsIntEquiv` is the transport along the equality of objects
+followed by `restrictScalarsIntEquiv`. -/
+theorem ofDiscreteModuleRestrictScalarsIntEquiv_apply
+    (a : continuousCohomology n (ofDiscreteModule ℤ G X.V)) :
+    ofDiscreteModuleRestrictScalarsIntEquiv X n a =
+      restrictScalarsIntEquiv X n (eqToHom (congrArg (continuousCohomology n)
+        (ofDiscreteModule_eq_restrictScalarsInt_obj X)) a) :=
+  (rfl)
 
 /-- `Hⁿ(G, X)` vanishes exactly when the `ℤ`-cohomology of the carrier of the discrete `X`
 vanishes. -/
