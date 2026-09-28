@@ -10,6 +10,7 @@ public import TauCeti.NumberTheory.Padics.RingHoms
 public import TauCeti.Topology.Algebra.ContinuousMulEquiv
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianization
+import TauCeti.Topology.Algebra.Group.Profinite.ProP.Torsion
 
 /-!
 # The abelianization of a Demushkin group and Labute's `q`-invariant
@@ -142,15 +143,14 @@ private theorem exists_dvd_nonempty_continuousMulEquiv_topologicalAbelianization
     ((presentedProP.oneRelatorAbelianizationEquiv r x₀ w hw _ hv).trans
       f.toContinuousAddEquiv.toMultiplicative.symm)⟩
 
-/-- The abelianization structure theorem together with the facts about the torsion subgroup that
-follow from it, all read off the model `ℤ_p^{n-1} × ℤ_p ⧸ (q)` with `p ∣ q`; the public statements
-below are its projections. -/
+/-- The abelianization structure theorem together with the cyclicity of the torsion subgroup and
+the divisibility of the `q`-invariant, all read off the model `ℤ_p^{n-1} × ℤ_p ⧸ (q)` with `p ∣ q`;
+the public statements below are its projections. -/
 private theorem torsion_spec :
-    Finite (torsion (TopologicalAbelianization G)) ∧
-      IsCyclic (torsion (TopologicalAbelianization G)) ∧ p ∣ demushkinQ hG ∧
-        Nonempty (TopologicalAbelianization G ≃ₜ*
-          Multiplicative ((Fin (demushkinRank hG - 1) → ℤ_[p]) ×
-            (ℤ_[p] ⧸ Ideal.span {(demushkinQ hG : ℤ_[p])}))) := by
+    IsCyclic (torsion (TopologicalAbelianization G)) ∧ p ∣ demushkinQ hG ∧
+      Nonempty (TopologicalAbelianization G ≃ₜ*
+        Multiplicative ((Fin (demushkinRank hG - 1) → ℤ_[p]) ×
+          (ℤ_[p] ⧸ Ideal.span {(demushkinQ hG : ℤ_[p])}))) := by
   obtain ⟨q, hpq, ⟨e⟩⟩ := hG.exists_dvd_nonempty_continuousMulEquiv_topologicalAbelianization
   by_cases hq : q = 0
   · -- `q = 0`: the abelianization is torsion-free and the `q`-invariant is `0`.
@@ -163,9 +163,8 @@ private theorem torsion_spec :
       exact Function.Injective.isMulTorsionFree e.toMulEquiv.toMonoidHom e.toMulEquiv.injective
     have h0 := demushkinQ_of_isMulTorsionFree hG hfree
     rw [CommGroup.isMulTorsionFree_iff_torsion_eq_bot] at hfree
-    have hfin : Finite (torsion (TopologicalAbelianization G)) := by rw [hfree]; infer_instance
     have hcyc : IsCyclic (torsion (TopologicalAbelianization G)) := by rw [hfree]; infer_instance
-    refine ⟨hfin, hcyc, h0 ▸ dvd_zero p, ?_⟩
+    refine ⟨hcyc, h0 ▸ dvd_zero p, ?_⟩
     rw [h0, Nat.cast_zero]
     exact ⟨e⟩
   · -- `q ≠ 0`: the torsion subgroup is `ℤ_p ⧸ (q)`, of order `p ^ v_p(q)` with `v_p(q) ≥ 1`.
@@ -174,7 +173,6 @@ private theorem torsion_spec :
     have hcard : Nat.card (torsion (TopologicalAbelianization G)) = p ^ q.valuation := by
       rw [natCard_torsion_of_mulEquiv isAddTorsion_of_finite e.toMulEquiv,
         PadicInt.natCard_quotient_span hq]
-    have hfin := finite_torsion_of_mulEquiv e.toMulEquiv
     obtain ⟨c, rfl⟩ := hpq
     have hc : c ≠ 0 := right_ne_zero_of_mul hq
     have hval := PadicInt.valuation_p_pow_mul 1 c hc
@@ -187,25 +185,27 @@ private theorem torsion_spec :
       · exact (Fact.out : p.Prime).one_lt.ne' h
       · omega
     have hQ := demushkinQ_of_not_isMulTorsionFree hG hne
-    refine ⟨hfin, isCyclic_torsion_of_mulEquiv isAddTorsion_of_finite e.toMulEquiv, ?_, ?_⟩
+    refine ⟨isCyclic_torsion_of_mulEquiv isAddTorsion_of_finite e.toMulEquiv, ?_, ?_⟩
     · rw [hQ, hcard, hval, pow_add, pow_one]
       exact dvd_mul_right p _
     · rw [hQ, hcard, Nat.cast_pow, ← PadicInt.span_singleton_eq_span_pow_valuation hq]
       exact ⟨e⟩
 
-/-- **The torsion subgroup of the abelianization of a Demushkin group is finite.** -/
+/-- **The torsion subgroup of the abelianization of a Demushkin group is finite**: the
+abelianization is a topologically finitely generated abelian pro-`p` group. -/
 theorem finite_torsion_topologicalAbelianization : Finite (torsion (TopologicalAbelianization G)) :=
-  hG.torsion_spec.1
+  hG.isProP.topologicalAbelianization_self.finite_torsion
+    (hG.isTopologicallyFinitelyGenerated.quotient _)
 
 /-- **The torsion subgroup of the abelianization of a Demushkin group is cyclic.** -/
 theorem isCyclic_torsion_topologicalAbelianization :
     IsCyclic (torsion (TopologicalAbelianization G)) :=
-  hG.torsion_spec.2.1
+  hG.torsion_spec.1
 
 /-- **The `q`-invariant of a Demushkin group is divisible by `p`**, because the relator of a
 minimal presentation lies in the Frattini subgroup. -/
 theorem prime_dvd_demushkinQ : p ∣ demushkinQ hG :=
-  hG.torsion_spec.2.2.1
+  hG.torsion_spec.2.1
 
 /-- **The abelianization structure theorem for Demushkin groups** (Labute, p. 106): for a Demushkin
 group `G` of rank `n` with `q`-invariant `q`,
@@ -218,7 +218,7 @@ theorem nonempty_continuousMulEquiv_topologicalAbelianization :
     Nonempty (TopologicalAbelianization G ≃ₜ*
       Multiplicative ((Fin (demushkinRank hG - 1) → ℤ_[p]) ×
         (ℤ_[p] ⧸ Ideal.span {(demushkinQ hG : ℤ_[p])}))) :=
-  hG.torsion_spec.2.2.2
+  hG.torsion_spec.2.2
 
 end IsDemushkin
 
