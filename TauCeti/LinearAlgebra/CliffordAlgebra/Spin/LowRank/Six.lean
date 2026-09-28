@@ -6,8 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.EvenUnitary
-public import TauCeti.LinearAlgebra.CliffordAlgebra.VolumeElement
-public import TauCeti.LinearAlgebra.QuadraticForm.OrthogonalBasis
+import TauCeti.LinearAlgebra.CliffordAlgebra.VolumeElement
+import TauCeti.LinearAlgebra.QuadraticForm.OrthogonalBasis
 import TauCeti.Algebra.Field.Conic
 import TauCeti.LinearAlgebra.CliffordAlgebra.Grading
 import TauCeti.LinearAlgebra.QuadraticForm.Diagonal.Basic
