@@ -89,13 +89,8 @@ theorem mem_lipschitzGroup_of_involute_act_ι_mem_range_ι (hQ : Q.Nondegenerate
     (hx : ∀ m, involute (Q := Q) ↑x * ι Q m * ↑x⁻¹ ∈ LinearMap.range (ι Q)) :
     x ∈ lipschitzGroup Q := by
   obtain ⟨g, hgO, hg⟩ := exists_mem_orthogonalGroup_of_involute_act_ι_mem_range_ι Q hx
-  -- By Cartan–Dieudonné, some Lipschitz element `y` induces the same isometry. The surjectivity
-  -- theorem is stated for the instance `invertibleOfNonzero`; `Invertible` is a subsingleton.
-  have hsurj : Function.Surjective (lipschitzToOrthogonal Q) := by
-    have : NeZero (2 : K) := ⟨Invertible.ne_zero 2⟩
-    convert lipschitzToOrthogonal_surjective Q hQ using 3
-    exact Subsingleton.elim _ _
-  obtain ⟨y, hy⟩ := hsurj ⟨g, hgO⟩
+  -- By Cartan–Dieudonné, some Lipschitz element `y` induces the same isometry.
+  obtain ⟨y, hy⟩ := lipschitzToOrthogonal_surjective Q hQ ⟨g, hgO⟩
   have hyx (m : V) :
       involute (Q := Q) ((y : (CliffordAlgebra Q)ˣ) : CliffordAlgebra Q) * ι Q m *
           (((y : (CliffordAlgebra Q)ˣ)⁻¹ : (CliffordAlgebra Q)ˣ) : CliffordAlgebra Q) =
