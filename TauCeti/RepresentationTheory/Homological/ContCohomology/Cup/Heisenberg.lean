@@ -136,28 +136,26 @@ theorem apply_conj (haN : ∀ n : N, (a : G → M) n = 0) (hbN : ∀ n : N, (b :
   have hb1 := (mem_Z1_iff.1 b.2).2
   have hmem : g⁻¹ * n * g ∈ N := by
     simpa only [inv_inv] using ‹N.Normal›.conj_mem n n.2 g⁻¹
-  -- `b` is constant on the coset `N * g`, since `n * g = g * (g⁻¹ * n * g)` with the second factor
-  -- in `N`.
+  -- `b` is constant on the coset `N * g`: writing `n * g = g * (g⁻¹ * n * g)` puts the `N`-factor
+  -- second, where the cocycle law and `hbN` kill it.
+  have hng : (n : G) * g = g * (g⁻¹ * n * g) := by group
   have hbng : (b : G → A) (n * g) = (b : G → A) g := by
-    rw [show (n : G) * g = g * (g⁻¹ * n * g) by group, hb1, hbN ⟨_, hmem⟩, smul_zero, zero_add]
+    rw [hng, hb1, hbN ⟨_, hmem⟩, smul_zero, zero_add]
   have e1 := hh.apply_mul g⁻¹ (n * g)
   have e2 := hh.apply_mul n g
   have e3 := hh.apply_mul g⁻¹ g
   rw [inv_mul_cancel, hh.apply_one] at e3
   rw [haN n, map_zero, AddMonoidHom.zero_apply, add_zero] at e2
   rw [hbng, ← mul_assoc, e2, smul_add] at e1
-  -- `h g⁻¹ + μ (a g⁻¹) (g⁻¹ • b g) = -(g⁻¹ • h g)`, from `h 1 = 0`.
-  have e4 : h g⁻¹ + μ ((a : G → M) g⁻¹) (g⁻¹ • (b : G → A) g) = -(g⁻¹ • h g) := by
-    rw [eq_neg_iff_add_eq_zero]
-    calc h g⁻¹ + μ ((a : G → M) g⁻¹) (g⁻¹ • (b : G → A) g) + g⁻¹ • h g
+  -- The cup term of `e1` is `μ (a g⁻¹) (g⁻¹ • b g)`; `h 1 = 0` (that is, `e3`) expresses it through
+  -- `h g⁻¹` and `g⁻¹ • h g`.
+  have e4 : μ ((a : G → M) g⁻¹) (g⁻¹ • (b : G → A) g) = -(g⁻¹ • h g) - h g⁻¹ := by
+    rw [eq_sub_iff_add_eq, eq_neg_iff_add_eq_zero]
+    calc μ ((a : G → M) g⁻¹) (g⁻¹ • (b : G → A) g) + h g⁻¹ + g⁻¹ • h g
         = h g⁻¹ + g⁻¹ • h g + μ ((a : G → M) g⁻¹) (g⁻¹ • (b : G → A) g) := by abel
       _ = 0 := e3.symm
-  rw [e1, show h g⁻¹ + (g⁻¹ • h n + g⁻¹ • ((n : G) • h g)) +
-        μ ((a : G → M) g⁻¹) (g⁻¹ • (b : G → A) g) =
-      (h g⁻¹ + μ ((a : G → M) g⁻¹) (g⁻¹ • (b : G → A) g)) +
-        (g⁻¹ • h n + g⁻¹ • ((n : G) • h g)) by abel,
-    e4, smul_add, smul_neg, smul_add, smul_smul, smul_smul, smul_smul, mul_inv_cancel, one_smul,
-    one_smul, one_smul]
+  rw [e1, e4]
+  simp only [smul_add, smul_sub, smul_neg, smul_smul, mul_inv_cancel, mul_inv_cancel_left, one_smul]
   abel
 
 end IsHeisenbergCochain
