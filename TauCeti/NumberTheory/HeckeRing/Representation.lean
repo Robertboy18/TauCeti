@@ -97,10 +97,11 @@ end Invariance
 variable (hΔ : Δ ≤ Δ') (hΓ₂ : Γ₂.toSubmonoid ≤ Δ') (q : V →ₗ[R] W)
   [Finite (DecompQuotient Γ₂ Γ₁ (D.out : G)⁻¹)]
 
--- The sum needs its index type to be finite, and that is all it needs: a Hecke triple supplies
--- this finiteness (`IsHeckeTriple.commensurable_conjAct_inv_left`) but is strictly stronger, so
--- the proposition `Finite` is assumed directly and the `Fintype` the `∑` notation requires is
--- installed once, as a local instance, exactly as in `ModularForms/HeckeSlash/Basic.lean`.
+/-- The enumeration `∑` needs, obtained from the `Finite` assumption by choice. The sum needs
+its index type to be finite, and that is all it needs: a Hecke triple supplies this finiteness
+(`IsHeckeTriple.commensurable_conjAct_inv_left`) but is strictly stronger, so the proposition
+`Finite` is assumed directly and the `Fintype` the `∑` notation requires is installed once, as a
+`local` `noncomputable` instance, exactly as in `ModularForms/HeckeSlash/Basic.lean`. -/
 noncomputable local instance : Fintype (DecompQuotient Γ₂ Γ₁ (D.out : G)⁻¹) := Fintype.ofFinite _
 
 /-- **The Hecke sum of a double coset on a representation.** For `Γ₁ δ Γ₂ = ⊔ᵥ Γ₁ aᵥ` with

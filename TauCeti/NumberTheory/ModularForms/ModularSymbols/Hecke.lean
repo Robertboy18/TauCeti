@@ -152,8 +152,10 @@ theorem mk_comp_symbolIntRep_of_mem {γ : GL (Fin 2) ℚ} (hγ : γ ∈ Γ₁.ma
 
 variable [Finite (DecompQuotient (Γ₂.map (mapGL ℚ)) (Γ₁.map (mapGL ℚ)) (D.out : GL (Fin 2) ℚ)⁻¹)]
 
--- The enumeration of the right cosets, chosen exactly as in `HeckeRing/Representation.lean` so
--- that the sums below are the terms `heckeSum_apply` produces.
+/-- The enumeration `∑` needs, obtained from the `Finite` assumption by choice exactly as in
+`HeckeRing/Representation.lean`, so that the sums below are the terms `heckeSum_apply` produces.
+It is `local` and `noncomputable`: no declaration in this file depends on which enumeration is
+chosen. -/
 noncomputable local instance :
     Fintype (DecompQuotient (Γ₂.map (mapGL ℚ)) (Γ₁.map (mapGL ℚ)) (D.out : GL (Fin 2) ℚ)⁻¹) :=
   Fintype.ofFinite _
@@ -274,8 +276,10 @@ variable (R w) in
 /-- **The Hecke operator `T_n` on `𝕄_w(Γ₁(N); R)`**: the operator of the double coset
 `Γ₁(N) · diag(1, n) · Γ₁(N)`, the same double coset that defines `T_n` on modular forms of level
 `Γ₁(N)` (`HeckeRing.GL2.heckeTNat`). The `NeZero n` binder records that Hecke operators are indexed
-by positive integers; at `n = 0` the double coset would degenerate to `Γ₁(N)` itself. -/
-noncomputable def heckeTSymbol (n : ℕ) [NeZero n] :
+by positive integers; at `n = 0` the double coset would degenerate to `Γ₁(N)` itself. As for
+`heckeTNat`, the binder is `_`-named because only the *statements* use it: the body is the same
+operator either way, and it is the index that is being constrained. -/
+noncomputable def heckeTSymbol (n : ℕ) [_hn : NeZero n] :
     Module.End R (ModularSymbols R (Gamma1 N) w) :=
   heckeSymbol (Gamma1 N) (Gamma1 N) (diagCosetGamma1 N n) (Delta0_le_intEntries N)
 
