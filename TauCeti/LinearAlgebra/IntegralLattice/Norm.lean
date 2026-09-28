@@ -214,7 +214,7 @@ theorem mem_vectorsOfNorm_intCast (L : IntegralLattice V) {n : ℤ} {x : L} :
   exact Int.cast_inj
 
 /-- Membership in `vectorsOfNorm (n : ℚ)` for a natural number `n` is equivalent to having integral
-norm equal to `n`.  Like `mem_vectorsOfNorm_intCast`, this stays an explicit rewrite lemma. -/
+norm equal to `n`. -/
 theorem mem_vectorsOfNorm_natCast (L : IntegralLattice V) {n : ℕ} {x : L} :
     x ∈ L.vectorsOfNorm (n : ℚ) ↔ L.integralNorm x = n := by
   rw [← Int.cast_natCast, L.mem_vectorsOfNorm_intCast]

@@ -16,11 +16,6 @@ A positive definite integral lattice has only finitely many vectors of norm at m
 bound, and hence only finitely many vectors of any given norm. This is what makes the minimum,
 the shells and the representation numbers of a positive definite lattice finite quantities.
 
-The finiteness is inherited from the corresponding statement for a positive definite quadratic
-form on a finitely generated free `ℤ`-module, applied to the integral norm form of the carrier;
-the only lattice-specific input is that positive definiteness of the ambient rational form makes
-that integral form positive definite.
-
 Positive definiteness is load-bearing: the hyperbolic plane is nondegenerate, yet its isotropic
 vectors form an infinite shell of norm zero
 (`TauCeti.IntegralLattice.infinite_vectorsOfNorm_zero_hyperbolicPlane`).
