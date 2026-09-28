@@ -11,6 +11,7 @@ public import Mathlib.Topology.Algebra.ContinuousMonoidHom
 public import Mathlib.Topology.Algebra.Group.Quotient
 public import Mathlib.Topology.Algebra.Group.TopologicalAbelianization
 public import TauCeti.GroupTheory.GroupAction.ConjAct
+public import TauCeti.Topology.Algebra.Group.ClosedSubgroup
 public import TauCeti.Topology.Algebra.Group.Subgroup
 
 /-!
@@ -57,6 +58,8 @@ and Labute's action is recovered by precomposing with the inversion of the actin
 * `TopologicalAbelianization.map_mk`, `TopologicalAbelianization.continuous_map`,
   `TopologicalAbelianization.map_id`, `TopologicalAbelianization.map_comp`: the characteristic
   properties of `map`.
+* `ContinuousMulEquiv.map_topologicalClosure_commutator`: a topological group isomorphism carries
+  the closed commutator subgroup onto the closed commutator subgroup.
 * `TopologicalAbelianization.map_surjective`, `TopologicalAbelianization.ker_map_of_surjective`:
   a continuous surjection `f : G →* H` of a compact group onto a Hausdorff group induces a
   surjection `G^{ab} →* H^{ab}` whose kernel is the image of `ker f`, so that `H^{ab}` is the
@@ -141,31 +144,39 @@ theorem map_surjective (f : G →* H) (hf : Continuous f) (hsurj : Function.Surj
   QuotientGroup.map_surjective_of_surjective _ _ f
     ((QuotientGroup.mk'_surjective (commutator H).topologicalClosure).comp hsurj) _
 
+/-- A topological group isomorphism `G ≃ₜ* H` carries the closed commutator subgroup of `G` onto
+the closed commutator subgroup of `H`. -/
+theorem _root_.ContinuousMulEquiv.map_topologicalClosure_commutator (e : G ≃ₜ* H) :
+    (commutator G).topologicalClosure.map e.toMulEquiv.toMonoidHom =
+      (commutator H).topologicalClosure := by
+  have h : (commutator G).map e.toMulEquiv.toMonoidHom = commutator H := by
+    rw [map_commutator_eq, MonoidHom.range_eq_top.mpr e.surjective, ← commutator_def]
+  apply SetLike.coe_injective
+  rw [Subgroup.coe_map, Subgroup.topologicalClosure_coe, Subgroup.topologicalClosure_coe, ← h,
+    Subgroup.coe_map]
+  exact e.toHomeomorph.image_closure _
+
 /-- A topological group isomorphism `G ≃ₜ* H` induces a topological isomorphism
 `G^{ab} ≃ₜ* H^{ab}` between the topological abelianizations. This is the topological analogue of
-`MulEquiv.abelianizationCongr`. -/
+`MulEquiv.abelianizationCongr`, and the specialisation of `ContinuousMulEquiv.quotientCongr` to
+the closed commutator subgroups. -/
 def _root_.ContinuousMulEquiv.topologicalAbelianizationCongr (e : G ≃ₜ* H) :
-    TopologicalAbelianization G ≃ₜ* TopologicalAbelianization H where
-  toFun := map (e : G →* H) e.continuous
-  invFun := map (e.symm : H →* G) e.symm.continuous
-  left_inv x := QuotientGroup.induction_on x fun g ↦ by simp
-  right_inv y := QuotientGroup.induction_on y fun h ↦ by simp
-  map_mul' := map_mul _
-  continuous_toFun := continuous_map _ _
-  continuous_invFun := continuous_map _ _
+    TopologicalAbelianization G ≃ₜ* TopologicalAbelianization H :=
+  e.quotientCongr _ _ e.map_topologicalClosure_commutator
 
 /-- `e.topologicalAbelianizationCongr` sends the class of `x : G` to the class of `e x`. -/
 @[simp]
 theorem _root_.ContinuousMulEquiv.topologicalAbelianizationCongr_mk (e : G ≃ₜ* H) (x : G) :
     e.topologicalAbelianizationCongr (x : TopologicalAbelianization G) =
       (e x : TopologicalAbelianization H) :=
-  map_mk (e : G →* H) e.continuous x
+  e.quotientCongr_mk _ _ _ x
 
 /-- The inverse of `e.topologicalAbelianizationCongr` is `e.symm.topologicalAbelianizationCongr`. -/
 @[simp]
 theorem _root_.ContinuousMulEquiv.topologicalAbelianizationCongr_symm (e : G ≃ₜ* H) :
     e.topologicalAbelianizationCongr.symm = e.symm.topologicalAbelianizationCongr :=
-  (rfl)
+  ContinuousMulEquiv.ext fun x ↦ QuotientGroup.induction_on x fun h ↦
+    e.topologicalAbelianizationCongr.symm_apply_eq.mpr (by simp)
 
 /-- **The kernel of the map induced on abelianizations by a surjection.** For a continuous
 surjection `f : G →* H` from a compact group onto a Hausdorff group, the kernel of

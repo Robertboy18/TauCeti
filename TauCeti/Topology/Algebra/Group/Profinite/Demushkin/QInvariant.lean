@@ -97,9 +97,8 @@ theorem demushkinQ_congr {H : Type v} [Group H] [TopologicalSpace H] [IsTopologi
   let f := e.topologicalAbelianizationCongr.toMulEquiv
   have hcard : Nat.card (torsion (TopologicalAbelianization G)) =
       Nat.card (torsion (TopologicalAbelianization H)) :=
-    Nat.card_congr (Equiv.subtypeEquiv f.toEquiv fun x ↦ by
-      rw [CommGroup.mem_torsion, CommGroup.mem_torsion]
-      exact (f.injective.isOfFinOrder_iff (f := f.toMonoidHom)).symm)
+    Nat.card_congr
+      ((f.subgroupMap (torsion _)).trans (MulEquiv.subgroupCongr f.map_torsion)).toEquiv
   have hfree : IsMulTorsionFree (TopologicalAbelianization G) ↔
       IsMulTorsionFree (TopologicalAbelianization H) :=
     ⟨fun _ ↦ Function.Injective.isMulTorsionFree f.symm.toMonoidHom f.symm.injective,
