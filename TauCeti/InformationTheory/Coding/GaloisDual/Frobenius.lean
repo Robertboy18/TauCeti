@@ -37,7 +37,8 @@ variable {R : Type*} [CommSemiring R] {p : ℕ} [ExpChar R p] [PerfectRing R p]
 
 /-- Membership in the Frobenius Galois dual means orthogonality to every codeword for the form
 `∑ i, x i * y i ^ p`. -/
-@[simp]
+-- Not `@[simp]`: `mem_galoisDual` and `frobeniusEquiv_apply` already rewrite the left-hand side
+-- to the `frobenius R p (y i)` spelling, so this lemma would never fire and fails `simpNF`.
 theorem mem_galoisDual_frobeniusEquiv (C : Submodule R (ι → R)) (y : ι → R) :
     y ∈ galoisDual (frobeniusEquiv R p) C ↔ ∀ x ∈ C, ∑ i, x i * y i ^ p = 0 := by
   simp only [mem_galoisDual, frobeniusEquiv_def]
