@@ -21,22 +21,24 @@ the function
 `f⋆ y = ⨆ x, (⟪x, y⟫ - f x)`
 
 on `F`. It is the basic operation of convex analysis: it turns a function into the supremum of
-the affine functions `y ↦ ⟪x, y⟫ - f x` indexed by the points of `E`, so it is convex and lower
-semicontinuous whatever `f` is. When the pairing is separating and `E` carries a locally convex
-topology compatible with it (for instance the weak topology `σ(E, F)`), the Fenchel–Moreau
-theorem describes the biconjugate `f⋆⋆`. If `f` lies above some affine function
-`x ↦ ⟪x, y⟫ + c` (so in particular `f` never takes the value `⊥`), then `f⋆⋆` is the largest
-lower-semicontinuous convex minorant of `f`; in particular `f⋆⋆ = f` when `f` is proper, convex
-and lower semicontinuous. If `f` has no such affine minorant, for instance when `f x = ⊥` at some
-point (`TauCeti.fenchelConjugate_eq_top_of_eq_bot`), then `f⋆ ≡ ⊤` and `f⋆⋆ ≡ ⊥`, even though
-the lower-semicontinuous convex minorants of `f` need not all be `⊥`. The theorem needs a
-separation theorem and is not proved here. For a bare bilinear pairing only the inequality
-`f⋆⋆ ≤ f` holds (for the zero pairing, `f⋆⋆` is the constant `⨅ x, f x`). This file contains the
-algebraic part of the theory, valid on a bare dual pair:
+the affine functions `y ↦ ⟪x, y⟫ - f x` indexed by the points of `E`, so whatever `f` is, it is
+convex, and it is lower semicontinuous for any topology on `F` making every functional `B x`
+continuous. When the pairing is separating and `E` carries a locally convex topology compatible
+with it (for instance the weak topology `σ(E, F)`), the Fenchel–Moreau theorem describes the
+biconjugate `f⋆⋆`. If `f` lies above some affine function `x ↦ ⟪x, y⟫ + c` (so in particular `f`
+never takes the value `⊥`), then `f⋆⋆` is the largest lower-semicontinuous convex minorant of
+`f`; in particular `f⋆⋆ = f` when `f` is proper, convex and lower semicontinuous. If `f` has no
+such affine minorant, for instance when `f x = ⊥` at some point
+(`TauCeti.fenchelConjugate_eq_top_of_eq_bot`), then `f⋆ ≡ ⊤` and `f⋆⋆ ≡ ⊥`, even though the
+lower-semicontinuous convex minorants of `f` need not all be `⊥`. The theorem needs a separation
+theorem and is not proved here. For a bare bilinear pairing only the inequality `f⋆⋆ ≤ f` holds
+(for the zero pairing, `f⋆⋆` is the constant `⨅ x, f x`). This file contains the algebraic part
+of the theory, valid on a bare dual pair:
 the conjugate itself, the Fenchel–Young inequality, the antitone Galois connection between the
 functions on `E` and on `F` that the conjugate and its transpose `B.flip` form, the
 biconjugate inequality `f⋆⋆ ≤ f`, the triple-conjugate identity `f⋆⋆⋆ = f⋆`, the normalisation
-rule for an additive constant, and the convexity and lower semicontinuity of every conjugate.
+rule for an additive constant, the convexity of every conjugate, and its lower semicontinuity
+for any topology on `F` making every functional `B x` continuous.
 
 The codomain is `EReal` throughout: the supremum defining `f⋆` can be `+∞` even for a finite `f`,
 and it is `-∞` exactly when `f ≡ +∞`. The only subtraction that occurs is `⟪x, y⟫ - f x`, a real
