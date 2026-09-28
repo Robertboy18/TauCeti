@@ -51,9 +51,11 @@ Coefficients are an object `R` of an abelian category with coproducts.
 
 ## References
 
-* A. Hatcher, *Algebraic Topology*, Section 2.2, Example 2.23 and the proof of Corollary 2.24: the
-  reduced Mayer–Vietoris sequence of a cover of `Sⁿ` by two neighbourhoods of its hemispheres,
-  here the complements of two antipodal points, and the induction on dimension.
+* A. Hatcher, *Algebraic Topology*, Section 2.2, Example 2.46: the reduced Mayer–Vietoris sequence
+  of a cover of `Sⁿ` by two contractible open sets meeting in a space homotopy equivalent to
+  `Sⁿ⁻¹`, there neighbourhoods of the two hemispheres and here the complements of two antipodal
+  points, and the resulting induction on dimension.  The computed groups are those of Section 2.1,
+  Corollary 2.14.
 -/
 
 public section
