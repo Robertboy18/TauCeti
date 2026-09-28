@@ -7,8 +7,6 @@ module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologicalDimension.SingleDegree
 public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Cohomology
-public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Extension
-public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Projective
 
 /-!
 # Cohomological dimension at most one is projectivity
