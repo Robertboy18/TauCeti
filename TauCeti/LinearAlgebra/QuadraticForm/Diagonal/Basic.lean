@@ -24,8 +24,8 @@ of squares.
   `QuadraticForm.discr'_weightedSumSquares`: over a ring in which two is invertible, the associated
   bilinear form of a diagonal form is the weighted dot product, its Gram matrix in the standard
   basis is the diagonal matrix of the weights, and its discriminant is their product.
-* `QuadraticMap.nondegenerate_weightedSumSquares`: over a domain in which two is invertible, a
-  diagonal form with nonzero weights is nondegenerate.
+* `QuadraticMap.nondegenerate_weightedSumSquares`: over a ring in which two is invertible, a
+  diagonal form with regular weights is nondegenerate.
 * `QuadraticMap.weightedSumSquares_units`: unit weights may be replaced by the scalars they name.
 * `QuadraticMap.not_anisotropic_weightedSumSquares_of_ternary_eq_zero`: a ternary solution with
   a nonzero third coordinate gives a nonzero isotropic vector in a diagonal form.
@@ -249,20 +249,20 @@ theorem _root_.QuadraticForm.discr'_weightedSumSquares [DecidableEq ι] (w : ι 
     QuadraticForm.discr' (QuadraticMap.weightedSumSquares R w) = ∏ i, w i := by
   rw [QuadraticForm.discr', QuadraticForm.toMatrix'_weightedSumSquares, Matrix.det_diagonal]
 
-/-- **A diagonal form with nonzero weights over a domain is nondegenerate** when two is
-invertible. -/
-theorem _root_.QuadraticMap.nondegenerate_weightedSumSquares [IsDomain R] {w : ι → R}
-    (hw : ∀ i, w i ≠ 0) : (QuadraticMap.weightedSumSquares R w).Nondegenerate := by
+/-- **A diagonal form with regular weights is nondegenerate** when two is invertible. Over a
+domain the hypothesis is that every weight is nonzero (`isRegular_iff_ne_zero`). -/
+theorem _root_.QuadraticMap.nondegenerate_weightedSumSquares {w : ι → R}
+    (hw : ∀ i, IsRegular (w i)) : (QuadraticMap.weightedSumSquares R w).Nondegenerate := by
   classical
-  -- The associated bilinear form has Gram matrix the diagonal matrix of the weights
-  -- (`QuadraticForm.toMatrix'_weightedSumSquares`), whose determinant is their product.
-  rw [← QuadraticMap.nondegenerate_associated_iff]
-  have h : QuadraticMap.associated (R := R) (QuadraticMap.weightedSumSquares R w) =
-      Matrix.toLinearMap₂' R (Matrix.diagonal w) := by
-    rw [← QuadraticForm.toMatrix'_weightedSumSquares (R := R) w, QuadraticForm.toMatrix',
-      Matrix.toLinearMap₂'_toMatrix']
-  rw [h, LinearMap.nondegenerate_toLinearMap₂'_iff_det_ne_zero, Matrix.det_diagonal]
-  exact Finset.prod_ne_zero_iff.mpr fun i _ => hw i
+  -- The associated bilinear form is the weighted dot product
+  -- (`QuadraticMap.associated_weightedSumSquares`), so pairing a vector `x` with the basis vector
+  -- `Pi.single i 1` isolates `w i * x i`, and regularity of `w i` forces `x i = 0`.
+  rw [← QuadraticMap.nondegenerate_associated_iff,
+    (QuadraticForm.associated_isSymm R _).isRefl.nondegenerate_iff_separatingLeft]
+  intro x hx
+  ext i
+  simpa [QuadraticMap.associated_weightedSumSquares, Pi.single_apply,
+    (hw i).left.mul_left_eq_zero_iff] using hx (Pi.single i 1)
 
 /-- **Isometric diagonal forms with unit weights have weight products differing by a square.** An
 isometry of the coordinate spaces changes the Gram matrix of a diagonal form by a congruence, so

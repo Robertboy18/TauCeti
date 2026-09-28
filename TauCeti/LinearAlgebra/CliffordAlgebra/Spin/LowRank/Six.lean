@@ -112,17 +112,6 @@ private theorem algebraMap_add_smul_mul_ι_mul_algebraMap_sub_smul {ω : Cliffor
 
 variable {l : List M}
 
-/-- The volume element of an orthogonal list with odd `n.choose 2` squares to `-∏ Q vᵢ`. -/
-private theorem prod_map_ι_sq_of_odd_choose_two (hl : l.Pairwise Q.IsOrtho)
-    (hodd : Odd (l.length.choose 2)) :
-    (l.map (ι Q)).prod * (l.map (ι Q)).prod = algebraMap R _ (-(l.map Q).prod) := by
-  rw [prod_map_ι_sq_scalar hl, hodd.neg_one_pow, neg_one_mul]
-
-/-- The volume element of an orthogonal list with odd `n.choose 2` is reverse-antisymmetric. -/
-private theorem reverse_prod_map_ι_of_odd_choose_two (hl : l.Pairwise Q.IsOrtho)
-    (hodd : Odd (l.length.choose 2)) : reverse (l.map (ι Q)).prod = -(l.map (ι Q)).prod := by
-  rw [reverse_prod_map_ι_of_pairwise_isOrtho hl, hodd.neg_one_pow, neg_one_smul]
-
 /-! ### The witness `a + b • ω` built from an orthogonal list of length `≡ 2 (mod 4)` -/
 
 /-- **The even unitary units `a + b • ω` built from an orthogonal list of even length with odd
@@ -137,8 +126,11 @@ theorem exists_mem_evenUnitaryGroup_coe_eq_algebraMap_add_smul_prod_map_ι
       (x : CliffordAlgebra Q) = algebraMap R _ a + b • (l.map (ι Q)).prod := by
   -- `ω` is even, `reverse ω = -ω` and `ω² = -∏ Q vᵢ`, so `a + b • ω` is an even unit with inverse
   -- `a - b • ω` and reverse norm `a² + b² ∏ Q vᵢ = 1`.
-  obtain ⟨h₁, h₂⟩ := algebraMap_add_smul_mul_algebraMap_sub_smul
-    (prod_map_ι_sq_of_odd_choose_two hl hodd) a b
+  have hsq : (l.map (ι Q)).prod * (l.map (ι Q)).prod = algebraMap R _ (-(l.map Q).prod) := by
+    rw [prod_map_ι_sq_scalar hl, hodd.neg_one_pow, neg_one_mul]
+  have hrev : reverse (l.map (ι Q)).prod = -(l.map (ι Q)).prod := by
+    rw [reverse_prod_map_ι_of_pairwise_isOrtho hl, hodd.neg_one_pow, neg_one_smul]
+  obtain ⟨h₁, h₂⟩ := algebraMap_add_smul_mul_algebraMap_sub_smul hsq a b
   have hnorm : a ^ 2 - b ^ 2 * -(l.map Q).prod = 1 := by rw [← hab]; ring
   rw [hnorm, map_one] at h₁ h₂
   refine ⟨⟨algebraMap R _ a + b • (l.map (ι Q)).prod, algebraMap R _ a - b • (l.map (ι Q)).prod,
@@ -150,8 +142,7 @@ theorem exists_mem_evenUnitaryGroup_coe_eq_algebraMap_add_smul_prod_map_ι
       rw [heven.natCast_zmod_two] at h
       rwa [← Subalgebra.mem_toSubmodule, even_toSubmodule]
     exact (even Q).add_mem ((even Q).algebraMap_mem a) ((even Q).smul_mem hω b)
-  · rw [map_add, map_smul, reverse.commutes, reverse_prod_map_ι_of_odd_choose_two hl hodd,
-      smul_neg, ← sub_eq_add_neg, h₂]
+  · rw [map_add, map_smul, reverse.commutes, hrev, smul_neg, ← sub_eq_add_neg, h₂]
 
 end CommRing
 
@@ -180,6 +171,10 @@ theorem notMem_lipschitzGroup_of_mem_evenUnitaryGroup_of_coe_eq (hl : l.Pairwise
   -- preserves the vectors (`lipschitzGroup.involute_act_ι_mem_range_ι`).
   intro hxL
   obtain ⟨v, hv⟩ := List.exists_mem_of_length_pos (l := l) (by omega)
+  have hsq : (l.map (ι Q)).prod * (l.map (ι Q)).prod = algebraMap K _ (-(l.map Q).prod) := by
+    rw [prod_map_ι_sq_scalar hl, hodd.neg_one_pow, neg_one_mul]
+  have hrev : reverse (l.map (ι Q)).prod = -(l.map (ι Q)).prod := by
+    rw [reverse_prod_map_ι_of_pairwise_isOrtho hl, hodd.neg_one_pow, neg_one_smul]
   -- `x` is even, so its involute is itself, and its inverse is its reverse `a - b • ω`.
   have hinvol : involute (x : CliffordAlgebra Q) = x := by
     rw [hcoe, map_add, map_smul, involute.commutes, involute_prod_map_ι, heven.neg_one_pow,
@@ -188,11 +183,9 @@ theorem notMem_lipschitzGroup_of_mem_evenUnitaryGroup_of_coe_eq (hl : l.Pairwise
       algebraMap K _ a - b • (l.map (ι Q)).prod := by
     have h := evenUnitaryGroup.reverse_eq_inv Q ⟨x, hx⟩
     dsimp only at h
-    rw [← h, hcoe, map_add, map_smul, reverse.commutes,
-      reverse_prod_map_ι_of_odd_choose_two hl hodd, smul_neg, ← sub_eq_add_neg]
+    rw [← h, hcoe, map_add, map_smul, reverse.commutes, hrev, smul_neg, ← sub_eq_add_neg]
   have hmem := lipschitzGroup.involute_act_ι_mem_range_ι hxL v
-  rw [hinvol, hinv, hcoe, algebraMap_add_smul_mul_ι_mul_algebraMap_sub_smul
-    (prod_map_ι_sq_of_odd_choose_two hl hodd)
+  rw [hinvol, hinv, hcoe, algebraMap_add_smul_mul_ι_mul_algebraMap_sub_smul hsq
     (prod_map_ι_mul_ι_of_even_length hl heven (Submodule.subset_span hv))] at hmem
   have hsub : (2 * a * b) • ((l.map (ι Q)).prod * ι Q v) ∈ LinearMap.range (ι Q) := by
     have h := (LinearMap.range (ι Q)).sub_mem hmem
@@ -263,9 +256,9 @@ group is a proper subgroup of its even unitary group. This is the classical exam
 theorem exists_spinGroup_ne_evenUnitaryGroup_finrank_six :
     ∃ Q : QuadraticForm ℚ (Fin 6 → ℚ), Q.Nondegenerate ∧
       (spinGroup.toUnits : spinGroup Q →* (CliffordAlgebra Q)ˣ).range ≠ evenUnitaryGroup Q := by
-  have hw : ∀ i : Fin 6, (![1, -1, 1, -1, 1, -1] : Fin 6 → ℚ) i ≠ 0 := by
+  have hw : ∀ i : Fin 6, IsRegular ((![1, -1, 1, -1, 1, -1] : Fin 6 → ℚ) i) := by
     intro i
-    fin_cases i <;> norm_num
+    exact isRegular_iff_ne_zero.mpr (by fin_cases i <;> norm_num)
   refine ⟨QuadraticMap.weightedSumSquares ℚ ![1, -1, 1, -1, 1, -1],
     QuadraticMap.nondegenerate_weightedSumSquares hw, ?_⟩
   exact range_spinGroup_toUnits_ne_evenUnitaryGroup_of_six_le_finrank _
