@@ -9,8 +9,8 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.ZModFo
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Equiv
 import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.RankParity
 import TauCeti.Topology.Algebra.Group.Profinite.ProP.ElementaryAbelian
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.PadicInt
-public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Procyclic
+import TauCeti.Topology.Algebra.Group.Profinite.Free.PadicInt
+import TauCeti.Topology.Algebra.Group.Profinite.ProP.Procyclic
 
 /-!
 # `ℤ/2` is the unique Demushkin group of rank one
@@ -32,8 +32,8 @@ whenever `4 ∣ n`; this covers the cyclic groups `ℤ/2ᵏ` with `k ≥ 2`.
 
 * `TauCeti.IsDemushkin.cupFp_self_ne_zero_of_demushkinRank_eq_one`: in a Demushkin group of rank
   one, every nonzero class of `H¹(G, 𝔽_p)` has nonzero cup square.
-* `TauCeti.not_isDemushkin_of_continuousMulEquiv_multiplicative_zmod`: a group topologically
-  isomorphic to `ℤ/n` is not Demushkin at `p = 2` when `4 ∣ n`.
+* `TauCeti.not_isDemushkin_of_four_dvd_of_continuousMulEquiv_multiplicative_zmod`: a group
+  topologically isomorphic to `ℤ/n` is not Demushkin at `p = 2` when `4 ∣ n`.
 * `TauCeti.IsDemushkin.eq_two_of_demushkinRank_eq_one`: a Demushkin group of rank one lives at
   `p = 2`.
 * `TauCeti.IsDemushkin.nonempty_continuousMulEquiv_multiplicative_zmod_two_of_demushkinRank_eq_one`:
@@ -74,7 +74,7 @@ theorem IsDemushkin.cupFp_self_ne_zero_of_demushkinRank_eq_one (hG : IsDemushkin
 /-- A Demushkin group at `p = 2` admitting a continuous character to `ℤ/4` with an odd value does
 not have rank one: the reduction modulo `2` of the character is a nonzero class of `H¹(G, 𝔽₂)`
 with vanishing cup square. -/
-theorem IsDemushkin.demushkinRank_ne_one_of_zmod_four (hG : IsDemushkin 2 G)
+theorem IsDemushkin.demushkinRank_ne_one_of_zmod_four_reduction_ne_zero (hG : IsDemushkin 2 G)
     (φ : G →ₜ* Multiplicative (ZMod 4)) {g : G}
     (hg : ZMod.castHom (by norm_num : (2 : ℕ) ∣ 4) (ZMod 2) (Multiplicative.toAdd (φ g)) ≠ 0) :
     demushkinRank hG ≠ 1 := fun h ↦
@@ -83,8 +83,8 @@ theorem IsDemushkin.demushkinRank_ne_one_of_zmod_four (hG : IsDemushkin 2 G)
 
 /-- **A profinite group topologically isomorphic to `ℤ/n` with `4 ∣ n` is not Demushkin at
 `p = 2`**: it has rank one, and its mod-`2` character lifts to `ℤ/4`. -/
-theorem not_isDemushkin_of_continuousMulEquiv_multiplicative_zmod {n : ℕ} [NeZero n] (hn : 4 ∣ n)
-    (e : G ≃ₜ* Multiplicative (ZMod n)) : ¬ IsDemushkin 2 G := fun hG ↦ by
+theorem not_isDemushkin_of_four_dvd_of_continuousMulEquiv_multiplicative_zmod {n : ℕ} [NeZero n]
+    (hn : 4 ∣ n) (e : G ≃ₜ* Multiplicative (ZMod n)) : ¬ IsDemushkin 2 G := fun hG ↦ by
   have hn1 : Fact (1 < n) := ⟨by
     obtain ⟨m, rfl⟩ := hn
     have := NeZero.ne (4 * m)
@@ -119,7 +119,7 @@ theorem not_isDemushkin_of_continuousMulEquiv_multiplicative_zmod {n : ℕ} [NeZ
   let φ : G →ₜ* Multiplicative (ZMod 4) := ψ.comp (ContinuousMonoidHom.toContinuousMonoidHom e)
   have hφ : Multiplicative.toAdd (φ b) = 1 := by
     simp [φ, ψ, hb, ZMod.cast_one hn]
-  refine hG.demushkinRank_ne_one_of_zmod_four φ (g := b) ?_ hrank
+  refine hG.demushkinRank_ne_one_of_zmod_four_reduction_ne_zero φ (g := b) ?_ hrank
   rw [hφ, map_one]
   exact one_ne_zero
 
@@ -161,7 +161,8 @@ theorem IsDemushkin.nonempty_continuousMulEquiv_multiplicative_zmod_two_of_demus
     · -- `k = 1`: the group is `ℤ/2`.
       exact ⟨e⟩
     · -- `k ≥ 2`: `4 ∣ 2ᵏ`, so the group is not Demushkin.
-      exact (not_isDemushkin_of_continuousMulEquiv_multiplicative_zmod ⟨2 ^ k, by ring⟩ e hG).elim
+      exact (not_isDemushkin_of_four_dvd_of_continuousMulEquiv_multiplicative_zmod ⟨2 ^ k, by ring⟩
+        e hG).elim
   · -- A generator of infinite order makes `G` free pro-`2` of rank one, which is not Demushkin.
     exfalso
     obtain ⟨e⟩ := freeProP.nonempty_continuousMulEquiv_of_not_isOfFinOrder (X := PUnit.{u + 1})
