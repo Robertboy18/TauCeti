@@ -11,6 +11,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Basi
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Abelianization
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.ElementaryAbelian
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.FinitePresentation
+import TauCeti.Data.ZMod.TrivialAction
 
 /-!
 # `ℤ_p × ℤ_p` is a Demushkin group
@@ -279,9 +280,9 @@ theorem finrank_cohomFp_two_multiplicative_pi_padicInt_fin_two :
   set G := Multiplicative (Fin 2 → ℤ_[p])
   -- The explicit `H²(G, 𝔽_p)` needs an action of `G` on `𝔽_p`; the trivial one is installed for
   -- the duration of the proof and does not appear in the statement.
-  let _ : DistribMulAction G (ZMod p) := DistribMulAction.compHom (ZMod p) (1 : G →* (ZMod p)ˣ)
-  have htriv : ∀ (g : G) (m : ZMod p), g • m = m := fun _ m ↦ one_smul (ZMod p)ˣ m
-  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd.congr fun x ↦ (htriv x.1 x.2).symm⟩
+  let _ := trivialZModAction p G
+  have htriv : ∀ (g : G) (m : ZMod p), g • m = m := fun _ _ ↦ rfl
+  have : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
   set r := demushkinWordNeTwo 0 2 (freeProPGen p 2)
   have hrels : ({r} : Set (freeProP p (Fin 2))) ⊆ proPFrattini p (freeProP p (Fin 2)) :=
     Set.singleton_subset_iff.mpr (demushkinWordNeTwo_mem_proPFrattini Fact.out (dvd_zero p) 2 _)
