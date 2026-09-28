@@ -8,8 +8,7 @@ module
 public import TauCeti.Algebra.Homology.EulerCharacteristic.ExtEuler.Descent
 public import TauCeti.Algebra.Homology.EulerCharacteristic.ExtEuler.FiniteLength
 public import TauCeti.RepresentationTheory.GrothendieckGroup.Quiver.DimensionVector
-public import TauCeti.RepresentationTheory.GrothendieckGroup.SimpleBasis
-public import TauCeti.RepresentationTheory.Quiver.Acyclic.PathAlgebra
+public import TauCeti.RepresentationTheory.GrothendieckGroup.Quiver.SimpleBasis
 public import TauCeti.RepresentationTheory.Quiver.Representation.Projective.Simple.ExtEuler
 
 /-!
@@ -25,8 +24,8 @@ exists, and it is the Ringel form of the dimension vectors,
 `χ(M, N) = ∑ᵢ dim Mᵢ dim Nᵢ - ∑_{a : i ⟶ j} dim Mᵢ dim Nⱼ`.
 
 Both sides are biadditive and the simple classes span, so the identity follows from the vertex
-simple computation. Its symmetrization is the polarized Tits form; the raw pairing stays
-nonsymmetric.
+simple computation. Its symmetrization is the polarized Tits form; the raw pairing need not be
+symmetric.
 
 ## Main results
 
@@ -58,34 +57,7 @@ variable (k : Type (max v w)) (Q : Type v) [Field k] [Quiver.{w} Q]
 
 section Finite
 
-variable [Finite Q]
-
-/-- The vertex simple `Sᵢ` as an object of the category of finitely generated modules. -/
-noncomputable def vertexSimpleModuleFG (i : Q) : FGModuleCat (pathAlgebra k Q) :=
-  ⟨vertexSimpleModule k Q i, inferInstanceAs (Module.Finite _ (vertexSimpleModule k Q i))⟩
-
-@[simp]
-theorem vertexSimpleModuleFG_obj (i : Q) :
-    (vertexSimpleModuleFG k Q i).obj = vertexSimpleModule k Q i := by
-  rfl
-
-instance isSimpleModule_vertexSimpleModuleFG (i : Q) :
-    IsSimpleModule (pathAlgebra k Q) (vertexSimpleModuleFG k Q i) :=
-  inferInstanceAs (IsSimpleModule (pathAlgebra k Q) (vertexSimpleModule k Q i))
-
-variable [FiniteDimensional k (pathAlgebra k Q)]
-
-/-- **The vertex simples exhaust the simple modules of a finite-dimensional path algebra.** -/
-theorem isExhaustiveSimpleFamily_vertexSimpleModuleFG :
-    IsExhaustiveSimpleFamily (vertexSimpleModuleFG k Q) := by
-  rw [isExhaustiveSimpleFamily_iff]
-  intro M hM
-  have hQ : Quiver.IsAcyclic Q := isAcyclic_of_module_finite_pathAlgebra k Q inferInstance
-  have : Simple M.obj := (simple_iff_isSimpleModule' M.obj).mpr hM
-  obtain ⟨i, ⟨e⟩⟩ := exists_iso_vertexSimpleModule_of_simple k Q hQ M.obj
-  exact ⟨i, ⟨e.toLinearEquiv⟩⟩
-
-variable [∀ a b : Q, Finite (a ⟶ b)]
+variable [Finite Q] [FiniteDimensional k (pathAlgebra k Q)]
 
 /-- **Every pair of finitely generated modules over a finite-dimensional path algebra is
 Euler-admissible.** The simple modules are the vertex simples, whose first-arrow resolutions
@@ -93,6 +65,7 @@ bound Ext above degree one, and admissibility propagates along composition serie
 theorem isEulerAdmissibleOn_isFG_pathAlgebra :
     IsEulerAdmissibleOn.{max v w} k (ModuleCat.isFG (pathAlgebra k Q))
       (ModuleCat.isFG (pathAlgebra k Q)) := by
+  have : ∀ a b : Q, Finite (a ⟶ b) := finite_hom_of_module_finite_pathAlgebra k Q inferInstance
   refine isEulerAdmissibleOn_isFG_of_forall_isSimpleModule k fun S Y hS hY ↦ ?_
   have hQ : Quiver.IsAcyclic Q := isAcyclic_of_module_finite_pathAlgebra k Q inferInstance
   have : Simple S := (simple_iff_isSimpleModule' S).mpr hS
@@ -109,6 +82,7 @@ variable [Fintype Q] [∀ a b : Q, Fintype (a ⟶ b)] [FiniteDimensional k (path
 /-- **The Ext-Euler pairing of a finite acyclic quiver is the Ringel form.** On the Grothendieck
 group of finitely generated modules over a finite-dimensional path algebra, the categorical
 Ext-Euler pairing is the quiver Euler form pulled back along the dimension-vector map. -/
+@[simp]
 theorem extEulerPairing_eq_pathAlgebraEulerPairingK0
     (x y : ExactK0 (finiteModulesExactStructure (pathAlgebra k Q))) :
     extEulerPairing (isExtensionClosed_finiteModules (pathAlgebra k Q))
@@ -144,10 +118,13 @@ theorem extEulerPairing_eq_pathAlgebraEulerPairingK0
   -- Both sides are additive in `y`.
   suffices (Φ (e x)).comp e.toAddMonoidHom = (pathAlgebraEulerPairingK0 k Q x).toAddMonoidHom from
     DFunLike.congr_fun this y
-  exact ExactK0.hom_ext fun Y ↦ by simpa [e] using key Y x
+  exact ExactK0.hom_ext fun Y ↦ by
+    simpa only [AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom,
+      LinearMap.toAddMonoidHom_coe, e, finiteModulesExactK0Equiv_of] using key Y x
 
 /-- **The Ext-Euler characteristic of two finitely generated modules over a finite-dimensional
 path algebra is the Ringel form of their dimension vectors.** -/
+@[simp]
 theorem extEuler_eq_eulerForm_dimVector (X Y : ModuleCat (pathAlgebra k Q))
     [Module.Finite (pathAlgebra k Q) X] [Module.Finite (pathAlgebra k Q) Y]
     (h : IsEulerAdmissible.{max v w} k X Y) :

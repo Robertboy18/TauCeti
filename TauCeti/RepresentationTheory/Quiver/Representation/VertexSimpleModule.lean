@@ -24,6 +24,11 @@ pairings against other modules.
 The resolution is the standard first-arrow sequence
 `0 ⟶ ⨁_{e : i ⟶ j} Pⱼ ⟶ Pᵢ ⟶ Sᵢ ⟶ 0`; see Assem--Simson--Skowroński,
 *Elements of the Representation Theory of Associative Algebras I*, Chapter III, Section 2.
+
+Over an acyclic quiver the vertex simples are the only simple modules:
+`TauCeti.exists_iso_vertexSimpleModule_of_simple` transports the classification of simple
+representations along the same equivalence. Together with the resolution it reduces statements
+about all simple path algebra modules, such as Euler-admissibility, to the vertex simples.
 -/
 
 public section
