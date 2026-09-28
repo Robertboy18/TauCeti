@@ -10,16 +10,17 @@ public import Mathlib.Algebra.Module.LinearMap.End
 /-!
 # Special contractions of modules with a differential
 
-A *special contraction*, classically a strong deformation retract, of a module `M` with an
-endomorphism `dM` onto a module `N` with an endomorphism `dN` consists of linear maps
-`incl : N → M` and `proj : M → N` commuting with the endomorphisms, a homotopy `h : M → M` with
+A *special contraction* of a module `M` with an endomorphism `dM` onto a module `N` with an
+endomorphism `dN` consists of linear maps `incl : N → M` and `proj : M → N` commuting with the
+endomorphisms, a homotopy `h : M → M` with
 
 `proj ∘ incl = 1`,   `dM h + h dM = 1 - incl ∘ proj`,
 
 and the three side conditions `h ∘ incl = 0`, `proj ∘ h = 0`, `h ∘ h = 0`.  When `dM` and `dN`
-square to zero this is a strong deformation retract of differential modules; the square of `dN` is
-in any case controlled by the square of `dM` (`LinearSpecialContraction.dN_comp_dN`), so
-requiring square-zero endomorphisms as part of the data would be redundant.
+square to zero this is the classical strong deformation retract of differential modules; the
+square of `dN` is in any case the compression of the square of `dM` to the retract
+(`LinearSpecialContraction.dN_comp_dN`), so requiring square-zero endomorphisms as part of the
+data would be redundant.
 
 `TauCeti.SpecialContraction` packages the same notion degreewise, for cochain complexes in a
 preadditive category.  The present total-module form is the one homological perturbation theory
@@ -55,10 +56,11 @@ namespace TauCeti
 variable {R : Type uR} {M : Type uM} {N : Type uN} [Semiring R]
   [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
 
-/-- A **special contraction** of `(M, dM)` onto `(N, dN)`, classically a strong deformation
-retract: maps `incl`, `proj` commuting with the endomorphisms, with `proj ∘ incl = 1`, and a
-homotopy `h` with `dM h + h dM = 1 - incl ∘ proj` satisfying the side conditions `h ∘ incl = 0`,
-`proj ∘ h = 0` and `h ∘ h = 0`. -/
+/-- A **special contraction** of `(M, dM)` onto `(N, dN)`: maps `incl`, `proj` commuting with
+the endomorphisms, with `proj ∘ incl = 1`, and a homotopy `h` with `dM h + h dM = 1 - incl ∘ proj`
+satisfying the side conditions `h ∘ incl = 0`, `proj ∘ h = 0` and `h ∘ h = 0`.  When `dM` squares
+to zero (so `dN` does too, by `dN_comp_dN_eq_zero`) this is a strong deformation retract of
+differential modules; for general endomorphisms it is the analogous contraction data. -/
 @[ext]
 structure LinearSpecialContraction (dM : Module.End R M) (dN : Module.End R N) where
   /-- the inclusion of the retract -/
@@ -74,7 +76,8 @@ structure LinearSpecialContraction (dM : Module.End R M) (dN : Module.End R N) w
   /-- the projection retracts the inclusion -/
   proj_comp_incl : proj ∘ₗ incl = LinearMap.id
   /-- `dM h + h dM` is the complementary idempotent `1 - incl ∘ proj` -/
-  comm : dM ∘ₗ homotopy + homotopy ∘ₗ dM = LinearMap.id - incl ∘ₗ proj
+  dM_comp_homotopy_add_homotopy_comp_dM :
+    dM ∘ₗ homotopy + homotopy ∘ₗ dM = LinearMap.id - incl ∘ₗ proj
   /-- the homotopy annihilates the inclusion -/
   homotopy_comp_incl : homotopy ∘ₗ incl = 0
   /-- the projection annihilates the homotopy -/
@@ -84,14 +87,15 @@ structure LinearSpecialContraction (dM : Module.End R M) (dN : Module.End R N) w
 
 namespace LinearSpecialContraction
 
-attribute [simp] proj_comp_incl homotopy_comp_incl proj_comp_homotopy homotopy_comp_homotopy
+attribute [simp] dM_comp_incl proj_comp_dM proj_comp_incl homotopy_comp_incl proj_comp_homotopy
+  homotopy_comp_homotopy
 
 variable {dM : Module.End R M} {dN : Module.End R N} (c : LinearSpecialContraction dM dN)
   {P : Type uP} [AddCommMonoid P] [Module R P]
 
 /-- The idempotent `incl ∘ proj` of a special contraction is the complement of `dM h + h dM`. -/
 theorem incl_comp_proj : c.incl ∘ₗ c.proj = LinearMap.id - (dM ∘ₗ c.homotopy + c.homotopy ∘ₗ dM) :=
-  by rw [c.comm, sub_sub_cancel]
+  by rw [c.dM_comp_homotopy_add_homotopy_comp_dM, sub_sub_cancel]
 
 /-! ### Reassociated forms
 
@@ -114,9 +118,11 @@ theorem proj_comp_homotopy_assoc (f : P →ₗ[R] M) : c.proj ∘ₗ c.homotopy 
 theorem homotopy_comp_homotopy_assoc (f : P →ₗ[R] M) : c.homotopy ∘ₗ c.homotopy ∘ₗ f = 0 := by
   rw [← LinearMap.comp_assoc, c.homotopy_comp_homotopy, LinearMap.zero_comp]
 
+@[simp]
 theorem dM_comp_incl_assoc (f : P →ₗ[R] N) : dM ∘ₗ c.incl ∘ₗ f = c.incl ∘ₗ dN ∘ₗ f := by
   rw [← LinearMap.comp_assoc, c.dM_comp_incl, LinearMap.comp_assoc]
 
+@[simp]
 theorem proj_comp_dM_assoc (f : P →ₗ[R] M) : c.proj ∘ₗ dM ∘ₗ f = dN ∘ₗ c.proj ∘ₗ f := by
   rw [← LinearMap.comp_assoc, c.proj_comp_dM, LinearMap.comp_assoc]
 
@@ -145,9 +151,11 @@ theorem proj_homotopy_apply (x : M) : c.proj (c.homotopy x) = 0 :=
 theorem homotopy_homotopy_apply (x : M) : c.homotopy (c.homotopy x) = 0 :=
   LinearMap.congr_fun c.homotopy_comp_homotopy x
 
+@[simp]
 theorem dM_incl_apply (y : N) : dM (c.incl y) = c.incl (dN y) :=
   LinearMap.congr_fun c.dM_comp_incl y
 
+@[simp]
 theorem proj_dM_apply (x : M) : c.proj (dM x) = dN (c.proj x) :=
   LinearMap.congr_fun c.proj_comp_dM x
 
@@ -158,7 +166,8 @@ theorem incl_proj_apply (x : M) :
 
 /-! ### The square of the differential of the retract -/
 
-/-- The square of `dN` is the square of `dM`, conjugated by the contraction. -/
+/-- The square of `dN` is the compression `proj ∘ dM² ∘ incl` of the square of `dM` to the
+retract. -/
 theorem dN_comp_dN : dN ∘ₗ dN = c.proj ∘ₗ dM ∘ₗ dM ∘ₗ c.incl := by
   rw [c.dM_comp_incl, c.dM_comp_incl_assoc, c.proj_comp_incl_assoc]
 
@@ -177,7 +186,7 @@ def refl (dM : Module.End R M) : LinearSpecialContraction dM dM where
   dM_comp_incl := by simp
   proj_comp_dM := by simp
   proj_comp_incl := by simp
-  comm := by simp
+  dM_comp_homotopy_add_homotopy_comp_dM := by simp
   homotopy_comp_incl := by simp
   proj_comp_homotopy := by simp
   homotopy_comp_homotopy := by simp

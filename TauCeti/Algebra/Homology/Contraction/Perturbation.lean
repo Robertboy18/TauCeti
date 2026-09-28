@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Algebra.GroupWithZero.Units.Basic
 public import TauCeti.Algebra.Homology.Contraction.Linear
+public import TauCeti.LinearAlgebra.End.LocallyNilpotent
 public import TauCeti.Algebra.Ring.Units
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.NoncommRing
@@ -225,7 +226,7 @@ noncomputable def perturb : LinearSpecialContraction (dM + δ) (c.perturbedDiffe
     linear_combination (norm := abel) h1
   proj_comp_incl := by
     simp [LinearMap.comp_sub, LinearMap.sub_comp, LinearMap.comp_assoc]
-  comm := by
+  dM_comp_homotopy_add_homotopy_comp_dM := by
     have h1 : c.homotopy ∘ₗ (dM ∘ₗ c.perturbationSeries δ + c.perturbationSeries δ ∘ₗ dM +
         c.perturbationSeries δ ∘ₗ c.incl ∘ₗ c.proj ∘ₗ c.perturbationSeries δ) ∘ₗ
           c.homotopy = 0 := by
