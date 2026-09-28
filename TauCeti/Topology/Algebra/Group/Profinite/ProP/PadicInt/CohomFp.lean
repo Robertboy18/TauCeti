@@ -20,24 +20,25 @@ generator rank is `#X` for finite `X`
 (`TauCeti.topologicalGeneratorRankNat_pi_multiplicative_zmod`).
 
 The `i`-th coordinate, reduced modulo `p`, is a continuous character `e_i^* : ℤ_p^X → 𝔽_p`
-(`TauCeti.coordinateCharacter`), dual to the coordinate vectors: `e_i^*(e_i) = 1` and
+(`TauCeti.piPadicIntCoordinateCharacter`), dual to the coordinate vectors: `e_i^*(e_i) = 1` and
 `e_i^*(e_j) = 0` for `i ≠ j`. Two distinct coordinate characters have a nonzero cup product in
-`H²(ℤ_p^X, 𝔽_p)` (`TauCeti.cupFp_coordinateCharacter_ne_zero`): their values on the commuting
-coordinate vectors `e_i`, `e_j` fail the symmetry test `TauCeti.mul_eq_mul_of_cupFp_eq_zero`, since
-`e_i^*(e_i) e_j^*(e_j) = 1` while `e_i^*(e_j) e_j^*(e_i) = 0`. This is the lower bound on
+`H²(ℤ_p^X, 𝔽_p)` (`TauCeti.cupFp_piPadicIntCoordinateCharacter_ne_zero`): their values on the
+commuting coordinate vectors `e_i`, `e_j` fail the symmetry test
+`TauCeti.mul_eq_mul_of_cupFp_eq_zero`, since `e_i^*(e_i) e_j^*(e_j) = 1` while
+`e_i^*(e_j) e_j^*(e_i) = 0`. This is the lower bound on
 `H²(ℤ_p × ℤ_p, 𝔽_p)` in the proof that `ℤ_p × ℤ_p` is a Demushkin group.
 
 ## Main definitions
 
-* `TauCeti.coordinateCharacter`: the coordinate characters `ℤ_p^X → 𝔽_p`.
+* `TauCeti.piPadicIntCoordinateCharacter`: the coordinate characters `ℤ_p^X → 𝔽_p`.
 
 ## Main results
 
 * `TauCeti.topologicalGeneratorRankNat_multiplicative_pi_padicInt`: `d(ℤ_p^X) = #X`.
 * `TauCeti.continuousZModDual_eq_zero_of_forall_ofAdd_single`: a continuous character of `ℤ_p^X`
   vanishing on every coordinate vector is zero.
-* `TauCeti.cupFp_coordinateCharacter_ne_zero`: the classes of two distinct coordinate characters
-  of `ℤ_p^X` have a nonzero cup product.
+* `TauCeti.cupFp_piPadicIntCoordinateCharacter_ne_zero`: the classes of two distinct coordinate
+  characters of `ℤ_p^X` have a nonzero cup product.
 
 ## References
 
@@ -88,7 +89,7 @@ theorem topologicalGeneratorRankNat_multiplicative_pi_padicInt [Finite X]
 
 /-- **The coordinate character** `ℤ_p^X → 𝔽_p` at `i`: the `i`-th coordinate, reduced modulo
 `p`. -/
-noncomputable def coordinateCharacter (i : X) :
+noncomputable def piPadicIntCoordinateCharacter (i : X) :
     continuousZModDual p (Multiplicative (X → ℤ_[p])) :=
   Additive.ofMul
     { toMonoidHom := MonoidHom.mk' (fun g ↦ ofAdd (PadicInt.toZMod (toAdd g i))) fun g h ↦ by
@@ -98,23 +99,25 @@ noncomputable def coordinateCharacter (i : X) :
 
 /-- The coordinate character at `i` reduces the `i`-th coordinate modulo `p`. This is the
 unfolding lemma; the `simp` normal form is given by the two evaluations on the coordinate vectors
-`TauCeti.coordinateCharacter_ofAdd_single_self` and
-`TauCeti.coordinateCharacter_ofAdd_single_of_ne`, which it would otherwise subsume. -/
-theorem coordinateCharacter_apply (i : X) (g : Multiplicative (X → ℤ_[p])) :
-    toAdd (Additive.toMul (coordinateCharacter p X i) g) = PadicInt.toZMod (toAdd g i) :=
+`TauCeti.piPadicIntCoordinateCharacter_ofAdd_single_self` and
+`TauCeti.piPadicIntCoordinateCharacter_ofAdd_single_of_ne`, which it would otherwise subsume. -/
+theorem piPadicIntCoordinateCharacter_apply (i : X) (g : Multiplicative (X → ℤ_[p])) :
+    toAdd (Additive.toMul (piPadicIntCoordinateCharacter p X i) g) = PadicInt.toZMod (toAdd g i) :=
   (rfl)
 
 /-- The coordinate characters are dual to the coordinate vectors: `e_i^* (e_i) = 1`. -/
 @[simp]
-theorem coordinateCharacter_ofAdd_single_self [DecidableEq X] (i : X) :
-    toAdd (Additive.toMul (coordinateCharacter p X i) (ofAdd (Pi.single i (1 : ℤ_[p])))) = 1 := by
-  rw [coordinateCharacter_apply, toAdd_ofAdd, Pi.single_eq_same, map_one]
+theorem piPadicIntCoordinateCharacter_ofAdd_single_self [DecidableEq X] (i : X) :
+    toAdd (Additive.toMul (piPadicIntCoordinateCharacter p X i)
+      (ofAdd (Pi.single i (1 : ℤ_[p])))) = 1 := by
+  rw [piPadicIntCoordinateCharacter_apply, toAdd_ofAdd, Pi.single_eq_same, map_one]
 
 /-- The coordinate characters are dual to the coordinate vectors: `e_i^* (e_j) = 0` for `i ≠ j`. -/
 @[simp]
-theorem coordinateCharacter_ofAdd_single_of_ne [DecidableEq X] {i j : X} (hij : i ≠ j) :
-    toAdd (Additive.toMul (coordinateCharacter p X i) (ofAdd (Pi.single j (1 : ℤ_[p])))) = 0 := by
-  rw [coordinateCharacter_apply, toAdd_ofAdd, Pi.single_eq_of_ne hij, map_zero]
+theorem piPadicIntCoordinateCharacter_ofAdd_single_of_ne [DecidableEq X] {i j : X} (hij : i ≠ j) :
+    toAdd (Additive.toMul (piPadicIntCoordinateCharacter p X i)
+      (ofAdd (Pi.single j (1 : ℤ_[p])))) = 0 := by
+  rw [piPadicIntCoordinateCharacter_apply, toAdd_ofAdd, Pi.single_eq_of_ne hij, map_zero]
 
 /-- A continuous character of `ℤ_p^X` that vanishes on every coordinate vector is zero. -/
 theorem continuousZModDual_eq_zero_of_forall_ofAdd_single [DecidableEq X]
@@ -129,18 +132,20 @@ theorem continuousZModDual_eq_zero_of_forall_ofAdd_single [DecidableEq X]
 `H²(ℤ_p^X, 𝔽_p)`: their values on the commuting coordinate vectors `e_i`, `e_j` fail the symmetry
 test `TauCeti.mul_eq_mul_of_cupFp_eq_zero`, since `e_i^*(e_i) e_j^*(e_j) = 1` while
 `e_i^*(e_j) e_j^*(e_i) = 0`. -/
-theorem cupFp_coordinateCharacter_ne_zero {i j : X} (hij : i ≠ j) :
+theorem cupFp_piPadicIntCoordinateCharacter_ne_zero {i j : X} (hij : i ≠ j) :
     cupFp p (Multiplicative (X → ℤ_[p]))
-      ((cohomFpLinearEquivContinuousZModDual p _).symm (coordinateCharacter p X i))
-      ((cohomFpLinearEquivContinuousZModDual p _).symm (coordinateCharacter p X j)) ≠ 0 := by
+      ((cohomFpLinearEquivContinuousZModDual p _).symm (piPadicIntCoordinateCharacter p X i))
+      ((cohomFpLinearEquivContinuousZModDual p _).symm (piPadicIntCoordinateCharacter p X j)) ≠
+        0 := by
   classical
   intro h
   have := mul_eq_mul_of_cupFp_eq_zero p h
     (Commute.all (ofAdd (Pi.single i (1 : ℤ_[p]))) (ofAdd (Pi.single j 1)))
   rw [LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply,
-    coordinateCharacter_ofAdd_single_self, coordinateCharacter_ofAdd_single_self,
-    coordinateCharacter_ofAdd_single_of_ne p X hij,
-    coordinateCharacter_ofAdd_single_of_ne p X hij.symm, mul_one, mul_zero] at this
+    piPadicIntCoordinateCharacter_ofAdd_single_self,
+    piPadicIntCoordinateCharacter_ofAdd_single_self,
+    piPadicIntCoordinateCharacter_ofAdd_single_of_ne p X hij,
+    piPadicIntCoordinateCharacter_ofAdd_single_of_ne p X hij.symm, mul_one, mul_zero] at this
   exact one_ne_zero this
 
 end TauCeti

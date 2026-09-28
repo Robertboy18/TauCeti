@@ -31,7 +31,7 @@ as follows.
   commutator of the two free generators dies in the presented group
   (`Subgroup.topologicalClosure_commutator_le_of_forall_commutatorElement_mem`). The lower bound
   is the nonvanishing of the cup product of the two coordinate characters `e_1^*`, `e_2^*`
-  (`TauCeti.cupFp_coordinateCharacter_ne_zero`).
+  (`TauCeti.cupFp_piPadicIntCoordinateCharacter_ne_zero`).
 * The cup pairing is nondegenerate. Every class of `H¹` is the class of a continuous character
   `χ : ℤ_p × ℤ_p → 𝔽_p`, and if `χ` is nonzero it is nonzero on some coordinate vector `e_i`. The
   symmetry test `TauCeti.mul_eq_mul_of_cupFp_eq_zero` then shows that `χ` pairs nontrivially with
@@ -179,7 +179,7 @@ theorem finrank_cohomFp_two_multiplicative_pi_padicInt_fin_two :
   -- The cup product of the two coordinate characters is a nonzero class.
   exact le_antisymm ((cohomFpLinearEquivH2 p G htriv).finrank_eq.trans_le hle)
     (Module.finrank_pos_iff_exists_ne_zero.mpr
-      ⟨_, cupFp_coordinateCharacter_ne_zero p (Fin 2) Fin.zero_ne_one⟩)
+      ⟨_, cupFp_piPadicIntCoordinateCharacter_ne_zero p (Fin 2) Fin.zero_ne_one⟩)
 
 /-- **`ℤ_p × ℤ_p` is a Demushkin group** at every prime `p`: it is pro-`p`, `H¹(ℤ_p × ℤ_p, 𝔽_p)` is
 two-dimensional, `H²(ℤ_p × ℤ_p, 𝔽_p)` is one-dimensional, and the cup pairing is nondegenerate:
@@ -206,21 +206,21 @@ theorem isDemushkin_multiplicative_pi_padicInt_fin_two :
   · obtain ⟨i, hi⟩ := key (cohomFpLinearEquivContinuousZModDual p G a)
       ((cohomFpLinearEquivContinuousZModDual p G).map_ne_zero_iff.2 ha)
     obtain ⟨j, hj⟩ := exists_ne i
-    refine ⟨(cohomFpLinearEquivContinuousZModDual p G).symm (coordinateCharacter p (Fin 2) j),
-      fun h ↦ hi ?_⟩
+    refine ⟨(cohomFpLinearEquivContinuousZModDual p G).symm
+      (piPadicIntCoordinateCharacter p (Fin 2) j), fun h ↦ hi ?_⟩
     have := mul_eq_mul_of_cupFp_eq_zero p h
       (Commute.all (ofAdd (Pi.single i (1 : ℤ_[p]))) (ofAdd (Pi.single j 1)))
-    rwa [LinearEquiv.apply_symm_apply, coordinateCharacter_ofAdd_single_self,
-      coordinateCharacter_ofAdd_single_of_ne p (Fin 2) hj, mul_one, mul_zero] at this
+    rwa [LinearEquiv.apply_symm_apply, piPadicIntCoordinateCharacter_ofAdd_single_self,
+      piPadicIntCoordinateCharacter_ofAdd_single_of_ne p (Fin 2) hj, mul_one, mul_zero] at this
   · obtain ⟨i, hi⟩ := key (cohomFpLinearEquivContinuousZModDual p G b)
       ((cohomFpLinearEquivContinuousZModDual p G).map_ne_zero_iff.2 hb)
     obtain ⟨j, hj⟩ := exists_ne i
-    refine ⟨(cohomFpLinearEquivContinuousZModDual p G).symm (coordinateCharacter p (Fin 2) j),
-      fun h ↦ hi ?_⟩
+    refine ⟨(cohomFpLinearEquivContinuousZModDual p G).symm
+      (piPadicIntCoordinateCharacter p (Fin 2) j), fun h ↦ hi ?_⟩
     have := mul_eq_mul_of_cupFp_eq_zero p h
       (Commute.all (ofAdd (Pi.single j (1 : ℤ_[p]))) (ofAdd (Pi.single i 1)))
-    rwa [LinearEquiv.apply_symm_apply, coordinateCharacter_ofAdd_single_self,
-      coordinateCharacter_ofAdd_single_of_ne p (Fin 2) hj, one_mul, zero_mul] at this
+    rwa [LinearEquiv.apply_symm_apply, piPadicIntCoordinateCharacter_ofAdd_single_self,
+      piPadicIntCoordinateCharacter_ofAdd_single_of_ne p (Fin 2) hj, one_mul, zero_mul] at this
 
 /-- **`ℤ_p × ℤ_p` is a Demushkin group of rank two.** -/
 @[simp]
