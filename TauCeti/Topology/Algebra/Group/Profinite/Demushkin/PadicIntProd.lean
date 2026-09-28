@@ -32,8 +32,8 @@ as follows.
   the cup product of the two coordinate characters.
 * The cup pairing is nondegenerate. Every class of `H¹` is the class of a continuous character
   `χ : ℤ_p × ℤ_p → 𝔽_p`, and if `χ` is nonzero it is nonzero on some coordinate vector `e_i`. The
-  symmetry test `TauCeti.mul_eq_mul_of_cupFp_characterClass_eq_zero` then shows that `χ` pairs
-  nontrivially with the other coordinate character `e_j^*`: a vanishing cup product would force
+  symmetry test `TauCeti.mul_eq_mul_of_cupFp_eq_zero` then shows that `χ` pairs nontrivially with
+  the other coordinate character `e_j^*`: a vanishing cup product would force
   `χ(e_i) e_j^*(e_j) = χ(e_j) e_j^*(e_i)`, that is `χ(e_i) = 0`.
 
 The relator is written as the `q = 0` normal-form word `TauCeti.demushkinWordNeTwo 0 2` of the
@@ -47,7 +47,7 @@ classification, so that this example is the rank-two, `q = 0` normal form itself
 ## Main results
 
 * `TauCeti.topologicalGeneratorRankNat_multiplicative_pi_padicInt`: `d(ℤ_p^X) = #X`.
-* `TauCeti.cupFp_characterClass_coordinateCharacter_ne_zero`: two distinct coordinate characters
+* `TauCeti.cupFp_coordinateCharacter_ne_zero`: the classes of two distinct coordinate characters
   of `ℤ_p^X` have a nonzero cup product.
 * `TauCeti.finrank_cohomFp_two_multiplicative_pi_padicInt_fin_two`: `H²(ℤ_p × ℤ_p, 𝔽_p)` is
   one-dimensional.
@@ -152,18 +152,20 @@ theorem continuousZModDual_eq_zero_of_forall_ofAdd_single [DecidableEq X]
   exact continuousMonoidHom_ext_multiplicative_pi_padicInt p X fun i ↦
     toAdd_eq_zero.mp (h i)
 
-/-- **Two distinct coordinate characters have a nonzero cup product** in `H²(ℤ_p^X, 𝔽_p)`: their
-values on the commuting coordinate vectors `e_i`, `e_j` fail the symmetry test
-`TauCeti.mul_eq_mul_of_cupFp_characterClass_eq_zero`, since `e_i^*(e_i) e_j^*(e_j) = 1` while
+/-- **The classes of two distinct coordinate characters have a nonzero cup product** in
+`H²(ℤ_p^X, 𝔽_p)`: their values on the commuting coordinate vectors `e_i`, `e_j` fail the symmetry
+test `TauCeti.mul_eq_mul_of_cupFp_eq_zero`, since `e_i^*(e_i) e_j^*(e_j) = 1` while
 `e_i^*(e_j) e_j^*(e_i) = 0`. -/
-theorem cupFp_characterClass_coordinateCharacter_ne_zero {i j : X} (hij : i ≠ j) :
-    cupFp p (Multiplicative (X → ℤ_[p])) (characterClass p (coordinateCharacter p X i))
-      (characterClass p (coordinateCharacter p X j)) ≠ 0 := by
+theorem cupFp_coordinateCharacter_ne_zero {i j : X} (hij : i ≠ j) :
+    cupFp p (Multiplicative (X → ℤ_[p]))
+      ((cohomFpLinearEquivContinuousZModDual p _).symm (coordinateCharacter p X i))
+      ((cohomFpLinearEquivContinuousZModDual p _).symm (coordinateCharacter p X j)) ≠ 0 := by
   classical
   intro h
-  have := mul_eq_mul_of_cupFp_characterClass_eq_zero p h
+  have := mul_eq_mul_of_cupFp_eq_zero p h
     (Commute.all (ofAdd (Pi.single i (1 : ℤ_[p]))) (ofAdd (Pi.single j 1)))
-  rw [coordinateCharacter_ofAdd_single_self, coordinateCharacter_ofAdd_single_self,
+  rw [LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply,
+    coordinateCharacter_ofAdd_single_self, coordinateCharacter_ofAdd_single_self,
     coordinateCharacter_ofAdd_single_of_ne p X hij,
     coordinateCharacter_ofAdd_single_of_ne p X hij.symm, mul_one, mul_zero] at this
   exact one_ne_zero this
@@ -299,13 +301,13 @@ theorem finrank_cohomFp_two_multiplicative_pi_padicInt_fin_two :
   -- The cup product of the two coordinate characters is a nonzero class.
   exact le_antisymm ((cohomFpLinearEquivH2 p G htriv).finrank_eq.trans_le hle)
     (Module.finrank_pos_iff_exists_ne_zero.mpr
-      ⟨_, cupFp_characterClass_coordinateCharacter_ne_zero p (Fin 2) Fin.zero_ne_one⟩)
+      ⟨_, cupFp_coordinateCharacter_ne_zero p (Fin 2) Fin.zero_ne_one⟩)
 
 /-- **`ℤ_p × ℤ_p` is a Demushkin group** at every prime `p`: it is pro-`p`, `H¹(ℤ_p × ℤ_p, 𝔽_p)` is
 two-dimensional, `H²(ℤ_p × ℤ_p, 𝔽_p)` is one-dimensional, and the cup pairing is nondegenerate:
 a nonzero class is the class of a character `χ` which is nonzero on a coordinate vector `e_i`, and
 `χ` pairs nontrivially with the coordinate character `e_j^*` for `j ≠ i`, by the symmetry test
-`TauCeti.mul_eq_mul_of_cupFp_characterClass_eq_zero` on the commuting elements `e_i`, `e_j`. -/
+`TauCeti.mul_eq_mul_of_cupFp_eq_zero` on the commuting elements `e_i`, `e_j`. -/
 theorem isDemushkin_multiplicative_pi_padicInt_fin_two :
     IsDemushkin p (Multiplicative (Fin 2 → ℤ_[p])) := by
   set G := Multiplicative (Fin 2 → ℤ_[p])
@@ -323,22 +325,24 @@ theorem isDemushkin_multiplicative_pi_padicInt_fin_two :
       finrank_cohomFp_two := finrank_cohomFp_two_multiplicative_pi_padicInt_fin_two p
       cup_separatingLeft := fun a ha ↦ ?_
       cup_separatingRight := fun b hb ↦ ?_ }
-  · obtain ⟨χ, rfl⟩ := characterClass_surjective p a
-    obtain ⟨i, hi⟩ := key χ (by rintro rfl; exact ha (map_zero _))
+  · obtain ⟨i, hi⟩ := key (cohomFpLinearEquivContinuousZModDual p G a)
+      ((cohomFpLinearEquivContinuousZModDual p G).map_ne_zero_iff.2 ha)
     obtain ⟨j, hj⟩ := exists_ne i
-    refine ⟨characterClass p (coordinateCharacter p (Fin 2) j), fun h ↦ hi ?_⟩
-    have := mul_eq_mul_of_cupFp_characterClass_eq_zero p h
+    refine ⟨(cohomFpLinearEquivContinuousZModDual p G).symm (coordinateCharacter p (Fin 2) j),
+      fun h ↦ hi ?_⟩
+    have := mul_eq_mul_of_cupFp_eq_zero p h
       (Commute.all (ofAdd (Pi.single i (1 : ℤ_[p]))) (ofAdd (Pi.single j 1)))
-    rwa [coordinateCharacter_ofAdd_single_self, coordinateCharacter_ofAdd_single_of_ne p (Fin 2) hj,
-      mul_one, mul_zero] at this
-  · obtain ⟨ψ, rfl⟩ := characterClass_surjective p b
-    obtain ⟨i, hi⟩ := key ψ (by rintro rfl; exact hb (map_zero _))
+    rwa [LinearEquiv.apply_symm_apply, coordinateCharacter_ofAdd_single_self,
+      coordinateCharacter_ofAdd_single_of_ne p (Fin 2) hj, mul_one, mul_zero] at this
+  · obtain ⟨i, hi⟩ := key (cohomFpLinearEquivContinuousZModDual p G b)
+      ((cohomFpLinearEquivContinuousZModDual p G).map_ne_zero_iff.2 hb)
     obtain ⟨j, hj⟩ := exists_ne i
-    refine ⟨characterClass p (coordinateCharacter p (Fin 2) j), fun h ↦ hi ?_⟩
-    have := mul_eq_mul_of_cupFp_characterClass_eq_zero p h
+    refine ⟨(cohomFpLinearEquivContinuousZModDual p G).symm (coordinateCharacter p (Fin 2) j),
+      fun h ↦ hi ?_⟩
+    have := mul_eq_mul_of_cupFp_eq_zero p h
       (Commute.all (ofAdd (Pi.single j (1 : ℤ_[p]))) (ofAdd (Pi.single i 1)))
-    rwa [coordinateCharacter_ofAdd_single_self, coordinateCharacter_ofAdd_single_of_ne p (Fin 2) hj,
-      one_mul, zero_mul] at this
+    rwa [LinearEquiv.apply_symm_apply, coordinateCharacter_ofAdd_single_self,
+      coordinateCharacter_ofAdd_single_of_ne p (Fin 2) hj, one_mul, zero_mul] at this
 
 /-- **`ℤ_p × ℤ_p` is a Demushkin group of rank two.** -/
 @[simp]
