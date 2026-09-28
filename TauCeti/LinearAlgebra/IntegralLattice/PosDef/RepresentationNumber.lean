@@ -19,14 +19,15 @@ r_L(n) = #S_n(L) = #{x ∈ L | B(x, x) = n}.
 ```
 
 The shells are the sets `TauCeti.IntegralLattice.vectorsOfNorm`, defined for every lattice and
-every rational `n`. Their cardinalities are counts of finite sets exactly for positive definite
-lattices, where every shell is finite; the representation number is defined for every lattice, and
-takes the value `0` on an infinite shell.
+every rational `n`. For a positive definite lattice every shell is finite, so its representation
+numbers are genuine counts; the representation number is defined for every lattice, and takes the
+value `0` on an infinite shell.
 
-This file records the basic behaviour of these counts: the zero shell of a positive definite
-lattice is `{0}`, so `r_L(0) = 1`; negative norms are not represented by a positive semidefinite
-lattice; in rank zero the zero shell is `{0}` and every other shell is empty; and an isometry
-carries shells onto shells, so representation numbers are isometry invariants.
+This file records the basic behaviour of these counts: the zero shell of an anisotropic lattice,
+in particular of a positive definite one, is `{0}`, so `r_L(0) = 1`; negative norms are not
+represented by a positive semidefinite lattice; in rank zero the zero shell is `{0}` and every
+other shell is empty; and an isometry carries shells onto shells, so representation numbers are
+isometry invariants.
 
 Representation numbers are the counts that the theta series of a positive definite lattice
 expands; that identification is not made here.
@@ -35,9 +36,9 @@ expands; that identification is not made here.
 
 * `TauCeti.IntegralLattice.representationNumber`: the number `r_L(n)` of lattice vectors of
   norm `n`.
-* `TauCeti.IntegralLattice.IsPosDef.vectorsOfNorm_zero` and
-  `TauCeti.IntegralLattice.IsPosDef.representationNumber_zero`: the zero shell of a positive
-  definite lattice is `{0}`, so `r_L(0) = 1`.
+* `TauCeti.IntegralLattice.vectorsOfNorm_zero_of_anisotropic` and
+  `TauCeti.IntegralLattice.representationNumber_zero_of_anisotropic`: the zero shell of an
+  anisotropic lattice is `{0}`, so `r_L(0) = 1`.
 * `TauCeti.IntegralLattice.IsPosDef.representationNumber_eq_zero_iff`: for a positive definite
   lattice, `r_L(n) = 0` exactly when the shell of norm `n` is empty.
 * `TauCeti.IntegralLattice.IsPosSemidef.vectorsOfNorm_eq_empty_of_neg`: a positive semidefinite
@@ -74,24 +75,26 @@ theorem representationNumber_def (L : IntegralLattice V) (n : ℚ) :
     L.representationNumber n = (L.vectorsOfNorm n).ncard :=
   (rfl)
 
-/-! ## Shells of a positive definite lattice -/
+/-! ## Shells of an anisotropic lattice -/
 
 variable {L : IntegralLattice V}
 
-/-- The norm-zero shell of a positive definite lattice consists of the zero vector alone. -/
-theorem IsPosDef.vectorsOfNorm_zero (hL : L.IsPosDef) : L.vectorsOfNorm 0 = {0} := by
+/-- The norm-zero shell of an anisotropic lattice consists of the zero vector alone. For a positive
+definite lattice `hL`, the hypothesis is `hL.anisotropic`. -/
+theorem vectorsOfNorm_zero_of_anisotropic (hL : L.norm.Anisotropic) :
+    L.vectorsOfNorm 0 = {0} := by
   ext x
   simp only [mem_vectorsOfNorm, Set.mem_singleton_iff]
   constructor
   · intro hx
-    rw [L.norm_def] at hx
-    exact Submodule.coe_eq_zero.mp (hL.anisotropic (x : V) hx)
+    exact Submodule.coe_eq_zero.mp (hL (x : V) hx)
   · rintro rfl
     simp
 
-/-- A positive definite lattice represents `0` exactly once: `r_L(0) = 1`. -/
-theorem IsPosDef.representationNumber_zero (hL : L.IsPosDef) : L.representationNumber 0 = 1 := by
-  rw [representationNumber_def, hL.vectorsOfNorm_zero, Set.ncard_singleton]
+/-- An anisotropic lattice represents `0` exactly once: `r_L(0) = 1`. -/
+theorem representationNumber_zero_of_anisotropic (hL : L.norm.Anisotropic) :
+    L.representationNumber 0 = 1 := by
+  rw [representationNumber_def, vectorsOfNorm_zero_of_anisotropic hL, Set.ncard_singleton]
 
 /-- For a positive definite lattice, whose shells are finite, the representation number of `n`
 vanishes exactly when no lattice vector has norm `n`. -/

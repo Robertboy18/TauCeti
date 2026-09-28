@@ -27,8 +27,10 @@ vectors form an infinite shell of norm zero
 
 ## Main results
 
-* `TauCeti.IntegralLattice.IsPosDef.posDef_integralNorm`: the integral norm form of a positive
-  definite lattice is positive definite.
+* `TauCeti.IntegralLattice.IsPosSemidef.integralNorm_nonneg` and
+  `TauCeti.IntegralLattice.IsPosDef.posDef_integralNorm`: the integral norm form of a positive
+  semidefinite lattice is nonnegative, and that of a positive definite lattice is positive
+  definite.
 * `TauCeti.IntegralLattice.IsPosDef.finite_setOf_norm_le`: only finitely many lattice vectors have
   norm at most a given rational bound.
 * `TauCeti.IntegralLattice.IsPosDef.finite_vectorsOfNorm`: every shell of a positive definite
@@ -51,6 +53,15 @@ variable {V : Type u} [AddCommGroup V] [Module ℚ V]
 namespace IntegralLattice
 
 variable {L : IntegralLattice V}
+
+/-- The integral norm of a positive semidefinite lattice is nonnegative. -/
+theorem IsPosSemidef.integralNorm_nonneg (hL : L.IsPosSemidef) (x : L) :
+    0 ≤ L.integralNorm x := by
+  have h : (0 : ℚ) ≤ L.norm x := by
+    rw [L.norm_apply]
+    exact L.isPosSemidef_iff.mp hL x
+  rw [← L.integralNorm_cast x] at h
+  exact_mod_cast h
 
 /-- The integral norm form of a positive definite lattice is positive definite. -/
 theorem IsPosDef.posDef_integralNorm (hL : L.IsPosDef) : L.integralNorm.PosDef := by
