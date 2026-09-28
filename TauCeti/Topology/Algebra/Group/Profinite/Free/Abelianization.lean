@@ -9,6 +9,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicInt
 public import TauCeti.Topology.Algebra.Group.TopologicalAbelianization
 public import TauCeti.Topology.Algebra.Group.TopologicalAbelianization.Lift
+public import TauCeti.Topology.Algebra.Group.Profinite.ProP.ContinuousDual
 
 /-!
 # The abelianization of a free pro-`p` group of finite rank
@@ -44,6 +45,8 @@ of `R`; see `TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianizatio
   the isomorphism is induced by `exponentSum`, and its inverse is `u ↦ ∏ x, x_x ^ (u x)`.
 * `TauCeti.freeProP.exponentSum_surjective`, `TauCeti.freeProP.exponentSum_eq_one_iff`: the
   exponent-sum map is surjective, and its kernel is the closed commutator subgroup.
+* `TauCeti.freeProP.dvd_exponentSum_of_mem_proPFrattini`: the exponent sums of an element of the
+  pro-`p` Frattini subgroup are divisible by `p`.
 
 ## References
 
@@ -76,6 +79,26 @@ noncomputable def exponentSum : freeProP p X →ₜ* Multiplicative (X → ℤ_[
 theorem exponentSum_of [DecidableEq X] (x : X) :
     exponentSum p X (of x) = ofAdd (Pi.single x 1) :=
   (lift_of _ _ x).trans (by congr; exact Subsingleton.elim _ _)
+
+/-- **The exponent sums of an element of the Frattini subgroup are divisible by `p`.** Reading the
+exponent of one generator modulo `p` is a continuous character of the free pro-`p` group with values
+in a group of order `p`, and every such character kills the pro-`p` Frattini subgroup. -/
+theorem dvd_exponentSum_of_mem_proPFrattini {y : freeProP p X}
+    (hy : y ∈ proPFrattini p (freeProP p X)) (x : X) :
+    (p : ℤ_[p]) ∣ (exponentSum p X y).toAdd x := by
+  -- The character `y ↦ (exponentSum y) x mod p`, with values in `ℤ/p = ZMod (p ^ 1)`.
+  let χ : freeProP p X →ₜ* Multiplicative (ZMod (p ^ 1)) :=
+    { toMonoidHom := ((PadicInt.toZModPow 1).toAddMonoidHom.comp
+        (Pi.evalAddMonoidHom (fun _ : X ↦ ℤ_[p]) x)).toMultiplicative.comp
+        (exponentSum p X).toMonoidHom
+      continuous_toFun := continuous_ofAdd.comp (((PadicInt.continuous_toZModPow 1).comp
+        ((continuous_apply x).comp continuous_toAdd)).comp (exponentSum p X).continuous) }
+  have hcard : Nat.card (Multiplicative (ZMod (p ^ 1))) = p := by simp
+  have hχ : χ y = 1 := MonoidHom.mem_ker.mp (proPFrattini_le_ker hcard χ hy)
+  have h : (exponentSum p X y).toAdd x ∈ RingHom.ker (PadicInt.toZModPow (p := p) 1) := by
+    rw [RingHom.mem_ker, ← ofAdd_eq_one]
+    exact hχ
+  rwa [PadicInt.ker_toZModPow, pow_one, Ideal.mem_span_singleton] at h
 
 end ExponentSum
 

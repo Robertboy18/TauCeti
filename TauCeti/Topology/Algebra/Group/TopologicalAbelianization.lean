@@ -7,6 +7,7 @@ module
 
 public import Mathlib.GroupTheory.GroupAction.ConjAct
 public import Mathlib.GroupTheory.GroupAction.Quotient
+public import Mathlib.Topology.Algebra.ContinuousMonoidHom
 public import Mathlib.Topology.Algebra.Group.Quotient
 public import Mathlib.Topology.Algebra.Group.TopologicalAbelianization
 public import TauCeti.GroupTheory.GroupAction.ConjAct
@@ -45,6 +46,8 @@ and Labute's action is recovered by precomposing with the inversion of the actin
 
 * `TopologicalAbelianization.map`: the homomorphism `G^{ab} →* H^{ab}` induced by a continuous
   homomorphism `G →* H`.
+* `ContinuousMulEquiv.topologicalAbelianizationCongr`: the topological isomorphism
+  `G^{ab} ≃ₜ* H^{ab}` induced by a topological group isomorphism `G ≃ₜ* H`.
 * The instances `MulDistribMulAction (ConjAct G) (TopologicalAbelianization N)` and
   `MulDistribMulAction (G ⧸ N) (TopologicalAbelianization N)`: conjugation on the topological
   abelianization of a normal subgroup, and its factorization through `G ⧸ N`.
@@ -137,6 +140,32 @@ theorem map_surjective (f : G →* H) (hf : Continuous f) (hsurj : Function.Surj
     Function.Surjective (map f hf) :=
   QuotientGroup.map_surjective_of_surjective _ _ f
     ((QuotientGroup.mk'_surjective (commutator H).topologicalClosure).comp hsurj) _
+
+/-- A topological group isomorphism `G ≃ₜ* H` induces a topological isomorphism
+`G^{ab} ≃ₜ* H^{ab}` between the topological abelianizations. This is the topological analogue of
+`MulEquiv.abelianizationCongr`. -/
+def _root_.ContinuousMulEquiv.topologicalAbelianizationCongr (e : G ≃ₜ* H) :
+    TopologicalAbelianization G ≃ₜ* TopologicalAbelianization H where
+  toFun := map (e : G →* H) e.continuous
+  invFun := map (e.symm : H →* G) e.symm.continuous
+  left_inv x := QuotientGroup.induction_on x fun g ↦ by simp
+  right_inv y := QuotientGroup.induction_on y fun h ↦ by simp
+  map_mul' := map_mul _
+  continuous_toFun := continuous_map _ _
+  continuous_invFun := continuous_map _ _
+
+/-- `e.topologicalAbelianizationCongr` sends the class of `x : G` to the class of `e x`. -/
+@[simp]
+theorem _root_.ContinuousMulEquiv.topologicalAbelianizationCongr_mk (e : G ≃ₜ* H) (x : G) :
+    e.topologicalAbelianizationCongr (x : TopologicalAbelianization G) =
+      (e x : TopologicalAbelianization H) :=
+  map_mk (e : G →* H) e.continuous x
+
+/-- The inverse of `e.topologicalAbelianizationCongr` is `e.symm.topologicalAbelianizationCongr`. -/
+@[simp]
+theorem _root_.ContinuousMulEquiv.topologicalAbelianizationCongr_symm (e : G ≃ₜ* H) :
+    e.topologicalAbelianizationCongr.symm = e.symm.topologicalAbelianizationCongr :=
+  (rfl)
 
 /-- **The kernel of the map induced on abelianizations by a surjection.** For a continuous
 surjection `f : G →* H` from a compact group onto a Hausdorff group, the kernel of

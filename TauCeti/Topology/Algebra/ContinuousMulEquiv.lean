@@ -32,6 +32,9 @@ decomposition of a topological group whose second factor turns out to be trivial
 * `TauCeti.ContinuousMulEquiv.multiplicativeProdUnique`: the topological isomorphism
   `Multiplicative (M × T) ≃ₜ* Multiplicative M` for `[Unique T]`, with its evaluation lemmas
   `multiplicativeProdUnique_apply` and `multiplicativeProdUnique_symm_apply`.
+* `ContinuousAddEquiv.toMultiplicative`: a topological isomorphism `M ≃ₜ+ N` of additive groups
+  as a topological isomorphism `Multiplicative M ≃ₜ* Multiplicative N`, with its evaluation
+  lemmas `toMultiplicative_apply` and `toMultiplicative_symm_apply`.
 -/
 
 public section
@@ -123,5 +126,30 @@ theorem ContinuousMulEquiv.multiplicativeProdUnique_symm_apply (v : Multiplicati
   (rfl)
 
 end Unique
+
+section ToMultiplicative
+
+variable {M N : Type*} [Add M] [Add N] [TopologicalSpace M] [TopologicalSpace N]
+
+/-- A topological isomorphism `M ≃ₜ+ N` of additive topological groups, as a topological
+isomorphism `Multiplicative M ≃ₜ* Multiplicative N` of the multiplicative type tags. This is
+`AddEquiv.toMultiplicative` as a `ContinuousMulEquiv`. -/
+def _root_.ContinuousAddEquiv.toMultiplicative (e : M ≃ₜ+ N) :
+    Multiplicative M ≃ₜ* Multiplicative N where
+  toMulEquiv := AddEquiv.toMultiplicative e.toAddEquiv
+  continuous_toFun := continuous_ofAdd.comp (e.continuous.comp continuous_toAdd)
+  continuous_invFun := continuous_ofAdd.comp (e.symm.continuous.comp continuous_toAdd)
+
+@[simp]
+theorem _root_.ContinuousAddEquiv.toMultiplicative_apply (e : M ≃ₜ+ N) (x : Multiplicative M) :
+    e.toMultiplicative x = ofAdd (e x.toAdd) :=
+  (rfl)
+
+@[simp]
+theorem _root_.ContinuousAddEquiv.toMultiplicative_symm_apply (e : M ≃ₜ+ N)
+    (y : Multiplicative N) : e.toMultiplicative.symm y = ofAdd (e.symm y.toAdd) :=
+  (rfl)
+
+end ToMultiplicative
 
 end TauCeti
