@@ -22,9 +22,12 @@ the function
 
 on `F`. It is the basic operation of convex analysis: it turns a function into the supremum of
 the affine functions `y ↦ ⟪x, y⟫ - f x` indexed by the points of `E`, so it is convex and lower
-semicontinuous whatever `f` is, and applying it twice produces the largest lower-semicontinuous
-convex minorant of `f` (the Fenchel–Moreau theorem, which needs a separation theorem and is not
-proved here). This file contains the algebraic part of the theory, valid on a bare dual pair:
+semicontinuous whatever `f` is. When the pairing is separating and `E` carries a locally convex
+topology compatible with it (for instance the weak topology `σ(E, F)`), applying conjugation
+twice produces the largest lower-semicontinuous convex minorant of `f`: this is the
+Fenchel–Moreau theorem, which needs a separation theorem and is not proved here. For a bare
+bilinear pairing only the inequality `f⋆⋆ ≤ f` holds (for the zero pairing, `f⋆⋆` is the constant
+`⨅ x, f x`). This file contains the algebraic part of the theory, valid on a bare dual pair:
 the conjugate itself, the Fenchel–Young inequality, the antitone Galois connection between the
 functions on `E` and on `F` that the conjugate and its transpose `B.flip` form, the
 biconjugate inequality `f⋆⋆ ≤ f`, the triple-conjugate identity `f⋆⋆⋆ = f⋆`, the normalisation
