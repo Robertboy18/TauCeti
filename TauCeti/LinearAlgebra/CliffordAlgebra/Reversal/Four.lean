@@ -62,14 +62,17 @@ of adjacent generators, each of which contributes a polarization term. -/
 theorem ι_mul_ι_mul_ι_add_reverse (a b c : M) :
     ι Q a * ι Q b * ι Q c + reverse (ι Q a * ι Q b * ι Q c) =
       ι Q (polar Q b c • a - polar Q a c • b + polar Q a b • c) := by
-  have key : ι Q a * ι Q b * ι Q c + ι Q c * (ι Q b * ι Q a) =
-      (ι Q c * ι Q b + ι Q b * ι Q c) * ι Q a - ι Q b * (ι Q c * ι Q a + ι Q a * ι Q c) +
-        (ι Q b * ι Q a + ι Q a * ι Q b) * ι Q c := by
-    noncomm_ring
-  rw [reverse.map_mul, reverse.map_mul, reverse_ι, reverse_ι, reverse_ι, key, ι_mul_ι_add_swap,
-    ι_mul_ι_add_swap, ι_mul_ι_add_swap, ← Algebra.commutes, map_add, map_sub, map_smul, map_smul,
-    map_smul, Algebra.smul_def, Algebra.smul_def, Algebra.smul_def, polar_comm Q b c,
-    polar_comm Q a c, polar_comm Q a b]
+  calc ι Q a * ι Q b * ι Q c + reverse (ι Q a * ι Q b * ι Q c)
+      = (ι Q c * ι Q b + ι Q b * ι Q c) * ι Q a - ι Q b * (ι Q c * ι Q a + ι Q a * ι Q c) +
+          (ι Q b * ι Q a + ι Q a * ι Q b) * ι Q c := by
+        simp only [reverse.map_mul, reverse_ι]
+        noncomm_ring
+    _ = algebraMap R _ (polar Q c b) * ι Q a - ι Q b * algebraMap R _ (polar Q c a) +
+          algebraMap R _ (polar Q b a) * ι Q c := by
+        simp only [ι_mul_ι_add_swap]
+    _ = ι Q (polar Q b c • a - polar Q a c • b + polar Q a b • c) := by
+        simp only [map_add, map_sub, map_smul, Algebra.smul_def, Algebra.commutes, polar_comm Q c b,
+          polar_comm Q c a, polar_comm Q b a]
 
 end CommRing
 
