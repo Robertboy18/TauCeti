@@ -99,16 +99,16 @@ theorem nondegenerate_cupForm_of_ne_zero {φ : cohomFp p G 2 →ₗ[ZMod p] ZMod
 alternating, `H¹(G, 𝔽_p)` has a basis indexed by `Fin m ⊕ Fin m` in which its matrix is the
 standard block matrix `J`. -/
 theorem exists_basis_toMatrix_cupForm_eq_J_of_isAlt {φ : cohomFp p G 2 →ₗ[ZMod p] ZMod p}
-    (hφ : Function.Injective φ) (halt : φ.cupForm.IsAlt) :
+    (hφ : φ ≠ 0) (halt : φ.cupForm.IsAlt) :
     ∃ (m : ℕ) (b : Basis (Fin m ⊕ Fin m) (ZMod p) (cohomFp p G 1)),
       LinearMap.BilinForm.toMatrix b φ.cupForm = Matrix.J (Fin m) (ZMod p) := by
   have := hG.finite_cohomFp_one
-  exact halt.exists_basis_toMatrix_eq_J (hG.nondegenerate_cupForm hφ)
+  exact halt.exists_basis_toMatrix_eq_J (hG.nondegenerate_cupForm_of_ne_zero hφ)
 
 /-- **At an odd prime the cup form has a symplectic basis**: `H¹(G, 𝔽_p)` has a basis indexed by
 `Fin m ⊕ Fin m` in which the matrix of the cup form is `J`. -/
 theorem exists_basis_toMatrix_cupForm_eq_J_of_ne_two (hp : p ≠ 2)
-    {φ : cohomFp p G 2 →ₗ[ZMod p] ZMod p} (hφ : Function.Injective φ) :
+    {φ : cohomFp p G 2 →ₗ[ZMod p] ZMod p} (hφ : φ ≠ 0) :
     ∃ (m : ℕ) (b : Basis (Fin m ⊕ Fin m) (ZMod p) (cohomFp p G 1)),
       LinearMap.BilinForm.toMatrix b φ.cupForm = Matrix.J (Fin m) (ZMod p) :=
   hG.exists_basis_toMatrix_cupForm_eq_J_of_isAlt hφ (φ.isAlt_cupForm_of_ne_two hp)
@@ -119,10 +119,10 @@ variable [CompactSpace G] [TotallyDisconnectedSpace G]
 
 /-- **An alternating cup form forces even rank.** -/
 theorem even_demushkinRank_of_isAlt {φ : cohomFp p G 2 →ₗ[ZMod p] ZMod p}
-    (hφ : Function.Injective φ) (halt : φ.cupForm.IsAlt) : Even (demushkinRank hG) := by
+    (hφ : φ ≠ 0) (halt : φ.cupForm.IsAlt) : Even (demushkinRank hG) := by
   have := hG.finite_cohomFp_one
   rw [← hG.finrank_cohomFp_one]
-  exact halt.even_finrank (hG.nondegenerate_cupForm hφ)
+  exact halt.even_finrank (hG.nondegenerate_cupForm_of_ne_zero hφ)
 
 end Rank
 
@@ -168,18 +168,18 @@ include hG
 /-- **A non-alternating cup form at `p = 2` has an orthonormal basis**: `H¹(G, 𝔽₂)` has a basis in
 which the matrix of the cup form is the identity. -/
 theorem exists_basis_toMatrix_cupForm_eq_one_of_not_isAlt {φ : cohomFp 2 G 2 →ₗ[ZMod 2] ZMod 2}
-    (hφ : Function.Injective φ) (h : ¬ φ.cupForm.IsAlt) :
+    (hφ : φ ≠ 0) (h : ¬ φ.cupForm.IsAlt) :
     ∃ b : Basis (Fin (finrank (ZMod 2) (cohomFp 2 G 1))) (ZMod 2) (cohomFp 2 G 1),
       LinearMap.BilinForm.toMatrix b φ.cupForm = 1 := by
   have := hG.finite_cohomFp_one
   exact φ.isSymm_cupForm_two.exists_basis_toMatrix_eq_one (fun a => isSquare_of_charTwo' a)
-    (hG.nondegenerate_cupForm hφ) fun h' => (h h').elim
+    (hG.nondegenerate_cupForm_of_ne_zero hφ) fun h' => (h h').elim
 
 /-- **The two shapes of the cup form at `p = 2`**: the cup form of a Demushkin group at `p = 2` is
 either alternating, with a symplectic basis in which its matrix is `J`, or not alternating, with an
 orthonormal basis in which its matrix is the identity. -/
 theorem exists_basis_toMatrix_cupForm_eq_J_or_eq_one {φ : cohomFp 2 G 2 →ₗ[ZMod 2] ZMod 2}
-    (hφ : Function.Injective φ) :
+    (hφ : φ ≠ 0) :
     (φ.cupForm.IsAlt ∧ ∃ (m : ℕ) (b : Basis (Fin m ⊕ Fin m) (ZMod 2) (cohomFp 2 G 1)),
         LinearMap.BilinForm.toMatrix b φ.cupForm = Matrix.J (Fin m) (ZMod 2)) ∨
       (¬ φ.cupForm.IsAlt ∧
@@ -187,7 +187,7 @@ theorem exists_basis_toMatrix_cupForm_eq_J_or_eq_one {φ : cohomFp 2 G 2 →ₗ[
           LinearMap.BilinForm.toMatrix b φ.cupForm = 1) := by
   have := hG.finite_cohomFp_one
   exact LinearMap.BilinForm.Nondegenerate.exists_basis_toMatrix_eq_J_or_toMatrix_eq_one
-    (fun a => isSquare_of_charTwo' a) (hG.nondegenerate_cupForm hφ)
+    (fun a => isSquare_of_charTwo' a) (hG.nondegenerate_cupForm_of_ne_zero hφ)
     (Or.inr φ.isSymm_cupForm_two)
 
 end IsDemushkin

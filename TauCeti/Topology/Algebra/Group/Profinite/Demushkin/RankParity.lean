@@ -35,7 +35,8 @@ variable {p : ℕ} [Fact p.Prime] {G : Type*} [Group G] [TopologicalSpace G]
 theorem IsDemushkin.even_demushkinRank_of_ne_two (hG : IsDemushkin p G) (hp : p ≠ 2) :
     Even (demushkinRank hG) := by
   obtain ⟨e⟩ := hG.nonempty_linearEquiv_cohomFp_two
-  exact hG.even_demushkinRank_of_isAlt e.injective (e.toLinearMap.isAlt_cupForm_of_ne_two hp)
+  exact hG.even_demushkinRank_of_isAlt (DFunLike.ne_iff.2 ⟨e.symm 1, by simp⟩)
+    (e.toLinearMap.isAlt_cupForm_of_ne_two hp)
 
 /-- A Demushkin group at an odd prime cannot have rank one. -/
 theorem IsDemushkin.demushkinRank_ne_one_of_ne_two (hG : IsDemushkin p G) (hp : p ≠ 2) :
