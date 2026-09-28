@@ -40,8 +40,8 @@ computations in that form. For `G` free pro-`p` on `x₁, …, x_n` and `χ` the
 of a normal form, which is trivial on the unmarked generators
 (`TauCeti.orientationNeTwo_presentedProPGen_of_ne` and its companions, composed with the
 presentation map), `X^{ab}` is Labute's module `E = X ⧸ (X, X)` (§4 Definition, p. 121), and the
-third formula is his expression `r̄ = (1 + a + (1 + T)^a) ȳ₁ + (2^g + (1 + T)^{ab} - 1) ȳ₃` of
-the relator class in the dyadic even-rank case (p. 122), once the images `[x₂]`, `[x₄]` of the
+third formula is his expression `⟦r⟧ = (1 + a + (1 + T)^a) ⟦y₁⟧ + (2^g + (1 + T)^{ab} - 1) ⟦y₃⟧`
+of the relator class in the dyadic even-rank case (p. 122), once the images `[x₂]`, `[x₄]` of the
 marked generators in `Γ = Im χ` are written as powers of a topological generator `1 + T` of
 `Λ = ℤ₂[[Γ]]`.
 
