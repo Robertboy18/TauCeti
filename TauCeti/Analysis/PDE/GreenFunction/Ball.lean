@@ -17,8 +17,8 @@ images.  For a pole `x` in the ball, the corrector
 `φˣ(y) = Φ(‖x‖ (y - x*))`, with `x* = x / ‖x‖²`,
 
 is the Newtonian kernel `Φ` with its pole at the reflection of `x` through the unit sphere,
-rescaled so that it agrees with `Φ(y - x)` on the sphere.  It is harmonic on a neighbourhood of
-the closed ball, so the Green kernel
+rescaled so that it agrees with `Φ(y - x)` on the sphere.  It is harmonic away from the reflected
+pole, in particular on a neighbourhood of the closed ball, so the Green kernel
 
 `G(x, y) = Φ(y - x) - φˣ(y)`
 
@@ -45,8 +45,10 @@ dimension two that kernel vanishes identically, so the planar case is instead
 * `TauCeti.ballGreenKernel`: the Dirichlet Green kernel of the unit ball.
 * `TauCeti.ballGreenKernel_comm`: symmetry of the Green kernel in its two arguments.
 * `TauCeti.harmonicAt_ballGreenKernel`: harmonicity in `y` away from the pole.
-* `TauCeti.ballGreenKernel_eq_zero_of_norm_eq_one`: vanishing on the unit sphere.
-* `TauCeti.ballGreenKernel_pos`: positivity inside the ball in dimension at least three.
+* `TauCeti.ballGreenKernel_eq_zero_of_norm_eq_one_left`,
+  `TauCeti.ballGreenKernel_eq_zero_of_norm_eq_one_right`: vanishing when either argument lies on
+  the unit sphere.
+* `TauCeti.ballGreenKernel_pos`: positivity inside the ball outside dimension two.
 * `TauCeti.ballPoissonKernel`: the Poisson kernel of the unit ball.
 * `TauCeti.fderiv_ballGreenKernel_normal`: the outward normal derivative of the Green kernel on
   the unit sphere is the negative Poisson kernel.
@@ -144,16 +146,37 @@ theorem ballGreenCorrector_zero_left (y : EuclideanSpace ℝ (Fin n)) :
       ((n : ℝ) * ((n : ℝ) - 2) * volume.real (ball (0 : EuclideanSpace ℝ (Fin n)) 1))⁻¹ := by
   simp [ballGreenCorrector_def]
 
-/-- On the unit sphere, the corrector agrees with the Newtonian kernel with pole `x`. -/
-theorem ballGreenCorrector_eq_newtonianKernel_sub_of_norm_eq_one (x : EuclideanSpace ℝ (Fin n))
-    {y : EuclideanSpace ℝ (Fin n)} (hy : ‖y‖ = 1) :
+/-- At the center `y = 0`, the corrector is the constant value of the Newtonian kernel on the unit
+sphere. -/
+@[simp]
+theorem ballGreenCorrector_zero_right (x : EuclideanSpace ℝ (Fin n)) :
+    ballGreenCorrector n x 0 =
+      ((n : ℝ) * ((n : ℝ) - 2) * volume.real (ball (0 : EuclideanSpace ℝ (Fin n)) 1))⁻¹ := by
+  rw [ballGreenCorrector_comm, ballGreenCorrector_zero_left]
+
+/-- For `y` on the unit sphere, the corrector agrees with the Newtonian kernel with pole `x`. -/
+@[simp]
+theorem ballGreenCorrector_eq_newtonianKernel_sub_of_norm_eq_one_right
+    (x : EuclideanSpace ℝ (Fin n)) {y : EuclideanSpace ℝ (Fin n)} (hy : ‖y‖ = 1) :
     ballGreenCorrector n x y = newtonianKernel n (y - x) := by
   rw [ballGreenCorrector_def, newtonianKernel_def, ← norm_sub_sq_eq_of_norm_eq_one x hy,
     norm_rpow_eq_norm_sq_rpow]
 
-/-- The corrector is harmonic in `y` wherever `‖x‖ ‖y‖ ≠ 1`, in particular on a neighbourhood
-of the closed unit ball when the pole `x` lies in the open ball. -/
-theorem harmonicAt_ballGreenCorrector {x y : EuclideanSpace ℝ (Fin n)} (h : ‖x‖ * ‖y‖ ≠ 1) :
+/-- For a pole `x` on the unit sphere, the corrector agrees with the Newtonian kernel with
+pole `x`. -/
+@[simp]
+theorem ballGreenCorrector_eq_newtonianKernel_sub_of_norm_eq_one_left
+    {x : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ = 1) (y : EuclideanSpace ℝ (Fin n)) :
+    ballGreenCorrector n x y = newtonianKernel n (y - x) := by
+  rw [ballGreenCorrector_comm, ballGreenCorrector_eq_newtonianKernel_sub_of_norm_eq_one_right y hx,
+    newtonianKernel_sub_comm]
+
+/-- The corrector is harmonic in `y` wherever the reflection polynomial
+`‖x‖² ‖y‖² - 2 ⟪x, y⟫ + 1` is positive, that is, away from the reflected pole `x / ‖x‖²`; by
+`norm_sq_mul_norm_sq_sub_two_mul_inner_add_one_pos` this holds wherever `‖x‖ ‖y‖ ≠ 1`, in
+particular on a neighbourhood of the closed unit ball when the pole `x` lies in the open ball. -/
+theorem harmonicAt_ballGreenCorrector {x y : EuclideanSpace ℝ (Fin n)}
+    (h : 0 < ‖x‖ ^ 2 * ‖y‖ ^ 2 - 2 * ⟪x, y⟫_ℝ + 1) :
     HarmonicAt (ballGreenCorrector n x) y := by
   rcases eq_or_ne x 0 with rfl | hx
   · have hfun : ballGreenCorrector n 0 = fun _ =>
@@ -170,7 +193,7 @@ theorem harmonicAt_ballGreenCorrector {x y : EuclideanSpace ℝ (Fin n)} (h : �
       intro hzero
       have hsq := norm_sq_norm_smul_sub_inv_norm_smul hx y
       rw [sub_eq_neg_add, hzero, norm_zero] at hsq
-      exact (norm_sq_mul_norm_sq_sub_two_mul_inner_add_one_pos h).ne' (by simpa using hsq.symm)
+      exact h.ne' (by simpa using hsq.symm)
     rw [hfun]
     exact (harmonicAt_comp_const_add_smul_iff (-(‖x‖⁻¹ • x)) (norm_ne_zero_iff.mpr hx)).2
       (harmonicAt_newtonianKernel n hne)
@@ -187,14 +210,14 @@ private theorem inv_mul_div_two_mul_two (hn : n ≠ 2) (w : ℝ) :
   field_simp
   ring
 
-/-- The Fréchet derivative of the corrector in `y`, wherever `‖x‖ ‖y‖ ≠ 1`. -/
+/-- The Fréchet derivative of the corrector in `y`, wherever the reflection polynomial
+`‖x‖² ‖y‖² - 2 ⟪x, y⟫ + 1` is positive. -/
 theorem hasFDerivAt_ballGreenCorrector (hn : n ≠ 2) {x y : EuclideanSpace ℝ (Fin n)}
-    (h : ‖x‖ * ‖y‖ ≠ 1) :
+    (h : 0 < ‖x‖ ^ 2 * ‖y‖ ^ 2 - 2 * ⟪x, y⟫_ℝ + 1) :
     HasFDerivAt (ballGreenCorrector n x)
       ((-(((n : ℝ) * volume.real (ball (0 : EuclideanSpace ℝ (Fin n)) 1))⁻¹) *
           (‖x‖ ^ 2 * ‖y‖ ^ 2 - 2 * ⟪x, y⟫_ℝ + 1) ^ (-(n : ℝ) / 2)) •
         (‖x‖ ^ 2 • innerSL ℝ y - innerSL ℝ x)) y := by
-  have hq := norm_sq_mul_norm_sq_sub_two_mul_inner_add_one_pos h
   have hpoly : HasFDerivAt (fun z : EuclideanSpace ℝ (Fin n) =>
       ‖x‖ ^ 2 * ‖z‖ ^ 2 - 2 * ⟪x, z⟫_ℝ + 1)
       (‖x‖ ^ 2 • (2 • innerSL ℝ y) - (2 : ℝ) • innerSL ℝ x) y := by
@@ -207,7 +230,7 @@ theorem hasFDerivAt_ballGreenCorrector (hn : n ≠ 2) {x y : EuclideanSpace ℝ 
     funext z
     exact ballGreenCorrector_def x z
   rw [hfun]
-  refine ((hpoly.rpow_const (Or.inl hq.ne')).const_mul _).congr_fderiv ?_
+  refine ((hpoly.rpow_const (Or.inl h.ne')).const_mul _).congr_fderiv ?_
   have hexp : (2 - (n : ℝ)) / 2 - 1 = -(n : ℝ) / 2 := by ring
   rw [hexp]
   ext v
@@ -244,18 +267,25 @@ theorem ballGreenKernel_comm (x y : EuclideanSpace ℝ (Fin n)) :
   rw [ballGreenKernel_def, ballGreenKernel_def, newtonianKernel_sub_comm,
     ballGreenCorrector_comm]
 
-/-- The Green kernel of the unit ball vanishes on the unit sphere. -/
+/-- The Green kernel of the unit ball vanishes for `y` on the unit sphere. -/
 @[simp]
-theorem ballGreenKernel_eq_zero_of_norm_eq_one (x : EuclideanSpace ℝ (Fin n))
+theorem ballGreenKernel_eq_zero_of_norm_eq_one_right (x : EuclideanSpace ℝ (Fin n))
     {y : EuclideanSpace ℝ (Fin n)} (hy : ‖y‖ = 1) :
     ballGreenKernel n x y = 0 := by
-  rw [ballGreenKernel_def, ballGreenCorrector_eq_newtonianKernel_sub_of_norm_eq_one x hy,
+  rw [ballGreenKernel_def, ballGreenCorrector_eq_newtonianKernel_sub_of_norm_eq_one_right x hy,
     sub_self]
 
-/-- The Green kernel of the unit ball is harmonic in `y` away from the pole, wherever
-`‖x‖ ‖y‖ ≠ 1`. -/
+/-- The Green kernel of the unit ball vanishes for a pole `x` on the unit sphere. -/
+@[simp]
+theorem ballGreenKernel_eq_zero_of_norm_eq_one_left {x : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ = 1)
+    (y : EuclideanSpace ℝ (Fin n)) :
+    ballGreenKernel n x y = 0 := by
+  rw [ballGreenKernel_comm, ballGreenKernel_eq_zero_of_norm_eq_one_right y hx]
+
+/-- The Green kernel of the unit ball is harmonic in `y` away from the pole, wherever the
+reflection polynomial `‖x‖² ‖y‖² - 2 ⟪x, y⟫ + 1` is positive. -/
 theorem harmonicAt_ballGreenKernel {x y : EuclideanSpace ℝ (Fin n)} (hxy : y ≠ x)
-    (h : ‖x‖ * ‖y‖ ≠ 1) :
+    (h : 0 < ‖x‖ ^ 2 * ‖y‖ ^ 2 - 2 * ⟪x, y⟫_ℝ + 1) :
     HarmonicAt (ballGreenKernel n x) y := by
   rw [ballGreenKernel_fun]
   exact (harmonicAt_newtonianKernel_sub n hxy).sub (harmonicAt_ballGreenCorrector h)
@@ -265,21 +295,20 @@ theorem harmonicOnNhd_ballGreenKernel {x : EuclideanSpace ℝ (Fin n)} (hx : ‖
     HarmonicOnNhd (ballGreenKernel n x) (ball (0 : EuclideanSpace ℝ (Fin n)) 1 \ {x}) := by
   intro y hy
   rw [Set.mem_sdiff, mem_ball_zero_iff, Set.mem_singleton_iff] at hy
-  exact harmonicAt_ballGreenKernel hy.2
-    ((mul_le_of_le_one_right (norm_nonneg x) hy.1.le).trans_lt hx).ne
+  exact harmonicAt_ballGreenKernel hy.2 (norm_sq_mul_norm_sq_sub_two_mul_inner_add_one_pos
+    ((mul_le_of_le_one_right (norm_nonneg x) hy.1.le).trans_lt hx).ne)
 
-/-- In dimension at least three, the Green kernel of the unit ball is positive inside the ball
-away from the pole. -/
-theorem ballGreenKernel_pos (hn : 3 ≤ n) {x y : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ < 1)
+/-- A Euclidean space containing two distinct points has positive dimension. -/
+private theorem ne_zero_of_ne {x y : EuclideanSpace ℝ (Fin n)} (hxy : x ≠ y) : n ≠ 0 := by
+  rintro rfl
+  exact hxy (Subsingleton.elim x y)
+
+/-- Outside dimension two, the Green kernel of the unit ball is positive inside the ball away
+from the pole. -/
+theorem ballGreenKernel_pos (hn : n ≠ 2) {x y : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ < 1)
     (hy : ‖y‖ < 1) (hxy : y ≠ x) :
     0 < ballGreenKernel n x y := by
-  have hnℝ : (3 : ℝ) ≤ n := by exact_mod_cast hn
-  have hc : 0 < ((n : ℝ) * ((n : ℝ) - 2) *
-      volume.real (ball (0 : EuclideanSpace ℝ (Fin n)) 1))⁻¹ := by
-    have := volume_real_unitBall_pos n
-    have hnpos : (0 : ℝ) < n := by linarith
-    have hnsub : (0 : ℝ) < (n : ℝ) - 2 := by linarith
-    positivity
+  have hω := volume_real_unitBall_pos n
   have hsub : 0 < ‖y - x‖ ^ 2 := by
     have : y - x ≠ 0 := sub_ne_zero.mpr hxy
     positivity
@@ -288,15 +317,34 @@ theorem ballGreenKernel_pos (hn : 3 ≤ n) {x y : EuclideanSpace ℝ (Fin n)} (h
     have hy' : 0 < 1 - ‖y‖ ^ 2 := by nlinarith [norm_nonneg y]
     rw [norm_sub_sq_real, real_inner_comm x y]
     nlinarith [mul_pos hx' hy']
-  have hexp : (2 - (n : ℝ)) / 2 < 0 := by linarith
   rw [ballGreenKernel_def, ballGreenCorrector_def, newtonianKernel_def,
     norm_rpow_eq_norm_sq_rpow, ← mul_sub]
-  exact mul_pos hc (sub_pos.mpr (Real.rpow_lt_rpow_of_neg hsub hlt hexp))
+  obtain hn1 | hn3 : n = 1 ∨ 3 ≤ n := by
+    have := Nat.pos_of_ne_zero (ne_zero_of_ne hxy)
+    omega
+  · have hn1ℝ : (n : ℝ) = 1 := by exact_mod_cast hn1
+    have hc : (n : ℝ) * ((n : ℝ) - 2) *
+        volume.real (ball (0 : EuclideanSpace ℝ (Fin n)) 1) < 0 := by
+      rw [hn1ℝ]
+      linarith
+    have hexp : (0 : ℝ) < (2 - (n : ℝ)) / 2 := by
+      rw [hn1ℝ]
+      norm_num
+    exact mul_pos_of_neg_of_neg (inv_lt_zero.mpr hc)
+      (sub_neg.mpr (Real.rpow_lt_rpow hsub.le hlt hexp))
+  · have hnℝ : (3 : ℝ) ≤ n := by exact_mod_cast hn3
+    have hc : 0 < ((n : ℝ) * ((n : ℝ) - 2) *
+        volume.real (ball (0 : EuclideanSpace ℝ (Fin n)) 1))⁻¹ := by
+      have hnpos : (0 : ℝ) < n := by linarith
+      have hnsub : (0 : ℝ) < (n : ℝ) - 2 := by linarith
+      positivity
+    have hexp : (2 - (n : ℝ)) / 2 < 0 := by linarith
+    exact mul_pos hc (sub_pos.mpr (Real.rpow_lt_rpow_of_neg hsub hlt hexp))
 
 /-- The Fréchet derivative of the Green kernel of the unit ball in `y`, away from the pole and
-wherever `‖x‖ ‖y‖ ≠ 1`. -/
+wherever the reflection polynomial `‖x‖² ‖y‖² - 2 ⟪x, y⟫ + 1` is positive. -/
 theorem hasFDerivAt_ballGreenKernel (hn : n ≠ 2) {x y : EuclideanSpace ℝ (Fin n)} (hxy : y ≠ x)
-    (h : ‖x‖ * ‖y‖ ≠ 1) :
+    (h : 0 < ‖x‖ ^ 2 * ‖y‖ ^ 2 - 2 * ⟪x, y⟫_ℝ + 1) :
     HasFDerivAt (ballGreenKernel n x)
       ((-(((n : ℝ) * volume.real (ball (0 : EuclideanSpace ℝ (Fin n)) 1))⁻¹) *
           ‖y - x‖ ^ (-(n : ℝ))) • innerSL ℝ (y - x) -
@@ -325,11 +373,6 @@ theorem ballPoissonKernel_def (x y : EuclideanSpace ℝ (Fin n)) :
         ((n : ℝ) * volume.real (ball (0 : EuclideanSpace ℝ (Fin n)) 1) * ‖x - y‖ ^ n) := by
   rw [ballPoissonKernel]
 
-/-- A Euclidean space containing two distinct points has positive dimension. -/
-private theorem ne_zero_of_ne {x y : EuclideanSpace ℝ (Fin n)} (hxy : x ≠ y) : n ≠ 0 := by
-  rintro rfl
-  exact hxy (Subsingleton.elim x y)
-
 /-- The Poisson kernel of the unit ball is positive for a pole in the open ball and any other
 point. -/
 theorem ballPoissonKernel_pos {x y : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ < 1) (hxy : x ≠ y) :
@@ -350,9 +393,8 @@ theorem fderiv_ballGreenKernel_normal (hn : n ≠ 2) {x y : EuclideanSpace ℝ (
   have hxy : y ≠ x := by
     rintro rfl
     exact hx hy
-  have h : ‖x‖ * ‖y‖ ≠ 1 := by
-    rw [hy, mul_one]
-    exact hx
+  have h : 0 < ‖x‖ ^ 2 * ‖y‖ ^ 2 - 2 * ⟪x, y⟫_ℝ + 1 :=
+    norm_sq_mul_norm_sq_sub_two_mul_inner_add_one_pos (by rw [hy, mul_one]; exact hx)
   have hsub : 0 < ‖y - x‖ := norm_pos_iff.mpr (sub_ne_zero.mpr hxy)
   rw [(hasFDerivAt_ballGreenKernel hn hxy h).fderiv, ← norm_sub_sq_eq_of_norm_eq_one x hy,
     ballPoissonKernel_def, norm_sub_rev x y]
@@ -373,9 +415,8 @@ theorem hasDerivAt_ballGreenKernel_radial (hn : n ≠ 2) {x y : EuclideanSpace �
   have hxy : y ≠ x := by
     rintro rfl
     exact hx hy
-  have h : ‖x‖ * ‖y‖ ≠ 1 := by
-    rw [hy, mul_one]
-    exact hx
+  have h : 0 < ‖x‖ ^ 2 * ‖y‖ ^ 2 - 2 * ⟪x, y⟫_ℝ + 1 :=
+    norm_sq_mul_norm_sq_sub_two_mul_inner_add_one_pos (by rw [hy, mul_one]; exact hx)
   have hG := hasFDerivAt_ballGreenKernel hn hxy h
   have hcurve : HasDerivAt (fun t : ℝ => t • y) y 1 := by
     simpa using (hasDerivAt_id (1 : ℝ)).smul_const y
