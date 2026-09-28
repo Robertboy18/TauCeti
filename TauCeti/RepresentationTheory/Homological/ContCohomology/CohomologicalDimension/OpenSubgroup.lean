@@ -54,9 +54,7 @@ variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGro
   [CompactSpace G] [TotallyDisconnectedSpace G]
 
 /-- **`cd_p ≤ 1` passes to open subgroups**, as the vanishing predicate: for `U` open in a profinite
-group `G` with `CohomologicalDimensionLE p G 1` and `p ≠ 0`, `CohomologicalDimensionLE p U 1`. The
-degree-two cohomology of `U` with finite `p`-primary coefficients `M` is that of `G` with
-coefficients in the finite `p`-primary module `Coind_U^G M`, by Shapiro's lemma. -/
+group `G` with `CohomologicalDimensionLE p G 1` and `p ≠ 0`, `CohomologicalDimensionLE p U 1`. -/
 theorem CohomologicalDimensionLE.one_of_openSubgroup (hp : p ≠ 0)
     (h : CohomologicalDimensionLE.{u} p G 1) (U : OpenSubgroup G) :
     CohomologicalDimensionLE.{u} p U.toSubgroup 1 := by
