@@ -11,8 +11,10 @@ public import Mathlib.Data.EReal.Operations
 # Operations on extended real numbers
 
 This file supplements Mathlib's API for arithmetic operations on `EReal`. The common theme is
-subtraction from a *real* number: `(r : EReal) - a` is defined for every extended real `a`, is
-never of the form `∞ - ∞`, and behaves like real subtraction in the ways recorded here.
+subtraction in which one operand is a *real* number: both `a - (r : EReal)` and `(r : EReal) - a`
+are defined for every extended real `a`, are never of the form `∞ - ∞`, and behave like real
+subtraction in the ways recorded here. The first two results below have a real subtrahend and
+the last two a real minuend.
 
 ## Main results
 
