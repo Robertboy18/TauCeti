@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Naturality
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.RestrictScalars
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.TrivialFp
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp.Explicit
@@ -69,27 +70,21 @@ section Mul
 
 variable (p : ℕ) (G : Type u) [Group G]
 
-/-- Multiplication in `ZMod p`, as a biadditive map on the lifted carrier of `trivialFp p G`. -/
+/-- The multiplication pairing `fpPairing p G` with its scalars forgotten, a biadditive map on the
+lifted carrier of `trivialFp p G`. -/
 private noncomputable def trivialFpMul :
     (trivialFp p G).V →+ (trivialFp p G).V →+ (trivialFp p G).V :=
-  ((AddMonoidHom.mul.comp (trivialFpEquiv p G).toLinearMap.toAddMonoidHom).compl₂
-    (trivialFpEquiv p G).toLinearMap.toAddMonoidHom).compr₂
-      (trivialFpEquiv p G).symm.toLinearMap.toAddMonoidHom
-
-private theorem trivialFpMul_apply (x y : (trivialFp p G).V) :
-    trivialFpMul p G x y =
-      (trivialFpEquiv p G).symm (trivialFpEquiv p G x * trivialFpEquiv p G y) :=
-  (rfl)
+  LinearMap.toAddMonoidHom'.comp (fpPairing p G).bil.toAddMonoidHom
 
 /-- The multiplication pairing `fpPairing p G` has the values of `trivialFpMul`. -/
 private theorem trivialFpMul_eq (x y : (trivialFp p G).V) :
-    trivialFpMul p G x y = (fpPairing p G).bil x y := by
-  rw [trivialFpMul_apply, fpPairing_bil_apply]
+    trivialFpMul p G x y = (fpPairing p G).bil x y :=
+  (rfl)
 
 /-- The universe lift intertwines `trivialFpMul` with multiplication in `ZMod p`. -/
 private theorem trivialFpEquiv_trivialFpMul (x y : (trivialFp p G).V) :
     trivialFpEquiv p G (trivialFpMul p G x y) = trivialFpEquiv p G x * trivialFpEquiv p G y := by
-  rw [trivialFpMul_apply, LinearEquiv.apply_symm_apply]
+  rw [trivialFpMul_eq, fpPairing_bil_apply, LinearEquiv.apply_symm_apply]
 
 end Mul
 
@@ -121,7 +116,7 @@ theorem cohomFpAddEquivH2_cupFp (a b : cohomFp p G 1) :
     cohomFpAddEquivH1_explicitH1AddEquivContinuousCohomologyOfDiscrete,
     cohomFpAddEquivH1_explicitH1AddEquivContinuousCohomologyOfDiscrete, explicitMap1Equiv_apply,
     explicitMap1Equiv_apply, explicitMap2Equiv_apply]
-  exact explicitCup11_explicitMap G _ _ _ G (ZMod p) (ZMod p) (ZMod p) (trivialFpMul p G) _ _
+  exact explicitMap2_explicitCup11 G _ _ _ (trivialFpMul p G) _ _ G (ZMod p) (ZMod p) (ZMod p)
     AddMonoidHom.mul continuous_mul (smul_mul_smul_of_smul_eq_self htriv) _ _ _ _ _ _ _ _ _ _
     (trivialFpEquiv_trivialFpMul p G) x y
 

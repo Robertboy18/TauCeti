@@ -8,6 +8,7 @@ module
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Comparison
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Functoriality
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.RestrictScalars
+import TauCeti.RepresentationTheory.Continuous.TopRep.Basic
 
 /-!
 # The cup product does not see the scalars
@@ -44,8 +45,6 @@ need in order to compute their cup product on explicit cocycles.
 * `TauCeti.TopPairing.cupCocycles_one_one_restrictScalarsInt`,
   `TauCeti.TopPairing.cup_one_one_restrictScalarsInt`: **the cup product does not see the
   scalars**, on one-cocycles and on cohomology in bidegree `(1, 1)`.
-* `TauCeti.TopPairing.cup_eqToHom`: transport of the cup product along equalities of coefficient
-  objects.
 * `TauCeti.TopPairing.cup_one_one_ofDiscreteModuleRestrictScalarsInt`: for discrete
   representations, the cup product of the associated pairing of discrete `ℤ`-modules is the cup
   product of `P`, under `TauCeti.ContCohomology.ofDiscreteModuleRestrictScalarsIntEquiv`.
@@ -82,11 +81,7 @@ its scalars forgotten, an `ℤ`-bilinear pairing with the same values. -/
 def restrictScalarsInt :
     TopPairing (TopRep.restrictScalarsInt.obj X) (TopRep.restrictScalarsInt.obj Y)
       (TopRep.restrictScalarsInt.obj Z) where
-  -- the pairing is written out on the carriers of `restrictScalarsInt.obj _`, so that its type
-  -- carries the `ℤ`-module structures of those objects and not those of `X.V`
-  bil := LinearMap.mk₂ ℤ (fun x y ↦ P.bil x y) (fun x x' y ↦ LinearMap.map_add₂ P.bil x x' y)
-    (fun c x y ↦ (LinearMap.congr_fun (map_zsmul P.bil c x) y).trans (LinearMap.smul_apply _ _ _))
-    (fun x y y' ↦ map_add (P.bil x) y y') (fun c x y ↦ map_zsmul (P.bil x) c y)
+  bil := P.bil.restrictScalars₁₂ ℤ ℤ
   cont := P.cont
   -- the operators of `restrictScalarsInt.obj _` are those of the original representations
   equivariant g x y :=
@@ -95,6 +90,8 @@ def restrictScalarsInt :
       (restrictScalarsInt_obj_ρ_apply Z g _).symm
 
 /-- The pairing with its scalars forgotten has the values of `P`. -/
+-- The arguments are typed by the carriers of `restrictScalarsInt.obj _`, where the cup product of
+-- `P.restrictScalarsInt` evaluates it.
 @[simp]
 theorem restrictScalarsInt_bil (x : (TopRep.restrictScalarsInt.obj X).V)
     (y : (TopRep.restrictScalarsInt.obj Y).V) :
@@ -142,22 +139,6 @@ theorem cup_one_one_restrictScalarsInt
   rw [cup_π, restrictScalarsIntEquiv_π, restrictScalarsIntEquiv_π, restrictScalarsIntEquiv_π,
     cup_π, cupCocycles_one_one_restrictScalarsInt]
 
-/-- **Transport of the cup product along equalities of coefficient objects.** Two pairings on equal
-objects with the same values, up to the transports of the carriers, have the same cup product, up
-to the transports of the cohomology groups. -/
-theorem cup_eqToHom {X' Y' Z' : TopRep.{max v w} R G} (hX : X = X') (hY : Y = Y') (hZ : Z = Z')
-    (P' : TopPairing X' Y' Z')
-    (h : ∀ (x : X.V) (y : Y.V),
-      P'.bil (cast (congrArg TopRep.V hX) x) (cast (congrArg TopRep.V hY) y) =
-        cast (congrArg TopRep.V hZ) (P.bil x y))
-    (m n : ℕ) (a : continuousCohomology m X) (b : continuousCohomology n Y) :
-    eqToHom (congrArg (continuousCohomology (m + n)) hZ) (P.cup m n a b) =
-      P'.cup m n (eqToHom (congrArg (continuousCohomology m) hX) a)
-        (eqToHom (congrArg (continuousCohomology n) hY) b) := by
-  subst hX hY hZ
-  obtain rfl : P = P' := TopPairing.ext (LinearMap.ext₂ fun x y ↦ (h x y).symm)
-  simp
-
 end RestrictScalars
 
 /-! ### Discrete representations over any scalars -/
@@ -187,14 +168,20 @@ omit [TopologicalSpace G] [IsTopologicalGroup G] in
 /-- Under the identification of the underlying additive representation of a discrete `X` with the
 discrete `ℤ`-module `X.V`, the pairing of `μ` on discrete `ℤ`-modules is the pairing of `P` with
 its scalars forgotten: the three carriers are unchanged by the transports, so this is `hμ`. -/
-theorem restrictScalarsInt_bil_cast (x : X.V) (y : Y.V) :
-    P.restrictScalarsInt.bil
-        (cast (congrArg TopRep.V (ofDiscreteModule_eq_restrictScalarsInt_obj X)) x)
-        (cast (congrArg TopRep.V (ofDiscreteModule_eq_restrictScalarsInt_obj Y)) y) =
-      cast (congrArg TopRep.V (ofDiscreteModule_eq_restrictScalarsInt_obj Z))
-        ((ofDiscreteModulePairing μ (P.equivariant_of_eq μ hμ)).bil x y) := by
-  rw [ofDiscreteModulePairing_bil_apply]
-  exact (hμ x y).symm
+theorem eqToHom_ofDiscreteModulePairing_bil (x : X.V) (y : Y.V) :
+    eqToHom (ofDiscreteModule_eq_restrictScalarsInt_obj Z)
+        ((ofDiscreteModulePairing μ (P.equivariant_of_eq μ hμ)).bil x y) =
+      P.restrictScalarsInt.bil (eqToHom (ofDiscreteModule_eq_restrictScalarsInt_obj X) x)
+        (eqToHom (ofDiscreteModule_eq_restrictScalarsInt_obj Y) y) :=
+  -- Assembled as a term: the transported value is typed at `Z.V`, which is the carrier of
+  -- `ofDiscreteModule ℤ G Z.V` only after unfolding, so `rw` does not see the transports. The
+  -- three casts are along equalities of a type with itself, so they vanish.
+  ((TopRep.eqToHom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj Z) _).trans
+    ((congrArg (cast _) (ofDiscreteModulePairing_bil_apply μ (P.equivariant_of_eq μ hμ) x y)).trans
+      (hμ x y))).trans
+    (congrArg₂ (fun a b ↦ P.restrictScalarsInt.bil a b)
+      (TopRep.eqToHom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj X) x).symm
+      (TopRep.eqToHom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj Y) y).symm)
 
 /-- **For discrete representations, the cup product of the pairing of discrete `ℤ`-modules is the
 cup product of `P`**, under `TauCeti.ContCohomology.ofDiscreteModuleRestrictScalarsIntEquiv`, in
@@ -206,11 +193,13 @@ theorem cup_one_one_ofDiscreteModuleRestrictScalarsInt
         ((ofDiscreteModulePairing μ (P.equivariant_of_eq μ hμ)).cup 1 1 a b) =
       P.cup 1 1 (ofDiscreteModuleRestrictScalarsIntEquiv X 1 a)
         (ofDiscreteModuleRestrictScalarsIntEquiv Y 1 b) := by
-  -- transport along the equality of objects, then forget the scalars
-  have key := (ofDiscreteModulePairing μ (P.equivariant_of_eq μ hμ)).cup_eqToHom
-    (ofDiscreteModule_eq_restrictScalarsInt_obj X) (ofDiscreteModule_eq_restrictScalarsInt_obj Y)
-    (ofDiscreteModule_eq_restrictScalarsInt_obj Z) P.restrictScalarsInt
-    (P.restrictScalarsInt_bil_cast μ hμ) 1 1 a b
+  -- transport along the equality of objects, a coefficient map, then forget the scalars
+  have key := (ofDiscreteModulePairing μ (P.equivariant_of_eq μ hμ)).cup_coeffMap
+    P.restrictScalarsInt (eqToHom (ofDiscreteModule_eq_restrictScalarsInt_obj X))
+    (eqToHom (ofDiscreteModule_eq_restrictScalarsInt_obj Y))
+    (eqToHom (ofDiscreteModule_eq_restrictScalarsInt_obj Z))
+    (P.eqToHom_ofDiscreteModulePairing_bil μ hμ) 1 1 a b
+  rw [coeffMap_eqToHom, coeffMap_eqToHom, coeffMap_eqToHom] at key
   rw [ofDiscreteModuleRestrictScalarsIntEquiv_apply X 1 a,
     ofDiscreteModuleRestrictScalarsIntEquiv_apply Y 1 b,
     ofDiscreteModuleRestrictScalarsIntEquiv_apply Z (1 + 1), key, cup_one_one_restrictScalarsInt]

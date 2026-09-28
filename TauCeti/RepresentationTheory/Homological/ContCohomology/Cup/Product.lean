@@ -55,8 +55,6 @@ of the general inhomogeneous formula
   bidegree `(1,1)` it holds only on classes, with the sign `-1`.
 * `TauCeti.ContCohomology.explicitCup11_comm_of_neg_eq_self`: the `2`-torsion specialization, in
   which the `(1,1)` cup is symmetric.
-* `TauCeti.ContCohomology.explicitCup11_explicitMap`: **naturality** of the `(1,1)` cup product
-  in compatible pairs, for the pullbacks `explicitMap1` and `explicitMap2`.
 * `TauCeti.ContCohomology.explicitCup_assoc000` and its nine siblings: **associativity**
   `(x ⌣_{μ₁} y) ⌣_{μ₂} z = x ⌣_{ν₂} (y ⌣_{ν₁} z)`, one theorem for each tridegree `(p, q, r)`
   with `p + q + r ≤ 2`, the three digits of the name being that tridegree. Each holds already on
@@ -128,7 +126,7 @@ public section
 
 namespace TauCeti.ContCohomology
 
-universe uG uM uN uP uH uM' uN' uP'
+universe uG uM uN uP
 
 section Pairing
 
@@ -611,61 +609,6 @@ theorem explicitCup11_mk (a : Z1 G M) (b : Z1 G N) :
   (rfl)
 
 end CupOneOne
-
-section CupOneOneMap
-
-/-! ### Naturality of the `(1,1)` cup product in compatible pairs
-
-The explicit `(1,1)` cup product is natural for the pullbacks
-`TauCeti.ContCohomology.explicitMap1` and `TauCeti.ContCohomology.explicitMap2` along a compatible
-pair made of a continuous homomorphism `φ : H → G` and coefficient maps intertwining the two
-pairings. -/
-
-variable (G : Type uG) [Group G] [TopologicalSpace G] [ContinuousMul G]
-  (M : Type uM) [AddCommGroup M] [TopologicalSpace M] [IsTopologicalAddGroup M]
-    [DistribMulAction G M] [ContinuousSMul G M]
-  (N : Type uN) [AddCommGroup N] [TopologicalSpace N] [IsTopologicalAddGroup N]
-    [DistribMulAction G N] [ContinuousSMul G N]
-  (P : Type uP) [AddCommGroup P] [TopologicalSpace P] [IsTopologicalAddGroup P]
-    [DistribMulAction G P] [ContinuousSMul G P]
-  (H : Type uH) [Group H] [TopologicalSpace H] [ContinuousMul H]
-  (M' : Type uM') [AddCommGroup M'] [TopologicalSpace M'] [IsTopologicalAddGroup M']
-    [DistribMulAction H M'] [ContinuousSMul H M']
-  (N' : Type uN') [AddCommGroup N'] [TopologicalSpace N'] [IsTopologicalAddGroup N']
-    [DistribMulAction H N'] [ContinuousSMul H N']
-  (P' : Type uP') [AddCommGroup P'] [TopologicalSpace P'] [IsTopologicalAddGroup P']
-    [DistribMulAction H P'] [ContinuousSMul H P']
-  (μ : M →+ N →+ P) (hμ : Continuous fun p : M × N => μ p.1 p.2)
-  (hequiv : ∀ (g : G) (m : M) (x : N), μ (g • m) (g • x) = g • μ m x)
-  (μ' : M' →+ N' →+ P') (hμ' : Continuous fun p : M' × N' => μ' p.1 p.2)
-  (hequiv' : ∀ (h : H) (m : M') (x : N'), μ' (h • m) (h • x) = h • μ' m x)
-  (φ : H →ₜ* G)
-  (fM : M →+ M') (hfM : Continuous fM) (hM : ∀ (h : H) (m : M), fM (φ h • m) = h • fM m)
-  (fN : N →+ N') (hfN : Continuous fN) (hN : ∀ (h : H) (x : N), fN (φ h • x) = h • fN x)
-  (fP : P →+ P') (hfP : Continuous fP) (hP : ∀ (h : H) (y : P), fP (φ h • y) = h • fP y)
-  (hcompat : ∀ (m : M) (x : N), fP (μ m x) = μ' (fM m) (fN x))
-
-include hcompat hN
-
-/-- **The `(1,1)` cup product is natural in compatible pairs**: for a continuous homomorphism
-`φ : H → G` and coefficient maps `fM`, `fN`, `fP` intertwining the pairings `μ` and `μ'`, the
-pullback of `a ⌣ b` is the cup product of the pullbacks. -/
-theorem explicitCup11_explicitMap (a : H1 G M) (b : H1 G N) :
-    explicitMap2 G P H P' φ fP hfP hP (explicitCup11 G M N P μ hμ hequiv a b) =
-      explicitCup11 H M' N' P' μ' hμ' hequiv' (explicitMap1 G M H M' φ fM hfM hM a)
-        (explicitMap1 G N H N' φ fN hfN hN b) := by
-  induction a using QuotientAddGroup.induction_on with
-  | H a =>
-    induction b using QuotientAddGroup.induction_on with
-    | H b =>
-      rw [explicitCup11_mk, explicitMap2_mk, explicitMap1_mk, explicitMap1_mk, explicitCup11_mk]
-      refine congrArg (fun z : Z2 H P' => (z : H2 H P')) (Subtype.ext (funext fun q => ?_))
-      obtain ⟨h, k⟩ := q
-      rw [cocyclesMap2_apply]
-      dsimp only
-      rw [cocyclesMap1_apply, cocyclesMap1_apply, hcompat, hN]
-
-end CupOneOneMap
 
 section CommZeroZero
 
