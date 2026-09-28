@@ -143,6 +143,10 @@ omit [DistribMulAction G (ZMod p)] [ContinuousSMul G (ZMod p)] htriv in
 `trivialZModAction p G`, it is the identification `cohomFpAddEquivH1` of `H¹(G, 𝔽_p)` with the
 explicit model followed by the identification `H1EquivOfSmulEqSelf` of the explicit classes with
 the continuous characters. -/
+-- Not a `simp` lemma: the canonical identification is the intended normal form of a character of
+-- `H¹(G, 𝔽_p)`, and the `simp` lemmas `cohomFpLinearEquivContinuousZModDual_π_characterCocycle` and
+-- `ContinuousMonoidHom.cohomFpLinearEquivContinuousZModDual_zmodFourReductionClass` own its
+-- left-hand side; as a `simp` lemma this equation would rewrite theirs (simpNF).
 theorem cohomFpLinearEquivContinuousZModDual_apply (x : cohomFp p G 1) :
     letI := trivialZModAction p G
     haveI : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩

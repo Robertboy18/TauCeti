@@ -21,7 +21,7 @@ a relator `r ∈ R` therefore defines a linear functional on `H²(G, 𝔽_p)`, t
 `TauCeti.freeProP.relatorFunctional`; `TauCeti.freeProP.relatorEval` is the same functional on the
 explicit model `H2 G (ZMod p)`, for an arbitrary trivial action of `G` on `𝔽_p`.
 
-The main theorem computes the relator functional on cup squares. For `a, b ∈ H¹(G, 𝔽_p)`, with
+The main theorem computes the relator functional on cup products. For `a, b ∈ H¹(G, 𝔽_p)`, with
 characters `χ, ψ : F → 𝔽_p` obtained by composing the characters of `G` attached to `a` and `b` with
 `F → G`,
 
@@ -58,7 +58,7 @@ group with `H²(G, 𝔽_p) ≠ 0` this makes the relator functional the trace is
 * `TauCeti.freeProP.relatorEval_h2QuotientEquiv_transgression`,
   `TauCeti.freeProP.relatorFunctional_apply`: the defining equations.
 * `TauCeti.freeProP.relatorEval_explicitCup11`, `TauCeti.freeProP.relatorFunctional_cupFp`: **the
-  relator functional of a cup square is minus the degree-one form of the relator class**.
+  relator functional of a cup product is minus the degree-one form of the relator class**.
 * `TauCeti.freeProP.relatorEval_injective`, `TauCeti.freeProP.relatorFunctional_injective`: for a
   single relator, the relator functional is injective.
 
@@ -306,7 +306,7 @@ variable [LocallyCompactSpace G]
 closed normal subgroup, and let `G ≅ F ⧸ R`, so that `1 → R → F → G → 1` is a minimal presentation
 of `G`. A class in `H²(G, 𝔽_p)` corresponds under the inverse transgression to a continuous
 homomorphism `R ⧸ Rᵖ[R, F] → 𝔽_p`; evaluating it at the class of a relator `r ∈ R` is the relator
-functional of `r`, an `𝔽_p`-linear functional on `H²(G, 𝔽_p)`. On a cup square it is minus the
+functional of `r`, an `𝔽_p`-linear functional on `H²(G, 𝔽_p)`. On a cup product it is minus the
 degree-one form of the class of `r` in `gr_1(F)` (`TauCeti.freeProP.relatorFunctional_cupFp`), and
 for a single relator it is injective (`TauCeti.freeProP.relatorFunctional_injective`). -/
 noncomputable def relatorFunctional (r : R) : cohomFp p G 2 →ₗ[ZMod p] ZMod p :=
@@ -322,6 +322,7 @@ noncomputable def relatorFunctional (r : R) : cohomFp p G 2 →ₗ[ZMod p] ZMod 
 explicit relator functional `TauCeti.freeProP.relatorEval`, for the trivial actions
 `trivialZModAction`, composed with the identification `cohomFpAddEquivH2` of `H²(G, 𝔽_p)` with its
 explicit model. -/
+@[simp]
 theorem relatorFunctional_apply (r : R) (x : cohomFp p G 2) :
     letI := trivialZModAction p (freeProP p X)
     letI := trivialZModAction p G
@@ -350,7 +351,7 @@ theorem relatorFunctional_injective (r : R)
 
 variable [Finite X]
 
-/-- **Labute's Proposition 3: the relator functional of a cup square is minus the degree-one form
+/-- **Labute's Proposition 3: the relator functional of a cup product is minus the degree-one form
 of the relator class.** Let `F` be the free pro-`p` group on a finite type `X`, let `R ≤ Φ(F)` be a
 closed normal subgroup, let `G ≅ F ⧸ R`, and let `r ∈ R`. For `a, b ∈ H¹(G, 𝔽_p)`, with characters
 `χ, ψ : F → 𝔽_p` obtained by composing the characters of `G` attached to `a` and `b` with `F → G`,
