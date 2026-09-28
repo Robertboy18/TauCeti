@@ -14,12 +14,12 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Free.Graded
 Let `F = freeProP p X` be the free pro-`p` group on a finite linearly ordered type `X`, with
 canonical generators `x_i = freeProP.of i`, and let `a : F → M` and `b : F → A` be continuous
 `1`-cocycles for trivial actions on `𝔽_p`-vector spaces, that is continuous homomorphisms to
-elementary abelian `p`-groups. A Heisenberg cochain `h : F → P` for `(a, b)`
-(`TauCeti.ContCohomology.IsHeisenbergCochain`) always exists, since `H²` of a free pro-`p` group
-vanishes on discrete `p`-primary coefficients
+elementary abelian `p`-groups, and let `h : F → P` be a Heisenberg cochain for `(a, b)`
+(`TauCeti.ContCohomology.IsHeisenbergCochain`). For `𝔽_p`-coefficients `P = ZMod p` such a cochain
+always exists, since `H²(F, 𝔽_p) = 0`
 (`TauCeti.ContCohomology.exists_isHeisenbergCochain_of_subsingleton_H2` with
-`TauCeti.freeProP.subsingleton_H2_zmod` for `𝔽_p`). Its restriction to `λ_1(F)` is the graded
-restriction
+`TauCeti.freeProP.subsingleton_H2_zmod`); for a general `P` it exists whenever `H²(F, P)` vanishes,
+and the results below take `h` as given. Its restriction to `λ_1(F)` is the graded restriction
 `TauCeti.ContCohomology.IsHeisenbergCochain.gradedRestrict`, an additive functional on
 `gr_1(F) = λ_1(F) ⧸ λ_2(F)`, and this file evaluates it in the standard basis
 `TauCeti.freeProP.degreeOneBasis` of `gr_1(F)`.
@@ -32,12 +32,12 @@ For `n ∈ λ_1(F)` with class `ρ = Σ_i c_i π ξ_i + Σ_{i<k} a_{ik} [ξ_i, �
 
 When `a` and `b` are two coordinate characters `χ_i` and `χ_j` of `F` with values in `𝔽_p`, that
 is `χ_i (x_k) = δ_{ik}`, the sums collapse to a single coordinate of `ρ`: `h n = a_{ij}` for
-`i < j`, `h n = -a_{ji}` for `j < i`, and `h n = (p choose 2) c_i` for `i = j`. These are the
-entries of Labute's cup matrix, read on the class of `n`: for a relator `r` of a minimal
-presentation of a pro-`p` group `G = F ⧸ R`, the transgression formula of
-`TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Transgression` identifies the cup
-product `χ_i ⌣ χ_j ∈ H²(G, 𝔽_p)` with the character `r ↦ -h r` of `R ⧸ Rᵖ[R, F]`, so the cup
-product of two coordinate characters is read off the class of the relator in `gr_1(F)`.
+`i < j`, `h n = -a_{ji}` for `j < i`, and `h n = (p choose 2) c_i` for `i = j`. These coordinate
+formulas are the `gr_1`-side input to Labute's Proposition 3: for a pro-`p` group `G = F ⧸ R`, the
+transgression formula of `TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Transgression`
+relates the cup product `χ_i ⌣ χ_j ∈ H²(G, 𝔽_p)` to the cocycle `-h|_R`, and combining it with
+the formulas here would read that cup product off the classes of the relators in `gr_1(F)`. That
+combination, for a minimal presentation, is not carried out in this file.
 
 ## Main results
 
@@ -64,7 +64,7 @@ open TauCeti.freeProP
 
 universe u uM uA uP
 
-variable {p : ℕ} [Fact p.Prime] {X : Type u} [Finite X] [LinearOrder X]
+variable {p : ℕ} [Fact p.Prime] {X : Type u} [LinearOrder X]
 
 section General
 
@@ -103,17 +103,19 @@ theorem apply_eq_sum_repr_degreeOneBasis (n : pLowerCentralSeries p (freeProP p 
   have hbN : ∀ n : pLowerCentralSeries p (freeProP p X) 1, (b : freeProP p X → A) n = 0 :=
     fun n ↦ apply_eq_zero_of_mem_Z1_of_mem_pLowerCentralSeries_one htrivA
       (ZModModule.char_nsmul_eq_zero p) b.2 n.2
-  rw [← hh.gradedRestrict_gradedMk htrivA htrivP haN hbN (ZModModule.char_nsmul_eq_zero p) n]
+  rw [← hh.gradedRestrict_gradedMk htrivP haN hbN (ZModModule.char_nsmul_eq_zero p) n]
   conv_lhs => rw [← (degreeOneBasis p X).sum_repr (gradedMk p (freeProP p X) 1 n)]
   simp only [Fintype.sum_sum_type, map_add, map_sum, ZMod.map_smul, degreeOneBasis_apply,
-    hh.gradedRestrict_degreeOneFamily_inl htrivA htrivP haN hbN
-      (ZModModule.char_nsmul_eq_zero p) htrivM,
-    hh.gradedRestrict_degreeOneFamily_inr htrivA htrivP haN hbN
-      (ZModModule.char_nsmul_eq_zero p) htrivM]
+    hh.gradedRestrict_degreeOneFamily_inl htrivP haN hbN
+      (ZModModule.char_nsmul_eq_zero p) htrivM htrivA,
+    hh.gradedRestrict_degreeOneFamily_inr htrivP haN hbN
+      (ZModModule.char_nsmul_eq_zero p) htrivM htrivA]
 
 end General
 
 section Coordinate
+
+variable [Finite X]
 
 -- Preferring the ring path keeps a single additive structure on `ZMod p`, so that the trivial
 -- action carried by the variables below is the one the cocycles are stated against.
@@ -152,17 +154,18 @@ private theorem apply_eq_of_forall_degreeOneBasis
   have hbN : ∀ n : pLowerCentralSeries p (freeProP p X) 1, (b : freeProP p X → ZMod p) n = 0 :=
     fun n ↦ apply_eq_zero_of_mem_Z1_of_mem_pLowerCentralSeries_one htriv
       (ZModModule.char_nsmul_eq_zero p) b.2 n.2
-  have key : (hh.gradedRestrict htriv htriv haN hbN
+  have key : (hh.gradedRestrict htriv haN hbN
       (ZModModule.char_nsmul_eq_zero p)).toZModLinearMap p = f := by
     refine (degreeOneBasis p X).ext fun k ↦ ?_
     rw [AddMonoidHom.coe_toZModLinearMap]
     rcases k with i | ij
     · rw [← hinl i, degreeOneBasis_apply,
-        hh.gradedRestrict_degreeOneFamily_inl htriv htriv haN hbN
-          (ZModModule.char_nsmul_eq_zero p) htriv, AddMonoidHom.mul_apply]
+        hh.gradedRestrict_degreeOneFamily_inl htriv haN hbN
+          (ZModModule.char_nsmul_eq_zero p) htriv htriv, AddMonoidHom.mul_apply]
     · rw [← hinr ij, degreeOneBasis_apply,
-        hh.gradedRestrict_degreeOneFamily_inr htriv htriv haN hbN
-          (ZModModule.char_nsmul_eq_zero p) htriv, AddMonoidHom.mul_apply, AddMonoidHom.mul_apply]
+        hh.gradedRestrict_degreeOneFamily_inr htriv haN hbN
+          (ZModModule.char_nsmul_eq_zero p) htriv htriv, AddMonoidHom.mul_apply,
+        AddMonoidHom.mul_apply]
   rw [← key, AddMonoidHom.coe_toZModLinearMap, gradedRestrict_gradedMk]
 
 variable {i j : X} (ha : ∀ k, (a : freeProP p X → ZMod p) (of k) = (Pi.single i 1 : X → ZMod p) k)

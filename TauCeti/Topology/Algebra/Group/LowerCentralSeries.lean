@@ -483,7 +483,7 @@ theorem pLowerCentralSeries_one :
 powers.** For a homomorphism `φ : G →* K` with closed kernel into a commutative group,
 `λ_1(G) ≤ ker φ` as soon as `φ` kills the `p`-th powers of `G`: the kernel is closed and contains
 `Gᵖ` and `[G, G]`. -/
-theorem pLowerCentralSeries_one_le_ker {K : Type*} [CommGroup K] (φ : G →* K)
+theorem _root_.MonoidHom.pLowerCentralSeries_one_le_ker {K : Type*} [CommGroup K] (φ : G →* K)
     (hφ : IsClosed (φ.ker : Set G)) (hp : ∀ g : G, φ g ^ p = 1) :
     pLowerCentralSeries p G 1 ≤ φ.ker := by
   rw [pLowerCentralSeries_succ, pLowerCentralSeries_zero]
