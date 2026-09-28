@@ -62,3 +62,20 @@ theorem HasMFDerivAt.hasFDerivWithinAt_of_mem_source {f : M → M'} {x x' : M} {
     exact (mdifferentiableAt_extChartAt hy).hasMFDerivAt
   exact hasMFDerivWithinAt_iff_hasFDerivWithinAt.1
     ((hchart.comp _ hf').comp_hasMFDerivWithinAt _ hsymm)
+
+section Boundaryless
+
+omit [IsManifold I 1 M] [IsManifold I' 1 M']
+
+/-- On a boundaryless manifold, the derivative of a vector-valued map is the Fréchet derivative of
+its expression in the preferred extended chart. -/
+theorem MDifferentiableAt.mvfderiv_eq_fderiv_comp_extChartAt_symm [I.Boundaryless]
+    {f : M → E'} {x : M} (hf : MDifferentiableAt I 𝓘(𝕜, E') f x) :
+    mvfderiv I f x = fderiv 𝕜 (f ∘ (extChartAt I x).symm) (extChartAt I x x) := by
+  rw [hf.mvfderiv, I.range_eq_univ, fderivWithin_univ]
+  simp only [writtenInExtChartAt, extChartAt_model_space_eq_id, PartialEquiv.refl_coe,
+    Function.id_comp]
+  -- The two sides differ only in presenting the domain as `TangentSpace I x` rather than `E`.
+  rfl
+
+end Boundaryless
