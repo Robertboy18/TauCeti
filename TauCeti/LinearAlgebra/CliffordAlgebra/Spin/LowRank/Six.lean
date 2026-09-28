@@ -51,7 +51,8 @@ H. B. Lawson and M.-L. Michelsohn, *Spin Geometry* (1989), Chapter I, §2.
 
 * `CliffordAlgebra.exists_mem_evenUnitaryGroup_coe_eq_algebraMap_add_smul_prod_map_ι`: for `ω`
   the volume element of an orthogonal list of even length with odd `n.choose 2`, in any quadratic
-  space containing it, `a + b • ω` is an even unitary unit when `a² + b² ∏ Q vᵢ = 1`.
+  module over a commutative ring containing it, `a + b • ω` is an even unitary unit when
+  `a² + b² ∏ Q vᵢ = 1`.
 * `CliffordAlgebra.notMem_lipschitzGroup_of_mem_evenUnitaryGroup_of_coe_eq`: such a unit with
   `a b ≠ 0` is not in the Lipschitz group once the list is anisotropic of length at least three.
 * `CliffordAlgebra.range_spinGroup_toUnits_ne_evenUnitaryGroup_of_six_le_finrank`: over a field
@@ -74,18 +75,20 @@ namespace CliffordAlgebra
 
 universe u v
 
-variable {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V]
-  {Q : QuadraticForm K V}
+section CommRing
+
+variable {R : Type u} {M : Type v} [CommRing R] [AddCommGroup M] [Module R M]
+  {Q : QuadraticForm R M}
 
 /-! ### Auxiliary volume-element computations -/
 
 /-- Both products of `a + b • ω` with `a - b • ω`, for `ω` squaring to the scalar `s`. -/
-private theorem algebraMap_add_smul_mul_algebraMap_sub_smul {ω : CliffordAlgebra Q} {s : K}
-    (hsq : ω * ω = algebraMap K _ s) (a b : K) :
-    (algebraMap K _ a + b • ω) * (algebraMap K _ a - b • ω) =
-        algebraMap K (CliffordAlgebra Q) (a ^ 2 - b ^ 2 * s) ∧
-      (algebraMap K _ a - b • ω) * (algebraMap K _ a + b • ω) =
-        algebraMap K (CliffordAlgebra Q) (a ^ 2 - b ^ 2 * s) := by
+private theorem algebraMap_add_smul_mul_algebraMap_sub_smul {ω : CliffordAlgebra Q} {s : R}
+    (hsq : ω * ω = algebraMap R _ s) (a b : R) :
+    (algebraMap R _ a + b • ω) * (algebraMap R _ a - b • ω) =
+        algebraMap R (CliffordAlgebra Q) (a ^ 2 - b ^ 2 * s) ∧
+      (algebraMap R _ a - b • ω) * (algebraMap R _ a + b • ω) =
+        algebraMap R (CliffordAlgebra Q) (a ^ 2 - b ^ 2 * s) := by
   constructor <;>
   · simp only [Algebra.algebraMap_eq_smul_one, add_mul, mul_add, sub_mul, mul_sub,
       smul_mul_smul_comm, one_mul, mul_one, hsq, smul_smul]
@@ -93,12 +96,12 @@ private theorem algebraMap_add_smul_mul_algebraMap_sub_smul {ω : CliffordAlgebr
 
 /-- Twisted conjugation of a vector by `a + b • ω`, for `ω` anticommuting with the vector and
 squaring to the scalar `s`. -/
-private theorem algebraMap_add_smul_mul_ι_mul_algebraMap_sub_smul {ω : CliffordAlgebra Q} {s : K}
-    (hsq : ω * ω = algebraMap K _ s) {v : V} (hv : ω * ι Q v = -(ι Q v * ω)) (a b : K) :
-    (algebraMap K _ a + b • ω) * ι Q v * (algebraMap K _ a - b • ω) =
+private theorem algebraMap_add_smul_mul_ι_mul_algebraMap_sub_smul {ω : CliffordAlgebra Q} {s : R}
+    (hsq : ω * ω = algebraMap R _ s) {v : M} (hv : ω * ι Q v = -(ι Q v * ω)) (a b : R) :
+    (algebraMap R _ a + b • ω) * ι Q v * (algebraMap R _ a - b • ω) =
       (a ^ 2 + b ^ 2 * s) • ι Q v + (2 * a * b) • (ω * ι Q v) := by
   have hvω : ι Q v * ω = -(ω * ι Q v) := by rw [hv, neg_neg]
-  have h1 : ι Q v * (algebraMap K _ a - b • ω) = (algebraMap K _ a + b • ω) * ι Q v := by
+  have h1 : ι Q v * (algebraMap R _ a - b • ω) = (algebraMap R _ a + b • ω) * ι Q v := by
     rw [mul_sub, add_mul, ← Algebra.commutes, mul_smul_comm, smul_mul_assoc, hvω, smul_neg,
       sub_neg_eq_add]
   rw [mul_assoc, h1, ← mul_assoc]
@@ -106,12 +109,12 @@ private theorem algebraMap_add_smul_mul_ι_mul_algebraMap_sub_smul {ω : Cliffor
     one_mul, mul_one, hsq, smul_smul]
   module
 
-variable {l : List V}
+variable {l : List M}
 
 /-- The volume element of an orthogonal list with odd `n.choose 2` squares to `-∏ Q vᵢ`. -/
 private theorem prod_map_ι_sq_of_odd_choose_two (hl : l.Pairwise Q.IsOrtho)
     (hodd : Odd (l.length.choose 2)) :
-    (l.map (ι Q)).prod * (l.map (ι Q)).prod = algebraMap K _ (-(l.map Q).prod) := by
+    (l.map (ι Q)).prod * (l.map (ι Q)).prod = algebraMap R _ (-(l.map Q).prod) := by
   rw [prod_map_ι_sq_scalar hl, hodd.neg_one_pow, neg_one_mul]
 
 /-- The volume element of an orthogonal list with odd `n.choose 2` is reverse-antisymmetric. -/
@@ -123,21 +126,21 @@ private theorem reverse_prod_map_ι_of_odd_choose_two (hl : l.Pairwise Q.IsOrtho
 
 /-- **The even unitary units `a + b • ω` built from an orthogonal list of even length with odd
 `n.choose 2`.** For `ω` the volume element of such a list (its length is `≡ 2 (mod 4)`), in any
-quadratic space containing the list, `a + b • ω` is an even unitary unit as soon as
-`a² + b² ∏ Q vᵢ = 1`. No anisotropy is needed at this stage; it enters only when the unit is shown
-to lie outside the Lipschitz group. -/
+quadratic module over a commutative ring containing the list, `a + b • ω` is an even unitary unit as
+soon as `a² + b² ∏ Q vᵢ = 1`. Neither anisotropy nor a field is needed at this stage; both enter
+only when the unit is shown to lie outside the Lipschitz group. -/
 theorem exists_mem_evenUnitaryGroup_coe_eq_algebraMap_add_smul_prod_map_ι
-    (hl : l.Pairwise Q.IsOrtho) (heven : Even l.length) (hodd : Odd (l.length.choose 2)) {a b : K}
+    (hl : l.Pairwise Q.IsOrtho) (heven : Even l.length) (hodd : Odd (l.length.choose 2)) {a b : R}
     (hab : a ^ 2 + b ^ 2 * (l.map Q).prod = 1) :
     ∃ x : (CliffordAlgebra Q)ˣ, x ∈ evenUnitaryGroup Q ∧
-      (x : CliffordAlgebra Q) = algebraMap K _ a + b • (l.map (ι Q)).prod := by
+      (x : CliffordAlgebra Q) = algebraMap R _ a + b • (l.map (ι Q)).prod := by
   -- `ω` is even, `reverse ω = -ω` and `ω² = -∏ Q vᵢ`, so `a + b • ω` is an even unit with inverse
   -- `a - b • ω` and reverse norm `a² + b² ∏ Q vᵢ = 1`.
   obtain ⟨h₁, h₂⟩ := algebraMap_add_smul_mul_algebraMap_sub_smul
     (prod_map_ι_sq_of_odd_choose_two hl hodd) a b
   have hnorm : a ^ 2 - b ^ 2 * -(l.map Q).prod = 1 := by rw [← hab]; ring
   rw [hnorm, map_one] at h₁ h₂
-  refine ⟨⟨algebraMap K _ a + b • (l.map (ι Q)).prod, algebraMap K _ a - b • (l.map (ι Q)).prod,
+  refine ⟨⟨algebraMap R _ a + b • (l.map (ι Q)).prod, algebraMap R _ a - b • (l.map (ι Q)).prod,
     h₁, h₂⟩, ?_, rfl⟩
   rw [evenUnitaryGroup.mem_iff_reverse_mul_self_eq_one, Units.val_mk]
   refine ⟨?_, ?_⟩
@@ -148,6 +151,11 @@ theorem exists_mem_evenUnitaryGroup_coe_eq_algebraMap_add_smul_prod_map_ι
     exact (even Q).add_mem ((even Q).algebraMap_mem a) ((even Q).smul_mem hω b)
   · rw [map_add, map_smul, reverse.commutes, reverse_prod_map_ι_of_odd_choose_two hl hodd,
       smul_neg, ← sub_eq_add_neg, h₂]
+
+end CommRing
+
+variable {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V]
+  {Q : QuadraticForm K V} {l : List V}
 
 section Invertible
 
