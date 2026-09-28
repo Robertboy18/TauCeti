@@ -17,11 +17,12 @@ Let `P : TopPairing X Y Z` be a coefficient pairing of topological representatio
 topological commutative ring `R`. Forgetting the scalars gives a pairing `P.restrictScalarsInt` of
 the underlying additive representations, with the same underlying biadditive map, and continuous
 cohomology does not see the scalars either
-(`TauCeti.ContCohomology.restrictScalarsIntIso`). This file proves that the two are compatible: the
-cup product of `P.restrictScalarsInt` is the cup product of `P`, read through
-`restrictScalarsIntIso` (`TauCeti.TopPairing.cup_restrictScalarsIntIso`). The identity holds already
-on the resolution, on homogeneous cochains and on cocycles, because both sides are the same
-Alexander–Whitney formula on the same iterated function spaces.
+(`TauCeti.ContCohomology.restrictScalarsIntEquiv`). This file proves that the two are compatible
+in bidegree `(1, 1)`: the cup product of `P.restrictScalarsInt` is the cup product of `P`, read
+through `restrictScalarsIntEquiv` (`TauCeti.TopPairing.cup_one_one_restrictScalarsInt`), and
+already on one-cocycles (`TauCeti.TopPairing.cupCocycles_one_one_restrictScalarsInt`). The reason
+is that both cup products are the Alexander–Whitney formula on the same iterated function spaces,
+and the identification of the cocycles does not change their values.
 
 The consequence this is for: the explicit low-degree cup products of
 `TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Product`, given by cochain formulas on
@@ -29,8 +30,8 @@ inhomogeneous cocycles, agree with the canonical cup product of a pairing of *di
 representations over any scalars, under the comparison isomorphisms
 `TopRep.explicitH1AddEquivContinuousCohomologyOfDiscrete` and
 `TopRep.explicitH2AddEquivContinuousCohomologyOfDiscrete`
-(`TauCeti.TopPairing.cup_explicitH1AddEquivContinuousCohomologyOfDiscrete`). The agreement for the
-pairings `TauCeti.ofDiscreteModulePairing` of discrete `ℤ`-modules is
+(`TauCeti.TopPairing.cup_one_one_explicitH1AddEquivContinuousCohomologyOfDiscrete`). The
+agreement for the pairings `TauCeti.ofDiscreteModulePairing` of discrete `ℤ`-modules is
 `TauCeti.ContCohomology.explicitAddEquiv_cup11`; the statement here removes the restriction to
 `ℤ`, which is what the coefficient objects of the pro-`p` theory, objects of `TopRep (ZMod p) G`,
 need in order to compute their cup product on explicit cocycles.
@@ -48,9 +49,9 @@ need in order to compute their cup product on explicit cocycles.
 * `TauCeti.TopPairing.cup_one_one_ofDiscreteModuleRestrictScalarsInt`: for discrete
   representations, the cup product of the associated pairing of discrete `ℤ`-modules is the cup
   product of `P`, under `TauCeti.ContCohomology.ofDiscreteModuleRestrictScalarsIntEquiv`.
-* `TauCeti.TopPairing.cup_explicitH1AddEquivContinuousCohomologyOfDiscrete`: **the canonical cup
-  product of a pairing of discrete representations over any scalars is the explicit `(1,1)` cup
-  product on their carriers**, `(a ⌣ b) (g, h) = μ (a g) (g • b h)`.
+* `TauCeti.TopPairing.cup_one_one_explicitH1AddEquivContinuousCohomologyOfDiscrete`: **the
+  canonical cup product of a pairing of discrete representations over any scalars is the explicit
+  `(1,1)` cup product on their carriers**, `(a ⌣ b) (g, h) = μ (a g) (g • b h)`.
 
 ## References
 
@@ -73,7 +74,7 @@ namespace TopPairing
 
 section Pairing
 
-variable {R : Type u} [CommRing R] [TopologicalSpace R] {G : Type v} [Group G]
+variable {R : Type u} [CommRing R] [TopologicalSpace R] {G : Type v} [Monoid G]
   {X Y Z : TopRep.{max v w} R G} (P : TopPairing X Y Z)
 
 /-- **The coefficient pairing of the underlying additive representations**: the pairing `P` with
@@ -213,7 +214,7 @@ explicit `(1,1)` cup product on their carriers.** Under the comparisons
 `TopRep.explicitH2AddEquivContinuousCohomologyOfDiscrete`, the cup product `TauCeti.TopPairing.cup`
 in bidegree `(1, 1)` is `TauCeti.ContCohomology.explicitCup11` for the biadditive map `μ` with the
 values of `P`, `(a ⌣ b) (g, h) = μ (a g) (g • b h)`. -/
-theorem cup_explicitH1AddEquivContinuousCohomologyOfDiscrete (x : H1 G X.V) (y : H1 G Y.V) :
+theorem cup_one_one_explicitH1AddEquivContinuousCohomologyOfDiscrete (x : H1 G X.V) (y : H1 G Y.V) :
     P.cup 1 1 (X.explicitH1AddEquivContinuousCohomologyOfDiscrete x)
         (Y.explicitH1AddEquivContinuousCohomologyOfDiscrete y) =
       Z.explicitH2AddEquivContinuousCohomologyOfDiscrete

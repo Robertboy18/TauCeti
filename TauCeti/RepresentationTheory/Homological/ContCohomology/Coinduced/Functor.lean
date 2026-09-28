@@ -10,6 +10,7 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.SmoothDiscrete
 
 import all TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Discrete
+import TauCeti.RepresentationTheory.Continuous.TopRep.Basic
 
 /-!
 # Coinduction as a functor of smooth discrete representations
@@ -241,13 +242,6 @@ theorem coindFunctor_map_apply {A B : SmoothDiscreteTopRep.{u, v, w} R U}
     CategoryTheory.ObjectProperty.eqToHom_hom, TopRep.hom_comp] using
       coindFunctor_map_apply_impl R G U f a g
 
-/-- A transport between equal topological representations acts by casting the carrier. -/
-private theorem topRep_eqToHom_apply {k H : Type*} [Ring k] [TopologicalSpace k] [Monoid H]
-    {X Y : TopRep k H} (h : X = Y) (x : X) :
-    (eqToHom h).hom x = cast (congrArg TopRep.V h) x := by
-  subst h
-  rfl
-
 /-- Evaluation at `1`, natural in the smooth discrete coefficient representation. -/
 noncomputable def coindCounitNatTrans :
     coindFunctor.{u, v, max v w} R G U ⋙ smoothDiscreteResFunctor R G U ⟶
@@ -290,14 +284,14 @@ noncomputable def coindCounitNatTrans :
         (((coindFunctor R G U).map f).hom.hom ((eqToHom sA.symm).hom (cast cA a)))) 1 =
         f.hom.hom ((show DiscreteCoind G U A.obj.V from cast cA a) 1) :=
       coindFunctor_map_apply R G U f (cast cA a) 1
-    rw [topRep_eqToHom_apply, topRep_eqToHom_apply, cast_cast, cast_eq] at h1
-    rw [topRep_eqToHom_apply, topRep_eqToHom_apply, cast_cast] at h2
+    rw [TopRep.eqToHom_apply, TopRep.eqToHom_apply, cast_cast, cast_eq] at h1
+    rw [TopRep.eqToHom_apply, TopRep.eqToHom_apply, cast_cast] at h2
     have h1' := congrArg (cast (congrArg TopRep.V eY).symm) h1
     rw [cast_cast, cast_eq] at h1'
     change coindCounit R G U B (TopRep.Hom.hom (eqToHom (C := TopRep R U) _)
         (((smoothDiscreteResFunctor R G U).map ((coindFunctor R G U).map f)).hom.hom a)) =
       f.hom.hom (coindCounit R G U A (TopRep.Hom.hom (eqToHom (C := TopRep R U) _) a))
-    rw [topRep_eqToHom_apply, topRep_eqToHom_apply, h1', cast_cast]
+    rw [TopRep.eqToHom_apply, TopRep.eqToHom_apply, h1', cast_cast]
     exact h2
 
 private theorem coindCounitNatTrans_app_hom_impl (A : SmoothDiscreteTopRep.{u, v, max v w} R U) :

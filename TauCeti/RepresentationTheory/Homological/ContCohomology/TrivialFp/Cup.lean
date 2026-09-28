@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.GroupAction.Trivial
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Naturality
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.RestrictScalars
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.TrivialFp
@@ -49,17 +50,6 @@ namespace TauCeti
 open CategoryTheory TauCeti.ContCohomology _root_.ContinuousCohomology
 
 universe u
-
-section TrivialAction
-
-variable {G : Type*} [Monoid G] {R : Type*} [NonUnitalNonAssocSemiring R] [DistribMulAction G R]
-
-/-- For a trivial action of `G` on a ring, multiplication is equivariant. -/
-theorem smul_mul_smul_of_smul_eq_self (htriv : ∀ (g : G) (m : R), g • m = m) (g : G) (m n : R) :
-    g • m * g • n = g • (m * n) := by
-  rw [htriv, htriv, htriv]
-
-end TrivialAction
 
 attribute [local instance] TopRep.distribMulAction
 
@@ -110,15 +100,21 @@ theorem cohomFpAddEquivH2_cupFp (a b : cohomFp p G 1) :
         (cohomFpAddEquivH1 p G htriv b) := by
   obtain ⟨x, rfl⟩ := (trivialFp p G).explicitH1AddEquivContinuousCohomologyOfDiscrete.surjective a
   obtain ⟨y, rfl⟩ := (trivialFp p G).explicitH1AddEquivContinuousCohomologyOfDiscrete.surjective b
-  rw [cupFp_def, (fpPairing p G).cup_explicitH1AddEquivContinuousCohomologyOfDiscrete
+  rw [cupFp_def, (fpPairing p G).cup_one_one_explicitH1AddEquivContinuousCohomologyOfDiscrete
     (trivialFpMul p G) (trivialFpMul_eq p G) x y,
     cohomFpAddEquivH2_explicitH2AddEquivContinuousCohomologyOfDiscrete,
     cohomFpAddEquivH1_explicitH1AddEquivContinuousCohomologyOfDiscrete,
     cohomFpAddEquivH1_explicitH1AddEquivContinuousCohomologyOfDiscrete, explicitMap1Equiv_apply,
     explicitMap1Equiv_apply, explicitMap2Equiv_apply]
-  exact explicitMap2_explicitCup11 G _ _ _ (trivialFpMul p G) _ _ G (ZMod p) (ZMod p) (ZMod p)
-    AddMonoidHom.mul continuous_mul (smul_mul_smul_of_smul_eq_self htriv) _ _ _ _ _ _ _ _ _ _
-    (trivialFpEquiv_trivialFpMul p G) x y
+  -- naturality of the explicit cup product along the universe lift, from the pairing
+  -- `trivialFpMul` to multiplication in `ZMod p`, intertwined by `trivialFpEquiv`; the group does
+  -- not move, and the continuity and equivariance hypotheses are those of the goal
+  exact explicitMap2_explicitCup11 (μ := trivialFpMul p G) (H := G) (M' := ZMod p) (N' := ZMod p)
+    (P' := ZMod p) (μ' := AddMonoidHom.mul) (hequiv' := smul_mul_smul_of_smul_eq_self htriv)
+    (fM := (trivialFpEquiv p G).toAddEquiv.toAddMonoidHom)
+    (fN := (trivialFpEquiv p G).toAddEquiv.toAddMonoidHom)
+    (fP := (trivialFpEquiv p G).toAddEquiv.toAddMonoidHom)
+    (hpair := trivialFpEquiv_trivialFpMul p G) (a := x) (b := y) ..
 
 /-- **The cup square on the explicit models, read from the explicit side**: the cup square of the
 classes corresponding to two explicit classes `x`, `y` corresponds to their explicit `(1,1)` cup
