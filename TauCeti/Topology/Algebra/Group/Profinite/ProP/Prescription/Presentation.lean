@@ -40,6 +40,11 @@ canonical character of each normal form is found (Labute, Theorem 4).
   the prescription property.
 * `TauCeti.presentedProP.hasPrescriptionProperty_iff_forall_isCrossedHom_eq_zero`: for a minimal
   presentation, the converse holds as well.
+* `TauCeti.HasPrescriptionProperty.exists_continuous_isCrossedHom_comp_mk_forall_apply_of_eq`: for
+  a minimal presentation, a character with the prescription property admits a continuous crossed
+  homomorphism of the free group for `χ ∘ mk` with any prescribed values on the generators that
+  kills the relators; `…_forall_freeProPGen_eq_ite` is the Kronecker case on a presentation on
+  `Fin n`, the form in which the relator computations read off one coefficient at a time.
 
 ## References
 
@@ -158,5 +163,41 @@ theorem hasPrescriptionProperty_iff_forall_isCrossedHom_eq_zero
   rw [← heq, Function.comp_apply, mk_relator r hr, hF'.map_one]
 
 end presentedProP
+
+namespace HasPrescriptionProperty
+
+variable [Finite X] {χ : presentedProP p X rels →ₜ* ℤ_[p]ˣ}
+
+/-- **Prescribed values on the generators, killing the relators.** For a minimal presentation, a
+character `χ` with the prescription property admits, for every `c : X → ℤ_p`, a continuous crossed
+homomorphism of the free group for `χ ∘ mk` taking the value `c x` at the generator `x` and
+vanishing on every relator. -/
+theorem exists_continuous_isCrossedHom_comp_mk_forall_apply_of_eq (hχ : HasPrescriptionProperty χ)
+    (hrels : rels ⊆ proPFrattini p (freeProP p X)) (c : X → ℤ_[p]) :
+    ∃ F : freeProP p X → ℤ_[p], Continuous F ∧ IsCrossedHom (χ.comp (presentedProP.mk p rels)) F ∧
+      (∀ x, F (freeProP.of x) = c x) ∧ ∀ r ∈ rels, F r = 0 := by
+  rw [presentedProP.hasPrescriptionProperty_iff_forall_isCrossedHom_eq_zero hrels] at hχ
+  obtain ⟨F, hFc, hF, hFv⟩ := freeProP.exists_continuous_isCrossedHom_forall_apply_of_eq
+    (χ.comp (presentedProP.mk p rels)) c
+  exact ⟨F, hFc, hF, hFv, hχ F hFc hF⟩
+
+/-- **The Kronecker crossed homomorphism of a minimal presentation on `Fin n`.** For `j < n`, a
+character `χ` with the prescription property admits a crossed homomorphism of the free group for
+`χ ∘ mk` taking the value `1` at the `j`-th `ℕ`-indexed generator and `0` at every other one, and
+vanishing on every relator. -/
+theorem exists_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite {n : ℕ}
+    {rels : Set (freeProP p (Fin n))} {χ : presentedProP p (Fin n) rels →ₜ* ℤ_[p]ˣ}
+    (hχ : HasPrescriptionProperty χ) (hrels : rels ⊆ proPFrattini p (freeProP p (Fin n))) {j : ℕ}
+    (hj : j < n) :
+    ∃ F : freeProP p (Fin n) → ℤ_[p], IsCrossedHom (χ.comp (presentedProP.mk p rels)) F ∧
+      (∀ i, F (freeProPGen p n i) = if i = j then 1 else 0) ∧ ∀ r ∈ rels, F r = 0 := by
+  obtain ⟨F, -, hF, hFv, hFr⟩ := hχ.exists_continuous_isCrossedHom_comp_mk_forall_apply_of_eq
+    hrels fun i : Fin n ↦ if (i : ℕ) = j then (1 : ℤ_[p]) else 0
+  refine ⟨F, hF, fun i ↦ ?_, hFr⟩
+  by_cases hi : i < n
+  · rw [freeProPGen_of_lt p hi, hFv]
+  · rw [freeProPGen_eq_one_of_le p (not_lt.1 hi), hF.map_one, ite_eq_right (by omega)]
+
+end HasPrescriptionProperty
 
 end TauCeti

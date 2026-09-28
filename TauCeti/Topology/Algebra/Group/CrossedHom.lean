@@ -13,8 +13,8 @@ import TauCeti.RepresentationTheory.Homological.ContCohomology.LowDegree
 /-!
 # Crossed homomorphisms twisted by a character
 
-Let `H` be a group, `R` a commutative ring and `χ : H →* Rˣ` a character. A function `F : H → R`
-is a **crossed homomorphism** for `χ` when
+Let `H` be a group, `R` a semiring and `χ : H →* Rˣ` a character. A function `F : H → R` is a
+**crossed homomorphism** for `χ` when
 
   `F (x * y) = χ x * F y + F x`
 
@@ -25,13 +25,14 @@ continuous character `χ : G →ₜ* ℤ_pˣ` of a pro-`p` group, the continuous
 coefficients `I(χ)/pⁱ`, and their values on a minimal generating tuple are what Labute's
 prescription property of `χ` prescribes.
 
-This file records the elementary calculus of crossed homomorphisms: the values at `1`, at an
-inverse and at a power, the value on a product of elements on which the character is trivial, the
-composite with a homomorphism, and the fact that two continuous crossed homomorphisms for the same
-character into a `T1` topological ring agreeing on a topological generating set of `H` are equal,
-which is the corresponding statement for continuous `1`-cocycles
+This file records the elementary calculus of crossed homomorphisms. The definition, the cocycle
+identity and the composite with a homomorphism need only a semiring; the values at `1`, at an
+inverse and at a power, the value on a product of elements on which the character is trivial, and
+the fact that two continuous crossed homomorphisms for the same character into a `T1` topological
+ring agreeing on a topological generating set of `H` are equal, which is the corresponding
+statement for continuous `1`-cocycles
 (`TauCeti.ContCohomology.eq_of_mem_Z1_of_eqOn_of_topologicalClosure_closure_eq_top`) read
-through the action of `H` on `R` by `χ`.
+through the action of `H` on `R` by `χ`, use additive inverses and are stated for a ring.
 
 ## Main definitions
 
@@ -55,7 +56,11 @@ public section
 
 namespace TauCeti
 
-variable {H : Type*} [Group H] {R : Type*} [CommRing R] {F' : Type*} [FunLike F' H Rˣ]
+variable {H : Type*} [Group H] {R : Type*}
+
+section Semiring
+
+variable [Semiring R] {F' : Type*} [FunLike F' H Rˣ]
 
 /-- A function `F : H → R` is a **crossed homomorphism** for the character `χ : H →* Rˣ` when
 `F (x * y) = χ x * F y + F x` for all `x y : H`: it is a `1`-cocycle for the action of `H` on `R`
@@ -78,7 +83,26 @@ include hF
 theorem map_mul (x y : H) : F (x * y) = (χ x : R) * F y + F x :=
   hF x y
 
-variable [MonoidHomClass F' H Rˣ]
+/-- The composite of a crossed homomorphism for `χ` with a homomorphism `φ` is a crossed
+homomorphism for the character `χ ∘ φ`. -/
+theorem comp {H' : Type*} [Group H'] {F'' : Type*} [FunLike F'' H' H] [MonoidHomClass F'' H' H]
+    (φ : F'') {F''' : Type*} [FunLike F''' H' Rˣ] {χ' : F'''} (hχ' : ∀ x, χ' x = χ (φ x)) :
+    IsCrossedHom χ' (F ∘ φ) := fun x y ↦ by
+  rw [Function.comp_apply, _root_.map_mul, hF.map_mul, hχ', Function.comp_apply,
+    Function.comp_apply]
+
+end IsCrossedHom
+
+end Semiring
+
+section Ring
+
+variable [Ring R] {F' : Type*} [FunLike F' H Rˣ] [MonoidHomClass F' H Rˣ] {χ : F'} {F : H → R}
+
+namespace IsCrossedHom
+
+variable (hF : IsCrossedHom χ F)
+include hF
 
 /-- A crossed homomorphism vanishes at `1`. -/
 theorem map_one : F 1 = 0 := by
@@ -124,15 +148,6 @@ theorem map_list_prod_of_forall_eq_one {l : List H} (hl : ∀ a ∈ l, χ a = 1)
     rw [List.prod_cons, hF.map_mul, hl a (by simp), Units.val_one, one_mul,
       ih fun b hb ↦ hl b (by simp [hb]), List.map_cons, List.sum_cons, add_comm]
 
-omit [MonoidHomClass F' H Rˣ] in
-/-- The composite of a crossed homomorphism for `χ` with a homomorphism `φ` is a crossed
-homomorphism for the character `χ ∘ φ`. -/
-theorem comp {H' : Type*} [Group H'] {F'' : Type*} [FunLike F'' H' H] [MonoidHomClass F'' H' H]
-    (φ : F'') {F''' : Type*} [FunLike F''' H' Rˣ] {χ' : F'''} (hχ' : ∀ x, χ' x = χ (φ x)) :
-    IsCrossedHom χ' (F ∘ φ) := fun x y ↦ by
-  rw [Function.comp_apply, _root_.map_mul, hF.map_mul, hχ', Function.comp_apply,
-    Function.comp_apply]
-
 section Topology
 
 variable [TopologicalSpace H] [IsTopologicalGroup H] [TopologicalSpace R] [IsTopologicalAddGroup R]
@@ -154,5 +169,7 @@ theorem eq_of_eqOn_of_topologicalClosure_closure_eq_top {F₁ F₂ : H → R} (h
 end Topology
 
 end IsCrossedHom
+
+end Ring
 
 end TauCeti
