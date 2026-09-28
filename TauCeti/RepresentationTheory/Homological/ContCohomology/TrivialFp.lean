@@ -38,7 +38,7 @@ without repeatedly transporting across the definitional equality of trivial repr
 
 * `TauCeti.trivialFp_ρ_apply_apply`, `TauCeti.smul_trivialFp_V`: the action is trivial.
 * `TauCeti.continuousSMul_trivialFp`: the derived action on the carrier is continuous.
-* `TauCeti.natCard_trivialFp_V`: the carrier has `p` elements.
+* `TauCeti.natCard_trivialFp_V`: the `Nat.card` of the carrier is `p`.
 * `TauCeti.nontrivial_cohomFp_zero`: `H⁰(G, 𝔽_p)` is nontrivial.
 * `TauCeti.res_trivialFp`: restriction preserves trivial coefficients on the nose;
   `TauCeti.trivialFpEquiv_eqToHom_res_trivialFp`: the transport along this equality is the identity
@@ -102,7 +102,8 @@ instance : DiscreteTopology (trivialFp p G).V :=
 instance [NeZero p] : Finite (trivialFp p G).V :=
   inferInstanceAs (Finite (ULift.{u} (ZMod p)))
 
-/-- The carrier of `trivialFp p G` has `p` elements. -/
+/-- The `Nat.card` of the carrier of `trivialFp p G` is `p`. For `p ≠ 0` this says that the carrier
+has `p` elements; for `p = 0` the carrier is infinite, and `Nat.card` is `0` by convention. -/
 theorem natCard_trivialFp_V : Nat.card (trivialFp p G).V = p :=
   (Nat.card_congr (trivialFpEquiv p G).toEquiv).trans (Nat.card_zmod p)
 

@@ -19,8 +19,8 @@ The vanishing predicate behind the `p`-cohomological dimension
 `G`-modules `M`, with the continuous cohomology of `ofDiscreteModule ℤ G M`, while the coefficient
 object of the pro-`p` theory is the representation `trivialFp p G` of `G` on `𝔽_p` over the scalars
 `ZMod p`, with cohomology `cohomFp p G n`. This file connects the two. The carrier of
-`trivialFp p G` is a discrete trivial `G`-module of order `p`, hence `p`-primary torsion, and its
-`ℤ`-cohomology is `cohomFp p G n`
+`trivialFp p G` is a discrete trivial `G`-module whose `Nat.card` is `p`, hence `p`-primary
+torsion, and its `ℤ`-cohomology vanishes exactly when `cohomFp p G n` does
 (`TauCeti.ContCohomology.subsingleton_continuousCohomology_ofDiscreteModule_iff`). Hence
 `cd_p G ≤ n` forces `Hᵐ(G, 𝔽_p) = 0` for every `m > n`, and, contrapositively, a nonvanishing
 `Hⁿ(G, 𝔽_p)` bounds `cd_p G` from below by `n`.
@@ -28,15 +28,16 @@ object of the pro-`p` theory is the representation `trivialFp p G` of `G` on `�
 These are the two implications valid for every topological group. For a pro-`p` group the first
 one is an equivalence, by dévissage; that is the pro-`p` reduction of `cd_p` in
 `TauCeti.Topology.Algebra.Group.Profinite.ProP.CohomologicalDimension`. The dévissage runs on the
-trivial discrete `G`-modules of order `p`, and the last result here identifies their cohomology
-with `cohomFp p G n`: such a module is cyclic of order `p`, hence `G`-equivariantly isomorphic to
-the carrier of `trivialFp p G`.
+trivial discrete `G`-modules of prime order `p`, and the last result here shows that their
+cohomology vanishes exactly when `cohomFp p G n` does: such a module is cyclic of order `p`, hence
+`G`-equivariantly isomorphic to the carrier of `trivialFp p G`.
 
 ## Main results
 
 * `TauCeti.isPPrimaryTorsion_trivialFp_V`: the carrier of `trivialFp p G` is `p`-primary torsion.
-* `TauCeti.subsingleton_continuousCohomology_iff_subsingleton_cohomFp_of_natCard_eq`: a trivial
-  discrete `G`-module of order `p` has the cohomology of `𝔽_p`.
+* `TauCeti.subsingleton_continuousCohomology_iff_subsingleton_cohomFp_of_natCard_eq`: the
+  cohomology of a trivial discrete `G`-module of prime order `p` vanishes exactly when that of
+  `𝔽_p` does.
 * `TauCeti.CohomologicalDimensionLE.subsingleton_cohomFp`,
   `TauCeti.subsingleton_cohomFp_of_cohomologicalDimensionAt_le`: `cd_p G ≤ n` gives
   `Hᵐ(G, 𝔽_p) = 0` for `m > n`.
@@ -57,18 +58,25 @@ open ContCohomology
 
 universe u
 
-variable (p : ℕ) (G : Type u) [Group G]
+variable (p : ℕ) (G : Type u)
 
-attribute [local instance] TopRep.distribMulAction continuousSMul_trivialFp
+section Monoid
 
-/-- The carrier of `trivialFp p G` is `p`-primary torsion, having `p` elements. -/
+variable [Monoid G]
+
+/-- The carrier of `trivialFp p G` is `p`-primary torsion, its `Nat.card` being `p`. -/
 theorem isPPrimaryTorsion_trivialFp_V : IsPPrimaryTorsion p (trivialFp p G).V :=
   isPPrimaryTorsion_of_natCard_eq_pow ((natCard_trivialFp_V p G).trans (pow_one p).symm)
 
-variable {p G} [TopologicalSpace G] [IsTopologicalGroup G]
+end Monoid
 
-/-- **A trivial discrete `G`-module of order `p` has the cohomology of `𝔽_p`.** Such a module is
-cyclic of order `p`, hence `G`-equivariantly isomorphic to the carrier of `trivialFp p G`. -/
+variable {p G} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
+
+attribute [local instance] TopRep.distribMulAction continuousSMul_trivialFp
+
+/-- **The cohomology of a trivial discrete `G`-module of prime order `p` vanishes exactly when that
+of `𝔽_p` does.** Such a module is cyclic of order `p`, hence `G`-equivariantly isomorphic to the
+carrier of `trivialFp p G`. -/
 theorem subsingleton_continuousCohomology_iff_subsingleton_cohomFp_of_natCard_eq [Fact p.Prime]
     (A : Type u) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A] [DistribMulAction G A]
     (hA : Nat.card A = p) (htriv : ∀ (g : G) (a : A), g • a = a) (n : ℕ) :
