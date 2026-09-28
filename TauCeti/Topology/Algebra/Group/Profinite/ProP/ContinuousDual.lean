@@ -9,6 +9,7 @@ public import TauCeti.Topology.Algebra.ContinuousMonoidHom
 public import TauCeti.Topology.Algebra.ContinuousZModDual
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Frattini.Basic
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
+public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Burnside
 
 /-!
 # Continuous characters and the pro-`p` Frattini subgroup
@@ -33,6 +34,8 @@ Frattini quotient is an isomorphism of `𝔽_p`-vector spaces from the continuou
   of a continuous `𝔽_p`-valued character.
 * `TauCeti.proPFrattini_eq_iInf_ker`: the pro-`p` Frattini subgroup is the intersection of the
   kernels of the continuous `𝔽_p`-valued characters.
+* `TauCeti.IsProP.eq_top_of_forall_continuousMonoidHom_eq_one`: Burnside's basis theorem in
+  character form, for a closed subgroup of a pro-`p` group.
 * `ContinuousMonoidHom.ker_le_proPFrattini_of_forall_exists_comp_eq`: a continuous homomorphism
   through which every continuous `𝔽_p`-valued character factors has kernel inside the pro-`p`
   Frattini subgroup.
@@ -99,6 +102,21 @@ theorem proPFrattini_eq_iInf_ker [ContinuousMul G] :
   refine mem_proPFrattini_iff.mpr fun U hU ↦ ?_
   obtain ⟨φ, hφ⟩ := exists_continuousMonoidHom_ker_eq hU
   exact hφ ▸ Subgroup.mem_iInf.mp hx φ
+
+/-- **Burnside's basis theorem, character form.** A closed subgroup of a profinite pro-`p` group
+on which every continuous `𝔽_p`-valued character of the group vanishing on the subgroup is trivial
+is the whole group: a proper closed subgroup lies in an open normal subgroup of index `p`, which is
+the kernel of a nontrivial character. -/
+theorem IsProP.eq_top_of_forall_continuousMonoidHom_eq_one [IsTopologicalGroup G] [CompactSpace G]
+    [TotallyDisconnectedSpace G] (hG : IsProP p G) {H : Subgroup G} (hH : IsClosed (H : Set G))
+    (h : ∀ ξ : G →ₜ* Multiplicative (ZMod p), (∀ x ∈ H, ξ x = 1) → ξ = 1) : H = ⊤ := by
+  refine hG.eq_top_of_forall_not_le_openNormalSubgroup_index_eq hH fun U hU hHU ↦ ?_
+  obtain ⟨ξ, hξ⟩ := exists_continuousMonoidHom_ker_eq hU
+  have hξ1 : ξ = 1 := h ξ fun x hx ↦ MonoidHom.mem_ker.mp (hξ ▸ hHU hx)
+  have hUtop : U.toSubgroup = ⊤ := by
+    rw [← hξ, hξ1]
+    exact MonoidHom.ker_one
+  exact (Fact.out : p.Prime).ne_one (hU.symm.trans (Subgroup.index_eq_one.mpr hUtop))
 
 /-- **The Frattini criterion for a kernel.** If every continuous `𝔽_p`-valued character of `G`
 factors through a continuous homomorphism `φ : G → H`, then the kernel of `φ` lies in the pro-`p`
