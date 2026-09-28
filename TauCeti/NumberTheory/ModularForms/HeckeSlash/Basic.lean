@@ -131,12 +131,11 @@ variable (k : ℤ) {Δ : Submonoid (GL (Fin 2) ℚ)} {Γ₁ Γ₂ : Subgroup (GL
 
 /-- Each representative lies in `posDetInt 2` when `δ` does and `Γ₂` does. Only `Γ₂` and the
 chosen `δ` are constrained: nothing is asked of `Γ₁`, and nothing of `Δ` beyond containing `δ`.
-The hypothesis is used at `τᵥ⁻¹`, which lies in `Γ₂` because `Γ₂` is a group. -/
+This is `DoubleCoset.rightCosetRep_mem` at the submonoid `posDetInt 2`. -/
 lemma rightCosetRep_mem_posDetInt (hΓ₂ : Γ₂.toSubmonoid ≤ posDetInt 2)
     (hD : (D.out : GL (Fin 2) ℚ) ∈ posDetInt 2)
-    (v : DecompQuotient Γ₂ Γ₁ (D.out : GL (Fin 2) ℚ)⁻¹) : rightCosetRep D v ∈ posDetInt 2 := by
-  have hv : ((v.out : GL (Fin 2) ℚ))⁻¹ ∈ Γ₂ := inv_mem v.out.2
-  exact rightCosetRep_def D v ▸ mul_mem hD (hΓ₂ hv)
+    (v : DecompQuotient Γ₂ Γ₁ (D.out : GL (Fin 2) ℚ)⁻¹) : rightCosetRep D v ∈ posDetInt 2 :=
+  rightCosetRep_mem D hD hΓ₂ v
 
 /-- The representatives have positive determinant, in the shape
 `ModularForm.rat_smul_slash_of_det_pos` consumes.

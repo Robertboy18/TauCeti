@@ -42,7 +42,8 @@ representatives and `bᵢ` over a spanning family of the binary forms, span `�
 * `TauCeti.ModularSymbols.degree R`: the degree `∑ nₓ[x] ↦ ∑ nₓ` of a cusp divisor.
 * `TauCeti.ModularSymbols.degreeZero R`: the degree-zero divisors `Div⁰(ℙ¹(ℚ))`, the augmentation
   submodule of the cusp divisors, equal to the kernel of the degree (`degreeZero_eq_ker_degree`).
-* `TauCeti.ModularSymbols.degreeZeroRep R`: the representation of `SL(2, ℤ)` on `Div⁰(ℙ¹(ℚ))`.
+* `TauCeti.ModularSymbols.degreeZeroGLRep R`, `TauCeti.ModularSymbols.degreeZeroRep R`: the
+  representations of `GL(2, ℚ)` and of `SL(2, ℤ)` on `Div⁰(ℙ¹(ℚ))`.
 * `TauCeti.ModularSymbols.binaryFormSLRep R w`: the left action `P ↦ P ∣ γ⁻¹` of `SL(2, ℤ)` on
   binary forms of degree `w`.
 * `TauCeti.ModularSymbols R Γ w`: the module of modular symbols `𝕄_w(Γ; R)`.
@@ -122,10 +123,26 @@ theorem divisorRep_single (g : SL(2, ℤ)) (x : OnePoint ℚ) (r : R) :
 variable {R}
 
 variable (R) in
+/-- The representation of `GL(2, ℚ)` on the degree-zero divisors `Div⁰(ℙ¹(ℚ))`, through the
+Möbius action on the cusps. Its restriction to `SL(2, ℤ)` is `TauCeti.ModularSymbols.degreeZeroRep`;
+the larger group is what the Hecke operators on modular symbols act through. -/
+noncomputable def degreeZeroGLRep : Representation R (GL (Fin 2) ℚ) (degreeZero R) :=
+  (augmentationSubrepresentation R (GL (Fin 2) ℚ) (OnePoint ℚ)).toRepresentation
+
+@[simp]
+theorem coe_degreeZeroGLRep_apply (g : GL (Fin 2) ℚ) (D : degreeZero R) :
+    (degreeZeroGLRep R g D : R[OnePoint ℚ]) = ofMulAction R (GL (Fin 2) ℚ) (OnePoint ℚ) g D := by
+  rfl
+
+variable (R) in
 /-- The representation of `SL(2, ℤ)` on the degree-zero divisors `Div⁰(ℙ¹(ℚ))`. -/
 noncomputable def degreeZeroRep : Representation R SL(2, ℤ) (degreeZero R) :=
-  (augmentationSubrepresentation R (GL (Fin 2) ℚ) (OnePoint ℚ)).toRepresentation.comp
-    (mapGL ℚ)
+  (degreeZeroGLRep R).comp (mapGL ℚ)
+
+/-- The `SL(2, ℤ)`-representation on `Div⁰(ℙ¹(ℚ))` is the `GL(2, ℚ)`-representation along
+`mapGL ℚ`. -/
+theorem degreeZeroRep_apply (g : SL(2, ℤ)) : degreeZeroRep R g = degreeZeroGLRep R (mapGL ℚ g) :=
+  (rfl)
 
 @[simp]
 theorem coe_degreeZeroRep_apply (g : SL(2, ℤ)) (D : degreeZero R) :
