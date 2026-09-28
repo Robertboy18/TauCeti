@@ -82,6 +82,12 @@ theorem stalkValuation_def (X : PreAdicSpace.{u}) (x : X) :
     X.stalkValuation x = ValuationSpectrum.comap (IsLocalRing.residue _) (X.valuation x) := by
   rfl
 
+/-- The residue-field valuation pulled back along the residue map is the stalk valuation. -/
+@[simp]
+theorem comap_residue_valuation (X : PreAdicSpace.{u}) (x : X) :
+    ValuationSpectrum.comap (IsLocalRing.residue _) (X.valuation x) = X.stalkValuation x := by
+  rfl
+
 /-- The support of the stalk valuation is the maximal ideal of the stalk. -/
 @[simp]
 theorem supp_stalkValuation (X : PreAdicSpace.{u}) (x : X) :
@@ -97,7 +103,7 @@ theorem valuation_eq_of_comap_residue_eq (X : PreAdicSpace.{u}) (x : X)
     (hw : ValuationSpectrum.comap (IsLocalRing.residue _) w = X.stalkValuation x) :
     w = X.valuation x :=
   ValuationSpectrum.comap_injective IsLocalRing.residue_surjective
-    (hw.trans (X.stalkValuation_def x))
+    (hw.trans (X.comap_residue_valuation x).symm)
 
 end PreAdicSpace
 
