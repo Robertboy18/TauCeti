@@ -20,6 +20,7 @@ the vanishing of the cup square of a class of `H¹(G, 𝔽₂)` that lifts to a 
 
 * `ZMod.carryFour`: the carry `⌊x.val / 2⌋ : ℤ/4 → 𝔽₂`.
 * `ZMod.carryFour_add`: **the carry identity** `⌊(u + v)/2⌋ = ⌊u/2⌋ + ⌊v/2⌋ + (u mod 2)(v mod 2)`.
+* `ZMod.carryFour_zero`: the carry of `0` is `0`.
 -/
 
 public section
@@ -30,7 +31,13 @@ namespace ZMod
 representative of a residue modulo four. -/
 def carryFour (x : ZMod 4) : ZMod 2 := ((x.val / 2 : ℕ) : ZMod 2)
 
+/-- The carry of `0` is `0`. -/
+@[simp]
+theorem carryFour_zero : carryFour 0 = 0 := by
+  decide
+
 /-- **The carry identity in `ℤ/4`**: `⌊(u + v)/2⌋ = ⌊u/2⌋ + ⌊v/2⌋ + (u mod 2)(v mod 2)` in `𝔽₂`. -/
+@[simp]
 theorem carryFour_add (u v : ZMod 4) :
     carryFour (u + v) =
       carryFour u + carryFour v +
