@@ -6,7 +6,7 @@ Authors: Claude
 module
 
 public import TauCeti.Combinatorics.DenseGraphLimits.CutMetric.UnitIntervalModel
-public import TauCeti.Combinatorics.DenseGraphLimits.GraphonSpace.HomDensity
+public import TauCeti.Combinatorics.DenseGraphLimits.GraphonSpace.Basic
 
 /-!
 # Every graphon space embeds isometrically in the unit-interval graphon space
@@ -20,8 +20,8 @@ is an isometry, and it is the identity on `GraphonSpaceI` itself.
 The embedding is the bridge from the canonical carrier back to arbitrary fixed carriers: every
 fixed-carrier graphon space is isometric to a subspace of the canonical one, so the metric
 properties of `GraphonSpaceI` that pass to subspaces -- total boundedness in the first place --
-hold on every fixed-carrier graphon space. Homomorphism densities are preserved by the embedding,
-so the transport is compatible with the coordinates on graphon space.
+hold on every fixed-carrier graphon space. The embedding also preserves homomorphism densities;
+see `homDensityOnSpace_toGraphonSpaceI` in `GraphonSpace/HomDensity.lean`.
 
 ## Main definitions
 
@@ -31,14 +31,14 @@ so the transport is compatible with the coordinates on graphon space.
 
 ## Main results
 
-* `TauCeti.DenseGraphLimits.cutDist_unitIntervalRepr_left` and
-  `TauCeti.DenseGraphLimits.cutDist_unitIntervalRepr_right` -- the representative has the same
-  cut distance to every graphon as the original;
+* `TauCeti.DenseGraphLimits.Graphon.cutDist_unitIntervalRepr_left` and
+  `TauCeti.DenseGraphLimits.Graphon.cutDist_unitIntervalRepr_right` -- the representative has the
+  same cut distance to every graphon as the original;
+* `TauCeti.DenseGraphLimits.Graphon.isometry_unitIntervalRepr` -- taking representatives is an
+  isometry of strict graphons;
 * `TauCeti.DenseGraphLimits.isometry_toGraphonSpaceI` -- the induced map is an isometry;
 * `TauCeti.DenseGraphLimits.toGraphonSpaceI_eq_self` -- on the unit-interval graphon space the
-  induced map is the identity;
-* `TauCeti.DenseGraphLimits.homDensityOnSpace_toGraphonSpaceI` -- homomorphism densities are
-  preserved by the induced map.
+  induced map is the identity.
 
 ## References
 
@@ -89,34 +89,28 @@ theorem cutDist_unitIntervalRepr_right (X : Graphon Ω' μ') (W : Graphon Ω μ)
     cutDist X W.unitIntervalRepr = cutDist X W :=
   (cutDist_congr_right (cutDist_unitIntervalRepr W) X).symm
 
-/-- The unit-interval representative has the same homomorphism densities as the original
-graphon. -/
-@[simp]
-theorem homDensity_unitIntervalRepr {V : Type*} [Fintype V] (F : SimpleGraph V) [DecidableRel F.Adj]
-    (W : Graphon Ω μ) : homDensity F W.unitIntervalRepr = homDensity F W := by
-  have h := abs_homDensity_sub_le_cutDist F W.unitIntervalRepr W
-  rw [cutDist_unitIntervalRepr_left, cutDist_self, mul_zero] at h
-  exact sub_eq_zero.1 (abs_nonpos_iff.1 h)
+/-- Taking unit-interval representatives is an isometry for the cut-distance pseudometrics on
+strict graphons. -/
+theorem isometry_unitIntervalRepr : Isometry (unitIntervalRepr (μ := μ)) :=
+  Isometry.of_dist_eq fun U W => by
+    simp only [dist_eq_cutDist, cutDist_unitIntervalRepr_left, cutDist_unitIntervalRepr_right]
 
 end Graphon
 
 /-- The map from the graphon space over an arbitrary probability carrier to the unit-interval
-graphon space, sending the class of a graphon to the class of its unit-interval representative.
+graphon space, sending the class of a graphon to the class of its unit-interval representative:
+the descent of the isometry `Graphon.unitIntervalRepr` to the cut-distance quotients.
 
-It is well defined because the representative's cut class depends only on the cut class of the
-graphon, and it is an isometry (`isometry_toGraphonSpaceI`). -/
+It is an isometry (`isometry_toGraphonSpaceI`). -/
 def toGraphonSpaceI : GraphonSpace Ω μ → GraphonSpaceI :=
-  SeparationQuotient.lift (fun W => SeparationQuotient.mk W.unitIntervalRepr) fun U W h => by
-    rw [graphonSpace_mk_eq_mk_iff, Graphon.cutDist_unitIntervalRepr_left,
-      Graphon.cutDist_unitIntervalRepr_right, ← Graphon.dist_eq_cutDist]
-    exact Metric.inseparable_iff.1 h
+  SeparationQuotient.map Graphon.unitIntervalRepr
 
 /-- The embedding sends the class of a graphon to the class of its unit-interval
 representative. -/
 @[simp]
 theorem toGraphonSpaceI_mk (W : Graphon Ω μ) :
     toGraphonSpaceI (SeparationQuotient.mk W) = SeparationQuotient.mk W.unitIntervalRepr :=
-  SeparationQuotient.lift_mk _ W
+  SeparationQuotient.map_mk Graphon.isometry_unitIntervalRepr.uniformContinuous W
 
 /-- **Every graphon space embeds isometrically in the unit-interval graphon space.** -/
 theorem isometry_toGraphonSpaceI : Isometry (toGraphonSpaceI (μ := μ)) := by
@@ -126,14 +120,6 @@ theorem isometry_toGraphonSpaceI : Isometry (toGraphonSpaceI (μ := μ)) := by
 /-- On the unit-interval graphon space the embedding is the identity. -/
 @[simp]
 theorem toGraphonSpaceI_eq_self (x : GraphonSpaceI) : toGraphonSpaceI x = x := by
-  obtain ⟨W, rfl⟩ := SeparationQuotient.surjective_mk x
-  simp
-
-/-- Homomorphism densities are preserved by the embedding into the unit-interval graphon space. -/
-@[simp]
-theorem homDensityOnSpace_toGraphonSpaceI {V : Type*} [Fintype V] (F : SimpleGraph V)
-    [DecidableRel F.Adj] (x : GraphonSpace Ω μ) :
-    homDensityOnSpace F (toGraphonSpaceI x) = homDensityOnSpace F x := by
   obtain ⟨W, rfl⟩ := SeparationQuotient.surjective_mk x
   simp
 

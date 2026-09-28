@@ -207,16 +207,16 @@ theorem cutDist_triangle (U : Graphon Ω₁ μ₁) (W : Graphon Ω₂ μ₂) (X 
 
 /-- **The cut distance factors through vanishing cut distance in its left argument**: two graphons
 at cut distance zero, on arbitrary probability carriers, are at the same cut distance from every
-graphon. This is the zero-distance analogue of `cutDist_congr_ae_left`, and it needs the triangle
-inequality. -/
+graphon. This is the zero-distance analogue of `cutDist_congr_ae_left`. -/
 theorem cutDist_congr_left {U : Graphon Ω₁ μ₁} {U' : Graphon Ω₂ μ₂} (h : cutDist U U' = 0)
     (W : Graphon Ω₃ μ₃) : cutDist U W = cutDist U' W := by
   refine le_antisymm ?_ ?_
   · simpa [h] using cutDist_triangle U U' W
   · simpa [cutDist_comm U' U, h] using cutDist_triangle U' U W
 
-/-- **The cut distance factors through vanishing cut distance in its right argument**, by symmetry
-(`cutDist_comm`). -/
+/-- **The cut distance factors through vanishing cut distance in its right argument**: every graphon
+is at the same cut distance from two graphons at cut distance zero, on arbitrary probability
+carriers. This is the zero-distance analogue of `cutDist_congr_ae_right`. -/
 theorem cutDist_congr_right {W : Graphon Ω₂ μ₂} {W' : Graphon Ω₃ μ₃} (h : cutDist W W' = 0)
     (U : Graphon Ω₁ μ₁) : cutDist U W = cutDist U W' := by
   rw [cutDist_comm U W, cutDist_comm U W', cutDist_congr_left h U]
