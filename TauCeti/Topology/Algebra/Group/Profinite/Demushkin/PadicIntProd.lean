@@ -81,21 +81,15 @@ variable (p : ℕ) [Fact p.Prime]
 section Presentation
 
 omit [Fact p.Prime] in
-/-- The `q = 0` normal-form relator at rank two is the commutator `(x₁, x₂)` of the two free
-generators. -/
-theorem demushkinWordNeTwo_zero_two_freeProPGen :
-    demushkinWordNeTwo 0 2 (freeProPGen p 2) = labuteComm (freeProP.of 0) (freeProP.of 1) := by
-  simp only [demushkinWordNeTwo_zero_two, freeProPGen_of_lt p zero_lt_two,
-    freeProPGen_of_lt p one_lt_two, Fin.mk_zero, Fin.mk_one]
-
-omit [Fact p.Prime] in
-/-- In `⟨x₁, x₂ ∣ (x₁, x₂)⟩` the two generators commute. -/
+/-- In `⟨x₁, x₂ ∣ (x₁, x₂)⟩` the two generators commute: the relator is their commutator. -/
 private theorem presentedProP.commute_of_zero_of_one :
     Commute (presentedProP.of p {demushkinWordNeTwo 0 2 (freeProPGen p 2)} 0)
       (presentedProP.of p {demushkinWordNeTwo 0 2 (freeProPGen p 2)} 1) := by
   rw [← labuteComm_eq_one_iff_commute, ← presentedProP.mk_of, ← presentedProP.mk_of,
-    ← map_labuteComm, ← demushkinWordNeTwo_zero_two_freeProPGen]
-  exact presentedProP.mk_relator _ rfl
+    ← map_labuteComm]
+  exact presentedProP.mk_relator _ (by
+    rw [Set.mem_singleton_iff, demushkinWordNeTwo_zero_two, freeProPGen_of_lt p zero_lt_two,
+      freeProPGen_of_lt p one_lt_two, Fin.mk_zero, Fin.mk_one])
 
 /-- **The closed normal closure of `(x₁, x₂)` is the kernel of the exponent-sum map** of the free
 pro-`p` group on two generators, that is its closed commutator subgroup. -/
@@ -109,7 +103,8 @@ theorem topologicalClosure_normalClosure_demushkinWordNeTwo_zero_two :
     refine topologicalClosure_minimal _ (normalClosure_le_normal ?_)
       (isClosed_singleton.preimage (freeProP.exponentSum p (Fin 2)).continuous)
     rw [Set.singleton_subset_iff, SetLike.mem_coe, MonoidHom.mem_ker, MonoidHom.coe_ofClass,
-      demushkinWordNeTwo_zero_two_freeProPGen, map_labuteComm, labuteComm_eq_one]
+      demushkinWordNeTwo_zero_two, freeProPGen_of_lt p zero_lt_two, freeProPGen_of_lt p one_lt_two,
+      Fin.mk_zero, Fin.mk_one, map_labuteComm, labuteComm_eq_one]
   · -- The kernel is the closed commutator subgroup, and the commutators of the two generators die
     -- in the presented group, where the generators commute.
     intro y hy
