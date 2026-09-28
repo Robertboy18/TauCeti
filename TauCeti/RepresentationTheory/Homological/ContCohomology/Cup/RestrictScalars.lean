@@ -8,7 +8,7 @@ module
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Comparison
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Functoriality
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.RestrictScalars
-import TauCeti.RepresentationTheory.Continuous.TopRep.Basic
+import TauCeti.RepresentationTheory.Continuous.TopRep.EqToHom
 
 /-!
 # The cup product does not see the scalars
@@ -177,12 +177,12 @@ theorem eqToHom_ofDiscreteModulePairing_bil (x : X.V) (y : Y.V) :
   -- Assembled as a term: the transported value is typed at `Z.V`, which is the carrier of
   -- `ofDiscreteModule ℤ G Z.V` only after unfolding, so `rw` does not see the transports. The
   -- three casts are along equalities of a type with itself, so they vanish.
-  ((TopRep.eqToHom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj Z) _).trans
+  ((TopRep.eqToHom_hom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj Z) _).trans
     ((congrArg (cast _) (ofDiscreteModulePairing_bil_apply μ (P.equivariant_of_eq μ hμ) x y)).trans
       (hμ x y))).trans
     (congrArg₂ (fun a b ↦ P.restrictScalarsInt.bil a b)
-      (TopRep.eqToHom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj X) x).symm
-      (TopRep.eqToHom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj Y) y).symm)
+      (TopRep.eqToHom_hom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj X) x).symm
+      (TopRep.eqToHom_hom_apply (ofDiscreteModule_eq_restrictScalarsInt_obj Y) y).symm)
 
 /-- **For discrete representations, the cup product of the pairing of discrete `ℤ`-modules is the
 cup product of `P`**, under `TauCeti.ContCohomology.ofDiscreteModuleRestrictScalarsIntEquiv`, in
