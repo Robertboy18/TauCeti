@@ -25,16 +25,17 @@ together with its integral form `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`.
 
 ## Main results
 
-* `TauCeti.LocalFieldsRamification.natCard_lowerRamificationGroupReal_herbrand_mul`:
-  Herbrand's theorem in counting form, `#(G/H)_{φ_{M/L}(u)} · #H_u = #G_u`.
-* `TauCeti.LocalFieldsRamification.lowerRamificationGroupReal_eq_of_herbrand_lt_of_le_herbrand`:
-  the filtration of `L/K` is constant on `(φ_{M/L}(a), φ_{M/L}(b)]` when that of `M/K` is
-  constant on `(a, b]`.
-* `TauCeti.LocalFieldsRamification.herbrand_tower`: `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`.
-* `TauCeti.LocalFieldsRamification.herbrandOrderIso_tower`: the same identity for the bundled
-  order isomorphisms, `herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L)`.
-* `TauCeti.LocalFieldsRamification.inverseHerbrand_tower`: `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`.
-* `TauCeti.LocalFieldsRamification.psiNat_tower`: `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`.
+All declarations live in the namespace `TauCeti.LocalFieldsRamification`.
+
+* `natCard_lowerRamificationGroupReal_herbrand_mul`: Herbrand's theorem in counting form,
+  `#(G/H)_{φ_{M/L}(u)} · #H_u = #G_u`.
+* `lowerRamificationGroupReal_eq_of_forall_eq_of_herbrand_lt_of_le_herbrand`: the filtration of
+  `L/K` is constant on `(φ_{M/L}(a), φ_{M/L}(b)]` when that of `M/K` is constant on `(a, b]`.
+* `herbrand_tower`: `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`.
+* `herbrandOrderIso_tower`: the same identity for the bundled order isomorphisms,
+  `herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L)`.
+* `inverseHerbrand_tower`: `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`.
+* `psiNat_tower`: `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`.
 
 ## References
 
@@ -67,18 +68,18 @@ theorem natCard_lowerRamificationGroupReal_herbrand_mul [Normal K L] [IsGalois L
         Nat.card (lowerRamificationGroupReal L M u) =
       Nat.card (lowerRamificationGroupReal K M u) := by
   rw [← map_restrictNormalHom_lowerRamificationGroupReal (K := K) (L := L) (M := M) u,
-    ← Subgroup.relIndex_ker,
+    ← MonoidHom.domRestrict_range,
     ← Subgroup.card_map_of_injective (K := lowerRamificationGroupReal L M u)
       (AlgEquiv.restrictScalarsHom_injective K),
     map_restrictScalarsHom_lowerRamificationGroupReal K M L u,
     AlgEquiv.range_restrictScalarsHom_eq_ker_restrictNormalHom K L M,
-    ← Subgroup.subgroupOf_map_subtype, Subgroup.card_subtype, Subgroup.relIndex, mul_comm,
-    Subgroup.card_mul_index]
+    ← Subgroup.subgroupOf_map_subtype, Subgroup.card_subtype, ← MonoidHom.ker_domRestrict,
+    mul_comm, Subgroup.card_ker_mul_card_range]
 
 /-- Through Herbrand's theorem, the lower filtration of `L/K` is constant on the interval
 `(φ_{M/L}(a), φ_{M/L}(b)]` as soon as that of `M/K` is constant on `(a, b]`. -/
-theorem lowerRamificationGroupReal_eq_of_herbrand_lt_of_le_herbrand [Normal K L] [IsGalois L M]
-    [Normal K M] {a b : RamificationIndexDomain}
+theorem lowerRamificationGroupReal_eq_of_forall_eq_of_herbrand_lt_of_le_herbrand [Normal K L]
+    [IsGalois L M] [Normal K M] {a b : RamificationIndexDomain}
     (h : ∀ t : ℝ, (a : ℝ) < t → t ≤ b →
       lowerRamificationGroupReal K M t = lowerRamificationGroupReal K M b)
     {t : ℝ} (ht₁ : (herbrand L M a : ℝ) < t) (ht₂ : t ≤ herbrand L M b) :
@@ -135,7 +136,7 @@ private theorem herbrand_tower_of_mem_Icc_of_eq (m : ℕ) {u : RamificationIndex
   have hML := coe_herbrand_sub_coe_herbrand_of_forall_eq L M hau hHM
   have hLK := coe_herbrand_sub_coe_herbrand_of_forall_eq K L
     ((herbrand_strictMono L M).monotone hau) fun _ ht₁ ht₂ ↦
-      lowerRamificationGroupReal_eq_of_herbrand_lt_of_le_herbrand K L M hGM ht₁ ht₂
+      lowerRamificationGroupReal_eq_of_forall_eq_of_herbrand_lt_of_le_herbrand K L M hGM ht₁ ht₂
   have hcard : (Nat.card (lowerRamificationGroupReal K L (herbrand L M u)) : ℝ) *
       Nat.card (lowerRamificationGroupReal L M u) =
         Nat.card (lowerRamificationGroupReal K M u) := by

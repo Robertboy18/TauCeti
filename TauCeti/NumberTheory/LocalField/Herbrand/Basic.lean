@@ -151,18 +151,26 @@ private theorem herbrandReal_sub (a b : ℝ) :
   integral_interval_sub_left (intervalIntegrable_herbrandDensity K L 0 b)
     (intervalIntegrable_herbrandDensity K L 0 a)
 
+/-- On an interval `[a, b]` over which the lower ramification filtration is constantly `H`, that
+is `G_t = H` for every `a < t ≤ b`, the Herbrand function is affine of slope `#H / #G_0`. -/
+private theorem herbrandReal_sub_of_forall_eq {a b : ℝ} (hab : a ≤ b) {H : Subgroup (L ≃ₐ[K] L)}
+    (h : ∀ t : ℝ, a < t → t ≤ b → lowerRamificationGroupReal K L t = H) :
+    herbrandReal K L b - herbrandReal K L a =
+      (b - a) * (Nat.card H / Nat.card (lowerRamificationGroup K L 0)) := by
+  rw [herbrandReal_sub, ← smul_eq_mul, ← intervalIntegral.integral_const]
+  refine integral_congr_ae (Filter.Eventually.of_forall fun t ht ↦ ?_)
+  rw [uIoc_of_le hab] at ht
+  rw [herbrandDensity, h t ht.1 ht.2]
+
 /-- On an interval `[a, b] ⊆ [i - 1, i]` the Herbrand function is affine of slope
 `#G_i / #G_0`. -/
 private theorem herbrandReal_sub_of_le {i : ℤ} {a b : ℝ} (ha : (i : ℝ) - 1 ≤ a) (hab : a ≤ b)
     (hb : b ≤ i) :
     herbrandReal K L b - herbrandReal K L a =
       (b - a) * (Nat.card (lowerRamificationGroup K L i) /
-        Nat.card (lowerRamificationGroup K L 0)) := by
-  rw [herbrandReal_sub, ← smul_eq_mul, ← intervalIntegral.integral_const]
-  refine integral_congr_ae (Filter.Eventually.of_forall fun t ht ↦ ?_)
-  rw [uIoc_of_le hab] at ht
-  rw [herbrandDensity,
-    lowerRamificationGroupReal_eq_of_sub_one_lt_of_le K L (ha.trans_lt ht.1) (ht.2.trans hb)]
+        Nat.card (lowerRamificationGroup K L 0)) :=
+  herbrandReal_sub_of_forall_eq K L hab fun _ ht₁ ht₂ ↦
+    lowerRamificationGroupReal_eq_of_sub_one_lt_of_le K L (ha.trans_lt ht₁) (ht₂.trans hb)
 
 private theorem div_sub_le_herbrandReal_sub {a b : ℝ} (hab : a ≤ b) :
     (b - a) / Nat.card (lowerRamificationGroup K L 0) ≤
@@ -338,11 +346,8 @@ theorem coe_herbrand_sub_coe_herbrand_of_forall_eq {a b : RamificationIndexDomai
     (herbrand K L b : ℝ) - herbrand K L a =
       ((b : ℝ) - a) * (Nat.card (lowerRamificationGroupReal K L b) /
         Nat.card (lowerRamificationGroup K L 0)) := by
-  rw [coe_herbrand_eq_herbrandReal, coe_herbrand_eq_herbrandReal, herbrandReal_sub, ← smul_eq_mul,
-    ← intervalIntegral.integral_const]
-  refine integral_congr_ae (Filter.Eventually.of_forall fun t ht ↦ ?_)
-  rw [uIoc_of_le (Subtype.coe_le_coe.2 hab)] at ht
-  rw [herbrandDensity, h t ht.1 ht.2]
+  rw [coe_herbrand_eq_herbrandReal, coe_herbrand_eq_herbrandReal]
+  exact herbrandReal_sub_of_forall_eq K L (Subtype.coe_le_coe.2 hab) h
 
 /-- The Herbrand function is the identity as long as the lower ramification filtration is
 constant from `0` through `u`. -/
