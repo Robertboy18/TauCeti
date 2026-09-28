@@ -82,7 +82,7 @@ group for `u ≤ -1`. -/
 abbrev RamificationIndexDomain : Set ℝ := Set.Ici (-1 : ℝ)
 
 /-- A natural number lies in the domain `[-1, ∞)` of the Herbrand function. -/
-theorem natCast_mem_ramificationIndexDomain (n : ℕ) :
+theorem _root_.Nat.cast_mem_ramificationIndexDomain (n : ℕ) :
     (n : ℝ) ∈ RamificationIndexDomain :=
   le_trans (by norm_num : (-1 : ℝ) ≤ 0) (Nat.cast_nonneg n)
 

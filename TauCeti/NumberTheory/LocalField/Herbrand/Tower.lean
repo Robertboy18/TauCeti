@@ -122,13 +122,13 @@ private theorem herbrand_tower_of_mem_Icc_of_eq (m : ℕ) {u : RamificationIndex
     (h₁ : (m : ℝ) ≤ u) (h₂ : (u : ℝ) ≤ m + 1) :
     haveI : Module.Finite K M := Module.Finite.trans L M
     haveI := IsGalois.tower_top_of_isGalois K L M
-    herbrand K M ⟨m, natCast_mem_ramificationIndexDomain m⟩ =
-        herbrand K L (herbrand L M ⟨m, natCast_mem_ramificationIndexDomain m⟩) →
+    herbrand K M ⟨m, Nat.cast_mem_ramificationIndexDomain m⟩ =
+        herbrand K L (herbrand L M ⟨m, Nat.cast_mem_ramificationIndexDomain m⟩) →
       herbrand K M u = herbrand K L (herbrand L M u) := by
   have : Module.Finite K M := Module.Finite.trans L M
   have := IsGalois.tower_top_of_isGalois K L M
   intro hm
-  set a : RamificationIndexDomain := ⟨m, natCast_mem_ramificationIndexDomain m⟩
+  set a : RamificationIndexDomain := ⟨m, Nat.cast_mem_ramificationIndexDomain m⟩
   have hau : a ≤ u := Subtype.coe_le_coe.1 h₁
   -- The lower filtrations of `M/K` and `M/L` are constant on `(m, u] ⊆ (m, m + 1]`.
   have hGM : ∀ t : ℝ, (a : ℝ) < t → t ≤ u →
@@ -229,8 +229,9 @@ theorem psiNat_tower :
     psiNat K M = psiNat L M ∘ psiNat K L := funext fun n ↦ by
   have : Module.Finite K M := Module.Finite.trans L M
   have := IsGalois.tower_top_of_isGalois K L M
-  have h : (⟨(psiNat K L n : ℝ), natCast_mem_ramificationIndexDomain _⟩ : RamificationIndexDomain) =
-      inverseHerbrand K L ⟨n, natCast_mem_ramificationIndexDomain n⟩ :=
+  have h : (⟨(psiNat K L n : ℝ), Nat.cast_mem_ramificationIndexDomain _⟩ :
+        RamificationIndexDomain) =
+      inverseHerbrand K L ⟨n, Nat.cast_mem_ramificationIndexDomain n⟩ :=
     Subtype.ext (coe_psiNat K L n)
   apply Nat.cast_injective (R := ℝ)
   rw [Function.comp_apply, coe_psiNat, coe_psiNat, h, ← herbrandOrderIso_symm_apply,
