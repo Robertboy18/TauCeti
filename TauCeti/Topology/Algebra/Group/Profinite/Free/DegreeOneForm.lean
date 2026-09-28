@@ -63,7 +63,7 @@ characters on the images of the generators. Bringing a relator into normal form 
   `TauCeti.freeProP.heisenbergFunctional_unique`: the values of the Heisenberg functional on
   brackets and `p`-power classes characterize it.
 * `TauCeti.freeProP.degreeOneForm_swap`, `TauCeti.freeProP.isAlt_degreeOneForm_of_ne_two`,
-  `TauCeti.freeProP.degreeOneForm_isSymm_of_two`: the degree-one form is skew-symmetric,
+  `TauCeti.freeProP.isSymm_degreeOneForm_of_two`: the degree-one form is skew-symmetric,
   alternating for odd `p`, and symmetric for `p = 2`.
 * `TauCeti.freeProP.heisenbergFunctional_gradedMap`, `TauCeti.freeProP.degreeOneForm_gradedMap`:
   the transformation law under a continuous homomorphism between free pro-`p` groups.
@@ -450,7 +450,7 @@ theorem isAlt_degreeOneForm_of_ne_two (hp : p ≠ 2) (ρ : gradedPiece p (freePr
   · rw [heisenbergFunctional_gradedBracket_gradedMkZero, LinearMap.zero_apply, mul_comm, sub_self]
 
 /-- **The degree-one form is symmetric at `p = 2`**: skew-symmetry is symmetry when `-1 = 1`. -/
-theorem degreeOneForm_isSymm_of_two (hp : p = 2) (ρ : gradedPiece p (freeProP p X) 1) :
+theorem isSymm_degreeOneForm_of_two (hp : p = 2) (ρ : gradedPiece p (freeProP p X) 1) :
     (degreeOneForm ρ).IsSymm := by
   subst hp
   refine ⟨fun χ ψ ↦ ?_⟩

@@ -243,6 +243,7 @@ theorem gradedMk_pow {k : ℕ} (x : pLowerCentralSeries p G k) (n : ℕ) :
   rw [gradedMk, gradedMk, QuotientGroup.mk_pow, ofMul_pow]
 
 /-- The class of a product of elements of `λ_k` is the sum of their classes. -/
+@[simp]
 theorem gradedMk_list_prod {k : ℕ} (l : List (pLowerCentralSeries p G k)) :
     gradedMk p G k l.prod = (l.map (gradedMk p G k)).sum := by
   induction l with

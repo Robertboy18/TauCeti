@@ -16,11 +16,12 @@ pieces `gr_k(H) = λ_k ⧸ λ_{k+1}`. The three normal-form relator words of the
 Demushkin groups,
 
 * `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` for `p ∣ q`,
-* `x₁² x₂^{2^f} (x₂, x₃)(x₄, x₅) ⋯ (x_{n-1}, x_n)` for `f ≥ 1`,
-* `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` for `2 ∣ a` and `f ≥ 1`,
+* `x₁² x₂^{2^f} (x₂, x₃)(x₄, x₅) ⋯ (x_{n-1}, x_n)` for `f ≥ 2`,
+* `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` for `4 ∣ a` and `f ≥ 2`,
 
 read on any tuple `x : ℕ → H`, are products of `p`-th powers and Labute commutators
-`(x, y) = x⁻¹y⁻¹xy`, so they lie in `λ_1(H)`, the pro-`p` Frattini subgroup. This file computes
+`(x, y) = x⁻¹y⁻¹xy`, so they lie in `λ_1(H)`, the pro-`p` Frattini subgroup; for this membership
+alone the weaker hypotheses `f ≥ 1` and `2 ∣ a` suffice. This file computes
 their classes in `gr_1(H)`: the class of a Labute commutator is the bracket of the degree-zero
 classes, the class of a `p`-th power `g ^ (p c)` is `c` times the `p`-power class `π ⟦g⟧`, and so
 the class of a normal-form word is the sum of the brackets of its commutator pairs, plus

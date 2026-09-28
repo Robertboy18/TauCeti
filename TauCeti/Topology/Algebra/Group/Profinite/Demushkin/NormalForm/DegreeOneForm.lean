@@ -382,9 +382,9 @@ theorem exists_continuousMulEquiv_gradedMap_eq_of_not_isAlt
     ∃ e : freeProP 2 (Fin n) ≃ₜ* freeProP 2 (Fin n),
       gradedMap 2 (e : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).toMonoidHom
         (e : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).continuous 1 ρ = T := by
-  obtain ⟨φ⟩ := (degreeOneForm_isSymm_of_two rfl ρ).equivalent_of_finrank_eq
+  obtain ⟨φ⟩ := (isSymm_degreeOneForm_of_two rfl ρ).equivalent_of_finrank_eq
     (fun a ↦ isSquare_of_charTwo' a) hnd (fun h ↦ (hnalt h).elim)
-    (degreeOneForm_isSymm_of_two rfl T) hTnd (fun h ↦ (hTnalt h).elim) rfl
+    (isSymm_degreeOneForm_of_two rfl T) hTnd (fun h ↦ (hTnalt h).elim) rfl
   obtain ⟨e, he⟩ := exists_continuousMulEquiv_degreeOneForm_gradedMap_dualBasis ρ
     ((dualBasis 2 (Fin n)).map φ.toLinearEquiv.symm)
   refine ⟨e, degreeOneForm_injective_of_two rfl
@@ -449,7 +449,7 @@ theorem nondegenerate_degreeOneForm_demushkinWordTwoOdd (hn : Odd n) {f : ℕ} (
         demushkinWordTwoOdd_mem_pLowerCentralSeries_one (zero_lt_two.trans_le hf) n _⟩)
       ).Nondegenerate := by
   obtain ⟨N, hN⟩ := hn
-  refine ((degreeOneForm_isSymm_of_two rfl _).isRefl.nondegenerate_iff_separatingLeft).2
+  refine ((isSymm_degreeOneForm_of_two rfl _).isRefl.nondegenerate_iff_separatingLeft).2
     fun χ hχ ↦ ?_
   rw [(dualBasis 2 (Fin n)).ext_elem_iff]
   intro i
@@ -487,8 +487,11 @@ theorem nondegenerate_degreeOneForm_demushkinWordTwoOdd (hn : Odd n) {f : ℕ} (
     simpa [h0] using this
   rcases Nat.even_or_odd (i : ℕ) with hi | hi
   · have := key ⟨(i : ℕ) - 1, by omega⟩
+    -- The predecessor of `i` is a nonzero odd index whose successor is `i`.
     have h1 : ((i : ℕ) - 1) % 2 = 1 := by obtain ⟨r, hr⟩ := hi; omega
-    simpa [show (i : ℕ) - 1 ≠ 0 by omega, h1, show (i : ℕ) - 1 + 1 = i by omega] using this
+    have h2 : (i : ℕ) - 1 ≠ 0 := by omega
+    have h3 : (i : ℕ) - 1 + 1 = i := by omega
+    simpa [h2, h1, h3] using this
   · have := key ⟨(i : ℕ) + 1, by obtain ⟨r, hr⟩ := hi; omega⟩
     have h1 : ((i : ℕ) + 1) % 2 ≠ 1 := by obtain ⟨r, hr⟩ := hi; omega
     simpa [h1] using this
@@ -541,17 +544,18 @@ theorem not_isAlt_degreeOneForm_demushkinWordTwoEven (hn : 0 < n) {a f : ℕ} (h
 for `n` even**: pairing with the second coordinate character reads off the value of a character
 at `x₁`, pairing with the first one then reads off its value at `x₂`, and the remaining
 coordinate characters read off the values at the partners in the commutator pairs. -/
-theorem nondegenerate_degreeOneForm_demushkinWordTwoEven (hn : Even n) (hn0 : 0 < n) {a f : ℕ}
-    (ha : 4 ∣ a) (hf : 2 ≤ f) :
+theorem nondegenerate_degreeOneForm_demushkinWordTwoEven (hn : Even n) {a f : ℕ} (ha : 4 ∣ a)
+    (hf : 2 ≤ f) :
     (degreeOneForm (gradedMk 2 (freeProP 2 (Fin n)) 1
       ⟨demushkinWordTwoEven a f n (freeProPGen 2 n),
         demushkinWordTwoEven_mem_pLowerCentralSeries_one (dvd_trans (Dvd.intro 2 rfl) ha)
           (zero_lt_two.trans_le hf) n _⟩)).Nondegenerate := by
   obtain ⟨N, hN⟩ := hn
-  refine ((degreeOneForm_isSymm_of_two rfl _).isRefl.nondegenerate_iff_separatingLeft).2
+  refine ((isSymm_degreeOneForm_of_two rfl _).isRefl.nondegenerate_iff_separatingLeft).2
     fun χ hχ ↦ ?_
   rw [(dualBasis 2 (Fin n)).ext_elem_iff]
   intro i
+  have hn0 : 0 < n := i.pos
   rw [map_zero, Finsupp.zero_apply, dualBasis_repr, ← freeProPGen_val]
   have hχ' (j : ℕ) (hj : j < n) := hχ (dualBasis 2 (Fin n) ⟨j, hj⟩)
   simp only [degreeOneForm_demushkinWordTwoEven_dualBasis ha hf] at hχ'
@@ -607,8 +611,10 @@ theorem nondegenerate_degreeOneForm_demushkinWordTwoEven (hn : Even n) (hn0 : 0 
     simpa [h2] using this
   · obtain ⟨r, hr⟩ := hi
     have := key ((i : ℕ) - 1) (by omega) (by omega)
+    -- The predecessor of `i` is an even index whose successor is `i`.
     have h2 : ((i : ℕ) - 1) % 2 = 0 := by omega
-    simpa [h2, show (i : ℕ) - 1 + 1 = i by omega] using this
+    have h3 : (i : ℕ) - 1 + 1 = i := by omega
+    simpa [h2, h3] using this
 
 /-- **Labute's normal form modulo `λ_2`, the nonalternating case of odd rank.** Let `F` be the
 free pro-`2` group on `n` generators, `n` odd, and let `ρ ∈ gr_1(F)` have nondegenerate degree-one
@@ -643,7 +649,7 @@ theorem exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoEven
           demushkinWordTwoEven_mem_pLowerCentralSeries_one (dvd_trans (Dvd.intro 2 rfl) ha)
             (zero_lt_two.trans_le hf) n _⟩ :=
   exists_continuousMulEquiv_gradedMap_eq_of_not_isAlt ρ _ hnd hnalt
-    (nondegenerate_degreeOneForm_demushkinWordTwoEven hn (pos_of_not_isAlt ρ hnalt) ha hf)
+    (nondegenerate_degreeOneForm_demushkinWordTwoEven hn ha hf)
     (not_isAlt_degreeOneForm_demushkinWordTwoEven (pos_of_not_isAlt ρ hnalt) ha hf)
 
 
