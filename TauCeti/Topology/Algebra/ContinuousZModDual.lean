@@ -29,8 +29,8 @@ the algebraic dual, injectively.
 
 * `TauCeti.continuousZModDual`: the group of continuous `ZMod n`-valued characters of a topological
   group, written additively; for a prime `p` it is the continuous `𝔽_p`-dual.
-* `TauCeti.continuousZModDual.map`: precomposition with a continuous homomorphism, the transpose
-  map between continuous duals.
+* `ContinuousMonoidHom.continuousZModDualMap`: precomposition with a continuous homomorphism, the
+  transpose map between continuous duals.
 * `TauCeti.continuousZModDualToDual`: a continuous `ZMod p`-valued character of a commutative group
   whose additive copy is a `ZMod p`-module, read as a linear functional on that module.
 -/
@@ -64,7 +64,7 @@ variable {H : Type*} [Group H] [TopologicalSpace H]
 
 /-- **Precomposition with a continuous homomorphism** `f : G →ₜ* H`, as a `ZMod n`-linear map from
 the continuous `ZMod n`-dual of `H` to that of `G`: the transpose of `f`. -/
-def continuousZModDual.map (f : G →ₜ* H) :
+def _root_.ContinuousMonoidHom.continuousZModDualMap (f : G →ₜ* H) :
     continuousZModDual n H →ₗ[ZMod n] continuousZModDual n G :=
   AddMonoidHom.toZModLinearMap n
     { toFun χ := Additive.ofMul (χ.toMul.comp f)
@@ -73,15 +73,30 @@ def continuousZModDual.map (f : G →ₜ* H) :
         simp [toMul_add, ContinuousMonoidHom.mul_apply]) }
 
 /-- The transpose of `f` precomposes a character of `H` with `f`. -/
-theorem continuousZModDual.toMul_map (f : G →ₜ* H) (χ : continuousZModDual n H) :
-    (continuousZModDual.map f χ).toMul = χ.toMul.comp f :=
+theorem _root_.ContinuousMonoidHom.toMul_continuousZModDualMap (f : G →ₜ* H)
+    (χ : continuousZModDual n H) : (f.continuousZModDualMap χ).toMul = χ.toMul.comp f :=
   (rfl)
 
 /-- The transpose of `f` evaluates a character of `H` along `f`. -/
 @[simp]
-theorem continuousZModDual.toMul_map_apply (f : G →ₜ* H) (χ : continuousZModDual n H) (g : G) :
-    (continuousZModDual.map f χ).toMul g = χ.toMul (f g) :=
+theorem _root_.ContinuousMonoidHom.toMul_continuousZModDualMap_apply (f : G →ₜ* H)
+    (χ : continuousZModDual n H) (g : G) : (f.continuousZModDualMap χ).toMul g = χ.toMul (f g) :=
   (rfl)
+
+/-- The transpose of the identity is the identity. -/
+@[simp]
+theorem _root_.ContinuousMonoidHom.continuousZModDualMap_id :
+    (ContinuousMonoidHom.id G).continuousZModDualMap (n := n) = LinearMap.id :=
+  LinearMap.ext fun _ ↦ Additive.toMul.injective (ContinuousMonoidHom.ext fun _ ↦ rfl)
+
+variable {K : Type*} [Group K] [TopologicalSpace K]
+
+/-- The transpose of a composite is the composite of the transposes, in the reverse order. -/
+@[simp]
+theorem _root_.ContinuousMonoidHom.continuousZModDualMap_comp (g : H →ₜ* K) (f : G →ₜ* H) :
+    (g.comp f).continuousZModDualMap (n := n) =
+      f.continuousZModDualMap.comp g.continuousZModDualMap :=
+  LinearMap.ext fun _ ↦ Additive.toMul.injective (ContinuousMonoidHom.ext fun _ ↦ rfl)
 
 end ZModDual
 

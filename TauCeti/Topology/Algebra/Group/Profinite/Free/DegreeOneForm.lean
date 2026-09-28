@@ -8,9 +8,7 @@ module
 public import Mathlib.LinearAlgebra.Matrix.BilinearForm
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Graded
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Rank
-public import TauCeti.Topology.Algebra.Group.Profinite.Hopfian
-import Mathlib.LinearAlgebra.StdBasis
-import TauCeti.Topology.Algebra.Group.Profinite.ProP.ContinuousDual
+import Mathlib.Data.Nat.Choose.Dvd
 
 /-!
 # The degree-one form of a free pro-`p` group and changes of basis
@@ -28,22 +26,25 @@ functional with
 on the brackets and `p`-power classes of degree-zero classes. Assembling these functionals gives
 the **degree-one form** `TauCeti.freeProP.degreeOneForm ρ`, an `𝔽_p`-bilinear form on the
 continuous `𝔽_p`-dual `H¹(F, 𝔽_p) = Hom_cont(F, 𝔽_p)` attached linearly to each class
-`ρ ∈ gr_1(F)`. In the basis of the dual which is dual to the generators
-(`TauCeti.freeProP.dualBasis`), its matrix has the commutator coordinates of `ρ` in the standard
-basis of `gr_1(F)` above the diagonal and `(p choose 2)` times the `p`-power coordinates on the
-diagonal. These are the coordinates Labute reads off the class `⟦r⟧` of a relator `r ∈ λ_1(F)` to
-describe the cup product on `H¹(F ⧸ ⟪r⟫, 𝔽_p)` (Labute, Proposition 3); the identification of the
-degree-one form of `⟦r⟧` with that cup product is not proved in this file.
+`ρ ∈ gr_1(F)`. The form is skew-symmetric, and alternating for odd `p`. In the basis of the dual
+which is dual to the generators (`TauCeti.freeProP.dualBasis`), its matrix has the commutator
+coordinates of `ρ` in the standard basis of `gr_1(F)` above the diagonal, their negatives below
+it, and `(p choose 2)` times the `p`-power coordinates on the diagonal. These are the coordinates
+Labute reads off the class `⟦r⟧` of a relator `r ∈ λ_1(F)` to describe the cup product on
+`H¹(F ⧸ ⟪r⟫, 𝔽_p)` (Labute, Proposition 3); the identification of the degree-one form of `⟦r⟧`
+with that cup product is not proved in this file.
 
 Its transformation law is the change-of-basis law of that matrix: a continuous homomorphism
 `φ : F → F'` between free pro-`p` groups carries the form of `ρ` to the form of `φ_* ρ` pulled back
 along the transpose of `φ` on the duals, `B_{φ_* ρ}(χ, ψ) = B_ρ(χ ∘ φ, ψ ∘ φ)`, which in matrices is
 `B ↦ Pᵀ B P`. Every linear automorphism of the dual is the transpose of a continuous automorphism
-of `F`, because a family of elements of `F` whose classes span the Frattini quotient is the image
-of the generators under an automorphism (Burnside and the Hopf property). Hence a change of basis
-of `F` brings the matrix of the form of `ρ` into any shape a basis of the dual provides, in
-particular into the normal forms of the bilinear-form theory, which is how a relator of a
-Demushkin group is brought into normal form modulo `λ_2(F)` (Labute, Proposition 4).
+of `F` (`TauCeti.freeProP.exists_continuousMulEquiv_continuousZModDualMap_eq`). Hence a change of
+basis of `F` brings the matrix of the form of `ρ` into any shape a basis of the dual provides, in
+particular into the normal forms of the bilinear-form theory. This normalizes the form of `ρ`
+only: for odd `p` the diagonal factor `(p choose 2)` vanishes in `𝔽_p`, so the form does not see
+the `p`-power coordinates of `ρ`, and bringing a relator of a Demushkin group into normal form
+modulo `λ_2(F)` (Labute, Proposition 4) needs, beyond this normalization, a separate normalization
+of the `p`-power component invisible to the form and the cup-product identification above.
 
 ## Main definitions
 
@@ -51,10 +52,6 @@ Demushkin group is brought into normal form modulo `λ_2(F)` (Labute, Propositio
   continuous `𝔽_p`-characters of `F`.
 * `TauCeti.freeProP.degreeOneForm`: the degree-one form, the bilinear form on the continuous
   `𝔽_p`-dual of `F` attached linearly to a class in `gr_1(F)`.
-* `TauCeti.freeProP.dualBasis`: the basis of the continuous `𝔽_p`-dual of `F` dual to the
-  generators.
-* `TauCeti.freeProP.continuousMulEquivOfTopologicallyGenerates`: the continuous automorphism of
-  `F` sending the generators to a given topological generating family.
 
 ## Main results
 
@@ -62,13 +59,14 @@ Demushkin group is brought into normal form modulo `λ_2(F)` (Labute, Propositio
   `TauCeti.freeProP.heisenbergFunctional_gradedPow_gradedMkZero`,
   `TauCeti.freeProP.heisenbergFunctional_unique`: the values of the Heisenberg functional on
   brackets and `p`-power classes characterize it.
+* `TauCeti.freeProP.degreeOneForm_swap`, `TauCeti.freeProP.degreeOneForm_isAlt_of_ne_two`: the
+  degree-one form is skew-symmetric, and alternating for odd `p`.
 * `TauCeti.freeProP.heisenbergFunctional_gradedMap`, `TauCeti.freeProP.degreeOneForm_gradedMap`:
   the transformation law under a continuous homomorphism between free pro-`p` groups.
-* `TauCeti.freeProP.degreeOneForm_dualBasis_of_lt`, `TauCeti.freeProP.degreeOneForm_dualBasis_self`:
+* `TauCeti.freeProP.degreeOneForm_dualBasis_of_lt`,
+  `TauCeti.freeProP.degreeOneForm_dualBasis_of_gt`, `TauCeti.freeProP.degreeOneForm_dualBasis_self`:
   the matrix of the degree-one form in the dual basis of the generators is read off the
   coordinates of the class in the standard basis of `gr_1(F)`.
-* `TauCeti.freeProP.exists_continuousMulEquiv_continuousZModDual_map_eq`: every linear
-  automorphism of the continuous `𝔽_p`-dual of `F` is the transpose of a continuous automorphism.
 * `TauCeti.freeProP.exists_continuousMulEquiv_toMatrix_degreeOneForm_gradedMap`: the matrix of
   the degree-one form of a class in any basis of the dual is the matrix, in the dual basis of the
   generators, of the form of the image of the class under some continuous automorphism of `F`.
@@ -346,24 +344,29 @@ private noncomputable def degreeOneFormRight (χ : freeProP p X →ₜ* Multipli
       map_add' := fun ψ ψ' ↦ by
         rw [toMul_add, heisenbergFunctional_mul_right, LinearMap.add_apply] }
 
+private theorem degreeOneFormRight_apply (χ : freeProP p X →ₜ* Multiplicative (ZMod p))
+    (ρ : gradedPiece p (freeProP p X) 1) (ψ : continuousZModDual p (freeProP p X)) :
+    degreeOneFormRight χ ρ ψ = heisenbergFunctional χ ψ.toMul ρ := by
+  rw [degreeOneFormRight, AddMonoidHom.coe_toZModLinearMap, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
+
 /-- The Heisenberg functional at a fixed class, as a bilinear form on the continuous dual. -/
 private noncomputable def degreeOneFormAux (ρ : gradedPiece p (freeProP p X) 1) :
     LinearMap.BilinForm (ZMod p) (continuousZModDual p (freeProP p X)) :=
   AddMonoidHom.toZModLinearMap p
     { toFun χ := degreeOneFormRight χ.toMul ρ
       map_zero' := LinearMap.ext fun ψ ↦ by
-        change heisenbergFunctional (0 : continuousZModDual p (freeProP p X)).toMul ψ.toMul ρ = 0
-        rw [toMul_zero, heisenbergFunctional_one_left, LinearMap.zero_apply]
+        rw [degreeOneFormRight_apply, toMul_zero, heisenbergFunctional_one_left,
+          LinearMap.zero_apply, LinearMap.zero_apply]
       map_add' := fun χ χ' ↦ LinearMap.ext fun ψ ↦ by
-        change heisenbergFunctional (χ + χ').toMul ψ.toMul ρ =
-          heisenbergFunctional χ.toMul ψ.toMul ρ + heisenbergFunctional χ'.toMul ψ.toMul ρ
-        rw [toMul_add, heisenbergFunctional_mul_left, LinearMap.add_apply] }
+        rw [degreeOneFormRight_apply, toMul_add, heisenbergFunctional_mul_left,
+          LinearMap.add_apply, LinearMap.add_apply, degreeOneFormRight_apply,
+          degreeOneFormRight_apply] }
 
 private theorem degreeOneFormAux_apply (ρ : gradedPiece p (freeProP p X) 1)
     (χ ψ : continuousZModDual p (freeProP p X)) :
     degreeOneFormAux ρ χ ψ = heisenbergFunctional χ.toMul ψ.toMul ρ := by
   rw [degreeOneFormAux, AddMonoidHom.coe_toZModLinearMap, AddMonoidHom.coe_mk, ZeroHom.coe_mk,
-    degreeOneFormRight, AddMonoidHom.coe_toZModLinearMap, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
+    degreeOneFormRight_apply]
 
 /-- **The degree-one form** of a free pro-`p` group `F` of finite rank: the `𝔽_p`-bilinear form
 `(χ, ψ) ↦ heisenbergFunctional χ ψ ρ` on the continuous `𝔽_p`-dual of `F`, attached
@@ -405,6 +408,34 @@ theorem degreeOneForm_gradedPow_gradedMkZero (u : freeProP p X)
       p.choose 2 • ((χ.toMul u).toAdd * (ψ.toMul u).toAdd) :=
   heisenbergFunctional_gradedPow_gradedMkZero _ _ u
 
+/-- **The degree-one form is skew-symmetric**: `B_ρ(ψ, χ) = -B_ρ(χ, ψ)`. On the `p`-power classes
+both sides are `(p choose 2) · χ u · ψ u`, and `2 · (p choose 2) = p (p - 1)` vanishes in `𝔽_p`. -/
+theorem degreeOneForm_swap (ρ : gradedPiece p (freeProP p X) 1)
+    (χ ψ : continuousZModDual p (freeProP p X)) :
+    degreeOneForm ρ ψ χ = -degreeOneForm ρ χ ψ := by
+  rw [degreeOneForm_apply, degreeOneForm_apply, ← LinearMap.neg_apply]
+  refine LinearMap.congr_fun (linearMap_ext (fun u ↦ ?_) fun u v ↦ ?_) ρ
+  · rw [LinearMap.neg_apply, heisenbergFunctional_gradedPow_gradedMkZero,
+      heisenbergFunctional_gradedPow_gradedMkZero, mul_comm, eq_neg_iff_add_eq_zero, ← add_nsmul,
+      ← two_mul, Nat.choose_two_right, Nat.two_mul_div_two_of_even (Nat.even_mul_pred_self p),
+      nsmul_eq_mul, Nat.cast_mul, ZMod.natCast_self, zero_mul, zero_mul]
+  · rw [LinearMap.neg_apply, heisenbergFunctional_gradedBracket_gradedMkZero,
+      heisenbergFunctional_gradedBracket_gradedMkZero]
+    ring
+
+/-- **The degree-one form is alternating for odd `p`**: the diagonal factor `(p choose 2)` is
+divisible by `p`. -/
+theorem degreeOneForm_isAlt_of_ne_two (hp : p ≠ 2) (ρ : gradedPiece p (freeProP p X) 1) :
+    (degreeOneForm ρ).IsAlt := by
+  intro χ
+  rw [degreeOneForm_apply]
+  refine (LinearMap.congr_fun (linearMap_ext (g := 0) (fun u ↦ ?_) fun u v ↦ ?_) ρ).trans
+    (LinearMap.zero_apply ρ)
+  · rw [heisenbergFunctional_gradedPow_gradedMkZero, LinearMap.zero_apply, nsmul_eq_mul,
+      (ZMod.natCast_eq_zero_iff _ _).mpr (Nat.Prime.dvd_choose_self Fact.out two_ne_zero
+        (lt_of_le_of_ne (Nat.Prime.two_le Fact.out) hp.symm)), zero_mul]
+  · rw [heisenbergFunctional_gradedBracket_gradedMkZero, LinearMap.zero_apply, mul_comm, sub_self]
+
 variable {Y : Type u} [Finite Y]
 
 /-- **The transformation law of the degree-one form.** A continuous homomorphism `φ : F → F'`
@@ -415,42 +446,19 @@ matrix of the form by `B ↦ Pᵀ B P`. -/
 theorem degreeOneForm_gradedMap (φ : freeProP p X →ₜ* freeProP p Y)
     (ρ : gradedPiece p (freeProP p X) 1) :
     degreeOneForm (gradedMap p φ.toMonoidHom φ.continuous 1 ρ) =
-      (degreeOneForm ρ).compl₁₂ (continuousZModDual.map φ) (continuousZModDual.map φ) :=
+      (degreeOneForm ρ).compl₁₂ φ.continuousZModDualMap φ.continuousZModDualMap :=
   LinearMap.ext₂ fun χ ψ ↦ by
     rw [degreeOneForm_apply, LinearMap.compl₁₂_apply, degreeOneForm_apply,
-      continuousZModDual.toMul_map, continuousZModDual.toMul_map, heisenbergFunctional_gradedMap]
+      ContinuousMonoidHom.toMul_continuousZModDualMap,
+      ContinuousMonoidHom.toMul_continuousZModDualMap, heisenbergFunctional_gradedMap]
 
 end Form
-
-/-! ### The dual basis of the generators -/
-
-section DualBasis
-
-variable (p X) [Fintype X] [DecidableEq X]
-
-/-- **The dual basis of the generators**: the basis of the continuous `𝔽_p`-dual of `freeProP p X`
-whose `i`-th vector is the coordinate character `x_j ↦ δ_{ij}`. -/
-noncomputable def dualBasis : Module.Basis X (ZMod p) (continuousZModDual p (freeProP p X)) :=
-  (Pi.basisFun (ZMod p) X).map (continuousZModDualEquiv p X).symm
-
-/-- The `i`-th vector of the dual basis is the character reading off the exponent of `x_i`. -/
-theorem dualBasis_apply (i : X) :
-    dualBasis p X i = Additive.ofMul (characterOfFun p X (Pi.single i 1)) := by
-  rw [dualBasis, Module.Basis.map_apply, Pi.basisFun_apply, continuousZModDualEquiv_symm_apply]
-
-/-- The `i`-th coordinate character takes the value `δ_{ij}` at the generator `x_j`. -/
-@[simp]
-theorem toMul_dualBasis_of (i j : X) :
-    (dualBasis p X i).toMul (of j) = Multiplicative.ofAdd ((Pi.single i 1 : X → ZMod p) j) := by
-  rw [dualBasis_apply, toMul_ofMul, characterOfFun_of]
-
-end DualBasis
 
 /-! ### Coordinates of the degree-one form -/
 
 section Coordinates
 
-variable [Fintype X]
+variable [Finite X]
 
 /-- Evaluation of the degree-one form at two fixed characters, as a linear functional on
 `gr_1(F)`. -/
@@ -508,6 +516,16 @@ theorem degreeOneForm_dualBasis_of_lt (ρ : gradedPiece p (freeProP p X) 1) {i j
       · simp [hmi]
   exact (evalDegreeOneForm_apply _ _ ρ).symm.trans (LinearMap.congr_fun h ρ)
 
+/-- **The degree-one form reads off the commutator coordinates, below the diagonal**: for
+`j < i`, the value of the form of `ρ` on the `i`-th and `j`-th coordinate characters is the
+negative of the coefficient of `[⟦x_j⟧, ⟦x_i⟧]` in the expansion of `ρ` in the standard basis of
+`gr_1(F)`. -/
+theorem degreeOneForm_dualBasis_of_gt (ρ : gradedPiece p (freeProP p X) 1) {i j : X}
+    (hji : j < i) :
+    degreeOneForm ρ (dualBasis p X i) (dualBasis p X j) =
+      -(degreeOneBasis p X).repr ρ (Sum.inr ⟨(j, i), hji⟩) := by
+  rw [degreeOneForm_swap, degreeOneForm_dualBasis_of_lt ρ hji]
+
 /-- **The degree-one form reads off the `p`-power coordinates**: the value of the form of `ρ` on
 the `i`-th coordinate character twice is `(p choose 2)` times the coefficient of `π ⟦x_i⟧` in the
 expansion of `ρ` in the standard basis of `gr_1(F)`. -/
@@ -533,86 +551,11 @@ theorem degreeOneForm_dualBasis_self (ρ : gradedPiece p (freeProP p X) 1) (i : 
 
 end Coordinates
 
-/-! ### Automorphisms of a free pro-`p` group of finite rank -/
+/-! ### Normal forms after an automorphism -/
 
 section Automorphism
 
 variable [Finite X]
-
-/-- **The automorphism of a free pro-`p` group of finite rank sending the generators to a
-topological generating family.** The endomorphism `x_i ↦ y_i` is surjective because the `y_i`
-generate topologically, hence bijective by the Hopf property of topologically finitely generated
-profinite groups. -/
-noncomputable def continuousMulEquivOfTopologicallyGenerates (y : X → freeProP p X)
-    (hy : (Subgroup.closure (Set.range y)).topologicalClosure = ⊤) :
-    freeProP p X ≃ₜ* freeProP p X :=
-  (isTopologicallyFinitelyGenerated_freeProP p X).continuousMulEquivOfSurjective
-    (f := (lift (isProP_freeProP p X) y).toMonoidHom) (lift (isProP_freeProP p X) y).continuous
-    (lift_surjective _ (by
-      rw [dense_iff_closure_eq, ← Subgroup.topologicalClosure_coe, hy, Subgroup.coe_top]))
-
-omit [Fact p.Prime] in
-/-- The automorphism attached to a topological generating family sends the generators to it. -/
-@[simp]
-theorem continuousMulEquivOfTopologicallyGenerates_of (y : X → freeProP p X)
-    (hy : (Subgroup.closure (Set.range y)).topologicalClosure = ⊤) (i : X) :
-    continuousMulEquivOfTopologicallyGenerates y hy (of i) = y i := by
-  rw [continuousMulEquivOfTopologicallyGenerates,
-    IsTopologicallyFinitelyGenerated.continuousMulEquivOfSurjective_apply]
-  exact lift_of _ _ i
-
-/-- **Every linear automorphism of the continuous `𝔽_p`-dual of a free pro-`p` group of finite
-rank is the transpose of a continuous automorphism.** Given `S`, the family
-`y_j = ∏_i x_i ^ {(S χ_i)(x_j)}`, where `χ_i` is the dual basis of the generators, satisfies
-`χ (y_j) = (S χ)(x_j)` for every character `χ`, so it generates topologically, by Burnside, and the
-automorphism `x_j ↦ y_j` has transpose `S`. -/
-theorem exists_continuousMulEquiv_continuousZModDual_map_eq
-    (S : continuousZModDual p (freeProP p X) ≃ₗ[ZMod p] continuousZModDual p (freeProP p X)) :
-    ∃ e : freeProP p X ≃ₜ* freeProP p X, ∀ χ : continuousZModDual p (freeProP p X),
-      continuousZModDual.map (e : freeProP p X →ₜ* freeProP p X) χ = S χ := by
-  cases nonempty_fintype X
-  classical
-  -- The class in the Frattini quotient with coordinates `(S χ_i)(x_j)` in the generator classes.
-  let w : X → Additive (freeProP p X ⧸ proPFrattini p (freeProP p X)) := fun j ↦
-    ∑ i, ((S (dualBasis p X i)).toMul (of j)).toAdd.val • frattiniQuotientBasis p X i
-  choose y hy using fun j ↦ QuotientGroup.mk_surjective (w j).toMul
-  -- Every character takes the same value at `y_j` as its image under `S` takes at `x_j`.
-  have key (χ : continuousZModDual p (freeProP p X)) (j : X) :
-      χ.toMul (y j) = (S χ).toMul (of j) := by
-    let L : continuousZModDual p (freeProP p X) →+ ZMod p :=
-      { toFun χ := (χ.toMul (y j)).toAdd
-        map_zero' := by simp
-        map_add' := fun a b ↦ by simp [toMul_add, ContinuousMonoidHom.mul_apply, toAdd_mul] }
-    let R : continuousZModDual p (freeProP p X) →+ ZMod p :=
-      { toFun χ := ((S χ).toMul (of j)).toAdd
-        map_zero' := by simp
-        map_add' := fun a b ↦ by simp [toMul_add, ContinuousMonoidHom.mul_apply, toAdd_mul] }
-    have hLR : L.toZModLinearMap p = R.toZModLinearMap p := by
-      refine (dualBasis p X).ext fun i ↦ ?_
-      -- Evaluate the coordinate character `χ_i` at `y_j` through the Frattini quotient.
-      simp only [AddMonoidHom.coe_toZModLinearMap, L, R, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
-      rw [← frattiniQuotientDualEquiv_symm_apply_mk, hy j]
-      simp only [w, toMul_sum, map_prod, toMul_nsmul, map_pow, frattiniQuotientBasis_apply,
-        toMul_ofMul, QuotientGroup.mk'_apply, frattiniQuotientDualEquiv_symm_apply_mk,
-        toMul_dualBasis_of, toAdd_prod, toAdd_pow, toAdd_ofAdd]
-      simp [Pi.single_apply]
-    exact Multiplicative.toAdd.injective (LinearMap.congr_fun hLR χ)
-  -- The family `y` generates topologically: a character killing it is killed by `S`.
-  have hgen : (Subgroup.closure (Set.range y)).topologicalClosure = ⊤ := by
-    refine (isProP_freeProP p X).eq_top_of_forall_continuousMonoidHom_eq_one
-      (Subgroup.isClosed_topologicalClosure _) fun ξ hξ ↦ ?_
-    have h1 : (S (Additive.ofMul ξ)).toMul = 1 := hom_ext fun j ↦ by
-      rw [← key (Additive.ofMul ξ) j, toMul_ofMul]
-      exact hξ (y j) (Subgroup.le_topologicalClosure _ (Subgroup.subset_closure ⟨j, rfl⟩))
-    have h2 : S (Additive.ofMul ξ) = 0 := by
-      rw [← ofMul_toMul (S (Additive.ofMul ξ)), h1, ofMul_one]
-    exact ofMul_eq_zero.mp (S.injective (h2.trans S.map_zero.symm))
-  refine ⟨continuousMulEquivOfTopologicallyGenerates y hgen, fun χ ↦ ?_⟩
-  refine Additive.toMul.injective (hom_ext fun j ↦ ?_)
-  rw [continuousZModDual.toMul_map_apply, ContinuousMonoidHom.coe_coe,
-    continuousMulEquivOfTopologicallyGenerates_of, key]
-
-variable [Fintype X]
 
 /-- **A basis of the dual is the dual basis of the generators after an automorphism.** For every
 class `ρ ∈ gr_1(F)` and every basis `η` of the continuous `𝔽_p`-dual of `F`, there is a continuous
@@ -626,7 +569,7 @@ theorem exists_continuousMulEquiv_degreeOneForm_gradedMap_dualBasis
           (e : freeProP p X →ₜ* freeProP p X).continuous 1 ρ) (dualBasis p X i) (dualBasis p X j) =
         degreeOneForm ρ (η i) (η j) := by
   obtain ⟨e, he⟩ :=
-    exists_continuousMulEquiv_continuousZModDual_map_eq ((dualBasis p X).equiv η (Equiv.refl X))
+    exists_continuousMulEquiv_continuousZModDualMap_eq ((dualBasis p X).equiv η (Equiv.refl X))
   refine ⟨e, fun i j ↦ ?_⟩
   rw [degreeOneForm_gradedMap, LinearMap.compl₁₂_apply, he, he, Module.Basis.equiv_apply,
     Module.Basis.equiv_apply, Equiv.refl_apply, Equiv.refl_apply]
@@ -637,7 +580,7 @@ automorphism.** For every class `ρ ∈ gr_1(F)` and every basis `η` of the con
 `e_* ρ` in the dual basis of the generators is the matrix of the degree-one form of `ρ` in `η`. So
 a normal form for the matrix of the form, such as a symplectic basis, is realized by a change of
 generators of `F`. -/
-theorem exists_continuousMulEquiv_toMatrix_degreeOneForm_gradedMap [DecidableEq X]
+theorem exists_continuousMulEquiv_toMatrix_degreeOneForm_gradedMap [Fintype X] [DecidableEq X]
     (ρ : gradedPiece p (freeProP p X) 1)
     (η : Module.Basis X (ZMod p) (continuousZModDual p (freeProP p X))) :
     ∃ e : freeProP p X ≃ₜ* freeProP p X,
