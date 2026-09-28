@@ -7,8 +7,7 @@ module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.EmbeddingProblem
-public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Projective
-public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Extension
+public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.Extension
 
 /-!
 # Extensions of a free pro-`p` group split
@@ -24,9 +23,11 @@ splits even when the total group lives in a different universe
 (`GroupExtension.exists_splitting_continuous_freeProP`).
 
 No finiteness of `X` is needed: the universal property and projectivity of `freeProP p X` hold
-for every type. Read through the classification of profinite extensions
-by continuous `H²`, this is the vanishing of `H²` of a free pro-`p` group, proved in
-`TauCeti.Topology.Algebra.Group.Profinite.Free.Cohomology`.
+for every type. Without prescribed values the splitting is the instance at `freeProP p X` of the
+splitting of extensions of any projective pro-`p` group
+(`GroupExtension.exists_splitting_continuous_of_isProjective`). Read through the classification of
+profinite extensions by continuous `H²`, this is the vanishing of `H²` of a free pro-`p` group,
+proved in `TauCeti.Topology.Algebra.Group.Profinite.Free.Cohomology`.
 
 ## Main results
 
@@ -80,15 +81,8 @@ theorem _root_.GroupExtension.exists_splitting_continuous_freeProP
     {E' : Type v} [Group E'] [TopologicalSpace E'] [IsTopologicalGroup E'] [CompactSpace E']
     [TotallyDisconnectedSpace E'] (S : GroupExtension M E' (freeProP p X))
     (hinl : Continuous S.inl)
-    (hrh : Continuous S.rightHom) (hM : IsProP p M) : ∃ s : S.Splitting, Continuous ⇑s := by
-  have hE : IsProP p E' := S.isProP hinl hrh hM (isProP_freeProP p X)
-  -- The projection, bundled with its continuity; it evaluates as `S.rightHom` by construction.
-  let π : E' →ₜ* freeProP p X := ⟨S.rightHom, hrh⟩
-  have hπ : ∀ z, π z = S.rightHom z := fun _ ↦ rfl
-  obtain ⟨s, hs⟩ :=
-    (isProjective_of_hasPGroupSolutions (hasPGroupSolutions_freeProP p X)).exists_continuous_lift
-      hE π S.rightHom_surjective (ContinuousMonoidHom.id _)
-  exact ⟨GroupExtension.Splitting.mk s.toMonoidHom fun y ↦ by
-    simpa [hπ] using DFunLike.congr_fun hs y, s.continuous⟩
+    (hrh : Continuous S.rightHom) (hM : IsProP p M) : ∃ s : S.Splitting, Continuous ⇑s :=
+  S.exists_splitting_continuous_of_isProjective hinl hrh hM (isProP_freeProP p X)
+    (isProjective_of_hasPGroupSolutions (hasPGroupSolutions_freeProP p X))
 
 end TauCeti

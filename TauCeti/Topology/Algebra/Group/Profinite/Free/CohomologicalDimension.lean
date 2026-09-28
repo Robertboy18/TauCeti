@@ -5,20 +5,19 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.CohomologicalDimension.SingleDegree
+public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.CohomologicalDimension
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Cohomology
 
 /-!
 # The cohomological dimension of a free pro-`p` group is at most one
 
-Let `F = freeProP p X` be the free pro-`p` group on a type `X`. Its second continuous cohomology
-vanishes on every finite discrete `p`-primary `F`-module, because every profinite extension of `F`
-by such a module splits
-(`TauCeti.freeProP.subsingleton_continuousCohomology_two_of_isPPrimaryTorsion`, in
-`TauCeti.Topology.Algebra.Group.Profinite.Free.Cohomology`). Since the `p`-cohomological dimension
-of a compact group is detected in a single degree on finite coefficients
-(`TauCeti.cohomologicalDimensionAt_le_iff_forall_finite_subsingleton_succ`), this vanishing in
-degree two is the statement `cd_p F ≤ 1`.
+Let `F = freeProP p X` be the free pro-`p` group on a type `X`. It is projective
+(`TauCeti.isProjective_of_hasPGroupSolutions` at `TauCeti.hasPGroupSolutions_freeProP`), and a
+projective pro-`p` group has `p`-cohomological dimension at most one
+(`TauCeti.IsProjective.cohomologicalDimensionAt_le_one`): its second continuous cohomology
+vanishes on every finite discrete `p`-primary module, because every profinite extension of it by
+such a module splits, and the `p`-cohomological dimension of a compact group is detected in degree
+two on finite coefficients. Hence `cd_p F ≤ 1`.
 
 No finiteness of `X` is needed. This is the converse direction, for the free pro-`p` groups
 themselves, of Serre's theorem
@@ -51,8 +50,8 @@ namespace freeProP
 vanishes for every `i ≥ 2` and every discrete `p`-primary torsion `F`-module `M`. -/
 theorem cohomologicalDimensionLE_one (hp : p ≠ 0) :
     CohomologicalDimensionLE.{u} p (freeProP p X) 1 :=
-  (cohomologicalDimensionLE_iff_forall_finite_subsingleton_succ hp 1).2
-    fun M _ _ _ _ _ _ hM ↦ subsingleton_continuousCohomology_two_of_isPPrimaryTorsion M hM
+  IsProjective.cohomologicalDimensionLE_one hp
+    (isProjective_of_hasPGroupSolutions (hasPGroupSolutions_freeProP p X)) (isProP_freeProP p X)
 
 /-- **The cohomological dimension of a free pro-`p` group is at most one**: `cd_p F ≤ 1` for
 `F = freeProP p X`, on any type `X` and for `p ≠ 0`. -/
