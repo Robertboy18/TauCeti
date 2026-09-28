@@ -143,50 +143,6 @@ private theorem exists_dvd_nonempty_continuousMulEquiv_topologicalAbelianization
     ((presentedProP.oneRelatorAbelianizationEquiv r x₀ w hw _ hv).trans
       f.toContinuousAddEquiv.toMultiplicative.symm)⟩
 
-end IsDemushkin
-
-section Model
-
-/-! The torsion of the model group `ℤ_p^m × ℤ_p ⧸ (q)`, transported to a group isomorphic to it:
-torsion-free when `q = 0`, and otherwise exactly the finite cyclic factor `ℤ_p ⧸ (q)`. -/
-
-variable {A : Type v} [CommGroup A] {m : ℕ} {q : ℤ_[p]}
-
-private theorem isMulTorsionFree_of_mulEquiv
-    (e : A ≃* Multiplicative ((Fin m → ℤ_[p]) × (ℤ_[p] ⧸ Ideal.span {(0 : ℤ_[p])}))) :
-    IsMulTorsionFree A := by
-  have : IsAddTorsionFree (ℤ_[p] ⧸ Ideal.span {(0 : ℤ_[p])}) := by
-    rw [Ideal.span_singleton_zero]
-    exact (RingEquiv.quotientBot ℤ_[p]).injective.isAddTorsionFree
-      (RingEquiv.quotientBot ℤ_[p]).toAddMonoidHom
-  exact Function.Injective.isMulTorsionFree e.toMonoidHom e.injective
-
-variable (hq : q ≠ 0)
-  (e : A ≃* Multiplicative ((Fin m → ℤ_[p]) × (ℤ_[p] ⧸ Ideal.span {q})))
-include hq e
-
-private theorem natCard_torsion_of_mulEquiv : Nat.card (torsion A) = p ^ q.valuation := by
-  have := PadicInt.finite_quotient_span hq
-  rw [Nat.card_congr (torsionMulEquiv isAddTorsion_of_finite e).toEquiv,
-    Nat.card_congr toAdd, PadicInt.natCard_quotient_span hq]
-
-private theorem finite_torsion_of_mulEquiv : Finite (torsion A) := by
-  have := PadicInt.finite_quotient_span hq
-  exact Finite.of_equiv _ (torsionMulEquiv isAddTorsion_of_finite e).symm.toEquiv
-
-private theorem isCyclic_torsion_of_mulEquiv : IsCyclic (torsion A) := by
-  have := PadicInt.finite_quotient_span hq
-  let e' : torsion A ≃* Multiplicative (ZMod (p ^ q.valuation)) :=
-    (torsionMulEquiv isAddTorsion_of_finite e).trans
-      (AddEquiv.toMultiplicative (PadicInt.quotientSpanEquivZMod hq).toAddEquiv)
-  exact isCyclic_of_surjective e'.symm e'.symm.surjective
-
-end Model
-
-namespace IsDemushkin
-
-include hG
-
 /-- The abelianization structure theorem together with the facts about the torsion subgroup that
 follow from it, all read off the model `ℤ_p^{n-1} × ℤ_p ⧸ (q)` with `p ∣ q`; the public statements
 below are its projections. -/
@@ -200,7 +156,12 @@ private theorem torsion_spec :
   by_cases hq : q = 0
   · -- `q = 0`: the abelianization is torsion-free and the `q`-invariant is `0`.
     subst hq
-    have hfree := isMulTorsionFree_of_mulEquiv e.toMulEquiv
+    have hfree : IsMulTorsionFree (TopologicalAbelianization G) := by
+      have : IsAddTorsionFree (ℤ_[p] ⧸ Ideal.span {(0 : ℤ_[p])}) := by
+        rw [Ideal.span_singleton_zero]
+        exact (RingEquiv.quotientBot ℤ_[p]).injective.isAddTorsionFree
+          (RingEquiv.quotientBot ℤ_[p]).toAddMonoidHom
+      exact Function.Injective.isMulTorsionFree e.toMulEquiv.toMonoidHom e.toMulEquiv.injective
     have h0 := demushkinQ_of_isMulTorsionFree hG hfree
     rw [CommGroup.isMulTorsionFree_iff_torsion_eq_bot] at hfree
     have hfin : Finite (torsion (TopologicalAbelianization G)) := by rw [hfree]; infer_instance
@@ -209,8 +170,12 @@ private theorem torsion_spec :
     rw [h0, Nat.cast_zero]
     exact ⟨e⟩
   · -- `q ≠ 0`: the torsion subgroup is `ℤ_p ⧸ (q)`, of order `p ^ v_p(q)` with `v_p(q) ≥ 1`.
-    have hcard := natCard_torsion_of_mulEquiv hq e.toMulEquiv
-    have hfin := finite_torsion_of_mulEquiv hq e.toMulEquiv
+    have := PadicInt.finite_quotient_span hq
+    have := PadicInt.isAddCyclic_quotient_span hq
+    have hcard : Nat.card (torsion (TopologicalAbelianization G)) = p ^ q.valuation := by
+      rw [natCard_torsion_of_mulEquiv isAddTorsion_of_finite e.toMulEquiv,
+        PadicInt.natCard_quotient_span hq]
+    have hfin := finite_torsion_of_mulEquiv e.toMulEquiv
     obtain ⟨c, rfl⟩ := hpq
     have hc : c ≠ 0 := right_ne_zero_of_mul hq
     have hval := PadicInt.valuation_p_pow_mul 1 c hc
@@ -223,7 +188,7 @@ private theorem torsion_spec :
       · exact (Fact.out : p.Prime).one_lt.ne' h
       · omega
     have hQ := demushkinQ_of_not_isMulTorsionFree hG hne
-    refine ⟨hfin, isCyclic_torsion_of_mulEquiv hq e.toMulEquiv, ?_, ?_⟩
+    refine ⟨hfin, isCyclic_torsion_of_mulEquiv isAddTorsion_of_finite e.toMulEquiv, ?_, ?_⟩
     · rw [hQ, hcard, hval, pow_add, pow_one]
       exact dvd_mul_right p _
     · rw [hQ, hcard, Nat.cast_pow, ← PadicInt.span_singleton_eq_span_pow_valuation hq]
