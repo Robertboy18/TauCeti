@@ -8,8 +8,7 @@ module
 public import TauCeti.GroupTheory.Torsion
 public import TauCeti.NumberTheory.Padics.RingHoms
 public import TauCeti.Topology.Algebra.ContinuousMulEquiv
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Equiv
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.Empty
+public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianization
 
 /-!
@@ -30,8 +29,8 @@ Frattini subgroup, `q` is divisible by `p`, so the factor `ℤ_p ⧸ q ℤ_p` is
 it is `0` when `G^{ab}` is torsion-free and the order of the torsion subgroup otherwise. The
 structure theorem is then restated with this invariant as the modulus,
 `G^{ab} ≅ ℤ_p^{n-1} × ℤ_p ⧸ (q(G))`, which shows that `q(G)` is the invariant `q` of Labute's
-classification, an isomorphism invariant that is `0` or a power of `p` divisible by `p`. It is the
-first of the two invariants, together with the rank, that classify Demushkin groups with `q ≠ 2`.
+classification, an isomorphism invariant divisible by `p`. It is the first of the two invariants,
+together with the rank, that classify Demushkin groups with `q ≠ 2`.
 
 ## Main definitions
 
@@ -39,14 +38,13 @@ first of the two invariants, together with the rank, that classify Demushkin gro
 
 ## Main results
 
-* `TauCeti.IsDemushkin.demushkinRank_pos`: a Demushkin group has positive rank.
 * `TauCeti.IsDemushkin.finite_torsion_topologicalAbelianization`,
   `TauCeti.IsDemushkin.isCyclic_torsion_topologicalAbelianization`: the torsion subgroup of the
   abelianization of a Demushkin group is finite and cyclic.
 * `TauCeti.IsDemushkin.nonempty_continuousMulEquiv_topologicalAbelianization`: the
   **abelianization structure theorem** `G^{ab} ≃ₜ* ℤ_p^{n-1} × ℤ_p ⧸ (q(G))`.
-* `TauCeti.IsDemushkin.prime_dvd_demushkinQ`: `p ∣ q(G)`, so `q(G)` is `0` or a positive power
-  of `p`.
+* `TauCeti.IsDemushkin.prime_dvd_demushkinQ`: `p ∣ q(G)`, because the relator of a minimal
+  presentation lies in the Frattini subgroup.
 * `TauCeti.demushkinQ_eq_zero_iff`: `q(G) = 0` exactly when `G^{ab}` is torsion-free.
 * `TauCeti.demushkinQ_congr`: the `q`-invariant is invariant under topological isomorphism.
 
@@ -116,20 +114,6 @@ variable [CompactSpace G] [TotallyDisconnectedSpace G]
 namespace IsDemushkin
 
 include hG
-
-/-- **A Demushkin group has positive rank**: on an empty generating type the presented group is
-trivial, hence free, and a free pro-`p` group is not Demushkin. -/
-theorem demushkinRank_pos : 0 < demushkinRank hG := by
-  rw [Nat.pos_iff_ne_zero]
-  intro h0
-  obtain ⟨r, -, ⟨e⟩⟩ := hG.exists_mem_proPFrattini_continuousMulEquiv_presentedProP
-    (ULift.{u} (Fin 0)) (by simp [h0])
-  have : Subsingleton (presentedProP p (ULift.{u} (Fin 0)) {r}) :=
-    (presentedProP.mk_surjective p {r}).subsingleton
-  have : Subsingleton G := e.symm.injective.subsingleton
-  let _ : Unique G := ⟨⟨1⟩, fun _ ↦ Subsingleton.elim _ _⟩
-  let _ : Unique (freeProP p (ULift.{u} (Fin 0))) := ⟨⟨1⟩, fun _ ↦ Subsingleton.elim _ _⟩
-  exact not_isDemushkin_freeProP (ULift.{u} (Fin 0)) (hG.of_equiv p ContinuousMulEquiv.ofUnique)
 
 /-- The one-relator presentation of a Demushkin group, abelianized: for some coordinate `q` of the
 exponent vector of the relator, which is divisible by `p` because the relator lies in the Frattini
@@ -254,9 +238,8 @@ theorem isCyclic_torsion_topologicalAbelianization :
     IsCyclic (torsion (TopologicalAbelianization G)) :=
   hG.torsion_spec.2.1
 
-/-- **The `q`-invariant of a Demushkin group is divisible by `p`**: it is `0` or a power of `p`
-with positive exponent, because the relator of a minimal presentation lies in the Frattini
-subgroup. -/
+/-- **The `q`-invariant of a Demushkin group is divisible by `p`**, because the relator of a
+minimal presentation lies in the Frattini subgroup. -/
 theorem prime_dvd_demushkinQ : p ∣ demushkinQ hG :=
   hG.torsion_spec.2.2.1
 
@@ -276,6 +259,7 @@ theorem nonempty_continuousMulEquiv_topologicalAbelianization :
 end IsDemushkin
 
 /-- **The `q`-invariant vanishes exactly when the abelianization is torsion-free.** -/
+@[simp]
 theorem demushkinQ_eq_zero_iff :
     demushkinQ hG = 0 ↔ IsMulTorsionFree (TopologicalAbelianization G) := by
   refine ⟨fun h ↦ by_contra fun hne ↦ ?_, demushkinQ_of_isMulTorsionFree hG⟩
