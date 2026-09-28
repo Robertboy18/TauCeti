@@ -9,6 +9,7 @@ public import Mathlib.Geometry.Manifold.Instances.Sphere
 public import TauCeti.Analysis.Calculus.Morse.Linearization
 public import TauCeti.Geometry.Manifold.MFDeriv.Chart
 public import TauCeti.Geometry.Manifold.Morse.Index
+import TauCeti.Analysis.Normed.Module.Ball
 
 /-!
 # The height function on the unit sphere is a Morse function
@@ -181,25 +182,6 @@ section Sphere
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] {n : ℕ}
   [Fact (finrank ℝ E = n + 1)]
 
-/-- A unit vector is a multiple of another unit vector exactly when the two are equal or
-opposite. -/
-theorem coe_mem_span_singleton_iff_eq_or_eq_neg (v x : sphere (0 : E) 1) :
-    (v : E) ∈ ℝ ∙ (x : E) ↔ x = v ∨ x = -v := by
-  rw [Submodule.mem_span_singleton]
-  constructor
-  · rintro ⟨a, ha⟩
-    have hnorm : |a| = 1 := by
-      have := congrArg norm ha
-      simpa [norm_smul, norm_eq_of_mem_sphere] using this
-    rcases (abs_eq zero_le_one).1 hnorm with rfl | rfl
-    · left
-      exact Subtype.ext (by simpa using ha)
-    · right
-      exact Subtype.ext (by simpa [coe_neg_sphere, neg_eq_iff_eq_neg] using ha)
-  · rintro (rfl | rfl)
-    · exact ⟨1, one_smul ℝ _⟩
-    · exact ⟨-1, by simp⟩
-
 /-- The **height function** on the unit sphere in the direction of the unit vector `v`: the inner
 product with `v`. It is the standard Morse function on the sphere, with the poles `v` and `-v` as
 its only critical points. -/
@@ -243,7 +225,8 @@ theorem mvfderiv_sphereHeight_eq_zero_iff (v x : sphere (0 : E) 1) :
   rw [sphereHeight_eq_innerSL_comp,
     mvfderiv_comp x (((innerSL ℝ (v : E)).contMDiffAt (n := 1)).mdifferentiableAt one_ne_zero)
       hcoe, mvfderiv_eq_fderiv,
-    ContinuousLinearMap.fderiv, ← coe_mem_span_singleton_iff_eq_or_eq_neg,
+    ContinuousLinearMap.fderiv, eq_comm (a := x) (b := v), eq_comm (a := x) (b := -v),
+    neg_eq_iff_eq_neg, ← coe_mem_span_singleton_iff one_ne_zero (x := v) (p := x),
     ← Submodule.orthogonal_orthogonal (ℝ ∙ (x : E)), ← range_mvfderiv_subtypeVal (n := n) x,
     Submodule.mem_orthogonal']
   simp only [mvfderiv, ContinuousLinearMap.comp_assoc, LinearMap.mem_range,
