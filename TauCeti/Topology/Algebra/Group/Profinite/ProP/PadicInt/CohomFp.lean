@@ -7,7 +7,7 @@ module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp.Character
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.ElementaryAbelian
-public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicInt
+public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicInt.Basic
 
 /-!
 # The rank and the coordinate characters of `ℤ_p^X`
@@ -95,18 +95,22 @@ noncomputable def coordinateCharacter (i : X) :
       continuous_toFun := continuous_ofAdd.comp
         (PadicInt.continuous_toZMod.comp ((continuous_apply i).comp continuous_toAdd)) }
 
-/-- The coordinate character at `i` reduces the `i`-th coordinate modulo `p`. -/
-@[simp]
+/-- The coordinate character at `i` reduces the `i`-th coordinate modulo `p`. This is the
+unfolding lemma; the `simp` normal form is given by the two evaluations on the coordinate vectors
+`TauCeti.coordinateCharacter_ofAdd_single_self` and
+`TauCeti.coordinateCharacter_ofAdd_single_of_ne`, which it would otherwise subsume. -/
 theorem coordinateCharacter_apply (i : X) (g : Multiplicative (X → ℤ_[p])) :
     toAdd (Additive.toMul (coordinateCharacter p X i) g) = PadicInt.toZMod (toAdd g i) :=
   (rfl)
 
 /-- The coordinate characters are dual to the coordinate vectors: `e_i^* (e_i) = 1`. -/
+@[simp]
 theorem coordinateCharacter_ofAdd_single_self [DecidableEq X] (i : X) :
     toAdd (Additive.toMul (coordinateCharacter p X i) (ofAdd (Pi.single i (1 : ℤ_[p])))) = 1 := by
   rw [coordinateCharacter_apply, toAdd_ofAdd, Pi.single_eq_same, map_one]
 
 /-- The coordinate characters are dual to the coordinate vectors: `e_i^* (e_j) = 0` for `i ≠ j`. -/
+@[simp]
 theorem coordinateCharacter_ofAdd_single_of_ne [DecidableEq X] {i j : X} (hij : i ≠ j) :
     toAdd (Additive.toMul (coordinateCharacter p X i) (ofAdd (Pi.single j (1 : ℤ_[p])))) = 0 := by
   rw [coordinateCharacter_apply, toAdd_ofAdd, Pi.single_eq_of_ne hij, map_zero]
