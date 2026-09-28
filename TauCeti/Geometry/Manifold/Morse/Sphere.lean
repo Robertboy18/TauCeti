@@ -5,8 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Geometry.Manifold.Instances.Sphere
 public import TauCeti.Analysis.Calculus.Morse.Linearization
+public import TauCeti.Geometry.Manifold.Instances.Sphere
 public import TauCeti.Geometry.Manifold.MFDeriv.Chart
 public import TauCeti.Geometry.Manifold.Morse.Index
 import TauCeti.Analysis.Normed.Module.Ball
@@ -243,11 +243,6 @@ theorem mvfderiv_sphereHeight_eq_zero_iff (v x : sphere (0 : E) 1) :
     ext u
     simpa using h u
 
-/-- The preferred chart of the sphere at `v` is the stereographic projection from `-v`. -/
-theorem chartAt_sphere (v : sphere (0 : E) 1) :
-    chartAt (EuclideanSpace ℝ (Fin n)) v = stereographic' n (-v) :=
-  rfl
-
 /-- In the chart centred at the north pole `v`, the height function in the direction `v` is
 `stereographicHeight`. -/
 theorem sphereHeight_comp_chartAt_symm (v : sphere (0 : E) 1) :
@@ -278,14 +273,6 @@ theorem sphereHeight_comp_chartAt_symm (v : sphere (0 : E) 1) :
 theorem sphereHeight_comp_extChartAt_symm (v : sphere (0 : E) 1) :
     sphereHeight v ∘ (extChartAt (𝓡 n) v).symm = stereographicHeight := by
   rw [extChartAt_coe_symm, modelWithCornersSelf_coe_symm, comp_id, sphereHeight_comp_chartAt_symm]
-
--- Not `@[simp]`: simp unfolds `extChartAt (𝓡 n) v v` to `chartAt _ v v` before this lemma can
--- fire, so it fails `simpNF`.
-/-- The preferred extended chart of the sphere at `v` sends `v` to the origin. -/
-theorem extChartAt_sphere_apply_self (v : sphere (0 : E) 1) : extChartAt (𝓡 n) v v = 0 := by
-  rw [extChartAt_coe, modelWithCornersSelf_coe, id_comp, chartAt_sphere, stereographic',
-    OpenPartialHomeomorph.trans_apply, stereographic_neg_apply,
-    Homeomorph.toOpenPartialHomeomorph_apply, LinearIsometryEquiv.coe_toHomeomorph, map_zero]
 
 /-- The north pole is a nondegenerate critical point of the height function. -/
 theorem isManifoldNondegenerateCriticalPoint_sphereHeight_self (v : sphere (0 : E) 1) :
