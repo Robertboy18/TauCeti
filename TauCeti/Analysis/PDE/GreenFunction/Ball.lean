@@ -298,11 +298,6 @@ theorem harmonicOnNhd_ballGreenKernel {x : EuclideanSpace ℝ (Fin n)} (hx : ‖
   exact harmonicAt_ballGreenKernel hy.2 (norm_sq_mul_norm_sq_sub_two_mul_inner_add_one_pos
     ((mul_le_of_le_one_right (norm_nonneg x) hy.1.le).trans_lt hx).ne)
 
-/-- A Euclidean space containing two distinct points has positive dimension. -/
-private theorem ne_zero_of_ne {x y : EuclideanSpace ℝ (Fin n)} (hxy : x ≠ y) : n ≠ 0 := by
-  rintro rfl
-  exact hxy (Subsingleton.elim x y)
-
 /-- Outside dimension two, the Green kernel of the unit ball is positive inside the ball away
 from the pole. -/
 theorem ballGreenKernel_pos (hn : n ≠ 2) {x y : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ < 1)
@@ -320,7 +315,8 @@ theorem ballGreenKernel_pos (hn : n ≠ 2) {x y : EuclideanSpace ℝ (Fin n)} (h
   rw [ballGreenKernel_def, ballGreenCorrector_def, newtonianKernel_def,
     norm_rpow_eq_norm_sq_rpow, ← mul_sub]
   obtain hn1 | hn3 : n = 1 ∨ 3 ≤ n := by
-    have := Nat.pos_of_ne_zero (ne_zero_of_ne hxy)
+    have := nontrivial_of_ne y x hxy
+    have : 0 < n := by simpa using Module.finrank_pos (R := ℝ) (M := EuclideanSpace ℝ (Fin n))
     omega
   · have hn1ℝ : (n : ℝ) = 1 := by exact_mod_cast hn1
     have hc : (n : ℝ) * ((n : ℝ) - 2) *
@@ -377,7 +373,8 @@ theorem ballPoissonKernel_def (x y : EuclideanSpace ℝ (Fin n)) :
 point. -/
 theorem ballPoissonKernel_pos {x y : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ < 1) (hxy : x ≠ y) :
     0 < ballPoissonKernel n x y := by
-  have hn : (0 : ℝ) < n := by exact_mod_cast Nat.pos_of_ne_zero (ne_zero_of_ne hxy)
+  have := nontrivial_of_ne x y hxy
+  have hn : 0 < n := by simpa using Module.finrank_pos (R := ℝ) (M := EuclideanSpace ℝ (Fin n))
   have hω := volume_real_unitBall_pos n
   have hsub : 0 < ‖x - y‖ := norm_pos_iff.mpr (sub_ne_zero.mpr hxy)
   have hx' : 0 < 1 - ‖x‖ ^ 2 := by nlinarith [norm_nonneg x]
