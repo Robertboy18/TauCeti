@@ -57,9 +57,9 @@ variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGro
 /-- **`cd_p ≤ n` passes to closed subgroups for `n ≤ 1`**, as the vanishing predicate: for `U`
 closed in a profinite group `G` with `CohomologicalDimensionLE p G n` and `n ≤ 1`,
 `CohomologicalDimensionLE p U n`. -/
-theorem CohomologicalDimensionLE.of_isClosed_of_le_one {n : ℕ} (hn : n ≤ 1)
-    (h : CohomologicalDimensionLE.{u} p G n) {U : Subgroup G} (hU : IsClosed (U : Set G)) :
-    CohomologicalDimensionLE.{u} p U n := by
+theorem CohomologicalDimensionLE.of_isClosed_of_le_one {n : ℕ}
+    (h : CohomologicalDimensionLE.{u} p G n) {U : Subgroup G} (hU : IsClosed (U : Set G))
+    (hn : n ≤ 1) : CohomologicalDimensionLE.{u} p U n := by
   have : CompactSpace U := isCompact_iff_compactSpace.mp hU.isCompact
   rw [cohomologicalDimensionLE_iff_forall_subsingleton_succ] at h ⊢
   intro M _ _ _ _ _ hM
@@ -80,11 +80,10 @@ theorem CohomologicalDimensionLE.of_isClosed_of_le_one {n : ℕ} (hn : n ≤ 1)
 /-- **`cd_p U ≤ n` for a closed subgroup `U` of a profinite group `G` with `cd_p G ≤ n`, when
 `n ≤ 1`.** This is the monotonicity `cd_p U ≤ cd_p G` of the `p`-cohomological dimension in a
 closed subgroup, in the range where Shapiro's lemma is available in the explicit low degrees. -/
-theorem cohomologicalDimensionAt_le_of_isClosed_of_le_one {n : ℕ} (hn : n ≤ 1)
-    (h : cohomologicalDimensionAt.{u} p G ≤ n) {U : Subgroup G} (hU : IsClosed (U : Set G)) :
-    cohomologicalDimensionAt.{u} p U ≤ n :=
+theorem cohomologicalDimensionAt_le_of_isClosed_of_le_one {n : ℕ}
+    (h : cohomologicalDimensionAt.{u} p G ≤ n) {U : Subgroup G} (hU : IsClosed (U : Set G))
+    (hn : n ≤ 1) : cohomologicalDimensionAt.{u} p U ≤ n :=
   (cohomologicalDimensionAt_le_iff p U n).2
-    (CohomologicalDimensionLE.of_isClosed_of_le_one hn ((cohomologicalDimensionAt_le_iff p G n).1 h)
-      hU)
+    (((cohomologicalDimensionAt_le_iff p G n).1 h).of_isClosed_of_le_one hU hn)
 
 end TauCeti

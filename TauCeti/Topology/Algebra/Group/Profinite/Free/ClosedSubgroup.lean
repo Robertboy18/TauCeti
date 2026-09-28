@@ -32,8 +32,9 @@ where the Schreier index formula for the rank is available
 
 ## Main results
 
-* `TauCeti.IsProP.exists_convergesToOne_continuousMulEquiv_of_isClosed`: a closed subgroup of a
-  pro-`p` group with `cd_p ≤ 1` is free pro-`p` on a pointed profinite space.
+* `IsProP.exists_convergesToOne_continuousMulEquiv_of_cohomologicalDimensionAt_le_one_of_isClosed`:
+  a closed subgroup of a pro-`p` group with `cd_p ≤ 1` is free pro-`p` on a pointed profinite
+  space.
 * `TauCeti.freeProP.cohomologicalDimensionAt_le_one_of_isClosed`: `cd_p U ≤ 1` for a closed
   subgroup `U` of a free pro-`p` group.
 * `TauCeti.freeProP.exists_convergesToOne_continuousMulEquiv_of_isClosed`: **the pro-`p`
@@ -65,7 +66,7 @@ universe u
 
 variable {p : ℕ}
 
-section IsProP
+namespace IsProP
 
 variable [Fact p.Prime] {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [CompactSpace G] [TotallyDisconnectedSpace G]
@@ -75,18 +76,19 @@ space.** For `G` pro-`p` with `cd_p G ≤ 1` and `U ≤ G` closed, some subset `
 to `1` has a topological isomorphism `F_p(insert 1 s, 1) ≃ₜ* U` sending the generator attached to
 each point of `insert 1 s` to that point; by `TauCeti.freeProCPointed.hom_ext` it is the
 presentation `TauCeti.IsProP.presentation` of `U` on `s`. -/
-theorem IsProP.exists_convergesToOne_continuousMulEquiv_of_isClosed (hG : IsProP p G)
-    (hcd : cohomologicalDimensionAt.{u} p G ≤ 1) {U : Subgroup G} (hU : IsClosed (U : Set G)) :
+theorem exists_convergesToOne_continuousMulEquiv_of_cohomologicalDimensionAt_le_one_of_isClosed
+    (hG : IsProP p G) (hcd : cohomologicalDimensionAt.{u} p G ≤ 1) {U : Subgroup G}
+    (hU : IsClosed (U : Set G)) :
     ∃ s : Set U, ConvergesToOne s ∧ ∃ e : freeProPInsertOne p s ≃ₜ* U,
       ∀ x : ↥(insert (1 : U) s), e (freeProCPointed.of (finiteGroupClassP.{u} p) _ x) = x := by
   have : CompactSpace U := isCompact_iff_compactSpace.mp hU.isCompact
   have hcdU : cohomologicalDimensionAt.{u} p U ≤ 1 := mod_cast
-    cohomologicalDimensionAt_le_of_isClosed_of_le_one le_rfl (by exact_mod_cast hcd) hU
+    cohomologicalDimensionAt_le_of_isClosed_of_le_one (by exact_mod_cast hcd) hU le_rfl
   have hU' : IsProP p U := hG.subgroup U
   obtain ⟨s, hs, e, he⟩ :=
     hU'.exists_convergesToOne_continuousMulEquiv_presentation_of_cohomologicalDimensionAt_le_one
       hcdU
-  exact ⟨s, hs, e, fun x ↦ (congrFun he _).trans (IsProP.presentation_of _ _ x)⟩
+  exact ⟨s, hs, e, fun x ↦ (congrFun he _).trans (presentation_of _ _ x)⟩
 
 end IsProP
 
@@ -98,8 +100,8 @@ variable {X : Type u}
 generators and for `p ≠ 0`: `cd_p (freeProP p X) ≤ 1` passes to closed subgroups. -/
 theorem cohomologicalDimensionAt_le_one_of_isClosed (hp : p ≠ 0) {U : Subgroup (freeProP p X)}
     (hU : IsClosed (U : Set (freeProP p X))) : cohomologicalDimensionAt.{u} p U ≤ 1 :=
-  mod_cast cohomologicalDimensionAt_le_of_isClosed_of_le_one le_rfl
-    (by exact_mod_cast cohomologicalDimensionAt_le_one hp) hU
+  mod_cast cohomologicalDimensionAt_le_of_isClosed_of_le_one
+    (by exact_mod_cast cohomologicalDimensionAt_le_one hp) hU le_rfl
 
 /-- **The pro-`p` Nielsen–Schreier theorem.** A closed subgroup `U` of the free pro-`p` group on
 any type `X` is free pro-`p` on a pointed profinite space: some subset `s` of `U` converging to
@@ -109,8 +111,8 @@ theorem exists_convergesToOne_continuousMulEquiv_of_isClosed [Fact p.Prime]
     {U : Subgroup (freeProP p X)} (hU : IsClosed (U : Set (freeProP p X))) :
     ∃ s : Set U, ConvergesToOne s ∧ ∃ e : freeProPInsertOne p s ≃ₜ* U,
       ∀ x : ↥(insert (1 : U) s), e (freeProCPointed.of (finiteGroupClassP.{u} p) _ x) = x :=
-  (isProP_freeProP p X).exists_convergesToOne_continuousMulEquiv_of_isClosed
-    (cohomologicalDimensionAt_le_one (Fact.out : p.Prime).ne_zero) hU
+  IsProP.exists_convergesToOne_continuousMulEquiv_of_cohomologicalDimensionAt_le_one_of_isClosed
+    (isProP_freeProP p X) (cohomologicalDimensionAt_le_one (Fact.out : p.Prime).ne_zero) hU
 
 end freeProP
 
