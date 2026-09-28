@@ -16,22 +16,8 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.EulerCharacteristic.
 
 An open subgroup `U` of index `m` in a free pro-`p` group `F` of finite rank `n ≥ 1` is free pro-`p`
 of rank `d(U) = 1 + m * (n - 1)`. This is the pro-`p` Nielsen–Schreier theorem for open subgroups,
-with the Schreier index formula for the rank.
-
-The two halves have separate proofs, both cohomological.
-
-* **The rank.** The vanishing of `H²(F, M)` on the trivial modules of order `p`
-  (`TauCeti.freeProP.subsingleton_H2_of_isPPrimaryTorsion`) puts `F` under the hypotheses of the
-  two-term Euler formula `TauCeti.IsProP.topologicalGeneratorRankNat_add_index`, which reads
-  `d(U) + m = 1 + m * n` since `d(F) = n`; rearranging gives `d(U) = 1 + m * (n - 1)` once `n ≥ 1`.
-  The Schreier bound `TauCeti.topologicalGeneratorRankNat_le_of_openSubgroup` is therefore an
-  equality for free pro-`p` groups.
-* **Freeness.** `cd_p F ≤ 1` (`TauCeti.freeProP.cohomologicalDimensionAt_le_one`) passes to the
-  open subgroup `U` by Shapiro's lemma in degree two
-  (`TauCeti.cohomologicalDimensionAt_le_one_of_openSubgroup`), and `U` is topologically finitely
-  generated, so Serre's theorem
-  (`TauCeti.IsProP.nonempty_continuousMulEquiv_freeProP_of_cohomologicalDimensionAt_le_one`)
-  identifies it with the free pro-`p` group on `d(U)` generators.
+with the Schreier index formula for the rank. The rank formula shows that the Schreier bound
+`TauCeti.topologicalGeneratorRankNat_le_of_openSubgroup` is an equality for free pro-`p` groups.
 
 Closed subgroups that are not open are free pro-`p` of possibly infinite rank; that statement needs
 free pro-`p` groups on a profinite space and is not made here.
@@ -84,6 +70,7 @@ theorem topologicalGeneratorRankNat_add_index (U : OpenSubgroup (freeProP p X)) 
     topologicalGeneratorRankNat U.toSubgroup
         ((isTopologicallyFinitelyGenerated_freeProP p X).of_openSubgroup U) + U.toSubgroup.index =
       1 + U.toSubgroup.index * Nat.card X := by
+  -- `H²(F, ℤ/p)` vanishes, so the two-term Euler formula applies to `F`; then use `d(F) = #X`.
   have h := (isProP_freeProP p X).topologicalGeneratorRankNat_add_index
     (isTopologicallyFinitelyGenerated_freeProP p X)
     (fun A _ _ _ _ _ _ hA _ ↦ subsingleton_H2_of_isPPrimaryTorsion
@@ -112,6 +99,7 @@ theorem nonempty_continuousMulEquiv_freeProP_openSubgroup (U : OpenSubgroup (fre
     (Y : Type u) [Finite Y] (hY : Nat.card Y = topologicalGeneratorRankNat U.toSubgroup
       ((isTopologicallyFinitelyGenerated_freeProP p X).of_openSubgroup U)) :
     Nonempty (U.toSubgroup ≃ₜ* freeProP p Y) :=
+  -- Serre's theorem: `U` is a topologically finitely generated pro-`p` group with `cd_p U ≤ 1`.
   have : CompactSpace U.toSubgroup := isCompact_iff_compactSpace.mp U.isClosed.isCompact
   IsProP.nonempty_continuousMulEquiv_freeProP_of_cohomologicalDimensionAt_le_one
     ((isProP_freeProP p X).subgroup U.toSubgroup) _

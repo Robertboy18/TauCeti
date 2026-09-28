@@ -17,17 +17,10 @@ public import TauCeti.Topology.Algebra.Group.OpenSubgroup.FiniteIndex
 
 Let `G` be a profinite group and `U` an open subgroup. If `cd_p G ≤ 1`, then `cd_p U ≤ 1`.
 
-For a finite discrete `p`-primary `U`-module `M`, Shapiro's lemma in degree two identifies
-`H²(U, M)` with `H²(G, Coind_U^G M)` (`TauCeti.ContCohomology.explicitShapiro2`). The coinduced
-module is again finite, because `U` has finite index, and again `p`-primary, so `H²(G, Coind_U^G M)`
-vanishes when `cd_p G ≤ 1`. Since the `p`-cohomological dimension of a compact group is detected in
-a single degree on finite coefficients
-(`TauCeti.cohomologicalDimensionLE_iff_forall_finite_subsingleton_succ`), this vanishing of
-`H²(U, -)` is the statement `cd_p U ≤ 1`.
-
 This is the degree-one case of the monotonicity of `cd_p` in the subgroup, `cd_p H ≤ cd_p G` for
-closed `H ≤ G` (NSW (3.3.5)); the general statement needs Shapiro's lemma in every degree, and only
-the case proved here is used to show that open subgroups of free pro-`p` groups are free.
+closed `H ≤ G` (NSW (3.3.5)). Only this case is proved here; it is what
+`TauCeti.Topology.Algebra.Group.Profinite.Free.OpenSubgroup` uses to show that open subgroups of
+free pro-`p` groups are again free pro-`p`.
 
 ## Main results
 
@@ -59,9 +52,11 @@ theorem CohomologicalDimensionLE.one_of_openSubgroup (hp : p ≠ 0)
     (h : CohomologicalDimensionLE.{u} p G 1) (U : OpenSubgroup G) :
     CohomologicalDimensionLE.{u} p U.toSubgroup 1 := by
   have : CompactSpace U.toSubgroup := isCompact_iff_compactSpace.mp U.isClosed.isCompact
+  -- `cd_p ≤ 1` is detected by the vanishing of `H²` on finite `p`-primary coefficients.
   rw [cohomologicalDimensionLE_iff_forall_finite_subsingleton_succ hp] at h ⊢
   intro M _ _ _ _ _ _ hM
-  -- `H²(G, Coind_U^G M)` vanishes, since `Coind_U^G M` is finite and `p`-primary.
+  -- `H²(G, Coind_U^G M)` vanishes, since `Coind_U^G M` is finite (`U` has finite index) and
+  -- `p`-primary.
   have hcoind := h (DiscreteCoind G U.toSubgroup M)
     (isPPrimaryTorsion_discreteCoind G U.toSubgroup M hM)
   -- `H²(U, M) ≅ H²(G, Coind_U^G M)` by Shapiro's lemma in degree two.
