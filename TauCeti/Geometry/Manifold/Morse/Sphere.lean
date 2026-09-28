@@ -238,12 +238,6 @@ theorem mvfderiv_sphereHeight_eq_zero_iff (v x : sphere (0 : E) 1) :
     ext u
     simpa using h u
 
-/-- The stereographic chart of the sphere centred at `v`, projecting from `-v`, sends `v` to the
-origin. -/
-theorem stereographic'_neg_apply (v : sphere (0 : E) 1) : stereographic' n (-v) v = 0 := by
-  rw [stereographic', OpenPartialHomeomorph.trans_apply, stereographic_neg_apply,
-    Homeomorph.toOpenPartialHomeomorph_apply, LinearIsometryEquiv.coe_toHomeomorph, map_zero]
-
 /-- The preferred chart of the sphere at `v` is the stereographic projection from `-v`. -/
 theorem chartAt_sphere (v : sphere (0 : E) 1) :
     chartAt (EuclideanSpace ℝ (Fin n)) v = stereographic' n (-v) :=
@@ -282,8 +276,9 @@ theorem sphereHeight_comp_extChartAt_symm (v : sphere (0 : E) 1) :
 
 /-- The preferred extended chart of the sphere at `v` sends `v` to the origin. -/
 theorem extChartAt_sphere_apply_self (v : sphere (0 : E) 1) : extChartAt (𝓡 n) v v = 0 := by
-  rw [extChartAt_coe, modelWithCornersSelf_coe, id_comp, chartAt_sphere]
-  exact stereographic'_neg_apply v
+  rw [extChartAt_coe, modelWithCornersSelf_coe, id_comp, chartAt_sphere, stereographic',
+    OpenPartialHomeomorph.trans_apply, stereographic_neg_apply,
+    Homeomorph.toOpenPartialHomeomorph_apply, LinearIsometryEquiv.coe_toHomeomorph, map_zero]
 
 /-- The north pole is a nondegenerate critical point of the height function. -/
 theorem isManifoldNondegenerateCriticalPoint_sphereHeight_self (v : sphere (0 : E) 1) :
