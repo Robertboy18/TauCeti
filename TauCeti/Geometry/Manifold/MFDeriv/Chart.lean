@@ -18,18 +18,10 @@ Mathlib's `mdifferentiableAt_iff_of_mem_source` records differentiability in suc
 the value of the derivative. Change-of-variables arguments on a manifold need that value, because
 they integrate the absolute Jacobian determinant of `f` read in fixed charts.
 
-On a boundaryless manifold the preferred extended chart at `x` is centred at `x` and its range is
-the whole model space, so the manifold derivative of a vector-valued map `f : M → E'` at `x` is
-simply the Fréchet derivative of `f ∘ (extChartAt I x).symm` at `extChartAt I x x`. This transfers
-derivative and critical-point computations to a chart in which `f` has an explicit formula.
-
 ## Main results
 
 * `HasMFDerivAt.hasFDerivWithinAt_of_mem_source`: the derivative of `f` read in the extended
   charts at `x` and `y`.
-* `MDifferentiableAt.mvfderiv_eq_fderiv_comp_extChartAt_symm`: on a boundaryless manifold, the
-  manifold derivative of a vector-valued map is the Fréchet derivative of its expression in the
-  preferred extended chart.
 -/
 
 public section
@@ -70,20 +62,3 @@ theorem HasMFDerivAt.hasFDerivWithinAt_of_mem_source {f : M → M'} {x x' : M} {
     exact (mdifferentiableAt_extChartAt hy).hasMFDerivAt
   exact hasMFDerivWithinAt_iff_hasFDerivWithinAt.1
     ((hchart.comp _ hf').comp_hasMFDerivWithinAt _ hsymm)
-
-section Boundaryless
-
-omit [IsManifold I 1 M] [IsManifold I' 1 M']
-
-/-- On a boundaryless manifold, the derivative of a vector-valued map is the Fréchet derivative of
-its expression in the preferred extended chart. -/
-theorem MDifferentiableAt.mvfderiv_eq_fderiv_comp_extChartAt_symm [I.Boundaryless]
-    {f : M → E'} {x : M} (hf : MDifferentiableAt I 𝓘(𝕜, E') f x) :
-    mvfderiv I f x = fderiv 𝕜 (f ∘ (extChartAt I x).symm) (extChartAt I x x) := by
-  rw [hf.mvfderiv, I.range_eq_univ, fderivWithin_univ]
-  simp only [writtenInExtChartAt, extChartAt_model_space_eq_id, PartialEquiv.refl_coe,
-    Function.id_comp]
-  -- The two sides differ only in presenting the domain as `TangentSpace I x` rather than `E`.
-  rfl
-
-end Boundaryless

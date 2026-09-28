@@ -7,7 +7,6 @@ module
 
 public import TauCeti.Analysis.Calculus.Morse.Linearization
 public import TauCeti.Geometry.Manifold.Instances.Sphere
-public import TauCeti.Geometry.Manifold.MFDeriv.Chart
 public import TauCeti.Geometry.Manifold.Morse.Index
 import TauCeti.Analysis.Normed.Module.Ball
 
@@ -25,10 +24,11 @@ The manifold structure on the sphere is Mathlib's, charted by stereographic proj
 chart centred at the north pole `v`, which projects from `-v`, the height function is the explicit
 rational function `stereographicHeight w = (4 - ‖w‖ ^ 2) / (‖w‖ ^ 2 + 4)` of the chart coordinate
 `w`. Its Hessian at the origin is minus the inner product, which is what makes `v` a nondegenerate
-maximum. The chart centred at `-v` sees the negative of the same function, so the south pole is a
-nondegenerate minimum. The critical points are located through the manifold derivative: the
-differential of the height function at `x` is the inner product with `v` restricted to the tangent
-space `(ℝ ∙ x)ᗮ`, which vanishes exactly when `v` is a multiple of `x`.
+critical point of index `n`. The chart centred at `-v` sees the negative of the same function, so
+the south pole is a nondegenerate critical point of index `0`. The critical points are located
+through the manifold derivative: the differential of the height function at `x` is the inner
+product with `v` restricted to the tangent space `(ℝ ∙ x)ᗮ`, which vanishes exactly when `v` is a
+multiple of `x`.
 
 ## Main declarations
 
@@ -165,8 +165,8 @@ theorem isNondegenerateCriticalPoint_stereographicHeight_zero :
   exact ContinuousLinearMap.isInvertible_equiv
 
 omit [CompleteSpace F] in
-/-- The origin is a nondegenerate maximum of the chart height function: its Morse index is the
-dimension of the chart space. -/
+/-- The Morse index of the chart height function at the origin is the dimension of the chart
+space. -/
 theorem morseIndex_stereographicHeight_zero [FiniteDimensional ℝ F] :
     morseIndex stereographicHeight (0 : F) = finrank ℝ F := by
   have := FiniteDimensional.complete ℝ F
@@ -206,11 +206,6 @@ theorem sphereHeight_eq_innerSL_comp (v : sphere (0 : E) 1) :
 theorem sphereHeight_neg (v : sphere (0 : E) 1) : sphereHeight (-v) = -sphereHeight v := by
   funext x
   simp
-
--- Not `@[simp]`: simp already proves it through `sphereHeight_apply` and `norm_eq_of_mem_sphere`.
-/-- The north pole has height `1`, the maximum value of the height function. -/
-theorem sphereHeight_self (v : sphere (0 : E) 1) : sphereHeight v v = 1 := by
-  simp [norm_eq_of_mem_sphere]
 
 /-- The height function is smooth. -/
 theorem contMDiff_sphereHeight {m : WithTop ℕ∞} (v : sphere (0 : E) 1) :
@@ -291,21 +286,25 @@ theorem isManifoldNondegenerateCriticalPoint_sphereHeight_neg (v : sphere (0 : E
 theorem isMorse_sphereHeight (v : sphere (0 : E) 1) : IsMorse (𝓡 n) (sphereHeight v) := by
   refine isMorse_iff.2 ⟨contMDiff_sphereHeight v, fun x hx ↦ ?_⟩
   have hx' : mvfderiv (𝓡 n) (sphereHeight v) x = 0 := by
-    rw [((contMDiff_sphereHeight (m := 1) v x).mdifferentiableAt
-      one_ne_zero).mvfderiv_eq_fderiv_comp_extChartAt_symm]
+    rw [((contMDiff_sphereHeight (m := 1) v x).mdifferentiableAt one_ne_zero).mvfderiv,
+      ModelWithCorners.range_eq_univ, fderivWithin_univ]
+    simp only [writtenInExtChartAt, extChartAt_model_space_eq_id, PartialEquiv.refl_coe,
+      Function.id_comp]
+    -- The two sides differ only in presenting the domain as a tangent space rather than as
+    -- `EuclideanSpace ℝ (Fin n)`.
     exact hx
   rcases (mvfderiv_sphereHeight_eq_zero_iff v x).1 hx' with rfl | rfl
   · exact isManifoldNondegenerateCriticalPoint_sphereHeight_self x
   · exact isManifoldNondegenerateCriticalPoint_sphereHeight_neg _
 
-/-- The north pole is a maximum of the height function: its Morse index is `n`. -/
+/-- The Morse index of the height function at the north pole is `n`. -/
 @[simp]
 theorem manifoldMorseIndex_sphereHeight_self (v : sphere (0 : E) 1) :
     manifoldMorseIndex (𝓡 n) (sphereHeight v) v = n := by
   rw [manifoldMorseIndex_def, sphereHeight_comp_extChartAt_symm, extChartAt_sphere_apply_self,
     morseIndex_stereographicHeight_zero, finrank_euclideanSpace_fin]
 
-/-- The south pole is a minimum of the height function: its Morse index is `0`. -/
+/-- The Morse index of the height function at the south pole is `0`. -/
 @[simp]
 theorem manifoldMorseIndex_sphereHeight_neg (v : sphere (0 : E) 1) :
     manifoldMorseIndex (𝓡 n) (sphereHeight v) (-v) = 0 := by
