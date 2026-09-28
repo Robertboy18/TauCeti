@@ -56,8 +56,8 @@ open scoped commutatorElement
 
 namespace TauCeti
 
-/-- The three-cycle of `Fin 3` is the commutator of the transposition `(0 1)` with itself: a
-transposition inverts the rotation, so `t c t⁻¹ c⁻¹ = c⁻¹ * c⁻¹ = c`. -/
+/-- The three-cycle of `Fin 3` is the commutator of the transposition `(0 1)` with the rotation
+`finRotate 3`: a transposition inverts the rotation, so `t c t⁻¹ c⁻¹ = c⁻¹ * c⁻¹ = c`. -/
 private theorem commutatorElement_swap_finRotate_three :
     ⁅swap (0 : Fin 3) 1, finRotate 3⁆ = finRotate 3 := by
   decide
