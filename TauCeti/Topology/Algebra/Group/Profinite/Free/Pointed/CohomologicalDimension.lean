@@ -22,13 +22,11 @@ the free pro-`p` groups on pointed spaces, of Serre's theorem at arbitrary rank
 `IsProP.exists_convergesToOne_continuousMulEquiv_presentation_of_cohomologicalDimensionAt_le_one`
 (in the `TauCeti` namespace), which recovers a pro-`p` group with `cd_p ≤ 1` as such a free group;
 the two directions are combined in `TauCeti.Topology.Algebra.Group.Profinite.Free.Pointed.Serre`.
-For the free pro-`p` group on a discrete type the same statements are
-`TauCeti.freeProP.cohomologicalDimensionLE_one` and
+For the free pro-`p` group on a discrete type the same statement is
 `TauCeti.freeProP.cohomologicalDimensionAt_le_one`.
 
 ## Main results
 
-* `TauCeti.freeProCPointed.cohomologicalDimensionLE_one`: the vanishing predicate `cd_p F ≤ 1`.
 * `TauCeti.freeProCPointed.cohomologicalDimensionAt_le_one`: **`cd_p F ≤ 1`** for the free
   pro-`p` group on a pointed space.
 
@@ -47,14 +45,6 @@ universe u
 variable (p : ℕ) {X : Type u} [TopologicalSpace X] (x₀ : X)
 
 namespace freeProCPointed
-
-/-- **The free pro-`p` group on a pointed space has `cd_p ≤ 1`**, as the vanishing predicate: for
-`p ≠ 0`, `Hⁱ(F_p(X, x₀), M)` vanishes for every `i ≥ 2` and every discrete `p`-primary torsion
-module `M`. -/
-theorem cohomologicalDimensionLE_one (hp : p ≠ 0) :
-    CohomologicalDimensionLE.{u} p (freeProCPointed (finiteGroupClassP.{u} p) x₀) 1 :=
-  (isProjective_freeProCPointed p x₀).cohomologicalDimensionLE_one hp
-    (isProC_finiteGroupClassP_iff.mp (isProC_freeProCPointed (finiteGroupClassP.{u} p) x₀))
 
 /-- **The cohomological dimension of the free pro-`p` group on a pointed space is at most one**:
 `cd_p F_p(X, x₀) ≤ 1` for every pointed topological space `(X, x₀)` and `p ≠ 0`. -/

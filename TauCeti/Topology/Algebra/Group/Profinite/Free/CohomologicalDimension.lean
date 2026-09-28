@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.EmbeddingProblem.CohomologicalDimension
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.Cohomology
+public import TauCeti.Topology.Algebra.Group.Profinite.Free.EmbeddingProblem
 
 /-!
 # The cohomological dimension of a free pro-`p` group is at most one
@@ -26,7 +26,6 @@ recovers a topologically finitely generated pro-`p` group with `cd_p ≤ 1` as a
 
 ## Main results
 
-* `TauCeti.freeProP.cohomologicalDimensionLE_one`: the vanishing predicate `cd_p F ≤ 1`.
 * `TauCeti.freeProP.cohomologicalDimensionAt_le_one`: **`cd_p F ≤ 1`** for a free pro-`p` group.
 
 ## References
@@ -46,18 +45,12 @@ variable {p : ℕ} {X : Type u}
 
 namespace freeProP
 
-/-- **A free pro-`p` group has `cd_p ≤ 1`**, as the vanishing predicate: for `p ≠ 0`, `Hⁱ(F, M)`
-vanishes for every `i ≥ 2` and every discrete `p`-primary torsion `F`-module `M`. -/
-theorem cohomologicalDimensionLE_one (hp : p ≠ 0) :
-    CohomologicalDimensionLE.{u} p (freeProP p X) 1 :=
-  IsProjective.cohomologicalDimensionLE_one hp
-    (isProjective_of_hasPGroupSolutions (hasPGroupSolutions_freeProP p X)) (isProP_freeProP p X)
-
 /-- **The cohomological dimension of a free pro-`p` group is at most one**: `cd_p F ≤ 1` for
 `F = freeProP p X`, on any type `X` and for `p ≠ 0`. -/
 theorem cohomologicalDimensionAt_le_one (hp : p ≠ 0) :
     cohomologicalDimensionAt.{u} p (freeProP p X) ≤ 1 :=
-  mod_cast (cohomologicalDimensionAt_le_iff p (freeProP p X) 1).2 (cohomologicalDimensionLE_one hp)
+  IsProjective.cohomologicalDimensionAt_le_one hp
+    (isProjective_of_hasPGroupSolutions (hasPGroupSolutions_freeProP p X)) (isProP_freeProP p X)
 
 end freeProP
 
