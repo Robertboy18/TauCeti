@@ -55,8 +55,6 @@ a point; it is not a further hypothesis of the theorem but a consequence for its
   automatically once `I` is known to be closed.
 * `Ideal.Quotient.continuous_lift`: a continuous ring homomorphism annihilating `I` induces a
   *continuous* homomorphism on `R ⧸ I`, with no hypothesis on `I`.
-* `Ideal.Quotient.isOpen_preimage_mk`: a subset of `R ⧸ I` is open exactly when its preimage in
-  `R` is open, the simp-normal form of "`R ⧸ I` carries the quotient topology".
 * `RingHom.isHomeomorph_kerLift`: the map `R ⧸ ker f →+* S` induced by `f` is a homeomorphism when
   `f` is a quotient map. `IsHomeomorph.homeomorph` bundles that as
   `R ⧸ ker f ≃ₜ S`, and the map bundled is the ring homomorphism `RingHom.kerLift`, so the ring
@@ -98,13 +96,6 @@ theorem continuous_lift {S : Type*} [Semiring S] [TopologicalSpace S] {f : R →
   -- `R ⧸ I` carries the coinduced topology, so continuity of a map out of it is continuity of its
   -- composite with the quotient map, which is `f`.
   continuous_coinduced_dom.mpr hf
-
-omit [SeparatelyContinuousAdd R] in
-/-- A subset of `R ⧸ I` is open exactly when its preimage in `R` is open, since `R ⧸ I` carries
-the topology coinduced by the quotient map. -/
-@[simp]
-theorem isOpen_preimage_mk {s : Set (R ⧸ I)} : IsOpen (Ideal.Quotient.mk I ⁻¹' s) ↔ IsOpen s :=
-  isOpen_coinduced.symm
 
 end Ideal.Quotient
 

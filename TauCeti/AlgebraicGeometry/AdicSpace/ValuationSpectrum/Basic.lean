@@ -339,7 +339,6 @@ lemma supp_eq_valuation_supp (v : Spv A) : v.supp = v.valuation.supp :=
   @ValuativeRel.supp_eq_valuation_supp A _ v.toValuativeRel
 
 /-- The support of a pullback is the preimage of the support. -/
-@[simp]
 lemma supp_comap {B : Type*} [CommRing B] (φ : A →+* B) (v : Spv B) :
     (comap φ v).supp = v.supp.comap φ :=
   Ideal.ext fun a ↦ by simp
@@ -565,7 +564,7 @@ theorem continuous_suppFun : Continuous (suppFun : Spv A → PrimeSpectrum A) :=
 /-- `supp ∘ Spv(φ) = Spec(φ) ∘ supp`. -/
 theorem suppFun_comap {B : Type*} [CommRing B] (φ : A →+* B) (v : Spv B) :
     suppFun (comap φ v) = PrimeSpectrum.comap φ (suppFun v) := by
-  ext; simp [mem_supp_iff]
+  ext; simp [mem_supp_iff, comap_vle]
 
 /-! ### The trivial-valuation section of the support map -/
 
