@@ -31,8 +31,9 @@ continuous `𝔽_p`-dual `H¹(F, 𝔽_p) = Hom_cont(F, 𝔽_p)` attached linearl
 `ρ ∈ gr_1(F)`. In the basis of the dual which is dual to the generators
 (`TauCeti.freeProP.dualBasis`), its matrix has the commutator coordinates of `ρ` in the standard
 basis of `gr_1(F)` above the diagonal and `(p choose 2)` times the `p`-power coordinates on the
-diagonal: for the class `ρ = ⟦r⟧` of a relator `r ∈ λ_1(F)` this is the matrix of the cup product
-on `H¹(F ⧸ ⟪r⟫, 𝔽_p)`, whose entries Labute reads off `⟦r⟧` (Labute, Proposition 3).
+diagonal. These are the coordinates Labute reads off the class `⟦r⟧` of a relator `r ∈ λ_1(F)` to
+describe the cup product on `H¹(F ⧸ ⟪r⟫, 𝔽_p)` (Labute, Proposition 3); the identification of the
+degree-one form of `⟦r⟧` with that cup product is not proved in this file.
 
 Its transformation law is the change-of-basis law of that matrix: a continuous homomorphism
 `φ : F → F'` between free pro-`p` groups carries the form of `ρ` to the form of `φ_* ρ` pulled back
@@ -366,11 +367,11 @@ private theorem degreeOneFormAux_apply (ρ : gradedPiece p (freeProP p X) 1)
 
 /-- **The degree-one form** of a free pro-`p` group `F` of finite rank: the `𝔽_p`-bilinear form
 `(χ, ψ) ↦ heisenbergFunctional χ ψ ρ` on the continuous `𝔽_p`-dual of `F`, attached
-`𝔽_p`-linearly to a class `ρ ∈ gr_1(F)`. For the class of a relator `r ∈ λ_1(F)` it is the cup
-matrix of the one-relator group `F ⧸ ⟪r⟫` read on `gr_1(F)`: its matrix in the dual basis of the
-generators has the commutator coordinates of `⟦r⟧` above the diagonal and `(p choose 2)` times the
-`p`-power coordinates on it (`TauCeti.freeProP.degreeOneForm_dualBasis_of_lt`,
-`TauCeti.freeProP.degreeOneForm_dualBasis_self`). -/
+`𝔽_p`-linearly to a class `ρ ∈ gr_1(F)`. Its matrix in the dual basis of the generators has the
+commutator coordinates of `ρ` above the diagonal and `(p choose 2)` times the `p`-power
+coordinates on it (`TauCeti.freeProP.degreeOneForm_dualBasis_of_lt`,
+`TauCeti.freeProP.degreeOneForm_dualBasis_self`); for the class of a relator `r ∈ λ_1(F)` these
+are the coordinates Labute attaches to the one-relator group `F ⧸ ⟪r⟫`. -/
 noncomputable def degreeOneForm : gradedPiece p (freeProP p X) 1 →ₗ[ZMod p]
     LinearMap.BilinForm (ZMod p) (continuousZModDual p (freeProP p X)) :=
   AddMonoidHom.toZModLinearMap p
@@ -410,7 +411,7 @@ variable {Y : Type u} [Finite Y]
 between free pro-`p` groups of finite rank carries the degree-one form of `ρ ∈ gr_1(F)` to the
 degree-one form of `φ_* ρ` pulled back along the transpose of `φ` on the continuous duals:
 `B_{φ_* ρ}(χ, ψ) = B_ρ(χ ∘ φ, ψ ∘ φ)`. In matrices, a change of generators by `P` acts on the
-cup matrix by `B ↦ Pᵀ B P`. -/
+matrix of the form by `B ↦ Pᵀ B P`. -/
 theorem degreeOneForm_gradedMap (φ : freeProP p X →ₜ* freeProP p Y)
     (ρ : gradedPiece p (freeProP p X) 1) :
     degreeOneForm (gradedMap p φ.toMonoidHom φ.continuous 1 ρ) =
