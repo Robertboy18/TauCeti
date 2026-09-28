@@ -106,6 +106,13 @@ noncomputable def quiverEulerPairingK0 :
   (eulerForm Q).comp (quiverDimensionVectorK0 k Q).toIntLinearMap
     (quiverDimensionVectorK0 k Q).toIntLinearMap
 
+/-- The pulled-back form is the quiver Euler form of the two dimension-vector images. -/
+theorem quiverEulerPairingK0_apply
+    (x y : ExactK0 (finiteModulesExactStructure (pathAlgebra k Q))) :
+    quiverEulerPairingK0 k Q x y =
+      eulerForm Q (quiverDimensionVectorK0 k Q x) (quiverDimensionVectorK0 k Q y) :=
+  LinearMap.BilinForm.comp_apply _ _ _ x y
+
 /-- On module classes, the pulled-back form is the quiver Euler form of the two dimension
 vectors. -/
 @[simp]

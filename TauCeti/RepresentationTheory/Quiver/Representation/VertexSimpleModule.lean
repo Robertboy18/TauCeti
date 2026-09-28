@@ -57,6 +57,14 @@ instance finiteDimensional_vertexSimpleModule_obj (i j : Q) :
 instance simple_vertexSimpleModule (i : Q) : Simple (vertexSimpleModule k Q i) :=
   simple_obj (quiverRepFunctor k Q).inv (simpleRep k Q i)
 
+/-- **Over an acyclic quiver, every simple path algebra module is a vertex simple.** -/
+theorem exists_iso_vertexSimpleModule_of_simple (hQ : Quiver.IsAcyclic Q)
+    (M : ModuleCat (pathAlgebra k Q)) [Simple M] :
+    ∃ i : Q, Nonempty (M ≅ vertexSimpleModule k Q i) := by
+  have := simple_obj (quiverRepFunctor k Q) M
+  obtain ⟨i, ⟨e⟩⟩ := exists_iso_simpleRep_of_simple hQ ((quiverRepFunctor k Q).obj M)
+  exact ⟨i, ⟨(quiverRepFunctor k Q).preimageIso (e ≪≫ (vertexSimpleModuleIso k Q i).symm)⟩⟩
+
 variable {Q}
 
 /-- The first-arrow projective resolution of the vertex simple, transported from quiver

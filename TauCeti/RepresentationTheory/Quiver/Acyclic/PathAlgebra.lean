@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.RingTheory.Artinian.Module
 public import TauCeti.RepresentationTheory.Quiver.Acyclic.FinitePaths
 public import TauCeti.RepresentationTheory.Quiver.PathAlgebra.Basic
 
@@ -36,6 +37,7 @@ module of its own: the path algebra itself needs nothing from the theory of acyc
 * `TauCeti.module_finite_pathAlgebra_iff_isAcyclic`: the two together, for a finite quiver with
   finite arrow types over a nonzero base semiring, and
   `TauCeti.finiteDimensional_pathAlgebra_iff_isAcyclic` its reading over a division ring.
+* `TauCeti.isArtinianRing_pathAlgebra`: a finite-dimensional path algebra is an Artinian ring.
 
 ## References
 
@@ -57,6 +59,11 @@ theorem finiteDimensional_pathAlgebra_of_isAcyclic (k : Type w) (Q : Type u) [Di
     FiniteDimensional k (pathAlgebra k Q) :=
   letI := finite_paths_of_isAcyclic h
   module_finite_pathAlgebra k Q
+
+/-- A finite-dimensional path algebra is an Artinian ring. -/
+instance isArtinianRing_pathAlgebra (k : Type w) (Q : Type u) [DivisionRing k] [Quiver.{v} Q]
+    [Finite Q] [FiniteDimensional k (pathAlgebra k Q)] : IsArtinianRing (pathAlgebra k Q) :=
+  IsArtinianRing.of_finite k (pathAlgebra k Q)
 
 /-- **A finite path algebra comes from an acyclic quiver.**  Over a nonzero base ring the paths are
 a basis, so finitely many of them are available; an oriented cycle would already contribute its
