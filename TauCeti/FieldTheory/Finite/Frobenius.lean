@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.FieldTheory.Perfect
 public import Mathlib.FieldTheory.PurelyInseparable.Basic
 
 /-!
@@ -22,6 +23,10 @@ For a field extension `L` of `K` the range of the `q`-power map is a subfield ov
 purely inseparable: every `x : L` has `x ^ q` in that image, and `q` is a power of the exponential
 characteristic.
 
+On a finite field of order `p ^ 2` the absolute Frobenius `x ↦ x ^ p` is an involution, so the
+Frobenius automorphism `frobeniusEquiv K p` is its own inverse. This is the field automorphism
+behind Hermitian duality of codes over the field of four elements.
+
 ## Main definitions
 
 * `TauCeti.FiniteField.frobeniusFixedSubalgebra`: the subalgebra fixed by an iterate of the
@@ -34,6 +39,8 @@ characteristic.
   equation `a ^ q ^ n = a`.
 * `TauCeti.FiniteField.isPurelyInseparable_fieldRange_frobeniusAlgHom`: `L` is purely
   inseparable over the field range of `FiniteField.frobeniusAlgHom K L`.
+* `TauCeti.FiniteField.frobenius_involutive`: on a field of order `p ^ 2`, the Frobenius
+  `x ↦ x ^ p` is an involution.
 
 ## Mathematical context
 
@@ -101,6 +108,35 @@ theorem isPurelyInseparable_fieldRange_frobeniusAlgHom :
   rw [AlgHom.mem_fieldRange]
   use x
   rw [FiniteField.coe_frobeniusAlgHom, hcard]
+
+/-! ### The Frobenius of a field of order `p ^ 2` -/
+
+section Involutive
+
+variable {K : Type*} [Field K] [Finite K] {p : ℕ} [Fact p.Prime] [CharP K p]
+
+/-- On a field of order `p ^ 2`, the Frobenius `x ↦ x ^ p` is an involution. -/
+theorem frobenius_involutive (hK : Nat.card K = p ^ 2) :
+    Function.Involutive (frobenius K p) := by
+  let := Fintype.ofFinite K
+  have hcard : Fintype.card K = p ^ 2 := Nat.card_eq_fintype_card.symm.trans hK
+  intro x
+  simpa only [pow_two, RingHom.mul_def, RingHom.comp_apply, RingHom.one_def,
+    RingHom.id_apply] using DFunLike.congr_fun (FiniteField.frobenius_pow hcard) x
+
+/-- On a field of order `p ^ 2`, the Frobenius automorphism is an involution. -/
+theorem frobeniusEquiv_involutive (hK : Nat.card K = p ^ 2) :
+    Function.Involutive (frobeniusEquiv K p) := by
+  rw [coe_frobeniusEquiv]
+  exact frobenius_involutive hK
+
+/-- On a field of order `p ^ 2`, the Frobenius automorphism is its own inverse. -/
+theorem frobeniusEquiv_symm_eq (hK : Nat.card K = p ^ 2) :
+    (frobeniusEquiv K p).symm = frobeniusEquiv K p :=
+  DFunLike.coe_injective
+    ((frobeniusEquiv_involutive hK).leftInverse_iff.mp (frobeniusEquiv K p).left_inv)
+
+end Involutive
 
 end TauCeti.FiniteField
 
