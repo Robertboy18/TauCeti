@@ -6,6 +6,10 @@ Authors: Chris Birkbeck
 module
 
 public import TauCeti.AlgebraicGeometry.AdicSpace.Spa.RationalSubset.Basic
+-- Public so that consumers of the quotient results below inherit the simp lemma
+-- `Ideal.Quotient.isOpen_preimage_mk`, which completes the simplification of
+-- `IsOpen ((comap (Ideal.Quotient.mk J) v).supp : Set A)` started by `supp_comap`.
+public import TauCeti.Topology.Algebra.Ring.Ideal
 
 /-!
 # Pullbacks and quotient embeddings of sub-unit valuation loci
@@ -207,12 +211,12 @@ section Quotient
 /-- Pullback along a quotient map preserves and reflects whether the support of a valuation is
 open. -/
 -- Not `@[simp]`: `supp_comap` and `Ideal.coe_comap` rewrite the left-hand side to
--- `IsOpen (Ideal.Quotient.mk J ⁻¹' ↑v.supp)`, so the lemma is not in simp normal form.
+-- `IsOpen (Ideal.Quotient.mk J ⁻¹' ↑v.supp)`, which `Ideal.Quotient.isOpen_preimage_mk` then
+-- closes, so `simp` proves this statement on its own.
 theorem isOpen_supp_comap_quotientMk_iff (J : Ideal A) (v : Spv (A ⧸ J)) :
     IsOpen ((comap (Ideal.Quotient.mk J) v).supp : Set A) ↔
       IsOpen (v.supp : Set (A ⧸ J)) := by
-  rw [supp_comap, Ideal.coe_comap]
-  exact isOpen_coinduced.symm
+  rw [supp_comap, Ideal.coe_comap, Ideal.Quotient.isOpen_preimage_mk]
 
 /-- The map on sub-unit valuation loci for a quotient homomorphism and the image plus ring is a
 topological embedding. -/

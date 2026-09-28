@@ -244,7 +244,7 @@ theorem Hom.valuation_eq_comap (x : X) :
   refine (Y.valuation_eq_of_comap_residue_eq (f.base x) ?_).symm
   rw [← Function.comp_apply (f := ValuationSpectrum.comap _), ← ValuationSpectrum.comap_comp,
     Hom.residueFieldMap_comp_residue, ValuationSpectrum.comap_comp, Function.comp_apply,
-    comap_residue_valuation, f.stalkValuation_eq_comap x]
+    ← X.stalkValuation_def x, f.stalkValuation_eq_comap x]
 
 end Stalks
 
