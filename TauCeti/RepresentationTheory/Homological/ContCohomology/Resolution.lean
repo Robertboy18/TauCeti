@@ -26,6 +26,8 @@ of such contractions over suitably chosen points can descend.
   the differential on a successor level of the resolution, at a point.
 * `TopRep.d_sum_apply_add_sum_d_apply`: evaluation at finitely many points, summed, contracts the
   coinduced resolution up to the number of points.
+* `TopRep.homogeneousCochains.d_zero_apply`: the differential of a homogeneous zero-cochain,
+  evaluated, is `(d a) g₀ g₁ = a g₁ - a g₀`.
 * `TopRep.homogeneousCochains.d_one_apply`: the differential of a homogeneous one-cochain,
   evaluated, is `(d a) g₀ g₁ g₂ = a g₁ g₂ - (a g₀ g₂ - a g₀ g₁)`; so a one-cocycle satisfies
   `a g₀ g₂ = a g₀ g₁ + a g₁ g₂` (`TopRep.homogeneousCochains.apply_eq_add_of_d_eq_zero`).
@@ -75,6 +77,16 @@ variable {X}
 theorem homogeneousCochains.d_one_apply (a : (homogeneousCochains X).X 1) (g₀ g₁ g₂ : G) :
     ((((homogeneousCochains X).d 1 (1 + 1)).hom a).val : C(G, C(G, C(G, X.V)))) g₀ g₁ g₂ =
       a.val g₁ g₂ - (a.val g₀ g₂ - a.val g₀ g₁) := by
+  rw [homogeneousCochains.d_apply]
+  simp only [hom_d_succ, d_zero, hom_ofHom, ContIntertwiningMap.sub_apply,
+    ContRepresentation.coind₁ι_toFun, ContRepresentation.coind₁Map_toFun, ContinuousMap.sub_apply,
+    ContinuousMap.const_apply, ContinuousMap.comp_apply, ContinuousMap.coe_mk]
+
+/-- The homogeneous differential of a zero-cochain, evaluated: `(d a) g₀ g₁ = a g₁ - a g₀`. -/
+-- Not a `simp` lemma, for the same reason as `homogeneousCochains.d_one_apply`.
+theorem homogeneousCochains.d_zero_apply (a : (homogeneousCochains X).X 0) (g₀ g₁ : G) :
+    ((((homogeneousCochains X).d 0 (0 + 1)).hom a).val : C(G, C(G, X.V))) g₀ g₁ =
+      a.val g₁ - a.val g₀ := by
   rw [homogeneousCochains.d_apply]
   simp only [hom_d_succ, d_zero, hom_ofHom, ContIntertwiningMap.sub_apply,
     ContRepresentation.coind₁ι_toFun, ContRepresentation.coind₁Map_toFun, ContinuousMap.sub_apply,
