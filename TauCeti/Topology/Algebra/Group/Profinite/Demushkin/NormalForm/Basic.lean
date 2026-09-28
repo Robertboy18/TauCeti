@@ -115,6 +115,27 @@ theorem labuteComm_mem_proPFrattini [TopologicalSpace H] {p : ℕ} (hp : p.Prime
     labuteComm x y ∈ proPFrattini p H :=
   commutator_le_proPFrattini hp (labuteComm_mem_commutator x y)
 
+/-- Labute's commutator `(x, y) = x⁻¹ (y⁻¹ x y)` of an element `x` of a normal subgroup `N` with
+any `y` lies in `N`. -/
+theorem labuteComm_mem_of_mem_left {N : Subgroup H} [N.Normal] {x : H} (hx : x ∈ N) (y : H) :
+    labuteComm x y ∈ N := by
+  rw [labuteComm_def, mul_assoc, mul_assoc]
+  exact N.mul_mem (N.inv_mem hx) (by simpa only [mul_assoc] using ‹N.Normal›.conj_mem' _ hx y)
+
+/-- Labute's commutator of two elements of a subgroup `N` lies in `⁅N, N⁆`. -/
+theorem labuteComm_mem_commutator_of_mem {N : Subgroup H} {x y : H} (hx : x ∈ N) (hy : y ∈ N) :
+    labuteComm x y ∈ ⁅N, N⁆ := by
+  rw [labuteComm_eq_commutatorElement_inv_inv]
+  exact Subgroup.commutator_mem_commutator (N.inv_mem hx) (N.inv_mem hy)
+
+/-- A product of Labute's commutators of elements of a subgroup `N` lies in `⁅N, N⁆`. -/
+theorem list_prod_map_labuteComm_range_mem_commutator {N : Subgroup H} (m : ℕ) {a b : ℕ → H}
+    (ha : ∀ i < m, a i ∈ N) (hb : ∀ i < m, b i ∈ N) :
+    ((List.range m).map fun i ↦ labuteComm (a i) (b i)).prod ∈ ⁅N, N⁆ := by
+  refine Subgroup.list_prod_mem _ ?_
+  simpa only [List.forall_mem_map, List.mem_range] using
+    fun i hi ↦ labuteComm_mem_commutator_of_mem (ha i hi) (hb i hi)
+
 end LabuteComm
 
 /-! ### The three normal-form words -/
@@ -240,6 +261,28 @@ theorem map_demushkinWordTwoEven_eq_one (a f n : ℕ) {x : ℕ → G} (h₀ : χ
     (h₂ : χ (x 2) ^ 2 ^ f = 1) : χ (demushkinWordTwoEven a f n x) = 1 := by
   rw [map_demushkinWordTwoEven, demushkinWordTwoEven_eq_of_commGroup, Function.comp_apply,
     Function.comp_apply, h₀, h₂, one_mul]
+
+/-- The `q ≠ 2` word lies in the kernel of a character into a commutative group that is trivial
+on every generator other than `x₂`. -/
+theorem demushkinWordNeTwo_mem_ker (q n : ℕ) {x : ℕ → G} (hx : ∀ i, i ≠ 1 → χ (x i) = 1) :
+    demushkinWordNeTwo q n x ∈ MonoidHom.ker (χ : G →* A) :=
+  MonoidHom.mem_ker.mpr (map_demushkinWordNeTwo_eq_one χ q n (by rw [hx 0 zero_ne_one, one_pow]))
+
+/-- The `q = 2`, `n` odd word lies in the kernel of a character into a commutative group whose
+value on `x₁` squares to `1` and which is trivial on every generator other than `x₁` and `x₃`. -/
+theorem demushkinWordTwoOdd_mem_ker (f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ 2 = 1)
+    (hx : ∀ i, i ≠ 0 → i ≠ 2 → χ (x i) = 1) :
+    demushkinWordTwoOdd f n x ∈ MonoidHom.ker (χ : G →* A) :=
+  MonoidHom.mem_ker.mpr (map_demushkinWordTwoOdd_eq_one χ f n h₀
+    (by rw [hx 1 one_ne_zero (by decide), one_pow]))
+
+/-- The `q = 2`, `n` even word lies in the kernel of a character into a commutative group that is
+trivial on every generator other than `x₂` and `x₄`. -/
+theorem demushkinWordTwoEven_mem_ker (a f n : ℕ) {x : ℕ → G}
+    (hx : ∀ i, i ≠ 1 → i ≠ 3 → χ (x i) = 1) :
+    demushkinWordTwoEven a f n x ∈ MonoidHom.ker (χ : G →* A) :=
+  MonoidHom.mem_ker.mpr (map_demushkinWordTwoEven_eq_one χ a f n
+    (by rw [hx 0 zero_ne_one (by decide), one_pow]) (by rw [hx 2 (by decide) (by decide), one_pow]))
 
 end Words
 
