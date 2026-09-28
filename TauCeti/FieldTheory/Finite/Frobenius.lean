@@ -22,9 +22,9 @@ For a field extension `L` of `K` the range of the `q`-power map is a subfield ov
 purely inseparable: every `x : L` has `x ^ q` in that image, and `q` is a power of the exponential
 characteristic.
 
-On a finite field of order `p ^ 2` the absolute Frobenius `x ↦ x ^ p` is an involution, so the
-Frobenius automorphism `frobeniusEquiv K p` is its own inverse. This is the field automorphism
-behind Hermitian duality of codes over the field of four elements.
+On a finite field of order `p ^ 2` the Frobenius automorphism `frobeniusEquiv K p`, sending `x`
+to `x ^ p`, is an involution. This is the field automorphism behind Hermitian duality of codes
+over the field of four elements.
 
 ## Main definitions
 
@@ -122,12 +122,6 @@ theorem frobeniusEquiv_involutive (hK : Nat.card K = p ^ 2) :
   intro x
   simpa only [coe_frobeniusEquiv, pow_two, RingHom.mul_def, RingHom.comp_apply, RingHom.one_def,
     RingHom.id_apply] using DFunLike.congr_fun (FiniteField.frobenius_pow hcard) x
-
-/-- On a field of order `p ^ 2`, the Frobenius automorphism is its own inverse. -/
-theorem frobeniusEquiv_symm_eq (hK : Nat.card K = p ^ 2) :
-    (frobeniusEquiv K p).symm = frobeniusEquiv K p :=
-  DFunLike.coe_injective
-    ((frobeniusEquiv_involutive hK).leftInverse_iff.mp (frobeniusEquiv K p).left_inv)
 
 end Involutive
 
