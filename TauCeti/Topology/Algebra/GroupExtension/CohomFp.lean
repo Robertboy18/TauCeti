@@ -22,7 +22,9 @@ a profinite extension of `G` by the multiplicatively written `𝔽_p`, on which 
 in `cohomFp p G 2`, so that the extensions by `𝔽_p` and the cup products of classes of
 `H¹(G, 𝔽_p)` live in one group. The class vanishes exactly when the extension has a continuous
 homomorphic section, and two extensions have the same class exactly when they are continuously
-equivalent, which are the two theorems of the dictionary transported along the identification.
+equivalent, and for profinite `G` every class is the class of an extension, so that the class is a
+bijection from the extensions modulo continuous equivalence onto `cohomFp p G 2`; these are the
+theorems of the dictionary transported along the identification.
 
 ## Main declarations
 
@@ -34,6 +36,10 @@ equivalent, which are the two theorems of the dictionary transported along the i
   extension has a continuous homomorphic section.
 * `TauCeti.ProfiniteGroupExtension.exists_equiv_continuous_iff_cohomFpClass_eq`: two extensions are
   continuously equivalent exactly when their classes agree.
+* `TauCeti.ProfiniteGroupExtension.exists_cohomFpClass_eq` and
+  `TauCeti.ProfiniteGroupExtension.cohomFpClassEquiv`: for profinite `G`, every class is the class
+  of an extension, and the class is a bijection from the extensions modulo continuous equivalence
+  onto `cohomFp p G 2`.
 
 ## References
 
@@ -132,6 +138,35 @@ theorem exists_equiv_continuous_iff_cohomFpClass_eq :
   rw [cohomFpClass_def, cohomFpClass_def,
     (cohomFpAddEquivH2Additive p G htriv).symm.injective.eq_iff,
     exists_equiv_continuous_iff_contCohomologyClass_eq]
+
+section Realization
+
+variable [CompactSpace G] [TotallyDisconnectedSpace G]
+
+/-- **Every class of `H²(G, 𝔽_p)` is the class of a profinite extension of `G` by `𝔽_p`** with
+trivial action: `TauCeti.ProfiniteGroupExtension.exists_contCohomologyClass_eq` read on
+`cohomFp p G 2`. -/
+theorem exists_cohomFpClass_eq (c : cohomFp p G 2) :
+    ∃ X : ProfiniteGroupExtension G (Multiplicative (ZMod p)), X.cohomFpClass htriv = c := by
+  obtain ⟨X, hX⟩ := exists_contCohomologyClass_eq (cohomFpAddEquivH2Additive p G htriv c)
+  exact ⟨X, by rw [cohomFpClass_def, hX, AddEquiv.symm_apply_apply]⟩
+
+/-- **`H²(G, 𝔽_p)` classifies the profinite extensions of `G` by `𝔽_p`** with trivial action: the
+class descends to a bijection from those extensions modulo continuous equivalence onto
+`cohomFp p G 2`, the bijection `TauCeti.ProfiniteGroupExtension.contCohomologyClassEquiv` read on
+`cohomFp p G 2`. -/
+noncomputable def cohomFpClassEquiv :
+    Quotient (continuousEquivSetoid G (Multiplicative (ZMod p))) ≃ cohomFp p G 2 :=
+  (contCohomologyClassEquiv G (Multiplicative (ZMod p))).trans
+    (cohomFpAddEquivH2Additive p G htriv).symm.toEquiv
+
+@[simp]
+theorem cohomFpClassEquiv_apply_mk (X : ProfiniteGroupExtension G (Multiplicative (ZMod p))) :
+    cohomFpClassEquiv htriv (Quotient.mk _ X) = X.cohomFpClass htriv := by
+  rw [cohomFpClassEquiv, Equiv.trans_apply, contCohomologyClassEquiv_apply_mk]
+  rfl
+
+end Realization
 
 end ProfiniteGroupExtension
 

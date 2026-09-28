@@ -89,8 +89,10 @@ theorem zmodFourExtension_rightHom :
 the generator of `ℤ/2` to an element of `ℤ/4` of order dividing two with odd residue, and the only
 elements of `ℤ/4` of order dividing two are `0` and `2`. -/
 theorem isEmpty_splitting_zmodFourExtension : IsEmpty zmodFourExtension.Splitting := ⟨fun s => by
+  -- The generator of `ℤ/2` squares to `1`, so its image under the section does.
+  have hgen : ofAdd (1 : ZMod 2) * ofAdd 1 = 1 := by decide
   have hsq : s (ofAdd 1) * s (ofAdd 1) = 1 := by
-    rw [← map_mul, show ofAdd (1 : ZMod 2) * ofAdd 1 = 1 by decide, map_one]
+    rw [← map_mul, hgen, map_one]
   have hred := s.rightHom_splitting (ofAdd 1)
   rw [zmodFourExtension_rightHom, AddMonoidHom.toMultiplicative_apply_apply,
     RingHom.toAddMonoidHom_eq_coe, AddMonoidHom.coe_ofClass] at hred

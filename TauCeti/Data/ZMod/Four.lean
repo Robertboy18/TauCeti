@@ -53,22 +53,26 @@ theorem carryFour_add (u v : ZMod 4) :
   revert u v
   decide
 
-/-- **The doubling map `𝔽₂ →+ ℤ/4`**, `x ↦ 2x`: the inclusion of `𝔽₂` as the subgroup `2ℤ/4ℤ`. -/
-def twoMulCastAddHom : ZMod 2 →+ ZMod 4 where
-  toFun x := 2 * x.cast
-  map_zero' := by decide
-  map_add' := by decide
+/-- **The doubling map `𝔽₂ →+ ℤ/4`**, `x ↦ 2x`: the inclusion of `𝔽₂` as the subgroup `2ℤ/4ℤ`. It
+is the homomorphism `ZMod.lift` induces from the doubling `ℤ →+ ℤ/4`, which kills `2`. -/
+def twoMulCastAddHom : ZMod 2 →+ ZMod 4 :=
+  lift 2 ⟨2 • Int.castAddHom (ZMod 4), by decide⟩
 
 @[simp]
-theorem twoMulCastAddHom_apply (x : ZMod 2) : twoMulCastAddHom x = 2 * x.cast :=
-  (rfl)
+theorem twoMulCastAddHom_apply (x : ZMod 2) : twoMulCastAddHom x = 2 * x.cast := by
+  nth_rw 1 [← intCast_zmod_cast x]
+  rw [twoMulCastAddHom, lift_coe]
+  simp only [AddMonoidHom.nsmul_apply, Int.coe_castAddHom, intCast_cast, nsmul_eq_mul,
+    Nat.cast_ofNat]
 
-/-- The doubling map `𝔽₂ →+ ℤ/4` is injective. -/
-theorem twoMulCastAddHom_injective : Function.Injective twoMulCastAddHom := by
-  intro x y h
-  rw [twoMulCastAddHom_apply, twoMulCastAddHom_apply] at h
-  revert x y h
-  decide
+/-- The doubling map `𝔽₂ →+ ℤ/4` is injective: if `4 ∣ 2m` then `2 ∣ m`. -/
+theorem twoMulCastAddHom_injective : Function.Injective twoMulCastAddHom :=
+  (lift_injective 2).2 fun m hm => by
+    have h4 : ((2 * m : ℤ) : ZMod 4) = 0 := by
+      simpa only [AddMonoidHom.nsmul_apply, Int.coe_castAddHom, nsmul_eq_mul, Nat.cast_ofNat,
+        Int.cast_mul, Int.cast_ofNat] using hm
+    rw [intCast_zmod_eq_zero_iff_dvd] at h4 ⊢
+    omega
 
 /-- **The range of the doubling map is the kernel of reduction modulo two**: the sequence
 `0 → 𝔽₂ → ℤ/4 → 𝔽₂ → 0` is exact in the middle. -/

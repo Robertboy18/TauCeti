@@ -5,8 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.GroupAction.Trivial
 public import TauCeti.GroupTheory.GroupExtension.ZModFour
-public import TauCeti.RepresentationTheory.ProjectiveRepresentation.Extension
 public import TauCeti.Topology.Algebra.GroupExtension.CohomFp
 
 /-!
@@ -28,7 +28,8 @@ The group `H²(ℤ/2, 𝔽₂)` is a line, so this nonzero class is the cup squa
 ## Main declarations
 
 * `TauCeti.ProfiniteGroupExtension.zmodFour`: the profinite extension `1 → ℤ/2 → ℤ/4 → ℤ/2 → 1`
-  of `ℤ/2` by `ℤ/2` with the trivial action.
+  of `ℤ/2` by `ℤ/2` with the trivial action; its underlying extension is `TauCeti.zmodFourExtension`
+  (`TauCeti.ProfiniteGroupExtension.zmodFour_toGroupExtension`).
 * `TauCeti.zmodFourExtensionClass`: **the class of the extension `ℤ/4` in `H²(ℤ/2, 𝔽₂)`**, and
   `TauCeti.zmodFourExtensionClass_ne_zero`: it is nonzero.
 
@@ -68,6 +69,12 @@ abbrev ProfiniteGroupExtension.zmodFour :
       (le_top.trans_eq Subgroup.center_eq_top.symm)).2 fun _ _ =>
         trivialMulDistribMulAction_smul _ _
 
+/-- The underlying extension of the profinite extension `ℤ/4` is `TauCeti.zmodFourExtension`. -/
+@[simp]
+theorem ProfiniteGroupExtension.zmodFour_toGroupExtension :
+    ProfiniteGroupExtension.zmodFour.toGroupExtension = zmodFourExtension :=
+  (rfl)
+
 /-- **The class of the extension `ℤ/4` in `H²(ℤ/2, 𝔽₂)`**: the class of the profinite extension
 `1 → ℤ/2 → ℤ/4 → ℤ/2 → 1` in Mathlib's continuous cohomology of the trivial
 `𝔽₂`-representation of `ℤ/2`. -/
@@ -90,7 +97,8 @@ theorem zmodFourExtensionClass_def :
 /-- **The class of the extension `ℤ/4` in `H²(ℤ/2, 𝔽₂)` is nonzero**: the extension has no
 homomorphic section. -/
 theorem zmodFourExtensionClass_ne_zero : zmodFourExtensionClass ≠ 0 := by
-  rw [zmodFourExtensionClass_def, Ne, ProfiniteGroupExtension.cohomFpClass_eq_zero_iff]
+  rw [zmodFourExtensionClass_def, Ne, ProfiniteGroupExtension.cohomFpClass_eq_zero_iff,
+    ProfiniteGroupExtension.zmodFour_toGroupExtension]
   rintro ⟨s, -⟩
   exact isEmpty_splitting_zmodFourExtension.elim s
 
