@@ -32,17 +32,24 @@ subgroup of `F`, is at most `#rels` since the relators generate `R` normally
 relation rank of a group presented by finitely many relators is finite
 (`TauCeti.presentedProP.module_finite_cohomFp_two_of_finite`), which is what makes the deficiency
 of such a group defined. Every statement here is about the canonical carrier `cohomFp p G 2` of
-the relation rank, so no action of `G` on `𝔽_p` appears.
+the relation rank, so no action of `G` on `𝔽_p` appears. The definition itself needs neither the
+primality of `p` nor that `G` be pro-`p`: for any natural number `p` and topological group `G` it is
+the difference of `d(G)` and the `ZMod p`-rank `Module.finrank (ZMod p) (cohomFp p G 2)` of the
+cohomology with trivial `ZMod p` coefficients, and the reading of that rank as the relation rank
+`r(G)` is the pro-`p` case.
 
 ## Main definitions
 
-* `TauCeti.deficiency`: the deficiency `def(G) = d(G) - dim_{𝔽_p} H²(G, 𝔽_p)`, in `ℤ`, of a
-  topologically finitely generated group with finite-dimensional `H²(G, 𝔽_p)`; both finiteness
-  proofs are carried, as `TauCeti.topologicalGeneratorRankNat` carries its own.
+* `TauCeti.deficiency`: the deficiency `def(G) = d(G) - finrank_{ZMod p} H²(G, ZMod p)`, in `ℤ`, of
+  a topologically finitely generated topological group `G` whose cohomology `cohomFp p G 2` with
+  trivial `ZMod p` coefficients is a finitely generated `ZMod p`-module, for any natural number `p`;
+  for a prime `p` and a pro-`p` group `G` this is `d(G) - r(G)`. Both finiteness proofs are carried,
+  as `TauCeti.topologicalGeneratorRankNat` carries its own.
 
 ## Main results
 
-* `TauCeti.deficiency_add_finrank_cohomFp_two`: `d(G) = def(G) + r(G)`.
+* `TauCeti.deficiency_add_finrank_cohomFp_two`: `d(G) = def(G) + finrank_{ZMod p} H²(G, ZMod p)`,
+  that is `d(G) = def(G) + r(G)` for a pro-`p` group `G`.
 * `TauCeti.presentedProP.card_sub_card_le_deficiency`: `#X - #rels ≤ def(G)`, and
   `TauCeti.presentedProP.card_sub_card_eq_deficiency_iff`: equality holds exactly when the
   number of relators is the least number of normal generators of the relation subgroup.
@@ -68,26 +75,32 @@ section Deficiency
 -- The deficiency needs no primality of `p`, so the section precedes the `Fact p.Prime` variable.
 variable (p : ℕ) (G : Type v) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
-/-- **The deficiency** `def(G) = d(G) - r(G)` of a topologically finitely generated topological
-group with finite-dimensional `H²(G, 𝔽_p)`, in `ℤ`: the topological generator rank minus the
-relation rank `dim_{𝔽_p} H²(G, 𝔽_p)`. The subtraction is in `ℤ`, so no natural-number truncation
-occurs, and both finiteness proofs are carried, as `TauCeti.topologicalGeneratorRankNat` carries its
-own, so that the value is never a truncation artefact. For a pro-`p` group with a finite
-presentation `⟨X ∣ rels⟩` the deficiency is an upper bound for `#X - #rels`
+/-- **The deficiency** `def(G) = d(G) - finrank_{ZMod p} H²(G, ZMod p)`, in `ℤ`, of a topologically
+finitely generated topological group `G` whose cohomology `cohomFp p G 2` with trivial `ZMod p`
+coefficients is a finitely generated `ZMod p`-module: the topological generator rank minus the
+`ZMod p`-rank `Module.finrank (ZMod p) (cohomFp p G 2)`, for any natural number `p`. The
+subtraction is in `ℤ`, so no natural-number truncation occurs, and both finiteness proofs are
+carried, as `TauCeti.topologicalGeneratorRankNat` carries its own, so that the value is never a
+truncation artefact. For a prime `p` and a pro-`p` group `G` the rank is the relation rank
+`r(G) = dim_{𝔽_p} H²(G, 𝔽_p)`, so `def(G) = d(G) - r(G)`, and for a finite presentation
+`⟨X ∣ rels⟩` of `G` the deficiency is an upper bound for `#X - #rels`
 (`TauCeti.presentedProP.card_sub_card_le_deficiency`), attained exactly when
 `#rels = d(R ⧸ Rᵖ[R, F])` (`TauCeti.presentedProP.card_sub_card_eq_deficiency_iff`). -/
 noncomputable def deficiency (hfg : IsTopologicallyFinitelyGenerated G)
     (_hfin : Module.Finite (ZMod p) (cohomFp p G 2)) : ℤ :=
   (topologicalGeneratorRankNat G hfg : ℤ) - Module.finrank (ZMod p) (cohomFp p G 2)
 
-/-- The deficiency is the generator rank minus the relation rank. -/
+/-- The deficiency is the generator rank minus the `ZMod p`-rank of `cohomFp p G 2`, which is the
+relation rank `r(G)` for a prime `p` and a pro-`p` group `G`. -/
 theorem deficiency_def (hfg : IsTopologicallyFinitelyGenerated G)
     (hfin : Module.Finite (ZMod p) (cohomFp p G 2)) :
     deficiency p G hfg hfin =
       (topologicalGeneratorRankNat G hfg : ℤ) - Module.finrank (ZMod p) (cohomFp p G 2) :=
   (rfl)
 
-/-- **`d(G) = def(G) + r(G)`**: the generator rank is the deficiency plus the relation rank. -/
+/-- **`d(G) = def(G) + finrank_{ZMod p} H²(G, ZMod p)`**: the generator rank is the deficiency plus
+the `ZMod p`-rank of `cohomFp p G 2`, which is the relation rank `r(G)` for a prime `p` and a
+pro-`p` group `G`. -/
 @[simp]
 theorem deficiency_add_finrank_cohomFp_two (hfg : IsTopologicallyFinitelyGenerated G)
     (hfin : Module.Finite (ZMod p) (cohomFp p G 2)) :

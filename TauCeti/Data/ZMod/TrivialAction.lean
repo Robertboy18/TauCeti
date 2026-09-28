@@ -11,12 +11,11 @@ public import Mathlib.Data.ZMod.Defs
 /-!
 # The trivial action of a monoid on `ZMod n`
 
-The trivial action `g • m = m` of a monoid `F` on `ZMod n`, as a `DistribMulAction`, with the
-triviality `g • m = m` holding by definition. It is the coefficient action that a statement about
-the cohomology of trivial `ZMod n`-coefficients installs locally when no action of `F` appears in
-its conclusion; the statements of `TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationRank`
-that carry an action of `F` on `ZMod n` as an instance together with the hypothesis that it is
-trivial are then applied with the hypothesis `fun _ _ ↦ rfl`.
+The trivial action `g • m = m` of a monoid `F` on `ZMod n`, as a `DistribMulAction`. It is the
+coefficient action that a statement about the cohomology of trivial `ZMod n`-coefficients installs
+locally when no action of `F` appears in its conclusion; the statements of
+`TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationRank` that carry an action of `F` on
+`ZMod n` as an instance together with the hypothesis that it is trivial then apply to it.
 
 ## Main definitions
 
@@ -27,10 +26,12 @@ public section
 
 namespace TauCeti
 
-/-- The trivial action of a monoid `F` on `ZMod n`, with `g • m = m` by definition: its triviality
-hypothesis is `fun _ _ ↦ rfl` and, for a topological monoid `F`, the continuity of the action is
-`⟨continuous_snd⟩`. A statement about the cohomology of trivial `ZMod n`-coefficients whose
-conclusion mentions no action of `F` installs it locally, by `let := trivialZModAction n F`. -/
+-- The action is trivial by definition, so its triviality hypothesis is `fun _ _ ↦ rfl` and, for a
+-- topological monoid `F`, the continuity of the action is `⟨continuous_snd⟩`; a statement whose
+-- conclusion mentions no action of `F` installs it locally by `let := trivialZModAction n F`.
+/-- The trivial action `g • m = m` of a monoid `F` on `ZMod n`. It is the coefficient action of a
+statement about the cohomology of trivial `ZMod n`-coefficients whose conclusion mentions no action
+of `F`. -/
 abbrev trivialZModAction (n : ℕ) (F : Type*) [Monoid F] : DistribMulAction F (ZMod n) where
   smul _ m := m
   one_smul _ := rfl
