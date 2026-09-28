@@ -134,7 +134,6 @@ theorem coordinateCharacter_apply (i : X) (g : Multiplicative (X → ℤ_[p])) :
   (rfl)
 
 /-- The coordinate characters are dual to the coordinate vectors: `e_i^* (e_i) = 1`. -/
-@[simp]
 theorem coordinateCharacter_ofAdd_single_self [DecidableEq X] (i : X) :
     toAdd (Additive.toMul (coordinateCharacter p X i) (ofAdd (Pi.single i (1 : ℤ_[p])))) = 1 := by
   rw [coordinateCharacter_apply, toAdd_ofAdd, Pi.single_eq_same, map_one]

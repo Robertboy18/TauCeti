@@ -138,7 +138,10 @@ noncomputable def characterCocycle (χ : continuousZModDual p G) : cocycles (tri
     (CochainComplex.next ℕ 1) (d_characterCochain p χ)
 
 /-- The underlying cochain of the cocycle of `χ` is `characterCochain p χ`. -/
-@[simp]
+-- Not a `simp` lemma: `simp` rewrites the ambient object
+-- `(homogeneousCochains (trivialFp p G)).X 1` on the left-hand side through
+-- `CategoryTheory.Functor.mapHomologicalComplex_obj_X`, so the statement is not in `simp`-normal
+-- form; use it with `rw` or `simp only`.
 theorem iCycles_characterCocycle (χ : continuousZModDual p G) :
     (homogeneousCochains (trivialFp p G)).iCycles 1 (characterCocycle p χ) =
       characterCochain p χ :=
