@@ -40,7 +40,8 @@ the presented group has topological generator rank exactly `n`.
 * `TauCeti.labuteComm`: Labute's commutator `(x, y) = x⁻¹y⁻¹xy`.
 * `TauCeti.demushkinWordNeTwo`, `TauCeti.demushkinWordTwoOdd`, `TauCeti.demushkinWordTwoEven`:
   the three normal-form relator words, on an arbitrary tuple; `TauCeti.demushkinWordTwoRankTwo`:
-  the even word of rank two, `x₁^{2+α} (x₁, x₂)`, with no level.
+  the even word of rank two, `x₁^{2+α} (x₁, x₂)`, with no level; `TauCeti.demushkinWordTwoEven_two`
+  reads the even word at rank two as it.
 
 ## Main results
 
@@ -176,7 +177,8 @@ theorem demushkinWordTwoEven_def (a f n : ℕ) (x : ℕ → H) :
 /-- The `q = 2` normal-form word of rank two, `x₁^{2+a} (x₁, x₂)`, on an arbitrary tuple
 `x : ℕ → H`, with `x 0` playing the role of `x₁`. It is the `n = 2` member of the even family
 with the factor `x₃^{2^f}` absent, Labute's level `f = ∞`, so it carries no level: on a tuple with
-`x 2 = 1` it agrees with `demushkinWordTwoEven a f 2 x` for every `f`. -/
+`x 2 = 1` it agrees with `demushkinWordTwoEven a f 2 x` for every `f`
+(`TauCeti.demushkinWordTwoEven_two`). -/
 def demushkinWordTwoRankTwo (a : ℕ) (x : ℕ → H) : H :=
   x 0 ^ (2 + a) * labuteComm (x 0) (x 1)
 
@@ -184,6 +186,13 @@ def demushkinWordTwoRankTwo (a : ℕ) (x : ℕ → H) : H :=
 theorem demushkinWordTwoRankTwo_def (a : ℕ) (x : ℕ → H) :
     demushkinWordTwoRankTwo a x = x 0 ^ (2 + a) * labuteComm (x 0) (x 1) :=
   (rfl)
+
+/-- At rank `2` the even word is the rank-two word: the factor `x₃^{2^f}` is `1` because the third
+generator is out of range, and the commutator product beyond `(x₁, x₂)` is empty. -/
+@[simp]
+theorem demushkinWordTwoEven_two (a f : ℕ) (x : ℕ → H) (hx : x 2 = 1) :
+    demushkinWordTwoEven a f 2 x = demushkinWordTwoRankTwo a x := by
+  simp [demushkinWordTwoEven_def, demushkinWordTwoRankTwo_def, hx]
 
 variable {K F : Type*} [Group K] [FunLike F H K] [MonoidHomClass F H K] (φ : F)
 
