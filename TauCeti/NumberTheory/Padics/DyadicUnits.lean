@@ -154,6 +154,14 @@ theorem disjoint_unitsPrincipal_zpowers_neg_one {f : ℕ} (hf : 2 ≤ f) :
   · rfl
   · exact absurd (neg_one_mem_unitsPrincipal_two_iff.mp hx) (by omega)
 
+/-- `{±1}` is closed in `ℤ_2ˣ`, being the finite set `{1, -1}`. -/
+theorem isClosed_zpowers_neg_one :
+    IsClosed ((Subgroup.zpowers (-1 : ℤ_[2]ˣ)) : Set ℤ_[2]ˣ) := by
+  apply Set.Finite.isClosed
+  refine ((Set.finite_singleton (-1 : ℤ_[2]ˣ)).insert 1).subset fun x hx ↦ ?_
+  simpa only [Set.mem_insert_iff, Set.mem_singleton_iff] using
+    (Subgroup.mem_zpowers_neg_one_iff PadicInt.units_neg_one_ne_one).mp hx
+
 /-! ### Indices and levels of `V^(f)` -/
 
 /-- `V^(f) ⊓ U^(2) = U^(f)` for `f ≥ 2`: the even part of `V^(f)` is `U^(f)`. -/
@@ -349,7 +357,7 @@ theorem closedSubgroup_units_two_classification {A : Subgroup ℤ_[2]ˣ}
   · exact Or.inr (Or.inl ⟨f, hf, eq_unitsPlusMinus_of_inf_unitsPrincipal_two_eq h h1⟩)
   by_cases hle : A ≤ unitsPrincipal 2 2
   · exact Or.inl ⟨f, hf, by rw [← h, inf_eq_left.mpr hle]⟩
-  obtain ⟨a, ha, ha2⟩ := SetLike.not_le_iff_exists.mp hle
+  obtain ⟨a, ha, ha2⟩ := IsConcreteLE.not_le_iff_exists.mp hle
   obtain ⟨g, u, -, hg, hu, hAu⟩ :=
     exists_eq_topologicalClosure_zpowers_of_inf_unitsPrincipal_two_eq hA h h1 ha ha2
   exact Or.inr (Or.inr (Or.inr ⟨g, u, hg, hu, hAu⟩))
@@ -381,7 +389,7 @@ theorem not_exists_topologicalClosure_zpowers_eq_unitsPlusMinus {f : ℕ} (hf : 
   have hu' : u ∈ unitsPlusMinus f :=
     hu ▸ Subgroup.le_topologicalClosure _ (Subgroup.mem_zpowers u)
   have h2 : (unitsPrincipal 2 (f + 1)).relIndex (unitsPlusMinus f) ∣ 2 := by
-    refine Subgroup.relIindex_dvd_two_iff'.mpr
+    refine Subgroup.relIndex_dvd_two_iff'.mpr
       ⟨u⁻¹, (unitsPlusMinus f).inv_mem hu', fun b hb ↦ ?_⟩
     rw [← hu] at hb
     exact (mem_or_inv_mul_mem_of_mem_topologicalClosure_zpowers u _

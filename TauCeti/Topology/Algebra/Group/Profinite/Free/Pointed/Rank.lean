@@ -80,7 +80,7 @@ noncomputable def characterOfContinuousMap (f : C(X, ZMod p)) (hf : f x₀ = 0) 
         ((ZModModule.isPGroup_multiplicative (n := p) (G := ZMod p)).isProP.of_equiv
           ContinuousMulEquiv.ulift.symm))
       (fun x ↦ ULift.up (Multiplicative.ofAdd (f x)))
-      (continuous_uliftUp.comp (continuous_ofAdd.comp f.continuous)) (ULift.ext _ _ (by simp [hf])))
+      (continuous_uliftUp.comp (continuous_ofAdd.comp f.continuous)) (ULift.ext (by simp [hf])))
 
 /-- The character extending `f` takes the value `f x` at the image of `x`. -/
 @[simp]

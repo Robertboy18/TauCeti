@@ -8,6 +8,7 @@ module
 public import Mathlib.Geometry.Manifold.Riemannian.Basic
 public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.Normal
 import TauCeti.Geometry.Manifold.VectorField.LieBracket
+import TauCeti.Geometry.Manifold.VectorBundle.Tangent
 
 /-!
 # Geodesics and the exponential map in inner-product spaces
@@ -201,9 +202,7 @@ theorem geodesicInterval_model_space (p v : F) :
 @[simp]
 theorem maximalGeodesic_model_space (p v : F) (t : ℝ) :
     maximalGeodesic 𝓘(ℝ, F) F p v t = p + t • v := by
-  let _ : T2Space (ModelProd F F) := Prod.t2Space
-  let _ : T2Space (TangentBundle 𝓘(ℝ, F) F) :=
-    (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, F)).symm.t2Space
+  let _ := instT2SpaceTangentBundleModelSpace (I := 𝓘(ℝ, F))
   exact (isGeodesicCurveOnFrom_add_smul p v).eq_maximalGeodesic_of_univ t
 
 /-- The geodesics in a finite-dimensional real inner-product space are exactly the affine
@@ -218,9 +217,7 @@ theorem isGeodesicCurve_iff_exists_eq_add_smul {γ : ℝ → F} :
     have hfrom : IsGeodesicCurveOnFrom 𝓘(ℝ, F) γ univ p v :=
       ((isGeodesicCurveOn_univ (I := 𝓘(ℝ, F))).2 hγ).isGeodesicCurveOnFrom
         (mem_univ 0)
-    let _ : T2Space (ModelProd F F) := Prod.t2Space
-    let _ : T2Space (TangentBundle 𝓘(ℝ, F) F) :=
-      (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, F)).symm.t2Space
+    let _ := instT2SpaceTangentBundleModelSpace (I := 𝓘(ℝ, F))
     have heq := hfrom.eq_maximalGeodesic_of_univ t
     rw [maximalGeodesic_model_space] at heq
     exact heq.symm
@@ -259,13 +256,18 @@ omit [FiniteDimensional ℝ F] in
 private theorem tangentSpaceEquivModel_apply (p : F) (v : TangentSpace 𝓘(ℝ, F) p) :
     tangentSpaceEquivModel p v = NormedSpace.fromTangentSpace p v := (rfl)
 
-private theorem hasMFDerivAt_riemannianExp_model_space (p : F) (v : TangentSpace 𝓘(ℝ, F) p) :
-    HasMFDerivAt 𝓘(ℝ, TangentSpace 𝓘(ℝ, F) p) 𝓘(ℝ, F) (riemannianExp 𝓘(ℝ, F) F p) v
-      (tangentSpaceEquivModel p : TangentSpace 𝓘(ℝ, F) p →L[ℝ] F) := by
+private theorem hasFDerivAt_riemannianExp_model_space (p : F) (v : TangentSpace 𝓘(ℝ, F) p) :
+    HasFDerivAt (riemannianExp 𝓘(ℝ, F) F p)
+      (tangentSpaceEquivModel p : TangentSpace 𝓘(ℝ, F) p →L[ℝ] F) v := by
   have hexp : riemannianExp 𝓘(ℝ, F) F p = fun u ↦ p + tangentSpaceEquivModel p u :=
     funext fun u ↦ by rw [riemannianExp_model_space, tangentSpaceEquivModel_apply]
   rw [hexp]
-  exact hasMFDerivAt_iff_hasFDerivAt.2 ((tangentSpaceEquivModel p).hasFDerivAt.const_add p)
+  exact (tangentSpaceEquivModel p).hasFDerivAt.const_add p
+
+private theorem hasMFDerivAt_riemannianExp_model_space (p : F) (v : TangentSpace 𝓘(ℝ, F) p) :
+    HasMFDerivAt 𝓘(ℝ, TangentSpace 𝓘(ℝ, F) p) 𝓘(ℝ, F) (riemannianExp 𝓘(ℝ, F) F p) v
+      (tangentSpaceEquivModel p : TangentSpace 𝓘(ℝ, F) p →L[ℝ] F) :=
+  hasMFDerivAt_iff_hasFDerivAt.2 (hasFDerivAt_riemannianExp_model_space p v)
 
 /-- The differential of the exponential map of a finite-dimensional inner-product space is the
 identity at every tangent vector. -/
@@ -281,8 +283,8 @@ the identity at every tangent vector. This is the simp-normal form of
 @[simp]
 theorem fderiv_riemannianExp_apply_model_space (p : F) (v w : TangentSpace 𝓘(ℝ, F) p) :
     fderiv ℝ (riemannianExp 𝓘(ℝ, F) F p) v w = NormedSpace.fromTangentSpace p w := by
-  rw [← mfderiv_eq_fderiv]
-  exact mfderiv_riemannianExp_apply_model_space p v w
+  rw [← tangentSpaceEquivModel_apply]
+  exact DFunLike.congr_fun (hasFDerivAt_riemannianExp_model_space p v).fderiv w
 
 /-- The exponential map of a finite-dimensional inner-product space at `p` maps the tangent ball of
 radius `r` onto the ball of radius `r` about `p`. -/
@@ -306,9 +308,7 @@ theorem image_riemannianExp_ball_model_space (p : F) (r : ℝ) :
 star-shaped at the origin is a normal domain. -/
 theorem isNormalDomain_model_space (p : F) {U : Set (TangentSpace 𝓘(ℝ, F) p)} (hU : IsOpen U)
     (h0 : 0 ∈ U) (hstar : StarConvex ℝ 0 U) : IsNormalDomain 𝓘(ℝ, F) F p U := by
-  let _ : T2Space (ModelProd F F) := Prod.t2Space
-  let _ : T2Space (TangentBundle 𝓘(ℝ, F) F) :=
-    (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, F)).symm.t2Space
+  let _ := instT2SpaceTangentBundleModelSpace (I := 𝓘(ℝ, F))
   refine ⟨hU, h0, hstar, (expDomain_model_space p).symm ▸ subset_univ U, fun v _ w _ h ↦ ?_,
     fun v ↦ ?_⟩
   · simp only [riemannianExp_model_space, add_right_inj] at h
