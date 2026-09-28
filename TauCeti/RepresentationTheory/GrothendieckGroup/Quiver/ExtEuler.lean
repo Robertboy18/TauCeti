@@ -32,7 +32,7 @@ nonsymmetric.
 
 * `TauCeti.isEulerAdmissibleOn_isFG_pathAlgebra`: every pair of finitely generated modules over
   a finite-dimensional path algebra is Euler-admissible.
-* `TauCeti.extEulerPairing_eq_quiverEulerPairingK0`: the Ext-Euler pairing on `G₀(mod kQ)` is
+* `TauCeti.extEulerPairing_eq_pathAlgebraEulerPairingK0`: the Ext-Euler pairing on `G₀(mod kQ)` is
   the Ringel form pulled back along dimension vectors.
 * `TauCeti.extEuler_eq_eulerForm_dimVector`: the object-level Ext-Euler characteristic of two
   finitely generated modules is the Ringel form of their dimension vectors.
@@ -109,14 +109,14 @@ variable [Fintype Q] [∀ a b : Q, Fintype (a ⟶ b)] [FiniteDimensional k (path
 /-- **The Ext-Euler pairing of a finite acyclic quiver is the Ringel form.** On the Grothendieck
 group of finitely generated modules over a finite-dimensional path algebra, the categorical
 Ext-Euler pairing is the quiver Euler form pulled back along the dimension-vector map. -/
-theorem extEulerPairing_eq_quiverEulerPairingK0
+theorem extEulerPairing_eq_pathAlgebraEulerPairingK0
     (x y : ExactK0 (finiteModulesExactStructure (pathAlgebra k Q))) :
     extEulerPairing (isExtensionClosed_finiteModules (pathAlgebra k Q))
       (isExtensionClosed_finiteModules (pathAlgebra k Q))
       (isEulerAdmissibleOn_isFG_pathAlgebra k Q)
       (finiteModulesExactK0Equiv (pathAlgebra k Q) x)
       (finiteModulesExactK0Equiv (pathAlgebra k Q) y) =
-    quiverEulerPairingK0 k Q x y := by
+    pathAlgebraEulerPairingK0 k Q x y := by
   set A := pathAlgebra k Q
   let e := finiteModulesExactK0Equiv A
   set Φ := extEulerPairing (isExtensionClosed_finiteModules A) (isExtensionClosed_finiteModules A)
@@ -124,11 +124,11 @@ theorem extEulerPairing_eq_quiverEulerPairingK0
   -- For a fixed module class `[Y]`, both sides are additive in `x` and agree on the spanning
   -- family of vertex simple classes.
   have key (Y : FGModuleCat A) (x : ExactK0 (finiteModulesExactStructure A)) :
-      Φ (e x) (ExactK0.of Y) = quiverEulerPairingK0 k Q x (ExactK0.of Y) := by
+      Φ (e x) (ExactK0.of Y) = pathAlgebraEulerPairingK0 k Q x (ExactK0.of Y) := by
     let f : ExactK0 (finiteModulesExactStructure A) →+ ℤ :=
       (Φ.flip (ExactK0.of Y)).comp e.toAddMonoidHom
     let g : ExactK0 (finiteModulesExactStructure A) →+ ℤ :=
-      ((quiverEulerPairingK0 k Q).flip (ExactK0.of Y)).toAddMonoidHom
+      ((pathAlgebraEulerPairingK0 k Q).flip (ExactK0.of Y)).toAddMonoidHom
     suffices f = g from DFunLike.congr_fun this x
     apply AddMonoidHom.toIntLinearMap_injective
     refine LinearMap.ext_on_range (span_range_exactK0OfFamily_eq_top (vertexSimpleModuleFG k Q)
@@ -139,10 +139,10 @@ theorem extEulerPairing_eq_quiverEulerPairingK0
       AddMonoidHom.flip_apply, LinearMap.toAddMonoidHom_coe, LinearMap.BilinForm.flip_apply,
       AddEquiv.coe_toAddMonoidHom, exactK0OfFamily_apply, e, finiteModulesExactK0Equiv_of, Φ,
       extEulerPairing_of_of, vertexSimpleModuleFG_obj]
-    rw [quiverEulerPairingK0_of_of]
+    rw [pathAlgebraEulerPairingK0_of_of]
     exact extEuler_vertexSimpleModule_eq_eulerForm k Q i Y.obj (hfin _) fun j _ ↦ hfin _
   -- Both sides are additive in `y`.
-  suffices (Φ (e x)).comp e.toAddMonoidHom = (quiverEulerPairingK0 k Q x).toAddMonoidHom from
+  suffices (Φ (e x)).comp e.toAddMonoidHom = (pathAlgebraEulerPairingK0 k Q x).toAddMonoidHom from
     DFunLike.congr_fun this y
   exact ExactK0.hom_ext fun Y ↦ by simpa [e] using key Y x
 
@@ -154,9 +154,9 @@ theorem extEuler_eq_eulerForm_dimVector (X Y : ModuleCat (pathAlgebra k Q))
     extEuler k h =
       eulerForm Q (fun i ↦ (dimVector ((quiverRepFunctor k Q).obj X) i : ℤ))
         (fun i ↦ (dimVector ((quiverRepFunctor k Q).obj Y) i : ℤ)) := by
-  have := extEulerPairing_eq_quiverEulerPairingK0 k Q (ExactK0.of (FGModuleCat.of _ X))
+  have := extEulerPairing_eq_pathAlgebraEulerPairingK0 k Q (ExactK0.of (FGModuleCat.of _ X))
     (ExactK0.of (FGModuleCat.of _ Y))
-  simpa only [finiteModulesExactK0Equiv_of, extEulerPairing_of_of, quiverEulerPairingK0_of_of]
+  simpa only [finiteModulesExactK0Equiv_of, extEulerPairing_of_of, pathAlgebraEulerPairingK0_of_of]
     using this
 
 /-- **The symmetrized Ext-Euler pairing is the polarized Tits form** of the dimension vectors. -/
@@ -172,8 +172,8 @@ theorem extEulerPairing_add_flip_eq_titsPolarForm
       (isEulerAdmissibleOn_isFG_pathAlgebra k Q)
       (finiteModulesExactK0Equiv (pathAlgebra k Q) y)
       (finiteModulesExactK0Equiv (pathAlgebra k Q) x) =
-    titsPolarForm Q (quiverDimensionVectorK0 k Q x) (quiverDimensionVectorK0 k Q y) := by
-  rw [extEulerPairing_eq_quiverEulerPairingK0, extEulerPairing_eq_quiverEulerPairingK0,
-    quiverEulerPairingK0_apply, quiverEulerPairingK0_apply, titsPolarForm_def]
+    titsPolarForm Q (pathAlgebraDimensionVectorK0 k Q x) (pathAlgebraDimensionVectorK0 k Q y) := by
+  rw [extEulerPairing_eq_pathAlgebraEulerPairingK0, extEulerPairing_eq_pathAlgebraEulerPairingK0,
+    pathAlgebraEulerPairingK0_apply, pathAlgebraEulerPairingK0_apply, titsPolarForm_def]
 
 end TauCeti
