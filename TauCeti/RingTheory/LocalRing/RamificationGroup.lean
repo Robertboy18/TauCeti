@@ -42,6 +42,8 @@ integer indexing that Herbrand theory uses.
 * `TauCeti.IsLocalRing.ramificationGroupReal G S u`: the same family reindexed by a real number
   through `⌈·⌉`, the convention under which the step function is constant on `(i - 1, i]`.
 * `TauCeti.IsLocalRing.RamificationGroupGraded G S i`: the successive quotient `G_i / G_{i+1}`.
+* `TauCeti.IsLocalRing.lowerIndex S σ`: over a discrete valuation ring, Serre's lower index
+  `i_G(σ) = min_x v (σ x - x)` in `ℕ∞`.
 
 ## Main results
 
@@ -66,11 +68,20 @@ integer indexing that Herbrand theory uses.
   monogenic case, where a single generator decides it.
 * `TauCeti.IsLocalRing.mem_ramificationGroup_iff_le_addVal`: over a discrete valuation ring the
   defining condition is the valuation inequality `v (σ x - x) ≥ i + 1`;
-  `TauCeti.IsLocalRing.mem_ramificationGroup_natCast_iff_le_addVal_of_adjoin_singleton_eq_top`
-  tests it at a single generator.
+  `TauCeti.IsLocalRing.mem_ramificationGroup_iff_le_lowerIndex` reads it as `i + 1 ≤ i_G(σ)`.
+* `TauCeti.IsLocalRing.lowerIndex_eq_top_iff`: for a faithful action only the identity has lower
+  index `⊤`, and `TauCeti.IsLocalRing.lowerIndex_eq_addVal_of_adjoin_singleton_eq_top` computes
+  the lower index at a single generator.
+* `TauCeti.IsLocalRing.mem_ramificationGroup_natCast_iff_le_addVal_of_adjoin_singleton_eq_top`
+  tests membership in `G_n` at a single generator.
 * `TauCeti.IsLocalRing.sum_addVal_smul_sub_eq_finsum_card_ramificationGroup_sub_one`:
   **Hilbert's counting identity** `∑_{σ ≠ 1} v (σ ξ - ξ) = ∑_{i ≥ 0} (#G_i - 1)` for a generator
   `ξ` of a discrete valuation ring under a faithful action of a finite group.
+* `TauCeti.IsLocalRing.sum_min_lowerIndex_natCast`: the truncated count
+  `∑_{σ ∈ G} min (i_G(σ), m) = ∑_{k < m} #G_k` for a finite group `G`.
+* `TauCeti.IsLocalRing.mem_ramificationGroup_iff_of_lowerIndex_eq` and
+  `TauCeti.IsLocalRing.mem_ramificationGroupReal_iff_of_lowerIndex_eq`: when `i_G(σ) = n` is
+  finite, `σ ∈ G_i ↔ i + 1 ≤ n` and `σ ∈ G_u ↔ u ≤ n - 1`.
 
 ## References
 
@@ -315,6 +326,111 @@ theorem mem_ramificationGroup_iff_le_addVal {i : ℤ} {σ : G} :
   simp only [mem_ramificationGroup_iff,
     TauCeti.IsDiscreteValuationRing.mem_maximalIdeal_pow_iff_le_addVal]
 
+variable (S) in
+/-- Serre's **lower index** `i_G(σ)` of an element `σ` acting on a discrete valuation ring `S`:
+the least valuation `v (σ x - x)` over all `x : S`, with value `⊤` when `σ` acts trivially.
+Its superlevel sets are the ramification groups:
+`σ ∈ G_i ↔ i + 1 ≤ i_G(σ)`. -/
+noncomputable def lowerIndex (σ : G) : ℕ∞ :=
+  ⨅ x : S, IsDiscreteValuationRing.addVal S (σ • x - x)
+
+/-- The lower index is the infimum of the valuations of all displacements. -/
+theorem lowerIndex_def (σ : G) :
+    lowerIndex S σ = ⨅ x : S, IsDiscreteValuationRing.addVal S (σ • x - x) :=
+  (rfl)
+
+/-- A lower bound for the lower index is a lower bound for every `v (σ x - x)`. -/
+theorem le_lowerIndex_iff {n : ℕ∞} {σ : G} :
+    n ≤ lowerIndex S σ ↔ ∀ x : S, n ≤ IsDiscreteValuationRing.addVal S (σ • x - x) :=
+  le_iInf_iff
+
+/-- The lower index is at most the valuation `v (σ x - x)` at any `x`. -/
+theorem lowerIndex_le_addVal (σ : G) (x : S) :
+    lowerIndex S σ ≤ IsDiscreteValuationRing.addVal S (σ • x - x) :=
+  iInf_le _ x
+
+/-- The ramification groups are the superlevel sets of the lower index: `σ ∈ G_i` exactly when
+`i + 1 ≤ i_G(σ)`. -/
+theorem mem_ramificationGroup_iff_le_lowerIndex {i : ℤ} {σ : G} :
+    σ ∈ ramificationGroup G S i ↔ ((i + 1).toNat : ℕ∞) ≤ lowerIndex S σ := by
+  rw [mem_ramificationGroup_iff_le_addVal, le_lowerIndex_iff]
+
+/-- A natural number bounds the lower index exactly when the automorphism belongs to the
+corresponding ramification group. -/
+theorem natCast_le_lowerIndex_iff_mem_ramificationGroup {n : ℕ} {σ : G} :
+    (n : ℕ∞) ≤ lowerIndex S σ ↔ σ ∈ ramificationGroup G S ((n : ℤ) - 1) := by
+  rw [mem_ramificationGroup_iff_le_lowerIndex]
+  norm_num
+
+/-- When the lower index of `σ` is the natural number `n`, `σ ∈ G_i` exactly when `i + 1 ≤ n`. -/
+theorem mem_ramificationGroup_iff_of_lowerIndex_eq {i : ℤ} {σ : G} {n : ℕ}
+    (hn : lowerIndex S σ = n) :
+    σ ∈ ramificationGroup G S i ↔ i + 1 ≤ n := by
+  rw [mem_ramificationGroup_iff_le_lowerIndex, hn, Nat.cast_le, Int.toNat_le]
+
+/-- The lower index is unchanged by inversion. -/
+@[simp]
+theorem lowerIndex_inv (σ : G) : lowerIndex S σ⁻¹ = lowerIndex S σ := by
+  apply ENat.eq_of_forall_natCast_le_iff
+  intro n
+  rw [natCast_le_lowerIndex_iff_mem_ramificationGroup,
+    natCast_le_lowerIndex_iff_mem_ramificationGroup]
+  exact ⟨fun h ↦ by
+    simpa only [inv_inv] using (ramificationGroup G S ((n : ℤ) - 1)).inv_mem h,
+    fun h ↦ (ramificationGroup G S ((n : ℤ) - 1)).inv_mem h⟩
+
+/-- The lower index is constant on conjugacy classes. -/
+@[simp]
+theorem lowerIndex_conj (σ τ : G) :
+    lowerIndex S (σ * τ * σ⁻¹) = lowerIndex S τ := by
+  apply ENat.eq_of_forall_natCast_le_iff
+  intro n
+  rw [natCast_le_lowerIndex_iff_mem_ramificationGroup,
+    natCast_le_lowerIndex_iff_mem_ramificationGroup]
+  exact ⟨fun h ↦ by
+    have h' := (inferInstance : (ramificationGroup G S ((n : ℤ) - 1)).Normal).conj_mem
+      _ h σ⁻¹
+    convert h' using 1; group,
+    fun h ↦ (inferInstance : (ramificationGroup G S ((n : ℤ) - 1)).Normal).conj_mem _ h σ⟩
+
+/-- The lower index of a product is at least the minimum of the two lower indices. -/
+theorem min_le_lowerIndex_mul (σ τ : G) :
+    min (lowerIndex S σ) (lowerIndex S τ) ≤ lowerIndex S (σ * τ) := by
+  apply ENat.forall_natCast_le_iff_le.mp
+  intro n hn
+  rw [natCast_le_lowerIndex_iff_mem_ramificationGroup]
+  exact (ramificationGroup G S ((n : ℤ) - 1)).mul_mem
+    (natCast_le_lowerIndex_iff_mem_ramificationGroup (n := n) (σ := σ) |>.mp
+      (le_trans hn (min_le_left ..)))
+    (natCast_le_lowerIndex_iff_mem_ramificationGroup (n := n) (σ := τ) |>.mp
+      (le_trans hn (min_le_right ..)))
+
+variable (S) in
+/-- The identity has lower index `⊤`. -/
+@[simp]
+theorem lowerIndex_one : lowerIndex S (1 : G) = ⊤ := by
+  simp [lowerIndex]
+
+/-- For a faithful action, only the identity has lower index `⊤`. -/
+@[simp]
+theorem lowerIndex_eq_top_iff [FaithfulSMul G S] {σ : G} : lowerIndex S σ = ⊤ ↔ σ = 1 := by
+  refine ⟨fun h ↦ FaithfulSMul.eq_of_smul_eq_smul (α := S) fun x ↦ ?_, ?_⟩
+  · have hx := le_lowerIndex_iff.1 h.ge x
+    rw [top_le_iff, IsDiscreteValuationRing.addVal_eq_top_iff, sub_eq_zero] at hx
+    rw [hx, one_smul]
+  · rintro rfl
+    exact lowerIndex_one S
+
+/-- When `S` is generated over a base ring `R` fixed by `G` by a single element `ξ`, the lower
+index is read at `ξ` alone: `i_G(σ) = v (σ ξ - ξ)`. This recovers Serre's monogenic
+computation formula. -/
+theorem lowerIndex_eq_addVal_of_adjoin_singleton_eq_top {R : Type*} [CommSemiring R]
+    [Algebra R S] [SMulCommClass G R S] {ξ : S} (hξ : Algebra.adjoin R {ξ} = ⊤) (σ : G) :
+    lowerIndex S σ = IsDiscreteValuationRing.addVal S (σ • ξ - ξ) := by
+  refine (lowerIndex_le_addVal σ ξ).antisymm (le_lowerIndex_iff.2 fun x ↦ ?_)
+  exact IsDiscreteValuationRing.addVal_le_iff_dvd.2
+    (TauCeti.smul_sub_dvd_smul_sub_of_adjoin_singleton_eq_top hξ σ x)
+
 variable {R : Type*} [CommSemiring R] [Algebra R S] [SMulCommClass G R S]
 
 /-- When the discrete valuation ring `S` is generated over a base `R` fixed by `G` by a single
@@ -324,8 +440,8 @@ theorem mem_ramificationGroup_natCast_iff_le_addVal_of_adjoin_singleton_eq_top {
     σ ∈ ramificationGroup G S n ↔
       ((n + 1 : ℕ) : ℕ∞) ≤ IsDiscreteValuationRing.addVal S (σ • ξ - ξ) := by
   have h : ((n : ℤ) + 1).toNat = n + 1 := by omega
-  rw [mem_ramificationGroup_iff_of_adjoin_singleton_eq_top hξ, h,
-    TauCeti.IsDiscreteValuationRing.mem_maximalIdeal_pow_iff_le_addVal]
+  rw [mem_ramificationGroup_iff_le_lowerIndex,
+    lowerIndex_eq_addVal_of_adjoin_singleton_eq_top hξ, h]
 
 open Finset in
 /-- **Hilbert's counting identity.** Let a finite group `G` act faithfully on a discrete valuation
@@ -379,6 +495,42 @@ theorem sum_addVal_smul_sub_eq_finsum_card_ramificationGroup_sub_one [Fintype G]
     rw [coe_range, Set.mem_Iio, not_lt] at h
     rw [Function.mem_support, hN i h, Subgroup.card_bot] at hi
     exact hi rfl
+
+open Finset in
+/-- **Counting the filtration by truncated lower indices.** For a finite group `G`,
+`∑_{σ ∈ G} min (i_G(σ), m) = ∑_{k < m} #G_k`: each `σ` lies in exactly `min (i_G(σ), m)` of the
+groups `G_0, …, G_{m-1}`. -/
+theorem sum_min_lowerIndex_natCast [Fintype G] (m : ℕ) :
+    ∑ σ : G, min (lowerIndex S σ) (m : ℕ∞) =
+      ∑ k ∈ range m, (Nat.card (ramificationGroup G S k) : ℕ∞) := by
+  classical
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    -- Passing from `m` to `m + 1` adds `1` exactly for the `σ` with `m + 1 ≤ i_G(σ)`, that is
+    -- for `σ ∈ G_m`.
+    have key : ∀ a : ℕ∞, min a ((m + 1 : ℕ) : ℕ∞) =
+        min a m + if ((m + 1 : ℕ) : ℕ∞) ≤ a then 1 else 0 := by
+      intro a
+      have hm : (m : ℕ∞) ≤ ((m + 1 : ℕ) : ℕ∞) := by exact_mod_cast Nat.le_succ m
+      split_ifs with h
+      · rw [min_eq_right h, min_eq_right (hm.trans h)]
+        push_cast
+        rfl
+      · have h' : a ≤ m := by
+          lift a to ℕ using (not_le.1 h).ne_top
+          exact_mod_cast Nat.le_of_lt_succ (by exact_mod_cast not_le.1 h)
+        rw [min_eq_left h', min_eq_left (h'.trans hm), add_zero]
+    have hcard : (Nat.card (ramificationGroup G S m) : ℕ∞) =
+        #{σ : G | ((m + 1 : ℕ) : ℕ∞) ≤ lowerIndex S σ} := by
+      rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
+      congr 2
+      ext σ
+      rw [mem_filter, mem_filter, natCast_le_lowerIndex_iff_mem_ramificationGroup]
+      push_cast
+      rw [add_sub_cancel_right]
+    simp_rw [key]
+    rw [sum_add_distrib, ih, sum_boole, sum_range_succ, hcard]
 
 end DiscreteValuationRing
 
@@ -445,6 +597,23 @@ theorem ramificationGroupReal_eq_of_sub_one_lt_of_le {i : ℤ} {u : ℝ} (hleft 
   rw [ramificationGroupReal_def, Int.ceil_eq_iff.2 ⟨hleft, hright⟩]
 
 end Real
+
+section RealDiscreteValuationRing
+
+variable {G : Type*} [Group G] {S : Type*} [CommRing S] [IsDomain S] [IsDiscreteValuationRing S]
+variable [MulSemiringAction G S]
+
+/-- When the lower index of `σ` is the natural number `n`, `σ ∈ G_u` for a real `u` exactly when
+`u ≤ n - 1`. -/
+theorem mem_ramificationGroupReal_iff_of_lowerIndex_eq {u : ℝ} {σ : G} {n : ℕ}
+    (hn : lowerIndex S σ = n) :
+    σ ∈ ramificationGroupReal G S u ↔ u ≤ (n : ℝ) - 1 := by
+  rw [ramificationGroupReal_def, mem_ramificationGroup_iff_of_lowerIndex_eq hn, Int.add_one_le_iff,
+    ← Int.le_sub_one_iff, Int.ceil_le]
+  push_cast
+  exact Iff.rfl
+
+end RealDiscreteValuationRing
 
 end IsLocalRing
 

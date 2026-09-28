@@ -14,7 +14,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.NormalGeneration
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Transgression
 import TauCeti.Data.Set.Finite
 import TauCeti.Data.ZMod.TrivialAction
-import TauCeti.Topology.Algebra.Group.Profinite.ProP.EulerCharacteristic
+import TauCeti.Topology.Algebra.Group.Profinite.ProP.EulerCharacteristic.Basic
 
 /-!
 # `H²(G, 𝔽_p)` counts the relations of a pro-`p` group
