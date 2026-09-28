@@ -59,7 +59,7 @@ of the `p`-power component invisible to the form and the cup-product identificat
   `TauCeti.freeProP.heisenbergFunctional_gradedPow_gradedMkZero`,
   `TauCeti.freeProP.heisenbergFunctional_unique`: the values of the Heisenberg functional on
   brackets and `p`-power classes characterize it.
-* `TauCeti.freeProP.degreeOneForm_swap`, `TauCeti.freeProP.degreeOneForm_isAlt_of_ne_two`: the
+* `TauCeti.freeProP.degreeOneForm_swap`, `TauCeti.freeProP.isAlt_degreeOneForm_of_ne_two`: the
   degree-one form is skew-symmetric, and alternating for odd `p`.
 * `TauCeti.freeProP.heisenbergFunctional_gradedMap`, `TauCeti.freeProP.degreeOneForm_gradedMap`:
   the transformation law under a continuous homomorphism between free pro-`p` groups.
@@ -256,6 +256,7 @@ theorem heisenbergFunctional_unique {f : gradedPiece p (freeProP p X) 1 →ₗ[Z
     fun u v ↦ (hbr u v).trans (heisenbergFunctional_gradedBracket_gradedMkZero χ ψ u v).symm
 
 /-- The Heisenberg functional is additive in its first character. -/
+@[simp]
 theorem heisenbergFunctional_mul_left (χ' : freeProP p X →ₜ* Multiplicative (ZMod p)) :
     heisenbergFunctional (χ * χ') ψ = heisenbergFunctional χ ψ + heisenbergFunctional χ' ψ :=
   linearMap_ext
@@ -269,6 +270,7 @@ theorem heisenbergFunctional_mul_left (χ' : freeProP p X →ₜ* Multiplicative
       ring
 
 /-- The Heisenberg functional is additive in its second character. -/
+@[simp]
 theorem heisenbergFunctional_mul_right (ψ' : freeProP p X →ₜ* Multiplicative (ZMod p)) :
     heisenbergFunctional χ (ψ * ψ') = heisenbergFunctional χ ψ + heisenbergFunctional χ ψ' :=
   linearMap_ext
@@ -425,7 +427,7 @@ theorem degreeOneForm_swap (ρ : gradedPiece p (freeProP p X) 1)
 
 /-- **The degree-one form is alternating for odd `p`**: the diagonal factor `(p choose 2)` is
 divisible by `p`. -/
-theorem degreeOneForm_isAlt_of_ne_two (hp : p ≠ 2) (ρ : gradedPiece p (freeProP p X) 1) :
+theorem isAlt_degreeOneForm_of_ne_two (hp : p ≠ 2) (ρ : gradedPiece p (freeProP p X) 1) :
     (degreeOneForm ρ).IsAlt := by
   intro χ
   rw [degreeOneForm_apply]
