@@ -212,6 +212,14 @@ theorem piQuotSpanSmul_mk (u : X → R) :
     piQuotSpanSmul x₀ w hw q (Submodule.Quotient.mk u) = LinearMap.piSplitAtQuot x₀ w hw q u := by
   simp [piQuotSpanSmul]
 
+/-- The inverse of `piQuotSpanSmul` sends the class of `(a, b)` to the class of the vector with
+coordinates `a` away from `x₀` and `b` along `w`, that is of `(piSplitAt x₀ w hw).symm (a, b)`. -/
+@[simp]
+theorem piQuotSpanSmul_symm_mk (a : {x // x ≠ x₀} → R) (b : R) :
+    (piQuotSpanSmul x₀ w hw q).symm (a, Submodule.Quotient.mk b) =
+      Submodule.Quotient.mk ((piSplitAt x₀ w hw).symm (a, b)) := by
+  rw [LinearEquiv.symm_apply_eq, piQuotSpanSmul_mk, LinearMap.piSplitAtQuot_piSplitAt_symm]
+
 end LinearEquiv
 
 end TauCeti

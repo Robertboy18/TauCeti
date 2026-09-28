@@ -79,33 +79,38 @@ theorem exponentSum_of [DecidableEq X] (x : X) :
 
 end ExponentSum
 
-variable [Fintype X]
+variable [Finite X]
 
 /-- The product of the `p`-adic powers of the classes of the generators, `u ↦ ∏ x, x_x ^ (u x)`,
 as a continuous homomorphism `ℤ_p^X → F^{ab}`; it is the inverse of the abelianization
 isomorphism. -/
 private noncomputable def abelianizationInv :
-    Multiplicative (X → ℤ_[p]) →ₜ* TopologicalAbelianization (freeProP p X) where
-  toFun u := ∏ x, (isProP_freeProP p X).topologicalAbelianization_self.padicPow
-    ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u.toAdd x)
-  map_one' := by simp
-  map_mul' u v := by
-    simp only [toAdd_mul, Pi.add_apply, IsProP.padicPow_add, Finset.prod_mul_distrib]
-  continuous_toFun := continuous_finsetProd _ fun x _ ↦
-    (isProP_freeProP p X).topologicalAbelianization_self.continuous_padicPow.comp
-      (f := fun u : Multiplicative (X → ℤ_[p]) ↦
-        (u.toAdd x, ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X))))
-      (((continuous_apply x).comp continuous_toAdd).prodMk continuous_const)
+    Multiplicative (X → ℤ_[p]) →ₜ* TopologicalAbelianization (freeProP p X) :=
+  letI := Fintype.ofFinite X
+  { toFun u := ∏ x, (isProP_freeProP p X).topologicalAbelianization_self.padicPow
+      ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u.toAdd x)
+    map_one' := by simp
+    map_mul' u v := by
+      simp only [toAdd_mul, Pi.add_apply, IsProP.padicPow_add, Finset.prod_mul_distrib]
+    continuous_toFun := continuous_finsetProd _ fun x _ ↦
+      (isProP_freeProP p X).topologicalAbelianization_self.continuous_padicPow.comp
+        (f := fun u : Multiplicative (X → ℤ_[p]) ↦
+          (u.toAdd x, ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X))))
+        (((continuous_apply x).comp continuous_toAdd).prodMk continuous_const) }
 
-private theorem abelianizationInv_ofAdd (u : X → ℤ_[p]) :
+private theorem abelianizationInv_ofAdd [Fintype X] (u : X → ℤ_[p]) :
     abelianizationInv p X (ofAdd u) =
       ∏ x, (isProP_freeProP p X).topologicalAbelianization_self.padicPow
-        ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u x) :=
-  (rfl)
+        ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u x) := by
+  -- the enumeration used in the definition and the ambient one agree, `Fintype X` being a
+  -- subsingleton; after identifying them the two sides coincide
+  obtain rfl : Fintype.ofFinite X = ‹Fintype X› := Subsingleton.elim _ _
+  rfl
 
 private theorem abelianizationInv_ofAdd_single [DecidableEq X] (x : X) :
     abelianizationInv p X (ofAdd (Pi.single x 1)) =
       ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) := by
+  cases nonempty_fintype X
   rw [abelianizationInv_ofAdd, Finset.prod_eq_single x
     (fun y _ hy ↦ by rw [Pi.single_eq_of_ne hy, IsProP.padicPow_zero]) (by simp)]
   rw [Pi.single_eq_same, IsProP.padicPow_one]
@@ -160,11 +165,11 @@ theorem abelianizationEquiv_mk_of [DecidableEq X] (x : X) :
 
 /-- The inverse of the abelianization isomorphism sends `u : X → ℤ_p` to `∏ x, x_x ^ (u x)`, the
 product of the `p`-adic powers of the classes of the generators. -/
-theorem abelianizationEquiv_symm_ofAdd (u : X → ℤ_[p]) :
+theorem abelianizationEquiv_symm_ofAdd [Fintype X] (u : X → ℤ_[p]) :
     (abelianizationEquiv p X).symm (ofAdd u) =
       ∏ x, (isProP_freeProP p X).topologicalAbelianization_self.padicPow
         ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) (u x) :=
-  (rfl)
+  abelianizationInv_ofAdd p X u
 
 /-- The inverse of the abelianization isomorphism sends the coordinate vector at `x` to the class
 of the generator at `x`. -/
@@ -174,20 +179,16 @@ theorem abelianizationEquiv_symm_ofAdd_single [DecidableEq X] (x : X) :
       ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X)) :=
   abelianizationInv_ofAdd_single p X x
 
-omit [Fintype X] in
 /-- The exponent-sum map of a free pro-`p` group of finite rank is surjective. -/
-theorem exponentSum_surjective [Finite X] : Function.Surjective (exponentSum p X) := fun u ↦ by
-  cases nonempty_fintype X
+theorem exponentSum_surjective : Function.Surjective (exponentSum p X) := fun u ↦ by
   obtain ⟨y, hy⟩ := QuotientGroup.mk_surjective ((abelianizationEquiv p X).symm u)
   exact ⟨y, by rw [← abelianizationEquiv_mk, hy, ContinuousMulEquiv.apply_symm_apply]⟩
 
-omit [Fintype X] in
 /-- **The kernel of the exponent-sum map is the closed commutator subgroup**: for `X` finite,
 `exponentSum y = 1` exactly when `y` lies in the closure of the commutator subgroup of the free
 pro-`p` group. -/
-theorem exponentSum_eq_one_iff [Finite X] (y : freeProP p X) :
+theorem exponentSum_eq_one_iff (y : freeProP p X) :
     exponentSum p X y = 1 ↔ y ∈ (commutator (freeProP p X)).topologicalClosure := by
-  cases nonempty_fintype X
   rw [← abelianizationEquiv_mk, map_eq_one_iff _ (abelianizationEquiv p X).injective,
     QuotientGroup.eq_one_iff]
 

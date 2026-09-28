@@ -102,7 +102,7 @@ private theorem coe_mk_apply (y : freeProP p X) :
 
 section Hom
 
-variable [Fintype X]
+variable [Finite X]
 
 /-- **The abelianization map of a presentation.** For `G = presentedProP p X rels`, the continuous
 homomorphism `ℤ_p^X → G^{ab}` sending `u` to `∏ x, x_x ^ (u x)`, the product of the `p`-adic
@@ -163,7 +163,7 @@ theorem abelianizationHom_surjective : Function.Surjective (abelianizationHom re
 
 /-- The abelianization map of a presentation is `u ↦ ∏ x, x_x ^ (u x)`, the product of the
 `p`-adic powers of the classes of the generators in the abelian pro-`p` group `G^{ab}`. -/
-theorem abelianizationHom_ofAdd (u : X → ℤ_[p]) :
+theorem abelianizationHom_ofAdd [Fintype X] (u : X → ℤ_[p]) :
     abelianizationHom rels (ofAdd u) =
       ∏ x, (isProP p X rels).topologicalAbelianization_self.padicPow
         ((of p rels x : presentedProP p X rels) :
@@ -283,7 +283,9 @@ private theorem toSplitQuot_mk (y : freeProP p X) :
   refine (TopologicalAbelianization.lift_mk _ _).trans ?_
   rw [lift_mk, ContinuousMonoidHom.coe_comp, Function.comp_apply]
 
-private theorem toSplitQuot_abelianizationHom [Fintype X] (u : Multiplicative (X → ℤ_[p])) :
+variable [Finite X]
+
+private theorem toSplitQuot_abelianizationHom (u : Multiplicative (X → ℤ_[p])) :
     toSplitQuot r x₀ w hw q hr (abelianizationHom {r} u) =
       piSplitAtQuotMultiplicative x₀ w hw q u := by
   classical
@@ -295,10 +297,7 @@ private theorem toSplitQuot_abelianizationHom [Fintype X] (u : Multiplicative (X
   have := DFunLike.congr_fun h u
   rwa [ContinuousMonoidHom.coe_comp, Function.comp_apply] at this
 
-variable [Finite X]
-
 private theorem toSplitQuot_bijective : Function.Bijective (toSplitQuot r x₀ w hw q hr) := by
-  cases nonempty_fintype X
   constructor
   · intro g g' hgg'
     obtain ⟨u, rfl⟩ := abelianizationHom_surjective {r} g
@@ -357,7 +356,7 @@ theorem oneRelatorAbelianizationEquiv_mk (y : freeProP p X) :
 the presentation is the reduction `TauCeti.LinearMap.piSplitAtQuot` of the exponent vectors: the
 element `∏ x, x_x ^ (u x)` of `G^{ab}` is sent to the class of `u`. -/
 @[simp]
-theorem oneRelatorAbelianizationEquiv_abelianizationHom_ofAdd [Fintype X] (u : X → ℤ_[p]) :
+theorem oneRelatorAbelianizationEquiv_abelianizationHom_ofAdd (u : X → ℤ_[p]) :
     oneRelatorAbelianizationEquiv r x₀ w hw q hr (abelianizationHom {r} (ofAdd u)) =
       ofAdd (LinearMap.piSplitAtQuot x₀ w hw q u) := by
   rw [oneRelatorAbelianizationEquiv_apply, toSplitQuot_abelianizationHom,
@@ -388,7 +387,7 @@ theorem oneRelatorAbelianizationEquiv_mk_of_self :
 /-- The inverse of the abelianization isomorphism of a one-relator group: the class of `(a, b)` is
 sent to `∏ x, x_x ^ (u x)` for `u` the vector with coordinates `a` away from `x₀` and `b` along
 `w`, that is `u = (piSplitAt x₀ w).symm (a, b)`. -/
-theorem oneRelatorAbelianizationEquiv_symm_ofAdd_mk [Fintype X] (a : {x // x ≠ x₀} → ℤ_[p])
+theorem oneRelatorAbelianizationEquiv_symm_ofAdd_mk (a : {x // x ≠ x₀} → ℤ_[p])
     (b : ℤ_[p]) :
     (oneRelatorAbelianizationEquiv r x₀ w hw q hr).symm
         (ofAdd (a, (Submodule.Quotient.mk b : ℤ_[p] ⧸ Ideal.span {q}))) =
