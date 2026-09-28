@@ -14,7 +14,7 @@ public import TauCeti.Analysis.InnerProductSpace.Harmonic.Dilation
 This file constructs the Dirichlet Green kernel of the unit ball of `ℝⁿ` by the method of
 images.  For a pole `x` in the ball, the corrector
 
-`φˣ(y) = Φ(‖x‖ (y - x̃))`, with `x̃ = x / ‖x‖²`,
+`φˣ(y) = Φ(‖x‖ (y - x*))`, with `x* = x / ‖x‖²`,
 
 is the Newtonian kernel `Φ` with its pole at the reflection of `x` through the unit sphere,
 rescaled so that it agrees with `Φ(y - x)` on the sphere.  It is harmonic on a neighbourhood of
@@ -74,8 +74,8 @@ section Reflection
 
 variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
 
-/-- The squared length of `‖x‖ • y - x / ‖x‖`, which is `‖x‖ ‖y - x̃‖` for the reflection
-`x̃ = x / ‖x‖²` of `x` through the unit sphere.  The right-hand side is a polynomial in `x` and
+/-- The squared length of `‖x‖ • y - x / ‖x‖`, which is `‖x‖ ‖y - x*‖` for the reflection
+`x* = x / ‖x‖²` of `x` through the unit sphere.  The right-hand side is a polynomial in `x` and
 `y`, defined at `x = 0` as well. -/
 theorem norm_sq_norm_smul_sub_inv_norm_smul {x : F} (hx : x ≠ 0) (y : F) :
     ‖‖x‖ • y - ‖x‖⁻¹ • x‖ ^ 2 = ‖x‖ ^ 2 * ‖y‖ ^ 2 - 2 * ⟪x, y⟫_ℝ + 1 := by
@@ -129,7 +129,7 @@ theorem ballGreenCorrector_comm (x y : EuclideanSpace ℝ (Fin n)) :
   rw [ballGreenCorrector_def, ballGreenCorrector_def, real_inner_comm, mul_comm (‖x‖ ^ 2)]
 
 /-- Away from the pole `x = 0`, the corrector is the Newtonian kernel evaluated at
-`‖x‖ • y - x / ‖x‖`, that is, the method-of-images formula `Φ(‖x‖ (y - x̃))`. -/
+`‖x‖ • y - x / ‖x‖`, that is, the method-of-images formula `Φ(‖x‖ (y - x*))`. -/
 theorem ballGreenCorrector_eq_newtonianKernel {x : EuclideanSpace ℝ (Fin n)} (hx : x ≠ 0)
     (y : EuclideanSpace ℝ (Fin n)) :
     ballGreenCorrector n x y = newtonianKernel n (‖x‖ • y - ‖x‖⁻¹ • x) := by
