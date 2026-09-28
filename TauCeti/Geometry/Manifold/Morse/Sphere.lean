@@ -99,6 +99,8 @@ theorem hasFDerivAt_stereographicHeight (w : F) :
   simp only [FunLike.coe_smul, Pi.smul_apply, smul_eq_mul, two_smul, add_apply]
   ring
 
+/-- The Fréchet derivative of the chart height function at `w` is `-16 / (‖w‖ ^ 2 + 4) ^ 2` times
+the inner product with `w`. -/
 theorem fderiv_stereographicHeight (w : F) :
     fderiv ℝ stereographicHeight w = (-16 / (‖w‖ ^ 2 + 4) ^ 2) • innerSL ℝ w :=
   (hasFDerivAt_stereographicHeight w).fderiv
@@ -113,6 +115,7 @@ theorem hasGradientAt_stereographicHeight (w : F) :
   ext y
   simp
 
+/-- The gradient of the chart height function at `w` is `-16 / (‖w‖ ^ 2 + 4) ^ 2` times `w`. -/
 theorem gradient_stereographicHeight (w : F) :
     ∇ stereographicHeight w = (-16 / (‖w‖ ^ 2 + 4) ^ 2) • w :=
   (hasGradientAt_stereographicHeight w).gradient
@@ -204,6 +207,7 @@ theorem sphereHeight_neg (v : sphere (0 : E) 1) : sphereHeight (-v) = -sphereHei
   funext x
   simp
 
+-- Not `@[simp]`: simp already proves it through `sphereHeight_apply` and `norm_eq_of_mem_sphere`.
 /-- The north pole has height `1`, the maximum value of the height function. -/
 theorem sphereHeight_self (v : sphere (0 : E) 1) : sphereHeight v v = 1 := by
   simp [norm_eq_of_mem_sphere]
@@ -215,6 +219,7 @@ theorem contMDiff_sphereHeight {m : WithTop ℕ∞} (v : sphere (0 : E) 1) :
   exact (innerSL ℝ (v : E)).contMDiff.comp contMDiff_coe_sphere
 
 /-- The critical points of the height function are exactly the north and south poles. -/
+@[simp]
 theorem mvfderiv_sphereHeight_eq_zero_iff (v x : sphere (0 : E) 1) :
     mvfderiv (𝓡 n) (sphereHeight v) x = 0 ↔ x = v ∨ x = -v := by
   have : FiniteDimensional ℝ E := .of_fact_finrank_eq_succ n
@@ -274,6 +279,8 @@ theorem sphereHeight_comp_extChartAt_symm (v : sphere (0 : E) 1) :
     sphereHeight v ∘ (extChartAt (𝓡 n) v).symm = stereographicHeight := by
   rw [extChartAt_coe_symm, modelWithCornersSelf_coe_symm, comp_id, sphereHeight_comp_chartAt_symm]
 
+-- Not `@[simp]`: simp unfolds `extChartAt (𝓡 n) v v` to `chartAt _ v v` before this lemma can
+-- fire, so it fails `simpNF`.
 /-- The preferred extended chart of the sphere at `v` sends `v` to the origin. -/
 theorem extChartAt_sphere_apply_self (v : sphere (0 : E) 1) : extChartAt (𝓡 n) v v = 0 := by
   rw [extChartAt_coe, modelWithCornersSelf_coe, id_comp, chartAt_sphere, stereographic',
@@ -305,12 +312,14 @@ theorem isMorse_sphereHeight (v : sphere (0 : E) 1) : IsMorse (𝓡 n) (sphereHe
   · exact isManifoldNondegenerateCriticalPoint_sphereHeight_neg _
 
 /-- The north pole is a maximum of the height function: its Morse index is `n`. -/
+@[simp]
 theorem manifoldMorseIndex_sphereHeight_self (v : sphere (0 : E) 1) :
     manifoldMorseIndex (𝓡 n) (sphereHeight v) v = n := by
   rw [manifoldMorseIndex_def, sphereHeight_comp_extChartAt_symm, extChartAt_sphere_apply_self,
     morseIndex_stereographicHeight_zero, finrank_euclideanSpace_fin]
 
 /-- The south pole is a minimum of the height function: its Morse index is `0`. -/
+@[simp]
 theorem manifoldMorseIndex_sphereHeight_neg (v : sphere (0 : E) 1) :
     manifoldMorseIndex (𝓡 n) (sphereHeight v) (-v) = 0 := by
   have h := (isManifoldNondegenerateCriticalPoint_sphereHeight_self (n := n)

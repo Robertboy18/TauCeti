@@ -18,10 +18,18 @@ Mathlib's `mdifferentiableAt_iff_of_mem_source` records differentiability in suc
 the value of the derivative. Change-of-variables arguments on a manifold need that value, because
 they integrate the absolute Jacobian determinant of `f` read in fixed charts.
 
+On a boundaryless manifold the preferred extended chart at `x` is centred at `x` and its range is
+the whole model space, so the manifold derivative of a vector-valued map `f : M → E'` at `x` is
+simply the Fréchet derivative of `f ∘ (extChartAt I x).symm` at `extChartAt I x x`. This transfers
+derivative and critical-point computations to a chart in which `f` has an explicit formula.
+
 ## Main results
 
 * `HasMFDerivAt.hasFDerivWithinAt_of_mem_source`: the derivative of `f` read in the extended
   charts at `x` and `y`.
+* `MDifferentiableAt.mvfderiv_eq_fderiv_comp_extChartAt_symm`: on a boundaryless manifold, the
+  manifold derivative of a vector-valued map is the Fréchet derivative of its expression in the
+  preferred extended chart.
 -/
 
 public section
