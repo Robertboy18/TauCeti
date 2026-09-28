@@ -30,9 +30,9 @@ the **graded restriction** `TauCeti.ContCohomology.IsHeisenbergCochain.gradedRes
 values on the two kinds of elements spanning `gr_1(G)` are the two components of the cup pairing
 of `a` and `b`:
 
-* on a bracket `[x̄, ȳ]` of degree-zero classes, the antisymmetric part
+* on a bracket `[x, y]` of degree-zero classes, the antisymmetric part
   `μ (a x) (b y) - μ (a y) (b x)`;
-* on a `p`-th power `π x̄`, the diagonal value `(p choose 2) • μ (a x) (b x)`, which vanishes for
+* on a `p`-th power `π x`, the diagonal value `(p choose 2) • μ (a x) (b x)`, which vanishes for
   odd `p` and is `μ (a x) (b x)` for `p = 2`.
 
 Through the transgression formula of
@@ -192,7 +192,7 @@ variable (htrivM : ∀ (g : G) (m : M), g • m = m)
 include htrivM
 
 /-- **The graded restriction on a bracket** of degree-zero classes is the antisymmetric part of
-the cup pairing: `[x̄, ȳ] ↦ μ (a x) (b y) - μ (a y) (b x)`. -/
+the cup pairing: `[x, y] ↦ μ (a x) (b y) - μ (a y) (b x)`. -/
 theorem gradedRestrict_gradedBracket_gradedMkZero (g g' : G) :
     hh.gradedRestrict htrivA htrivP haN hbN hP
         (gradedBracket p G 0 0 (gradedMkZero p G g) (gradedMkZero p G g')) =
@@ -201,7 +201,7 @@ theorem gradedRestrict_gradedBracket_gradedMkZero (g g' : G) :
     hh.apply_commutatorElement_of_smul_eq_self htrivM htrivA htrivP]
 
 /-- **The graded restriction on a `p`-th power** of a degree-zero class is the diagonal value of
-the cup pairing, weighted by `p choose 2`: `π x̄ ↦ (p choose 2) • μ (a x) (b x)`. -/
+the cup pairing, weighted by `p choose 2`: `π x ↦ (p choose 2) • μ (a x) (b x)`. -/
 theorem gradedRestrict_gradedPow_gradedMkZero (g : G) :
     hh.gradedRestrict htrivA htrivP haN hbN hP (gradedPow p G 0 (gradedMkZero p G g)) =
       p.choose 2 • μ ((a : G → M) g) ((b : G → A) g) := by
@@ -229,7 +229,7 @@ section DegreeOneFamily
 variable {ι : Type*} [LT ι] (y : ι → G)
 
 /-- **The graded restriction on the `p`-power members of a degree-one family**:
-`π ȳ_i ↦ (p choose 2) • μ (a (y i)) (b (y i))`. -/
+`π (y i) ↦ (p choose 2) • μ (a (y i)) (b (y i))`. -/
 theorem gradedRestrict_degreeOneFamily_inl (i : ι) :
     hh.gradedRestrict htrivA htrivP haN hbN hP (degreeOneFamily p y (Sum.inl i)) =
       p.choose 2 • μ ((a : G → M) (y i)) ((b : G → A) (y i)) := by
@@ -237,7 +237,7 @@ theorem gradedRestrict_degreeOneFamily_inl (i : ι) :
     gradedRestrict_gradedPow_gradedMkZero hh htrivA htrivP haN hbN hP htrivM]
 
 /-- **The graded restriction on the bracket members of a degree-one family**:
-`[ȳ_i, ȳ_j] ↦ μ (a (y i)) (b (y j)) - μ (a (y j)) (b (y i))`. -/
+`[y i, y j] ↦ μ (a (y i)) (b (y j)) - μ (a (y j)) (b (y i))`. -/
 theorem gradedRestrict_degreeOneFamily_inr (ij : {ij : ι × ι // ij.1 < ij.2}) :
     hh.gradedRestrict htrivA htrivP haN hbN hP (degreeOneFamily p y (Sum.inr ij)) =
       μ ((a : G → M) (y ij.1.1)) ((b : G → A) (y ij.1.2)) -
