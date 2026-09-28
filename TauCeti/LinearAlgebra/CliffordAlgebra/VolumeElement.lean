@@ -9,13 +9,16 @@ public import Mathlib.LinearAlgebra.CliffordAlgebra.Basic
 public import Mathlib.LinearAlgebra.CliffordAlgebra.Conjugation
 
 import Mathlib.LinearAlgebra.CliffordAlgebra.Inversion
+import TauCeti.LinearAlgebra.CliffordAlgebra.Vectors
 
 /-!
 # The volume element of a Clifford algebra
 
 The **volume element** (or pseudoscalar) of a quadratic space is the ordered Clifford product
 `ι Q v₁ * ⋯ * ι Q vₙ` of an orthogonal basis. This file proves the facts that make it useful:
-how it commutes past a vector, how reversal acts on it, and what its square is.
+how it commutes past a vector, how reversal acts on it, what its square is, and, over a field,
+that it moves each of its anisotropic factors out of the vectors once there are at least three of
+them and evenly many.
 
 The ordered product is spelled `(l.map (ι Q)).prod` for a list `l` of vectors, the spelling Mathlib
 already uses for it (`CliffordAlgebra.involute_prod_map_ι`, `CliffordAlgebra.reverse_prod_map_ι`)
@@ -84,6 +87,9 @@ the values `Q vᵢ` is a unit.
   of two orthogonal generators being the scalar `-(Q a * Q b)`.
 * `CliffordAlgebra.isUnit_prod_map_ι`: an ordered product of generators — orthogonal or not — is
   a unit as soon as the product of the values `Q vᵢ` is.
+* `CliffordAlgebra.prod_map_ι_mul_ι_notMem_range_ι`: over a field, the volume element of an
+  orthogonal anisotropic list of even length at least three moves each member of the list out of
+  the vectors.
 
 ## References
 
@@ -312,5 +318,66 @@ theorem isUnit_prod_map_ι {l : List M} (h : IsUnit ((l.map Q).prod)) :
   obtain ⟨m, hm, rfl⟩ := List.mem_map.mp hx
   have hQm : IsUnit (Q m) := List.prod_isUnit_iff.mp h _ (List.mem_map_of_mem hm)
   exact isUnit_ι_of_isUnit Q hQm
+
+section Field
+
+variable {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V]
+  {Q : QuadraticForm K V}
+
+/-! ### The volume element moves its factors out of the vectors -/
+
+/-- Two members of a pairwise orthogonal list of length at least three, orthogonal to a given
+member and to each other. The list is split at the given member and the two are its first two
+other entries. -/
+private theorem exists_isOrtho_pair_of_mem {l : List V} (hl : l.Pairwise Q.IsOrtho)
+    (h3 : 3 ≤ l.length) {v : V} (hv : v ∈ l) :
+    ∃ u₁ ∈ l, ∃ u₂ ∈ l, Q.IsOrtho v u₁ ∧ Q.IsOrtho v u₂ ∧ Q.IsOrtho u₁ u₂ := by
+  obtain ⟨s, t, rfl⟩ := List.append_of_mem hv
+  rw [List.pairwise_append, List.pairwise_cons] at hl
+  obtain ⟨hs, ⟨hvt, ht⟩, hst⟩ := hl
+  have hortho : ∀ u ∈ s ++ t, Q.IsOrtho v u := by
+    intro u hu
+    rcases List.mem_append.mp hu with hu | hu
+    · exact (hst u hu v List.mem_cons_self).symm
+    · exact hvt u hu
+  have hpair : (s ++ t).Pairwise Q.IsOrtho :=
+    List.pairwise_append.mpr ⟨hs, ht, fun a ha b hb => hst a ha b (List.mem_cons_of_mem v hb)⟩
+  have hmem : ∀ u ∈ s ++ t, u ∈ s ++ v :: t := by
+    intro u hu
+    rcases List.mem_append.mp hu with hu | hu
+    · exact List.mem_append_left _ hu
+    · exact List.mem_append_right _ (List.mem_cons_of_mem v hu)
+  have h0 : 0 < (s ++ t).length := by
+    simp only [List.length_append, List.length_cons] at h3 ⊢
+    omega
+  have h1 : 1 < (s ++ t).length := by
+    simp only [List.length_append, List.length_cons] at h3 ⊢
+    omega
+  exact ⟨(s ++ t)[0], hmem _ (List.getElem_mem h0), (s ++ t)[1], hmem _ (List.getElem_mem h1),
+    hortho _ (List.getElem_mem h0), hortho _ (List.getElem_mem h1),
+    List.pairwise_iff_getElem.mp hpair 0 1 h0 h1 zero_lt_one⟩
+
+variable [Invertible (2 : K)]
+
+/-- **The volume element of an orthogonal anisotropic list of even length at least three moves each
+member of the list out of the vectors.** The volume element anticommutes with every member
+(`CliffordAlgebra.prod_map_ι_mul_ι_of_even_length`), is a unit
+(`CliffordAlgebra.isUnit_prod_map_ι`), and every member has two orthogonal anisotropic companions
+in the list, so `CliffordAlgebra.mul_ι_notMem_range_ι_of_mul_ι_eq_neg` applies. Length two is
+genuinely excluded: there the volume element sends each member to a multiple of the other. -/
+theorem prod_map_ι_mul_ι_notMem_range_ι {l : List V} (hl : l.Pairwise Q.IsOrtho)
+    (hlen : Even l.length) (h3 : 3 ≤ l.length) (haniso : ∀ v ∈ l, Q v ≠ 0) {v : V}
+    (hv : v ∈ l) : (l.map (ι Q)).prod * ι Q v ∉ LinearMap.range (ι Q) := by
+  obtain ⟨u₁, hu₁, u₂, hu₂, hvu₁, hvu₂, hu₁u₂⟩ := exists_isOrtho_pair_of_mem hl h3 hv
+  have hunit : IsUnit ((l.map Q).prod) :=
+    List.prod_isUnit fun x hx => by
+      obtain ⟨m, hm, rfl⟩ := List.mem_map.mp hx
+      exact isUnit_iff_ne_zero.mpr (haniso m hm)
+  exact mul_ι_notMem_range_ι_of_mul_ι_eq_neg (isUnit_prod_map_ι hunit).ne_zero (haniso v hv)
+    (haniso u₁ hu₁) (haniso u₂ hu₂) hvu₁ hvu₂ hu₁u₂
+    (prod_map_ι_mul_ι_of_even_length hl hlen (Submodule.subset_span hu₁))
+    (prod_map_ι_mul_ι_of_even_length hl hlen (Submodule.subset_span hu₂))
+
+end Field
 
 end CliffordAlgebra
