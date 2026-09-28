@@ -24,8 +24,11 @@ A set `s` converging to `1` is a **basis converging to `1`** of `G` when its pre
 continuous homomorphism from `freeProPInsertOne p s` sending the generator attached to each point
 to that point, is a topological isomorphism. The free pro-`p` group on `(insert 1 s, 1)` has
 topological generator rank `#(s \ {1})`, since `(insert 1 s, 1)` is the pointed one-point
-compactification of the discrete space `s \ {1}`; so a basis converging to `1` has the cardinality
-of the rank of `G`, and any two bases converging to `1` have the same cardinality.
+compactification of the discrete space `s \ {1}`; so for a basis `s` converging to `1` the
+cardinality `#(s \ {1})` is the rank of `G`, and any two bases converging to `1` have the same
+cardinality once `1` is removed from each. Only `#(s \ {1})` is invariant, not `#s`: both `∅` and
+`{1}` are bases converging to `1` of the trivial group, since `freeProPInsertOne p s` depends on
+`s` only through `insert 1 s`.
 
 The presentation on `s` is **minimal** when its kernel lies in the Frattini subgroup of the free
 pro-`p` group. This is the condition under which a continuous homomorphic section makes the
@@ -46,9 +49,9 @@ of a minimal presentation has the same topological generator rank as `G`.
   `(insert 1 s, 1)` has topological generator rank `#(s \ {1})`, because `(insert 1 s, 1)` is the
   pointed one-point compactification of the discrete space `s \ {1}`.
 * `TauCeti.ConvergesToOne.mk_diff_singleton_eq_topologicalGeneratorRank`,
-  `TauCeti.ConvergesToOne.mk_diff_singleton_eq_of_continuousMulEquiv`: **the cardinality of a
-  basis converging to `1` is the topological generator rank**, so any two such bases of one group
-  have the same cardinality.
+  `TauCeti.ConvergesToOne.mk_diff_singleton_eq_of_continuousMulEquiv`: **for a basis `s`
+  converging to `1`, the cardinality `#(s \ {1})` is the topological generator rank**, so any two
+  such bases of one group have the same cardinality once `1` is removed from each.
 * `TauCeti.IsProP.presentation_surjective_iff`: the presentation on `s` is surjective exactly when
   `s` generates `G` topologically.
 * `TauCeti.IsProP.exists_convergesToOne_presentation_surjective`: **every pro-`p` group is a
