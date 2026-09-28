@@ -8,7 +8,7 @@ module
 public import TauCeti.NumberTheory.LocalField.Herbrand.Quotient
 
 /-!
-# Transitivity of the Herbrand functions and the upper numbering of a quotient
+# Transitivity of the Herbrand functions
 
 Let `M/K` be a finite Galois extension of nonarchimedean local fields with group `G`, and let
 `L` be an intermediate field Galois over `K`, so that `H = Gal(M/L)` is normal in `G` and
@@ -21,10 +21,7 @@ identity on `[-1, 0]`, this gives the **transitivity of the Herbrand functions**
 
 `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`   and   `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`,
 
-together with its integral form `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`. Reading Herbrand's theorem
-at `u = ψ_{M/K}(v) = ψ_{M/L}(ψ_{L/K}(v))` then shows that the upper numbering, unlike the lower
-one, is **compatible with quotients**: the image of `G^v` under restriction to `L` is the upper
-ramification group of `L/K` at the same index, `(G/H)^v = G^v H / H`.
+together with its integral form `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`.
 
 ## Main results
 
@@ -33,18 +30,15 @@ ramification group of `L/K` at the same index, `(G/H)^v = G^v H / H`.
 * `TauCeti.LocalFieldsRamification.lowerRamificationGroupReal_eq_of_herbrand_lt_of_le_herbrand`:
   the filtration of `L/K` is constant on `(φ_{M/L}(a), φ_{M/L}(b)]` when that of `M/K` is
   constant on `(a, b]`.
-* `TauCeti.LocalFieldsRamification.herbrand_tower`: `φ_{M/K}(u) = φ_{L/K}(φ_{M/L}(u))`.
+* `TauCeti.LocalFieldsRamification.herbrand_tower`: `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`.
 * `TauCeti.LocalFieldsRamification.herbrandOrderIso_tower`: the same identity for the bundled
   order isomorphisms, `herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L)`.
-* `TauCeti.LocalFieldsRamification.inverseHerbrand_tower`:
-  `ψ_{M/K}(v) = ψ_{M/L}(ψ_{L/K}(v))`.
-* `TauCeti.LocalFieldsRamification.psiNat_tower`: `ψℕ_{M/K}(n) = ψℕ_{M/L}(ψℕ_{L/K}(n))`.
-* `TauCeti.LocalFieldsRamification.map_restrictNormalHom_upperRamificationGroup`:
-  `(G/H)^v = G^v H / H`, the compatibility of the upper numbering with quotients.
+* `TauCeti.LocalFieldsRamification.inverseHerbrand_tower`: `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`.
+* `TauCeti.LocalFieldsRamification.psiNat_tower`: `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`.
 
 ## References
 
-* [J.-P. Serre, *Corps Locaux*][serre1968], Chapter IV, §3, Propositions 14 and 15.
+* [J.-P. Serre, *Corps Locaux*][serre1968], Chapter IV, §3, Proposition 15.
 -/
 
 public section
@@ -176,8 +170,8 @@ private theorem herbrand_tower_of_mem_Icc (m : ℕ) :
 
 /-- **Transitivity of the Herbrand function** in a tower `M/L/K` of Galois extensions:
 `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`. -/
-theorem herbrand_tower (u : RamificationIndexDomain) :
-    herbrand K M u = herbrand K L (herbrand L M u) := by
+theorem herbrand_tower : herbrand K M = herbrand K L ∘ herbrand L M := funext fun u ↦ by
+  rw [Function.comp_apply]
   rcases le_or_gt (u : ℝ) 0 with hu | hu
   · rw [herbrand_of_coe_le_zero L M hu, herbrand_of_coe_le_zero K L hu,
       herbrand_of_coe_le_zero K M hu]
@@ -190,33 +184,22 @@ theorem herbrandOrderIso_tower :
     herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L) :=
   OrderIso.ext <| funext fun u ↦ by
     rw [OrderIso.trans_apply, herbrandOrderIso_apply, herbrandOrderIso_apply,
-      herbrandOrderIso_apply, herbrand_tower K L M]
+      herbrandOrderIso_apply, herbrand_tower K L M, Function.comp_apply]
 
 /-- **Transitivity of the inverse Herbrand function** in a tower `M/L/K` of Galois extensions:
 `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`. Inverting the composite `φ_{L/K} ∘ φ_{M/L}` reverses its order. -/
-theorem inverseHerbrand_tower (v : RamificationIndexDomain) :
-    inverseHerbrand K M v = inverseHerbrand L M (inverseHerbrand K L v) := by
-  rw [← herbrandOrderIso_symm_apply, herbrandOrderIso_tower K L M, OrderIso.symm_trans_apply,
-    herbrandOrderIso_symm_apply, herbrandOrderIso_symm_apply]
+theorem inverseHerbrand_tower :
+    inverseHerbrand K M = inverseHerbrand L M ∘ inverseHerbrand K L := funext fun v ↦ by
+  rw [Function.comp_apply, ← herbrandOrderIso_symm_apply, herbrandOrderIso_tower K L M,
+    OrderIso.symm_trans_apply, herbrandOrderIso_symm_apply, herbrandOrderIso_symm_apply]
 
 /-- **Transitivity of the integral inverse Herbrand function**: `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`. -/
-theorem psiNat_tower (n : ℕ) : psiNat K M n = psiNat L M (psiNat K L n) := by
+theorem psiNat_tower : psiNat K M = psiNat L M ∘ psiNat K L := funext fun n ↦ by
   have h : (⟨(psiNat K L n : ℝ), natCast_mem_ramificationIndexDomain _⟩ : RamificationIndexDomain) =
       inverseHerbrand K L ⟨n, natCast_mem_ramificationIndexDomain n⟩ :=
     Subtype.ext (coe_psiNat K L n)
   apply Nat.cast_injective (R := ℝ)
-  rw [coe_psiNat, coe_psiNat, h, inverseHerbrand_tower K L M]
-
-/-! ### The upper numbering is compatible with quotients -/
-
-/-- **The upper numbering is compatible with quotients.** For `G = Gal(M/K)`, `H = Gal(M/L)`
-normal and `G/H = Gal(L/K)`, the image of the upper ramification group `G^v` under restriction to
-`L` is the upper ramification group of `L/K` at the same index: `(G/H)^v = G^v H / H`. -/
-@[simp]
-theorem map_restrictNormalHom_upperRamificationGroup (v : RamificationIndexDomain) :
-    (upperRamificationGroup K M v).map (AlgEquiv.restrictNormalHom L) =
-      upperRamificationGroup K L v := by
-  rw [upperRamificationGroup_def, upperRamificationGroup_def, inverseHerbrand_tower K L M,
-    map_restrictNormalHom_lowerRamificationGroupReal, herbrand_inverseHerbrand]
+  rw [Function.comp_apply, coe_psiNat, coe_psiNat, h, inverseHerbrand_tower K L M,
+    Function.comp_apply]
 
 end TauCeti.LocalFieldsRamification
