@@ -31,10 +31,11 @@ All declarations live in the namespace `TauCeti.LocalFieldsRamification`.
   `#(G/H)_{φ_{M/L}(u)} · #H_u = #G_u`.
 * `lowerRamificationGroupReal_eq_of_forall_eq_of_herbrand_lt_of_le_herbrand`: the filtration of
   `L/K` is constant on `(φ_{M/L}(a), φ_{M/L}(b)]` when that of `M/K` is constant on `(a, b]`.
-* `herbrand_tower`: `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`.
-* `herbrandOrderIso_tower`: the same identity for the bundled order isomorphisms,
-  `herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L)`.
-* `inverseHerbrand_tower`: `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`.
+* `herbrand_tower`: `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`, as the identity
+  `herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L)` of bundled order
+  isomorphisms.
+* `inverseHerbrand_tower`: `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`, as the identity of the inverse order
+  isomorphisms.
 * `psiNat_tower`: `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`.
 
 ## References
@@ -180,36 +181,29 @@ private theorem herbrand_tower_of_mem_Icc (m : ℕ) :
       (ih _ (by push_cast; linarith) (by push_cast; linarith))
 
 /-- **Transitivity of the Herbrand function** in a tower `M/L/K` of Galois extensions:
-`φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`. -/
+`φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`, as an identity of the bundled order isomorphisms of
+`RamificationIndexDomain`. -/
 theorem herbrand_tower :
     haveI := IsGalois.tower_top_of_isGalois K L M
-    herbrand K M = herbrand K L ∘ herbrand L M := funext fun u ↦ by
+    herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L) := by
   have := IsGalois.tower_top_of_isGalois K L M
-  rw [Function.comp_apply]
+  refine OrderIso.ext <| funext fun u ↦ ?_
+  rw [OrderIso.trans_apply, herbrandOrderIso_apply, herbrandOrderIso_apply, herbrandOrderIso_apply]
   rcases le_or_gt (u : ℝ) 0 with hu | hu
   · rw [herbrand_of_coe_le_zero L M hu, herbrand_of_coe_le_zero K L hu,
       herbrand_of_coe_le_zero K M hu]
   · exact herbrand_tower_of_mem_Icc K L M ⌊(u : ℝ)⌋₊ u (Nat.floor_le hu.le)
       (Nat.lt_floor_add_one _).le
 
-/-- **Transitivity of the Herbrand function** for the bundled order isomorphisms of
-`RamificationIndexDomain`: `φ_{M/K}` is the composite of `φ_{M/L}` followed by `φ_{L/K}`. -/
-theorem herbrandOrderIso_tower :
-    haveI := IsGalois.tower_top_of_isGalois K L M
-    herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L) :=
-  OrderIso.ext <| funext fun u ↦ by
-    have := IsGalois.tower_top_of_isGalois K L M
-    rw [OrderIso.trans_apply, herbrandOrderIso_apply, herbrandOrderIso_apply,
-      herbrandOrderIso_apply, herbrand_tower K L M, Function.comp_apply]
-
 /-- **Transitivity of the inverse Herbrand function** in a tower `M/L/K` of Galois extensions:
-`ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`. Inverting the composite `φ_{L/K} ∘ φ_{M/L}` reverses its order. -/
+`ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`, as an identity of the inverse order isomorphisms. Inverting the
+composite `φ_{L/K} ∘ φ_{M/L}` reverses its order. -/
 theorem inverseHerbrand_tower :
     haveI := IsGalois.tower_top_of_isGalois K L M
-    inverseHerbrand K M = inverseHerbrand L M ∘ inverseHerbrand K L := funext fun v ↦ by
+    (herbrandOrderIso K M).symm =
+      (herbrandOrderIso K L).symm.trans (herbrandOrderIso L M).symm := by
   have := IsGalois.tower_top_of_isGalois K L M
-  rw [Function.comp_apply, ← herbrandOrderIso_symm_apply, herbrandOrderIso_tower K L M,
-    OrderIso.symm_trans_apply, herbrandOrderIso_symm_apply, herbrandOrderIso_symm_apply]
+  rw [herbrand_tower K L M, OrderIso.symm_trans]
 
 /-- **Transitivity of the integral inverse Herbrand function**: `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`. -/
 theorem psiNat_tower :
@@ -220,7 +214,8 @@ theorem psiNat_tower :
       inverseHerbrand K L ⟨n, natCast_mem_ramificationIndexDomain n⟩ :=
     Subtype.ext (coe_psiNat K L n)
   apply Nat.cast_injective (R := ℝ)
-  rw [Function.comp_apply, coe_psiNat, coe_psiNat, h, inverseHerbrand_tower K L M,
-    Function.comp_apply]
+  rw [Function.comp_apply, coe_psiNat, coe_psiNat, h, ← herbrandOrderIso_symm_apply,
+    inverseHerbrand_tower K L M, OrderIso.trans_apply, herbrandOrderIso_symm_apply,
+    herbrandOrderIso_symm_apply]
 
 end TauCeti.LocalFieldsRamification
