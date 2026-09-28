@@ -5,10 +5,10 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Resolution
+import TauCeti.RepresentationTheory.Homological.ContCohomology.Resolution
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Basic
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.RankParity
-public import TauCeti.Topology.Algebra.Group.Profinite.ProP.ElementaryAbelian
+import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.RankParity
+import TauCeti.Topology.Algebra.Group.Profinite.ProP.ElementaryAbelian
 
 /-!
 # The cyclic group of order two is a Demushkin group
@@ -132,6 +132,7 @@ noncomputable def cyclicTwoClass : cohomFp 2 (Multiplicative (ZMod 2)) 1 :=
 /-- **The cup square of the generator of `H¹(ℤ/2, 𝔽₂)` is nonzero.** The cup square of the
 homogeneous cocycle `(g₀, g₁) ↦ g₀⁻¹ g₁` is the two-cochain `(g₀, g₁, g₂) ↦ (g₀⁻¹ g₁) (g₁⁻¹ g₂)`,
 which is not the coboundary of any invariant one-cochain. -/
+@[simp]
 theorem cupFp_cyclicTwoClass_self_ne_zero :
     cupFp 2 (Multiplicative (ZMod 2)) cyclicTwoClass cyclicTwoClass ≠ 0 := by
   rw [cyclicTwoClass, cupFp_π]
