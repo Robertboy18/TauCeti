@@ -29,8 +29,8 @@ to a `p`-adic exponent: `g ^ x.appr n` does not change when `n` grows past the o
 ## Main results
 
 * `PadicInt.val_toZModPow_eq_appr`: `appr` computes the `ZMod (p ^ n)`-value of `toZModPow`.
-* `PadicInt.continuous_toZMod`, `PadicInt.continuous_toZModPow`: reduction modulo `p` and
-  truncation modulo `p ^ n` are continuous, `ZMod p` and `ZMod (p ^ n)` carrying the discrete
+* `PadicInt.continuous_toZModPow`, `PadicInt.continuous_toZMod`: truncation modulo `p ^ n` and
+  reduction modulo `p` are continuous, `ZMod (p ^ n)` and `ZMod p` carrying the discrete
   topology.
 * `PadicInt.appr_modEq`, `PadicInt.appr_add_modEq`, `PadicInt.appr_mul_modEq`,
   `PadicInt.appr_natCast_modEq`: the truncations are compatible with each other and with the
@@ -88,16 +88,16 @@ theorem continuous_toZModPow (n : ℕ) : Continuous (toZModPow (p := p) n) := by
   rw [h]
   exact IsUltrametricDist.isOpen_closedBall _ (zpow_ne_zero _ hp0.ne')
 
-/-- Reduction modulo `p` is continuous: its fibres are the open balls of radius `1`. -/
+/-- Reduction modulo `p` is continuous: its fibres are those of the truncation `toZModPow 1`,
+both kernels being the maximal ideal `(p)`. -/
 theorem continuous_toZMod : Continuous (toZMod : ℤ_[p] → ZMod p) := by
   refine (IsLocallyConstant.iff_isOpen_fiber_apply.mpr fun x ↦ ?_).continuous
-  have h : (toZMod : ℤ_[p] → ZMod p) ⁻¹' {toZMod x} = Metric.ball x 1 := by
+  have h : (toZMod : ℤ_[p] → ZMod p) ⁻¹' {toZMod x} = toZModPow 1 ⁻¹' {toZModPow 1 x} := by
     ext y
-    simp only [Set.mem_preimage, Set.mem_singleton_iff, Metric.mem_ball, dist_eq_norm]
-    rw [norm_lt_one_iff_dvd, ← Ideal.mem_span_singleton, ← maximalIdeal_eq_span_p, ← ker_toZMod,
-      RingHom.mem_ker, map_sub, sub_eq_zero]
+    simp only [Set.mem_preimage, Set.mem_singleton_iff, ← RingHom.sub_mem_ker_iff, ker_toZMod,
+      ker_toZModPow, maximalIdeal_eq_span_p, pow_one]
   rw [h]
-  exact Metric.isOpen_ball
+  exact (continuous_toZModPow 1).isOpen_preimage _ (isOpen_discrete _)
 
 /-- A coarser truncation of `x` is a finer truncation of `x` read modulo the coarser
 modulus. -/

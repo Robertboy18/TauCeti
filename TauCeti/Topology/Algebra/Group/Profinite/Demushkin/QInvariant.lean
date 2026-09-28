@@ -10,6 +10,7 @@ public import TauCeti.NumberTheory.Padics.RingHoms
 public import TauCeti.Topology.Algebra.ContinuousMulEquiv
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianization
+import Mathlib.Topology.Algebra.Module.Equiv.Prod
 import TauCeti.Topology.Algebra.Group.Profinite.ProP.Torsion
 
 /-!
