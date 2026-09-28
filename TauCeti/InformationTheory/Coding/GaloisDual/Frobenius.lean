@@ -16,9 +16,11 @@ The Galois dual of a code for a semiring automorphism `σ` uses the form
 `frobeniusEquiv R p`, sending `x` to `x ^ p`, of a perfect ring of exponential characteristic
 `p`: membership in the dual is the vanishing of `∑ i, x i * y i ^ p` against every codeword.
 
-Over a finite field of order `p ^ 2` the Frobenius is an involution, so its Galois dual is a
-Hermitian dual: taking the dual twice recovers the code, and a matrix generates a code exactly
-when its entrywise `p`-th power checks the dual. For `p = 2` this is Hermitian duality over the
+Over a finite field of order `p ^ 2` the Frobenius is an involution
+(`TauCeti.FiniteField.frobeniusEquiv_involutive`), so its Galois dual is a Hermitian dual: the
+dual of a row space is the kernel of the entrywise `p`-th power of the generator. The remaining
+consequences of involutivity, such as `RingEquiv.galoisDual_galoisDual`, apply verbatim to
+`frobeniusEquiv K p` with that involutivity proof. For `p = 2` this is Hermitian duality over the
 field of four elements, the setting of the Hermitian self-dual hexacode. Omitting the entrywise
 `p`-th power computes the Euclidean dual instead.
 
@@ -58,23 +60,6 @@ theorem galoisDual_range_vecMulLinear_frobeniusEquiv (hK : Nat.card K = p ^ 2)
   simpa only [coe_frobeniusEquiv] using
     galoisDual_range_vecMulLinear_of_involutive _
       (TauCeti.FiniteField.frobeniusEquiv_involutive hK) G
-
-/-- Over a field of order `p ^ 2`, taking the Frobenius Galois dual twice recovers the code. -/
-theorem galoisDual_galoisDual_frobeniusEquiv (hK : Nat.card K = p ^ 2)
-    (C : Submodule K (ι → K)) :
-    galoisDual (frobeniusEquiv K p) (galoisDual (frobeniusEquiv K p) C) = C :=
-  galoisDual_galoisDual _ (TauCeti.FiniteField.frobeniusEquiv_involutive hK) C
-
-/-- Over a field of order `p ^ 2`, a matrix generates a code exactly when its entrywise `p`-th
-power checks the Frobenius Galois dual. -/
-theorem range_vecMulLinear_eq_iff_ker_map_frobenius_eq_galoisDual_frobeniusEquiv
-    (hK : Nat.card K = p ^ 2) {ρ : Type*} [Fintype ρ] (G : Matrix ρ ι K)
-    (C : Submodule K (ι → K)) :
-    LinearMap.range G.vecMulLinear = C ↔
-      LinearMap.ker (G.map (frobenius K p)).mulVecLin = galoisDual (frobeniusEquiv K p) C := by
-  simpa only [coe_frobeniusEquiv] using
-    range_vecMulLinear_eq_iff_ker_map_eq_galoisDual_of_involutive _
-      (TauCeti.FiniteField.frobeniusEquiv_involutive hK) G C
 
 end Field
 
