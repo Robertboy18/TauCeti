@@ -12,11 +12,9 @@ public import Mathlib.Algebra.Ring.GeomSum
 # Inverting `1 + f` for a locally nilpotent endomorphism
 
 An endomorphism `f` of a module is *locally nilpotent* when every vector is annihilated by some
-power of `f`.  Then `1 + f` is invertible: on a vector annihilated by `f ^ n` its inverse is the
-finite geometric series `∑_{k < n} (-f) ^ k`, and the series does not depend on the choice of
-`n`.  No global nilpotence bound is needed, so the statement applies to operators which lower a
-filtration by direct summands without being nilpotent on the whole module, such as those of
-homological perturbation theory on bar constructions.
+power of `f`.  Then `1 + f` is invertible.  No global nilpotence bound is needed, so the statement
+applies to operators which lower a filtration by direct summands without being nilpotent on the
+whole module, such as those of homological perturbation theory on bar constructions.
 
 ## Main results
 
@@ -28,8 +26,7 @@ public section
 
 variable {R M : Type*} [Semiring R] [AddCommGroup M] [Module R M]
 
-/-- If every vector is annihilated by some power of `f`, then `1 + f` is invertible; on a vector
-annihilated by `f ^ n`, the inverse is the finite geometric series `∑_{k < n} (-f) ^ k`. -/
+/-- If every vector is annihilated by some power of `f`, then `1 + f` is invertible. -/
 theorem Module.End.isUnit_one_add_of_forall_exists_pow_apply_eq_zero (f : Module.End R M)
     (hf : ∀ x, ∃ n, (f ^ n) x = 0) : IsUnit (1 + f) := by
   have hneg : ∀ (n : ℕ) (x : M), (f ^ n) x = 0 → ((-f) ^ n) x = 0 := by
