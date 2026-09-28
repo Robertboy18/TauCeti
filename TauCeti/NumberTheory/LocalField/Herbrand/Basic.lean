@@ -97,11 +97,6 @@ open MeasureTheory Set intervalIntegral
 
 namespace TauCeti.LocalFieldsRamification
 
-/-- A natural number lies in the domain `[-1, ∞)` of the Herbrand function. -/
-theorem natCast_mem_ramificationIndexDomain (n : ℕ) :
-    (n : ℝ) ∈ RamificationIndexDomain :=
-  le_trans (by norm_num : (-1 : ℝ) ≤ 0) (Nat.cast_nonneg n)
-
 variable (K L : Type*) [Field K] [ValuativeRel K] [TopologicalSpace K]
   [IsNonarchimedeanLocalField K] [Field L] [ValuativeRel L] [TopologicalSpace L]
   [IsNonarchimedeanLocalField L] [Algebra K L] [ValuativeExtension K L]
