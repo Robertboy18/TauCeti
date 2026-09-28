@@ -137,6 +137,7 @@ theorem demushkinWordNeTwo_def (q n : ℕ) (x : ℕ → H) :
 
 /-- At `q = 0` and rank two the word is the single commutator `(x₁, x₂)`, the surface relation of
 `ℤ_p × ℤ_p`. -/
+@[simp]
 theorem demushkinWordNeTwo_zero_two (x : ℕ → H) :
     demushkinWordNeTwo 0 2 x = labuteComm (x 0) (x 1) := by
   simp [demushkinWordNeTwo_def]
