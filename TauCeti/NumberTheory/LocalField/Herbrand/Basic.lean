@@ -68,6 +68,8 @@ classical `φ_{L/K}` is instead defined through a Galois closure.
   on `[-1, 0]`.
 * `TauCeti.LocalFieldsRamification.herbrand_inverseHerbrand` and
   `TauCeti.LocalFieldsRamification.inverseHerbrand_herbrand`: `φ ∘ ψ = id` and `ψ ∘ φ = id`.
+* `TauCeti.LocalFieldsRamification.coe_herbrand_sub_coe_herbrand_of_forall_eq`: `φ` is affine
+  of slope `#G_b / #G_0` on an interval `[a, b]` where the filtration is constant.
 * `TauCeti.LocalFieldsRamification.herbrand_slope_anti_adjacent`: `φ` is concave.
 * `TauCeti.LocalFieldsRamification.continuous_herbrand`,
   `TauCeti.LocalFieldsRamification.herbrand_strictMono` and their counterparts for `ψ`.
@@ -96,7 +98,7 @@ open MeasureTheory Set intervalIntegral
 namespace TauCeti.LocalFieldsRamification
 
 /-- A natural number lies in the domain `[-1, ∞)` of the Herbrand function. -/
-private theorem natCast_mem_ramificationIndexDomain (n : ℕ) :
+theorem natCast_mem_ramificationIndexDomain (n : ℕ) :
     (n : ℝ) ∈ RamificationIndexDomain :=
   le_trans (by norm_num : (-1 : ℝ) ≤ 0) (Nat.cast_nonneg n)
 
@@ -326,6 +328,21 @@ theorem herbrand_slope_anti_adjacent {u v w : RamificationIndexDomain} (huv : u 
 theorem herbrand_of_coe_le_zero {u : RamificationIndexDomain} (hu : (u : ℝ) ≤ 0) :
     herbrand K L u = u :=
   Subtype.ext ((coe_herbrand_eq_herbrandReal K L u).trans (herbrandReal_of_le_zero K L u.2 hu))
+
+/-- On an interval `[a, b]` over which the lower ramification filtration is constant, that is
+`G_t = G_b` for every `a < t ≤ b`, the Herbrand function is affine of slope `#G_b / #G_0`:
+`φ(b) - φ(a) = (b - a) · #G_b / #G_0`. -/
+theorem coe_herbrand_sub_coe_herbrand_of_forall_eq {a b : RamificationIndexDomain} (hab : a ≤ b)
+    (h : ∀ t : ℝ, (a : ℝ) < t → t ≤ b →
+      lowerRamificationGroupReal K L t = lowerRamificationGroupReal K L b) :
+    (herbrand K L b : ℝ) - herbrand K L a =
+      ((b : ℝ) - a) * (Nat.card (lowerRamificationGroupReal K L b) /
+        Nat.card (lowerRamificationGroup K L 0)) := by
+  rw [coe_herbrand_eq_herbrandReal, coe_herbrand_eq_herbrandReal, herbrandReal_sub, ← smul_eq_mul,
+    ← intervalIntegral.integral_const]
+  refine integral_congr_ae (Filter.Eventually.of_forall fun t ht ↦ ?_)
+  rw [uIoc_of_le (Subtype.coe_le_coe.2 hab)] at ht
+  rw [herbrandDensity, h t ht.1 ht.2]
 
 /-- The Herbrand function is the identity as long as the lower ramification filtration is
 constant from `0` through `u`. -/
