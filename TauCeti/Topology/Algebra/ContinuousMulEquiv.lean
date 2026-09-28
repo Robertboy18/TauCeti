@@ -8,9 +8,10 @@ module
 public import Mathlib.Topology.Algebra.ContinuousMonoidHom
 public import Mathlib.Topology.Constructions
 public import Mathlib.Algebra.Group.Equiv.TypeTags
+public import Mathlib.Algebra.Group.ULift
 
 /-!
-# Topological isomorphisms between multiplicative type tags of products
+# Topological isomorphisms between type tags
 
 The multiplicative type tag of a product of additive topological groups is topologically
 isomorphic to the product of the multiplicative type tags, both for binary products and for
@@ -19,7 +20,10 @@ isomorphic to `Multiplicative M`. These are `MulEquiv.prodMultiplicative`,
 `MulEquiv.piMultiplicative` and `AddEquiv.prodUnique` between the multiplicative type tags,
 upgraded to `ContinuousMulEquiv`s: the first two transport properties of topological groups, such
 as being pro-`p`, between the two shapes of a product, and the last collapses a product
-decomposition of a topological group whose second factor turns out to be trivial.
+decomposition of a topological group whose second factor turns out to be trivial. The universe
+lift `ULift M` of a topological monoid is topologically isomorphic to `M`, which is
+`MulEquiv.ulift` upgraded to a `ContinuousMulEquiv`; it lets a universal property whose target must
+live in a fixed universe be applied to a group in a smaller one.
 
 ## Main definitions
 
@@ -35,6 +39,8 @@ decomposition of a topological group whose second factor turns out to be trivial
 * `ContinuousAddEquiv.toMultiplicative`: a topological isomorphism `M ≃ₜ+ N` of additive groups
   as a topological isomorphism `Multiplicative M ≃ₜ* Multiplicative N`, with its evaluation
   lemmas `toMultiplicative_apply` and `toMultiplicative_symm_apply`.
+* `TauCeti.ContinuousMulEquiv.ulift`: the topological isomorphism `ULift M ≃ₜ* M`, with its
+  evaluation lemmas `ulift_apply` and `ulift_symm_apply`.
 -/
 
 public section
@@ -151,5 +157,29 @@ theorem _root_.ContinuousAddEquiv.toMultiplicative_symm_apply (e : M ≃ₜ+ N)
   (rfl)
 
 end ToMultiplicative
+
+section ULift
+
+universe u v
+
+variable {M : Type u} [Mul M] [TopologicalSpace M]
+
+/-- The universe lift of a topological monoid is topologically isomorphic to it. This is
+`MulEquiv.ulift` as a `ContinuousMulEquiv`. -/
+def ContinuousMulEquiv.ulift : ULift.{v} M ≃ₜ* M where
+  toMulEquiv := MulEquiv.ulift
+  continuous_toFun := continuous_uliftDown
+  continuous_invFun := continuous_uliftUp
+
+@[simp]
+theorem ContinuousMulEquiv.ulift_apply (x : ULift.{v} M) : ContinuousMulEquiv.ulift x = x.down :=
+  (rfl)
+
+@[simp]
+theorem ContinuousMulEquiv.ulift_symm_apply (x : M) :
+    (ContinuousMulEquiv.ulift : ULift.{v} M ≃ₜ* M).symm x = ULift.up.{v} x :=
+  (rfl)
+
+end ULift
 
 end TauCeti
