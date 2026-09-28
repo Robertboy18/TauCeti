@@ -51,7 +51,7 @@ variable (K L M : Type*) [Field K] [ValuativeRel K] [TopologicalSpace K]
   [IsNonarchimedeanLocalField L] [Field M] [ValuativeRel M] [TopologicalSpace M]
   [IsNonarchimedeanLocalField M]
   [Algebra K L] [ValuativeExtension K L] [Module.Finite K L]
-  [Algebra L M] [ValuativeExtension L M] [Module.Finite L M] [IsGalois L M]
+  [Algebra L M] [ValuativeExtension L M] [Module.Finite L M]
   [Algebra K M] [ValuativeExtension K M] [Module.Finite K M]
   [IsScalarTower K L M]
 
@@ -61,7 +61,7 @@ variable (K L M : Type*) [Field K] [ValuativeRel K] [TopologicalSpace K]
 `G/H = Gal(L/K)`, the orders satisfy `#(G/H)_{φ_{M/L}(u)} · #H_u = #G_u`: the lower ramification
 group of the quotient at `φ_{M/L}(u)` is the image of `G_u` under restriction to `L`, and the
 kernel of restriction on `G_u` is `H ∩ G_u = H_u`. -/
-theorem natCard_lowerRamificationGroupReal_herbrand_mul [Normal K L] [Normal K M]
+theorem natCard_lowerRamificationGroupReal_herbrand_mul [Normal K L] [IsGalois L M] [Normal K M]
     (u : RamificationIndexDomain) :
     Nat.card (lowerRamificationGroupReal K L (herbrand L M u)) *
         Nat.card (lowerRamificationGroupReal L M u) =
@@ -77,8 +77,8 @@ theorem natCard_lowerRamificationGroupReal_herbrand_mul [Normal K L] [Normal K M
 
 /-- Through Herbrand's theorem, the lower filtration of `L/K` is constant on the interval
 `(φ_{M/L}(a), φ_{M/L}(b)]` as soon as that of `M/K` is constant on `(a, b]`. -/
-theorem lowerRamificationGroupReal_eq_of_herbrand_lt_of_le_herbrand [Normal K L] [Normal K M]
-    {a b : RamificationIndexDomain}
+theorem lowerRamificationGroupReal_eq_of_herbrand_lt_of_le_herbrand [Normal K L] [IsGalois L M]
+    [Normal K M] {a b : RamificationIndexDomain}
     (h : ∀ t : ℝ, (a : ℝ) < t → t ≤ b →
       lowerRamificationGroupReal K M t = lowerRamificationGroupReal K M b)
     {t : ℝ} (ht₁ : (herbrand L M a : ℝ) < t) (ht₂ : t ≤ herbrand L M b) :
@@ -95,7 +95,12 @@ theorem lowerRamificationGroupReal_eq_of_herbrand_lt_of_le_herbrand [Normal K L]
   rw [ht, ← map_restrictNormalHom_lowerRamificationGroupReal,
     ← map_restrictNormalHom_lowerRamificationGroupReal, h _ hs₁ hs₂]
 
-/-! ### Transitivity of the Herbrand functions -/
+/-! ### Transitivity of the Herbrand functions
+
+Here `L/K` and `M/K` are Galois, so `M/L` is Galois as well (`IsGalois.tower_top_of_isGalois`).
+Since `L` is an arbitrary field rather than an `IntermediateField K M`, instance synthesis cannot
+recover `IsGalois L M` from `[IsGalois K M]`; the statements below therefore install it with
+`haveI` instead of assuming it separately. -/
 
 variable [IsGalois K L] [IsGalois K M]
 
@@ -103,10 +108,13 @@ variable [IsGalois K L] [IsGalois K M]
 an interval `[m, m + 1]`, `m : ℕ`, to every point `u` of that interval: both sides are affine
 there, and Herbrand's theorem in counting form identifies their slopes. -/
 private theorem herbrand_tower_of_mem_Icc_of_eq (m : ℕ) {u : RamificationIndexDomain}
-    (h₁ : (m : ℝ) ≤ u) (h₂ : (u : ℝ) ≤ m + 1)
-    (hm : herbrand K M ⟨m, natCast_mem_ramificationIndexDomain m⟩ =
-      herbrand K L (herbrand L M ⟨m, natCast_mem_ramificationIndexDomain m⟩)) :
-    herbrand K M u = herbrand K L (herbrand L M u) := by
+    (h₁ : (m : ℝ) ≤ u) (h₂ : (u : ℝ) ≤ m + 1) :
+    haveI := IsGalois.tower_top_of_isGalois K L M
+    herbrand K M ⟨m, natCast_mem_ramificationIndexDomain m⟩ =
+        herbrand K L (herbrand L M ⟨m, natCast_mem_ramificationIndexDomain m⟩) →
+      herbrand K M u = herbrand K L (herbrand L M u) := by
+  have := IsGalois.tower_top_of_isGalois K L M
+  intro hm
   set a : RamificationIndexDomain := ⟨m, natCast_mem_ramificationIndexDomain m⟩
   have hau : a ≤ u := Subtype.coe_le_coe.1 h₁
   -- The lower filtrations of `M/K` and `M/L` are constant on `(m, u] ⊆ (m, m + 1]`.
@@ -155,8 +163,10 @@ private theorem herbrand_tower_of_mem_Icc_of_eq (m : ℕ) {u : RamificationIndex
 
 /-- `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}` on `[m, m + 1]`, by induction on `m : ℕ`. -/
 private theorem herbrand_tower_of_mem_Icc (m : ℕ) :
+    haveI := IsGalois.tower_top_of_isGalois K L M
     ∀ u : RamificationIndexDomain, (m : ℝ) ≤ u → (u : ℝ) ≤ m + 1 →
       herbrand K M u = herbrand K L (herbrand L M u) := by
+  have := IsGalois.tower_top_of_isGalois K L M
   induction m with
   | zero =>
     intro u h₁ h₂
@@ -170,7 +180,10 @@ private theorem herbrand_tower_of_mem_Icc (m : ℕ) :
 
 /-- **Transitivity of the Herbrand function** in a tower `M/L/K` of Galois extensions:
 `φ_{M/K} = φ_{L/K} ∘ φ_{M/L}`. -/
-theorem herbrand_tower : herbrand K M = herbrand K L ∘ herbrand L M := funext fun u ↦ by
+theorem herbrand_tower :
+    haveI := IsGalois.tower_top_of_isGalois K L M
+    herbrand K M = herbrand K L ∘ herbrand L M := funext fun u ↦ by
+  have := IsGalois.tower_top_of_isGalois K L M
   rw [Function.comp_apply]
   rcases le_or_gt (u : ℝ) 0 with hu | hu
   · rw [herbrand_of_coe_le_zero L M hu, herbrand_of_coe_le_zero K L hu,
@@ -181,20 +194,27 @@ theorem herbrand_tower : herbrand K M = herbrand K L ∘ herbrand L M := funext 
 /-- **Transitivity of the Herbrand function** for the bundled order isomorphisms of
 `RamificationIndexDomain`: `φ_{M/K}` is the composite of `φ_{M/L}` followed by `φ_{L/K}`. -/
 theorem herbrandOrderIso_tower :
+    haveI := IsGalois.tower_top_of_isGalois K L M
     herbrandOrderIso K M = (herbrandOrderIso L M).trans (herbrandOrderIso K L) :=
   OrderIso.ext <| funext fun u ↦ by
+    have := IsGalois.tower_top_of_isGalois K L M
     rw [OrderIso.trans_apply, herbrandOrderIso_apply, herbrandOrderIso_apply,
       herbrandOrderIso_apply, herbrand_tower K L M, Function.comp_apply]
 
 /-- **Transitivity of the inverse Herbrand function** in a tower `M/L/K` of Galois extensions:
 `ψ_{M/K} = ψ_{M/L} ∘ ψ_{L/K}`. Inverting the composite `φ_{L/K} ∘ φ_{M/L}` reverses its order. -/
 theorem inverseHerbrand_tower :
+    haveI := IsGalois.tower_top_of_isGalois K L M
     inverseHerbrand K M = inverseHerbrand L M ∘ inverseHerbrand K L := funext fun v ↦ by
+  have := IsGalois.tower_top_of_isGalois K L M
   rw [Function.comp_apply, ← herbrandOrderIso_symm_apply, herbrandOrderIso_tower K L M,
     OrderIso.symm_trans_apply, herbrandOrderIso_symm_apply, herbrandOrderIso_symm_apply]
 
 /-- **Transitivity of the integral inverse Herbrand function**: `ψℕ_{M/K} = ψℕ_{M/L} ∘ ψℕ_{L/K}`. -/
-theorem psiNat_tower : psiNat K M = psiNat L M ∘ psiNat K L := funext fun n ↦ by
+theorem psiNat_tower :
+    haveI := IsGalois.tower_top_of_isGalois K L M
+    psiNat K M = psiNat L M ∘ psiNat K L := funext fun n ↦ by
+  have := IsGalois.tower_top_of_isGalois K L M
   have h : (⟨(psiNat K L n : ℝ), natCast_mem_ramificationIndexDomain _⟩ : RamificationIndexDomain) =
       inverseHerbrand K L ⟨n, natCast_mem_ramificationIndexDomain n⟩ :=
     Subtype.ext (coe_psiNat K L n)
