@@ -28,9 +28,7 @@ for the trivial line bundle.
 * `InvertibleSheaf.tensorProductComm` exchanges the two tensor factors;
 * `InvertibleSheaf.tensorProductAssoc` is the associativity isomorphism;
 * `InvertibleSheaf.tensorTrivialLeftIso` and `InvertibleSheaf.tensorTrivialRightIso` are the
-  unit isomorphisms in the full category of invertible sheaves;
-* `SheafOfModules.isInvertible_tensorUnit` records that the monoidal unit `𝟙_ X.Modules` is
-  invertible.
+  unit isomorphisms in the full category of invertible sheaves.
 
 The underlying sheaf is exposed by `tensorProduct_obj`, while the congruence, symmetry,
 associativity, and unit isomorphisms provide the categorical API for manipulating tensor products
@@ -50,14 +48,6 @@ namespace AlgebraicGeometry
 universe u
 
 noncomputable section
-
-/-- The unit of the monoidal structure on `𝒪_X`-modules is the structure sheaf, which is an
-invertible sheaf. This restates `SheafOfModules.isInvertible_unit` at `𝟙_ X.Modules`: the two
-objects are definitionally equal, but instance resolution does not unfold `𝟙_ X.Modules` to
-`SheafOfModules.unit X.ringCatSheaf`, so it does not find `isInvertible_unit` there. -/
-instance SheafOfModules.isInvertible_tensorUnit (X : Scheme.{u}) :
-    SheafOfModules.isInvertible X (MonoidalCategoryStruct.tensorUnit X.Modules) :=
-  SheafOfModules.isInvertible_unit X
 
 namespace InvertibleSheaf
 
