@@ -126,13 +126,12 @@ nor `A` needs to be commutative. When `K` is a field every nontrivial `L` is fai
 the hypothesis is automatic there.
 
 This is the converse of `TauCeti.IsSimpleRing.tensorProduct_of_isCentral_right`, with no centrality
-hypothesis at all: a proper two-sided ideal `I` of `A` gives a nontrivial quotient `A ⧸ I`, hence a
-surjection `L ⊗[K] A → L ⊗[K] (A ⧸ I)` onto a nontrivial ring, which simplicity of `L ⊗[K] A` forces
-to be injective; every `x ∈ I` then has `1 ⊗ₜ x = 0`, and `x = 0` by faithful flatness
-(`Module.FaithfullyFlat.one_tmul_eq_zero_iff`). Together with
-`TauCeti.Algebra.IsCentral.of_baseChange` this says that central simplicity over `K` is detected by
-central simplicity of `L ⊗[K] A` over `L`. -/
+hypothesis at all. Together with `TauCeti.Algebra.IsCentral.of_baseChange` it says that central
+simplicity over `K` is detected by central simplicity of `L ⊗[K] A` over `L`. -/
 theorem _root_.TauCeti.IsSimpleRing.of_baseChange [IsSimpleRing (L ⊗[K] A)] : IsSimpleRing A := by
+  -- A proper two-sided ideal `I` of `A` gives a nontrivial quotient `A ⧸ I`, hence a surjection
+  -- `L ⊗[K] A → L ⊗[K] (A ⧸ I)` onto a nontrivial ring, which simplicity of `L ⊗[K] A` forces to
+  -- be injective; every `x ∈ I` then has `1 ⊗ₜ x = 0`, and `x = 0` by faithful flatness.
   have hA : Nontrivial A :=
     (Module.FaithfullyFlat.nontrivial_tensorProduct_iff_right K L (N := A)).mp inferInstance
   refine IsSimpleRing.of_eq_bot_or_eq_top fun I => ?_
@@ -168,9 +167,8 @@ variable (K L A : Type*) [Field K] [Ring L] [IsSimpleRing L] [Algebra K L]
 /-- **Simplicity passes both ways along a scalar extension.** Over a field `K`, a central
 `K`-algebra `A` is simple exactly when its scalar extension along a simple `K`-algebra `L` (for
 instance a field extension) is simple. The forward direction is the instance
-`TauCeti.IsSimpleRing.tensorProduct_of_isCentral_right`; the converse is
-`TauCeti.IsSimpleRing.of_baseChange`, whose faithful flatness is automatic because a simple ring is
-nontrivial and every module over the field `K` is free. This is the companion of
+`TauCeti.IsSimpleRing.tensorProduct_of_isCentral_right` and the converse is
+`TauCeti.IsSimpleRing.of_baseChange`; this is the companion of
 `TauCeti.Algebra.isCentral_baseChange_iff`. -/
 @[simp]
 theorem isSimpleRing_baseChange_iff : IsSimpleRing (L ⊗[K] A) ↔ IsSimpleRing A :=
