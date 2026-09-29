@@ -6,25 +6,23 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Abelianization
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.Rank
 import TauCeti.RingTheory.Valuation.FinsetDvd
 import TauCeti.LinearAlgebra.Quotient.PiSpanSingleton
 
 /-!
 # Elementary automorphisms of a free pro-`p` group and the exponent vector of a relator
 
-Let `F = freeProP p X` be the free pro-`p` group on a finite type `X`. This file studies the two
-kinds of elementary automorphisms of `F` that act on the abelianization `F^{ab} = ℤ_p^X` through
-elementary matrices, computes their effect on the exponent vector `TauCeti.freeProP.exponentSum`,
-and uses them to normalise the exponent vector of an arbitrary element of `F`:
+Let `F = freeProP p X` be the free pro-`p` group on a type `X`. This file studies the two kinds of
+elementary automorphisms of `F` that act on the exponent vector `TauCeti.freeProP.exponentSum` in
+`ℤ_p^X` through elementary matrices, computes that action, and uses them, for `X` finite, to
+normalise the exponent vector of an arbitrary element of `F`:
 
 * `TauCeti.freeProP.congr σ`, for a bijection `σ` of the generating type, permutes the generators;
   it permutes the coordinates of the exponent vector.
 * `TauCeti.freeProP.transvection x₀ x hx a`, for `x ≠ x₀` and a `p`-adic exponent `a`, sends the
-  generator at `x₀` to `x₀ · x ^ a` and fixes the other generators; it adds `a` times the
-  coordinate at `x₀` to the coordinate at `x` of the exponent vector. It is an automorphism
-  because its image contains every generator, by Burnside's basis theorem and the Hopf property
-  (`TauCeti.freeProP.continuousMulEquivOfTopologicallyGenerates`).
+  generator at `x₀` to `x₀ · x ^ a` and fixes the other generators; its inverse is the transvection
+  with exponent `-a`, and it adds `a` times the coordinate at `x₀` to the coordinate at `x` of the
+  exponent vector.
 
 The normalisation is the elimination step of Labute's classification of Demushkin groups: if the
 exponent vector of `r ∈ F` is `q • w` with `w x₀ = 1`, then composing the transvections
@@ -47,6 +45,9 @@ abelianization structure theorem reads off.
 
 ## Main results
 
+* `TauCeti.freeProP.transvection_symm`, `TauCeti.freeProP.transvection_zero`,
+  `TauCeti.freeProP.transvection_add`: the transvections at fixed `x₀, x` form a one-parameter
+  group of automorphisms.
 * `TauCeti.freeProP.toAdd_exponentSum_congr`, `TauCeti.freeProP.toAdd_exponentSum_transvection`:
   the exponent vectors of the images under the two elementary automorphisms.
 * `TauCeti.freeProP.toAdd_exponentSum_eq_single_iff`: the exponent vector of `y` is `q e_{x₀}`
@@ -107,52 +108,99 @@ theorem toAdd_exponentSum_congr (σ : X ≃ Y) (y : freeProP p X) :
 
 section Transvection
 
-variable [Finite X] [DecidableEq X]
+variable [DecidableEq X]
 
-/-- **The transvection `x₀ ↦ x₀ · x ^ a`** of the free pro-`p` group on a finite type `X`, for
-generators `x ≠ x₀` and a `p`-adic exponent `a`: the continuous automorphism sending the generator
-at `x₀` to `x₀ · x ^ a` and fixing every other generator. Its image contains every generator, so
-it is an automorphism by Burnside's basis theorem and the Hopf property. On the abelianization
-`ℤ_p^X` it is the elementary matrix adding `a` times the coordinate at `x₀` to the coordinate at
-`x` (`TauCeti.freeProP.toAdd_exponentSum_transvection`). -/
+/-- The lifts of the families `x₀ ↦ x₀ · x ^ a` compose by adding the exponents: the composition
+law behind `TauCeti.freeProP.transvection`. -/
+private theorem lift_update_mul_padicPow_comp {x₀ x : X} (hx : x ≠ x₀) (a b : ℤ_[p]) :
+    (lift (isProP_freeProP p X)
+        (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) b))).comp
+      (lift (isProP_freeProP p X)
+        (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) a))) =
+      lift (isProP_freeProP p X)
+        (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) (a + b))) :=
+  hom_ext fun x' ↦ by
+    simp only [ContinuousMonoidHom.coe_comp, Function.comp_apply, lift_of]
+    by_cases hx' : x' = x₀
+    · subst hx'
+      have h := (isProP_freeProP p X).map_padicPow (isProP_freeProP p X)
+        (lift (isProP_freeProP p X)
+          (Function.update of x' (of x' * (isProP_freeProP p X).padicPow (of x) b)) :
+            freeProP p X →* freeProP p X)
+        (lift _ _).continuous (of x) a
+      rw [MonoidHom.coe_ofClass] at h
+      rw [Function.update_self, Function.update_self, map_mul, lift_of, Function.update_self, h,
+        lift_of, Function.update_of_ne hx, mul_assoc, ← (isProP_freeProP p X).padicPow_add,
+        add_comm]
+    · rw [Function.update_of_ne hx', Function.update_of_ne hx', lift_of, Function.update_of_ne hx']
+
+/-- The lift of the family `x₀ ↦ x₀ · x ^ 0` is the identity. -/
+private theorem lift_update_mul_padicPow_zero (x₀ x : X) :
+    lift (isProP_freeProP p X)
+        (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) 0)) =
+      ContinuousMonoidHom.id (freeProP p X) :=
+  hom_ext fun x' ↦ by
+    rw [lift_of, (isProP_freeProP p X).padicPow_zero, mul_one, Function.update_eq_self]
+    rfl
+
+/-- **The transvection `x₀ ↦ x₀ · x ^ a`** of the free pro-`p` group on `X`, for generators
+`x ≠ x₀` and a `p`-adic exponent `a`: the continuous automorphism sending the generator at `x₀` to
+`x₀ · x ^ a` and fixing every other generator. Its inverse is the transvection with exponent `-a`
+(`TauCeti.freeProP.transvection_symm`). On the exponent vectors in `ℤ_p^X` it is the elementary
+matrix adding `a` times the coordinate at `x₀` to the coordinate at `x`
+(`TauCeti.freeProP.toAdd_exponentSum_transvection`). -/
 noncomputable def transvection (x₀ x : X) (hx : x ≠ x₀) (a : ℤ_[p]) :
-    freeProP p X ≃ₜ* freeProP p X :=
-  continuousMulEquivOfTopologicallyGenerates
-    (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) a)) (by
-      set H := (Subgroup.closure (Set.range (Function.update (of : X → freeProP p X) x₀
-        (of x₀ * (isProP_freeProP p X).padicPow (of x) a)))).topologicalClosure
-      have hH : IsClosed (H : Set (freeProP p X)) := Subgroup.isClosed_topologicalClosure _
-      -- Every generator other than `x₀` is in the family, and `x₀` is recovered from
-      -- `x₀ · x ^ a` and `x`.
-      have hne : ∀ x', x' ≠ x₀ → of x' ∈ H := fun x' hx' ↦
-        Subgroup.le_topologicalClosure _
-          (Subgroup.subset_closure ⟨x', Function.update_of_ne hx' _ _⟩)
-      have hx₀ : of x₀ ∈ H := by
-        have h₁ : of x₀ * (isProP_freeProP p X).padicPow (of x) a ∈ H :=
-          Subgroup.le_topologicalClosure _
-            (Subgroup.subset_closure ⟨x₀, Function.update_self _ _ _⟩)
-        have h₂ := (isProP_freeProP p X).padicPow_mem hH (hne x hx) a
-        simpa using H.mul_mem h₁ (H.inv_mem h₂)
-      rw [eq_top_iff, ← topologicalClosure_closure_range_of_eq_top p X]
-      refine Subgroup.topologicalClosure_minimal _ ((Subgroup.closure_le _).mpr ?_) hH
-      rintro _ ⟨x', rfl⟩
-      by_cases hx' : x' = x₀
-      · exact hx' ▸ hx₀
-      · exact hne x' hx')
+    freeProP p X ≃ₜ* freeProP p X where
+  toFun := lift (isProP_freeProP p X)
+    (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) a))
+  invFun := lift (isProP_freeProP p X)
+    (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) (-a)))
+  left_inv y := by
+    have h := lift_update_mul_padicPow_comp hx a (-a)
+    rw [add_neg_cancel, lift_update_mul_padicPow_zero] at h
+    simpa using DFunLike.congr_fun h y
+  right_inv y := by
+    have h := lift_update_mul_padicPow_comp hx (-a) a
+    rw [neg_add_cancel, lift_update_mul_padicPow_zero] at h
+    simpa using DFunLike.congr_fun h y
+  map_mul' := map_mul _
+  continuous_toFun := (lift _ _).continuous
+  continuous_invFun := (lift _ _).continuous
 
 variable {x₀ x : X} (hx : x ≠ x₀) (a : ℤ_[p])
+
+/-- The transvection `x₀ ↦ x₀ · x ^ a` is the lift of the family sending `x₀` to `x₀ · x ^ a` and
+every other generator to itself. -/
+theorem coe_transvection :
+    ⇑(transvection x₀ x hx a) = ⇑(lift (isProP_freeProP p X)
+      (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) a))) := (rfl)
 
 /-- The transvection `x₀ ↦ x₀ · x ^ a` sends the generator at `x₀` to `x₀ · x ^ a`. -/
 @[simp]
 theorem transvection_of_self :
     transvection x₀ x hx a (of x₀) = of x₀ * (isProP_freeProP p X).padicPow (of x) a := by
-  rw [transvection, continuousMulEquivOfTopologicallyGenerates_of, Function.update_self]
+  rw [coe_transvection, lift_of, Function.update_self]
 
 /-- The transvection `x₀ ↦ x₀ · x ^ a` fixes the generators other than `x₀`. -/
 @[simp]
 theorem transvection_of_of_ne {x' : X} (hx' : x' ≠ x₀) :
     transvection x₀ x hx a (of x') = of x' := by
-  rw [transvection, continuousMulEquivOfTopologicallyGenerates_of, Function.update_of_ne hx']
+  rw [coe_transvection, lift_of, Function.update_of_ne hx']
+
+/-- The inverse of the transvection `x₀ ↦ x₀ · x ^ a` is the transvection `x₀ ↦ x₀ · x ^ (-a)`. -/
+@[simp]
+theorem transvection_symm : (transvection x₀ x hx a).symm = transvection x₀ x hx (-a) :=
+  ContinuousMulEquiv.ext fun _ ↦ rfl
+
+/-- The transvection with exponent `0` is the identity. -/
+@[simp]
+theorem transvection_zero : transvection x₀ x hx 0 = ContinuousMulEquiv.refl (freeProP p X) :=
+  ContinuousMulEquiv.ext fun y ↦ DFunLike.congr_fun (lift_update_mul_padicPow_zero x₀ x) y
+
+/-- **Transvections at fixed `x₀, x` compose by adding the exponents.** -/
+theorem transvection_add (b : ℤ_[p]) :
+    transvection x₀ x hx (a + b) = (transvection x₀ x hx a).trans (transvection x₀ x hx b) :=
+  ContinuousMulEquiv.ext fun y ↦ (DFunLike.congr_fun (lift_update_mul_padicPow_comp hx a b) y).symm
 
 /-- **The exponent vector under a transvection.** The transvection `x₀ ↦ x₀ · x ^ a` adds `a`
 times the coordinate at `x₀` to the coordinate at `x` of the exponent vector, and leaves the other
@@ -177,13 +225,6 @@ theorem toAdd_exponentSum_transvection (y : freeProP p X) :
             (Pi.single x (a * u.toAdd x₀) : X → ℤ_[p]) :=
           (continuous_single x).comp h₁
         exact continuous_ofAdd.comp (continuous_toAdd.add h₂) }
-  have hpow : exponentSum p X ((isProP_freeProP p X).padicPow (of x) a) =
-      ofAdd (a • Pi.single x 1) := by
-    have h := (isProP_freeProP p X).map_padicPow (isProP_multiplicative_pi_padicInt p X)
-      (exponentSum p X : freeProP p X →* Multiplicative (X → ℤ_[p]))
-      (exponentSum p X).continuous (of x) a
-    rw [MonoidHom.coe_ofClass] at h
-    rw [h, exponentSum_of, IsProP.padicPow_ofAdd_pi]
   have hΨ : ∀ u, Ψ u = ofAdd (u.toAdd + Pi.single x (a * u.toAdd x₀)) := fun u ↦ rfl
   have h : (exponentSum p X).comp (transvection x₀ x hx a : freeProP p X →ₜ* freeProP p X) =
       Ψ.comp (exponentSum p X) := hom_ext fun x' ↦ by
@@ -192,8 +233,8 @@ theorem toAdd_exponentSum_transvection (y : freeProP p X) :
     rw [hΨ, toAdd_ofAdd]
     by_cases hx' : x' = x₀
     · subst hx'
-      rw [transvection_of_self, map_mul, hpow, exponentSum_of, ← ofAdd_add, Pi.single_eq_same,
-        mul_one, ← Pi.single_smul, smul_eq_mul, mul_one]
+      rw [transvection_of_self, map_mul, exponentSum_padicPow_of, exponentSum_of, ← ofAdd_add,
+        Pi.single_eq_same, mul_one]
     · rw [transvection_of_of_ne hx a hx', exponentSum_of, Pi.single_eq_of_ne' hx', mul_zero,
         Pi.single_zero, add_zero]
   have := DFunLike.congr_fun h y
@@ -214,14 +255,8 @@ theorem toAdd_exponentSum_eq_single_iff (y : freeProP p X) (x₀ : X) (q : ℤ_[
     (exponentSum p X y).toAdd = Pi.single x₀ q ↔
       ((isProP_freeProP p X).padicPow (of x₀) q)⁻¹ * y ∈
         (commutator (freeProP p X)).topologicalClosure := by
-  have hpow : exponentSum p X ((isProP_freeProP p X).padicPow (of x₀) q) =
-      ofAdd (Pi.single x₀ q) := by
-    have h := (isProP_freeProP p X).map_padicPow (isProP_multiplicative_pi_padicInt p X)
-      (exponentSum p X : freeProP p X →* Multiplicative (X → ℤ_[p]))
-      (exponentSum p X).continuous (of x₀) q
-    rw [MonoidHom.coe_ofClass] at h
-    rw [h, exponentSum_of, IsProP.padicPow_ofAdd_pi, ← Pi.single_smul, smul_eq_mul, mul_one]
-  rw [← exponentSum_eq_one_iff, map_mul, map_inv, hpow, inv_mul_eq_one, eq_comm]
+  rw [← exponentSum_eq_one_iff, map_mul, map_inv, exponentSum_padicPow_of, inv_mul_eq_one,
+    eq_comm]
   exact Multiplicative.toAdd.eq_symm_apply.symm
 
 /-- **Normalising the exponent vector of a relator.** If the exponent vector of `r ∈ freeProP p X`
