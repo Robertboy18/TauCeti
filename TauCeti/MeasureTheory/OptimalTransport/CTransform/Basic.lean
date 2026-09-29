@@ -73,7 +73,10 @@ marginal integrals of a dual pair meaningful.
   real-valued infimal transform is uniformly continuous when the target-variable sections of the
   cost share a uniform modulus and its infima are finite;
 * `TauCeti.cTransform_add_const` — the transform turns an additive real constant into its
-  negative, which is the normalisation freedom of the dual problem;
+  negative, which is the normalisation freedom of the dual problem, and
+  `TauCeti.cTransform_add_add`, `TauCeti.cSuperdifferential_add_add`,
+  `TauCeti.isCConcave_add_add_iff` — adding a split cost `a x + b y` shifts the transform and
+  the potentials by the split terms without changing the `c`-superdifferential;
 * `TauCeti.cTransform_coe` and `TauCeti.cTransformSymm_coe` — the extended-real transforms of
   coerced real potentials agree with the corresponding real infima whenever those infima are
   bounded below;
@@ -408,6 +411,32 @@ theorem cTransformSymm_add_const (c : X × Y → ℝ) (ψ : Y → EReal) (a : �
   simpa only [cTransformSymm_eq_cTransform] using
     cTransform_add_const (fun p : Y × X => c (p.2, p.1)) ψ a x
 
+/-! ### Split shifts of the cost -/
+
+/-- Adding a split cost `a x + b y` to the cost shifts the `c`-transform: the source term is
+absorbed into the potential and the target term is added to the result. -/
+theorem cTransform_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (φ : X → EReal) (y : Y) :
+    cTransform (fun p => c p + a p.1 + b p.2) φ y =
+      (b y : EReal) + cTransform c (fun x => φ x - (a x : EReal)) y := by
+  rw [cTransform_apply, cTransform_apply, EReal.coe_add_iInf]
+  refine iInf_congr fun x => ?_
+  generalize φ x = z
+  induction z with
+  | bot => simp
+  | coe s => norm_cast; ring
+  | top => simp
+
+/-- Adding a split cost `a x + b y` to the cost shifts the symmetric `c`-transform: the target
+term is absorbed into the potential and the source term is added to the result. -/
+theorem cTransformSymm_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (ψ : Y → EReal)
+    (x : X) :
+    cTransformSymm (fun p => c p + a p.1 + b p.2) ψ x =
+      (a x : EReal) + cTransformSymm c (fun y => ψ y - (b y : EReal)) x := by
+  have hcost : (fun p : Y × X => c (p.2, p.1) + a p.2 + b p.1) =
+      fun p : Y × X => c (p.2, p.1) + b p.1 + a p.2 := funext fun p => add_right_comm _ _ _
+  simp only [cTransformSymm_eq_cTransform]
+  rw [hcost, cTransform_add_add (fun p : Y × X => c (p.2, p.1)) b a ψ x]
+
 /-! ### `c`-concave potentials -/
 
 /-- A potential on the source is `c`-concave when it is the symmetric `c`-transform of some
@@ -604,6 +633,42 @@ theorem cTransformSymm_cTransform_eq_of_mem_cSuperdifferential
     (hz : (x, y) ∈ cSuperdifferential c φ) : cTransformSymm c (cTransform c φ) x = φ x := by
   rw [cSuperdifferential_def] at hz
   exact cTransformSymm_eq_of_mem_contactSet (fun y' => add_cTransform_le c φ x y') hz
+
+/-! ### Split shifts, continued -/
+
+/-- A potential is `c`-concave for the cost shifted by a split cost `a x + b y` exactly when the
+potential with the source term absorbed is `c`-concave for the original cost. -/
+theorem isCConcave_add_add_iff (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (φ : X → EReal) :
+    IsCConcave (fun p => c p + a p.1 + b p.2) φ ↔
+      IsCConcave c (fun x => φ x - (a x : EReal)) := by
+  constructor
+  · rintro ⟨ψ, rfl⟩
+    exact ⟨fun y => ψ y - (b y : EReal), funext fun x => by
+      rw [cTransformSymm_add_add, EReal.add_sub_cancel_left]⟩
+  · rintro ⟨ψ, hψ⟩
+    refine ⟨fun y => ψ y + (b y : EReal), funext fun x => ?_⟩
+    have hx : φ x - (a x : EReal) = cTransformSymm c ψ x := congr_fun hψ x
+    rw [cTransformSymm_add_add]
+    simp only [EReal.add_sub_cancel_right]
+    rw [← hx, add_comm, EReal.sub_add_cancel]
+
+/-- Adding a split cost `a x + b y` to the cost does not change the `c`-superdifferential, once
+the source term is absorbed into the potential. -/
+theorem cSuperdifferential_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (φ : X → EReal) :
+    cSuperdifferential (fun p => c p + a p.1 + b p.2) φ =
+      cSuperdifferential c (fun x => φ x - (a x : EReal)) := by
+  ext ⟨x, y⟩
+  rw [mk_mem_cSuperdifferential_iff, mk_mem_cSuperdifferential_iff, cTransform_add_add]
+  generalize cTransform c (fun x => φ x - (a x : EReal)) y = t
+  generalize φ x = z
+  induction z <;> induction t <;>
+    simp only [EReal.bot_add, EReal.add_bot, EReal.bot_sub, EReal.top_sub_coe, EReal.coe_add_top,
+      EReal.top_add_coe, EReal.top_add_top, ← EReal.coe_add, ← EReal.coe_sub,
+      EReal.coe_eq_coe_iff]
+  all_goals first
+    | exact iff_of_false (EReal.bot_ne_coe _) (EReal.bot_ne_coe _)
+    | exact iff_of_false (EReal.top_ne_coe _) (EReal.top_ne_coe _)
+    | (constructor <;> intro h <;> linarith)
 
 end TauCeti
 

@@ -23,7 +23,11 @@ the last two a real minuend.
 * `EReal.coe_sub_add_coe` — subtracting a sum whose final term is real can be reassociated when
   the minuend is real;
 * `EReal.coe_sub_le_comm` — the two subtrahends of a real minuend can be exchanged across an
-  inequality, as in `sub_le_comm` for groups.
+  inequality, as in `sub_le_comm` for groups;
+* `EReal.coe_add_iInf` — adding a real constant commutes with an infimum;
+* `EReal.neg_sub_coe` and `EReal.neg_coe_sub` — negating a difference with one real operand
+  exchanges the operands, with no finiteness hypothesis on the other;
+* `EReal.neg_iSup` and `EReal.neg_iInf` — negation exchanges suprema and infima.
 -/
 
 public section
@@ -64,6 +68,38 @@ finiteness hypothesis on `a` or `b`. -/
 theorem _root_.EReal.coe_sub_le_comm {r : ℝ} {a b : EReal} :
     (r : EReal) - a ≤ b ↔ (r : EReal) - b ≤ a := by
   induction a <;> induction b <;> simp [← EReal.coe_sub, add_comm]
+
+/-- Adding a real constant commutes with an infimum in `EReal`; both sides are `⊤` when the
+index type is empty. -/
+theorem _root_.EReal.coe_add_iInf {ι : Sort*} (a : ℝ) (f : ι → EReal) :
+    (a : EReal) + ⨅ i, f i = ⨅ i, ((a : EReal) + f i) := by
+  have h := EReal.iInf_sub_coe f (-a)
+  simp only [EReal.coe_neg, sub_eq_add_neg, neg_neg, add_comm _ (a : EReal)] at h
+  exact h.symm
+
+/-- Negating a difference with a real subtrahend exchanges the operands, for every extended-real
+minuend. -/
+theorem _root_.EReal.neg_sub_coe (b : EReal) (r : ℝ) : -(b - (r : EReal)) = (r : EReal) - b := by
+  induction b with
+  | bot => simp
+  | coe b => norm_cast; ring
+  | top => simp
+
+/-- Negating a difference with a real minuend exchanges the operands, for every extended-real
+subtrahend. -/
+theorem _root_.EReal.neg_coe_sub (r : ℝ) (b : EReal) : -((r : EReal) - b) = b - (r : EReal) := by
+  rw [← EReal.neg_sub_coe, neg_neg]
+
+/-- Negation turns a supremum in `EReal` into the infimum of the negated values. -/
+theorem _root_.EReal.neg_iSup {ι : Sort*} (f : ι → EReal) : -(⨆ i, f i) = ⨅ i, -f i := by
+  refine le_antisymm (le_iInf fun i => EReal.neg_le_neg_iff.2 (le_iSup f i)) ?_
+  rw [EReal.le_neg]
+  exact iSup_le fun i => EReal.le_neg.1 (iInf_le (fun i => -f i) i)
+
+/-- Negation turns an infimum in `EReal` into the supremum of the negated values. -/
+theorem _root_.EReal.neg_iInf {ι : Sort*} (f : ι → EReal) : -(⨅ i, f i) = ⨆ i, -f i := by
+  rw [← neg_neg (⨆ i, -f i), EReal.neg_iSup]
+  simp only [neg_neg]
 
 end TauCeti
 

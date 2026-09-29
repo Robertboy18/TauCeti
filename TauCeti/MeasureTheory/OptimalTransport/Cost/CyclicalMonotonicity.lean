@@ -31,6 +31,8 @@ require additional hypotheses.
 ## Main statements
 
 * `TauCeti.IsCyclicallyMonotone` — finite `c`-cyclical monotonicity of a set of pairs;
+* `TauCeti.isCyclicallyMonotone_add_add_iff` — adding a split cost `a x + b y` does not change
+  the cyclically monotone sets;
 * `TauCeti.IsOptimalCoupling.isCyclicallyMonotone_support` — the support of an optimal coupling
   of finite cost for a continuous cost `c : X × Y → ℝ≥0∞` is `c`-cyclically monotone.
 
@@ -119,6 +121,24 @@ theorem isCyclicallyMonotone_empty [Preorder M] (c : X × Y → M) :
     rcases Nat.eq_zero_or_pos n with rfl | hn
     · simp
     · exact absurd (hmem ⟨0, hn⟩) (Set.notMem_empty _)
+
+section Split
+
+variable [PartialOrder M] [IsOrderedCancelAddMonoid M]
+
+/-- **Cyclical monotonicity is insensitive to split costs.** Adding a function of the source
+alone and a function of the target alone to the cost does not change which sets are cyclically
+monotone: both extra terms contribute the same total to the diagonal and to any rearrangement of
+the targets. -/
+theorem isCyclicallyMonotone_add_add_iff (c : X × Y → M) (a : X → M) (b : Y → M)
+    {S : Set (X × Y)} :
+    IsCyclicallyMonotone (fun p => c p + a p.1 + b p.2) S ↔ IsCyclicallyMonotone c S := by
+  simp only [isCyclicallyMonotone_iff]
+  refine forall₃_congr fun n x y => forall_congr' fun _ => forall_congr' fun σ => ?_
+  simp only [Finset.sum_add_distrib, Equiv.sum_comp σ fun i => b (y i)]
+  rw [add_le_add_iff_right, add_le_add_iff_right]
+
+end Split
 
 section Support
 
