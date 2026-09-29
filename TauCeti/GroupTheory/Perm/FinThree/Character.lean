@@ -33,7 +33,7 @@ smallest example, with the offending value computed.
 
 ## Main results
 
-* `TauCeti.monoidHom_apply_finRotate_three`: every linear character of `S₃` kills the three-cycle.
+* `MonoidHom.apply_finRotate_three`: every linear character of `S₃` kills the three-cycle.
 * `TauCeti.card_monoidHom_perm_fin_three`: **`S₃` has exactly two linear characters** valued in a
   commutative monoid with a primitive square root of unity.
 * `TauCeti.sum_monoidHom_apply_finRotate_three`: the character sum of `S₃` at the three-cycle is
@@ -61,7 +61,7 @@ variable {M : Type*} [CommMonoid M]
 homomorphism from a permutation group to a commutative monoid is trivial on the alternating
 subgroup (`MonoidHom.alternatingGroup_le_ker`). -/
 @[simp]
-theorem monoidHom_apply_finRotate_three (χ : Perm (Fin 3) →* M) : χ (finRotate 3) = 1 :=
+theorem _root_.MonoidHom.apply_finRotate_three (χ : Perm (Fin 3) →* M) : χ (finRotate 3) = 1 :=
   MonoidHom.mem_ker.mp <| χ.alternatingGroup_le_ker <| Perm.mem_alternatingGroup.mpr (by decide)
 
 variable (M) [HasEnoughRootsOfUnity M 2]
@@ -71,6 +71,7 @@ square root of unity: the trivial character and a single nontrivial one. Every l
 factors through
 the abelianization, which has order two by `TauCeti.card_abelianization_perm_fin_three`, and a
 finite commutative group with enough roots of unity in `M` has as many characters as elements. -/
+@[simp]
 theorem card_monoidHom_perm_fin_three : Nat.card (Perm (Fin 3) →* Mˣ) = 2 := by
   have : HasEnoughRootsOfUnity M (Monoid.exponent (Abelianization (Perm (Fin 3)))) := by
     rw [exponent_abelianization_perm_fin_three]

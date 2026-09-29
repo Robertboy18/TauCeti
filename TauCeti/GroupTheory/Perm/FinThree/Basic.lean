@@ -190,6 +190,7 @@ private theorem commutatorElement_swap_finRotate_three :
 /-- **The commutator subgroup of `S₃` is `A₃`.** The commutator subgroup of any permutation group
 lies in the alternating subgroup, and on three points the alternating subgroup consists of the
 identity and the two rotations, each of which is a commutator. -/
+@[simp]
 theorem commutator_perm_fin_three_eq_alternatingGroup :
     commutator (Equiv.Perm (Fin 3)) = alternatingGroup (Fin 3) := by
   refine le_antisymm alternatingGroup.commutator_perm_le fun g hg ↦ ?_
@@ -207,6 +208,7 @@ theorem commutator_perm_fin_three_eq_alternatingGroup :
 
 /-- **The abelianization of `S₃` has order two.** The commutator subgroup is `A₃`, of order `3`
 inside a group of order `6`. -/
+@[simp]
 theorem card_abelianization_perm_fin_three :
     Nat.card (Abelianization (Equiv.Perm (Fin 3))) = 2 := by
   have hcomm : Nat.card (commutator (Equiv.Perm (Fin 3))) = 3 := by
@@ -221,6 +223,7 @@ theorem card_abelianization_perm_fin_three :
   omega
 
 /-- **The abelianization of `S₃` has exponent two**: it is a group of prime order two. -/
+@[simp]
 theorem exponent_abelianization_perm_fin_three :
     Monoid.exponent (Abelianization (Equiv.Perm (Fin 3))) = 2 := by
   have : IsCyclic (Abelianization (Equiv.Perm (Fin 3))) :=

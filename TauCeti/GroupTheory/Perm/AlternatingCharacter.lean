@@ -210,9 +210,12 @@ theorem alternatingGroup_le_ker (χ : Perm α →* M) : alternatingGroup α ≤ 
         (χ.comp (alternatingGroup α).subtype) (MulAut.conjNormal s y) =
           (χ.comp (alternatingGroup α).subtype) y := by
       intro y
-      simp only [MonoidHom.coe_comp, Subgroup.coe_subtype, Function.comp_apply,
-        MulAut.conjNormal_apply, _root_.map_mul]
-      rw [mul_comm (χ s), mul_assoc, ← _root_.map_mul, mul_inv_cancel, _root_.map_one, mul_one]
+      -- the target is commutative, so `χ s` and `χ s⁻¹` regroup into `χ (s * s⁻¹) = 1`
+      calc χ ((alternatingGroup α).subtype (MulAut.conjNormal s y))
+          = χ s * χ y * χ s⁻¹ := by
+            simp only [Subgroup.coe_subtype, MulAut.conjNormal_apply, _root_.map_mul]
+        _ = χ (s * s⁻¹) * χ y := by rw [_root_.map_mul]; ac_rfl
+        _ = χ y := by simp
     have hone := eq_one_of_map_conjNormal_eq_alternatingGroup _ hs' hfix
     have := congrArg (fun f : alternatingGroup α →* M => f ⟨x, hx⟩) hone
     simpa using this

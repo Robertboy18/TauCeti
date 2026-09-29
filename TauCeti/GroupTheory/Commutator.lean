@@ -311,8 +311,10 @@ theorem isMulCommutative_of_forall_exists_monoidHom_apply_ne_one {A : Type*} [Co
   by_contra hne
   obtain ⟨φ, hφ⟩ := h _ hne
   apply hφ
-  rw [commutatorElement_def, map_mul, map_mul, map_mul, mul_assoc, mul_mul_mul_comm, ← map_mul,
-    ← map_mul, mul_inv_cancel, mul_inv_cancel, map_one, mul_one]
+  -- regroup the four factors of `φ ⁅a, b⁆` into the two products `φ (a * a⁻¹)` and `φ (b * b⁻¹)`
+  calc φ ⁅a, b⁆ = φ a * φ b * φ a⁻¹ * φ b⁻¹ := by simp only [commutatorElement_def, map_mul]
+    _ = φ (a * a⁻¹) * φ (b * b⁻¹) := by simp only [map_mul]; ac_rfl
+    _ = 1 := by simp
 
 /-- If the commutator `⁅a, y⁆` commutes with `y` modulo a normal subgroup `N`, then modulo `N` the
 commutator `⁅a, y ^ n⁆` is the power `⁅a, y⁆ ^ n`: one lies in `N` exactly when the other does. -/
