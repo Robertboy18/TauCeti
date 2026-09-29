@@ -150,6 +150,7 @@ theorem exponentSumZModPow_apply (k : ℕ) (i : X) (y : freeProP p X) :
 
 /-- The `i`-th exponent sum modulo `p ^ k` of `y` vanishes exactly when `p ^ k` divides the
 `i`-th exponent sum of `y`. -/
+@[simp]
 theorem exponentSumZModPow_eq_one_iff (k : ℕ) (i : X) (y : freeProP p X) :
     exponentSumZModPow p X k i y = 1 ↔ (p : ℤ_[p]) ^ k ∣ (exponentSum p X y).toAdd i := by
   rw [exponentSumZModPow_apply, MulEquiv.map_eq_one_iff, ofAdd_eq_one, ← RingHom.mem_ker,
