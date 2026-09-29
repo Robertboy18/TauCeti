@@ -57,6 +57,9 @@ cohomology of `Rep.trivial ℤ H ℤ` on the restricted representation.
 * `TauCeti.TateCohomology.HNegTwoRes`: the degree-`-2` specialization.
 * `TauCeti.TateCohomology.trivialResIso`: Tate cohomology of the trivial integral representation
   of a subgroup, as Tate cohomology of the restricted trivial representation.
+* `TauCeti.TateCohomology.resTrivialTateHZeroOne`: the class of `1` in degree-zero Tate
+  cohomology of the restricted trivial integral representation; it generates, and is killed by
+  the order of the subgroup.
 
 ## Main results
 
@@ -337,6 +340,36 @@ theorem trivialResIso_hom (S : Subgroup G) (n : ℤ) :
     (trivialResIso S n).hom =
       map (e := MulEquiv.refl S) (isIntertwiningMap_trivial_res S) n := by
   rw [trivialResIso, mapIso_hom]
+
+/-- The class of `1 ∈ ℤ` in degree-zero Tate cohomology of the restriction to `S` of the trivial
+integral representation of `G`. -/
+def resTrivialTateHZeroOne (S : Subgroup G) :
+    tateCohomology (Rep.res S.subtype (Rep.trivial ℤ G ℤ)) 0 :=
+  H0π _ ⟨1, fun _ ↦ rfl⟩
+
+/-- The class of `1` is the degree-zero projection of the invariant `1`. -/
+theorem resTrivialTateHZeroOne_def (S : Subgroup G) :
+    resTrivialTateHZeroOne S = H0π _ ⟨1, fun _ ↦ rfl⟩ :=
+  (rfl)
+
+/-- Every degree-zero class of the restricted trivial integral representation is an integer
+multiple of the class of `1`. -/
+theorem exists_zsmul_resTrivialTateHZeroOne_eq (S : Subgroup G)
+    (x : tateCohomology (Rep.res S.subtype (Rep.trivial ℤ G ℤ)) 0) :
+    ∃ n : ℤ, n • resTrivialTateHZeroOne S = x := by
+  induction x using H0_induction_on with
+  | h y =>
+    refine ⟨(y : ℤ), ?_⟩
+    rw [resTrivialTateHZeroOne_def, ← map_zsmul]
+    congr 1
+    exact Subtype.ext (by simp)
+
+/-- The order of the subgroup kills the class of `1`. -/
+theorem natCard_zsmul_resTrivialTateHZeroOne (S : Subgroup G) :
+    (Nat.card S : ℤ) • resTrivialTateHZeroOne S = 0 := by
+  rw [resTrivialTateHZeroOne_def, ← map_zsmul]
+  refine (H0π_eq_zero_iff _).2 ⟨1, ?_⟩
+  simp [Representation.norm, Nat.card_eq_fintype_card]
 
 /-- Degree-zero Tate cohomology of the restricted trivial integral representation has the order
 of the subgroup. -/

@@ -66,40 +66,6 @@ open CategoryTheory Limits MonoidalCategory Rep
 
 namespace TauCeti.TateCohomology
 
-section Subgroup
-
-variable {G : Type} [Group G] [Finite G]
-
-attribute [local instance] Subgroup.fintypeOfFinite
-
-/-! ### Trivial integral coefficients on a subgroup -/
-
-/-- The invariant `1` of the restricted trivial integral representation. -/
-private def resTrivialOne (S : Subgroup G) :
-    (Rep.res S.subtype (Rep.trivial ℤ G ℤ)).ρ.invariants :=
-  ⟨1, fun _ ↦ rfl⟩
-
-/-- Every degree-zero class of the restricted trivial integral representation is an integer
-multiple of the class of `1`. -/
-private theorem exists_eq_zsmul_H0π_resTrivialOne (S : Subgroup G)
-    (x : tateCohomology (Rep.res S.subtype (Rep.trivial ℤ G ℤ)) 0) :
-    ∃ n : ℤ, x = n • H0π _ (resTrivialOne S) := by
-  induction x using H0_induction_on with
-  | h y =>
-    refine ⟨(y : ℤ), ?_⟩
-    have hy : y = (y : ℤ) • resTrivialOne S := Subtype.ext (by simp [resTrivialOne])
-    conv_lhs => rw [hy]
-    rw [map_zsmul]
-
-/-- The order of the subgroup kills the class of `1`. -/
-private theorem natCard_zsmul_H0π_resTrivialOne (S : Subgroup G) :
-    (Nat.card S : ℤ) • H0π _ (resTrivialOne S) = 0 := by
-  rw [← map_zsmul]
-  refine (H0π_eq_zero_iff _).2 ⟨1, ?_⟩
-  simp [Representation.norm, resTrivialOne, Nat.card_eq_fintype_card]
-
-end Subgroup
-
 section TateTheorem
 
 variable {G : Type} [Group G] [Fintype G]
@@ -122,15 +88,15 @@ theorem map_res_zero_bijective_of_injective {B : Rep ℤ G} (f : Rep.trivial ℤ
   let one : (Rep.trivial ℤ G ℤ).ρ.invariants := ⟨1, fun _ ↦ rfl⟩
   -- The image of the class of `1` on `S` is the restriction of the image of the class of `1`.
   have hy : (tateCohomologyFunctor 0).map ((resFunctor S.subtype).map f)
-        (H0π _ (resTrivialOne S)) =
+        (resTrivialTateHZeroOne S) =
       H0Res B S ((tateCohomologyFunctor 0).map f (H0π _ one)) := by
-    rw [H0π_comp_tateCohomologyFunctor_map_apply, H0π_comp_tateCohomologyFunctor_map_apply,
-      H0π_comp_H0Res_apply]
+    rw [resTrivialTateHZeroOne_def, H0π_comp_tateCohomologyFunctor_map_apply,
+      H0π_comp_tateCohomologyFunctor_map_apply, H0π_comp_H0Res_apply]
     -- Both sides are the class of the invariant `f 1`, viewed as an invariant of `S`.
     rfl
   -- If `n` kills the image of the class of `1` on `S`, then `|S|` divides `n`.
   have key : ∀ n : ℤ, n • (tateCohomologyFunctor 0).map ((resFunctor S.subtype).map f)
-      (H0π _ (resTrivialOne S)) = 0 → (Nat.card S : ℤ) ∣ n := by
+      (resTrivialTateHZeroOne S) = 0 → (Nat.card S : ℤ) ∣ n := by
     intro n hn
     rw [hy, ← map_zsmul] at hn
     have hcor := congrArg (H0Cor B S) hn
@@ -144,24 +110,14 @@ theorem map_res_zero_bijective_of_injective {B : Rep ℤ G} (f : Rep.trivial ℤ
   have hinjS : Function.Injective
       ((tateCohomologyFunctor 0).map ((resFunctor S.subtype).map f)) := by
     refine (injective_iff_map_eq_zero _).2 fun x hx ↦ ?_
-    obtain ⟨n, rfl⟩ := exists_eq_zsmul_H0π_resTrivialOne S x
+    obtain ⟨n, rfl⟩ := exists_zsmul_resTrivialTateHZeroOne_eq S x
     rw [map_zsmul] at hx
     obtain ⟨c, rfl⟩ := key n hx
-    rw [mul_comm, mul_smul, natCard_zsmul_H0π_resTrivialOne, zsmul_zero]
+    rw [mul_comm, mul_smul, natCard_zsmul_resTrivialTateHZeroOne, zsmul_zero]
   have : Finite (tateCohomology (Rep.res S.subtype B) 0) :=
     Nat.finite_of_card_ne_zero (hcard.trans_ne Nat.card_pos.ne')
   exact (Nat.bijective_iff_injective_and_card _).2
     ⟨hinjS, (natCard_tateCohomology_zero_res_trivial_int_eq_card S).trans hcard.symm⟩
-
-/-- Tate cohomology on a subgroup of the tensor product of the trivial representation with the
-twice-shifted `N`, in degree `n`, is Tate cohomology of `N` on that subgroup in degree `n + 2`. -/
-private def resTensorDimensionShiftUpTwoIso (N : Rep ℤ G) (S : Subgroup G) (n : ℤ) :
-    tateCohomology (Rep.res S.subtype (Rep.trivial ℤ G ℤ ⊗ dimensionShiftUp (dimensionShiftUp N)))
-        n ≅
-      tateCohomology (Rep.res S.subtype N) (n + 1 + 1) :=
-  (tateCohomologyFunctor n).mapIso
-      ((resFunctor S.subtype).mapIso (λ_ (dimensionShiftUp (dimensionShiftUp N)))) ≪≫
-    dimensionShiftUpResIso (dimensionShiftUp N) S n ≪≫ dimensionShiftUpResIso N S (n + 1)
 
 /-! ### Tate's theorem -/
 
@@ -221,15 +177,18 @@ theorem cup_bijective_of_cupTrivialInt_injective (N : Rep ℤ G) (u : tateCohomo
     obtain rfl : inst = Subgroup.fintypeOfFinite S := Subsingleton.elim _ _
     have : Subsingleton (tateCohomology
         (Rep.res S.subtype (Rep.trivial ℤ G ℤ ⊗ dimensionShiftUp (dimensionShiftUp N))) (0 - 1)) :=
-      ModuleCat.subsingleton_of_isZero
-        ((h1 p S hS).of_iso (resTensorDimensionShiftUpTwoIso N S (0 - 1)))
+      ModuleCat.subsingleton_of_isZero ((h1 p S hS).of_iso
+        ((tateCohomologyFunctor (0 - 1)).mapIso
+          ((resFunctor S.subtype).mapIso (λ_ (dimensionShiftUp (dimensionShiftUp N)))) ≪≫
+        dimensionShiftUpTwoResIso N S (0 - 1)))
     exact Function.surjective_to_subsingleton _
   · -- Degree `0`: the corestriction argument, with `H⁰(S, ℤ ⊗ N₂) ≅ H²(S, N)` of order `|S|`.
     intro p _ S inst hS
     obtain rfl : inst = Subgroup.fintypeOfFinite S := Subsingleton.elim _ _
     exact map_res_zero_bijective_of_injective f hinj S
-      ((Nat.card_congr (resTensorDimensionShiftUpTwoIso N S 0).toLinearEquiv.toEquiv).trans
-        (hcard p S hS))
+      ((Nat.card_congr ((tateCohomologyFunctor 0).mapIso
+          ((resFunctor S.subtype).mapIso (λ_ (dimensionShiftUp (dimensionShiftUp N)))) ≪≫
+        dimensionShiftUpTwoResIso N S 0).toLinearEquiv.toEquiv).trans (hcard p S hS))
   · -- Degree `1`: the source `H¹(S, ℤ)` vanishes.
     intro p _ S inst hS
     obtain rfl : inst = Subgroup.fintypeOfFinite S := Subsingleton.elim _ _

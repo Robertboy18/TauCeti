@@ -225,19 +225,6 @@ theorem cup_dimensionShiftDownIso_hom {p q r' r : ℤ} (hq : q < 0) (h' : p + q 
       Iso.inv_hom_id_apply]
     exact LinearMap.congr_fun₂ (cup_negSucc M (dimensionShiftDown N) p n _) x _
 
-/-- Two upward dimension shifts identify degree-zero Tate cohomology of the twice-shifted
-representation with degree-two Tate cohomology of the representation itself. -/
-def dimensionShiftUpTwoIso :
-    tateCohomology (dimensionShiftUp (dimensionShiftUp N)) 0 ≅ tateCohomology N 2 :=
-  dimensionShiftUpIso (dimensionShiftUp N) 0 ≪≫ dimensionShiftUpIso N 1
-
-/-- The double shift is the composite of the two upward dimension shifts. -/
-@[simp]
-theorem dimensionShiftUpTwoIso_hom :
-    (dimensionShiftUpTwoIso N).hom =
-      (dimensionShiftUpIso (dimensionShiftUp N) 0).hom ≫ (dimensionShiftUpIso N 1).hom := by
-  rw [dimensionShiftUpTwoIso, Iso.trans_hom]
-
 /-- Cup product with a degree-two class obtained by shifting a degree-zero class `z` twice is the
 degree-zero cup product with `z`, followed by the two tensored dimension shifts. The two signs
 `(-1)^p` of the shifting rule cancel. -/
