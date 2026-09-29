@@ -52,6 +52,8 @@ nondegenerate and not alternating, which is a direct computation.
 
 ## Main results
 
+* `TauCeti.freeProP.degreeOneBasis_repr_gradedMk_demushkinWordNeTwo_inl`: the `p`-power
+  coordinates of the class of `x₁^q (x₁, x₂) ⋯` are `q / p` at `x₁` and `0` elsewhere.
 * `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo`: the
   alternating case, for every `p`.
 * `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordTwoOdd`,
@@ -241,6 +243,29 @@ private theorem gradedMk_demushkinWordNeTwo_self_eq_altClass :
       demushkinWordNeTwo_mem_pLowerCentralSeries_one dvd_rfl n _⟩ = altClass p n 1 := by
   rw [gradedMk_demushkinWordNeTwo dvd_rfl, altClass, Nat.div_self (Fact.out : p.Prime).pos,
     one_smul, one_smul]
+
+/-- **The `p`-power coordinates of the class of the `q ≠ 2` normal-form word**
+`x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)`, for `p ∣ q`: the coefficient of `π ξ₁` is `q / p`, and the other
+`p`-power coordinates vanish. -/
+theorem degreeOneBasis_repr_gradedMk_demushkinWordNeTwo_inl {q : ℕ} (hq : p ∣ q) (k : Fin n) :
+    (degreeOneBasis p (Fin n)).repr (gradedMk p (freeProP p (Fin n)) 1
+        ⟨demushkinWordNeTwo q n (freeProPGen p n),
+          demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩) (Sum.inl k) =
+      if (k : ℕ) = 0 then ((q / p : ℕ) : ZMod p) else 0 := by
+  have hn : 0 < n := k.pos
+  have h0 : gradedPow p (freeProP p (Fin n)) 0
+      (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n 0)) =
+      degreeOneBasis p (Fin n) (Sum.inl ⟨0, hn⟩) := by
+    rw [degreeOneBasis_apply, degreeOneFamily_inl, freeProPGen_of_lt p hn]
+  rw [gradedMk_demushkinWordNeTwo hq, map_add, Finsupp.add_apply, map_nsmul, Finsupp.smul_apply,
+    map_sum, Finsupp.finsetSum_apply,
+    Finset.sum_eq_zero fun i _ ↦ degreeOneBasis_repr_gradedBracket_inl _ _ _, add_zero, h0,
+    Module.Basis.repr_self, Finsupp.single_apply, nsmul_eq_mul]
+  by_cases hk : (k : ℕ) = 0
+  · have : (⟨0, hn⟩ : Fin n) = k := Fin.ext hk.symm
+    simp [this, hk]
+  · have : (⟨0, hn⟩ : Fin n) ≠ k := fun h ↦ hk (congrArg Fin.val h).symm
+    simp [this, hk]
 
 private theorem even_of_basis {m : ℕ}
     (b : Module.Basis (Fin m ⊕ Fin m) (ZMod p) (continuousZModDual p (freeProP p (Fin n)))) :

@@ -44,6 +44,7 @@ not additive.
 
 ## Main definitions
 
+* `TauCeti.freeProP.degreeZeroBasis`: the basis `x'_i` of `gr_0(F)` formed by the generator classes.
 * `TauCeti.freeProP.degreeOneBasis`: the basis `π x'_i`, `[x'_i, x'_j]` (`i < j`) of `gr_1(F)`.
 
 ## Main results
@@ -274,6 +275,24 @@ theorem span_gradedMkZero_image_range_of_eq_top :
   span_gradedMkZero_image_eq_top
     ((isTopologicallyFinitelyGenerated_freeProP p X).isOpen_pLowerCentralSeries Fact.out 1)
     (topologicalClosure_closure_range_of_eq_top p X)
+
+omit [LinearOrder X] in
+/-- **The basis of `gr_0` of a free pro-`p` group of finite rank** formed by the classes
+`x'_i = ⟦x_i⟧` of the generators: they are linearly independent, being the iterated `p`-powers of
+degree zero, and they span `gr_0(F) = F ⧸ Φ(F)`. -/
+noncomputable def degreeZeroBasis : Module.Basis X (ZMod p) (gradedPiece p (freeProP p X) 0) :=
+  Module.Basis.mk
+    (by simpa only [gradedPowIter_zero] using linearIndependent_gradedPowIter_gradedMkZero_of p X 0)
+    (by
+      have h : Set.range (fun i ↦ gradedMkZero p (freeProP p X) (of i)) =
+          gradedMkZero p (freeProP p X) '' Set.range of := Set.range_comp _ _
+      rw [h, span_gradedMkZero_image_range_of_eq_top])
+
+omit [LinearOrder X] in
+@[simp]
+theorem degreeZeroBasis_apply (i : X) :
+    degreeZeroBasis p X i = gradedMkZero p (freeProP p X) (of i) :=
+  Module.Basis.mk_apply _ _ i
 
 omit [Finite X] in
 /-- **The dimension of `gr_1` of a free pro-`p` group of finite rank** is `#X + (#X choose 2)`:
