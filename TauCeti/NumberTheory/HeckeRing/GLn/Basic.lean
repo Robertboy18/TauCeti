@@ -47,6 +47,8 @@ modular forms); the AINTLIB `HeckePair` bundle is replaced by Mathlib's `IsHecke
   `δ`. `mem_doubleCoset_SLnZ_of_intMatrix_eq` is its `SL_n(ℤ)` case, and
   `det_eq_of_mem_doubleCoset_of_le_SLnZ` extracts the determinant invariant in the other
   direction.
+* `mem_intEntries_of_mem_doubleCoset`: the double coset of an integral matrix between images of
+  subgroups of `SL_n(ℤ)` consists of integral matrices.
 * the `IsHeckeTriple (posDetInt n) (SLnZ n) (SLnZ n)` instance, and the
   Hecke ring `IntegralHeckeRing n` it founds.
 
@@ -280,6 +282,15 @@ lemma map_mapGL_le_intEntries (Γ : Subgroup (SpecialLinearGroup (Fin n) ℤ)) :
     (Γ.map (mapGL ℚ)).toSubmonoid ≤ intEntries n := by
   rintro _ ⟨σ, -, rfl⟩
   exact mapGL_mem_intEntries n σ
+
+/-- The double coset `Γ₁' δ Γ₂'` of an integral matrix `δ` between the images
+`Γᵢ' = Γᵢ.map (mapGL ℚ)` of two subgroups of `SL_n(ℤ)` consists of integral matrices. -/
+lemma mem_intEntries_of_mem_doubleCoset {Γ₁ Γ₂ : Subgroup (SpecialLinearGroup (Fin n) ℤ)}
+    {δ x : GL (Fin n) ℚ} (hδ : δ ∈ intEntries n)
+    (hx : x ∈ DoubleCoset.doubleCoset δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ))) :
+    x ∈ intEntries n := by
+  obtain ⟨g₁, hg₁, g₂, hg₂, rfl⟩ := DoubleCoset.mem_doubleCoset.mp hx
+  exact mul_mem (mul_mem (map_mapGL_le_intEntries n Γ₁ hg₁) hδ) (map_mapGL_le_intEntries n Γ₂ hg₂)
 
 /-! ### The integral matrix underlying an element of `intEntries n`
 
