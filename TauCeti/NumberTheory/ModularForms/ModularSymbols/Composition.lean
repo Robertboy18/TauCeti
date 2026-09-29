@@ -233,17 +233,43 @@ section Assembly
 
 variable (Γ₁ Γ₂ Γ₃ : Subgroup SL(2, ℤ)) {Δ : Submonoid (GL (Fin 2) ℚ)}
   [IsHeckeTriple Δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ))]
-  [IsHeckeTriple Δ (Γ₂.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ))] (hΔ : Δ ≤ intEntries 2)
+  [IsHeckeTriple Δ (Γ₂.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ))]
   (D₁ : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)))
   (D₂ : HeckeCoset Δ (Γ₂.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ)))
+  (hD₁ : (D₁.out : GL (Fin 2) ℚ) ∈ intEntries 2) (hD₂ : (D₂.out : GL (Fin 2) ℚ) ∈ intEntries 2)
+
+include hD₁ hD₂ in
+open Classical in
+/-- **Every double coset met by the products of the representatives is integral.** If `D₁.out`
+and `D₂.out` are integral then so is `D.out` for every `D` in the image of `pairCoset D₁ D₂`: such
+a `D` is the double coset of a product `aᵥ b_u` of two integral representatives, and
+`HeckeRing.GLn.mem_intEntries_of_mem_doubleCoset` applies. This supplies the integrality proof
+that `heckeSymbol` asks for at each output coset of the composition law; nothing is assumed of
+the other elements of `Δ`. -/
+theorem mem_intEntries_of_mem_image_pairCoset
+    {D : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ))}
+    (hD : D ∈ Finset.univ.image (pairCoset D₁ D₂)) : (D.out : GL (Fin 2) ℚ) ∈ intEntries 2 := by
+  obtain ⟨q, -, rfl⟩ := Finset.mem_image.mp hD
+  -- `D.out` lies in its own double coset, which is that of the product of the representatives
+  have hmem : ((pairCoset D₁ D₂ q).out : GL (Fin 2) ℚ) ∈
+      doubleCoset (rightCosetRep D₁ q.1 * rightCosetRep D₂ q.2) (Γ₁.map (mapGL ℚ))
+        (Γ₃.map (mapGL ℚ)) := by
+    rw [doubleCoset_eq_of_mem (pairCoset_eq_iff.mp rfl)]
+    exact mem_doubleCoset_self _ _ _
+  exact mem_intEntries_of_mem_doubleCoset 2
+    (mul_mem (rightCosetRep_mem D₁ hD₁ (map_mapGL_le_intEntries 2 Γ₂) q.1)
+      (rightCosetRep_mem D₂ hD₂ (map_mapGL_le_intEntries 2 Γ₃) q.2)) hmem
 
 open Classical in
-/-- **The multiplicity-weighted composition law.** For double cosets `D₁`, `D₂` of a monoid `Δ`
-of integral matrices, the composite of the two Hecke operators is the sum, over the double cosets
-`D` met by the products `aᵥ b_u` of the representatives, of Shimura's multiplicity times the
-operator of `D`:
+/-- **The multiplicity-weighted composition law.** For double cosets `D₁`, `D₂` of integral
+matrices, the composite of the two Hecke operators is the sum, over the double cosets `D` met by
+the products `aᵥ b_u` of the representatives, of Shimura's multiplicity times the operator of `D`:
 
 `T_{D₁} ∘ T_{D₂} = ∑_D m(D₁, D₂; D) • T_D`.
+
+The sum runs over the attached finset of output cosets, each `D` carrying its membership, from
+which `mem_intEntries_of_mem_image_pairCoset` derives the integrality of `D.out` that `T_D`
+needs: only the two input cosets are assumed integral, not the monoid `Δ`.
 
 `heckeSymbol_comp_heckeSymbol_eq_heckeSymbol` is the special case where the products meet a single
 double coset and meet each of its right cosets exactly once. The coefficient is
@@ -257,28 +283,29 @@ coset's own decomposition comes from the composite triple `IsHeckeTriple Δ Γ�
 theorem heckeSymbol_comp_heckeSymbol_eq_sum_nsmul :
     letI : IsHeckeTriple Δ (Γ₁.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ)) :=
       IsHeckeTriple.trans (H₂ := Γ₂.map (mapGL ℚ))
-    heckeSymbol Γ₁ Γ₂ D₁ (hΔ D₁.out.2) ∘ₗ heckeSymbol Γ₂ Γ₃ D₂ (hΔ D₂.out.2) =
-      ∑ D ∈ Finset.univ.image (pairCoset D₁ D₂),
+    heckeSymbol Γ₁ Γ₂ D₁ hD₁ ∘ₗ heckeSymbol Γ₂ Γ₃ D₂ hD₂ =
+      ∑ D ∈ (Finset.univ.image (pairCoset D₁ D₂)).attach,
         DoubleCoset.multiplicity (Γ₃.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)) (Γ₁.map (mapGL ℚ))
-          (D₂.out : GL (Fin 2) ℚ)⁻¹ (D₁.out : GL (Fin 2) ℚ)⁻¹ (D.out : GL (Fin 2) ℚ)⁻¹ •
-            (heckeSymbol Γ₁ Γ₃ D (hΔ D.out.2) :
-              ModularSymbols R Γ₃ w →ₗ[R] ModularSymbols R Γ₁ w) := by
+          (D₂.out : GL (Fin 2) ℚ)⁻¹ (D₁.out : GL (Fin 2) ℚ)⁻¹ (D.1.out : GL (Fin 2) ℚ)⁻¹ •
+            (heckeSymbol Γ₁ Γ₃ D.1 (mem_intEntries_of_mem_image_pairCoset Γ₁ Γ₂ Γ₃ D₁ D₂ hD₁ hD₂
+              D.2) : ModularSymbols R Γ₃ w →ₗ[R] ModularSymbols R Γ₁ w) := by
   -- the same composite triple the statement derives; `IsHeckeTriple.trans` cannot be an
   -- instance, since `Γ₂` does not occur in the conclusion, so it is named at both points
   let _ : IsHeckeTriple Δ (Γ₁.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ)) :=
     IsHeckeTriple.trans (H₂ := Γ₂.map (mapGL ℚ))
   refine Coinvariants.hom_ext (LinearMap.ext fun x ↦ ?_)
   simp only [LinearMap.comp_apply, LinearMap.sum_apply, LinearMap.smul_apply]
-  rw [heckeSymbol_heckeSymbol_mk Γ₁ Γ₂ Γ₃ D₁ D₂ (hΔ D₁.out.2) (hΔ D₂.out.2),
-    ← Fintype.sum_prod_type',
+  rw [heckeSymbol_heckeSymbol_mk Γ₁ Γ₂ Γ₃ D₁ D₂ hD₁ hD₂, ← Fintype.sum_prod_type',
     TauCeti.sum_eq_sum_image_fiber (pairCoset D₁ D₂) fun q ↦
       (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
         ModularSymbols R Γ₁ w)
         (symbolIntRep R w ⟨rightCosetRep D₁ q.1 * rightCosetRep D₂ q.2,
-          mul_mem (rightCosetRep_mem D₁ (hΔ D₁.out.2) (map_mapGL_le_intEntries 2 Γ₂) q.1)
-            (rightCosetRep_mem D₂ (hΔ D₂.out.2) (map_mapGL_le_intEntries 2 Γ₃) q.2)⟩ x)]
+          mul_mem (rightCosetRep_mem D₁ hD₁ (map_mapGL_le_intEntries 2 Γ₂) q.1)
+            (rightCosetRep_mem D₂ hD₂ (map_mapGL_le_intEntries 2 Γ₃) q.2)⟩ x),
+    ← Finset.sum_attach (Finset.univ.image (pairCoset D₁ D₂))]
   refine Finset.sum_congr rfl fun D _ ↦ ?_
-  exact sum_mk_symbolIntRep_eq_nsmul_heckeSymbol_mk Γ₁ Γ₃ D (hΔ D.out.2) _ _
+  exact sum_mk_symbolIntRep_eq_nsmul_heckeSymbol_mk Γ₁ Γ₃ D.1
+    (mem_intEntries_of_mem_image_pairCoset Γ₁ Γ₂ Γ₃ D₁ D₂ hD₁ hD₂ D.2) _ _
     (fun i ↦ pairCoset_eq_iff.mp i.2)
     (fun _ hx ↦ card_pairs_pairCoset_rightCoset_eq_multiplicity hx) x
 
