@@ -49,15 +49,17 @@ finite holomorphic map.
   `TauCeti.RiemannSurface.eventually_fiberMultiplicitySum_eq`, its local constancy.
 * `TauCeti.RiemannSurface.degree`: the degree, with
   `TauCeti.RiemannSurface.fiberMultiplicitySum_eq_degree` saying that every fibre sum over a
-  connected target equals it, `TauCeti.RiemannSurface.degree_pos`,
+  connected target equals it, `TauCeti.RiemannSurface.degree_pos_of_forall_not_eventuallyConst`,
   `TauCeti.RiemannSurface.surjective_of_forall_not_eventuallyConst` and
-  `TauCeti.RiemannSurface.degree_comp`.
+  `TauCeti.RiemannSurface.degree_comp_of_forall_not_eventuallyConst`, for maps carrying the
+  pointwise nonconstancy hypothesis.
 * `TauCeti.RiemannSurface.FiniteHolomorphicMap`: the bundled finite holomorphic maps, with
-  `TauCeti.RiemannSurface.FiniteHolomorphicMap.ofMDifferentiable`,
-  `TauCeti.RiemannSurface.FiniteHolomorphicMap.comp`,
-  `TauCeti.RiemannSurface.FiniteHolomorphicMap.degree_eq_sum_localMultiplicity`,
+  `TauCeti.RiemannSurface.FiniteHolomorphicMap.ofMDifferentiable` and
+  `TauCeti.RiemannSurface.FiniteHolomorphicMap.comp`, and the degree API on them with no side
+  hypotheses: `TauCeti.RiemannSurface.localMultiplicity_pos`,
+  `TauCeti.RiemannSurface.degree_eq_fiber_sum`, `TauCeti.RiemannSurface.degree_pos`,
   `TauCeti.RiemannSurface.FiniteHolomorphicMap.localMultiplicity_comp` and
-  `TauCeti.RiemannSurface.FiniteHolomorphicMap.degree_comp`.
+  `TauCeti.RiemannSurface.degree_comp`.
 
 ## References
 
@@ -244,21 +246,18 @@ theorem fiberMultiplicitySum_eq_degree (y : Y) : fiberMultiplicitySum f y = degr
       y' y
   rw [degree_def, h, ciSup_const]
 
-/-- The degree is the sum of the local multiplicities over any fibre, as a finite sum. -/
-theorem degree_eq_sum_localMultiplicity (y : Y) :
-    degree f = ∑ x ∈ (finite_preimage_singleton hf hne y).toFinset, localMultiplicity f x :=
-  (fiberMultiplicitySum_eq_degree hf hne y).symm.trans (fiberMultiplicitySum_eq_sum _)
-
-/-- Every local multiplicity is at most the degree. -/
-theorem localMultiplicity_le_degree (x : X) : localMultiplicity f x ≤ degree f :=
+/-- Every local multiplicity of a holomorphic map from a compact Riemann surface to a connected
+Riemann surface which is constant near no point is at most the degree. -/
+theorem localMultiplicity_le_degree_of_forall_not_eventuallyConst (x : X) :
+    localMultiplicity f x ≤ degree f :=
   (localMultiplicity_le_fiberMultiplicitySum (finite_preimage_singleton hf hne (f x)) rfl).trans
     (fiberMultiplicitySum_eq_degree hf hne (f x)).le
 
 /-- **Positivity of the degree.** A holomorphic map from a nonempty compact Riemann surface to a
 connected Riemann surface which is constant near no point has positive degree. -/
-theorem degree_pos [Nonempty X] : 0 < degree f :=
+theorem degree_pos_of_forall_not_eventuallyConst [Nonempty X] : 0 < degree f :=
   ((localMultiplicity_pos_iff (.of_forall fun z ↦ hf z)).2 (hne (Classical.arbitrary X))).trans_le
-    (localMultiplicity_le_degree hf hne _)
+    (localMultiplicity_le_degree_of_forall_not_eventuallyConst hf hne _)
 
 /-- **Surjectivity.** A holomorphic map from a nonempty compact Riemann surface to a connected
 Riemann surface which is constant near no point is surjective: its positive degree is the fibre
@@ -268,7 +267,8 @@ theorem surjective_of_forall_not_eventuallyConst [Nonempty X] : Surjective f := 
   have hemp : f ⁻¹' {y} = ∅ := eq_empty_iff_forall_notMem.2 fun x hx ↦ h ⟨x, hx⟩
   have h0 : fiberMultiplicitySum f y = 0 := by
     rw [fiberMultiplicitySum_def, hemp, finsum_mem_empty]
-  exact (degree_pos hf hne).ne' ((fiberMultiplicitySum_eq_degree hf hne y).symm.trans h0)
+  exact (degree_pos_of_forall_not_eventuallyConst hf hne).ne'
+    ((fiberMultiplicitySum_eq_degree hf hne y).symm.trans h0)
 
 end Degree
 
@@ -281,11 +281,11 @@ compact Riemann surfaces with connected targets, both constant near no point, th
 `g ∘ f` is the product of the degrees: the fibre of `g ∘ f` over `z` is the disjoint union of the
 fibres of `f` over the points of the fibre of `g` over `z`, and the local multiplicities
 multiply. -/
-theorem degree_comp [IsManifold 𝓘(ℂ) 1 Z] [CompactSpace X] [T2Space X] [CompactSpace Y]
-    [T2Space Y] [PreconnectedSpace Y] [T2Space Z] [PreconnectedSpace Z]
-    (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f) (hne : ∀ x, ¬ EventuallyConst f (𝓝 x))
-    (hg : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) g) (hneg : ∀ y, ¬ EventuallyConst g (𝓝 y)) :
-    degree (g ∘ f) = degree g * degree f := by
+theorem degree_comp_of_forall_not_eventuallyConst [IsManifold 𝓘(ℂ) 1 Z] [CompactSpace X]
+    [T2Space X] [CompactSpace Y] [T2Space Y] [PreconnectedSpace Y] [T2Space Z]
+    [PreconnectedSpace Z] (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f)
+    (hne : ∀ x, ¬ EventuallyConst f (𝓝 x)) (hg : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) g)
+    (hneg : ∀ y, ¬ EventuallyConst g (𝓝 y)) : degree (g ∘ f) = degree g * degree f := by
   classical
   rcases isEmpty_or_nonempty Z with hZ | ⟨⟨z⟩⟩
   · simp [degree_def]
@@ -322,15 +322,22 @@ theorem degree_comp [IsManifold 𝓘(ℂ) 1 Z] [CompactSpace X] [T2Space X] [Com
         rw [fiberMultiplicitySum_eq_sum hT, finsum_mem_eq_finite_toFinset_sum _ hT, Finset.sum_mul]
     _ = degree g * degree f := by rw [fiberMultiplicitySum_eq_degree hg hneg z]
 
-/-! ### The degree of a finite holomorphic map -/
+/-! ### The degree of a finite holomorphic map
 
-namespace FiniteHolomorphicMap
+The results above, restated on `TauCeti.RiemannSurface.FiniteHolomorphicMap` with no side
+hypotheses: on a connected source the identity theorem supplies the pointwise nonconstancy. The
+statements about `degree` and `localMultiplicity` keep the names of the theorems they restate and
+live in the namespace of that head symbol; the theorems whose head symbol is generic
+(`Function.Surjective`, `Filter.EventuallyConst`, the composite) live in the carrier's namespace. -/
+
+section FiniteHolomorphicMap
 
 variable (f : FiniteHolomorphicMap X Y)
 
 /-- A finite holomorphic map from a connected Riemann surface is constant near no point: this is
 the identity theorem. -/
-theorem not_eventuallyConst [PreconnectedSpace X] (x : X) : ¬ EventuallyConst f (𝓝 x) :=
+theorem FiniteHolomorphicMap.not_eventuallyConst [PreconnectedSpace X] (x : X) :
+    ¬ EventuallyConst f (𝓝 x) :=
   let ⟨_, _, h⟩ := f.nonconstant
   not_eventuallyConst_of_ne f.holomorphic h x
 
@@ -342,8 +349,9 @@ theorem localMultiplicity_pos [PreconnectedSpace X] (x : X) : 0 < localMultiplic
 /-- A holomorphic map from a compact connected Riemann surface which takes two distinct values is
 a finite holomorphic map: its fibres are finite by
 `TauCeti.RiemannSurface.finite_preimage_singleton`. -/
-def ofMDifferentiable [CompactSpace X] [PreconnectedSpace X] [T1Space Y] {f : X → Y}
-    (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f) (hne : ∃ x x', f x ≠ f x') : FiniteHolomorphicMap X Y where
+def FiniteHolomorphicMap.ofMDifferentiable [CompactSpace X] [PreconnectedSpace X] [T1Space Y]
+    {f : X → Y} (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f) (hne : ∃ x x', f x ≠ f x') :
+    FiniteHolomorphicMap X Y where
   toFun := f
   holomorphic := hf
   nonconstant := hne
@@ -352,9 +360,9 @@ def ofMDifferentiable [CompactSpace X] [PreconnectedSpace X] [T1Space Y] {f : X 
     finite_preimage_singleton hf (not_eventuallyConst_of_ne hf h)
 
 @[simp]
-theorem coe_ofMDifferentiable [CompactSpace X] [PreconnectedSpace X] [T1Space Y] {f : X → Y}
-    (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f) (hne : ∃ x x', f x ≠ f x') :
-    ⇑(ofMDifferentiable hf hne) = f :=
+theorem FiniteHolomorphicMap.coe_ofMDifferentiable [CompactSpace X] [PreconnectedSpace X]
+    [T1Space Y] {f : X → Y} (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f) (hne : ∃ x x', f x ≠ f x') :
+    ⇑(FiniteHolomorphicMap.ofMDifferentiable hf hne) = f :=
   (rfl)
 
 section Compact
@@ -363,32 +371,33 @@ variable [CompactSpace X] [T2Space X] [PreconnectedSpace X] [T2Space Y] [Preconn
 
 /-- A finite holomorphic map from a compact connected Riemann surface to a connected Riemann
 surface is surjective. -/
-theorem surjective : Surjective f :=
+theorem FiniteHolomorphicMap.surjective : Surjective f :=
   have : Nonempty X := f.nonconstant.nonempty
   surjective_of_forall_not_eventuallyConst f.holomorphic f.not_eventuallyConst
 
 /-- **Fibre independence of the degree**, for a finite holomorphic map from a compact connected
 Riemann surface to a connected Riemann surface: the degree is the sum of the local multiplicities
 over any fibre. -/
-theorem degree_eq_sum_localMultiplicity (y : Y) :
+theorem degree_eq_fiber_sum (y : Y) :
     degree f = ∑ x ∈ (f.finite_fiber y).toFinset, localMultiplicity f x :=
-  RiemannSurface.degree_eq_sum_localMultiplicity f.holomorphic f.not_eventuallyConst y
+  (fiberMultiplicitySum_eq_degree f.holomorphic f.not_eventuallyConst y).symm.trans
+    (fiberMultiplicitySum_eq_sum _)
 
 /-- Every local multiplicity of a finite holomorphic map from a compact connected Riemann surface
 to a connected Riemann surface is at most its degree. -/
 theorem localMultiplicity_le_degree (x : X) : localMultiplicity f x ≤ degree f :=
-  RiemannSurface.localMultiplicity_le_degree f.holomorphic f.not_eventuallyConst x
+  localMultiplicity_le_degree_of_forall_not_eventuallyConst f.holomorphic f.not_eventuallyConst x
 
 /-- **Positivity of the degree** of a finite holomorphic map from a compact connected Riemann
 surface to a connected Riemann surface. -/
 theorem degree_pos : 0 < degree f :=
   have : Nonempty X := f.nonconstant.nonempty
-  RiemannSurface.degree_pos f.holomorphic f.not_eventuallyConst
+  degree_pos_of_forall_not_eventuallyConst f.holomorphic f.not_eventuallyConst
 
 /-- The composite of finite holomorphic maps, for a compact connected source and a connected
 middle surface: the composite takes two distinct values because the first map is surjective, and
 its fibres are finite unions of finite fibres. -/
-def comp (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) :
+def FiniteHolomorphicMap.comp (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) :
     FiniteHolomorphicMap X Z where
   toFun := g ∘ f
   holomorphic := g.holomorphic.comp f.holomorphic
@@ -402,14 +411,16 @@ def comp (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) :
     exact (g.finite_fiber z).biUnion fun y _ ↦ f.finite_fiber y
 
 @[simp]
-theorem coe_comp (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) :
-    ⇑(g.comp f) = g ∘ f :=
+theorem FiniteHolomorphicMap.coe_comp (g : FiniteHolomorphicMap Y Z)
+    (f : FiniteHolomorphicMap X Y) : ⇑(g.comp f) = g ∘ f :=
   (rfl)
 
 /-- **Multiplicativity of the local multiplicity** for finite holomorphic maps: the local
-multiplicity of `g.comp f` at `x` is the product of that of `g` at `f x` and that of `f` at `x`. -/
-theorem localMultiplicity_comp [IsManifold 𝓘(ℂ) 1 Z] (g : FiniteHolomorphicMap Y Z)
-    (f : FiniteHolomorphicMap X Y) (x : X) :
+multiplicity of `g.comp f` at `x` is the product of that of `g` at `f x` and that of `f` at `x`.
+The root name `TauCeti.RiemannSurface.localMultiplicity_comp` is the statement for maps, with
+holomorphy near the two points as hypotheses. -/
+theorem FiniteHolomorphicMap.localMultiplicity_comp [IsManifold 𝓘(ℂ) 1 Z]
+    (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) (x : X) :
     localMultiplicity (g.comp f) x = localMultiplicity g (f x) * localMultiplicity f x :=
   RiemannSurface.localMultiplicity_comp (.of_forall fun y ↦ g.holomorphic y)
     (.of_forall fun y ↦ f.holomorphic y)
@@ -419,7 +430,7 @@ with `X` and `Y` compact and connected and `Z` connected. -/
 theorem degree_comp [IsManifold 𝓘(ℂ) 1 Z] [CompactSpace Y] [T2Space Z] [PreconnectedSpace Z]
     (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) :
     degree (g.comp f) = degree g * degree f :=
-  RiemannSurface.degree_comp f.holomorphic f.not_eventuallyConst g.holomorphic
+  degree_comp_of_forall_not_eventuallyConst f.holomorphic f.not_eventuallyConst g.holomorphic
     g.not_eventuallyConst
 
 end Compact
