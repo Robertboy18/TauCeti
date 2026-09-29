@@ -14,6 +14,7 @@ public import Mathlib.Topology.Algebra.Group.Subgroup
 public import Mathlib.Topology.Algebra.Group.Units
 public import TauCeti.NumberTheory.Padics.RingHoms
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Subgroup
+import Mathlib.Algebra.CharZero.Infinite
 import Mathlib.NumberTheory.Padics.ProperSpace
 import Mathlib.RingTheory.LocalRing.ResidueField.Basic
 import TauCeti.NumberTheory.Padics.PadicIntegers
@@ -425,6 +426,39 @@ theorem exists_topologicalClosure_zpowers_eq_unitsPrincipal {f : ℕ} (hf : 0 < 
     ∃ u : ℤ_[p]ˣ, (Subgroup.zpowers u).topologicalClosure = unitsPrincipal p f := by
   obtain ⟨u, hu, hu'⟩ := exists_mem_unitsPrincipal_and_notMem_succ_of_pos p hf
   exact ⟨u, topologicalClosure_zpowers_eq_unitsPrincipal hf hf₂ hu hu'⟩
+
+variable (p) in
+/-- The principal unit group `U^(f)` is infinite: `x ↦ 1 + p ^ (f + 1) x` embeds `ℤ_p` into
+it. -/
+theorem infinite_unitsPrincipal (f : ℕ) : Infinite (unitsPrincipal p f) := by
+  have hp0 : (p : ℤ_[p]) ^ (f + 1) ≠ 0 := pow_ne_zero _ (Nat.cast_ne_zero.mpr hp.out.ne_zero)
+  have hunit (x : ℤ_[p]) : IsUnit (1 + (p : ℤ_[p]) ^ (f + 1) * x) :=
+    PadicInt.isUnit_one_add_of_dvd ((dvd_pow_self _ f.succ_ne_zero).mul_right x)
+  refine Infinite.of_injective (fun x : ℤ_[p] ↦ (⟨(hunit x).unit, ?_⟩ : unitsPrincipal p f))
+    fun x y hxy ↦ ?_
+  · rw [mem_unitsPrincipal_iff, IsUnit.unit_spec, add_sub_cancel_left]
+    exact (pow_dvd_pow _ f.le_succ).mul_right x
+  · have h := congrArg (fun u : unitsPrincipal p f ↦ ((u : ℤ_[p]ˣ) : ℤ_[p])) hxy
+    simp only [IsUnit.unit_spec, add_right_inj] at h
+    exact mul_left_cancel₀ hp0 h
+
+/-- A principal unit `u ≠ 1` of level `f ≥ 1`, with `f ≥ 2` when `p = 2`, has infinite order:
+its exact level `g ≥ f` makes it a topological generator of the infinite group `U^(g)`, which a
+unit of finite order, generating a finite closed subgroup, cannot be. -/
+theorem not_isOfFinOrder_of_mem_unitsPrincipal {f : ℕ} (hf : 0 < f) (hf₂ : p = 2 → 2 ≤ f)
+    {u : ℤ_[p]ˣ} (hu : u ∈ unitsPrincipal p f) (hu1 : u ≠ 1) : ¬ IsOfFinOrder u := by
+  intro hfin
+  obtain ⟨g, hg, hg'⟩ := exists_mem_unitsPrincipal_and_notMem_succ hu1
+  have hfg : f ≤ g := by
+    by_contra h
+    exact hg' (unitsPrincipal_antitone p (by omega) hu)
+  have hclos := topologicalClosure_zpowers_eq_unitsPrincipal (by omega : 0 < g)
+    (fun h ↦ (hf₂ h).trans hfg) hg hg'
+  have : Finite (Subgroup.zpowers u) := hfin.finite_zpowers
+  rw [(Set.toFinite _).isClosed.subgroup_topologicalClosure_eq] at hclos
+  have hinf := infinite_unitsPrincipal p g
+  rw [← hclos] at hinf
+  exact hinf.not_finite this
 
 /-! ### The subgroup of `p`-th powers -/
 
