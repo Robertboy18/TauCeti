@@ -107,8 +107,10 @@ theorem ker_orientationNeTwo_comp_mk (hn : 1 < n) {f : ℕ} (hq : q = p ^ f) (hf
   subst hq
   push_cast at hu'
   refine freeProP.ker_eq_topologicalClosure_normalClosure_image_freeProPGen _
+    ((orientationNeTwo _ n u hu).comp (presentedProP.mk p _)).isClosed_ker
     (fun i hi ↦ orientationNeTwo_comp_mk_freeProPGen_of_ne _ n u hu hi) ?_
-  rw [orientationNeTwo_comp_mk_freeProPGen_one _ n u hu hn]
+  rw [ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_ofClass,
+    orientationNeTwo_comp_mk_freeProPGen_one _ n u hu hn]
   exact not_isOfFinOrder_of_val_mul_one_sub_pow_eq_one hf hf₂ hu'
 
 /-- **Labute's module `E` of the `q ≠ 2` normal form is spanned by the classes of the generators
@@ -133,13 +135,10 @@ theorem span_topologicalAbelianization_ker_orientationNeTwo_comp_mk_eq_top
             ((orientationNeTwo q n u hu).comp (presentedProP.mk p _)).toMonoidHom.ker →
               TopologicalAbelianization
                 ((orientationNeTwo q n u hu).comp (presentedProP.mk p _)).toMonoidHom.ker) ''
-          (Subtype.val ⁻¹' (freeProPGen p n '' {i | i ≠ 1})))) = ⊤ := by
-  subst hq
-  push_cast at hu'
-  refine freeProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top _
-    (fun i hi ↦ orientationNeTwo_comp_mk_freeProPGen_of_ne _ n u hu hi) ?_
-  rw [orientationNeTwo_comp_mk_freeProPGen_one _ n u hu hn]
-  exact not_isOfFinOrder_of_val_mul_one_sub_pow_eq_one hf hf₂ hu'
+          (Subtype.val ⁻¹' (freeProPGen p n '' {i | i ≠ 1})))) = ⊤ :=
+  (isProP_freeProP p (Fin n)).span_completedGroupAlgebraModule_topologicalAbelianization_eq_top _
+    ((finite_range_freeProPGen p n).subset (Set.image_subset_range _ _))
+    (ker_orientationNeTwo_comp_mk q n u hu hn hq hf hf₂ hu').symm
 
 end NeTwo
 
@@ -192,15 +191,18 @@ theorem ker_orientationTwoEven_comp_mk (hn : 3 < n) (hv : (v : ℤ_[2]) * (1 + (
         (freeProPGen 2 n 3 * ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 1) l)⁻¹)
         (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3}))).topologicalClosure := by
   refine freeProP.ker_eq_topologicalClosure_normalClosure_insert_image_freeProPGen _
+    ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)).isClosed_ker
     (fun i hi₁ hi₃ ↦ orientationTwoEven_comp_mk_freeProPGen_of_ne a f n v u hi₁ hi₃) ?_ ?_
-  · rw [orientationTwoEven_comp_mk_freeProPGen_one a f n v u (by omega)]
+  · rw [ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_ofClass,
+      orientationTwoEven_comp_mk_freeProPGen_one a f n v u (by omega)]
     exact not_isOfFinOrder_of_val_mul_one_add_eq_neg_one hv ha₄ ha
   · have h := (isProP_freeProP 2 (Fin n)).map_padicPow isProP_units_padicInt_two
       ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _) : freeProP 2 (Fin n) →* ℤ_[2]ˣ)
       (map_continuous ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)))
       (freeProPGen 2 n 1) l
     rw [MonoidHom.coe_ofClass] at h
-    rw [orientationTwoEven_comp_mk_freeProPGen_three a f n v u hn, h,
+    rw [ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_ofClass,
+      orientationTwoEven_comp_mk_freeProPGen_three a f n v u hn, h,
       orientationTwoEven_comp_mk_freeProPGen_one a f n v u (by omega), hl]
 
 /-- **Labute's module `E` of the `q = 2`, `n` even normal form with procyclic image is spanned by
@@ -227,18 +229,10 @@ theorem span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top
                 ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)).toMonoidHom.ker) ''
           (Subtype.val ⁻¹' insert
             (freeProPGen 2 n 3 * ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 1) l)⁻¹)
-            (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3})))) = ⊤ := by
-  refine freeProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top_insert _
-    (fun i hi₁ hi₃ ↦ orientationTwoEven_comp_mk_freeProPGen_of_ne a f n v u hi₁ hi₃) ?_ ?_
-  · rw [orientationTwoEven_comp_mk_freeProPGen_one a f n v u (by omega)]
-    exact not_isOfFinOrder_of_val_mul_one_add_eq_neg_one hv ha₄ ha
-  · have h := (isProP_freeProP 2 (Fin n)).map_padicPow isProP_units_padicInt_two
-      ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _) : freeProP 2 (Fin n) →* ℤ_[2]ˣ)
-      (map_continuous ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)))
-      (freeProPGen 2 n 1) l
-    rw [MonoidHom.coe_ofClass] at h
-    rw [orientationTwoEven_comp_mk_freeProPGen_three a f n v u hn, h,
-      orientationTwoEven_comp_mk_freeProPGen_one a f n v u (by omega), hl]
+            (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3})))) = ⊤ :=
+  (isProP_freeProP 2 (Fin n)).span_completedGroupAlgebraModule_topologicalAbelianization_eq_top _
+    (((finite_range_freeProPGen 2 n).subset (Set.image_subset_range _ _)).insert _)
+    (ker_orientationTwoEven_comp_mk a f n v u hn hv ha₄ ha hl).symm
 
 end TwoEven
 

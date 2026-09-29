@@ -18,7 +18,7 @@ by a normal subgroup it contains together with a complementary subgroup.
 
 ## Main results
 
-* `Subgroup.sup_inf_assoc_of_le`: `(K ⊓ H) ⊔ N = K ⊓ (H ⊔ N)` for `N` normal with `N ≤ K`.
+* `Subgroup.inf_sup_assoc_of_le`: `(K ⊓ H) ⊔ N = K ⊓ (H ⊔ N)` for `N` normal with `N ≤ K`.
 -/
 
 public section
@@ -31,7 +31,7 @@ variable {G : Type*} [Group G]
 `(K ⊓ H) ⊔ N = K ⊓ (H ⊔ N)`. -/
 @[to_additive /-- **Dedekind's modular law** for a normal additive subgroup: if `N` is normal and
 `N ≤ K`, then `(K ⊓ H) ⊔ N = K ⊓ (H ⊔ N)`. -/]
-theorem sup_inf_assoc_of_le (H : Subgroup G) {K N : Subgroup G} [N.Normal] (h : N ≤ K) :
+theorem inf_sup_assoc_of_le (H : Subgroup G) {K N : Subgroup G} [N.Normal] (h : N ≤ K) :
     (K ⊓ H) ⊔ N = K ⊓ (H ⊔ N) := by
   apply SetLike.coe_injective
   rw [mul_normal, inf_mul_assoc K H N h, coe_inf, mul_normal]

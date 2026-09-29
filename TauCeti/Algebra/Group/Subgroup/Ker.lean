@@ -44,7 +44,7 @@ theorem mem_eqLocus {f g : G →* M} {x : G} : x ∈ f.eqLocus g ↔ f x = g x :
 additive subgroup `H` with `H ⊔ N = ⊤`: `ker f = (ker f ⊓ H) ⊔ N`, by Dedekind's modular law. -/]
 theorem ker_eq_ker_inf_sup_of_sup_eq_top {f : G →* M} {H N : Subgroup G} [N.Normal]
     (hN : N ≤ f.ker) (hHN : H ⊔ N = ⊤) : f.ker = (f.ker ⊓ H) ⊔ N := by
-  rw [Subgroup.sup_inf_assoc_of_le H hN, hHN, inf_top_eq]
+  rw [Subgroup.inf_sup_assoc_of_le H hN, hHN, inf_top_eq]
 
 /-- If a normal subgroup `N ≤ ker f` and a subgroup `H` on which `f` is injective satisfy
 `H ⊔ N = ⊤`, then `ker f = N`. -/
