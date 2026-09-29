@@ -291,10 +291,9 @@ omit [LinearOrder X] in
 @[simp]
 theorem degreeZeroBasis_apply (i : X) :
     degreeZeroBasis p X i = gradedMkZero p (freeProP p X) (of i) := by
-  rw [degreeZeroBasis, Module.Basis.map_apply, AddEquiv.coe_toLinearEquiv, AddEquiv.symm_apply_eq,
-    AddEquiv.trans_apply, gradedPieceZeroEquiv_gradedMkZero, MulEquiv.toAdditive_apply_apply,
-    toMul_ofMul, QuotientGroup.quotientMulEquivOfEq_mk, frattiniQuotientBasis_apply,
-    QuotientGroup.mk'_apply]
+  rw [degreeZeroBasis, Module.Basis.map_apply, AddEquiv.coe_toLinearEquiv, AddEquiv.symm_apply_eq]
+  -- The identification `gr_0(F) ≅ F ⧸ Φ(F)` carries `x'_i` to the class `⟦x_i⟧`.
+  simp
 
 omit [Finite X] in
 /-- **The dimension of `gr_1` of a free pro-`p` group of finite rank** is `#X + (#X choose 2)`:

@@ -92,32 +92,31 @@ of `λ_k`, hence descends to a continuous homomorphism between the quotients by 
 equation is `ContinuousMonoidHom.pLowerCentralSeriesDesc_mk`. -/
 noncomputable def _root_.ContinuousMonoidHom.pLowerCentralSeriesDesc
     (ψ : G ⧸ pLowerCentralSeries p G (k + 1) →ₜ* H ⧸ pLowerCentralSeries p H (k + 1)) :
-    G ⧸ pLowerCentralSeries p G k →ₜ* H ⧸ pLowerCentralSeries p H k where
-  toMonoidHom := QuotientGroup.lift _ ((QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k)).comp
-    (ψ.toMonoidHom.comp (QuotientGroup.mk' _))) (by
-      intro g hg
-      -- The class of `g ∈ λ_k(G)` lies in `λ_k(G ⧸ λ_{k+1})`, which `ψ` carries into
-      -- `λ_k(H ⧸ λ_{k+1})`, the image of `λ_k(H)`.
-      have hH : IsClosed ((pLowerCentralSeries p H (k + 1) : Subgroup H) : Set H) :=
-        isClosed_pLowerCentralSeries _
-      have h1 : ψ (g : G ⧸ pLowerCentralSeries p G (k + 1)) ∈
-          pLowerCentralSeries p (H ⧸ pLowerCentralSeries p H (k + 1)) k :=
-        ψ.toMonoidHom.map_pLowerCentralSeries_le ψ.continuous k
-          ⟨_, (QuotientGroup.mk' _).map_pLowerCentralSeries_le QuotientGroup.continuous_mk k
-            ⟨g, hg, rfl⟩, rfl⟩
-      rw [← (QuotientGroup.mk' (pLowerCentralSeries p H (k + 1)))
-        |>.map_pLowerCentralSeries_eq_of_surjective QuotientGroup.continuous_mk
-          QuotientGroup.continuous_mk.isClosedMap (QuotientGroup.mk'_surjective _)] at h1
-      obtain ⟨h, hh, hh'⟩ := h1
-      rw [MonoidHom.mem_ker]
-      change QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k)
-        (ψ (g : G ⧸ pLowerCentralSeries p G (k + 1))) = 1
-      rw [← hh', QuotientGroup.mk'_apply, QuotientGroup.mapOfLE_mk, QuotientGroup.eq_one_iff]
-      exact hh)
-  continuous_toFun := by
-    -- Composed with the quotient map of `G` modulo `λ_k`, the lift is `mapOfLE ∘ ψ ∘ mk`.
-    refine (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr ?_
-    exact (QuotientGroup.continuous_mapOfLE _).comp (ψ.continuous.comp QuotientGroup.continuous_mk)
+    G ⧸ pLowerCentralSeries p G k →ₜ* H ⧸ pLowerCentralSeries p H k :=
+  ContinuousMonoidHom.quotientLift _
+    ((⟨QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k), QuotientGroup.continuous_mapOfLE _⟩ :
+        H ⧸ pLowerCentralSeries p H (k + 1) →ₜ* H ⧸ pLowerCentralSeries p H k).comp
+      (ψ.comp (ContinuousMonoidHom.quotientMk _))) (by
+    intro g hg
+    -- The class of `g ∈ λ_k(G)` lies in `λ_k(G ⧸ λ_{k+1})`, which `ψ` carries into
+    -- `λ_k(H ⧸ λ_{k+1})`, the image of `λ_k(H)`.
+    -- `H ⧸ λ_{k+1}` is Hausdorff, as `λ_{k+1}(H)` is closed.
+    have hH : IsClosed ((pLowerCentralSeries p H (k + 1) : Subgroup H) : Set H) :=
+      isClosed_pLowerCentralSeries _
+    have h1 : ψ (g : G ⧸ pLowerCentralSeries p G (k + 1)) ∈
+        pLowerCentralSeries p (H ⧸ pLowerCentralSeries p H (k + 1)) k :=
+      ψ.toMonoidHom.map_pLowerCentralSeries_le ψ.continuous k
+        ⟨_, (QuotientGroup.mk' _).map_pLowerCentralSeries_le QuotientGroup.continuous_mk k
+          ⟨g, hg, rfl⟩, rfl⟩
+    rw [← (QuotientGroup.mk' (pLowerCentralSeries p H (k + 1)))
+      |>.map_pLowerCentralSeries_eq_of_surjective QuotientGroup.continuous_mk
+        QuotientGroup.continuous_mk.isClosedMap (QuotientGroup.mk'_surjective _)] at h1
+    obtain ⟨h, hh, hh'⟩ := h1
+    simp only [MonoidHom.mem_ker, ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_ofClass,
+      ContinuousMonoidHom.comp_toFun, ContinuousMonoidHom.quotientMk_apply,
+      ContinuousMonoidHom.coe_mk]
+    rw [← hh', QuotientGroup.mk'_apply, QuotientGroup.mapOfLE_mk, QuotientGroup.eq_one_iff]
+    exact hh)
 
 /-- The descended homomorphism on the class of `g` is the class of `ψ ⟦g⟧`. -/
 @[simp]
@@ -125,9 +124,8 @@ theorem _root_.ContinuousMonoidHom.pLowerCentralSeriesDesc_mk
     (ψ : G ⧸ pLowerCentralSeries p G (k + 1) →ₜ* H ⧸ pLowerCentralSeries p H (k + 1)) (g : G) :
     ψ.pLowerCentralSeriesDesc (g : G ⧸ pLowerCentralSeries p G k) =
       QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k)
-        (ψ (g : G ⧸ pLowerCentralSeries p G (k + 1))) := by
-  rw [ContinuousMonoidHom.pLowerCentralSeriesDesc]
-  rfl
+        (ψ (g : G ⧸ pLowerCentralSeries p G (k + 1))) :=
+  ContinuousMonoidHom.quotientLift_mk _ _ _ g
 
 /-- The descended homomorphism commutes with the quotient projections. -/
 @[simp]

@@ -257,15 +257,19 @@ theorem degreeOneBasis_repr_gradedMk_demushkinWordNeTwo_inl {q : ℕ} (hq : p �
       (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n 0)) =
       degreeOneBasis p (Fin n) (Sum.inl ⟨0, hn⟩) := by
     rw [degreeOneBasis_apply, degreeOneFamily_inl, freeProPGen_of_lt p hn]
-  rw [gradedMk_demushkinWordNeTwo hq, map_add, Finsupp.add_apply, map_nsmul, Finsupp.smul_apply,
-    map_sum, Finsupp.finsetSum_apply,
-    Finset.sum_eq_zero fun i _ ↦ degreeOneBasis_repr_gradedBracket_inl _ _ _, add_zero, h0,
-    Module.Basis.repr_self, Finsupp.single_apply, nsmul_eq_mul]
+  -- The bracket summands have no `p`-power coordinates.
+  have hbr : (degreeOneBasis p (Fin n)).repr (∑ i ∈ Finset.range (n / 2),
+      gradedBracket p (freeProP p (Fin n)) 0 0
+        (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * i)))
+        (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * i + 1)))) (Sum.inl k) = 0 := by
+    rw [map_sum, Finsupp.finsetSum_apply]
+    exact Finset.sum_eq_zero fun i _ ↦ degreeOneBasis_repr_gradedBracket_inl _ _ _
+  rw [gradedMk_demushkinWordNeTwo hq, map_add, Finsupp.add_apply, hbr, add_zero, h0, map_nsmul,
+    Finsupp.smul_apply, Module.Basis.repr_self_apply]
   by_cases hk : (k : ℕ) = 0
-  · have : (⟨0, hn⟩ : Fin n) = k := Fin.ext hk.symm
-    simp [this, hk]
-  · have : (⟨0, hn⟩ : Fin n) ≠ k := fun h ↦ hk (congrArg Fin.val h).symm
-    simp [this, hk]
+  · obtain rfl : (⟨0, hn⟩ : Fin n) = k := Fin.ext hk.symm
+    simp
+  · simp [hk, Fin.ext_iff, Ne.symm hk]
 
 private theorem even_of_basis {m : ℕ}
     (b : Module.Basis (Fin m ⊕ Fin m) (ZMod p) (continuousZModDual p (freeProP p (Fin n)))) :

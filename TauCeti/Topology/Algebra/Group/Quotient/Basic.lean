@@ -69,8 +69,8 @@ group is continuous: composed with the quotient map of `G` modulo `V` it is the 
 modulo `U`, and `G ⧸ V` carries the quotient topology. -/
 theorem continuous_mapOfLE (hVU : V ≤ U) : Continuous (mapOfLE hVU) :=
   (_root_.QuotientGroup.isQuotientMap_mk V).continuous_iff.mpr <| by
-    rw [show mapOfLE hVU ∘ (_root_.QuotientGroup.mk : G → G ⧸ V) = _root_.QuotientGroup.mk from
-      funext (mapOfLE_mk hVU)]
+    rw [← _root_.QuotientGroup.coe_mk' V, ← MonoidHom.coe_comp, mapOfLE_comp_mk',
+      _root_.QuotientGroup.coe_mk']
     exact _root_.QuotientGroup.continuous_mk
 
 end MapOfLE

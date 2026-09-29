@@ -59,15 +59,13 @@ universe u
 variable {p : ℕ} [Fact p.Prime] {X : Type u} [Finite X] [LinearOrder X]
 
 /-- **Finite successive approximation.** Let `r, w ∈ λ_1(F)` have the same class `ρ ∈ gr_1(F)`,
-and suppose `δ_ρ` is onto `gr_{m+1}(F)` for every `m ≥ 1`. Then for every `k` there is a continuous
-endomorphism `φ` of `F`, congruent to the identity modulo `λ_1(F)`, with `φ r ≡ w mod λ_{k+2}(F)`.
-The endomorphism is a composite of `k` basis modifications, one at each level `1, …, k`. -/
+and suppose `δ_ρ` is onto `gr_{m+1}(F)` for `1 ≤ m ≤ k`. Then there is a continuous endomorphism
+`φ` of `F`, congruent to the identity modulo `λ_1(F)`, with `φ r ≡ w mod λ_{k+2}(F)`. -/
 theorem exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries
     (r w : pLowerCentralSeries p (freeProP p X) 1)
-    (h : gradedMk p (freeProP p X) 1 r = gradedMk p (freeProP p X) 1 w)
-    (hspan : ∀ m (hm : 1 ≤ m),
-      LinearMap.range (basisModificationDelta p X hm (gradedMk p (freeProP p X) 1 r)) = ⊤)
-    (k : ℕ) :
+    (h : gradedMk p (freeProP p X) 1 r = gradedMk p (freeProP p X) 1 w) (k : ℕ)
+    (hspan : ∀ m (hm : 1 ≤ m), m ≤ k →
+      LinearMap.range (basisModificationDelta p X hm (gradedMk p (freeProP p X) 1 r)) = ⊤) :
     ∃ φ : freeProP p X →ₜ* freeProP p X,
       (∀ g, g⁻¹ * φ g ∈ pLowerCentralSeries p (freeProP p X) 1) ∧
         (φ r)⁻¹ * w ∈ pLowerCentralSeries p (freeProP p X) (k + 2) := by
@@ -77,7 +75,7 @@ theorem exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries
     · simp
     · simpa using QuotientGroup.eq.mp (gradedMk_eq_gradedMk_iff.mp h)
   | succ k ih =>
-    obtain ⟨φ, hφ, hr⟩ := ih
+    obtain ⟨φ, hφ, hr⟩ := ih fun m hm hmk ↦ hspan m hm (hmk.trans k.le_succ)
     -- `φ r` is again a relator with class `ρ`: `φ` is congruent to the identity modulo `λ_2` on
     -- `λ_1`.
     have hφr : φ r ∈ pLowerCentralSeries p (freeProP p X) 1 :=
@@ -88,7 +86,7 @@ theorem exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries
         (inv_mul_apply_mem_pLowerCentralSeries φ.toMonoidHom φ.continuous hφ r.2)).symm
     -- The class in `gr_{k+2}(F)` of the deviation `(φ r)⁻¹ * w` is `δ_ρ(v)` for some `v`; lift the
     -- `v_i` to `w_i ∈ λ_{k+1}(F)` and modify the basis by them.
-    obtain ⟨v, hv⟩ := LinearMap.range_eq_top.mp (hspan (k + 1) (by omega))
+    obtain ⟨v, hv⟩ := LinearMap.range_eq_top.mp (hspan (k + 1) (by omega) le_rfl)
       (gradedMk p (freeProP p X) (k + 1 + 1) ⟨(φ r)⁻¹ * w, hr⟩)
     choose ω hω using fun i ↦ gradedMk_surjective (k + 1) (v i)
     refine ⟨(basisModification ω).comp φ, fun g ↦ ?_, ?_⟩
@@ -108,8 +106,7 @@ theorem exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries
 /-- **The successive-approximation theorem.** Let `r, w ∈ λ_1(F)` be relators of the free pro-`p`
 group `F` on a finite linearly ordered type with the same class `ρ ∈ gr_1(F)`, and suppose the
 basis-modification map `δ_ρ` is onto `gr_{m+1}(F)` for every `m ≥ 1`. Then a continuous
-automorphism of `F` carries `r` to `w`: it is the limit of the finite approximations, assembled
-through the levelwise comparison schema. -/
+automorphism of `F` carries `r` to `w`. -/
 theorem exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_top
     (r w : pLowerCentralSeries p (freeProP p X) 1)
     (h : gradedMk p (freeProP p X) 1 r = gradedMk p (freeProP p X) 1 w)
@@ -134,7 +131,8 @@ theorem exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_to
   -- identity modulo `Φ(F)` is surjective, so it induces a surjection of `F ⧸ λ_k`.
   have : ∀ k, Nonempty (S k) := fun k ↦ by
     obtain ⟨φ, hφ, hr⟩ :=
-      exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries r w h hspan k
+      exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries r w h k
+        fun m hm _ ↦ hspan m hm
     rw [pLowerCentralSeries_one_eq_proPFrattini hp] at hφ
     have hsurj : Function.Surjective φ :=
       hP.surjective_of_forall_inv_mul_mem_proPFrattini (φ := φ.toMonoidHom) φ.continuous hφ
