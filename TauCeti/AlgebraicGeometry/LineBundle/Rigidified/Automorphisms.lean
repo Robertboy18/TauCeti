@@ -18,7 +18,9 @@ a unit `u` respects the rigidification exactly when the pullback `s^♯ u` of `u
 automorphism group of the rigidified line bundle is the kernel of `Γ(Y, 𝒪_Y)ˣ → Γ(T, 𝒪_T)ˣ`,
 and the rigidified line bundle has no automorphisms other than the identity exactly when this map
 is injective, for instance when `s` is a section of a morphism `f : Y ⟶ T` with `f_* 𝒪_Y = 𝒪_T`.
-This *rigidity* is what lets rigidified line bundles descend along coverings.
+This *rigidity* removes the automorphisms from the moduli problem: an isomorphism of rigidified line
+bundles is then unique when it exists, so the isomorphism classes of rigidified line bundles form a
+set-valued functor with no automorphism ambiguity, the rigidified Picard functor.
 
 The trivializations of a fixed line bundle `L` along `s` are permuted by the global units
 `Γ(T, 𝒪_T)ˣ`, acting through the automorphisms of `𝒪_T`. This action descends to isomorphism
@@ -101,6 +103,7 @@ def autSubgroup : Subgroup (Aut P.lineBundle.obj) where
 
 /-- An automorphism of the line bundle respects the rigidification when its pullback along `s`
 carries the trivialization to itself. -/
+@[simp]
 lemma mem_autSubgroup_iff (e : Aut P.lineBundle.obj) :
     e ∈ P.autSubgroup ↔
       (Scheme.Modules.pullback s).map e.hom ≫ P.rigidification.hom = P.rigidification.hom :=

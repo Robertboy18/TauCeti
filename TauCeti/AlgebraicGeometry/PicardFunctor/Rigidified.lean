@@ -22,9 +22,11 @@ The rigidification is how the section `x₀` enters the construction of the Pica
 `f_* 𝒪_X = 𝒪_S` holds universally, a rigidified line bundle has no automorphisms other than the
 identity, and the rigidified functor is the relative Picard functor `T ↦ Pic(X_T) / Pic(T)`.
 The first statement is the rigidity theorem
-`TauCeti.AlgebraicGeometry.RigidifiedLineBundle.autSubgroup_eq_bot_iff`, which identifies the
-automorphisms of a rigidified line bundle with the kernel of the pullback of global units along
-the section; the second is not proved in this file, which constructs the functor.
+`TauCeti.AlgebraicGeometry.RigidifiedLineBundle.autSubgroup_eq_bot_iff` of the separate module
+`TauCeti.AlgebraicGeometry.LineBundle.Rigidified.Automorphisms`, which this file does not import;
+it identifies the automorphisms of a rigidified line bundle with the kernel of the pullback of
+global units along the section. The second statement is not proved in this file, which
+constructs the functor.
 
 ## Main declarations
 
