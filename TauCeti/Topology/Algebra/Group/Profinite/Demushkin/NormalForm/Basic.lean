@@ -223,6 +223,47 @@ theorem demushkinWordTwoEven_two (a f : ℕ) (x : ℕ → H) (hx : x 2 = 1) :
     demushkinWordTwoEven a f 2 x = demushkinWordTwoRankTwo a x := by
   simp [demushkinWordTwoEven_def, demushkinWordTwoRankTwo_def, hx]
 
+/-- The `q ≠ 2` word on a tuple whose entries other than `x₂ = x 1` lie in a normal subgroup `N`
+lies in `N`: each commutator factor has left entry in `N`. -/
+theorem demushkinWordNeTwo_mem {N : Subgroup H} [N.Normal] (q n : ℕ) {x : ℕ → H}
+    (hx : ∀ i, i ≠ 1 → x i ∈ N) : demushkinWordNeTwo q n x ∈ N :=
+  mul_mem (pow_mem (hx 0 zero_ne_one) q) <| Subgroup.list_prod_mem _ <| by
+    simpa only [List.forall_mem_map, List.mem_range] using
+      fun i _ ↦ labuteComm_mem_of_mem_left (hx _ (by omega)) _
+
+/-- The `q = 2`, `n` odd word on a tuple with `x₁² ∈ N` and all entries other than `x₁ = x 0`
+and `x₃ = x 2` in a normal subgroup `N` lies in `N`: each commutator factor has left entry in
+`N`. -/
+theorem demushkinWordTwoOdd_mem {N : Subgroup H} [N.Normal] (f n : ℕ) {x : ℕ → H}
+    (hx₀ : x 0 ^ 2 ∈ N) (hx : ∀ i, i ≠ 0 → i ≠ 2 → x i ∈ N) : demushkinWordTwoOdd f n x ∈ N :=
+  mul_mem (mul_mem hx₀ (pow_mem (hx 1 one_ne_zero (by decide)) _)) <|
+    Subgroup.list_prod_mem _ <| by
+      simpa only [List.forall_mem_map, List.mem_range] using
+        fun i _ ↦ labuteComm_mem_of_mem_left (hx _ (by omega) (by omega)) _
+
+/-- The `q = 2`, `n` even word on a tuple whose entries other than `x₂ = x 1` and `x₄ = x 3` lie
+in a normal subgroup `N` lies in `N`: each commutator factor has left entry in `N`. -/
+theorem demushkinWordTwoEven_mem {N : Subgroup H} [N.Normal] (a f n : ℕ) {x : ℕ → H}
+    (hx : ∀ i, i ≠ 1 → i ≠ 3 → x i ∈ N) : demushkinWordTwoEven a f n x ∈ N := by
+  have h0 : x 0 ∈ N := hx 0 zero_ne_one (by decide)
+  refine mul_mem (mul_mem (mul_mem (pow_mem h0 _) (labuteComm_mem_of_mem_left h0 _))
+    (pow_mem (hx 2 (by decide) (by decide)) _)) (Subgroup.list_prod_mem _ ?_)
+  simpa only [List.forall_mem_map, List.mem_range] using
+    fun i _ ↦ labuteComm_mem_of_mem_left (hx _ (by omega) (by omega)) _
+
+/-- For `n ≤ 3` the `q = 2`, `n` even word is `x₁^{2+a} (x₁, x₂) x₃^{2^f}`, which lies in a
+normal subgroup `N` as soon as `x₁, x₃ ∈ N`. -/
+theorem demushkinWordTwoEven_mem_of_le_three {N : Subgroup H} [N.Normal] (a f : ℕ) {n : ℕ}
+    (hn : n ≤ 3) {x : ℕ → H} (h0 : x 0 ∈ N) (h2 : x 2 ∈ N) : demushkinWordTwoEven a f n x ∈ N := by
+  have hm : n / 2 - 1 = 0 := by omega
+  rw [demushkinWordTwoEven_def, hm, List.range_zero, List.map_nil, List.prod_nil, mul_one]
+  exact mul_mem (mul_mem (pow_mem h0 _) (labuteComm_mem_of_mem_left h0 _)) (pow_mem h2 _)
+
+/-- The rank-two `q = 2` word on a tuple with `x₁ ∈ N` lies in the normal subgroup `N`. -/
+theorem demushkinWordTwoRankTwo_mem {N : Subgroup H} [N.Normal] (a : ℕ) {x : ℕ → H}
+    (h0 : x 0 ∈ N) : demushkinWordTwoRankTwo a x ∈ N :=
+  mul_mem (pow_mem h0 _) (labuteComm_mem_of_mem_left h0 _)
+
 variable {K F : Type*} [Group K] [FunLike F H K] [MonoidHomClass F H K] (φ : F)
 
 /-- A homomorphism reads the `q ≠ 2` word on the image tuple. -/

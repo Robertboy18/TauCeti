@@ -25,9 +25,9 @@ A homomorphism from a topological group with open kernel is also continuous, for
 on the target. It also records the pointwise characterization of finite-order continuous
 homomorphisms and the open kernel of a finite-order continuous character into complex units.
 Kernels of continuous homomorphisms into a `T1` monoid are closed, so on a compact group the
-common kernel of a family of them into a discrete monoid is approximated from outside by the
-common kernels of its finite subfamilies, and the range of a continuous homomorphism out of a
-compact group into a Hausdorff group is a closed subgroup.
+common kernel of a family of them is approximated from outside by the common kernels of its
+finite subfamilies, and the range of a continuous homomorphism out of a compact group into a
+Hausdorff group is a closed subgroup.
 -/
 
 public section
@@ -90,11 +90,11 @@ theorem _root_.ContinuousMonoidHom.isClosed_ker {H : Type*} [Monoid H] [Topologi
   exact isClosed_singleton.preimage φ.continuous
 
 /-- **A finite subfamily of kernels suffices.** In a compact group, an open set containing the
-common kernel of a family of continuous homomorphisms into a discrete monoid already contains the
+common kernel of a family of continuous homomorphisms into a `T1` monoid already contains the
 common kernel of a finite subfamily: each kernel is closed, so this is the finite intersection
 property. -/
 theorem exists_finset_iInter_ker_subset [CompactSpace G] {H : Type*}
-    [Monoid H] [TopologicalSpace H] [DiscreteTopology H] {ι : Type*} (φ : ι → G →ₜ* H)
+    [Monoid H] [TopologicalSpace H] [T1Space H] {ι : Type*} (φ : ι → G →ₜ* H)
     {U : Set G} (hU : IsOpen U) (h : ⋂ j, ((φ j).ker : Set G) ⊆ U) :
     ∃ F : Finset ι, ⋂ j ∈ F, ((φ j).ker : Set G) ⊆ U := by
   obtain ⟨F, hF⟩ := hU.isClosed_compl.isCompact.elim_finite_subfamily_closed
