@@ -226,9 +226,8 @@ theorem ofMul_mk_demushkinWordTwoEven (a f : ℕ) {n : ℕ} (hn : 3 < n) {x : �
   rw [h]
   simp only [QuotientGroup.mk_mul, ofMul_mul]
   rw [hG.ofMul_mk_pow_mul_labuteComm h0 (x 1), hG.ofMul_mk_pow_mul_labuteComm h2 (x 3),
-    TopologicalAbelianization.ofMul_mk_eq_zero_of_mem_commutator _ ht, add_zero, Nat.cast_pow,
-    Nat.cast_ofNat, Nat.cast_add, Nat.cast_ofNat, add_sub_right_comm, ← one_add_one_eq_two,
-    add_sub_cancel_right]
+    TopologicalAbelianization.ofMul_mk_eq_zero_of_mem_commutator _ ht, add_zero]
+  congr 2 <;> norm_num [add_sub_right_comm]
 
 /-- **The relator class of the `q = 2`, `n` even normal form**, for `n ≤ 3`, where the word is
 `x₁^{2+a} (x₁, x₂) x₃^{2^f}`. For `x₁, x₃ ∈ N` the class in `N^{ab}` is
@@ -252,8 +251,8 @@ theorem ofMul_mk_demushkinWordTwoEven_of_le_three (a f : ℕ) {n : ℕ} (hn : n 
     simp [demushkinWordTwoEven_def, hm, mul_assoc]
   rw [h, QuotientGroup.mk_mul, QuotientGroup.mk_pow, ofMul_mul, ofMul_pow,
     hG.ofMul_mk_pow_mul_labuteComm h0 (x 1),
-    ← Nat.cast_smul_eq_nsmul (completedGroupAlgebra ℤ_[p] (G ⧸ N)), Nat.cast_pow, Nat.cast_ofNat,
-    Nat.cast_add, Nat.cast_ofNat, add_sub_right_comm, ← one_add_one_eq_two, add_sub_cancel_right]
+    ← Nat.cast_smul_eq_nsmul (completedGroupAlgebra ℤ_[p] (G ⧸ N))]
+  congr 2 <;> norm_num [add_sub_right_comm]
 
 /-! ### The relator classes in the abelianized kernel of a character -/
 
