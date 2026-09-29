@@ -183,6 +183,7 @@ variable [Fact p.Prime]
 /-- **The exponent vector of a basis modification.** For `u = exponentSum g`, the exponent vector
 of `θ_w g` is `Σ_i u_i • (e_i + exponentSum w_i)`: the generator `x_i` contributes `e_i` and its
 correction `w_i` contributes `exponentSum w_i`, each `u_i` times. -/
+@[simp]
 theorem toAdd_exponentSum_basisModification [Fintype X] [DecidableEq X]
     (w : X → pLowerCentralSeries p (freeProP p X) m) (g : freeProP p X) :
     (exponentSum p X (basisModification w g)).toAdd =
@@ -199,6 +200,7 @@ theorem toAdd_exponentSum_basisModification [Fintype X] [DecidableEq X]
 /-- **A basis modification lying in the closed commutator subgroup at every generator carrying
 a nonzero exponent preserves the exponent vector**: if `w_i ∈ closure [F, F]` for every `i` with
 `(exponentSum g)_i ≠ 0`, then `exponentSum (θ_w g) = exponentSum g`. -/
+@[simp]
 theorem exponentSum_basisModification [Finite X] (w : X → pLowerCentralSeries p (freeProP p X) m)
     {g : freeProP p X} (hw : ∀ i, (exponentSum p X g).toAdd i ≠ 0 →
       (w i : freeProP p X) ∈ (commutator (freeProP p X)).topologicalClosure) :

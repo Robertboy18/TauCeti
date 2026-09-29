@@ -45,8 +45,9 @@ Two successive-approximation theorems follow, according to the span statement av
   with `v_i ≠ 0`. Such a correction preserves the exponent vector of the relator
   (`TauCeti.freeProP.exponentSum_basisModification`), so the deviation stays in `K` at every
   level and the induction closes. The intended application is to the relators
-  `x₁^q (x₁, x₂) (x₃, x₄) ⋯` with `q ≠ p`, whose `p`-power part lies in `λ_2(F)`; this file does
-  not establish the hypothesis on the corrections for them, and the theorem is conditional on it.
+  `x₁^q (x₁, x₂) (x₃, x₄) ⋯` with `q = 0` or `q = p^f`, `f ≥ 2`, whose `p`-power part `x₁^q` lies
+  in `λ_2(F)`; this file does not establish the hypothesis on the corrections for them, and the
+  theorem is conditional on it.
   For `q = 0` the relator lies in `K`, the exponent vector vanishes and the constraint on `ω` is
   empty, so the hypothesis reduces to `Im δ_ρ` containing every class of an element of
   `λ_{m+1}(F) ∩ K`.
