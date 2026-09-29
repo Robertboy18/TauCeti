@@ -75,8 +75,9 @@ marginal integrals of a dual pair meaningful.
 * `TauCeti.cTransform_add_const` — the transform turns an additive real constant into its
   negative, which is the normalisation freedom of the dual problem, and
   `TauCeti.cTransform_add_add`, `TauCeti.cSuperdifferential_add_add`,
-  `TauCeti.isCConcave_add_add_iff` — adding a split cost `a x + b y` shifts the transform and
-  the potentials by the split terms without changing the `c`-superdifferential;
+  `TauCeti.isCConcave_add_add_iff`, `TauCeti.isCConcaveSymm_add_add_iff` — adding a split cost
+  `a x + b y` shifts the transform and the potentials by the split terms without changing the
+  `c`-superdifferential;
 * `TauCeti.cTransform_coe` and `TauCeti.cTransformSymm_coe` — the extended-real transforms of
   coerced real potentials agree with the corresponding real infima whenever those infima are
   bounded below;
@@ -648,6 +649,17 @@ theorem isCConcave_add_add_iff (c : X × Y → ℝ) (a : X → ℝ) (b : Y → �
     rw [cTransformSymm_add_add]
     simp only [EReal.add_sub_cancel_right]
     rw [← hx, add_comm, EReal.sub_add_cancel]
+
+/-- A potential on the target is `c`-concave for the cost shifted by a split cost `a x + b y`
+exactly when the potential with the target term absorbed is `c`-concave for the original cost. -/
+theorem isCConcaveSymm_add_add_iff (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (ψ : Y → EReal) :
+    IsCConcaveSymm (fun p => c p + a p.1 + b p.2) ψ ↔
+      IsCConcaveSymm c (fun y => ψ y - (b y : EReal)) := by
+  have hcost : (fun p : Y × X => c (p.2, p.1) + b p.1 + a p.2) =
+      fun p : Y × X => c (p.2, p.1) + a p.2 + b p.1 := funext fun p => add_right_comm _ _ _
+  have h := isCConcave_add_add_iff (fun p : Y × X => c (p.2, p.1)) b a ψ
+  rw [hcost] at h
+  simpa only [IsCConcaveSymm, IsCConcave, cTransformSymm_eq_cTransform] using h
 
 /-- Adding a split cost `a x + b y` to the cost does not change the `c`-superdifferential, once
 the source term is absorbed into the potential. -/

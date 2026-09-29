@@ -87,10 +87,8 @@ theorem _root_.EReal.coe_add_iInf {ι : Sort*} (a : ℝ) (f : ι → EReal) :
 /-- Negating a difference with a real subtrahend exchanges the operands, for every extended-real
 minuend. -/
 theorem _root_.EReal.neg_sub_coe (b : EReal) (r : ℝ) : -(b - (r : EReal)) = (r : EReal) - b := by
-  induction b with
-  | bot => simp
-  | coe b => norm_cast; ring
-  | top => simp
+  rw [EReal.neg_sub (.inr (EReal.coe_ne_bot r)) (.inr (EReal.coe_ne_top r)), add_comm,
+    sub_eq_add_neg]
 
 /-- Negating a difference with a real minuend exchanges the operands, for every extended-real
 subtrahend. -/
@@ -123,10 +121,8 @@ theorem _root_.EReal.add_eq_coe_iff_neg_add_neg_eq {x y : EReal} {r : ℝ} :
   induction x <;> induction y <;> simp [← EReal.coe_add, ← EReal.coe_neg, ← neg_add, -neg_add_rev]
 
 /-- Negation turns a supremum in `EReal` into the infimum of the negated values. -/
-theorem _root_.EReal.neg_iSup {ι : Sort*} (f : ι → EReal) : -(⨆ i, f i) = ⨅ i, -f i := by
-  refine le_antisymm (le_iInf fun i => EReal.neg_le_neg_iff.2 (le_iSup f i)) ?_
-  rw [EReal.le_neg]
-  exact iSup_le fun i => EReal.le_neg.1 (iInf_le (fun i => -f i) i)
+theorem _root_.EReal.neg_iSup {ι : Sort*} (f : ι → EReal) : -(⨆ i, f i) = ⨅ i, -f i :=
+  EReal.negOrderIso.map_iSup f
 
 /-- Negation turns an infimum in `EReal` into the supremum of the negated values. -/
 theorem _root_.EReal.neg_iInf {ι : Sort*} (f : ι → EReal) : -(⨅ i, f i) = ⨆ i, -f i := by
