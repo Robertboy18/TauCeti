@@ -35,6 +35,9 @@ they make the intermediate field a nonarchimedean local field.
   valuation.
 * `TauCeti.finiteIntermediateField_isNonarchimedeanLocalField`: the intermediate field is a
   nonarchimedean local field.
+* `IntermediateField.valuativeExtension`: if the ambient field carries a valuative relation
+  extending that of `K`, it is a valuative extension of every finite intermediate field whose
+  valuative relation extends that of `K`.
 
 ## References
 
@@ -94,5 +97,22 @@ theorem finiteIntermediateField_isNonarchimedeanLocalField
     @IsNonarchimedeanLocalField M _ (finiteIntermediateFieldValuativeRel K Ω M)
       (finiteIntermediateFieldTopology K Ω M) :=
   finiteExtension_isNonarchimedeanLocalField K M
+
+variable {K Ω} in
+/-- **The ambient field is a valuative extension of a compatible intermediate field.** If `Ω`
+carries a valuative relation extending that of `K`, and a finite intermediate field `E` of `Ω / K`
+carries one as well, then `Ω` is a valuative extension of `E`: both relations restrict to the
+valuation class of `K`, and the extension of that class to `E` is unique. -/
+theorem _root_.IntermediateField.valuativeExtension [ValuativeRel Ω] [ValuativeExtension K Ω]
+    (E : IntermediateField K Ω) [Module.Finite K E] [ValuativeRel E] [ValuativeExtension K E] :
+    ValuativeExtension E Ω := by
+  have hΩ := ValuativeRel.isEquiv ((ValuativeRel.valuation Ω).comap (algebraMap K Ω))
+    (ValuativeRel.valuation K)
+  rw [IsScalarTower.algebraMap_eq K E Ω, Valuation.comap_comp] at hΩ
+  have h := finiteExtensionValuation_isEquiv hΩ
+    (ValuativeRel.isEquiv ((ValuativeRel.valuation E).comap (algebraMap K E))
+      (ValuativeRel.valuation K))
+  exact ⟨fun a b ↦ (ValuativeRel.valuation Ω).vle_iff_le.trans
+    ((h a b).trans (ValuativeRel.valuation E).vle_iff_le.symm)⟩
 
 end TauCeti
