@@ -14,7 +14,10 @@ public import TauCeti.Topology.Compactness.InverseSystem
 # Levelwise comparison along the lower `p`-series
 
 A `PLowerCentralSeriesComparison p G H S` assigns to each datum in `S k` a continuous
-surjection `G ⧸ λ_k → H ⧸ λ_k`. Its bonding maps commute with the quotient projections.
+surjection `G ⧸ λ_k → H ⧸ λ_k`. Its bonding maps commute with the quotient projections; when the
+data are themselves continuous homomorphisms of the finite levels, the descent
+`ContinuousMonoidHom.pLowerCentralSeriesDesc` of
+`TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCentralSeries` supplies them.
 When every `S k` is finite and nonempty, there is a compatible sequence of data. If `G` is
 compact and `H` is a pro-`p` group, the corresponding quotient maps come from a continuous
 surjection `G → H`.
@@ -24,10 +27,6 @@ has a compatible sequence. Surjectivity of the realization maps is essential.
 
 ## Main results
 
-* `ContinuousMonoidHom.pLowerCentralSeriesDesc`: a continuous homomorphism between the quotients
-  by `λ_{k+1}` descends to a continuous homomorphism between the quotients by `λ_k`, compatibly
-  with the quotient projections; this supplies the bonding maps of a comparison whose data are
-  continuous homomorphisms of the finite levels.
 * `PLowerCentralSeriesComparison.exists_continuous_surjective`: a compatible sequence of
   finite comparison data is realized at every level by a continuous surjection.
 * `PLowerCentralSeriesComparison.exists_continuousMulEquiv`: comparison data in both
@@ -47,74 +46,6 @@ namespace TauCeti
 
 variable (p : ℕ) (G H : Type*) [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [Group H] [TopologicalSpace H] [IsTopologicalGroup H] (S : ℕ → Type*)
-
-section Desc
-
-variable {p G H} [CompactSpace H] {k : ℕ}
-
-/-- **Descent along the lower `p`-series.** A continuous homomorphism between the quotients by
-`λ_{k+1}` of two topological groups, the target compact, carries the image of `λ_k` into the image
-of `λ_k`, hence descends to a continuous homomorphism between the quotients by `λ_k`. Its defining
-equation is `ContinuousMonoidHom.pLowerCentralSeriesDesc_mk`. -/
-noncomputable def _root_.ContinuousMonoidHom.pLowerCentralSeriesDesc
-    (ψ : G ⧸ pLowerCentralSeries p G (k + 1) →ₜ* H ⧸ pLowerCentralSeries p H (k + 1)) :
-    G ⧸ pLowerCentralSeries p G k →ₜ* H ⧸ pLowerCentralSeries p H k where
-  toMonoidHom := QuotientGroup.lift _ ((QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k)).comp
-    (ψ.toMonoidHom.comp (QuotientGroup.mk' _))) (by
-      intro g hg
-      -- The class of `g ∈ λ_k(G)` lies in `λ_k(G ⧸ λ_{k+1})`, which `ψ` carries into
-      -- `λ_k(H ⧸ λ_{k+1})`, the image of `λ_k(H)`.
-      have hH : IsClosed ((pLowerCentralSeries p H (k + 1) : Subgroup H) : Set H) :=
-        isClosed_pLowerCentralSeries _
-      have h1 : ψ (g : G ⧸ pLowerCentralSeries p G (k + 1)) ∈
-          pLowerCentralSeries p (H ⧸ pLowerCentralSeries p H (k + 1)) k :=
-        ψ.toMonoidHom.map_pLowerCentralSeries_le ψ.continuous k
-          ⟨_, (QuotientGroup.mk' _).map_pLowerCentralSeries_le QuotientGroup.continuous_mk k
-            ⟨g, hg, rfl⟩, rfl⟩
-      rw [← (QuotientGroup.mk' (pLowerCentralSeries p H (k + 1)))
-        |>.map_pLowerCentralSeries_eq_of_surjective QuotientGroup.continuous_mk
-          QuotientGroup.continuous_mk.isClosedMap (QuotientGroup.mk'_surjective _)] at h1
-      obtain ⟨h, hh, hh'⟩ := h1
-      rw [MonoidHom.mem_ker]
-      change QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k)
-        (ψ (g : G ⧸ pLowerCentralSeries p G (k + 1))) = 1
-      rw [← hh', QuotientGroup.mk'_apply, QuotientGroup.mapOfLE_mk, QuotientGroup.eq_one_iff]
-      exact hh)
-  continuous_toFun := by
-    -- Composed with the quotient map of `G` modulo `λ_k`, the lift is `mapOfLE ∘ ψ ∘ mk`.
-    refine (QuotientGroup.isQuotientMap_mk _).continuous_iff.mpr ?_
-    exact (QuotientGroup.continuous_mapOfLE _).comp (ψ.continuous.comp QuotientGroup.continuous_mk)
-
-/-- The descended homomorphism on the class of `g` is the class of `ψ ⟦g⟧`. -/
-@[simp]
-theorem _root_.ContinuousMonoidHom.pLowerCentralSeriesDesc_mk
-    (ψ : G ⧸ pLowerCentralSeries p G (k + 1) →ₜ* H ⧸ pLowerCentralSeries p H (k + 1)) (g : G) :
-    ψ.pLowerCentralSeriesDesc (g : G ⧸ pLowerCentralSeries p G k) =
-      QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k)
-        (ψ (g : G ⧸ pLowerCentralSeries p G (k + 1))) := by
-  rw [ContinuousMonoidHom.pLowerCentralSeriesDesc]
-  rfl
-
-/-- The descended homomorphism commutes with the quotient projections. -/
-@[simp]
-theorem _root_.ContinuousMonoidHom.pLowerCentralSeriesDesc_mapOfLE
-    (ψ : G ⧸ pLowerCentralSeries p G (k + 1) →ₜ* H ⧸ pLowerCentralSeries p H (k + 1))
-    (x : G ⧸ pLowerCentralSeries p G (k + 1)) :
-    ψ.pLowerCentralSeriesDesc (QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k) x) =
-      QuotientGroup.mapOfLE (pLowerCentralSeries_succ_le k) (ψ x) := by
-  induction x using QuotientGroup.induction_on with
-  | H g => rw [QuotientGroup.mapOfLE_mk, ContinuousMonoidHom.pLowerCentralSeriesDesc_mk]
-
-/-- The descent of a surjective homomorphism is surjective. -/
-theorem _root_.ContinuousMonoidHom.pLowerCentralSeriesDesc_surjective
-    (ψ : G ⧸ pLowerCentralSeries p G (k + 1) →ₜ* H ⧸ pLowerCentralSeries p H (k + 1))
-    (h : Function.Surjective ψ) : Function.Surjective ψ.pLowerCentralSeriesDesc := by
-  intro y
-  obtain ⟨y', rfl⟩ := QuotientGroup.mapOfLE_surjective (pLowerCentralSeries_succ_le k) y
-  obtain ⟨x, rfl⟩ := h y'
-  exact ⟨_, ψ.pLowerCentralSeriesDesc_mapOfLE x⟩
-
-end Desc
 
 /-- Surjective maps between lower `p`-series quotients, indexed by a tower of comparison data.
 Applications put their finite-level constraints in `S`; finiteness and nonemptiness are required
