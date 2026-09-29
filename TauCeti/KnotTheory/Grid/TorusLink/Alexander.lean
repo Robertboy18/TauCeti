@@ -150,6 +150,7 @@ theorem two_mul_sum_min_torusLink_X :
 
 /-- The southwest counts of the `O`-markings of a torus link grid, which lie on the diagonal, are
 `min c r`. -/
+@[simp]
 theorem southwestCount_O_torusLink (c r : Fin (p + 1 + (q + 1))) :
     (torusLink p q).O.southwestCount c r = min (c : ℕ) r :=
   GridState.southwestCount_of_apply_eq _ c r (torusLink_O_apply p q)

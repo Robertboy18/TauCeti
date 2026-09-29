@@ -78,6 +78,7 @@ variable (R : Type*) [CommSemiring R]
 /-! ### Evaluating the grid variables at one -/
 
 /-- Setting every grid variable to `1` sends the weight of a rectangle to `1`. -/
+@[simp]
 theorem eval_one_OMonomial (r : GridRectangle n) :
     eval (fun _ : Fin n => (1 : R)) (G.OMonomial R r) = 1 := by
   rw [OMonomial_eq_monomial, eval_monomial]
@@ -85,11 +86,12 @@ theorem eval_one_OMonomial (r : GridRectangle n) :
 
 /-- Setting every grid variable to `1` sends a matrix coefficient of `∂⁻` to the number of
 rectangles it counts. -/
+@[simp]
 theorem eval_one_unblockedCoefficient (x y : GridState n) :
     eval (fun _ : Fin n => (1 : R)) (G.unblockedCoefficient R x y) =
       ((G.unblockedRectangles x y).card : R) := by
   rw [unblockedCoefficient_def, map_sum]
-  simp [eval_one_OMonomial]
+  simp
 
 /-- Setting every grid variable to `1` in the `z`-coefficient of `∂⁻ c` gives the sum, over the
 support of `c`, of the evaluated coefficients weighted by the numbers of counted rectangles. -/

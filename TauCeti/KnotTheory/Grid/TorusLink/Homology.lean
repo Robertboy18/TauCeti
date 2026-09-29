@@ -32,9 +32,9 @@ instances are the `5 × 5` trefoil grid, with maximal non-torsion degree `1`
 (`supNonTorsionDegree_torusLink_one_two`), and the `7 × 7` grid of the `(3, 4)` torus knot, with
 maximal non-torsion degree `3` (`supNonTorsionDegree_torusLink_two_three`).
 
-The results here are statements about the grid diagram; that they are invariants of the knot it
-presents is the stabilization and commutation invariance of `GH⁻`, which is established
-separately.
+The results here are statements about the grid diagram. Reading them as invariants of the knot it
+presents requires the stabilization and commutation invariance of `GH⁻`, which is not established
+here.
 
 ## Main results
 
