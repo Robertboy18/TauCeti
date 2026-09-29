@@ -39,7 +39,7 @@ is needed.
 * `TauCeti.freeProP.exists_apply_mem_gradedBracketSpan_basisModificationDelta_eq`: every element
   of `Im δ_ρ` is `δ_ρ(ω)` with `ω_{x₀} ∈ C_m(F)`.
 * `TauCeti.freeProP.exists_apply_mem_commutator_basisModificationDelta_eq_of_mem_range`: every
-  element of `Im δ_ρ` is `δ_ρ(ω̄)` for a family `ω : X → λ_m(F)` with `ω_{x₀}` in the commutator
+  element of `Im δ_ρ` is `δ_ρ(⟦ω⟧)` for a family `ω : X → λ_m(F)` with `ω_{x₀}` in the commutator
   subgroup of `F`.
 
 ## References
@@ -163,10 +163,10 @@ theorem exists_apply_mem_gradedBracketSpan_basisModificationDelta_eq {k : ℕ}
 
 /-- **The pivot-constrained span statement.** Let `ρ ∈ gr_1(F)` have no `p`-power part and partial
 derivatives spanning `gr_0(F)`, and let `m ≥ 1`. Every element of the image of
-`δ_ρ : gr_m(F)^X → gr_{m+1}(F)` is `δ_ρ(ω̄)` for a family `ω : X → λ_m(F)` whose component at the
+`δ_ρ : gr_m(F)^X → gr_{m+1}(F)` is `δ_ρ(⟦ω⟧)` for a family `ω : X → λ_m(F)` whose component at the
 prescribed generator `x₀` lies in the commutator subgroup of `F`. For a relator whose exponent
 vector is supported at `x₀`, the basis modification `x_i ↦ x_i ω_i` therefore preserves the exponent
-vector while moving the relator by the class `δ_ρ(ω̄)`. -/
+vector while moving the relator by the class `δ_ρ(⟦ω⟧)`. -/
 theorem exists_apply_mem_commutator_basisModificationDelta_eq_of_mem_range (hm : 1 ≤ m)
     {ρ : gradedPiece p (freeProP p X) 1}
     (hρ : span (ZMod p) (Set.range fun i ↦ degreeOneDeriv p X i ρ) = ⊤)
