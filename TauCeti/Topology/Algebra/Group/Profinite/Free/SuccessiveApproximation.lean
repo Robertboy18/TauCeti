@@ -26,7 +26,7 @@ The limit is taken through the levelwise comparison schema
 `TauCeti.PLowerCentralSeriesComparison`: the level-`k` comparison data are the surjective
 endomorphisms of the finite group `F ⧸ λ_k` carrying the class of `r` to the class of `w`, the
 finite approximations show that each level is nonempty, and descent along the series
-(`MonoidHom.pLowerCentralSeriesDesc`) bonds the levels. The schema produces a continuous
+(`ContinuousMonoidHom.pLowerCentralSeriesDesc`) bonds the levels. The schema produces a continuous
 automorphism `e` of `F` with `e r = w`, which is
 `TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_top`.
 
@@ -123,7 +123,7 @@ theorem exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_to
     fun k ↦ QuotientGroup.discreteTopology (hfg.isOpen_pLowerCentralSeries hp k)
   -- The level-`k` comparison data: surjective endomorphisms of `F ⧸ λ_k` carrying `r` to `w`.
   let S (k : ℕ) : Type u :=
-    {ψ : freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) k →*
+    {ψ : freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) k →ₜ*
         freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) k //
       Function.Surjective ψ ∧ ψ (r : freeProP p X) = (w : freeProP p X)}
   have : ∀ k, Finite (S k) := fun k ↦ by
@@ -141,17 +141,17 @@ theorem exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_to
     have hle : pLowerCentralSeries p (freeProP p X) k ≤
         (pLowerCentralSeries p (freeProP p X) k).comap φ.toMonoidHom :=
       Subgroup.map_le_iff_le_comap.mp (φ.toMonoidHom.map_pLowerCentralSeries_le φ.continuous k)
-    refine ⟨⟨QuotientGroup.map _ _ φ.toMonoidHom hle, QuotientGroup.map_surjective_of_surjective
-      _ _ _ (QuotientGroup.mk_surjective.comp hsurj) hle, ?_⟩⟩
-    rw [QuotientGroup.map_mk]
+    refine ⟨⟨⟨QuotientGroup.map _ _ φ.toMonoidHom hle, continuous_of_discreteTopology⟩,
+      QuotientGroup.map_surjective_of_surjective _ _ _ (QuotientGroup.mk_surjective.comp hsurj) hle,
+      ?_⟩⟩
+    rw [ContinuousMonoidHom.coe_mk, QuotientGroup.map_mk]
     exact QuotientGroup.eq.mpr (pLowerCentralSeries_antitone (by omega : k ≤ k + 2) hr)
   let C : PLowerCentralSeriesComparison p (freeProP p X) (freeProP p X) S :=
-    { map := fun _ s ↦ ⟨s.1, continuous_of_discreteTopology⟩
+    { map := fun _ s ↦ s.1
       map_surjective := fun _ s ↦ s.2.1
-      bond := fun _ s ↦ ⟨s.1.pLowerCentralSeriesDesc continuous_of_discreteTopology,
-        s.1.pLowerCentralSeriesDesc_surjective _ s.2.1, by
-          rw [MonoidHom.pLowerCentralSeriesDesc_mk, s.2.2, QuotientGroup.mapOfLE_mk]⟩
-      commutes := fun _ s x ↦ (s.1.pLowerCentralSeriesDesc_mapOfLE _ x).symm }
+      bond := fun _ s ↦ ⟨s.1.pLowerCentralSeriesDesc, s.1.pLowerCentralSeriesDesc_surjective s.2.1,
+        by rw [ContinuousMonoidHom.pLowerCentralSeriesDesc_mk, s.2.2, QuotientGroup.mapOfLE_mk]⟩
+      commutes := fun _ s x ↦ (s.1.pLowerCentralSeriesDesc_mapOfLE x).symm }
   obtain ⟨_, e, -, -, he, -⟩ := C.exists_continuousMulEquiv_preserving hP hfg hp
     (fun _ : Unit ↦ (r : freeProP p X)) (fun _ ↦ (w : freeProP p X))
     (1 : freeProP p X →ₜ* freeProP p X) 1 (fun _ s _ ↦ s.2.2)

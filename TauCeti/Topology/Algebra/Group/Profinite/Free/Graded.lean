@@ -10,6 +10,7 @@ public import Mathlib.LinearAlgebra.Dimension.StrongRankCondition
 public import TauCeti.GroupTheory.SpecificGroups.Heisenberg
 public import TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded.Span
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
+import TauCeti.Topology.Algebra.Group.Profinite.Free.Rank
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCentralSeries
 import Mathlib.FieldTheory.Finiteness
 
@@ -278,21 +279,22 @@ theorem span_gradedMkZero_image_range_of_eq_top :
 
 omit [LinearOrder X] in
 /-- **The basis of `gr_0` of a free pro-`p` group of finite rank** formed by the classes
-`x'_i = ⟦x_i⟧` of the generators: they are linearly independent, being the iterated `p`-powers of
-degree zero, and they span `gr_0(F) = F ⧸ Φ(F)`. -/
+`x'_i = ⟦x_i⟧` of the generators: the basis `TauCeti.freeProP.frattiniQuotientBasis` of the
+Frattini quotient `F ⧸ Φ(F)`, transported along `gr_0(F) ≅ F ⧸ λ_1(F) = F ⧸ Φ(F)`. -/
 noncomputable def degreeZeroBasis : Module.Basis X (ZMod p) (gradedPiece p (freeProP p X) 0) :=
-  Module.Basis.mk
-    (by simpa only [gradedPowIter_zero] using linearIndependent_gradedPowIter_gradedMkZero_of p X 0)
-    (by
-      have h : Set.range (fun i ↦ gradedMkZero p (freeProP p X) (of i)) =
-          gradedMkZero p (freeProP p X) '' Set.range of := Set.range_comp _ _
-      rw [h, span_gradedMkZero_image_range_of_eq_top])
+  (frattiniQuotientBasis p X).map <| AddEquiv.toLinearEquiv (R := ZMod p)
+    ((gradedPieceZeroEquiv p (freeProP p X)).trans (MulEquiv.toAdditive
+      (QuotientGroup.quotientMulEquivOfEq (pLowerCentralSeries_one_eq_proPFrattini Fact.out)))).symm
+    (ZMod.map_smul _)
 
 omit [LinearOrder X] in
 @[simp]
 theorem degreeZeroBasis_apply (i : X) :
-    degreeZeroBasis p X i = gradedMkZero p (freeProP p X) (of i) :=
-  Module.Basis.mk_apply _ _ i
+    degreeZeroBasis p X i = gradedMkZero p (freeProP p X) (of i) := by
+  rw [degreeZeroBasis, Module.Basis.map_apply, AddEquiv.coe_toLinearEquiv, AddEquiv.symm_apply_eq,
+    AddEquiv.trans_apply, gradedPieceZeroEquiv_gradedMkZero, MulEquiv.toAdditive_apply_apply,
+    toMul_ofMul, QuotientGroup.quotientMulEquivOfEq_mk, frattiniQuotientBasis_apply,
+    QuotientGroup.mk'_apply]
 
 omit [Finite X] in
 /-- **The dimension of `gr_1` of a free pro-`p` group of finite rank** is `#X + (#X choose 2)`:
