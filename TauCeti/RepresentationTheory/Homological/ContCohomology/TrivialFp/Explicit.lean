@@ -10,7 +10,7 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.ExplicitFu
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.H2ZMod
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp
 public import TauCeti.Topology.Algebra.ContinuousZModDual
-import TauCeti.Data.ZMod.TrivialAction
+public import TauCeti.Data.ZMod.TrivialAction
 
 /-!
 # The explicit models of `H¹(G, 𝔽_p)` and `H²(G, 𝔽_p)`
@@ -72,7 +72,7 @@ include htriv
 
 omit [IsTopologicalGroup G] [ContinuousSMul G (ZMod p)] in
 /-- The universe lift `trivialFpEquiv p G` is compatible with the trivial actions on both sides. -/
-private theorem trivialFpEquiv_smul (g : G) (x : (trivialFp p G).V) :
+theorem trivialFpEquiv_smul (g : G) (x : (trivialFp p G).V) :
     trivialFpEquiv p G ((ContinuousMulEquiv.refl G) g • x) = g • trivialFpEquiv p G x := by
   rw [smul_trivialFp_V, htriv]
 
@@ -83,12 +83,34 @@ noncomputable def cohomFpAddEquivH1 : cohomFp p G 1 ≃+ H1 G (ZMod p) :=
       (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology continuous_of_discreteTopology
       (trivialFpEquiv_smul p G htriv))
 
+/-- On the comparison of the carrier of `trivialFp p G`, the identification `cohomFpAddEquivH1` is
+the change of coefficients along the universe lift `trivialFpEquiv p G`. -/
+theorem cohomFpAddEquivH1_explicitH1AddEquivContinuousCohomologyOfDiscrete
+    (x : H1 G (trivialFp p G).V) :
+    cohomFpAddEquivH1 p G htriv
+        ((trivialFp p G).explicitH1AddEquivContinuousCohomologyOfDiscrete x) =
+      explicitMap1Equiv G (trivialFp p G).V G (ZMod p) (ContinuousMulEquiv.refl G)
+        (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology
+        continuous_of_discreteTopology (trivialFpEquiv_smul p G htriv) x := by
+  rw [cohomFpAddEquivH1, AddEquiv.trans_apply, AddEquiv.symm_apply_apply]
+
 /-- **`H²(G, 𝔽_p)` is the explicit `H2 G (ZMod p)`**, for any trivial action of `G` on `ZMod p`. -/
 noncomputable def cohomFpAddEquivH2 [LocallyCompactSpace G] : cohomFp p G 2 ≃+ H2 G (ZMod p) :=
   (trivialFp p G).explicitH2AddEquivContinuousCohomologyOfDiscrete.symm.trans
     (explicitMap2Equiv G (trivialFp p G).V G (ZMod p) (ContinuousMulEquiv.refl G)
       (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology continuous_of_discreteTopology
       (trivialFpEquiv_smul p G htriv))
+
+/-- On the comparison of the carrier of `trivialFp p G`, the identification `cohomFpAddEquivH2` is
+the change of coefficients along the universe lift `trivialFpEquiv p G`. -/
+theorem cohomFpAddEquivH2_explicitH2AddEquivContinuousCohomologyOfDiscrete [LocallyCompactSpace G]
+    (x : H2 G (trivialFp p G).V) :
+    cohomFpAddEquivH2 p G htriv
+        ((trivialFp p G).explicitH2AddEquivContinuousCohomologyOfDiscrete x) =
+      explicitMap2Equiv G (trivialFp p G).V G (ZMod p) (ContinuousMulEquiv.refl G)
+        (trivialFpEquiv p G).toAddEquiv continuous_of_discreteTopology
+        continuous_of_discreteTopology (trivialFpEquiv_smul p G htriv) x := by
+  rw [cohomFpAddEquivH2, AddEquiv.trans_apply, AddEquiv.symm_apply_apply]
 
 /-- **`H²(G, 𝔽_p)` is the explicit `H2 G (ZMod p)` as an `𝔽_p`-vector space**, for any trivial
 action of `G` on `ZMod p`. -/
@@ -117,6 +139,22 @@ noncomputable def cohomFpLinearEquivContinuousZModDual :
   LinearEquiv.ofBijective (e.toAddMonoidHom.toZModLinearMap p) e.bijective
 
 omit [DistribMulAction G (ZMod p)] [ContinuousSMul G (ZMod p)] htriv in
+/-- **The defining equation of `cohomFpLinearEquivContinuousZModDual`**: for the trivial action
+`trivialZModAction p G`, it is the identification `cohomFpAddEquivH1` of `H¹(G, 𝔽_p)` with the
+explicit model followed by the identification `H1EquivOfSmulEqSelf` of the explicit classes with
+the continuous characters. -/
+-- Not a `simp` lemma: the canonical identification is the intended normal form of a character of
+-- `H¹(G, 𝔽_p)`, and the `simp` lemmas `cohomFpLinearEquivContinuousZModDual_π_characterCocycle` and
+-- `ContinuousMonoidHom.cohomFpLinearEquivContinuousZModDual_zmodFourReductionClass` own its
+-- left-hand side; as a `simp` lemma this equation would rewrite theirs (simpNF).
+theorem cohomFpLinearEquivContinuousZModDual_apply (x : cohomFp p G 1) :
+    letI := trivialZModAction p G
+    haveI : ContinuousSMul G (ZMod p) := ⟨continuous_snd⟩
+    cohomFpLinearEquivContinuousZModDual p G x =
+      H1EquivOfSmulEqSelf (fun _ _ ↦ rfl) (cohomFpAddEquivH1 p G (fun _ _ ↦ rfl) x) :=
+  (rfl)
+
+omit [DistribMulAction G (ZMod p)] [ContinuousSMul G (ZMod p)] htriv in
 /-- The character attached by `cohomFpLinearEquivContinuousZModDual` to the class of a homogeneous
 one-cocycle `z` reads `z` at `(1, g)`. -/
 theorem cohomFpLinearEquivContinuousZModDual_π_apply (z : cocycles (trivialFp p G) 1) (g : G) :
@@ -139,11 +177,9 @@ theorem cohomFpLinearEquivContinuousZModDual_π_apply (z : cocycles (trivialFp p
         g := by
     rw [← hz]
     exact iCycles_ofDiscreteModuleCocyclesRestrictScalarsIntIso_hom_apply (trivialFp p G) w 1 g
-  have hπ : (ofDiscreteModuleRestrictScalarsIntIso (trivialFp p G) 1).hom
+  have hπ : ofDiscreteModuleRestrictScalarsIntEquiv (trivialFp p G) 1
       (π (ofDiscreteModule ℤ G (trivialFp p G).V) 1 w) = π (trivialFp p G) 1 z := by
-    rw [← CategoryTheory.comp_apply, π_comp_ofDiscreteModuleRestrictScalarsIntIso_hom,
-      CategoryTheory.comp_apply, hz]
-    rfl
+    rw [ofDiscreteModuleRestrictScalarsIntEquiv_π, hz]
   have h2 : (trivialFp p G).explicitH1AddEquivContinuousCohomologyOfDiscrete.symm
       (π (trivialFp p G) 1 z) =
       (((cocycleEquiv1 G (trivialFp p G).V).symm w : Z1 G _) : H1 G (trivialFp p G).V) := by
