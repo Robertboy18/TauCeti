@@ -83,6 +83,12 @@ theorem exponentSum_of [DecidableEq X] (x : X) :
     exponentSum p X (of x) = ofAdd (Pi.single x 1) :=
   (lift_of _ _ x).trans (by congr; exact Subsingleton.elim _ _)
 
+/-- The exponent vector of the power `x_i ^ n` of a generator is `n` at `i` and `0` elsewhere. -/
+theorem toAdd_exponentSum_of_pow_apply [DecidableEq X] (i : X) (n : ℕ) (k : X) :
+    (exponentSum p X (of i ^ n)).toAdd k = if k = i then n else 0 := by
+  rw [map_pow, exponentSum_of, toAdd_pow, toAdd_ofAdd, Pi.smul_apply, Pi.single_apply]
+  split_ifs <;> simp
+
 /-- The exponent vector of the `i`-th `ℕ`-indexed generator of `freeProP p (Fin n)` is the
 coordinate vector at `i`; out of range it is `0`. -/
 @[simp]

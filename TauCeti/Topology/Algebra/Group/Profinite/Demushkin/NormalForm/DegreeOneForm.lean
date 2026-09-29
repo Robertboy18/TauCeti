@@ -48,13 +48,13 @@ form for odd `p`; they define a functional `ℓ` on the dual, and if `ℓ ≠ 0`
 chosen through a hyperbolic pair `(θ, e₀)` with `θ` representing `ℓ`, so that `ℓ` vanishes on every
 basis vector but `e₀`, and the `p`-power part becomes exactly `π ξ₁`. When the `p`-power part is
 concentrated on the first generator `x₁`, the same choice with `θ` representing evaluation at `x₁`
-makes `e₀` the first coordinate character, and the automorphism can then be taken to fix `x₁`; for a
-relator with exponent vector `q e₁` this keeps the exponent vector, which is what the successive
-approximation of the relators with `q ≠ p` needs. In the nonalternating case,
-which occurs only at `p = 2`, the form is symmetric and any two nondegenerate symmetric
-nonalternating forms of the same dimension are equivalent, while at `p = 2` the form determines
-the class; it therefore suffices to check that the forms of the two dyadic normal-form words are
-nondegenerate and not alternating, which is a direct computation.
+makes `e₀` take the value `1` at `x₁` while every other basis vector vanishes at `x₁`, and the
+automorphism can then be taken to fix `x₁`; for a relator with exponent vector `q e₁` this keeps the
+exponent vector, which is what the successive approximation of the relators with `q ≠ p` needs. In
+the nonalternating case, which occurs only at `p = 2`, the form is symmetric and any two
+nondegenerate symmetric nonalternating forms of the same dimension are equivalent, while at `p = 2`
+the form determines the class; it therefore suffices to check that the forms of the two dyadic
+normal-form words are nondegenerate and not alternating, which is a direct computation.
 
 ## Main results
 
