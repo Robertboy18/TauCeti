@@ -197,6 +197,7 @@ character `χ : G →* Mˣ` kills the commutator subgroup, so at such an element
 column sum is `1`. For a commutative group the commutator subgroup is trivial and this is the
 `g = 1` case of `CommGroup.sum_monoidHom_apply_eq_ite`; for a non-commutative group it is the
 value at which the column relation breaks. -/
+@[simp]
 theorem sum_monoidHom_apply_of_mem_commutator {g : G} (hg : g ∈ commutator G) :
     ∑ χ : G →* Mˣ, (χ g : M) = Nat.card (G →* Mˣ) := by
   have h (χ : G →* Mˣ) : (χ g : M) = 1 := by
