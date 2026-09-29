@@ -9,6 +9,7 @@ public import TauCeti.Topology.Algebra.Group.CrossedHom
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Cocycle
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Rank
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.CompatibleSystem
+import TauCeti.Topology.Algebra.Group.Profinite.Free.PadicUnits
 
 /-!
 # The prescription property for free pro-`p` groups
@@ -38,6 +39,9 @@ with `F (x * y) = χ x * F y + F x` (`TauCeti.IsCrossedHom`).
   `TauCeti.IsCrossedHom.eq_crossedHom` its uniqueness and
   `TauCeti.freeProP.crossedHom_apply_eq_sum` the linearity of its values in the prescribed values
   on the generators.
+* `TauCeti.IsCrossedHom.pow_dvd_sub_of_forall_of_eq`: two continuous crossed homomorphisms with
+  the same values on the generators, for characters congruent modulo `p ^ k`, are congruent modulo
+  `p ^ k`.
 
 ## References
 
@@ -111,6 +115,34 @@ theorem _root_.TauCeti.IsCrossedHom.eq_crossedHom {F : freeProP p X → ℤ_[p]}
     (by rintro _ ⟨x, rfl⟩; rw [crossedHom_of])
 
 end Finite
+
+/-- **Crossed homomorphisms with the same values on the generators, for characters congruent
+modulo `p ^ k`, are congruent modulo `p ^ k`**: their truncations modulo `p ^ k` are continuous
+crossed homomorphisms for the same character of `F` agreeing on the generators. -/
+theorem _root_.TauCeti.IsCrossedHom.pow_dvd_sub_of_forall_of_eq {χ χ' : freeProP p X →ₜ* ℤ_[p]ˣ}
+    {k : ℕ} (hχ : ∀ x, (p : ℤ_[p]) ^ k ∣ (χ' (of x) : ℤ_[p]) - χ (of x))
+    {f f' : freeProP p X → ℤ_[p]} (hf : IsCrossedHom χ f) (hf' : IsCrossedHom χ' f')
+    (hfc : Continuous f) (hf'c : Continuous f') (hff' : ∀ x, f (of x) = f' (of x))
+    (g : freeProP p X) : (p : ℤ_[p]) ^ k ∣ f' g - f g := by
+  -- The truncated characters agree.
+  have hχeq :
+      (Units.map (PadicInt.toZModPow (p := p) k : ℤ_[p] →* ZMod (p ^ k))).comp χ'.toMonoidHom =
+        (Units.map (PadicInt.toZModPow (p := p) k : ℤ_[p] →* ZMod (p ^ k))).comp χ.toMonoidHom := by
+    refine MonoidHom.ext fun g ↦ Units.ext ?_
+    rw [MonoidHom.comp_apply, MonoidHom.comp_apply, Units.coe_map, Units.coe_map,
+      MonoidHom.coe_ofClass, ← sub_eq_zero, ← map_sub, PadicInt.toZModPow_eq_zero_iff_dvd]
+    exact freeProP.pow_dvd_sub_of_forall_of hχ g
+  have hf₀ : IsCrossedHom χ.toMonoidHom f := isCrossedHom_iff.2 fun x y ↦ hf.map_mul x y
+  have hf'₀ : IsCrossedHom χ'.toMonoidHom f' := isCrossedHom_iff.2 fun x y ↦ hf'.map_mul x y
+  have h1 := hf₀.ringHom_comp (PadicInt.toZModPow k)
+  have h2 := hf'₀.ringHom_comp (PadicInt.toZModPow k)
+  rw [hχeq] at h2
+  have h := h1.eq_of_eqOn_of_topologicalClosure_closure_eq_top h2
+    ((PadicInt.continuous_toZModPow k).comp hfc) ((PadicInt.continuous_toZModPow k).comp hf'c)
+    (topologicalClosure_closure_range_of_eq_top p X)
+    (by rintro _ ⟨x, rfl⟩; simp [hff' x])
+  rw [← PadicInt.toZModPow_eq_zero_iff_dvd, map_sub, sub_eq_zero]
+  exact (congrFun h g).symm
 
 /-- **The value of a crossed homomorphism is linear in its values on the generators**: `crossedHom
 χ c` is the `ℤ_p`-combination, with coefficients `c x`, of the Kronecker crossed homomorphisms

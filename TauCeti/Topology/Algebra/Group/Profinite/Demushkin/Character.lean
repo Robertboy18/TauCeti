@@ -13,6 +13,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Free.PadicUnits
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.Equiv
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.Presentation
 import Mathlib.LinearAlgebra.Matrix.BilinearForm
+import TauCeti.Topology.Algebra.Group.Profinite.ProP.CrossedHom
 
 /-!
 # The canonical character of a Demushkin group

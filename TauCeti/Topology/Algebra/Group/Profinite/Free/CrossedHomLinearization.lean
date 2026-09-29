@@ -35,13 +35,8 @@ Frattini subgroup, as a function of the values of the character on the generator
 degree-one form of that element as its derivative modulo `p`. It is the linearisation that
 Newton's method uses to find the canonical character of a Demushkin group.
 
-## Main results
+## Main result
 
-* `TauCeti.IsCrossedHom.dvd_apply_of_mem_pLowerCentralSeries_one`: a continuous crossed
-  homomorphism of a pro-`p` group `G` vanishes modulo `p` on the Frattini subgroup `λ_1(G)`.
-* `TauCeti.IsCrossedHom.pow_dvd_sub_of_forall_of_eq`: two continuous crossed homomorphisms with
-  the same values on the generators, for characters congruent modulo `p ^ k`, are congruent modulo
-  `p ^ k`.
 * `TauCeti.IsCrossedHom.pow_succ_dvd_sub_sub_sum_degreeOneForm`: the first-order expansion above,
   modulo `p ^ (k + 1)`, on the Frattini subgroup.
 
@@ -64,53 +59,6 @@ universe u
 attribute [local instance 2000] Ring.toAddCommGroup
 
 variable {p : ℕ} [Fact p.Prime] {X : Type u}
-
-/-- **A continuous crossed homomorphism of a pro-`p` group vanishes modulo `p` on the Frattini
-subgroup.** For a continuous character `χ : G → ℤ_pˣ` of a pro-`p` group `G` and a continuous
-crossed homomorphism `f` for `χ`, the reduction of `f` modulo `p` is a continuous character with
-values in `𝔽_p`, because `χ ≡ 1 mod p`, and such a character kills `λ_1(G) = Φ(G)`. -/
-theorem IsCrossedHom.dvd_apply_of_mem_pLowerCentralSeries_one {G : Type*} [Group G]
-    [TopologicalSpace G] [IsTopologicalGroup G] (hG : IsProP p G) {χ : G →ₜ* ℤ_[p]ˣ}
-    {f : G → ℤ_[p]} (hf : IsCrossedHom χ f) (hfc : Continuous f) {g : G}
-    (hg : g ∈ pLowerCentralSeries p G 1) : (p : ℤ_[p]) ∣ f g := by
-  rw [← PadicInt.toZMod_eq_zero_iff_dvd]
-  let _ : DistribMulAction G (ZMod p) := DistribMulAction.compHom (ZMod p) (1 : G →* (ZMod p)ˣ)
-  have htriv : ∀ (g : G) (x : ZMod p), g • x = x := fun _ x ↦ one_smul (ZMod p)ˣ x
-  have hχ1 : ∀ g, PadicInt.toZMod (χ g : ℤ_[p]) = 1 := fun g ↦
-    mem_unitsPrincipal_one_iff_toZMod.1 (hG.mem_unitsPrincipal_one χ g)
-  refine apply_eq_zero_of_mem_Z1_of_mem_pLowerCentralSeries_one htriv
-    (ZModModule.char_nsmul_eq_zero p) (f := fun g ↦ PadicInt.toZMod (f g))
-    (mem_Z1_iff.2 ⟨PadicInt.continuous_toZMod.comp hfc, fun g h ↦ ?_⟩) hg
-  dsimp only
-  rw [htriv, hf.map_mul g h, map_add, _root_.map_mul, hχ1, one_mul]
-
-/-- **Crossed homomorphisms with the same values on the generators, for characters congruent
-modulo `p ^ k`, are congruent modulo `p ^ k`**: their truncations modulo `p ^ k` are continuous
-crossed homomorphisms for the same character of `F` agreeing on the generators. -/
-theorem IsCrossedHom.pow_dvd_sub_of_forall_of_eq {χ χ' : freeProP p X →ₜ* ℤ_[p]ˣ} {k : ℕ}
-    (hχ : ∀ x, (p : ℤ_[p]) ^ k ∣ (χ' (of x) : ℤ_[p]) - χ (of x))
-    {f f' : freeProP p X → ℤ_[p]} (hf : IsCrossedHom χ f) (hf' : IsCrossedHom χ' f')
-    (hfc : Continuous f) (hf'c : Continuous f') (hff' : ∀ x, f (of x) = f' (of x))
-    (g : freeProP p X) : (p : ℤ_[p]) ^ k ∣ f' g - f g := by
-  -- The truncated characters agree.
-  have hχeq :
-      (Units.map (PadicInt.toZModPow (p := p) k : ℤ_[p] →* ZMod (p ^ k))).comp χ'.toMonoidHom =
-        (Units.map (PadicInt.toZModPow (p := p) k : ℤ_[p] →* ZMod (p ^ k))).comp χ.toMonoidHom := by
-    refine MonoidHom.ext fun g ↦ Units.ext ?_
-    rw [MonoidHom.comp_apply, MonoidHom.comp_apply, Units.coe_map, Units.coe_map,
-      MonoidHom.coe_ofClass, ← sub_eq_zero, ← map_sub, PadicInt.toZModPow_eq_zero_iff_dvd]
-    exact freeProP.pow_dvd_sub_of_forall_of hχ g
-  have hf₀ : IsCrossedHom χ.toMonoidHom f := isCrossedHom_iff.2 fun x y ↦ hf.map_mul x y
-  have hf'₀ : IsCrossedHom χ'.toMonoidHom f' := isCrossedHom_iff.2 fun x y ↦ hf'.map_mul x y
-  have h1 := hf₀.ringHom_comp (PadicInt.toZModPow k)
-  have h2 := hf'₀.ringHom_comp (PadicInt.toZModPow k)
-  rw [hχeq] at h2
-  have h := h1.eq_of_eqOn_of_topologicalClosure_closure_eq_top h2
-    ((PadicInt.continuous_toZModPow k).comp hfc) ((PadicInt.continuous_toZModPow k).comp hf'c)
-    (topologicalClosure_closure_range_of_eq_top p X)
-    (by rintro _ ⟨x, rfl⟩; simp [hff' x])
-  rw [← PadicInt.toZModPow_eq_zero_iff_dvd, map_sub, sub_eq_zero]
-  exact (congrFun h g).symm
 
 /-- **The first-order expansion of a crossed homomorphism in the character, on the Frattini
 subgroup.** Let `χ, χ' : F → ℤ_pˣ` be continuous characters of the free pro-`p` group on a finite
