@@ -9,7 +9,6 @@ public import TauCeti.NumberTheory.Padics.CharacterLift
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.ZModFourLift
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.QInvariant
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.RankParity
-public import TauCeti.Topology.Algebra.Group.TopologicalAbelianization.Lift
 
 /-!
 # The cup squares of a Demushkin group at `p = 2` vanish exactly when `q ≠ 2`
@@ -61,51 +60,6 @@ universe u
 
 variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
-/-! ### Transport of lifting problems along the abelianization -/
-
-/-- **Lifting characters from `𝔽₂` to `ℤ/4` is decided on the abelianization.** For a model
-`A ≅ G^{ab}` of the topological abelianization of `G`, every continuous character `G → 𝔽₂` lifts
-to a continuous character `G → ℤ/4` exactly when every continuous character `A → 𝔽₂` does: both
-kinds of characters factor through `G^{ab}`. -/
-theorem forall_exists_zmodFourReduction_eq_iff_of_topologicalAbelianization
-    {A : Type*} [Group A] [TopologicalSpace A] (e : TopologicalAbelianization G ≃ₜ* A) :
-    (∀ χ : continuousZModDual 2 G, ∃ φ : G →ₜ* Multiplicative (ZMod 4),
-        φ.zmodFourReduction = χ) ↔
-      ∀ χ : A →ₜ* Multiplicative (ZMod 2), ∃ φ : A →ₜ* Multiplicative (ZMod 4),
-        ∀ a, ZMod.castHom (by norm_num : (2 : ℕ) ∣ 4) (ZMod 2) (Multiplicative.toAdd (φ a)) =
-          Multiplicative.toAdd (χ a) := by
-  -- The projection `G → G^{ab} ≅ A`, kept opaque so that rewriting does not unfold it.
-  obtain ⟨π, hπ_apply⟩ : ∃ π : G →ₜ* A, ∀ g, π g = e (g : TopologicalAbelianization G) :=
-    ⟨(e : TopologicalAbelianization G →ₜ* A).comp
-      (ContinuousMonoidHom.quotientMk (commutator G).topologicalClosure), fun g ↦ rfl⟩
-  have hsurj : Function.Surjective π := fun a ↦ by
-    obtain ⟨g, hg⟩ := QuotientGroup.mk_surjective (e.symm a)
-    exact ⟨g, by rw [hπ_apply, hg, ContinuousMulEquiv.apply_symm_apply]⟩
-  refine ⟨fun h χ ↦ ?_, fun h χ ↦ ?_⟩
-  · obtain ⟨φ, hφ⟩ := h (Additive.ofMul (χ.comp π))
-    rw [φ.zmodFourReduction_eq_iff] at hφ
-    refine ⟨(TopologicalAbelianization.lift φ).comp (e.symm : A →ₜ* TopologicalAbelianization G),
-      fun a ↦ ?_⟩
-    obtain ⟨g, rfl⟩ := hsurj a
-    rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, hπ_apply,
-      ContinuousMonoidHom.coe_coe, ContinuousMulEquiv.symm_apply_apply,
-      TopologicalAbelianization.lift_mk, hφ g, toMul_ofMul, ContinuousMonoidHom.coe_comp,
-      Function.comp_apply, hπ_apply]
-  · obtain ⟨χ', rfl⟩ : ∃ χ' : G →ₜ* Multiplicative (ZMod 2), Additive.ofMul χ' = χ :=
-      ⟨Additive.toMul χ, rfl⟩
-    obtain ⟨φ, hφ⟩ := h ((TopologicalAbelianization.lift χ').comp
-      (e.symm : A →ₜ* TopologicalAbelianization G))
-    refine ⟨φ.comp π, (φ.comp π).zmodFourReduction_eq_iff _ |>.2 fun g ↦ ?_⟩
-    -- The two sides are compared up to definitional unfolding of `comp` and of the coercions,
-    -- because the monoid instance on `Multiplicative (ZMod 2)` produced by
-    -- `TopologicalAbelianization.lift` differs syntactically from the quantified one.
-    have h₂ : ((TopologicalAbelianization.lift χ').comp
-        (e.symm : A →ₜ* TopologicalAbelianization G)) (π g) = χ' g := by
-      rw [hπ_apply]
-      exact (congrArg (TopologicalAbelianization.lift χ') (e.symm_apply_apply _)).trans
-        (TopologicalAbelianization.lift_mk χ' g)
-    exact (hφ (π g)).trans (congrArg Multiplicative.toAdd h₂)
-
 /-! ### Demushkin groups at `p = 2` -/
 
 variable [CompactSpace G] [TotallyDisconnectedSpace G] (hG : IsDemushkin 2 G)
@@ -134,7 +88,8 @@ theorem forall_exists_zmodFourReduction_eq_iff_demushkinQ_ne_two :
     · obtain ⟨k, hk, hqk⟩ := hG.exists_demushkinQ_eq_pow h0
       have hk2 : 2 ≤ k := by
         by_contra hlt
-        exact hq (by rw [hqk, show k = 1 by omega, pow_one])
+        have hk1 : k = 1 := by omega
+        exact hq (by rw [hqk, hk1, pow_one])
       rw [hqk, Nat.cast_pow, Nat.cast_ofNat]
       exact pow_dvd_pow _ hk2
 

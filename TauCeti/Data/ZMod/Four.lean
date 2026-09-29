@@ -24,8 +24,6 @@ the vanishing of the cup square of a class of `H¹(G, 𝔽₂)` that lifts to a 
 * `ZMod.cast_add_two_mul_cast_sub_mul`: the lift `(u, s) ↦ u + 2s` of a pair of residues modulo
   two to `ℤ/4` is additive up to the carry `u v` in the second coordinate.
 * `ZMod.cast_cast_add_two_mul_cast`: that lift reduces to its first coordinate modulo `2`.
-* `ZMod.castHom_eq_zero_of_two_mul_eq_zero`: an element of `ℤ/4` killed by `2` reduces to `0`
-  modulo `2`.
 -/
 
 public section
@@ -66,12 +64,6 @@ theorem cast_add_two_mul_cast_sub_mul (u v s t : ZMod 2) :
 theorem cast_cast_add_two_mul_cast (u s : ZMod 2) :
     (cast ((cast u : ZMod 4) + 2 * cast s) : ZMod 2) = u := by
   revert u s
-  decide
-
-/-- An element of `ℤ/4` killed by `2` reduces to `0` modulo `2`. -/
-theorem castHom_eq_zero_of_two_mul_eq_zero {u : ZMod 4} (hu : 2 * u = 0) :
-    castHom (by decide : (2 : ℕ) ∣ 4) (ZMod 2) u = 0 := by
-  revert u
   decide
 
 end ZMod

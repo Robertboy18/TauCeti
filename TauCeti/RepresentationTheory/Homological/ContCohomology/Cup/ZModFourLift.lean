@@ -9,6 +9,7 @@ import TauCeti.Data.ZMod.Four
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.TrivialFp
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp.Character
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp.Explicit
+public import TauCeti.Topology.Algebra.Group.TopologicalAbelianization.Lift
 
 /-!
 # Cup squares of classes of `H¹(G, 𝔽₂)` that lift to `ℤ/4`
@@ -50,6 +51,9 @@ distinguishes `ℤ/2` from the cyclic groups `ℤ/2ᵏ`, `k ≥ 2`, whose mod-`2
   vanishing cup square exactly when it is the class of the reduction of a character `G → ℤ/4`**.
 * `TauCeti.forall_cupFp_self_eq_zero_iff_forall_exists_zmodFourReduction_eq`: every cup square on
   `H¹(G, 𝔽₂)` vanishes exactly when every continuous character `G → 𝔽₂` lifts to `ℤ/4`.
+* `TauCeti.forall_exists_zmodFourReduction_eq_iff_of_topologicalAbelianization`: whether every
+  continuous character `G → 𝔽₂` lifts to `ℤ/4` is decided on any model of the topological
+  abelianization of `G`, since both kinds of characters factor through it.
 
 ## References
 
@@ -270,5 +274,51 @@ theorem forall_cupFp_self_eq_zero_iff_forall_exists_zmodFourReduction_eq :
     rw [cupFp_self_eq_zero_iff_exists_zmodFourReductionClass_eq a]
     exact ⟨φ, (cohomFpLinearEquivContinuousZModDual 2 G).injective (by
       rw [φ.cohomFpLinearEquivContinuousZModDual_zmodFourReductionClass, hφ])⟩
+
+/-! ### Transport of lifting problems along the abelianization -/
+
+omit φ in
+/-- **Lifting characters from `𝔽₂` to `ℤ/4` is decided on the abelianization.** For a model
+`A ≅ G^{ab}` of the topological abelianization of `G`, every continuous character `G → 𝔽₂` lifts
+to a continuous character `G → ℤ/4` exactly when every continuous character `A → 𝔽₂` does: both
+kinds of characters factor through `G^{ab}`. -/
+theorem forall_exists_zmodFourReduction_eq_iff_of_topologicalAbelianization
+    {A : Type*} [Group A] [TopologicalSpace A] (e : TopologicalAbelianization G ≃ₜ* A) :
+    (∀ χ : continuousZModDual 2 G, ∃ φ : G →ₜ* Multiplicative (ZMod 4),
+        φ.zmodFourReduction = χ) ↔
+      ∀ χ : A →ₜ* Multiplicative (ZMod 2), ∃ φ : A →ₜ* Multiplicative (ZMod 4),
+        ∀ a, ZMod.castHom (by norm_num : (2 : ℕ) ∣ 4) (ZMod 2) (Multiplicative.toAdd (φ a)) =
+          Multiplicative.toAdd (χ a) := by
+  -- The projection `G → G^{ab} ≅ A`, kept opaque so that rewriting does not unfold it.
+  obtain ⟨π, hπ_apply⟩ : ∃ π : G →ₜ* A, ∀ g, π g = e (g : TopologicalAbelianization G) :=
+    ⟨(e : TopologicalAbelianization G →ₜ* A).comp
+      (ContinuousMonoidHom.quotientMk (commutator G).topologicalClosure), fun g ↦ rfl⟩
+  have hsurj : Function.Surjective π := fun a ↦ by
+    obtain ⟨g, hg⟩ := QuotientGroup.mk_surjective (e.symm a)
+    exact ⟨g, by rw [hπ_apply, hg, ContinuousMulEquiv.apply_symm_apply]⟩
+  refine ⟨fun h χ ↦ ?_, fun h χ ↦ ?_⟩
+  · obtain ⟨φ, hφ⟩ := h (Additive.ofMul (χ.comp π))
+    rw [φ.zmodFourReduction_eq_iff] at hφ
+    refine ⟨(TopologicalAbelianization.lift φ).comp (e.symm : A →ₜ* TopologicalAbelianization G),
+      fun a ↦ ?_⟩
+    obtain ⟨g, rfl⟩ := hsurj a
+    rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, hπ_apply,
+      ContinuousMonoidHom.coe_coe, ContinuousMulEquiv.symm_apply_apply,
+      TopologicalAbelianization.lift_mk, hφ g, toMul_ofMul, ContinuousMonoidHom.coe_comp,
+      Function.comp_apply, hπ_apply]
+  · obtain ⟨χ', rfl⟩ : ∃ χ' : G →ₜ* Multiplicative (ZMod 2), Additive.ofMul χ' = χ :=
+      ⟨Additive.toMul χ, rfl⟩
+    obtain ⟨φ, hφ⟩ := h ((TopologicalAbelianization.lift χ').comp
+      (e.symm : A →ₜ* TopologicalAbelianization G))
+    refine ⟨φ.comp π, (φ.comp π).zmodFourReduction_eq_iff _ |>.2 fun g ↦ ?_⟩
+    -- The two sides are compared up to definitional unfolding of `comp` and of the coercions,
+    -- because the monoid instance on `Multiplicative (ZMod 2)` produced by
+    -- `TopologicalAbelianization.lift` differs syntactically from the quantified one.
+    have h₂ : ((TopologicalAbelianization.lift χ').comp
+        (e.symm : A →ₜ* TopologicalAbelianization G)) (π g) = χ' g := by
+      rw [hπ_apply]
+      exact (congrArg (TopologicalAbelianization.lift χ') (e.symm_apply_apply _)).trans
+        (TopologicalAbelianization.lift_mk χ' g)
+    exact (hφ (π g)).trans (congrArg Multiplicative.toAdd h₂)
 
 end TauCeti

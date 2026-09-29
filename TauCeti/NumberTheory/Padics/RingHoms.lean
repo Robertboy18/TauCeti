@@ -12,6 +12,7 @@ public import Mathlib.Topology.LocallyConstant.Basic
 public import Mathlib.Topology.MetricSpace.Ultra.Basic
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
 import Mathlib.RingTheory.LocalRing.RingHom.Basic
+import TauCeti.Topology.Algebra.Ring.Ideal
 
 /-!
 # Congruence and continuity properties of the truncations of a `p`-adic integer
@@ -206,10 +207,8 @@ theorem quotientSpanToZMod_mk {q : ℤ_[p]} (hq : (p : ℤ_[p]) ∣ q) (x : ℤ_
 
 /-- Reduction modulo `p` of `ℤ_[p] ⧸ (q)` is continuous for the quotient topology. -/
 theorem continuous_quotientSpanToZMod {q : ℤ_[p]} (hq : (p : ℤ_[p]) ∣ q) :
-    Continuous (quotientSpanToZMod hq) := by
-  rw [(Submodule.isQuotientMap_mkQ (Ideal.span {q})).continuous_iff]
-  exact continuous_toZMod.congr fun x ↦ by
-    simp [Function.comp_apply, Submodule.mkQ_apply, Ideal.Quotient.mk_eq_mk]
+    Continuous (quotientSpanToZMod hq) :=
+  Ideal.Quotient.continuous_lift _ continuous_toZMod _
 
 /-- **Truncation modulo `p ^ n` of `ℤ_[p] ⧸ (q)`**, for `p ^ n ∣ q`: the ring homomorphism
 induced by `toZModPow n`, whose kernel `(p ^ n)` contains `(q)`. -/
@@ -227,10 +226,8 @@ theorem quotientSpanToZModPow_mk (n : ℕ) {q : ℤ_[p]} (hq : (p : ℤ_[p]) ^ n
 
 /-- Truncation modulo `p ^ n` of `ℤ_[p] ⧸ (q)` is continuous for the quotient topology. -/
 theorem continuous_quotientSpanToZModPow (n : ℕ) {q : ℤ_[p]} (hq : (p : ℤ_[p]) ^ n ∣ q) :
-    Continuous (quotientSpanToZModPow n hq) := by
-  rw [(Submodule.isQuotientMap_mkQ (Ideal.span {q})).continuous_iff]
-  exact (continuous_toZModPow n).congr fun x ↦ by
-    simp [Function.comp_apply, Submodule.mkQ_apply, Ideal.Quotient.mk_eq_mk]
+    Continuous (quotientSpanToZModPow n hq) :=
+  Ideal.Quotient.continuous_lift _ (continuous_toZModPow n) _
 
 /-- Every unit of `ZMod (p ^ n)` lifts to a unit of `ℤ_[p]`. For `n > 0` this holds because
 truncation is a surjective local homomorphism out of the local ring `ℤ_[p]`; for `n = 0` the
