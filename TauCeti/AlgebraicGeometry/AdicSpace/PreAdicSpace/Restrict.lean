@@ -120,6 +120,7 @@ theorem restrictStalkIso_def (x : X.restrict h) :
 
 /-- The valuation of the restriction at `x` is the valuation of `X` at `f x`, pulled back along
 the residue-field map of the stalk identification. -/
+@[simp]
 theorem valuation_restrict (x : X.restrict h) :
     (X.restrict h).valuation x =
       ValuationSpectrum.comap (IsLocalRing.ResidueField.map (X.restrictStalkIso h x).hom.hom)
@@ -128,6 +129,7 @@ theorem valuation_restrict (x : X.restrict h) :
 
 /-- The stalk valuation of the restriction at `x` is the stalk valuation of `X` at `f x`,
 pulled back along the stalk identification. -/
+@[simp]
 theorem stalkValuation_restrict (x : X.restrict h) :
     (X.restrict h).stalkValuation x =
       ValuationSpectrum.comap (X.restrictStalkIso h x).hom.hom (X.stalkValuation (f x)) := by
