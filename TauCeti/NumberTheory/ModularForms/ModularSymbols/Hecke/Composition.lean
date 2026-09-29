@@ -5,7 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.NumberTheory.ModularForms.HeckeSlash.Composition
+public import TauCeti.Algebra.BigOperators.Finset.Fiber
+public import TauCeti.NumberTheory.HeckeRing.GL2.PairCoset
 public import TauCeti.NumberTheory.ModularForms.ModularSymbols.Hecke.Basic
 
 /-!
@@ -21,9 +22,12 @@ of representatives,
 
 the multiplicative half of Shimura's §3.4 transposed from functions on `ℍ` to the coinvariants.
 It is the symbol-side counterpart of `HeckeSlash/Composition.lean`, and the two files share the
-set-level bookkeeping of the products `aᵢ bⱼ`: which right cosets they cover
-(`DoubleCoset.doubleCoset_mul_doubleCoset_eq_iUnion_rightCosets`), and how often each is met
-(`HeckeRing.GL2.pairCoset` and `HeckeRing.GL2.card_pairs_pairCoset_rightCoset_eq_multiplicity`).
+set-level bookkeeping of the products `aᵢ bⱼ`, none of which mentions either action: which right
+cosets they cover (`DoubleCoset.doubleCoset_mul_doubleCoset_eq_iUnion_rightCosets`), how often
+each is met (`HeckeRing.GL2.pairCoset` and
+`HeckeRing.GL2.card_pairs_pairCoset_rightCoset_eq_multiplicity`, `HeckeRing/GL2/PairCoset.lean`),
+and how a family naming each right coset `m` times is counted
+(`DoubleCoset.card_filter_eq_of_rightCosetRep_smul_eq`).
 
 Three forms of the composition law are recorded, in increasing generality of the conclusion.
 *Over arbitrary representatives* (`heckeSymbol_heckeSymbol_mk_eq_sum_of_rightCosets`), the
@@ -294,12 +298,6 @@ end Assembly
 section Gamma1
 
 variable (N : ℕ) [NeZero N]
-
-/-- **Transport `T_n` along an equality of indices.** -/
-theorem heckeTSymbol_congr {n m : ℕ} [NeZero n] [NeZero m] (h : n = m) :
-    heckeTSymbol R w N n = heckeTSymbol R w N m := by
-  subst h
-  rfl
 
 /-- **The Hecke operators on modular symbols at indices supported on the level multiply**:
 `T_{n m} = T_n ∘ T_m` on `𝕄_w(Γ₁(N); R)` when every prime factor of `n` and of `m` divides `N`.

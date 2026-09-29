@@ -55,6 +55,8 @@ integers once the period pairing is shown to be Hecke-equivariant and injective.
   family of representatives of the right cosets.
 * `TauCeti.ModularSymbols.heckeSymbol_one`: the identity double coset acts as the identity, and
   `TauCeti.ModularSymbols.heckeTSymbol_one`: `T₁ = 1`.
+* `TauCeti.ModularSymbols.heckeTSymbol_congr`: `T_n` transported along an equality of indices,
+  each carrying its own `NeZero` instance.
 
 ## References
 
@@ -293,6 +295,12 @@ theorem heckeTSymbol_def (n : ℕ) [NeZero n] :
     heckeTSymbol R w N n =
       heckeSymbol (Gamma1 N) (Gamma1 N) (diagCosetGamma1 N n)
         (Delta0_le_intEntries N (diagCosetGamma1 N n).out.2) := (rfl)
+
+/-- **Transport `T_n` along an equality of indices.** -/
+theorem heckeTSymbol_congr {n m : ℕ} [NeZero n] [NeZero m] (h : n = m) :
+    heckeTSymbol R w N n = heckeTSymbol R w N m := by
+  subst h
+  rfl
 
 /-- The first Hecke operator on modular symbols is the identity. -/
 @[simp]
