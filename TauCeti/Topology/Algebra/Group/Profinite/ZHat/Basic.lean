@@ -191,6 +191,7 @@ theorem comp_lift (f : P →ₜ* Q) (a : P) : f.comp (lift a : zHat.{u} →ₜ* 
 
 /-- A continuous homomorphism between profinite groups commutes with the lift: it carries
 `lift a x` to `lift (f a) x`. -/
+@[simp]
 theorem map_lift (f : P →ₜ* Q) (a : P) (x : zHat.{u}) : f (lift a x) = lift (f a) x := by
   rw [← comp_lift f a, ContinuousMonoidHom.coe_comp, Function.comp_apply]
 

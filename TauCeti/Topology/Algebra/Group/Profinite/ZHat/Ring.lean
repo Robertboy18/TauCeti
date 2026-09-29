@@ -17,12 +17,12 @@ unique continuous endomorphism of `ℤ̂` sending the generator `zHat.gen` to `a
 multiplication by an integer is on `ℤ`: so `a * b` is `zHat.lift a b`, read additively. The unit
 is the generator, and the casts of natural numbers and integers are its powers.
 
-Every ring axiom is an instance of the universal property of `ℤ̂` or of the density of `ℤ` in it:
-`1 * b = b` because the lift of the generator is the identity, `a * (b + c) = a * b + a * c`
-because each lift is a homomorphism, `(a + b) * c = a * c + b * c` and `a * b = b * a` because
-both sides are continuous and agree on the integers, and `(a * b) * c = a * (b * c)` by
-naturality of the lift. The multiplication is jointly continuous, so `Additive zHat` is a
-compact, totally disconnected topological ring.
+The ring is commutative, and the multiplication is jointly continuous, so `Additive zHat` is a
+compact, totally disconnected topological commutative ring in which the integers are dense
+(`zHat.denseRange_ofInt` and `zHat.ofMul_ofInt`). The defining equations for the product, the
+unit and the casts are recorded as `simp` lemmas on both sides of the equivalence between `zHat`
+and `Additive zHat`, so that a statement about the ring can be rewritten into the language of
+`zHat.lift` and back.
 
 This is the ring by which a profinite group is powered: the profinite power of an element `x` of
 a profinite group by `a : ℤ̂` is `zHat.lift x a`, and by naturality of the lift (`zHat.map_lift`)
@@ -63,6 +63,11 @@ open Additive
 `zHat.lift a b`, the value at `b` of the continuous endomorphism of `ℤ̂` sending the generator to
 `a`; the unit is the generator, and the casts of `ℕ` and `ℤ` are its powers. -/
 noncomputable instance instCommRing : CommRing (Additive zHat.{u}) :=
+  -- Every axiom is an instance of the universal property of `ℤ̂` or of the density of `ℤ` in it:
+  -- the lift of the generator is the identity (`one_mul`), each lift is a homomorphism
+  -- (`left_distrib`), the pointwise product of lifts is the lift of the product and the lift on
+  -- `ℤ̂` is symmetric because both sides are continuous and agree on the integers
+  -- (`right_distrib`, `mul_comm`), and the lift is natural in its target (`mul_assoc`).
   { Additive.addGroup with
     add_comm a b := congrArg ofMul (mul_comm' a.toMul b.toMul)
     mul a b := ofMul (lift a.toMul b.toMul)
@@ -82,28 +87,36 @@ noncomputable instance instCommRing : CommRing (Additive zHat.{u}) :=
     mul_zero a := congrArg ofMul (map_one (lift a.toMul))
     mul_comm a b := congrArg ofMul (lift_comm a.toMul b.toMul) }
 
+/-- The product of the ring, read in `zHat`: `(a * b).toMul` is the lift of `a.toMul` at
+`b.toMul`. -/
 @[simp]
 theorem toMul_mul (a b : Additive zHat.{u}) :
     (a * b).toMul = (lift a.toMul : zHat.{u} →ₜ* zHat.{u}) b.toMul := by
   rfl
 
+/-- The lift of `a` at `b`, read in the ring: `ofMul (lift a b)` is the product
+`ofMul a * ofMul b`. -/
 @[simp]
 theorem ofMul_lift (a b : zHat.{u}) :
     ofMul ((lift a : zHat.{u} →ₜ* zHat.{u}) b) = ofMul a * ofMul b := by
   rfl
 
+/-- The unit of the ring, read in `zHat`, is the generator. -/
 @[simp]
 theorem toMul_one : (1 : Additive zHat.{u}).toMul = gen := by
   rfl
 
+/-- The generator, read in the ring, is the unit. -/
 @[simp]
 theorem ofMul_gen : ofMul (gen : zHat.{u}) = 1 := by
   rfl
 
+/-- The cast of a natural number `n`, read in `zHat`, is the `n`-th power of the generator. -/
 @[simp]
 theorem toMul_natCast (n : ℕ) : (n : Additive zHat.{u}).toMul = gen ^ n := by
   rfl
 
+/-- The cast of an integer `n`, read in `zHat`, is the `n`-th power of the generator. -/
 @[simp]
 theorem toMul_intCast (n : ℤ) : (n : Additive zHat.{u}).toMul = gen ^ n := by
   rfl
