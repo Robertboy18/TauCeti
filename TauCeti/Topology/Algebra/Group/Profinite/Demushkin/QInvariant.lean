@@ -364,7 +364,9 @@ theorem demushkinQ_presentedProP_eq_iff_exists_not_dvd (hG : IsDemushkin p (pres
     have := Nat.pow_right_injective hp.two_le (h.trans (pow_one p).symm)
     omega
   · intro h
-    rw [show q.valuation = 1 by omega, pow_one]
+    -- `p ∣ q` and `¬ p ^ 2 ∣ q` pin the valuation of `q` to `1`.
+    have hval : q.valuation = 1 := by omega
+    rw [hval, pow_one]
 
 end OneRelator
 

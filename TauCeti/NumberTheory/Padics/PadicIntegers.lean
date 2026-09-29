@@ -10,6 +10,7 @@ public import Mathlib.NumberTheory.Padics.PadicIntegers
 public import Mathlib.NumberTheory.Padics.ProperSpace
 public import Mathlib.Topology.MetricSpace.Ultra.TotallySeparated
 import Mathlib.Data.Finset.Max
+import TauCeti.LinearAlgebra.Quotient.PiSpanSingleton
 
 /-!
 # Units of the `p`-adic integers
@@ -99,12 +100,8 @@ theorem exists_apply_eq_one_and_eq_smul {ι : Type*} [Finite ι] [Nonempty ι] (
   cases nonempty_fintype ι
   obtain ⟨i₀, -, hi₀⟩ :=
     Finset.exists_max_image Finset.univ (fun i ↦ ‖v i‖) Finset.univ_nonempty
-  by_cases h0 : v i₀ = 0
-  · refine ⟨i₀, 0, fun _ ↦ 1, rfl, funext fun i ↦ ?_⟩
-    have h : ‖v i‖ ≤ 0 := by simpa [h0] using hi₀ i (Finset.mem_univ i)
-    simpa using norm_le_zero_iff.1 h
-  · choose w hw using fun i ↦ dvd_of_norm_le (hi₀ i (Finset.mem_univ i))
-    exact ⟨i₀, v i₀, w, mul_left_cancel₀ h0 ((hw i₀).symm.trans (mul_one _).symm),
-      funext fun i ↦ hw i⟩
+  obtain ⟨w, hw, hv⟩ :=
+    TauCeti.exists_eq_smul_of_forall_dvd fun i ↦ dvd_of_norm_le (hi₀ i (Finset.mem_univ i))
+  exact ⟨i₀, v i₀, w, hw, hv⟩
 
 end PadicInt

@@ -717,6 +717,10 @@ theorem degreeOneBasis_repr_gradedPow_gradedMkZero_inl (g : freeProP p X) (k : X
   have := LinearMap.congr_fun hf (gradedMkZero p (freeProP p X) g)
   simpa [f, characterFunctional_gradedMkZero] using this
 
+/- Formal source: the following lemma is stated and proved identically in
+[TauCeti PR #10006](https://github.com/TauCetiProject/TauCeti/pull/10006), Labute's normal form
+fixing the first generator. -/
+
 /-- **The `p`-power coordinates through the exponent sums**: the coefficient of `π x'_k` in the
 class of `y ∈ λ_1(F)` vanishes exactly when `p ^ 2` divides the `k`-th exponent sum of `y`. The
 graded map induced on `gr_1(F)` by the `k`-th exponent sum modulo `p ^ 2` kills the brackets and

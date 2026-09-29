@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.OddPrime
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.QInvariant
+public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.QInvariant
 
 /-!
 # Uniqueness of Demushkin groups at an odd prime with `q = p`
@@ -20,19 +20,15 @@ presentation is chosen in the statement.
 The input is Labute's exact normal form `x₁^p (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` for a relator with
 nondegenerate degree-one form and a nonzero `p`-power part
 (`TauCeti.IsDemushkin.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_odd`). The
-`p`-power part of the class of a relator `r ∈ Φ(F)` in `gr_1(F)` is read off its exponent sums
-divided by `p` (`TauCeti.freeProP.degreeOneBasis_repr_gradedMk_inl_eq_zero_iff`), and the
-`q`-invariant of the presented group is `p` exactly when some exponent sum of `r` is not divisible
-by `p ^ 2` (`TauCeti.demushkinQ_presentedProP_eq_iff_exists_not_dvd`); so the presentation-level
-hypothesis of the normal form is the intrinsic condition `q(G) = p`, checked on a minimal
-presentation of `G` on `Fin (demushkinRank hG)`
+`p`-power part of the class of a relator `r ∈ Φ(F)` in `gr_1(F)` is nonzero exactly when the
+`q`-invariant of the presented group is `p`
+(`TauCeti.demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero`); so the
+presentation-level hypothesis of the normal form is the intrinsic condition `q(G) = p`, checked on
+a minimal presentation of `G` on `Fin (demushkinRank hG)`
 (`TauCeti.IsDemushkin.exists_mem_proPFrattini_continuousMulEquiv_presentedProP_fin`).
 
 ## Main results
 
-* `TauCeti.demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero`: for a relator
-  `r ∈ Φ(F)` presenting a Demushkin group, `q = p` exactly when the class of `r` in `gr_1(F)` has a
-  nonzero `p`-power coordinate.
 * `TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_odd_of_demushkinQ_eq`: Labute's
   Theorem 2 in this case, two relators in `Φ(F)` presenting Demushkin groups with `q = p` are
   carried to each other by a continuous automorphism of `F`.
@@ -57,29 +53,7 @@ universe u v
 
 open freeProP
 
--- Preferring the ring path keeps a single additive structure on `ZMod p`, so that the coordinate
--- statements below are stated over the module structure of `ZMod p` on itself.
-attribute [local instance 2000] Ring.toAddCommGroup
-
 variable {p : ℕ} [Fact p.Prime]
-
-section Presentation
-
-variable {X : Type u} [Finite X] [LinearOrder X] {r : freeProP p X}
-
-/-- **The `q`-invariant is `p` exactly when the relator has a `p`-power part.** For a relator
-`r ∈ Φ(F)` presenting a Demushkin group, the `q`-invariant of the group is `p` exactly when the
-class of `r` in `gr_1(F)` has a nonzero `p`-power coordinate, that is, when some exponent sum of
-`r` is not divisible by `p ^ 2`. -/
-theorem demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero
-    (hr : r ∈ proPFrattini p (freeProP p X)) (hG : IsDemushkin p (presentedProP p X {r})) :
-    demushkinQ hG = p ↔ ∃ i, (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1
-      ⟨r, (pLowerCentralSeries_one_eq_proPFrattini Fact.out).symm.le hr⟩) (Sum.inl i) ≠ 0 := by
-  rw [demushkinQ_presentedProP_eq_iff_exists_not_dvd hG
-    (dvd_exponentSum_of_mem_proPFrattini p X hr)]
-  simp only [ne_eq, degreeOneBasis_repr_gradedMk_inl_eq_zero_iff]
-
-end Presentation
 
 section Relator
 
