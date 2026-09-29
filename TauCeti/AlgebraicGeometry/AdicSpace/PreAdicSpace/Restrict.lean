@@ -103,7 +103,7 @@ theorem restrict_toPresheafedSpace :
   rfl
 
 /-- The presheaf of rings of the restriction is the restriction of the presheaf of rings. -/
-theorem toRingPresheafedSpace_restrict :
+theorem restrict_toRingPresheafedSpace :
     (X.restrict h).toRingPresheafedSpace = X.toRingPresheafedSpace.restrict h := by
   rfl
 
@@ -135,7 +135,11 @@ theorem stalkValuation_restrict (x : X.restrict h) :
     ← Function.comp_apply (f := ValuationSpectrum.comap _), ← ValuationSpectrum.comap_comp,
     IsLocalRing.ResidueField.map_comp_residue, ValuationSpectrum.comap_comp, Function.comp_apply]
 
--- The canonical morphism is exposed so that its base map unfolds to `f`.
+-- The canonical morphism is exposed, as Mathlib's `LocallyRingedSpace.ofRestrict` is, so that
+-- its base map unfolds to `f`: the stalk map of `X.ofRestrict h` at `x` is typed at the point
+-- `(X.ofRestrict h).base x` of `X`, and identifying it with a map out of the stalk at `f x`, as
+-- `restrictStalkIso_inv_eq_ofRestrict` does, needs the two points to be definitionally equal.
+-- The propositional `ofRestrict_base` cannot rewrite inside the type of the stalk map.
 @[expose] public section OfRestrictDef
 
 /-- The canonical morphism from the restriction of a pre-adic space along an open embedding. -/
