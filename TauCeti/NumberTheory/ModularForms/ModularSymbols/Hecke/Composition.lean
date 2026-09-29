@@ -238,28 +238,6 @@ variable (Γ₁ Γ₂ Γ₃ : Subgroup SL(2, ℤ)) {Δ : Submonoid (GL (Fin 2) �
   (D₂ : HeckeCoset Δ (Γ₂.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ)))
   (hD₁ : (D₁.out : GL (Fin 2) ℚ) ∈ intEntries 2) (hD₂ : (D₂.out : GL (Fin 2) ℚ) ∈ intEntries 2)
 
-include hD₁ hD₂ in
-open Classical in
-/-- **Every double coset met by the products of the representatives is integral.** If `D₁.out`
-and `D₂.out` are integral then so is `D.out` for every `D` in the image of `pairCoset D₁ D₂`: such
-a `D` is the double coset of a product `aᵥ b_u` of two integral representatives, and
-`HeckeRing.GLn.mem_intEntries_of_mem_doubleCoset` applies. This supplies the integrality proof
-that `heckeSymbol` asks for at each output coset of the composition law; nothing is assumed of
-the other elements of `Δ`. -/
-theorem mem_intEntries_of_mem_image_pairCoset
-    {D : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ))}
-    (hD : D ∈ Finset.univ.image (pairCoset D₁ D₂)) : (D.out : GL (Fin 2) ℚ) ∈ intEntries 2 := by
-  obtain ⟨q, -, rfl⟩ := Finset.mem_image.mp hD
-  -- `D.out` lies in its own double coset, which is that of the product of the representatives
-  have hmem : ((pairCoset D₁ D₂ q).out : GL (Fin 2) ℚ) ∈
-      doubleCoset (rightCosetRep D₁ q.1 * rightCosetRep D₂ q.2) (Γ₁.map (mapGL ℚ))
-        (Γ₃.map (mapGL ℚ)) := by
-    rw [doubleCoset_eq_of_mem (pairCoset_eq_iff.mp rfl)]
-    exact mem_doubleCoset_self _ _ _
-  exact mem_intEntries_of_mem_doubleCoset 2
-    (mul_mem (rightCosetRep_mem D₁ hD₁ (map_mapGL_le_intEntries 2 Γ₂) q.1)
-      (rightCosetRep_mem D₂ hD₂ (map_mapGL_le_intEntries 2 Γ₃) q.2)) hmem
-
 open Classical in
 /-- **The multiplicity-weighted composition law.** For double cosets `D₁`, `D₂` of integral
 matrices, the composite of the two Hecke operators is the sum, over the double cosets `D` met by

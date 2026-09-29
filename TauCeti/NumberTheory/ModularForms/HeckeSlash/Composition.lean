@@ -110,6 +110,8 @@ it is what makes the Hecke ring commutative there (Shimura's Proposition 3.8).
 * `HeckeRing.GL2.heckeSlashSum_heckeSlashSum_eq_sum_nsmul`: **the multiplicity-weighted
   composite**, `(f ∣[Γ₁ δ₁ Γ₂]ₖ) ∣[Γ₂ δ₂ Γ₃]ₖ = ∑_D m(D₁, D₂; D) • (f ∣[Γ₁ δ₃ Γ₃]ₖ)`, for a
   `Γ₁`-invariant `f`.
+* `HeckeRing.GL2.mem_intEntries_of_mem_image_pairCoset`: between images of subgroups of
+  `SL(2, ℤ)`, every double coset met by the products of two integral representatives is integral.
 * `HeckeRing.GL2.heckeSlashGamma1ModularFormEnd_mul_of_doubleCoset_eq_mul` and
   `HeckeRing.GL2.heckeSlashGamma1CuspFormEnd_mul_of_doubleCoset_eq_mul`: the same criterion for
   the Hecke operators of level `Γ₁(N)`, as an equation between endomorphisms.
@@ -386,6 +388,40 @@ theorem heckeSlashSum_heckeSlashSum_eq_sum_nsmul
     (fun _ hx ↦ card_pairs_pairCoset_rightCoset_eq_multiplicity hx) f hf
 
 end Assembly
+
+section Integral
+
+variable (Γ₁ Γ₂ Γ₃ : Subgroup SL(2, ℤ))
+  [IsHeckeTriple Δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ))]
+  [IsHeckeTriple Δ (Γ₂.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ))]
+  (D₁ : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)))
+  (D₂ : HeckeCoset Δ (Γ₂.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ)))
+  (hD₁ : (D₁.out : GL (Fin 2) ℚ) ∈ intEntries 2) (hD₂ : (D₂.out : GL (Fin 2) ℚ) ∈ intEntries 2)
+
+include hD₁ hD₂ in
+open Classical in
+/-- **Every double coset met by the products of the representatives is integral.** Between images
+`Γᵢ' = Γᵢ.map (mapGL ℚ)` of subgroups of `SL(2, ℤ)`, if `D₁.out` and `D₂.out` are integral then so
+is `D.out` for every `D` in the image of `pairCoset D₁ D₂`: such a `D` is the double coset of a
+product `aᵥ b_u` of two integral representatives, and
+`HeckeRing.GLn.mem_intEntries_of_mem_doubleCoset` applies. This supplies the integrality proof that
+operators indexed by integral double cosets ask for at each output coset of the composition law;
+nothing is assumed of the other elements of `Δ`. -/
+theorem mem_intEntries_of_mem_image_pairCoset
+    {D : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ))}
+    (hD : D ∈ Finset.univ.image (pairCoset D₁ D₂)) : (D.out : GL (Fin 2) ℚ) ∈ intEntries 2 := by
+  obtain ⟨q, -, rfl⟩ := Finset.mem_image.mp hD
+  -- `D.out` lies in its own double coset, which is that of the product of the representatives
+  have hmem : ((pairCoset D₁ D₂ q).out : GL (Fin 2) ℚ) ∈
+      doubleCoset (rightCosetRep D₁ q.1 * rightCosetRep D₂ q.2) (Γ₁.map (mapGL ℚ))
+        (Γ₃.map (mapGL ℚ)) := by
+    rw [doubleCoset_eq_of_mem (pairCoset_eq_iff.mp rfl)]
+    exact mem_doubleCoset_self _ _ _
+  exact mem_intEntries_of_mem_doubleCoset 2
+    (mul_mem (rightCosetRep_mem D₁ hD₁ (map_mapGL_le_intEntries 2 Γ₂) q.1)
+      (rightCosetRep_mem D₂ hD₂ (map_mapGL_le_intEntries 2 Γ₃) q.2)) hmem
+
+end Integral
 
 section Gamma1
 
