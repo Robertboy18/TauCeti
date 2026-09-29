@@ -21,8 +21,10 @@ Feeding the relator through the normal forms of
 forms modulo `λ_2(F)`: when every cup square on `H¹(G, 𝔽_p)` vanishes, a change of basis of `F`
 brings `r` to `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` modulo `λ_2(F)` with `q ∈ {0, p}`, and `n` is even;
 when some cup square does not vanish, which forces `p = 2`, it brings `r` to
-`x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)`, equivalently to `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)`, for odd
-`n` and to `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` for even `n`.
+`x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)` for any `f ≥ 2`, equivalently to
+`x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)` (for `f ≥ 2` the factor `x₂^{2^f}` is a fourth power, so the two
+words have the same class in `gr_1(F)`), for odd `n` and to
+`x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` for even `n`.
 
 ## Main results
 
