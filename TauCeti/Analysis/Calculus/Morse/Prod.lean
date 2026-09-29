@@ -45,6 +45,7 @@ variable {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 /-- The Hessian quadratic form of a separated sum at `(a, b)` is the orthogonal product of the
 Hessians of the summands at `a` and `b`. -/
+@[simp]
 theorem hessianQuadraticForm_comp_fst_add_comp_snd (hφ : ContDiffAt ℝ 2 φ a)
     (hψ : ContDiffAt ℝ 2 ψ b) :
     hessianQuadraticForm (φ ∘ Prod.fst + ψ ∘ Prod.snd) (a, b) =
@@ -58,6 +59,7 @@ theorem hessianQuadraticForm_comp_fst_add_comp_snd (hφ : ContDiffAt ℝ 2 φ a)
 differentiable at `a` and `ψ` twice continuously differentiable at `b`, the separated sum
 `φ ∘ Prod.fst + ψ ∘ Prod.snd` has a nondegenerate critical point at `(a, b)` exactly when `φ` has
 one at `a` and `ψ` has one at `b`. -/
+@[simp]
 theorem isNondegenerateCriticalPoint_comp_fst_add_comp_snd_iff (hφ : ContDiffAt ℝ 2 φ a)
     (hψ : ContDiffAt ℝ 2 ψ b) :
     IsNondegenerateCriticalPoint (φ ∘ Prod.fst + ψ ∘ Prod.snd) (a, b) ↔
@@ -86,6 +88,7 @@ theorem IsNondegenerateCriticalPoint.comp_fst_add_comp_snd (hφ : IsNondegenerat
 /-- **The Morse index of a separated sum is additive**: for `φ` twice continuously differentiable
 at `a` and `ψ` twice continuously differentiable at `b`, the index of `φ ∘ Prod.fst + ψ ∘ Prod.snd`
 at `(a, b)` is the sum of the indices of `φ` at `a` and of `ψ` at `b`. -/
+@[simp]
 theorem morseIndex_comp_fst_add_comp_snd [FiniteDimensional ℝ E] [FiniteDimensional ℝ F]
     (hφ : ContDiffAt ℝ 2 φ a) (hψ : ContDiffAt ℝ 2 ψ b) :
     morseIndex (φ ∘ Prod.fst + ψ ∘ Prod.snd) (a, b) = morseIndex φ a + morseIndex ψ b := by

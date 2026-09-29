@@ -17,7 +17,7 @@ sphereHeight w ∘ Prod.snd` of the height functions in the directions of the un
 index at `(x, y)` is the sum of the indices of the two height functions, so the four critical
 points have indices `n + m`, `n`, `m` and `0`. For `n = m = 1` this is the standard Morse function
 on the two-torus `S¹ × S¹`, with one critical point of index `2`, two of index `1` and one of
-index `0`, the first example after the sphere on which the Morse complex is computed.
+index `0`.
 
 ## Main declarations
 

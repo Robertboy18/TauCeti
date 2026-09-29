@@ -46,12 +46,15 @@ theorem _root_.HasFDerivAt.comp_fst_add_comp_snd (hφ : HasFDerivAt φ φ' a)
 
 /-- The totalized derivative of a separated sum of differentiable functions is the coproduct of
 the derivatives of its summands. -/
+@[simp]
 theorem fderiv_comp_fst_add_comp_snd (hφ : DifferentiableAt 𝕜 φ a) (hψ : DifferentiableAt 𝕜 ψ b) :
     fderiv 𝕜 (φ ∘ Prod.fst + ψ ∘ Prod.snd) (a, b) = (fderiv 𝕜 φ a).coprod (fderiv 𝕜 ψ b) :=
   (hφ.hasFDerivAt.comp_fst_add_comp_snd hψ.hasFDerivAt).fderiv
 
 /-- A separated sum of differentiable functions is critical at `(a, b)` exactly when both
-summands are critical at `a` and at `b`. -/
+summands are critical at `a` and at `b`. This is not a `simp` lemma: the `@[simp]` lemma
+`TauCeti.fderiv_comp_fst_add_comp_snd` already rewrites its left-hand side to
+`(fderiv 𝕜 φ a).coprod (fderiv 𝕜 ψ b) = 0`. -/
 theorem fderiv_comp_fst_add_comp_snd_eq_zero_iff (hφ : DifferentiableAt 𝕜 φ a)
     (hψ : DifferentiableAt 𝕜 ψ b) :
     fderiv 𝕜 (φ ∘ Prod.fst + ψ ∘ Prod.snd) (a, b) = 0 ↔
