@@ -278,9 +278,8 @@ theorem range_demushkinCharacter_of_equiv (e : G ≃ₜ* H) :
     (demushkinCharacter (IsDemushkin.of_equiv p hG e)).toMonoidHom.range =
       (demushkinCharacter hG).toMonoidHom.range := by
   rw [demushkinCharacter_of_equiv hG e]
-  ext u
-  simp only [MonoidHom.mem_range, ContinuousMonoidHom.coe_toMonoidHom]
-  exact ⟨fun ⟨h, hh⟩ ↦ ⟨e.symm h, hh⟩, fun ⟨g, hg⟩ ↦ ⟨e g, by simpa using hg⟩⟩
+  exact (MonoidHom.range_comp _ _).trans
+    (by rw [MonoidHom.range_eq_top.mpr e.symm.surjective, Subgroup.map_top])
 
 end Demushkin
 
