@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+import TauCeti.Analysis.Complex.RiemannSurface.OpenMapping
 public import TauCeti.Analysis.Complex.RiemannSurface.LocalDegree
 public import Mathlib.Order.Lattice.Nat
 public import Mathlib.Topology.LocallyConstant.Basic
@@ -22,8 +23,10 @@ exactly the multiplicity of that point, while compactness of the complement of t
 neighbourhoods keeps nearby fibres from having any further points. Over a connected `Y` the fibre
 sum is therefore the same at every point, and this common value is the **degree**
 `TauCeti.RiemannSurface.degree f`. The degree is positive, dominates every local multiplicity,
-forces `f` to be surjective, and is multiplicative under composition. Along the way the map is
-shown to be open, which is the open mapping theorem for Riemann surfaces.
+forces `f` to be surjective, and is multiplicative under composition. Nonconstancy of the
+composite of two such maps comes from the open mapping theorem for Riemann surfaces,
+`TauCeti.RiemannSurface.not_eventuallyConst_comp` in
+`TauCeti.Analysis.Complex.RiemannSurface.OpenMapping`.
 
 Nonconstancy is spelled pointwise, as `∀ x, ¬ EventuallyConst f (𝓝 x)`, exactly as in the local
 fibre count: this is the hypothesis the arguments use, and on a connected `X` it is equivalent to
@@ -34,7 +37,6 @@ value is junk.
 
 ## Main declarations
 
-* `TauCeti.RiemannSurface.isOpenMap_of_forall_not_eventuallyConst`: the open mapping theorem.
 * `TauCeti.RiemannSurface.finite_preimage_singleton`: fibre finiteness over a compact source.
 * `TauCeti.RiemannSurface.fiberMultiplicitySum`: the fibre sum of local multiplicities, and
   `TauCeti.RiemannSurface.eventually_fiberMultiplicitySum_eq`, its local constancy.
@@ -47,7 +49,7 @@ value is junk.
 ## References
 
 * Otto Forster, *Lectures on Riemann Surfaces*, Graduate Texts in Mathematics 81,
-  Springer, 1981, §2 (Theorem 2.7, the open mapping theorem) and §4 (Theorem 4.24, the degree).
+  Springer, 1981, §4, Theorem 4.24.
 * Rick Miranda, *Algebraic Curves and Riemann Surfaces*, Graduate Studies in Mathematics 5,
   American Mathematical Society, 1995, Chapter II §4, Proposition 4.8.
 -/
@@ -103,40 +105,6 @@ theorem degree_def (f : X → Y) : degree f = ⨆ y, fiberMultiplicitySum f y :=
 
 variable [IsManifold 𝓘(ℂ) 1 X] [IsManifold 𝓘(ℂ) 1 Y]
 
-/-! ### The open mapping theorem -/
-
-/-- **The open mapping theorem, at a point.** A map holomorphic and nonconstant near `x` sends
-every neighbourhood of `x` onto a neighbourhood of `f x`. -/
-theorem nhds_le_map_nhds_of_not_eventuallyConst {x : X}
-    (hf : ∀ᶠ y in 𝓝 x, MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) f y) (hne : ¬ EventuallyConst f (𝓝 x)) :
-    𝓝 (f x) ≤ map f (𝓝 x) := by
-  intro s hs
-  obtain ⟨U, -, hUs, V, hV, -, hfib⟩ :=
-    exists_nhds_localMultiplicity_fiber_sum hf hne (mem_map.1 hs)
-  refine mem_of_superset hV fun y' hy' ↦ ?_
-  obtain ⟨x', hx'⟩ := nonempty_iff_ne_empty.2 (hfib y' hy').1
-  have hfx' : f x' = y' := hx'.1
-  exact hfx' ▸ hUs hx'.2
-
-/-- **The open mapping theorem.** A holomorphic map between Riemann surfaces which is constant
-near no point is an open map. -/
-theorem isOpenMap_of_forall_not_eventuallyConst (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f)
-    (hne : ∀ x, ¬ EventuallyConst f (𝓝 x)) : IsOpenMap f :=
-  isOpenMap_iff_nhds_le.2 fun x ↦
-    nhds_le_map_nhds_of_not_eventuallyConst (.of_forall fun y ↦ hf y) (hne x)
-
-/-- If `f` is holomorphic and nonconstant near `x` and `g` is not constant near `f x`, then
-`g ∘ f` is not constant near `x`: by the open mapping theorem, constancy of `g ∘ f` near `x`
-would force constancy of `g` on the neighbourhood `f '' U` of `f x`. -/
-theorem not_eventuallyConst_comp {x : X}
-    (hf : ∀ᶠ y in 𝓝 x, MDifferentiableAt 𝓘(ℂ) 𝓘(ℂ) f y) (hne : ¬ EventuallyConst f (𝓝 x))
-    (hg : ¬ EventuallyConst g (𝓝 (f x))) : ¬ EventuallyConst (g ∘ f) (𝓝 x) := fun h ↦ by
-  have : Nonempty Z := ⟨g (f x)⟩
-  obtain ⟨c, hc⟩ := eventuallyConst_iff_exists_eventuallyEq.1 h
-  refine hg (eventuallyConst_iff_exists_eventuallyEq.2 ⟨c, ?_⟩)
-  exact Eventually.filter_mono (nhds_le_map_nhds_of_not_eventuallyConst hf hne)
-    (eventually_map.2 hc)
-
 /-! ### Fibre finiteness -/
 
 /-- **Finiteness of fibres.** A holomorphic map from a compact Riemann surface which is constant
@@ -145,23 +113,16 @@ containing no other point of the fibre. -/
 theorem finite_preimage_singleton [CompactSpace X] [T1Space Y]
     (hf : MDifferentiable 𝓘(ℂ) 𝓘(ℂ) f) (hne : ∀ x, ¬ EventuallyConst f (𝓝 x)) (y : Y) :
     (f ⁻¹' {y}).Finite := by
-  have hK : IsCompact (f ⁻¹' {y}) := (isClosed_singleton.preimage hf.continuous).isCompact
-  have hloc : ∀ x ∈ f ⁻¹' {y}, ∃ U ∈ 𝓝 x, f ⁻¹' {f x} ∩ U = {x} := fun x _ ↦ by
-    obtain ⟨U, hU, -, V, -, hx, -⟩ :=
-      exists_nhds_localMultiplicity_fiber_sum (.of_forall fun z ↦ hf z) (hne x) univ_mem
-    exact ⟨U, hU, hx⟩
-  choose! U hU hUx using hloc
-  obtain ⟨t, hts, ht⟩ := hK.elim_nhds_subcover U hU
-  refine t.finite_toSet.subset fun x' hx' ↦ ?_
-  obtain ⟨x, hxt, hx'U⟩ := mem_iUnion₂.1 (ht hx')
-  have hx : x ∈ f ⁻¹' {y} := hts x hxt
-  have hx'x : x' ∈ f ⁻¹' {f x} ∩ U x := by
-    refine ⟨?_, hx'U⟩
-    rw [mem_preimage, mem_singleton_iff] at hx hx' ⊢
-    rw [hx', hx]
-  rw [hUx x hx, mem_singleton_iff] at hx'x
-  rw [hx'x]
-  exact Finset.mem_coe.2 hxt
+  refine (isClosed_singleton.preimage hf.continuous).isCompact.finite
+    (isDiscrete_iff_forall_mem_exists_isOpen.2 fun x hx ↦ ?_)
+  obtain ⟨U, hU, -, V, -, hUx, -⟩ :=
+    exists_nhds_localMultiplicity_fiber_sum (.of_forall fun z ↦ hf z) (hne x) univ_mem
+  have hfx : f x = y := hx
+  rw [hfx] at hUx
+  refine ⟨interior U, isOpen_interior, subset_antisymm (fun x' hx' ↦ ?_)
+    (singleton_subset_iff.2 ⟨mem_interior_iff_mem_nhds.2 hU, hx⟩)⟩
+  rw [← hUx]
+  exact ⟨hx'.2, interior_subset hx'.1⟩
 
 /-! ### Local constancy of the fibre sum -/
 
@@ -290,21 +251,29 @@ theorem degree_comp [CompactSpace X] [T2Space X] [CompactSpace Y] [T2Space Y]
     simp
   have hdisj : (g ⁻¹' {z}).PairwiseDisjoint fun y ↦ f ⁻¹' {y} := fun y _ y' _ hyy' ↦
     disjoint_left.2 fun x hx hx' ↦ hyy' ((mem_singleton_iff.1 hx).symm.trans hx')
-  rw [← fiberMultiplicitySum_eq_degree (hg.comp hf) hgf z,
-    ← fiberMultiplicitySum_eq_degree hg hneg z, fiberMultiplicitySum_def,
-    fiberMultiplicitySum_def, hfib,
-    finsum_mem_biUnion hdisj hT fun y _ ↦ finite_preimage_singleton hf hne y,
-    finsum_mem_eq_finite_toFinset_sum _ hT, finsum_mem_eq_finite_toFinset_sum _ hT, Finset.sum_mul]
-  refine Finset.sum_congr rfl fun y _ ↦ ?_
-  have hS : (f ⁻¹' {y}).Finite := finite_preimage_singleton hf hne y
-  calc ∑ᶠ x ∈ f ⁻¹' {y}, localMultiplicity (g ∘ f) x
-      = ∑ᶠ x ∈ f ⁻¹' {y}, localMultiplicity g y * localMultiplicity f x :=
-        finsum_mem_congr rfl fun x hx ↦ by
-          rw [localMultiplicity_comp (.of_forall fun w ↦ hg w) (.of_forall fun w ↦ hf w),
-            mem_singleton_iff.1 (mem_preimage.1 hx)]
-    _ = localMultiplicity g y * fiberMultiplicitySum f y := by
-        rw [fiberMultiplicitySum_eq_sum hS, finsum_mem_eq_finite_toFinset_sum _ hS, Finset.mul_sum]
-    _ = localMultiplicity g y * degree f := by rw [fiberMultiplicitySum_eq_degree hf hne y]
+  -- Over each point `y` of the fibre of `g`, the fibre of `f` contributes `e_g(y) * deg f`.
+  have hpiece : ∀ y ∈ g ⁻¹' {z},
+      ∑ᶠ x ∈ f ⁻¹' {y}, localMultiplicity (g ∘ f) x = localMultiplicity g y * degree f := by
+    intro y _
+    have hS : (f ⁻¹' {y}).Finite := finite_preimage_singleton hf hne y
+    calc ∑ᶠ x ∈ f ⁻¹' {y}, localMultiplicity (g ∘ f) x
+        = ∑ᶠ x ∈ f ⁻¹' {y}, localMultiplicity g y * localMultiplicity f x :=
+          finsum_mem_congr rfl fun x hx ↦ by
+            rw [localMultiplicity_comp (.of_forall fun w ↦ hg w) (.of_forall fun w ↦ hf w),
+              mem_singleton_iff.1 (mem_preimage.1 hx)]
+      _ = localMultiplicity g y * fiberMultiplicitySum f y := by
+          rw [fiberMultiplicitySum_eq_sum hS, finsum_mem_eq_finite_toFinset_sum _ hS,
+            Finset.mul_sum]
+      _ = localMultiplicity g y * degree f := by rw [fiberMultiplicitySum_eq_degree hf hne y]
+  calc degree (g ∘ f)
+      = fiberMultiplicitySum (g ∘ f) z := (fiberMultiplicitySum_eq_degree (hg.comp hf) hgf z).symm
+    _ = ∑ᶠ y ∈ g ⁻¹' {z}, ∑ᶠ x ∈ f ⁻¹' {y}, localMultiplicity (g ∘ f) x := by
+        rw [fiberMultiplicitySum_def, hfib,
+          finsum_mem_biUnion hdisj hT fun y _ ↦ finite_preimage_singleton hf hne y]
+    _ = ∑ᶠ y ∈ g ⁻¹' {z}, localMultiplicity g y * degree f := finsum_mem_congr rfl hpiece
+    _ = fiberMultiplicitySum g z * degree f := by
+        rw [fiberMultiplicitySum_eq_sum hT, finsum_mem_eq_finite_toFinset_sum _ hT, Finset.sum_mul]
+    _ = degree g * degree f := by rw [fiberMultiplicitySum_eq_degree hg hneg z]
 
 end TauCeti.RiemannSurface
 
