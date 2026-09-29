@@ -49,9 +49,10 @@ together with the rank, that classify Demushkin groups with `q ≠ 2`.
   presentation lies in the Frattini subgroup.
 * `TauCeti.demushkinQ_eq_zero_iff`: `q(G) = 0` exactly when `G^{ab}` is torsion-free.
 * `TauCeti.demushkinQ_congr`: the `q`-invariant is invariant under topological isomorphism.
-* `TauCeti.demushkinQ_eq_zero_of_mulEquiv`, `TauCeti.demushkinQ_eq_pow_valuation_of_mulEquiv`:
-  the `q`-invariant read off a model `G^{ab} ≅ ℤ_p^ι × ℤ_p ⧸ (q)` with `p ∣ q`: it is `0` when
-  `q = 0` and `p^{v_p(q)}` otherwise.
+* `TauCeti.isMulTorsionFree_topologicalAbelianization_of_mulEquiv`,
+  `TauCeti.demushkinQ_eq_zero_of_mulEquiv`, `TauCeti.demushkinQ_eq_pow_valuation_of_mulEquiv`:
+  the torsion of `G^{ab}` read off a model `G^{ab} ≅ ℤ_p^ι × ℤ_p ⧸ (q)` with `p ∣ q`: `G^{ab}` is
+  torsion-free and `q(G) = 0` when `q = 0`, and `q(G) = p^{v_p(q)}` otherwise.
 * `TauCeti.demushkinQ_presentedProP_eq_zero_iff`,
   `TauCeti.demushkinQ_presentedProP_eq_zero_iff_mem_topologicalClosure_commutator`,
   `TauCeti.demushkinQ_presentedProP_eq_pow_valuation`: for a Demushkin group given by a
@@ -127,16 +128,22 @@ variable {ι : Type*} {q : ℤ_[p]}
   (e : TopologicalAbelianization G ≃* Multiplicative ((ι → ℤ_[p]) × (ℤ_[p] ⧸ Ideal.span {q})))
 
 include e in
-/-- **The `q`-invariant vanishes on the torsion-free model.** If `G^{ab} ≅ ℤ_p^ι × ℤ_p ⧸ (q)` with
-`q = 0`, then `G^{ab}` is torsion-free and `q(G) = 0`. -/
-theorem demushkinQ_eq_zero_of_mulEquiv (hq : q = 0) : demushkinQ hG = 0 := by
+/-- **The model with `q = 0` is torsion-free.** If `G^{ab} ≅ ℤ_p^ι × ℤ_p ⧸ (q)` with `q = 0`, then
+`G^{ab}` is torsion-free. -/
+theorem isMulTorsionFree_topologicalAbelianization_of_mulEquiv (hq : q = 0) :
+    IsMulTorsionFree (TopologicalAbelianization G) := by
   subst hq
   have : IsAddTorsionFree (ℤ_[p] ⧸ Ideal.span {(0 : ℤ_[p])}) := by
     rw [Ideal.span_singleton_zero]
     exact (RingEquiv.quotientBot ℤ_[p]).injective.isAddTorsionFree
       (RingEquiv.quotientBot ℤ_[p]).toAddMonoidHom
-  exact demushkinQ_of_isMulTorsionFree hG (Function.Injective.isMulTorsionFree e.toMonoidHom
-    e.injective)
+  exact Function.Injective.isMulTorsionFree e.toMonoidHom e.injective
+
+include e in
+/-- **The `q`-invariant vanishes on the torsion-free model.** If `G^{ab} ≅ ℤ_p^ι × ℤ_p ⧸ (q)` with
+`q = 0`, then `q(G) = 0`. -/
+theorem demushkinQ_eq_zero_of_mulEquiv (hq : q = 0) : demushkinQ hG = 0 :=
+  demushkinQ_of_isMulTorsionFree hG (isMulTorsionFree_topologicalAbelianization_of_mulEquiv e hq)
 
 include e in
 /-- **The `q`-invariant is `p^{v_p(q)}` on the model with torsion.** If
@@ -220,8 +227,9 @@ private theorem torsion_spec :
   by_cases hq : q = 0
   · -- `q = 0`: the abelianization is torsion-free and the `q`-invariant is `0`.
     subst hq
-    have h0 := demushkinQ_eq_zero_of_mulEquiv hG e.toMulEquiv rfl
-    have hbot := CommGroup.isMulTorsionFree_iff_torsion_eq_bot.1 ((demushkinQ_eq_zero_iff hG).1 h0)
+    have hfree := isMulTorsionFree_topologicalAbelianization_of_mulEquiv e.toMulEquiv rfl
+    have h0 := demushkinQ_of_isMulTorsionFree hG hfree
+    have hbot := CommGroup.isMulTorsionFree_iff_torsion_eq_bot.1 hfree
     refine ⟨by rw [hbot]; infer_instance, h0 ▸ dvd_zero p, ?_⟩
     rw [h0, Nat.cast_zero]
     exact ⟨e⟩

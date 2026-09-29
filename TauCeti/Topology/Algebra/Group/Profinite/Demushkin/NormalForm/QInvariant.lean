@@ -22,13 +22,16 @@ normal forms, presented on `x₁, …, xₙ` by the relator words
 This file checks that the parameter `q` of a normal form is the `q`-invariant of the group it
 presents: whenever such a presented group is a Demushkin group, `TauCeti.demushkinQ` of it is `q`
 for the first word (`p^{v_p(q)}` in general, so `q` itself for `q = 0` or `q` a positive power of
-`p`), and `2` for the two dyadic words. The computation is the one-relator abelianization
-structure theorem `TauCeti.demushkinQ_presentedProP_eq_pow_valuation`: the exponent vector of the
-first word is `q e₁`, that of the second is `2 e₁ + 2^f e₂ = 2 (e₁ + 2^{f-1} e₂)`, and that of the
-third is `(2 + a) e₁ + 2^f e₃ = (2 + a)(e₁ + c e₃)` with `2 + a = 2u` for the unit `u = 1 + a/2`
-of `ℤ₂`, so the abelianizations are `ℤ_p^{n-1} × ℤ_p ⧸ (q)`, `ℤ₂^{n-1} × ℤ/2` and
-`ℤ₂^{n-1} × ℤ/2`. The hypothesis `4 ∣ a` in the third word is what makes `1 + a/2` a unit: for
-`a ≡ 2 mod 4` the whole exponent vector is divisible by `4` and the `q`-invariant is not `2`.
+`p`), and `2` for the two dyadic words. The computation goes through the one-relator
+abelianization structure theorem `TauCeti.presentedProP.oneRelatorAbelianizationEquiv`, in the form
+`TauCeti.demushkinQ_presentedProP_eq_pow_valuation`: the exponent vector of the first word is
+`q e₁`, that of the second is `2 e₁ + 2^f e₂ = 2 (e₁ + 2^{f-1} e₂)`, and that of the third is
+`(2 + a) e₁ + 2^f e₃ = (2 + a)(e₁ + c e₃)` with `2 + a = 2u` for the unit `u = 1 + a/2` of `ℤ₂`,
+so the abelianizations are `ℤ_p^{n-1} × ℤ_p ⧸ (q)`, `ℤ₂^{n-1} × ℤ/2` and `ℤ₂^{n-1} × ℤ/2`. The
+hypothesis `4 ∣ a` in the third word is Labute's normalisation `α ∈ 4ℤ₂`, and it is what makes
+`1 + a/2` a unit: for `a ≡ 2 mod 4` and `f ≥ 2` the whole exponent vector is divisible by `4`, so
+the `q`-invariant would be at least `4`. (For `f = 1` the coordinate `2` at `x₃` alone gives
+`q`-invariant `2`, whatever `a` is.)
 
 ## Main results
 
@@ -66,19 +69,6 @@ namespace freeProP
 
 variable (p)
 
-/-- The exponent vector of the `i`-th `ℕ`-indexed generator of `freeProP p (Fin n)` is the
-coordinate vector at `i`; out of range it is `0`. -/
-theorem toAdd_exponentSum_freeProPGen_apply (i : ℕ) (j : Fin n) :
-    (exponentSum p (Fin n) (freeProPGen p n i)).toAdd j = if (j : ℕ) = i then 1 else 0 := by
-  by_cases hi : i < n
-  · rw [freeProPGen_of_lt p hi, exponentSum_of, toAdd_ofAdd]
-    split_ifs with h
-    · obtain rfl : j = ⟨i, hi⟩ := Fin.ext h
-      exact Pi.single_eq_same _ _
-    · exact Pi.single_eq_of_ne (fun h' ↦ h (congrArg Fin.val h')) _
-  · rw [freeProPGen_eq_one_of_le p (not_lt.1 hi), map_one, toAdd_one, Pi.zero_apply,
-      ite_eq_right (j.isLt.trans_le (not_lt.1 hi)).ne]
-
 /-- The exponent vector of the `q ≠ 2` word `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` on the free generators
 is `q e₁`. -/
 theorem toAdd_exponentSum_demushkinWordNeTwo (q : ℕ) :
@@ -114,21 +104,26 @@ end freeProP
 
 open freeProP
 
-section NeTwo
-
-variable {q : ℕ}
-
-/-- A normal-form presentation that is a Demushkin group has at least one generator. -/
-private theorem pos_of_isDemushkin_demushkinWordNeTwo (hq : p ∣ q)
-    (hG : IsDemushkin p (presentedProP p (Fin n) {demushkinWordNeTwo q n (freeProPGen p n)})) :
-    0 < n := by
+/-- A presentation on `Fin n` of a Demushkin group has at least one generator: the rank of the
+group is positive and at most `n`. -/
+private theorem pos_of_isDemushkin_presentedProP {rels : Set (freeProP p (Fin n))}
+    (hG : IsDemushkin p (presentedProP p (Fin n) rels)) : 0 < n := by
   have h := hG.demushkinRank_pos
-  rwa [demushkinRank_def, topologicalGeneratorRankNat_presentedProP_demushkinWordNeTwo hq] at h
+  rw [demushkinRank_def] at h
+  refine h.trans_le ((topologicalGeneratorRankNat_le_of_surjective
+    (presentedProP.mk p rels : freeProP p (Fin n) →* _) (map_continuous (presentedProP.mk p rels))
+    (presentedProP.mk_surjective p rels) (isTopologicallyFinitelyGenerated_freeProP p _)).trans_eq
+    ?_)
+  rw [topologicalGeneratorRankNat_freeProP, Nat.card_fin]
 
 /-- The exponent vector `e₁` of the first generator has coordinate `1` at `x₁`. -/
 private theorem exponentSum_freeProPGen_zero_apply (hn : 0 < n) :
     (exponentSum p (Fin n) (freeProPGen p n 0)).toAdd ⟨0, hn⟩ = 1 := by
   rw [toAdd_exponentSum_freeProPGen_apply, ite_eq_left rfl]
+
+section NeTwo
+
+variable {q : ℕ}
 
 /-- **The `q`-invariant of the `q ≠ 2` normal form vanishes exactly when `q = 0`**: for `p ∣ q`,
 if `⟨x₁, …, xₙ ∣ x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)⟩` is a Demushkin group, its `q`-invariant is `0`
@@ -137,7 +132,7 @@ theorem demushkinQ_presentedProP_demushkinWordNeTwo_eq_zero_iff (hq : p ∣ q)
     (hG : IsDemushkin p (presentedProP p (Fin n) {demushkinWordNeTwo q n (freeProPGen p n)})) :
     demushkinQ hG = 0 ↔ q = 0 :=
   (demushkinQ_presentedProP_eq_zero_iff
-    (exponentSum_freeProPGen_zero_apply (pos_of_isDemushkin_demushkinWordNeTwo hq hG))
+    (exponentSum_freeProPGen_zero_apply (pos_of_isDemushkin_presentedProP hG))
     (toAdd_exponentSum_demushkinWordNeTwo p q) hG (map_dvd (Nat.castRingHom ℤ_[p]) hq)).trans
     Nat.cast_eq_zero
 
@@ -148,7 +143,7 @@ theorem demushkinQ_presentedProP_demushkinWordNeTwo (hq : p ∣ q) (hq0 : q ≠ 
     (hG : IsDemushkin p (presentedProP p (Fin n) {demushkinWordNeTwo q n (freeProPGen p n)})) :
     demushkinQ hG = p ^ padicValNat p q := by
   rw [demushkinQ_presentedProP_eq_pow_valuation
-    (exponentSum_freeProPGen_zero_apply (pos_of_isDemushkin_demushkinWordNeTwo hq hG))
+    (exponentSum_freeProPGen_zero_apply (pos_of_isDemushkin_presentedProP hG))
     (toAdd_exponentSum_demushkinWordNeTwo p q) hG (map_dvd (Nat.castRingHom ℤ_[p]) hq)
     (Nat.cast_ne_zero.2 hq0), PadicInt.valuation_natCast]
 
@@ -174,13 +169,11 @@ variable {f : ℕ}
 theorem demushkinQ_presentedProP_demushkinWordTwoOdd (hf : 0 < f)
     (hG : IsDemushkin 2 (presentedProP 2 (Fin n) {demushkinWordTwoOdd f n (freeProPGen 2 n)})) :
     demushkinQ hG = 2 := by
-  have hn : 0 < n := by
-    have h := hG.demushkinRank_pos
-    rwa [demushkinRank_def, topologicalGeneratorRankNat_presentedProP_demushkinWordTwoOdd hf] at h
+  have hn : 0 < n := pos_of_isDemushkin_presentedProP hG
   set e : ℕ → Fin n → ℤ_[2] := fun i ↦ (exponentSum 2 (Fin n) (freeProPGen 2 n i)).toAdd with he
   -- The exponent vector is `2 (e₁ + 2^{f-1} e₂)`, and the second factor is `1` at `x₁`.
   have hw : (e 0 + (2 : ℤ_[2]) ^ (f - 1) • e 1) ⟨0, hn⟩ = 1 := by
-    simp [he, toAdd_exponentSum_freeProPGen_apply]
+    simp [he]
   have hr : (exponentSum 2 (Fin n) (demushkinWordTwoOdd f n (freeProPGen 2 n))).toAdd =
       (2 : ℤ_[2]) • (e 0 + (2 : ℤ_[2]) ^ (f - 1) • e 1) := by
     rw [toAdd_exponentSum_demushkinWordTwoOdd, smul_add, smul_smul, ← pow_succ',
@@ -196,10 +189,7 @@ theorem demushkinQ_presentedProP_demushkinWordTwoEven {a : ℕ} (ha : 4 ∣ a) (
     (hG : IsDemushkin 2
       (presentedProP 2 (Fin n) {demushkinWordTwoEven a f n (freeProPGen 2 n)})) :
     demushkinQ hG = 2 := by
-  have hn : 0 < n := by
-    have h := hG.demushkinRank_pos
-    rwa [demushkinRank_def, topologicalGeneratorRankNat_presentedProP_demushkinWordTwoEven
-      (dvd_trans (Dvd.intro 2 rfl) ha) hf] at h
+  have hn : 0 < n := pos_of_isDemushkin_presentedProP hG
   obtain ⟨b, rfl⟩ := ha
   -- `2 + 4b = 2u` for the unit `u = 1 + 2b` of `ℤ₂`.
   obtain ⟨u, hu⟩ : IsUnit (1 + 2 * (b : ℤ_[2])) :=
@@ -209,7 +199,7 @@ theorem demushkinQ_presentedProP_demushkinWordTwoEven {a : ℕ} (ha : 4 ∣ a) (
   set e : ℕ → Fin n → ℤ_[2] := fun i ↦ (exponentSum 2 (Fin n) (freeProPGen 2 n i)).toAdd with he
   -- The exponent vector is `(2 + 4b) (e₁ + 2^{f-1} u⁻¹ e₃)`, and the second factor is `1` at `x₁`.
   have hw : (e 0 + ((2 : ℤ_[2]) ^ (f - 1) * ↑u⁻¹) • e 2) ⟨0, hn⟩ = 1 := by
-    simp [he, toAdd_exponentSum_freeProPGen_apply]
+    simp [he]
   have hr : (exponentSum 2 (Fin n) (demushkinWordTwoEven (4 * b) f n (freeProPGen 2 n))).toAdd =
       (2 + ((4 * b : ℕ) : ℤ_[2])) • (e 0 + ((2 : ℤ_[2]) ^ (f - 1) * ↑u⁻¹) • e 2) := by
     rw [toAdd_exponentSum_demushkinWordTwoEven, smul_add, smul_smul, hq]
