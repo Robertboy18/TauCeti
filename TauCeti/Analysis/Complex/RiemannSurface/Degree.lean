@@ -55,7 +55,8 @@ finite holomorphic map.
 * `TauCeti.RiemannSurface.FiniteHolomorphicMap`: the bundled finite holomorphic maps, with
   `TauCeti.RiemannSurface.FiniteHolomorphicMap.ofMDifferentiable`,
   `TauCeti.RiemannSurface.FiniteHolomorphicMap.comp`,
-  `TauCeti.RiemannSurface.FiniteHolomorphicMap.degree_eq_sum_localMultiplicity` and
+  `TauCeti.RiemannSurface.FiniteHolomorphicMap.degree_eq_sum_localMultiplicity`,
+  `TauCeti.RiemannSurface.FiniteHolomorphicMap.localMultiplicity_comp` and
   `TauCeti.RiemannSurface.FiniteHolomorphicMap.degree_comp`.
 
 ## References
@@ -404,6 +405,14 @@ def comp (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) :
 theorem coe_comp (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) :
     ⇑(g.comp f) = g ∘ f :=
   (rfl)
+
+/-- **Multiplicativity of the local multiplicity** for finite holomorphic maps: the local
+multiplicity of `g.comp f` at `x` is the product of that of `g` at `f x` and that of `f` at `x`. -/
+theorem localMultiplicity_comp [IsManifold 𝓘(ℂ) 1 Z] (g : FiniteHolomorphicMap Y Z)
+    (f : FiniteHolomorphicMap X Y) (x : X) :
+    localMultiplicity (g.comp f) x = localMultiplicity g (f x) * localMultiplicity f x :=
+  RiemannSurface.localMultiplicity_comp (.of_forall fun y ↦ g.holomorphic y)
+    (.of_forall fun y ↦ f.holomorphic y)
 
 /-- **Multiplicativity of the degree** for finite holomorphic maps `f : X → Y` and `g : Y → Z`
 with `X` and `Y` compact and connected and `Z` connected. -/
