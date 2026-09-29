@@ -6,12 +6,12 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.NumberTheory.ModularForms.HeckeSlash.Composition
-public import TauCeti.NumberTheory.ModularForms.ModularSymbols.Hecke
+public import TauCeti.NumberTheory.ModularForms.ModularSymbols.Hecke.Basic
 
 /-!
 # Composing the Hecke operators on modular symbols
 
-`ModularSymbols/Hecke.lean` attaches to a double coset `Γ₁' δ Γ₂' = ⊔ᵥ Γ₁' aᵥ` (with
+`ModularSymbols/Hecke/Basic.lean` attaches to a double coset `Γ₁' δ Γ₂' = ⊔ᵥ Γ₁' aᵥ` (with
 `Γᵢ' = Γᵢ.map (mapGL ℚ)` the images of subgroups of `SL(2, ℤ)`) the Hecke operator
 `T_D : 𝕄_w(Γ₂; R) → 𝕄_w(Γ₁; R)`, `[x] ↦ ∑ᵥ [aᵥ · x]`, on the modules of modular symbols. This file
 computes the composite of two such operators: it is the sum over the products of the two families
