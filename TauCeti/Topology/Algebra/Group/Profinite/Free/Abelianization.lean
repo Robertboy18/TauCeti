@@ -46,6 +46,8 @@ of `R`; see `TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianizatio
   the isomorphism is induced by `exponentSum`, and its inverse is `u ↦ ∏ x, x_x ^ (u x)`.
 * `TauCeti.freeProP.exponentSum_surjective`, `TauCeti.freeProP.exponentSum_eq_one_iff`: the
   exponent-sum map is surjective, and its kernel is the closed commutator subgroup.
+* `TauCeti.freeProP.toAdd_exponentSum_eq_single_iff`: the exponent vector of `y` is `q e_{x₀}`
+  exactly when `y` is `x₀ ^ q` times an element of the closed commutator subgroup.
 * `TauCeti.freeProP.dvd_exponentSum_of_mem_proPFrattini`: the exponent sums of an element of the
   pro-`p` Frattini subgroup are divisible by `p`.
 
@@ -246,6 +248,17 @@ theorem exponentSum_eq_one_iff (y : freeProP p X) :
     exponentSum p X y = 1 ↔ y ∈ (commutator (freeProP p X)).topologicalClosure := by
   rw [← abelianizationEquiv_mk, map_eq_one_iff _ (abelianizationEquiv p X).injective,
     QuotientGroup.eq_one_iff]
+
+/-- **Exponent vector supported at one generator.** For `X` finite, the exponent vector of `y` is
+`q e_{x₀}` exactly when `(x₀ ^ q)⁻¹ · y` lies in the closed commutator subgroup, that is when `y`
+is `x₀ ^ q` times an element of the closed commutator subgroup of the free pro-`p` group. -/
+theorem toAdd_exponentSum_eq_single_iff [DecidableEq X] (y : freeProP p X) (x₀ : X) (q : ℤ_[p]) :
+    (exponentSum p X y).toAdd = Pi.single x₀ q ↔
+      ((isProP_freeProP p X).padicPow (of x₀) q)⁻¹ * y ∈
+        (commutator (freeProP p X)).topologicalClosure := by
+  rw [← exponentSum_eq_one_iff, map_mul, map_inv, exponentSum_padicPow_of, inv_mul_eq_one,
+    eq_comm]
+  exact Multiplicative.toAdd.eq_symm_apply.symm
 
 end freeProP
 

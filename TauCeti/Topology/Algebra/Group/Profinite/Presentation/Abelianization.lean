@@ -447,7 +447,7 @@ theorem exists_continuousMulEquiv_singleton_padicPow_mul [Finite X] (r : freePro
   obtain ⟨x₁, e, hx₁, he⟩ := freeProP.exists_continuousMulEquiv_toAdd_exponentSum_eq_single r x₀
   refine ⟨x₁, ((isProP_freeProP p X).padicPow (freeProP.of x₀)
     ((freeProP.exponentSum p X r).toAdd x₁))⁻¹ * e r,
-    hx₁, (freeProP.toAdd_exponentSum_eq_single_iff _ _ _).mp he, ?_⟩
+    hx₁, (freeProP.toAdd_exponentSum_eq_single_iff p X _ _ _).mp he, ?_⟩
   rw [mul_inv_cancel_left]
   exact ⟨congr e
     (fun s hs ↦ by rw [Set.mem_singleton_iff.mp hs]; exact mk_relator _ (Set.mem_singleton _))

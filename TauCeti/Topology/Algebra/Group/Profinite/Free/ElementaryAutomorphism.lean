@@ -27,7 +27,8 @@ normalise the exponent vector of an arbitrary element of `F`:
 The normalisation is the elimination step of Labute's classification of Demushkin groups: if the
 exponent vector of `r ∈ F` is `q • w` with `w x₀ = 1`, then composing the transvections
 `x₀ ↦ x₀ · x ^ (-w x)` over the generators `x ≠ x₀` produces an automorphism `e` of `F` with
-`exponentSum (e r) = q e_{x₀}`, that is `e r ∈ x₀ ^ q · [F, F]`
+`exponentSum (e r) = q e_{x₀}`, that is `e r ∈ x₀ ^ q · [F, F]` by
+`TauCeti.freeProP.toAdd_exponentSum_eq_single_iff`
 (`TauCeti.freeProP.exists_continuousMulEquiv_toAdd_exponentSum_eq_single_of_eq_smul`). Since `ℤ_p`
 is a valuation ring, some coordinate of the exponent vector divides all the others, so every `r`
 admits such a normalisation, with the pivot coordinate placed at any prescribed generator
@@ -50,8 +51,6 @@ abelianization structure theorem reads off.
   group of automorphisms.
 * `TauCeti.freeProP.toAdd_exponentSum_congr`, `TauCeti.freeProP.toAdd_exponentSum_transvection`:
   the exponent vectors of the images under the two elementary automorphisms.
-* `TauCeti.freeProP.toAdd_exponentSum_eq_single_iff`: the exponent vector of `y` is `q e_{x₀}`
-  exactly when `y` is `x₀ ^ q` times an element of the closed commutator subgroup.
 * `TauCeti.freeProP.exists_continuousMulEquiv_toAdd_exponentSum_eq_single_of_eq_smul`: if the
   exponent vector of `r` is `q • w` with `w x₀ = 1`, an automorphism of `freeProP p X` carries `r`
   to an element with exponent vector `q e_{x₀}`.
@@ -247,17 +246,6 @@ end Transvection
 section Normalisation
 
 variable [Finite X] [DecidableEq X]
-
-/-- **Exponent vector supported at one generator.** The exponent vector of `y` is `q e_{x₀}`
-exactly when `(x₀ ^ q)⁻¹ · y` lies in the closed commutator subgroup, that is when `y` is `x₀ ^ q`
-times an element of the closed commutator subgroup of the free pro-`p` group. -/
-theorem toAdd_exponentSum_eq_single_iff (y : freeProP p X) (x₀ : X) (q : ℤ_[p]) :
-    (exponentSum p X y).toAdd = Pi.single x₀ q ↔
-      ((isProP_freeProP p X).padicPow (of x₀) q)⁻¹ * y ∈
-        (commutator (freeProP p X)).topologicalClosure := by
-  rw [← exponentSum_eq_one_iff, map_mul, map_inv, exponentSum_padicPow_of, inv_mul_eq_one,
-    eq_comm]
-  exact Multiplicative.toAdd.eq_symm_apply.symm
 
 /-- **Normalising the exponent vector of a relator.** If the exponent vector of `r ∈ freeProP p X`
 is `q • w` with `w x₀ = 1`, then an automorphism of `freeProP p X` carries `r` to an element with

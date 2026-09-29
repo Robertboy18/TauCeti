@@ -393,6 +393,21 @@ theorem coe_congr (σ : X ≃ Y) : ⇑(congr (p := p) σ) = ⇑(map (p := p) σ)
 theorem congr_symm (σ : X ≃ Y) : (congr (p := p) σ).symm = congr σ.symm :=
   ContinuousMulEquiv.ext fun _ ↦ rfl
 
+/-- The isomorphism induced by the identity bijection is the identity. -/
+@[simp]
+theorem congr_refl : congr (p := p) (Equiv.refl X) = ContinuousMulEquiv.refl (freeProP p X) :=
+  ContinuousMulEquiv.ext fun y ↦ by
+    rw [coe_congr, Equiv.coe_refl, map_id]
+    rfl
+
+/-- The isomorphisms induced by bijections of generating types compose functorially. -/
+@[simp]
+theorem congr_trans (σ : X ≃ Y) (τ : Y ≃ Z) :
+    congr (p := p) (σ.trans τ) = (congr σ).trans (congr τ) :=
+  ContinuousMulEquiv.ext fun y ↦ by
+    rw [ContinuousMulEquiv.trans_apply, coe_congr, coe_congr, coe_congr, Equiv.coe_trans, map_comp]
+    rfl
+
 /-- The isomorphism induced by a bijection of generating types sends the generator at `x` to the
 generator at `σ x`. -/
 @[simp]
