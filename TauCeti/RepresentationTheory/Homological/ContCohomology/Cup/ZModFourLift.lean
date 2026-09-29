@@ -244,7 +244,7 @@ theorem exists_zmodFourReductionClass_eq_of_cupFp_self_eq_zero {a : cohomFp 2 G 
   refine ⟨φ, (cohomFpLinearEquivContinuousZModDual 2 G).injective ?_⟩
   rw [φ.cohomFpLinearEquivContinuousZModDual_zmodFourReductionClass, ← hχ,
     φ.zmodFourReduction_eq_iff]
-  exact fun g ↦ ZMod.castHom_cast_add_two_mul_cast _ _
+  exact fun g ↦ ZMod.cast_cast_add_two_mul_cast _ _
 
 omit φ in
 /-- **Bockstein exactness on `H¹(G, 𝔽₂)`**: a class has vanishing cup square exactly when it is

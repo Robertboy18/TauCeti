@@ -145,7 +145,7 @@ theorem exists_forall_castHom_toAdd_eq_toAdd_of_pow_two_dvd [Finite ι] {q : ℤ
   rw [hχ]
   simp only [φ', AddMonoidHom.coe_mk, ZeroHom.coe_mk, map_add, map_sum, map_mul,
     ZMod.castHom_apply, ZMod.cast_cast_zmod_of_le (by norm_num : 2 ≤ 4), hρ,
-    quotientSpanToZModPow_mk, castHom_toZModPow two_ne_zero]
+    quotientSpanToZModPow_mk, cast_toZModPow_eq_toZMod two_ne_zero]
 
 /-- **The character `(x, y) ↦ y mod 2` of `ℤ_2^ι × ℤ_2 ⧸ (2)` does not lift to `ℤ/4`**: the
 element `(0, 1)` has order two, so a lift would send it to an element of `ℤ/4` killed by `2`, whose

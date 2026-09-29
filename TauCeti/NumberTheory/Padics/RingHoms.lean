@@ -32,7 +32,7 @@ to a `p`-adic exponent: `g ^ x.appr n` does not change when `n` grows past the o
 * `PadicInt.continuous_toZModPow`, `PadicInt.continuous_toZMod`: truncation modulo `p ^ n` and
   reduction modulo `p` are continuous, `ZMod (p ^ n)` and `ZMod p` carrying the discrete
   topology.
-* `PadicInt.castHom_toZModPow`: reducing the truncation modulo `p ^ n` further modulo `p`
+* `PadicInt.cast_toZModPow_eq_toZMod`: reducing the truncation modulo `p ^ n` further modulo `p`
   recovers `toZMod`.
 * `PadicInt.appr_modEq`, `PadicInt.appr_add_modEq`, `PadicInt.appr_mul_modEq`,
   `PadicInt.appr_natCast_modEq`: the truncations are compatible with each other and with the
@@ -106,13 +106,13 @@ theorem continuous_toZMod : Continuous (toZMod : ℤ_[p] → ZMod p) := by
 
 /-- Reducing the truncation `x mod p ^ n` further modulo `p` gives `x mod p`. -/
 @[simp]
-theorem castHom_toZModPow {n : ℕ} (hn : n ≠ 0) (x : ℤ_[p]) :
-    ZMod.castHom (dvd_pow_self p hn) (ZMod p) (toZModPow n x) = toZMod x := by
+theorem cast_toZModPow_eq_toZMod {n : ℕ} (hn : n ≠ 0) (x : ℤ_[p]) :
+    (ZMod.cast (toZModPow n x) : ZMod p) = toZMod x := by
   have h : toZMod (x - (x.appr n : ℤ_[p])) = 0 := by
     rw [← RingHom.mem_ker, ker_toZMod, maximalIdeal_eq_span_p]
     exact Ideal.span_singleton_le_span_singleton.mpr (dvd_pow_self (p : ℤ_[p]) hn) (appr_spec n x)
   rw [map_sub, sub_eq_zero] at h
-  rw [h, toZModPow_eq_natCast_appr x n, map_natCast, map_natCast]
+  rw [h, toZModPow_eq_natCast_appr x n, ZMod.cast_natCast (dvd_pow_self p hn), map_natCast]
 
 /-- A coarser truncation of `x` is a finer truncation of `x` read modulo the coarser
 modulus. -/
