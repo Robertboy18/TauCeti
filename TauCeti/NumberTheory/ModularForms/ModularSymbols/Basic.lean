@@ -141,10 +141,13 @@ noncomputable def degreeZeroRep : Representation R SL(2, ℤ) (degreeZero R) :=
 
 /-- The `SL(2, ℤ)`-representation on `Div⁰(ℙ¹(ℚ))` is the `GL(2, ℚ)`-representation along
 `mapGL ℚ`. -/
+@[simp]
 theorem degreeZeroRep_apply (g : SL(2, ℤ)) : degreeZeroRep R g = degreeZeroGLRep R (mapGL ℚ g) :=
   (rfl)
 
-@[simp]
+/-- On the underlying divisor, `degreeZeroRep` is the permutation representation `divisorRep`.
+Not `@[simp]`: simp normalises `degreeZeroRep R g` to `degreeZeroGLRep R (mapGL ℚ g)` through
+`degreeZeroRep_apply`, and this lemma is the bridge to `divisorRep` for `rw`. -/
 theorem coe_degreeZeroRep_apply (g : SL(2, ℤ)) (D : degreeZero R) :
     (degreeZeroRep R g D : R[OnePoint ℚ]) = divisorRep R g D := by
   rfl
@@ -252,6 +255,19 @@ theorem binaryFormSLRep_binaryFormRep (γ : SL(2, ℤ)) (P : homogeneousSubmodul
     binaryFormSLRep R w γ (binaryFormRep R w (op (γ : Matrix (Fin 2) (Fin 2) ℤ)) P) = P := by
   rw [binaryFormSLRep_apply, ← binaryFormRep_op_mul_apply, ← coe_mul, mul_inv_cancel, coe_one,
     op_one, map_one, Module.End.one_apply]
+
+/-- On `SL(2, ℤ)` the adjugate action `TauCeti.binaryFormAdjugateRep` on binary forms is the
+action `P ↦ P ∣ γ⁻¹` defining the modular symbols: the adjugate of a determinant-one matrix is its
+inverse. -/
+@[simp]
+theorem binaryFormAdjugateRep_coe (γ : SL(2, ℤ)) :
+    binaryFormAdjugateRep R w (γ : Matrix (Fin 2) (Fin 2) ℤ) = binaryFormSLRep R w γ := by
+  refine LinearMap.ext fun P ↦ ?_
+  rw [binaryFormAdjugateRep_apply, binaryFormSLRep_apply]
+  -- `rw [SpecialLinearGroup.coe_inv]` fails to build a type-correct motive here because the
+  -- coercion `SL(2, ℤ) → Matrix` unfolds the subtype; the rewrite is done by `congrArg` instead.
+  exact congrArg (fun M : Matrix (Fin 2) (Fin 2) ℤ ↦ binaryFormRep R w (op M) P)
+    (Matrix.SpecialLinearGroup.coe_inv γ).symm
 
 variable (R w) in
 /-- The diagonal representation of `SL(2, ℤ)` on `Div⁰(ℙ¹(ℚ)) ⊗_R Sym^w(R²)`. -/

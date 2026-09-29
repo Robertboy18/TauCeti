@@ -39,8 +39,9 @@ integers once the period pairing is shown to be Hecke-equivariant and injective.
 
 * `TauCeti.ModularSymbols.symbolIntRep R w`: the action of the integral matrices `intEntries 2`
   on `Div⁰(ℙ¹(ℚ)) ⊗_R Sym^w(R²)`, extending `TauCeti.ModularSymbols.symbolRep`.
-* `TauCeti.ModularSymbols.heckeSymbol Γ₁ Γ₂ D hΔ`: the Hecke operator
-  `𝕄_w(Γ₂; R) →ₗ[R] 𝕄_w(Γ₁; R)` of a double coset `D` of a submonoid `Δ ≤ intEntries 2`.
+* `TauCeti.ModularSymbols.heckeSymbol Γ₁ Γ₂ D hD`: the Hecke operator
+  `𝕄_w(Γ₂; R) →ₗ[R] 𝕄_w(Γ₁; R)` of a double coset `D` whose representative `D.out` is an
+  integral matrix.
 * `TauCeti.ModularSymbols.heckeTSymbol N n`: the Hecke operator `T_n` on `𝕄_w(Γ₁(N); R)`.
 
 ## Main results
@@ -93,18 +94,6 @@ theorem symbolIntRep_tmul (δ : intEntries 2) (D : degreeZero R)
       degreeZeroGLRep R δ D ⊗ₜ binaryFormAdjugateRep R w (intMatrix 2 δ) P := by
   simp [symbolIntRep]
 
-/-- On `SL(2, ℤ)` the adjugate action on binary forms is the action `P ↦ P ∣ γ⁻¹` defining the
-modular symbols: the adjugate of a determinant-one matrix is its inverse. -/
-@[simp]
-theorem binaryFormAdjugateRep_coe (γ : SL(2, ℤ)) :
-    binaryFormAdjugateRep R w (γ : Matrix (Fin 2) (Fin 2) ℤ) = binaryFormSLRep R w γ := by
-  refine LinearMap.ext fun P ↦ ?_
-  rw [binaryFormAdjugateRep_apply, binaryFormSLRep_apply]
-  -- `rw [SpecialLinearGroup.coe_inv]` fails to build a type-correct motive here because the
-  -- coercion `SL(2, ℤ) → Matrix` unfolds the subtype; the rewrite is done by `congrArg` instead.
-  exact congrArg (fun M : Matrix (Fin 2) (Fin 2) ℤ ↦ binaryFormRep R w (op M) P)
-    (Matrix.SpecialLinearGroup.coe_inv γ).symm
-
 /-- On `SL(2, ℤ)` the action of integral matrices is the action `symbolRep` defining the modular
 symbols. -/
 @[simp]
@@ -113,12 +102,6 @@ theorem symbolIntRep_mapGL (γ : SL(2, ℤ)) :
   refine TensorProduct.ext' fun D P ↦ ?_
   rw [symbolIntRep_tmul, symbolRep_tmul, degreeZeroRep_apply, intMatrix_mapGL,
     binaryFormAdjugateRep_coe]
-
-/-- The image of a subgroup of `SL(2, ℤ)` in `GL(2, ℚ)` consists of integral matrices. -/
-theorem map_mapGL_le_intEntries (Γ : Subgroup SL(2, ℤ)) :
-    (Γ.map (mapGL ℚ)).toSubmonoid ≤ intEntries 2 := by
-  rintro _ ⟨γ, -, rfl⟩
-  exact mapGL_mem_intEntries 2 γ
 
 /-- The class of `δ · (([α] - [β]) ⊗ P)` in `𝕄_w(Γ; R)` is the symbol
 `{δα, δβ} ⊗ (P ∣ adj δ)`. -/
@@ -137,13 +120,14 @@ theorem mk_symbolIntRep_tmul (Γ : Subgroup SL(2, ℤ)) (δ : intEntries 2) (α 
 /-! ### The Hecke operator of a double coset -/
 
 variable (Γ₁ Γ₂ : Subgroup SL(2, ℤ)) {Δ : Submonoid (GL (Fin 2) ℚ)}
-  (D : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ))) (hΔ : Δ ≤ intEntries 2)
+  (D : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)))
+  (hD : (D.out : GL (Fin 2) ℚ) ∈ intEntries 2)
 
 /-- The projection onto `𝕄_w(Γ₁; R)` is invariant under the action of `Γ₁.map (mapGL ℚ)`
 through `symbolIntRep`: that action is `symbolRep`, which the coinvariants kill. -/
 theorem mk_comp_symbolIntRep_of_mem {γ : GL (Fin 2) ℚ} (hγ : γ ∈ Γ₁.map (mapGL ℚ)) :
     (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
-        ModularSymbols R Γ₁ w) ∘ₗ symbolIntRep R w ⟨γ, map_mapGL_le_intEntries Γ₁ hγ⟩ =
+        ModularSymbols R Γ₁ w) ∘ₗ symbolIntRep R w ⟨γ, map_mapGL_le_intEntries 2 Γ₁ hγ⟩ =
       Coinvariants.mk _ := by
   obtain ⟨g, hg, rfl⟩ := Subgroup.mem_map.mp hγ
   rw [symbolIntRep_mapGL]
@@ -166,16 +150,18 @@ with `Γᵢ' = Γᵢ.map (mapGL ℚ)`, this is the `R`-linear map `𝕄_w(Γ₂;
 `Γ₂`-coinvariants of the Hecke sum `HeckeCoset.heckeSum` of `D` on `symbolIntRep`, and it depends
 on the double coset alone, not on the representatives (`heckeSymbol_symbol_eq_sum_of_rightCosets`).
 
-The hypothesis `hΔ` is what lets the representatives act integrally; every Hecke triple of the
-modular-forms theory satisfies it (`Delta0_le_intEntries`). -/
+The hypothesis `hD` is what lets the representatives act integrally: the chosen `D.out` is an
+integral matrix, and `Γ₂` consists of them, so every representative does
+(`DoubleCoset.rightCosetRep_mem`). Nothing is asked of the rest of `Δ`; for the double cosets of
+the modular-forms theory the hypothesis is supplied by `Delta0_le_intEntries`. -/
 noncomputable def heckeSymbol : ModularSymbols R Γ₂ w →ₗ[R] ModularSymbols R Γ₁ w :=
   Coinvariants.lift _
-    (HeckeCoset.heckeSum D (symbolIntRep R w) hΔ (map_mapGL_le_intEntries Γ₂)
+    (HeckeCoset.heckeSum D (symbolIntRep R w) hD (map_mapGL_le_intEntries 2 Γ₂)
       (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
         ModularSymbols R Γ₁ w))
     fun γ ↦ by
-      have h := HeckeCoset.heckeSum_comp_of_mem D (symbolIntRep R w) hΔ
-        (map_mapGL_le_intEntries Γ₂) (map_mapGL_le_intEntries Γ₁)
+      have h := HeckeCoset.heckeSum_comp_of_mem D (symbolIntRep R w) hD
+        (map_mapGL_le_intEntries 2 Γ₂) (map_mapGL_le_intEntries 2 Γ₁)
         (fun _ hγ ↦ mk_comp_symbolIntRep_of_mem Γ₁ hγ) (Subgroup.mem_map_of_mem (mapGL ℚ) γ.2)
       rwa [symbolIntRep_mapGL] at h
 
@@ -183,8 +169,8 @@ noncomputable def heckeSymbol : ModularSymbols R Γ₂ w →ₗ[R] ModularSymbol
 coset on `symbolIntRep`, relative to the projection onto `𝕄_w(Γ₁; R)`: the defining equation of
 `heckeSymbol`, which is a lift out of the coinvariants. -/
 theorem heckeSymbol_mk_eq_heckeSum (x : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w) :
-    heckeSymbol Γ₁ Γ₂ D hΔ (Coinvariants.mk _ x) =
-      HeckeCoset.heckeSum D (symbolIntRep R w) hΔ (map_mapGL_le_intEntries Γ₂)
+    heckeSymbol Γ₁ Γ₂ D hD (Coinvariants.mk _ x) =
+      HeckeCoset.heckeSum D (symbolIntRep R w) hD (map_mapGL_le_intEntries 2 Γ₂)
         (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
           ModularSymbols R Γ₁ w) x :=
   Coinvariants.lift_mk _ _ _ x
@@ -192,20 +178,20 @@ theorem heckeSymbol_mk_eq_heckeSum (x : degreeZero R ⊗[R] homogeneousSubmodule
 /-- The Hecke operator on the class of `x ∈ Div⁰(ℙ¹(ℚ)) ⊗ Sym^w(R²)`: the sum of the classes of
 the translates `aᵥ · x` over the chosen right-coset representatives. -/
 theorem heckeSymbol_mk (x : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w) :
-    heckeSymbol Γ₁ Γ₂ D hΔ (Coinvariants.mk _ x) =
+    heckeSymbol Γ₁ Γ₂ D hD (Coinvariants.mk _ x) =
       ∑ v, (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
         ModularSymbols R Γ₁ w)
         (symbolIntRep R w ⟨rightCosetRep D v,
-          rightCosetRep_mem D (hΔ D.out.2) (map_mapGL_le_intEntries Γ₂) v⟩ x) := by
+          rightCosetRep_mem D hD (map_mapGL_le_intEntries 2 Γ₂) v⟩ x) := by
   rw [heckeSymbol_mk_eq_heckeSum, HeckeCoset.heckeSum_apply]
 
 /-- **The Hecke operator on a modular symbol**, over the chosen representatives:
 `T_D ({α, β} ⊗ P) = ∑ᵥ {aᵥα, aᵥβ} ⊗ (P ∣ adj aᵥ)`. -/
 theorem heckeSymbol_symbol (α β : OnePoint ℚ) (P : homogeneousSubmodule (Fin 2) R w) :
-    heckeSymbol Γ₁ Γ₂ D hΔ (symbol Γ₂ α β P) =
+    heckeSymbol Γ₁ Γ₂ D hD (symbol Γ₂ α β P) =
       ∑ v, symbol Γ₁ (rightCosetRep D v • α) (rightCosetRep D v • β)
         (binaryFormRep R w (op (adjugate (intMatrix 2 ⟨rightCosetRep D v,
-          rightCosetRep_mem D (hΔ D.out.2) (map_mapGL_le_intEntries Γ₂) v⟩))) P) := by
+          rightCosetRep_mem D hD (map_mapGL_le_intEntries 2 Γ₂) v⟩))) P) := by
   rw [symbol_apply, heckeSymbol_mk]
   exact Finset.sum_congr rfl fun v _ ↦ mk_symbolIntRep_tmul Γ₁ _ α β P
 
@@ -218,11 +204,11 @@ theorem heckeSymbol_mk_eq_sum_of_rightCosets {ι : Type*} [Fintype ι] (a : ι �
       ⋃ i, op (a i) • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
     (hinj : Function.Injective fun i ↦ op (a i) • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
     (x : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w) :
-    heckeSymbol Γ₁ Γ₂ D hΔ (Coinvariants.mk _ x) =
+    heckeSymbol Γ₁ Γ₂ D hD (Coinvariants.mk _ x) =
       ∑ i, (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
         ModularSymbols R Γ₁ w) (symbolIntRep R w ⟨a i, ha i⟩ x) := by
   rw [heckeSymbol_mk_eq_heckeSum, HeckeCoset.heckeSum_eq_sum_of_rightCosets D
-    (symbolIntRep R w) hΔ (map_mapGL_le_intEntries Γ₂) (map_mapGL_le_intEntries Γ₁)
+    (symbolIntRep R w) hD (map_mapGL_le_intEntries 2 Γ₂) (map_mapGL_le_intEntries 2 Γ₁)
     (fun _ hγ ↦ mk_comp_symbolIntRep_of_mem Γ₁ hγ) a ha hcover hinj, LinearMap.sum_apply]
   rfl
 
@@ -239,11 +225,11 @@ theorem heckeSymbol_symbol_eq_sum_of_rightCosets {ι : Type*} [Fintype ι] (a : 
       ⋃ i, op (a i) • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
     (hinj : Function.Injective fun i ↦ op (a i) • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
     (α β : OnePoint ℚ) (P : homogeneousSubmodule (Fin 2) R w) :
-    heckeSymbol Γ₁ Γ₂ D hΔ (symbol Γ₂ α β P) =
+    heckeSymbol Γ₁ Γ₂ D hD (symbol Γ₂ α β P) =
       ∑ i, symbol Γ₁ (a i • α) (a i • β) (binaryFormRep R w (op (adjugate (A i))) P) := by
   have ha : ∀ i, a i ∈ intEntries 2 := fun i ↦
     (mem_intEntries 2).mpr ((hasIntEntries_iff 2).mpr ⟨A i, hA i⟩)
-  rw [symbol_apply, heckeSymbol_mk_eq_sum_of_rightCosets Γ₁ Γ₂ D hΔ a ha hcover hinj]
+  rw [symbol_apply, heckeSymbol_mk_eq_sum_of_rightCosets Γ₁ Γ₂ D hD a ha hcover hinj]
   refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [mk_symbolIntRep_tmul Γ₁ ⟨a i, ha i⟩ α β P, (intMatrix_eq_iff 2).mpr (hA i)]
 
@@ -251,10 +237,11 @@ theorem heckeSymbol_symbol_eq_sum_of_rightCosets {ι : Type*} [Fintype ι] (a : 
 single right coset, represented by `1`. -/
 @[simp]
 theorem heckeSymbol_one (Γ : Subgroup SL(2, ℤ)) {Δ : Submonoid (GL (Fin 2) ℚ)}
-    (hΔ : Δ ≤ intEntries 2)
+    (hD : ((1 : HeckeCoset Δ (Γ.map (mapGL ℚ)) (Γ.map (mapGL ℚ))).out : GL (Fin 2) ℚ) ∈
+      intEntries 2)
     [Finite (DecompQuotient (Γ.map (mapGL ℚ)) (Γ.map (mapGL ℚ))
       ((1 : HeckeCoset Δ (Γ.map (mapGL ℚ)) (Γ.map (mapGL ℚ))).out : GL (Fin 2) ℚ)⁻¹)] :
-    heckeSymbol Γ Γ (1 : HeckeCoset Δ (Γ.map (mapGL ℚ)) (Γ.map (mapGL ℚ))) hΔ =
+    heckeSymbol Γ Γ (1 : HeckeCoset Δ (Γ.map (mapGL ℚ)) (Γ.map (mapGL ℚ))) hD =
       (LinearMap.id : ModularSymbols R Γ w →ₗ[R] ModularSymbols R Γ w) := by
   refine Coinvariants.hom_ext (LinearMap.ext fun x ↦ ?_)
   have hcover : doubleCoset ((1 : HeckeCoset Δ (Γ.map (mapGL ℚ)) (Γ.map (mapGL ℚ))).out :
@@ -263,7 +250,7 @@ theorem heckeSymbol_one (Γ : Subgroup SL(2, ℤ)) {Δ : Submonoid (GL (Fin 2) �
     rw [Set.iUnion_const, op_one, one_smul, ← HeckeCoset.rep_def,
       ← HeckeCoset.toSet_eq_doubleCoset_rep, HeckeCoset.toSet_one]
   rw [LinearMap.comp_apply, LinearMap.comp_apply, LinearMap.id_apply,
-    heckeSymbol_mk_eq_sum_of_rightCosets Γ Γ _ hΔ _ (fun _ ↦ one_mem _) hcover
+    heckeSymbol_mk_eq_sum_of_rightCosets Γ Γ _ hD _ (fun _ ↦ one_mem _) hcover
       (Function.injective_of_subsingleton _), Fintype.sum_unique]
   congr 1
   exact congrArg (fun e ↦ e x) (map_one (symbolIntRep R w))
@@ -281,12 +268,14 @@ by positive integers; at `n = 0` the double coset would degenerate to `Γ₁(N)`
 operator either way, and it is the index that is being constrained. -/
 noncomputable def heckeTSymbol (n : ℕ) [_hn : NeZero n] :
     Module.End R (ModularSymbols R (Gamma1 N) w) :=
-  heckeSymbol (Gamma1 N) (Gamma1 N) (diagCosetGamma1 N n) (Delta0_le_intEntries N)
+  heckeSymbol (Gamma1 N) (Gamma1 N) (diagCosetGamma1 N n)
+    (Delta0_le_intEntries N (diagCosetGamma1 N n).out.2)
 
 /-- The defining equation of `heckeTSymbol`. -/
 theorem heckeTSymbol_def (n : ℕ) [NeZero n] :
     heckeTSymbol R w N n =
-      heckeSymbol (Gamma1 N) (Gamma1 N) (diagCosetGamma1 N n) (Delta0_le_intEntries N) := (rfl)
+      heckeSymbol (Gamma1 N) (Gamma1 N) (diagCosetGamma1 N n)
+        (Delta0_le_intEntries N (diagCosetGamma1 N n).out.2) := (rfl)
 
 /-- The first Hecke operator on modular symbols is the identity. -/
 @[simp]

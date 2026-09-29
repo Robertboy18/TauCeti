@@ -275,6 +275,12 @@ lemma posDetInt_le_intEntries : posDetInt n ≤ intEntries n := inf_le_left
 lemma mapGL_mem_intEntries (σ : SpecialLinearGroup (Fin n) ℤ) : mapGL ℚ σ ∈ intEntries n :=
   hasIntEntries_of_mem_SLnZ n (coe_mem_SLnZ n σ)
 
+/-- The image in `GL_n(ℚ)` of a subgroup of `SL_n(ℤ)` has integer entries. -/
+lemma map_mapGL_le_intEntries (Γ : Subgroup (SpecialLinearGroup (Fin n) ℤ)) :
+    (Γ.map (mapGL ℚ)).toSubmonoid ≤ intEntries n := by
+  rintro _ ⟨σ, -, rfl⟩
+  exact mapGL_mem_intEntries n σ
+
 /-! ### The integral matrix underlying an element of `intEntries n`
 
 Membership in `intEntries n` is an existential over integral matrices, so reading off *the*
