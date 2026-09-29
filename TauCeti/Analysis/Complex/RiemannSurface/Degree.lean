@@ -83,8 +83,9 @@ variable {X Y Z : Type*} [TopologicalSpace X] [ChartedSpace ℂ X] [TopologicalS
 /-! ### The fibre sum -/
 
 /-- The number of preimages of `y` under `f`, counted with local multiplicities: the sum of
-`TauCeti.RiemannSurface.localMultiplicity f x` over the fibre `f ⁻¹' {y}`. It is `0` when the
-fibre is infinite, by the convention for `finsum`.
+`TauCeti.RiemannSurface.localMultiplicity f x` over the fibre `f ⁻¹' {y}`. Over a finite fibre it
+is a finite sum (`TauCeti.RiemannSurface.fiberMultiplicitySum_eq_sum`); by the convention for
+`finsum`, it is `0` when infinitely many points of the fibre have nonzero local multiplicity.
 
 For a holomorphic `f` on a compact Riemann surface which is constant near no point, this is a
 locally constant function of `y` (`TauCeti.RiemannSurface.eventually_fiberMultiplicitySum_eq`), and
