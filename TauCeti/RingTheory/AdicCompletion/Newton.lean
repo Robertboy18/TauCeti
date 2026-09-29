@@ -99,8 +99,7 @@ theorem IsAdicComplete.existsUnique_eq_zero_of_isUnit_det (A : (ι → R) → (�
       have hclass : ∀ i, π ∣ u (k + 1) i - u₀ i := fun i ↦ by
         have h1 := (dvd_pow_self π (Nat.succ_ne_zero k)).trans (hstep k ih.2 i)
         have h2 := ih.1 i
-        rw [show u (k + 1) i - u₀ i = (u (k + 1) i - u k i) + (u k i - u₀ i) by ring]
-        exact dvd_add h1 h2
+        simpa only [sub_add_sub_cancel] using dvd_add h1 h2
       refine ⟨hclass, fun i ↦ ?_⟩
       have h1 := hA (u k) (u (k + 1)) ih.1 hclass (k + 1) (by omega) (hstep k ih.2) i
       rw [hu_succ, hT, Pi.neg_apply, sub_neg_eq_add, sub_add_cancel] at h1
@@ -116,17 +115,15 @@ theorem IsAdicComplete.existsUnique_eq_zero_of_isUnit_det (A : (ι → R) → (�
     | succ n hmn ih =>
       intro i
       have h1 := (pow_dvd_pow π (by omega : m ≤ n + 1)).trans (hconsec n i)
-      rw [show (u m - u (n + 1)) i = (u m - u n) i - (u (n + 1) i - u n i) by
-        simp only [Pi.sub_apply]; ring]
-      exact dvd_sub (ih i) h1
+      simpa only [Pi.sub_apply, sub_sub_sub_cancel_right] using dvd_sub (ih i) h1
   obtain ⟨L, hL⟩ := IsPrecomplete.prec inferInstance hcauchy
   have hL' : ∀ k i, π ^ k ∣ L i - u k i := fun k i ↦ by
     have := (mem_span_singleton_pow_smul_top_iff π _ k).1 (SModEq.sub_mem.1 (hL k)) i
     rw [Pi.sub_apply] at this
     exact (dvd_neg.2 this).trans (by rw [neg_sub])
   have hLclass : ∀ i, π ∣ L i - u₀ i := fun i ↦ by
-    rw [show L i - u₀ i = (L i - u 1 i) + (u 1 i - u₀ i) by ring]
-    exact dvd_add (by simpa using hL' 1 i) ((key 1).1 i)
+    have h1 : π ∣ L i - u 1 i := by simpa only [pow_one] using hL' 1 i
+    simpa only [sub_add_sub_cancel] using dvd_add h1 ((key 1).1 i)
   -- `A L` vanishes modulo every power of `π`, hence vanishes.
   have hAL : A L = 0 := by
     refine IsHausdorff.haus (I := Ideal.span {π}) inferInstance _ fun k ↦ ?_
@@ -138,9 +135,7 @@ theorem IsAdicComplete.existsUnique_eq_zero_of_isUnit_det (A : (ι → R) → (�
     have h2 := (pow_dvd_pow π (Nat.le_succ k)).trans ((key k).2 i)
     have h3 := hmulVec M (L - u k) (π ^ k) (fun j ↦ by simpa using hL' k j) i
     have h4 := (pow_dvd_pow π (Nat.le_succ k)).trans h1
-    rw [show A L i = (A L i - A (u k) i - (M *ᵥ (L - u k)) i) + A (u k) i + (M *ᵥ (L - u k)) i by
-      ring]
-    exact dvd_add (dvd_add h4 h2) h3
+    simpa only [sub_add_cancel] using dvd_add (dvd_add h4 h3) h2
   refine ⟨L, ⟨hLclass, hAL⟩, fun v ⟨hv, hAv⟩ ↦ ?_⟩
   -- Uniqueness: two zeros in the residue class agree modulo every power of `π`.
   have hdiff : ∀ k i, π ^ k ∣ v i - L i := by
@@ -150,8 +145,7 @@ theorem IsAdicComplete.existsUnique_eq_zero_of_isUnit_det (A : (ι → R) → (�
     | succ k ih =>
       rcases Nat.eq_zero_or_pos k with rfl | hk
       · intro i
-        rw [show v i - L i = (v i - u₀ i) - (L i - u₀ i) by ring, zero_add, pow_one]
-        exact dvd_sub (hv i) (hLclass i)
+        simpa only [zero_add, pow_one, sub_sub_sub_cancel_right] using dvd_sub (hv i) (hLclass i)
       have h1 := hA L v hLclass hv k hk ih
       simp only [hAL, hAv, Pi.zero_apply, sub_self, zero_sub, dvd_neg] at h1
       have h2 := hmulVec M⁻¹ _ _ h1

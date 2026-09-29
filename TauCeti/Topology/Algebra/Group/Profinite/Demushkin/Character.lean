@@ -9,12 +9,10 @@ public import TauCeti.RingTheory.AdicCompletion.Newton
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Criterion
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Equiv
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.CrossedHomLinearization
+public import TauCeti.Topology.Algebra.Group.Profinite.Free.PadicUnits
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.Equiv
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.Presentation
 import Mathlib.LinearAlgebra.Matrix.BilinearForm
-import TauCeti.NumberTheory.Padics.PadicIntegers
-import TauCeti.Topology.Algebra.ContinuousMulEquiv
-import TauCeti.Topology.Connected.TotallyDisconnected
 
 /-!
 # The canonical character of a Demushkin group
@@ -80,36 +78,6 @@ universe u v
 attribute [local instance 2000] Ring.toAddCommGroup
 
 variable {p : ℕ} [Fact p.Prime] {X : Type u}
-
-section CharacterOfUnits
-
-variable (p X)
-
-/-- **The continuous character of a free pro-`p` group with prescribed principal-unit values on
-the generators**: for `u : X → 1 + pℤ_p`, the character `freeProP p X → ℤ_pˣ` with `x ↦ u x` on
-the generators, the universal property applied to the pro-`p` group `1 + pℤ_p`, lifted to the
-universe of `X`. -/
-noncomputable def freeProP.characterOfUnits (u : X → unitsPrincipal p 1) :
-    freeProP p X →ₜ* ℤ_[p]ˣ :=
-  ((ContinuousMonoidHom.subgroupSubtype (unitsPrincipal p 1)).comp
-    ((ContinuousMulEquiv.ulift : ULift.{u} (unitsPrincipal p 1) ≃ₜ* unitsPrincipal p 1) :
-      ULift.{u} (unitsPrincipal p 1) →ₜ* unitsPrincipal p 1)).comp
-    (lift ((isProP_unitsPrincipal p one_pos).of_equiv ContinuousMulEquiv.ulift.symm)
-      fun x ↦ ULift.up (u x))
-
-/-- The character attached to `u` takes the value `u x` at the generator `x`. -/
-@[simp]
-theorem freeProP.characterOfUnits_of (u : X → unitsPrincipal p 1) (x : X) :
-    characterOfUnits p X u (of x) = u x := by
-  simp [characterOfUnits]
-
-/-- Every continuous character of a free pro-`p` group is the character of its values on the
-generators, which are principal units. -/
-theorem freeProP.eq_characterOfUnits (χ : freeProP p X →ₜ* ℤ_[p]ˣ) :
-    χ = characterOfUnits p X fun x ↦ ⟨χ (of x), (isProP_freeProP p X).mem_unitsPrincipal_one χ _⟩ :=
-  hom_ext fun x ↦ by rw [characterOfUnits_of]
-
-end CharacterOfUnits
 
 section Presented
 
@@ -277,6 +245,7 @@ theorem HasPrescriptionProperty.eq_demushkinCharacter {χ : G →ₜ* ℤ_[p]ˣ}
 
 /-- A continuous character of a Demushkin group has the prescription property exactly when it is
 the canonical character. -/
+@[simp]
 theorem hasPrescriptionProperty_iff_eq_demushkinCharacter (χ : G →ₜ* ℤ_[p]ˣ) :
     HasPrescriptionProperty χ ↔ χ = demushkinCharacter hG :=
   ⟨fun h ↦ h.eq_demushkinCharacter hG, fun h ↦ h ▸ hasPrescriptionProperty_demushkinCharacter hG⟩
