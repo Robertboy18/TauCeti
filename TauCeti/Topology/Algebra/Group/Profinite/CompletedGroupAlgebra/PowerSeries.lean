@@ -193,6 +193,7 @@ theorem aeval_surjective (hΓ : IsProP p Γ) {γ : Γ}
 section Division
 
 /-- Evaluation at `γ - 1` sends `X - C c` to `γ - (1 + c)`. -/
+@[simp]
 theorem aeval_X_sub_C (hΓ : IsProP p Γ) (γ : Γ) (c : ℤ_[p]) :
     PowerSeries.aeval (isTopologicallyNilpotent_of_sub_one hΓ γ)
       (PowerSeries.X - PowerSeries.C c) =
