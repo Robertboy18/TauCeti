@@ -45,14 +45,15 @@ the presented group has topological generator rank exactly `n`.
 
 ## Main results
 
-* `TauCeti.demushkinWordNeTwo_presentedProPGen_eq_one` and its two companions: the generators of the
-  normal-form presentation satisfy its defining relation.
+* `TauCeti.demushkinWordNeTwo_presentedProPGen_eq_one` and its three companions: the generators of
+  the normal-form presentation satisfy its defining relation.
 * `TauCeti.demushkinWordNeTwo_mem_proPFrattini`, `TauCeti.demushkinWordTwoOdd_mem_proPFrattini`,
   `TauCeti.demushkinWordTwoEven_mem_proPFrattini`,
   `TauCeti.demushkinWordTwoRankTwo_mem_proPFrattini`: each word lies in the pro-`p` Frattini
   subgroup, for `p ∣ q`, resp. `0 < f`, resp. `2 ∣ a` and `0 < f`, resp. `2 ∣ a`.
-* `TauCeti.topologicalGeneratorRankNat_presentedProP_demushkinWordNeTwo` and its two companions:
-  under the same conditions, the normal-form presentation on `n` generators is minimal.
+* `TauCeti.topologicalGeneratorRankNat_presentedProP_demushkinWordNeTwo` and its three
+  companions: under the same conditions, the normal-form presentation on `n` generators, resp. on
+  two generators, is minimal.
 * `TauCeti.map_demushkinWordNeTwo_eq_one` and its three companions: a character into a
   commutative group kills the word as soon as its values on the generators carrying a power have
   trivial power: `χ(x₁)^q = 1`, resp. `χ(x₁)² = 1` and `χ(x₂)^{2^f} = 1`, resp. `χ(x₁)^{2+a} = 1`
@@ -313,6 +314,15 @@ theorem demushkinWordTwoEven_presentedProPGen_eq_one (a f n : ℕ) :
   rw [← presentedProP.mk_comp_freeProPGen, ← map_demushkinWordTwoEven]
   exact presentedProP.mk_relator _ (Set.mem_singleton _)
 
+/-- The `ℕ`-indexed generators of the rank-two `q = 2` normal-form presentation satisfy its
+defining relation `x₁^{2+a} (x₁, x₂) = 1`. -/
+@[simp]
+theorem demushkinWordTwoRankTwo_presentedProPGen_eq_one (a : ℕ) :
+    demushkinWordTwoRankTwo a
+      (presentedProPGen p 2 {demushkinWordTwoRankTwo a (freeProPGen p 2)}) = 1 := by
+  rw [← presentedProP.mk_comp_freeProPGen, ← map_demushkinWordTwoRankTwo]
+  exact presentedProP.mk_relator _ (Set.mem_singleton _)
+
 end Relation
 
 /-! ### The words lie in the Frattini subgroup -/
@@ -394,6 +404,16 @@ theorem topologicalGeneratorRankNat_presentedProP_demushkinWordTwoEven {a f : �
   simpa using (presentedProP.topologicalGeneratorRankNat_eq_card_iff
     {demushkinWordTwoEven a f n (freeProPGen 2 n)}).mpr
     (Set.singleton_subset_iff.mpr (demushkinWordTwoEven_mem_proPFrattini ha hf n _))
+
+/-- **The rank-two `q = 2` normal-form presentation is minimal**: for `a` even, the pro-`2` group
+presented on two generators by `x₁^{2+a} (x₁, x₂)` has topological generator rank `2`. -/
+theorem topologicalGeneratorRankNat_presentedProP_demushkinWordTwoRankTwo {a : ℕ} (ha : 2 ∣ a) :
+    topologicalGeneratorRankNat
+      (presentedProP 2 (Fin 2) {demushkinWordTwoRankTwo a (freeProPGen 2 2)})
+      presentedProP.isTopologicallyFinitelyGenerated = 2 := by
+  simpa using (presentedProP.topologicalGeneratorRankNat_eq_card_iff
+    {demushkinWordTwoRankTwo a (freeProPGen 2 2)}).mpr
+    (Set.singleton_subset_iff.mpr (demushkinWordTwoRankTwo_mem_proPFrattini ha _))
 
 end Minimal
 
