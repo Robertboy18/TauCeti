@@ -420,11 +420,8 @@ theorem cTransform_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) 
       (b y : EReal) + cTransform c (fun x => φ x - (a x : EReal)) y := by
   rw [cTransform_apply, cTransform_apply, EReal.coe_add_iInf]
   refine iInf_congr fun x => ?_
-  generalize φ x = z
-  induction z with
-  | bot => simp
-  | coe s => norm_cast; ring
-  | top => simp
+  rw [EReal.sub_sub_coe_eq_add_coe_sub, ← add_sub_assoc, ← EReal.coe_add, ← EReal.coe_add,
+    add_comm (b y)]
 
 /-- Adding a split cost `a x + b y` to the cost shifts the symmetric `c`-transform: the target
 term is absorbed into the potential and the source term is added to the result. -/
@@ -658,17 +655,10 @@ theorem cSuperdifferential_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y �
     cSuperdifferential (fun p => c p + a p.1 + b p.2) φ =
       cSuperdifferential c (fun x => φ x - (a x : EReal)) := by
   ext ⟨x, y⟩
-  rw [mk_mem_cSuperdifferential_iff, mk_mem_cSuperdifferential_iff, cTransform_add_add]
-  generalize cTransform c (fun x => φ x - (a x : EReal)) y = t
-  generalize φ x = z
-  induction z <;> induction t <;>
-    simp only [EReal.bot_add, EReal.add_bot, EReal.bot_sub, EReal.top_sub_coe, EReal.coe_add_top,
-      EReal.top_add_coe, EReal.top_add_top, ← EReal.coe_add, ← EReal.coe_sub,
-      EReal.coe_eq_coe_iff]
-  all_goals first
-    | exact iff_of_false (EReal.bot_ne_coe _) (EReal.bot_ne_coe _)
-    | exact iff_of_false (EReal.top_ne_coe _) (EReal.top_ne_coe _)
-    | (constructor <;> intro h <;> linarith)
+  rw [mk_mem_cSuperdifferential_iff, mk_mem_cSuperdifferential_iff, cTransform_add_add,
+    add_left_comm, EReal.coe_add, EReal.coe_add, add_comm _ ((b y : ℝ) : EReal),
+    (EReal.addLECancellable_coe _).inj_right, EReal.sub_coe_add_eq_add_sub,
+    EReal.sub_coe_eq_iff_eq_add_coe]
 
 end TauCeti
 

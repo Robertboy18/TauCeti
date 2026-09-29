@@ -78,12 +78,8 @@ theorem cTransform_pairingCost (φ : E → EReal) (y : F) :
     cTransform (pairingCost B) φ y = -fenchelConjugate B (fun x => -φ x) y := by
   rw [cTransform_apply, fenchelConjugate_apply, EReal.neg_iSup]
   refine iInf_congr fun x => ?_
-  rw [pairingCost_apply]
-  generalize φ x = z
-  induction z with
-  | bot => simp
-  | coe s => norm_cast; ring
-  | top => simp
+  rw [pairingCost_apply, EReal.neg_coe_sub, EReal.coe_neg, sub_eq_add_neg, sub_eq_add_neg,
+    add_comm]
 
 /-- The symmetric `c`-transform for the pairing cost is the negative of the Legendre–Fenchel
 conjugate, for the transposed pairing, of the negated potential. -/
@@ -130,19 +126,8 @@ theorem cSuperdifferential_pairingCost (φ : E → EReal) :
     cSuperdifferential (pairingCost B) φ = {p | p.2 ∈ subdifferential B (fun x => -φ x) p.1} := by
   ext ⟨x, y⟩
   rw [mk_mem_cSuperdifferential_iff, Set.mem_ofPred_eq,
-    mem_subdifferential_iff_add_fenchelConjugate_eq, cTransform_pairingCost, pairingCost_apply]
-  generalize fenchelConjugate B (fun x => -φ x) y = t
-  generalize φ x = z
-  induction z <;> induction t <;>
-    simp only [EReal.bot_add, EReal.add_bot, EReal.neg_bot, EReal.neg_top, EReal.top_add_coe,
-      EReal.coe_add_top, EReal.top_add_top, ← EReal.coe_neg, ← EReal.coe_add,
-      EReal.coe_eq_coe_iff]
-  all_goals first
-    | exact iff_of_false (EReal.bot_ne_coe _) (EReal.bot_ne_coe _)
-    | exact iff_of_false (EReal.top_ne_coe _) (EReal.top_ne_coe _)
-    | exact iff_of_false (EReal.bot_ne_coe _) (EReal.top_ne_coe _)
-    | exact iff_of_false (EReal.top_ne_coe _) (EReal.bot_ne_coe _)
-    | (constructor <;> intro h <;> linarith)
+    mem_subdifferential_iff_add_fenchelConjugate_eq, cTransform_pairingCost, pairingCost_apply,
+    EReal.add_eq_coe_iff_neg_add_neg_eq, neg_neg, neg_neg]
 
 end TauCeti
 

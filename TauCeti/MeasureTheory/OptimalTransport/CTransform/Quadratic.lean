@@ -20,8 +20,11 @@ Legendre–Fenchel conjugate, its `c`-transform is `‖y‖ ^ 2 / 2 - u⋆ y`, i
 is the graph of the subdifferential `∂u`, and a set is `c`-cyclically monotone exactly when it is
 cyclically monotone in the classical sense `∑ i, ⟪x i, y (σ i)⟫ ≤ ∑ i, ⟪x i, y i⟫`. Rockafellar's
 theorem then produces, from a `c`-cyclically monotone set, a conjugate `u` whose subdifferential
-graph contains it; this `u` is the convex potential of the Brenier map, and every bridge here
-accounts for the factor `1 / 2` in the cost.
+graph contains it. This is the algebraic step of Brenier's theorem: applied to the support of a
+quadratic optimal plan, it yields the convex potential from which the Brenier map is later
+extracted, once finite dimension, absolute continuity of the source and almost-everywhere
+differentiability of `u` enter; none of these analytic and measure-theoretic hypotheses is used
+here. Every bridge in this file accounts for the factor `1 / 2` in the cost.
 
 ## Main statements
 
@@ -29,10 +32,11 @@ accounts for the factor `1 / 2` in the cost.
   quadratic cost is cyclical monotonicity for the inner-product pairing, with
   `TauCeti.isCyclicallyMonotone_norm_sub_sq_div_two_iff_forall_sum_inner_le` its classical
   sum form;
-* `TauCeti.cTransform_norm_sub_sq_div_two`, `TauCeti.isCConcave_norm_sub_sq_div_two_iff` and
-  `TauCeti.cSuperdifferential_norm_sub_sq_div_two` — the `c`-transform, `c`-concavity and
-  `c`-superdifferential for the quadratic cost in terms of the Legendre–Fenchel conjugate and the
-  subdifferential of `‖·‖ ^ 2 / 2 - φ`;
+* `TauCeti.cTransform_norm_sub_sq_div_two`, `TauCeti.cTransformSymm_norm_sub_sq_div_two`,
+  `TauCeti.isCConcave_norm_sub_sq_div_two_iff` and
+  `TauCeti.cSuperdifferential_norm_sub_sq_div_two` — the two `c`-transforms, `c`-concavity and
+  the `c`-superdifferential for the quadratic cost in terms of the Legendre–Fenchel conjugate
+  and the subdifferential of `‖·‖ ^ 2 / 2 - φ`;
 * `TauCeti.IsCyclicallyMonotone.exists_fenchelConjugate_innerₗ_subset_subdifferential`
   — **Rockafellar's theorem for the quadratic cost**: a `c`-cyclically monotone set lies in the
   subdifferential graph of a Legendre–Fenchel conjugate for the inner product.
@@ -92,6 +96,19 @@ theorem cTransform_norm_sub_sq_div_two (φ : E → EReal) (y : E) :
   rw [norm_sub_sq_div_two_eq_pairingCost_add_add,
     cTransform_add_add (pairingCost (innerₗ E)) (fun x => ‖x‖ ^ 2 / 2) (fun y => ‖y‖ ^ 2 / 2),
     cTransform_pairingCost, sub_eq_add_neg]
+  simp only [EReal.neg_sub_coe]
+
+/-- The symmetric `c`-transform of a potential `ψ` on the target for the quadratic cost is
+`‖x‖ ^ 2 / 2 - v⋆ x`, where `v = ‖·‖ ^ 2 / 2 - ψ` and `v⋆` is its Legendre–Fenchel conjugate for
+the inner product; the quadratic cost is symmetric, so the formula is the same as for the
+infimal `c`-transform. -/
+theorem cTransformSymm_norm_sub_sq_div_two (ψ : E → EReal) (x : E) :
+    cTransformSymm (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) ψ x =
+      ((‖x‖ ^ 2 / 2 : ℝ) : EReal) -
+        fenchelConjugate (innerₗ E) (fun y => ((‖y‖ ^ 2 / 2 : ℝ) : EReal) - ψ y) x := by
+  rw [norm_sub_sq_div_two_eq_pairingCost_add_add,
+    cTransformSymm_add_add (pairingCost (innerₗ E)) (fun x => ‖x‖ ^ 2 / 2) (fun y => ‖y‖ ^ 2 / 2),
+    cTransformSymm_pairingCost, flip_innerₗ, sub_eq_add_neg]
   simp only [EReal.neg_sub_coe]
 
 /-- A potential `φ` is `c`-concave for the quadratic cost exactly when `‖·‖ ^ 2 / 2 - φ` is a

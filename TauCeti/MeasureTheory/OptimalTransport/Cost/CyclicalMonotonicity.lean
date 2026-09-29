@@ -124,7 +124,7 @@ theorem isCyclicallyMonotone_empty [Preorder M] (c : X × Y → M) :
 
 section Split
 
-variable [PartialOrder M] [IsOrderedCancelAddMonoid M]
+variable [LE M] [AddRightMono M] [AddRightReflectLE M]
 
 /-- **Cyclical monotonicity is insensitive to split costs.** Adding a function of the source
 alone and a function of the target alone to the cost does not change which sets are cyclically

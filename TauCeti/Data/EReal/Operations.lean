@@ -27,6 +27,13 @@ the last two a real minuend.
 * `EReal.coe_add_iInf` — adding a real constant commutes with an infimum;
 * `EReal.neg_sub_coe` and `EReal.neg_coe_sub` — negating a difference with one real operand
   exchanges the operands, with no finiteness hypothesis on the other;
+* `EReal.sub_sub_coe_eq_add_coe_sub` and `EReal.sub_coe_add_eq_add_sub` — a real subtrahend
+  moves freely through sums and differences, as in `sub_sub_eq_add_sub` and `sub_add_eq_add_sub`
+  for groups;
+* `EReal.sub_coe_eq_iff_eq_add_coe` — a real subtrahend can be moved across an equation, as in
+  `sub_eq_iff_eq_add` for groups;
+* `EReal.add_eq_coe_iff_neg_add_neg_eq` — an equation between a sum and a real number can be
+  negated term by term;
 * `EReal.neg_iSup` and `EReal.neg_iInf` — negation exchanges suprema and infima.
 -/
 
@@ -89,6 +96,31 @@ theorem _root_.EReal.neg_sub_coe (b : EReal) (r : ℝ) : -(b - (r : EReal)) = (r
 subtrahend. -/
 theorem _root_.EReal.neg_coe_sub (r : ℝ) (b : EReal) : -((r : EReal) - b) = b - (r : EReal) := by
   rw [← EReal.neg_sub_coe, neg_neg]
+
+/-- A real subtrahend inside a subtrahend can be pulled out as a summand, for all extended-real
+`x` and `y`: this is `sub_sub_eq_add_sub` for `EReal`, with no finiteness hypothesis. -/
+theorem _root_.EReal.sub_sub_coe_eq_add_coe_sub (x y : EReal) (a : ℝ) :
+    x - (y - (a : EReal)) = x + (a : EReal) - y := by
+  rw [sub_eq_add_neg x, EReal.neg_sub_coe, sub_eq_add_neg, ← add_assoc, ← sub_eq_add_neg]
+
+/-- A real subtrahend commutes past a summand, for all extended-real `x` and `y`: this is
+`sub_add_eq_add_sub` for `EReal`, with no finiteness hypothesis. -/
+theorem _root_.EReal.sub_coe_add_eq_add_sub (x y : EReal) (a : ℝ) :
+    x - (a : EReal) + y = x + y - (a : EReal) := by
+  rw [sub_eq_add_neg, sub_eq_add_neg, add_right_comm]
+
+/-- A real subtrahend can be moved across an equation in `EReal`, for all extended-real `x` and
+`y`: this is `sub_eq_iff_eq_add` for `EReal`, with no finiteness hypothesis. -/
+theorem _root_.EReal.sub_coe_eq_iff_eq_add_coe {x y : EReal} {a : ℝ} :
+    x - (a : EReal) = y ↔ x = y + (a : EReal) :=
+  ⟨fun h => by rw [← h, EReal.sub_add_cancel], fun h => by rw [h, EReal.add_sub_cancel_right]⟩
+
+/-- An equation between a sum of extended reals and a real number can be negated term by term.
+Both sides force `x` and `y` to be real, so no finiteness hypothesis is needed, even though
+`-(x + y) = -x + -y` fails in `EReal` when `x` and `y` are opposite infinities. -/
+theorem _root_.EReal.add_eq_coe_iff_neg_add_neg_eq {x y : EReal} {r : ℝ} :
+    x + y = (r : EReal) ↔ -x + -y = ((-r : ℝ) : EReal) := by
+  induction x <;> induction y <;> simp [← EReal.coe_add, ← EReal.coe_neg, ← neg_add, -neg_add_rev]
 
 /-- Negation turns a supremum in `EReal` into the infimum of the negated values. -/
 theorem _root_.EReal.neg_iSup {ι : Sort*} (f : ι → EReal) : -(⨆ i, f i) = ⨅ i, -f i := by
