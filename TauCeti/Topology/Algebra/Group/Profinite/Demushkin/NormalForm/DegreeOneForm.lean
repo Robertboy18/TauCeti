@@ -55,7 +55,8 @@ nondegenerate and not alternating, which is a direct computation.
 * `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo`: the
   alternating case, for every `p`.
 * `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordNeTwo`: the degree-one form of the
-  alternating normal-form word `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` is nondegenerate for `n` even.
+  normal-form word `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` is nondegenerate for `n` even and every `q`
+  divisible by `p` (at `p = 2` this includes `q ≡ 2 mod 4`, where the form is not alternating).
 * `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordTwoOdd`,
   `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordTwoEven`: the degree-one forms of
   the two dyadic normal-form words are nondegenerate, for `n` odd, resp. even, for every `f ≥ 1`
@@ -368,7 +369,7 @@ theorem exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo_zero_
   exact ⟨hn, e, he.trans gradedMk_demushkinWordNeTwo_zero_eq_altClass.symm⟩
 
 
-/-! ### The alternating normal forms are nondegenerate -/
+/-! ### The normal form `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` is nondegenerate -/
 
 /-- The value of the degree-one form of the class of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` on a
 character and the `j`-th coordinate character. -/
@@ -389,7 +390,8 @@ private theorem degreeOneForm_demushkinWordNeTwo_dualBasis {q : ℕ} (hq : p ∣
 /-- **The degree-one form of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` is nondegenerate for `n` even** and
 `p ∣ q`: pairing with the `j`-th coordinate character reads off the value of a character at the
 partner `x_{j±1}` of `x_j` in the commutator pairs, up to the `p`-power term, which involves only
-the value at `x₁` and is read off first. This covers `q = 0`. -/
+the value at `x₁` and is read off first. This covers `q = 0`, and at `p = 2` also `q ≡ 2 mod 4`,
+where the form is not alternating. -/
 theorem nondegenerate_degreeOneForm_demushkinWordNeTwo (hn : Even n) {q : ℕ} (hq : p ∣ q) :
     (degreeOneForm (gradedMk p (freeProP p (Fin n)) 1
       ⟨demushkinWordNeTwo q n (freeProPGen p n),

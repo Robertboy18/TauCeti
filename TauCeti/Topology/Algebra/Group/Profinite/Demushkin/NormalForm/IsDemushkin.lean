@@ -61,9 +61,10 @@ open freeProP
 
 variable {p : ℕ} [Fact p.Prime] {n : ℕ}
 
-/-- **The alternating normal form defines a Demushkin group.** For `p ∣ q` and `n ≥ 2` even, the
-pro-`p` group presented on `n` generators by `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` is a
-Demushkin group. This covers `q = 0`, where the relator is `(x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`. -/
+/-- **The normal form `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` defines a Demushkin group.** For
+`p ∣ q` and `n ≥ 2` even, the pro-`p` group presented on `n` generators by this word is a
+Demushkin group. This covers `q = 0`, where the relator is `(x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`, and
+at `p = 2` also `q ≡ 2 mod 4`, where the degree-one form is not alternating. -/
 theorem isDemushkin_presentedProP_demushkinWordNeTwo (hn : Even n) (hn0 : n ≠ 0) {q : ℕ}
     (hq : p ∣ q) :
     IsDemushkin p (presentedProP p (Fin n) {demushkinWordNeTwo q n (freeProPGen p n)}) :=
@@ -72,8 +73,8 @@ theorem isDemushkin_presentedProP_demushkinWordNeTwo (hn : Even n) (hn0 : n ≠ 
     (demushkinWordNeTwo_mem_proPFrattini Fact.out hq n _) (ContinuousMulEquiv.refl _)
     (nondegenerate_degreeOneForm_demushkinWordNeTwo hn hq)
 
-/-- **The alternating normal form on `n` generators has rank `n`**, for `p ∣ q`, whenever it is
-a Demushkin group. -/
+/-- **The normal form `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` on `n` generators has rank `n`**,
+for `p ∣ q`, whenever it is a Demushkin group. -/
 @[simp]
 theorem demushkinRank_presentedProP_demushkinWordNeTwo {q : ℕ} (hq : p ∣ q)
     (hG : IsDemushkin p (presentedProP p (Fin n) {demushkinWordNeTwo q n (freeProPGen p n)})) :

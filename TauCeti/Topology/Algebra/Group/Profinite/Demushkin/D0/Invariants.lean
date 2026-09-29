@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.D0
+public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.D0.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.QInvariant
 import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Abelianization
 import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Finite
