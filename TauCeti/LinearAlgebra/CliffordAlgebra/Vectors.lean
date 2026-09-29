@@ -61,8 +61,8 @@ the scalars and the vectors, the disjointness of the two pins that step down to 
 * `CliffordAlgebra.eq_zero_of_commute_ι_of_isOrtho`: over a field, a vector commuting with two
   orthogonal anisotropic vectors is zero.
 * `CliffordAlgebra.eq_zero_or_exists_ι_eq_smul_of_mul_self_eq_algebraMap`: over a field, if a
-  vector plus a multiple of a central element with nonzero scalar square has scalar square, then
-  the multiple vanishes or the vector is a multiple of the central element.
+  vector plus a multiple of a commuting element with nonzero scalar square has scalar square, then
+  the multiple vanishes or the vector is a multiple of that element.
 * `CliffordAlgebra.mul_ι_notMem_range_ι_of_mul_ι_eq_neg`: over a field, a nonzero element
   anticommuting with two orthogonal anisotropic companions of an anisotropic vector `v` sends
   `ι Q v` outside the vectors.
@@ -319,19 +319,20 @@ theorem eq_zero_of_commute_ι_of_isOrtho {u₁ u₂ w : V} (hu₁ : Q u₁ ≠ 0
     · exact absurd h (mul_ne_zero (Invertible.ne_zero (2 : K)) hu₁)
   rw [hc₁, hc₁0, zero_smul]
 
-/-! ### A vector plus a central element with scalar square -/
+/-! ### A vector plus a commuting element with scalar square -/
 
 variable {Q} in
-/-- **A vector plus a multiple of a central element with nonzero scalar square has scalar square
-only if the multiple vanishes or the vector is itself a multiple of the central element.** Let `ω`
-be central with `ω * ω` the nonzero scalar `s`. If `(ι Q w + c • ω) ^ 2` is a scalar, then either
-`c = 0` or `ι Q w` is a multiple of `ω`: the cross term `2 c • (ω * ι Q w)` is a scalar, and
-multiplying it by `ω` once more isolates `ι Q w`. -/
-theorem eq_zero_or_exists_ι_eq_smul_of_mul_self_eq_algebraMap {ω : CliffordAlgebra Q}
-    (hω : ∀ z, Commute ω z) {s : K} (hsq : ω * ω = algebraMap K _ s) (hs : s ≠ 0) {w : V}
+/-- **A vector plus a multiple of a commuting element with nonzero scalar square has scalar square
+only if the multiple vanishes or the vector is itself a multiple of that element.** Let `ω` commute
+with `ι Q w` and have `ω * ω` the nonzero scalar `s`. If `(ι Q w + c • ω) ^ 2` is a scalar, then
+either `c = 0` or `ι Q w` is a multiple of `ω`: the cross term `2 c • (ω * ι Q w)` is a scalar, and
+multiplying it by `ω` once more isolates `ι Q w`. Only commutation with the single vector `ι Q w`
+is needed; a central `ω` (such as a volume element in odd dimension) supplies it. -/
+theorem eq_zero_or_exists_ι_eq_smul_of_mul_self_eq_algebraMap {ω : CliffordAlgebra Q} {w : V}
+    (hω : Commute ω (ι Q w)) {s : K} (hsq : ω * ω = algebraMap K _ s) (hs : s ≠ 0)
     {c q : K} (h : (ι Q w + c • ω) * (ι Q w + c • ω) = algebraMap K _ q) :
     c = 0 ∨ ∃ t : K, ι Q w = t • ω := by
-  have hwω : ι Q w * ω = ω * ι Q w := (hω (ι Q w)).symm.eq
+  have hwω : ι Q w * ω = ω * ι Q w := hω.symm.eq
   have hexp : (2 * c) • (ω * ι Q w) = algebraMap K _ (q - Q w - c * c * s) := by
     have hsq' : (ι Q w + c • ω) * (ι Q w + c • ω) =
         algebraMap K _ (Q w) + (2 * c) • (ω * ι Q w) + algebraMap K _ (c * c * s) := by

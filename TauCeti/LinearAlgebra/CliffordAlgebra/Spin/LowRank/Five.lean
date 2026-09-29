@@ -126,7 +126,8 @@ theorem evenUnitaryGroup_le_lipschitzGroup_of_finrank_eq_five (Q : QuadraticForm
     rw [hy]
     simp only [mul_assoc, Units.inv_mul_cancel_left]
     rw [← mul_assoc (ι Q m), ι_sq_scalar, Algebra.commutes, ← mul_assoc, Units.mul_inv, one_mul]
-  rcases eq_zero_or_exists_ι_eq_smul_of_mul_self_eq_algebraMap hcenter hsq hs hysq with hc | ⟨t, ht⟩
+  rcases eq_zero_or_exists_ι_eq_smul_of_mul_self_eq_algebraMap (hcenter (ι Q w)) hsq hs hysq with
+    hc | ⟨t, ht⟩
   · -- `c = 0`: the conjugate is the vector `ι Q w`.
     rw [← hy, hc, zero_smul, add_zero]
     exact LinearMap.mem_range_self _ w
