@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Analysis.InnerProductSpace.Basic
-public import TauCeti.Analysis.Convex.CyclicallyMonotone
+public import TauCeti.MeasureTheory.OptimalTransport.CTransform.Rockafellar
 
 /-!
 # The quadratic cost and convex analysis
