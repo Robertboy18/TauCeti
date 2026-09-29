@@ -59,8 +59,7 @@ finite holomorphic map.
   `TauCeti.RiemannSurface.FiniteHolomorphicMap.comp`, and the degree API on them with no side
   hypotheses: `TauCeti.RiemannSurface.localMultiplicity_pos`,
   `TauCeti.RiemannSurface.degree_eq_fiber_sum`, `TauCeti.RiemannSurface.degree_pos`,
-  `TauCeti.RiemannSurface.FiniteHolomorphicMap.localMultiplicity_comp` and
-  `TauCeti.RiemannSurface.degree_comp`.
+  `TauCeti.RiemannSurface.localMultiplicity_comp` and `TauCeti.RiemannSurface.degree_comp`.
 
 ## References
 
@@ -308,8 +307,8 @@ theorem degree_comp_of_forall_not_eventuallyConst [IsManifold 𝓘(ℂ) 1 Z] [Co
     calc ∑ᶠ x ∈ f ⁻¹' {y}, localMultiplicity (g ∘ f) x
         = ∑ᶠ x ∈ f ⁻¹' {y}, localMultiplicity g y * localMultiplicity f x :=
           finsum_mem_congr rfl fun x hx ↦ by
-            rw [localMultiplicity_comp (.of_forall fun w ↦ hg w) (.of_forall fun w ↦ hf w),
-              mem_singleton_iff.1 (mem_preimage.1 hx)]
+            rw [localMultiplicity_comp_of_eventually_mdifferentiableAt (.of_forall fun w ↦ hg w)
+              (.of_forall fun w ↦ hf w), mem_singleton_iff.1 (mem_preimage.1 hx)]
       _ = localMultiplicity g y * fiberMultiplicitySum f y := by
           rw [fiberMultiplicitySum_eq_sum hS, finsum_mem_eq_finite_toFinset_sum _ hS,
             Finset.mul_sum]
@@ -419,12 +418,12 @@ theorem FiniteHolomorphicMap.coe_comp (g : FiniteHolomorphicMap Y Z)
 
 /-- **Multiplicativity of the local multiplicity** for finite holomorphic maps: the local
 multiplicity of `g.comp f` at `x` is the product of that of `g` at `f x` and that of `f` at `x`.
-The root name `TauCeti.RiemannSurface.localMultiplicity_comp` is the statement for maps, with
-holomorphy near the two points as hypotheses. -/
-theorem FiniteHolomorphicMap.localMultiplicity_comp [IsManifold 𝓘(ℂ) 1 Z]
+The statement for maps, with holomorphy near the two points as hypotheses, is
+`TauCeti.RiemannSurface.localMultiplicity_comp_of_eventually_mdifferentiableAt`. -/
+theorem localMultiplicity_comp [IsManifold 𝓘(ℂ) 1 Z]
     (g : FiniteHolomorphicMap Y Z) (f : FiniteHolomorphicMap X Y) (x : X) :
     localMultiplicity (g.comp f) x = localMultiplicity g (f x) * localMultiplicity f x :=
-  RiemannSurface.localMultiplicity_comp (.of_forall fun y ↦ g.holomorphic y)
+  localMultiplicity_comp_of_eventually_mdifferentiableAt (.of_forall fun y ↦ g.holomorphic y)
     (.of_forall fun y ↦ f.holomorphic y)
 
 /-- **Multiplicativity of the degree** for finite holomorphic maps `f : X → Y` and `g : Y → Z`
