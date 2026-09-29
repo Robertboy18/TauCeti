@@ -275,14 +275,8 @@ def IsEmptyFor (x : GridState n) : Prop :=
 /-- A rectangle is empty for a grid state exactly when no point of the state lies in its
 interior. -/
 theorem isEmptyFor_iff (x : GridState n) :
-    R.IsEmptyFor x ↔ ∀ p ∈ x.pointSet, p ∉ R.interior := by
-  rw [IsEmptyFor, disjoint_comm, Finset.disjoint_iff_ne]
-  constructor
-  · intro h p hp hpR
-    exact h p hp p hpR rfl
-  · intro h p hp q hq hpq
-    subst hpq
-    exact h p hp hq
+    R.IsEmptyFor x ↔ ∀ p ∈ x.pointSet, p ∉ R.interior :=
+  Finset.disjoint_right
 
 /-- A rectangle is empty for a grid state exactly when the state sends every column strictly
 between its two side columns to a row outside the open arc between its two side rows.
@@ -924,78 +918,33 @@ def swapSides (R : GridRectangleBetween x y) : GridRectangleBetween x y where
   map_right := R.map_left
   map_of_ne c hl hr := R.map_of_ne c hr hl
 
-end GridRectangleBetween
-
-end TauCeti
-
-end
-
-section
-
-namespace TauCeti
-
-namespace GridRectangleBetween
-
-variable {n : ℕ} {x y : GridState n}
-
-private theorem swapSides_left_aux (R : GridRectangleBetween x y) : R.swapSides.left = R.right :=
-  rfl
-
-private theorem swapSides_right_aux (R : GridRectangleBetween x y) : R.swapSides.right = R.left :=
-  rfl
-
-private theorem swapSides_bottom_aux (R : GridRectangleBetween x y) : R.swapSides.bottom = R.top :=
-  rfl
-
-private theorem swapSides_top_aux (R : GridRectangleBetween x y) : R.swapSides.top = R.bottom :=
-  rfl
-
-private theorem swapSides_toGridRectangle_aux (R : GridRectangleBetween x y) :
-    R.swapSides.toGridRectangle =
-      { left := R.right, right := R.left, bottom := R.top, top := R.bottom } := by
-  rfl
-
-end GridRectangleBetween
-
-end TauCeti
-
-end
-
-public section
-
-namespace TauCeti
-
-namespace GridRectangleBetween
-
-variable {n : ℕ} {x y : GridState n}
-
 /-- The side-swapped rectangle's initial side column is the original terminal side column. -/
 @[simp]
 theorem swapSides_left (R : GridRectangleBetween x y) : R.swapSides.left = R.right :=
-  swapSides_left_aux R
+  (rfl)
 
 /-- The side-swapped rectangle's terminal side column is the original initial side column. -/
 @[simp]
 theorem swapSides_right (R : GridRectangleBetween x y) : R.swapSides.right = R.left :=
-  swapSides_right_aux R
+  (rfl)
 
 /-- The side-swapped rectangle's bottom row is the original top row. -/
 @[simp]
 theorem swapSides_bottom (R : GridRectangleBetween x y) : R.swapSides.bottom = R.top :=
-  swapSides_bottom_aux R
+  (rfl)
 
 /-- The side-swapped rectangle's top row is the original bottom row. -/
 @[simp]
 theorem swapSides_top (R : GridRectangleBetween x y) : R.swapSides.top = R.bottom :=
-  swapSides_top_aux R
+  (rfl)
 
 /-- The toroidal rectangle of the side-swapped oriented rectangle, written out by its four
 sides. -/
 @[simp]
 theorem swapSides_toGridRectangle (R : GridRectangleBetween x y) :
     R.swapSides.toGridRectangle =
-      { left := R.right, right := R.left, bottom := R.top, top := R.bottom } := by
-  exact swapSides_toGridRectangle_aux R
+      { left := R.right, right := R.left, bottom := R.top, top := R.bottom } :=
+  (rfl)
 
 /-- Exchanging the two side columns twice gives the original rectangle. -/
 @[simp]
