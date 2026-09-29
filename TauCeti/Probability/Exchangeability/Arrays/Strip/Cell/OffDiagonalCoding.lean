@@ -8,6 +8,7 @@ module
 public import TauCeti.Probability.Exchangeability.Arrays.Strip.Cell.JointPair
 public import Mathlib.Probability.Independence.Conditional
 import TauCeti.MeasureTheory.Constructions.ProdProjective
+import TauCeti.MeasureTheory.MeasurableSpace.Restrict
 import TauCeti.Probability.Exchangeability.Arrays.Block.Independence
 import TauCeti.Probability.Independence.Conditional
 import TauCeti.Probability.Kernel.ConditionalRandomization
@@ -275,18 +276,6 @@ private theorem squareStripsOfContext_comp :
 
 end Context
 
-/-- The information in two entries of an array is part of the information in any set of positions
-containing both. -/
-private theorem comap_pair_le_comap_domRestrict (D : Set (ℕ × ℕ)) {a b : ℕ × ℕ}
-    (ha : a ∈ D) (hb : b ∈ D) :
-    MeasurableSpace.comap (fun x : ℕ × ℕ → α => (x a, x b)) inferInstance ≤
-      MeasurableSpace.comap (D.domRestrict (π := fun _ => α)) inferInstance := by
-  have hread : (fun x : ℕ × ℕ → α => (x a, x b)) =
-      (fun y : D → α => (y ⟨a, ha⟩, y ⟨b, hb⟩)) ∘ D.domRestrict := rfl
-  rw [hread, ← MeasurableSpace.comap_comp]
-  exact MeasurableSpace.comap_mono
-    ((measurable_pi_apply _).prodMk (measurable_pi_apply _)).comap_le
-
 /-! ## Conditional independence -/
 
 variable [StandardBorelSpace α] {ρ : Measure (ℕ × ℕ → α)} [IsFiniteMeasure ρ]
@@ -343,7 +332,7 @@ theorem JointlyExchangeable.condIndepFun_offDiagonalPair_crossingStrips
       MeasurableSpace.comap (Cᶜ.domRestrict (π := fun _ => α)) inferInstance := by
     rw [← Set.domRestrict₂_comp_domRestrict hDsub, ← MeasurableSpace.comap_comp]
     exact MeasurableSpace.comap_mono (Set.measurable_restrict₂ hDsub).comap_le
-  have hpair := comap_pair_le_comap_domRestrict (α := α) C
+  have hpair := TauCeti.MeasureTheory.comap_pair_le_comap_domRestrict (π := fun _ => α) C
     (Set.mem_insert (i, j) _) (Set.mem_insert_of_mem _ (Set.mem_singleton (j, i)))
   have hstep := condIndep_of_condIndep_of_le_right
     (condIndep_of_condIndep_of_le_left hbase hpair) hDC
@@ -424,7 +413,7 @@ theorem JointlyExchangeable.iCondIndepFun_offDiagonalPairs
     (condIndepFun_iff_condIndep m' hm' C.domRestrict Cᶜ.domRestrict ρ).1
       (condIndepFun_domRestrict_of_subset (Set.measurable_restrict C) hlocal hRH hHD)
   have hleft : m ⟨(i, j), hp⟩ ≤ MeasurableSpace.comap C.domRestrict inferInstance :=
-    comap_pair_le_comap_domRestrict C (Set.mem_insert _ _) (by simp [C])
+    TauCeti.MeasureTheory.comap_pair_le_comap_domRestrict C (Set.mem_insert _ _) (by simp [C])
   -- Every other increasing representative, and its swap, avoids both entries of the pair.
   have hright : (⨆ q : {q : V₂ // q ≠ ⟨(i, j), hp⟩}, m q.1) ≤
       MeasurableSpace.comap Cᶜ.domRestrict inferInstance := by
@@ -434,7 +423,7 @@ theorem JointlyExchangeable.iCondIndepFun_offDiagonalPairs
     have hne' : q.1.1 ≠ (j, i) := fun h => by
       obtain ⟨h₁, h₂⟩ := Prod.ext_iff.1 h
       omega
-    refine comap_pair_le_comap_domRestrict Cᶜ ?_ ?_
+    refine TauCeti.MeasureTheory.comap_pair_le_comap_domRestrict Cᶜ ?_ ?_
     · simp only [C, Set.mem_compl_iff, Set.mem_insert_iff, Set.mem_singleton_iff, not_or]
       exact ⟨hne, hne'⟩
     · simp only [C, Set.mem_compl_iff, Set.mem_insert_iff, Set.mem_singleton_iff, not_or,
