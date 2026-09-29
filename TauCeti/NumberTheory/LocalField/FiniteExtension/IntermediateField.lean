@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.NumberTheory.LocalField.FiniteExtension.Basic
+import TauCeti.NumberTheory.LocalField.IntegerRing
 
 /-!
 # Local-field structures on finite intermediate fields
@@ -38,6 +39,9 @@ they make the intermediate field a nonarchimedean local field.
 * `IntermediateField.valuativeExtension`: if the ambient field carries a valuative relation
   extending that of `K`, it is a valuative extension of every finite intermediate field whose
   valuative relation extends that of `K`.
+* `IntermediateField.valuativeExtension_of_isNonarchimedeanLocalField`: when the ambient field
+  is itself a nonarchimedean local field extending `K`, this holds for every compatible
+  intermediate field, and is an instance.
 
 ## References
 
@@ -114,5 +118,18 @@ theorem _root_.IntermediateField.valuativeExtension [ValuativeRel Ω] [Valuative
       (ValuativeRel.valuation K))
   exact ⟨fun a b ↦ (ValuativeRel.valuation Ω).vle_iff_le.trans
     ((h a b).trans (ValuativeRel.valuation E).vle_iff_le.symm)⟩
+
+variable {K Ω} in
+/-- **A local field is a valuative extension of its compatible intermediate fields.** For an
+extension `Ω / K` of nonarchimedean local fields and an intermediate field `E` carrying a valuative
+relation extending that of `K`, the valuative relation of `Ω` extends that of `E`. The finiteness
+of `Ω / K` needed by `IntermediateField.valuativeExtension` is automatic here, so this is an
+instance. -/
+instance _root_.IntermediateField.valuativeExtension_of_isNonarchimedeanLocalField
+    [ValuativeRel Ω] [TopologicalSpace Ω] [IsNonarchimedeanLocalField Ω] [ValuativeExtension K Ω]
+    (E : IntermediateField K Ω) [ValuativeRel E] [ValuativeExtension K E] :
+    ValuativeExtension E Ω :=
+  have := finite_of_valuativeExtension K Ω
+  E.valuativeExtension
 
 end TauCeti

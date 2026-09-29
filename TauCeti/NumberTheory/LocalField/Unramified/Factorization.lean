@@ -21,13 +21,11 @@ how results about totally ramified extensions, such as the Eisenstein descriptio
 integers, extend to all finite extensions.
 
 The statements about an intermediate field `E` of `L/K` hold for any structure of nonarchimedean
-local field on `E` compatible with `K`; `L` is then a valuative extension of `E` by the uniqueness
-of extended valuations, which is recorded here as an instance.
+local field on `E` compatible with `K`; `L` is then a valuative extension of `E` by the instance
+`IntermediateField.valuativeExtension_of_isNonarchimedeanLocalField`.
 
 ## Main results
 
-* `IntermediateField.valuativeExtension_of_isNonarchimedeanLocalField`: `L` is a valuative
-  extension of every intermediate field of `L/K` whose valuative relation extends that of `K`.
 * `TauCeti.exists_isPrimitiveRoot_natCard_pow_inertiaDegree_sub_one`: `L` contains a primitive
   `(q^f − 1)`-st root of unity.
 * `TauCeti.finrank_unramifiedExtension_inertiaDegree` and
@@ -54,16 +52,6 @@ namespace TauCeti
 variable (K L : Type*) [Field K] [ValuativeRel K] [TopologicalSpace K]
   [IsNonarchimedeanLocalField K] [Field L] [ValuativeRel L] [TopologicalSpace L]
   [IsNonarchimedeanLocalField L] [Algebra K L] [ValuativeExtension K L]
-
-variable {K L} in
-/-- **`L` is a valuative extension of its compatible intermediate fields.** For an extension
-`L/K` of nonarchimedean local fields and an intermediate field `E` carrying a valuative relation
-extending that of `K`, the valuative relation of `L` extends that of `E`. -/
-instance _root_.IntermediateField.valuativeExtension_of_isNonarchimedeanLocalField
-    (E : IntermediateField K L) [ValuativeRel E] [ValuativeExtension K E] :
-    ValuativeExtension E L :=
-  have := finite_of_valuativeExtension K L
-  E.valuativeExtension
 
 /-- `L` contains a primitive `(q^f − 1)`-st root of unity, where `q = #𝓀[K]` and `f = f(L/K)`:
 its residue field has `q^f` elements. -/
