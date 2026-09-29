@@ -80,8 +80,10 @@ variable {C : Type u} [Category.{v} C] {R : Cᵒᵖ ⥤ RingCat.{v}}
 
 /-- The free presheaf of modules on the presheaf of sets represented by `U` restricts the basis
 element indexed by `g : X.unop ⟶ U` along `f : X ⟶ Y` to the basis element indexed by
-`f.unop ≫ g`. -/
-@[simp]
+`f.unop ≫ g`.
+
+This is not a simp lemma: `PresheafOfModules.freeObj_map` already unfolds the restriction map
+of a free presheaf, so the left-hand side is not in simp normal form. -/
 theorem freeObj_yoneda_map_freeMk {U : C} {X Y : Cᵒᵖ} (f : X ⟶ Y) (g : X.unop ⟶ U) :
     (freeObj (R := R) (yoneda.obj U)).map f (ModuleCat.freeMk g) =
       ModuleCat.freeMk (f.unop ≫ g) := by
@@ -155,7 +157,12 @@ def restrictOfTensorFreeYoneda (ψ : M ⊗ freeYoneda R U ⟶ N) :
         rfl
       exact (congrArg (ConcreteCategory.hom (ψ.app' (op Y.unop.left))) h').symm.trans h)
 
-@[simp]
+/-- The component at `g : V ⟶ U` of the morphism of restrictions induced by `ψ` sends a section
+`m` over `V` to `ψ (m ⊗ g)`.
+
+This is not a simp lemma: the component is a morphism of modules over the ring of the slice
+presheaf `(Over.forget U).op ⋙ R` at `Over.mk g`, and simp rewrites that ring to `R.obj (op V)`
+inside the implicit arguments of the coercion, so the left-hand side has no simp normal form. -/
 theorem restrictOfTensorFreeYoneda_app_apply (ψ : M ⊗ freeYoneda R U ⟶ N) {V : C} (g : V ⟶ U)
     (m : M.obj (op V)) :
     (restrictOfTensorFreeYoneda U M N ψ).app' (op (Over.mk g)) m =
@@ -206,6 +213,9 @@ def tensorFreeYonedaOfRestrict
       exact (congrArg (fun L ↦ L (M.map f m)) e₁).trans
         (h.trans (congrArg (N.map f) (congrArg (fun L ↦ L m) e₂).symm)))
 
+/-- The morphism out of the tensor product induced by a morphism of restrictions `φ` sends the
+pure tensor of a section `m` over `V` with the basis element indexed by `g : V ⟶ U` to the value
+of the component of `φ` at `g` on `m`. -/
 @[simp]
 theorem tensorFreeYonedaOfRestrict_app_tmul_freeMk
     (φ : (pushforward₀ (Over.forget U) R).obj M ⟶ (pushforward₀ (Over.forget U) R).obj N)
@@ -297,8 +307,11 @@ theorem ihomObjEquiv_symm_apply
   rfl
 
 /-- The morphism of restrictions corresponding to a section `s` of `𝓗om(M, N)` over `U` acts at
-`g : V ⟶ U` by evaluating the restriction of `s` along `g`. -/
-@[simp]
+`g : V ⟶ U` by evaluating the restriction of `s` along `g`.
+
+This is not a simp lemma, for the same reason as
+`TauCeti.PresheafOfModules.restrictOfTensorFreeYoneda_app_apply`: simp rewrites the base ring of
+the component inside the implicit arguments of the coercion. -/
 theorem ihomObjEquiv_apply_app (s : ((ihom M).obj N).obj (op U)) {V : C} (g : V ⟶ U)
     (m : M.obj (op V)) :
     (ihomObjEquiv U M N s).app' (op (Over.mk g)) m =
