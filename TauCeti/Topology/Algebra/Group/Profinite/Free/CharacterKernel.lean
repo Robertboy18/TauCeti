@@ -44,7 +44,7 @@ lying in `X`.
 * `TauCeti.freeProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top`: the
   abelianized kernel is spanned over `ℤ_p[[F ⧸ ker χ]]` by the classes of the generators other
   than `x_j`;
-  `TauCeti.freeProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top_insert`:
+  `TauCeti.freeProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_insert_eq_top`:
   with a second marked generator, by the classes of the other generators and of `x_k * (x_j ^ l)⁻¹`.
 
 ## References
@@ -122,7 +122,7 @@ of the other generators and of `x_k * (x_j ^ l)⁻¹`.** If `χ` has closed kern
 spanned over `ℤ_p[[F ⧸ ker χ]]`, for the module structure
 `TauCeti.IsProP.completedGroupAlgebraModule` through conjugation, by the classes of the `x_i`,
 `i ≠ j, k`, and of `x_k * (x_j ^ l)⁻¹`. -/
-theorem span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top_insert {j k : ℕ}
+theorem span_completedGroupAlgebraModule_topologicalAbelianization_ker_insert_eq_top {j k : ℕ}
     (hχ : ∀ i, i ≠ j → i ≠ k → χ (freeProPGen p n i) = 1)
     (hj : ¬ IsOfFinOrder (χ (freeProPGen p n j))) {l : ℤ_[p]}
     (hk : χ (freeProPGen p n k) =

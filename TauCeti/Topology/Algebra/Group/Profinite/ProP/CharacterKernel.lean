@@ -52,7 +52,7 @@ module `E = X ⧸ (X, X)`, `X = ker χ`, on which his classification argument ru
 * `TauCeti.IsProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top`:
   **the abelianized kernel is spanned over `ℤ_p[[G ⧸ ker χ]]` by the classes of the elements of
   `S`**, for finite `S`;
-  `TauCeti.IsProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top_insert`:
+  `TauCeti.IsProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_insert_eq_top`:
   the same with a second marked generator, whose class `b * (a ^ l)⁻¹` joins the generators.
 
 ## References
@@ -161,7 +161,7 @@ and the finite set `S`, `χ` has closed kernel, kills `S`, `χ a` has infinite o
 `χ b = χ (a ^ l)`, then `(ker χ)^{ab}` is spanned over `ℤ_p[[G ⧸ ker χ]]`, for the module structure
 `TauCeti.IsProP.completedGroupAlgebraModule` through conjugation, by the classes of the elements of
 `S` and of `b * (a ^ l)⁻¹`. -/
-theorem span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top_insert
+theorem span_completedGroupAlgebraModule_topologicalAbelianization_ker_insert_eq_top
     {S : Set G} {a b : G} (hS : S.Finite)
     (hgen : (Subgroup.closure (insert a (insert b S))).topologicalClosure = ⊤)
     (hS₁ : ∀ s ∈ S, χ s = 1) (ha : ¬ IsOfFinOrder (χ a)) {l : ℤ_[p]}
