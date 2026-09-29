@@ -12,7 +12,8 @@ module
 -- instance that makes `L ⊗[K] A` central simple over `L` visible to instance search from this
 -- import alone; `TauCeti.Algebra.TensorProduct.BaseChange` supplies the compatibility of the scalar
 -- extension with `⊗` and with `ᵐᵒᵖ`; `Module.FaithfullyFlat` is the hypothesis of
--- `TauCeti.IsSimpleRing.of_baseChange`.
+-- `TauCeti.IsSimpleRing.of_baseChange`, and the free-module instance that supplies it over a field
+-- is what proves `TauCeti.isSimpleRing_baseChange_iff`.
 public import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 public import TauCeti.Algebra.Central.BaseChange
 public import TauCeti.Algebra.CentralSimple.Degree
@@ -46,10 +47,13 @@ a central simple `L`-algebra with no glue at all.
 * `TauCeti.Algebra.deg_baseChange`: base change **preserves the degree**,
   `deg L (L ⊗[K] A) = deg K A`.
 * `TauCeti.IsSimpleRing.of_baseChange`: base change **detects simplicity**: if `L ⊗[K] A` is a
-  simple ring for some faithfully flat commutative `K`-algebra `L` (for instance any nontrivial
-  `L` when `K` is a field), then `A` is a simple ring. With
-  `TauCeti.Algebra.IsCentral.of_baseChange` this makes central simplicity of `A` over `K`
-  equivalent to central simplicity of `L ⊗[K] A` over a field extension `L`.
+  simple ring for some faithfully flat `K`-algebra `L` (for instance any nontrivial `L` when `K`
+  is a field), then `A` is a simple ring.
+* `TauCeti.isSimpleRing_baseChange_iff`: for a central `K`-algebra `A` over a field `K` and a
+  simple `K`-algebra `L`, **simplicity passes both ways** along the scalar extension,
+  `IsSimpleRing (L ⊗[K] A) ↔ IsSimpleRing A`. With `TauCeti.Algebra.isCentral_baseChange_iff`
+  this makes central simplicity of `A` over `K` equivalent to central simplicity of `L ⊗[K] A`
+  over a field extension `L`.
 
 Together with the centrality of `TauCeti/Algebra/Central/BaseChange.lean` and the two compatibility
 equivalences of `TauCeti/Algebra/TensorProduct/BaseChange.lean`, both re-exported here, this is what
@@ -113,12 +117,13 @@ end Algebra
 
 section Descent
 
-variable {K : Type*} [CommRing K] {L : Type*} [CommRing L] [Algebra K L]
+variable {K : Type*} [CommRing K] {L : Type*} [Ring L] [Algebra K L]
   [Module.FaithfullyFlat K L] {A : Type*} [Ring A] [Algebra K A]
 
 /-- **Base change detects simplicity.** If the scalar extension `L ⊗[K] A` of a `K`-algebra `A`
-along a faithfully flat commutative `K`-algebra `L` is a simple ring, then `A` is a simple ring.
-When `K` is a field every nontrivial `L` is faithfully flat, so the hypothesis is automatic there.
+along a faithfully flat `K`-algebra `L` is a simple ring, then `A` is a simple ring. Neither `L`
+nor `A` needs to be commutative. When `K` is a field every nontrivial `L` is faithfully flat, so
+the hypothesis is automatic there.
 
 This is the converse of `TauCeti.IsSimpleRing.tensorProduct_of_isCentral_right`, with no centrality
 hypothesis at all: a proper two-sided ideal `I` of `A` gives a nontrivial quotient `A ⧸ I`, hence a
@@ -152,6 +157,26 @@ theorem _root_.TauCeti.IsSimpleRing.of_baseChange [IsSimpleRing (L ⊗[K] A)] : 
   exact (Module.FaithfullyFlat.one_tmul_eq_zero_iff K A x).mp hx0
 
 end Descent
+
+/-! ### Simplicity passes both ways -/
+
+section Iff
+
+variable (K L A : Type*) [Field K] [Ring L] [IsSimpleRing L] [Algebra K L]
+  [Ring A] [Algebra K A] [Algebra.IsCentral K A]
+
+/-- **Simplicity passes both ways along a scalar extension.** Over a field `K`, a central
+`K`-algebra `A` is simple exactly when its scalar extension along a simple `K`-algebra `L` (for
+instance a field extension) is simple. The forward direction is the instance
+`TauCeti.IsSimpleRing.tensorProduct_of_isCentral_right`; the converse is
+`TauCeti.IsSimpleRing.of_baseChange`, whose faithful flatness is automatic because a simple ring is
+nontrivial and every module over the field `K` is free. This is the companion of
+`TauCeti.Algebra.isCentral_baseChange_iff`. -/
+@[simp]
+theorem isSimpleRing_baseChange_iff : IsSimpleRing (L ⊗[K] A) ↔ IsSimpleRing A :=
+  ⟨fun _ => IsSimpleRing.of_baseChange (K := K) (L := L) (A := A), fun _ => inferInstance⟩
+
+end Iff
 
 /-! ### Worked examples -/
 
