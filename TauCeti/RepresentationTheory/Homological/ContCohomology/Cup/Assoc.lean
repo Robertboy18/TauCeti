@@ -29,7 +29,10 @@ degree `m + (n + p)`, is transported to the degree `m + n + p` of the left-hand 
 (`TauCeti.TopPairing.cup_assoc`). Four pairings are needed to type the two sides at all, and the
 single-ring specialization that the applications use, one coefficient object `X` with an
 associative pairing `P : TopPairing X X X` in all four places, is the instance
-`cup_assoc P P P P`.
+`cup_assoc P P P P`. For a discrete `G`-ring `S` acted on by ring automorphisms, with all four
+pairings its multiplication `TauCeti.ofDiscreteModulePairing AddMonoidHom.mul`, this instance is
+stated separately as `TauCeti.TopPairing.cup_assoc_mul`: associativity of the cohomology ring
+`H^•(G, S)`.
 
 The identity already holds on homogeneous cochains, before any passage to cohomology. The
 Alexander–Whitney formula
@@ -69,6 +72,8 @@ side is transported through `HomologicalComplex.XIsoOfEq`; on cohomology the tra
 * `TauCeti.TopPairing.cupCochain_assoc`: **associativity of the cup product of homogeneous
   cochains**, an identity of cochains and not only of classes.
 * `TauCeti.TopPairing.cup_assoc`: **associativity of the cup product on continuous cohomology**.
+* `TauCeti.TopPairing.cup_assoc_mul`: the specialization to a discrete `G`-ring with its
+  multiplication as the pairing, **associativity of the cohomology ring**.
 
 ## References
 
@@ -218,6 +223,45 @@ theorem cup_assoc (m n p : ℕ) (x : continuousCohomology m A) (y : continuousCo
   refine ContinuousCohomology.π_eq_degreeCast_π (Nat.add_assoc m n p).symm _ _ ?_
   rw [iCycles_cupCocycles, iCycles_cupCocycles, iCycles_cupCocycles, iCycles_cupCocycles]
   exact cupCochain_assoc μ₁ μ₂ ν₁ ν₂ hcoeff m n p _ _ _
+
+end TopPairing
+
+namespace TopPairing
+
+/-! ### Associativity for a discrete `G`-ring
+
+The specialization the applications use: one discrete coefficient ring `S` acted on by ring
+automorphisms, all four pairings its multiplication `AddMonoidHom.mul`, and the coefficient
+identity `mul_assoc`. The equivariance a discrete-module pairing has to come with is `smul_mul'`,
+which applies to `AddMonoidHom.mul` as it stands, exactly as for the low-degree
+`TauCeti.ContCohomology.explicitCup_assoc000_mul` and its siblings. -/
+
+variable {G : Type v} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
+  {S : Type (max v w)} [Ring S] [TopologicalSpace S] [DiscreteTopology S] [MulSemiringAction G S]
+
+/-- **Associativity of the cup product of the cohomology ring of a discrete `G`-ring**: for a
+discrete ring `S` acted on by ring automorphisms and classes `x ∈ Hᵐ(G, S)`, `y ∈ Hⁿ(G, S)`,
+`z ∈ Hᵖ(G, S)`, with the multiplication of `S` as the coefficient pairing throughout,
+`(x ⌣ y) ⌣ z = x ⌣ (y ⌣ z)`, where the right-hand side lives in degree `m + (n + p)` and is
+transported to `m + n + p`. This is `TauCeti.TopPairing.cup_assoc` at the pairing
+`TauCeti.ofDiscreteModulePairing AddMonoidHom.mul` with coefficient identity `mul_assoc`. -/
+theorem cup_assoc_mul (m n p : ℕ) (x : continuousCohomology m (ofDiscreteModule ℤ G S))
+    (y : continuousCohomology n (ofDiscreteModule ℤ G S))
+    (z : continuousCohomology p (ofDiscreteModule ℤ G S)) :
+    (ofDiscreteModulePairing AddMonoidHom.mul fun g a b ↦ (smul_mul' g a b).symm).cup (m + n) p
+        ((ofDiscreteModulePairing AddMonoidHom.mul fun g a b ↦ (smul_mul' g a b).symm).cup m n
+          x y) z =
+      (ContinuousCohomology.degreeCast (ofDiscreteModule ℤ G S) (Nat.add_assoc m n p).symm).hom
+        ((ofDiscreteModulePairing AddMonoidHom.mul fun g a b ↦ (smul_mul' g a b).symm).cup m
+          (n + p) x
+          ((ofDiscreteModulePairing AddMonoidHom.mul fun g a b ↦ (smul_mul' g a b).symm).cup n p
+            y z)) :=
+  cup_assoc _ _ _ _ (fun (a b c : S) ↦ by
+    -- the values of the multiplication pairing, at this pairing so that `rw` keys on it
+    have h := ofDiscreteModulePairing_bil_apply (G := G) (AddMonoidHom.mul (R := S))
+      fun g a b ↦ (smul_mul' g a b).symm
+    rw [h a b, h b c, h _ c, h a _]
+    exact mul_assoc a b c) m n p x y z
 
 end TopPairing
 
