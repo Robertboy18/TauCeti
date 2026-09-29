@@ -5,28 +5,34 @@ Authors: The Tau Ceti contributors
 -/
 module
 
--- Imported publicly: it supplies the polarized structure theorem the proofs descend from, and
--- through it `CliffordAlgebra`, `Algebra.IsCentral`, `IsSimpleRing` and
--- `QuadraticMap.Nondegenerate`, which occur in the statements below.
-public import TauCeti.RepresentationTheory.Spin.Structure
--- Non-public: the separable closure, Mathlib's base-change equivalence of Clifford algebras, the
--- transport of simplicity along a ring equivalence, the two descent lemmas for centrality and
--- simplicity, and the base change of nondegeneracy are used only inside proofs.
+-- Imported publicly: exactly the modules defining what occurs in the exported statements, namely
+-- `CliffordAlgebra`, `Algebra.IsCentral`, `IsSimpleRing`, `QuadraticMap.Nondegenerate` and
+-- `FiniteDimensional` / `Module.finrank`.
+public import Mathlib.Algebra.Central.Defs
+public import Mathlib.LinearAlgebra.CliffordAlgebra.Basic
+public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
+public import Mathlib.LinearAlgebra.QuadraticForm.Radical
+public import Mathlib.RingTheory.SimpleRing.Defs
+-- Non-public: the polarized structure theorem the proofs descend from, the separable closure,
+-- Mathlib's base-change equivalence of Clifford algebras, the transport of simplicity along a ring
+-- equivalence, the two descent lemmas for centrality and simplicity, and the base change of
+-- nondegeneracy are used only inside proofs.
 import Mathlib.FieldTheory.SeparableClosure
 import Mathlib.LinearAlgebra.CliffordAlgebra.BaseChange
 import Mathlib.RingTheory.SimpleRing.Congr
 import TauCeti.Algebra.CentralSimple.BaseChange
 import TauCeti.LinearAlgebra.QuadraticForm.BaseChange
+import TauCeti.RepresentationTheory.Spin.Structure
 
 /-!
 # The Clifford algebra of an even-dimensional regular form is central simple
 
 Let `Q` be a nondegenerate quadratic form on a finite-dimensional vector space `V` over a field `K`
-in which `2` is invertible. This file proves that when `finrank K V` is **even**, the Clifford
-algebra `CliffordAlgebra Q` is a central simple `K`-algebra (Lam, *Introduction to Quadratic Forms
-over Fields*, V.2.4; Chevalley, *The Algebraic Theory of Spinors*, II.2). It is finite-dimensional
-by `CliffordAlgebra.instFinite`, so its Brauer class is defined: this is the even half of the
-Clifford invariant of a regular quadratic form.
+of characteristic different from `2`. This file proves that when `finrank K V` is **even**, the
+Clifford algebra `CliffordAlgebra Q` is a central simple `K`-algebra (Lam, *Introduction to
+Quadratic Forms over Fields*, V.2.4; Chevalley, *The Algebraic Theory of Spinors*, II.2). It is
+finite-dimensional by `CliffordAlgebra.instFinite`, so its Brauer class is defined: this is the even
+half of the Clifford invariant of a regular quadratic form.
 
 The proof is by descent from a separable closure `Kˢ` of `K`. Over `Kˢ` the extended form
 `Q.baseChange Kˢ` is still nondegenerate (`TauCeti.QuadraticForm.Nondegenerate.baseChange`) and
@@ -64,8 +70,15 @@ namespace CliffordAlgebra
 
 universe u v
 
-variable {K : Type u} [Field K] [Invertible (2 : K)] {V : Type v} [AddCommGroup V] [Module K V]
+variable {K : Type u} [Field K] {V : Type v} [AddCommGroup V] [Module K V]
   [FiniteDimensional K V] {Q : QuadraticForm K V}
+
+section Invertible
+
+-- The private helpers are stated with `Invertible (2 : K)`, which `QuadraticForm.baseChange` and
+-- `TauCeti.QuadraticForm.Nondegenerate.baseChange` require; the public theorems assume only
+-- `NeZero (2 : K)` and install the invertibility locally.
+variable [Invertible (2 : K)]
 
 omit [FiniteDimensional K V] in
 /-- `2` stays invertible in a separable closure. -/
@@ -80,17 +93,22 @@ private noncomputable def polarizationSepClosure (hQ : Q.Nondegenerate) :
   TauCeti.SpinPolarizationData.ofNondegenerate _
     (QuadraticForm.Nondegenerate.baseChange (L := SeparableClosure K) hQ)
 
-omit [Invertible (2 : K)] [FiniteDimensional K V] in
+end Invertible
+
+omit [FiniteDimensional K V] in
 /-- Extension of scalars preserves the parity of the dimension. -/
 private theorem even_finrank_baseChange_sepClosure (heven : Even (finrank K V)) :
     Even (finrank (SeparableClosure K) (SeparableClosure K ⊗[K] V)) := by
   rwa [Module.finrank_baseChange]
 
-/-- **The Clifford algebra of a nondegenerate form in even dimension is central.** Over a field in
-which `2` is invertible, if `Q` is nondegenerate on a finite-dimensional space of even dimension,
-then the centre of `CliffordAlgebra Q` is the base field. -/
+variable [NeZero (2 : K)]
+
+/-- **The Clifford algebra of a nondegenerate form in even dimension is central.** Over a field of
+characteristic different from `2`, if `Q` is nondegenerate on a finite-dimensional space of even
+dimension, then the centre of `CliffordAlgebra Q` is the base field. -/
 theorem isCentral_of_even_finrank (hQ : Q.Nondegenerate) (heven : Even (finrank K V)) :
     Algebra.IsCentral K (CliffordAlgebra Q) := by
+  let : Invertible (2 : K) := invertibleOfNonzero (NeZero.ne (2 : K))
   let := invertibleTwoSepClosure (K := K)
   have h : Algebra.IsCentral (SeparableClosure K)
       (CliffordAlgebra (Q.baseChange (SeparableClosure K))) :=
@@ -101,12 +119,13 @@ theorem isCentral_of_even_finrank (hQ : Q.Nondegenerate) (heven : Even (finrank 
   exact TauCeti.Algebra.IsCentral.of_baseChange (L := SeparableClosure K)
 
 /-- **The Clifford algebra of a nondegenerate form in even dimension is a simple ring.** Over a
-field in which `2` is invertible, if `Q` is nondegenerate on a finite-dimensional space of even
-dimension, then `CliffordAlgebra Q` has no two-sided ideals other than `⊥` and `⊤`. Together with
-`CliffordAlgebra.isCentral_of_even_finrank` and `CliffordAlgebra.instFinite`, it is a
+field of characteristic different from `2`, if `Q` is nondegenerate on a finite-dimensional space of
+even dimension, then `CliffordAlgebra Q` has no two-sided ideals other than `⊥` and `⊤`. Together
+with `CliffordAlgebra.isCentral_of_even_finrank` and `CliffordAlgebra.instFinite`, it is a
 finite-dimensional central simple `K`-algebra. -/
 theorem isSimpleRing_of_even_finrank (hQ : Q.Nondegenerate) (heven : Even (finrank K V)) :
     IsSimpleRing (CliffordAlgebra Q) := by
+  let : Invertible (2 : K) := invertibleOfNonzero (NeZero.ne (2 : K))
   let := invertibleTwoSepClosure (K := K)
   have h : IsSimpleRing (CliffordAlgebra (Q.baseChange (SeparableClosure K))) :=
     (polarizationSepClosure hQ).isSimpleRing_cliffordAlgebra
