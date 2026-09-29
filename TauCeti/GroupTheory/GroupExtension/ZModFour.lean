@@ -7,13 +7,13 @@ module
 
 public import Mathlib.Algebra.Group.TypeTags.Finite
 public import Mathlib.GroupTheory.GroupExtension.Defs
-public import TauCeti.Data.ZMod.Four
+public import TauCeti.Data.ZMod.MulCastHom
 
 /-!
 # The extension `1 → ℤ/2 → ℤ/4 → ℤ/2 → 1`
 
 The cyclic group of order four is a non-split extension of `ℤ/2` by `ℤ/2`: the kernel is the
-subgroup `2ℤ/4ℤ`, included by the doubling map `ZMod.twoMulCastAddHom`, and the projection is
+subgroup `2ℤ/4ℤ`, included by the doubling map `ZMod.mulCastHom 2`, and the projection is
 reduction modulo two. Written multiplicatively, as the extension dictionary of
 `TauCeti/GroupTheory/GroupExtension` requires, this is `TauCeti.zmodFourExtension`. It has no
 homomorphic section (`TauCeti.isEmpty_splitting_zmodFourExtension`): a section would send the
@@ -49,17 +49,19 @@ included as `2ℤ/4ℤ` by the doubling map, and the projection is reduction mod
 def zmodFourExtension :
     GroupExtension (Multiplicative (ZMod 2)) (Multiplicative (ZMod 4))
       (Multiplicative (ZMod 2)) where
-  inl := AddMonoidHom.toMultiplicative ZMod.twoMulCastAddHom
+  inl := AddMonoidHom.toMultiplicative (ZMod.mulCastHom 2 rfl)
   rightHom :=
     AddMonoidHom.toMultiplicative (ZMod.castHom (by decide : (2 : ℕ) ∣ 4) (ZMod 2)).toAddMonoidHom
   inl_injective := fun x y h =>
-    toAdd.injective (ZMod.twoMulCastAddHom_injective (ofAdd.injective h))
+    toAdd.injective (ZMod.mulCastHom_injective 2 rfl two_ne_zero (ofAdd.injective h))
   range_inl_eq_ker_rightHom := by
     ext y
+    -- Exactness of `ℤ/2 → ℤ/4 → ℤ/2`, transported along `ofAdd`.
+    have h := (ZMod.exact_mulCastHom_castHom (m := 2) (n := 4) 2 rfl (toAdd y)).symm
     simp only [MonoidHom.mem_range, MonoidHom.mem_ker, AddMonoidHom.toMultiplicative_apply_apply,
-      ZMod.twoMulCastAddHom_apply, RingHom.toAddMonoidHom_eq_coe, AddMonoidHom.coe_ofClass]
-    revert y
-    decide
+      RingHom.toAddMonoidHom_eq_coe, AddMonoidHom.coe_ofClass, ofAdd_eq_one]
+    rw [← h, Set.mem_range]
+    exact toAdd.exists_congr fun x => by rw [← toAdd.apply_eq_iff_eq, toAdd_ofAdd]
   rightHom_surjective := by
     intro y
     refine ⟨ofAdd ((toAdd y).cast), ?_⟩
@@ -74,7 +76,7 @@ def zmodFourExtension :
 /-- The kernel of `1 → ℤ/2 → ℤ/4 → ℤ/2 → 1` is included by the doubling map. -/
 @[simp]
 theorem zmodFourExtension_inl :
-    zmodFourExtension.inl = AddMonoidHom.toMultiplicative ZMod.twoMulCastAddHom :=
+    zmodFourExtension.inl = AddMonoidHom.toMultiplicative (ZMod.mulCastHom 2 rfl) :=
   (rfl)
 
 /-- The projection of `1 → ℤ/2 → ℤ/4 → ℤ/2 → 1` is reduction modulo two. -/
