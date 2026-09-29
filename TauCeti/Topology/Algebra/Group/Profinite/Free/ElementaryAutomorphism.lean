@@ -25,8 +25,7 @@ normalise the exponent vector of an arbitrary element of `F`:
   exponent vector.
 
 The normalisation is the elimination step of Labute's classification of Demushkin groups: if the
-exponent vector of `r ∈ F` is `q • w` with `w x₀ = 1`, then composing the transvections
-`x₀ ↦ x₀ · x ^ (-w x)` over the generators `x ≠ x₀` produces an automorphism `e` of `F` with
+exponent vector of `r ∈ F` is `q • w` with `w x₀ = 1`, then some automorphism `e` of `F` has
 `exponentSum (e r) = q e_{x₀}`, that is `e r ∈ x₀ ^ q · [F, F]` by
 `TauCeti.freeProP.toAdd_exponentSum_eq_single_iff`
 (`TauCeti.freeProP.exists_continuousMulEquiv_toAdd_exponentSum_eq_single_of_eq_smul`). Since `ℤ_p`
@@ -107,8 +106,7 @@ theorem toAdd_exponentSum_congr (σ : X ≃ Y) (y : freeProP p X) :
 
 section Transvection
 
-variable [DecidableEq X]
-
+open scoped Classical in
 /-- The lifts of the families `x₀ ↦ x₀ · x ^ a` compose by adding the exponents: the composition
 law behind `TauCeti.freeProP.transvection`. -/
 private theorem lift_update_mul_padicPow_comp {x₀ x : X} (hx : x ≠ x₀) (a b : ℤ_[p]) :
@@ -133,6 +131,7 @@ private theorem lift_update_mul_padicPow_comp {x₀ x : X} (hx : x ≠ x₀) (a 
         add_comm]
     · rw [Function.update_of_ne hx', Function.update_of_ne hx', lift_of, Function.update_of_ne hx']
 
+open scoped Classical in
 /-- The lift of the family `x₀ ↦ x₀ · x ^ 0` is the identity. -/
 private theorem lift_update_mul_padicPow_zero (x₀ x : X) :
     lift (isProP_freeProP p X)
@@ -142,6 +141,7 @@ private theorem lift_update_mul_padicPow_zero (x₀ x : X) :
     rw [lift_of, (isProP_freeProP p X).padicPow_zero, mul_one, Function.update_eq_self]
     rfl
 
+open scoped Classical in
 /-- **The transvection `x₀ ↦ x₀ · x ^ a`** of the free pro-`p` group on `X`, for generators
 `x ≠ x₀` and a `p`-adic exponent `a`: the continuous automorphism sending the generator at `x₀` to
 `x₀ · x ^ a` and fixing every other generator. Its inverse is the transvection with exponent `-a`
@@ -170,20 +170,25 @@ variable {x₀ x : X} (hx : x ≠ x₀) (a : ℤ_[p])
 
 /-- The transvection `x₀ ↦ x₀ · x ^ a` is the lift of the family sending `x₀` to `x₀ · x ^ a` and
 every other generator to itself. -/
-theorem coe_transvection :
+theorem coe_transvection [DecidableEq X] :
     ⇑(transvection x₀ x hx a) = ⇑(lift (isProP_freeProP p X)
-      (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) a))) := (rfl)
+      (Function.update of x₀ (of x₀ * (isProP_freeProP p X).padicPow (of x) a))) := by
+  -- `transvection` is built with the classical instance; identify the two `DecidableEq X`.
+  obtain rfl := Subsingleton.elim ‹DecidableEq X› (Classical.decEq X)
+  rfl
 
 /-- The transvection `x₀ ↦ x₀ · x ^ a` sends the generator at `x₀` to `x₀ · x ^ a`. -/
 @[simp]
 theorem transvection_of_self :
     transvection x₀ x hx a (of x₀) = of x₀ * (isProP_freeProP p X).padicPow (of x) a := by
+  classical
   rw [coe_transvection, lift_of, Function.update_self]
 
 /-- The transvection `x₀ ↦ x₀ · x ^ a` fixes the generators other than `x₀`. -/
 @[simp]
 theorem transvection_of_of_ne {x' : X} (hx' : x' ≠ x₀) :
     transvection x₀ x hx a (of x') = of x' := by
+  classical
   rw [coe_transvection, lift_of, Function.update_of_ne hx']
 
 /-- The inverse of the transvection `x₀ ↦ x₀ · x ^ a` is the transvection `x₀ ↦ x₀ · x ^ (-a)`. -/
@@ -205,7 +210,7 @@ theorem transvection_add (b : ℤ_[p]) :
 times the coordinate at `x₀` to the coordinate at `x` of the exponent vector, and leaves the other
 coordinates unchanged. -/
 @[simp]
-theorem toAdd_exponentSum_transvection (y : freeProP p X) :
+theorem toAdd_exponentSum_transvection [DecidableEq X] (y : freeProP p X) :
     (exponentSum p X (transvection x₀ x hx a y)).toAdd =
       (exponentSum p X y).toAdd + Pi.single x (a * (exponentSum p X y).toAdd x₀) := by
   -- Both sides are continuous homomorphisms of `y`; compare them on the generators.
@@ -249,14 +254,15 @@ variable [Finite X] [DecidableEq X]
 
 /-- **Normalising the exponent vector of a relator.** If the exponent vector of `r ∈ freeProP p X`
 is `q • w` with `w x₀ = 1`, then an automorphism of `freeProP p X` carries `r` to an element with
-exponent vector `q e_{x₀}`: the composite of the transvections `x₀ ↦ x₀ · x ^ (-w x)` over the
-generators `x ≠ x₀`. -/
+exponent vector `q e_{x₀}`, that is to `x₀ ^ q` times an element of the closed commutator subgroup
+(`TauCeti.freeProP.toAdd_exponentSum_eq_single_iff`). -/
 theorem exists_continuousMulEquiv_toAdd_exponentSum_eq_single_of_eq_smul {r : freeProP p X} {x₀ : X}
     {w : X → ℤ_[p]} {q : ℤ_[p]} (hw : w x₀ = 1) (hr : (exponentSum p X r).toAdd = q • w) :
     ∃ e : freeProP p X ≃ₜ* freeProP p X, (exponentSum p X (e r)).toAdd = Pi.single x₀ q := by
   cases nonempty_fintype X
-  -- Kill the coordinates in a finite set `s` of generators other than `x₀`, one transvection at
-  -- a time; the coordinate at `x₀` stays `q`.
+  -- The automorphism is the composite of the transvections `x₀ ↦ x₀ · x ^ (-w x)` over the
+  -- generators `x ≠ x₀`. Kill the coordinates in a finite set `s` of generators other than `x₀`,
+  -- one transvection at a time; the coordinate at `x₀` stays `q`.
   suffices h : ∀ s : Finset X, x₀ ∉ s → ∃ e : freeProP p X ≃ₜ* freeProP p X,
       ∀ x, (exponentSum p X (e r)).toAdd x = if x ∈ s then 0 else q * w x by
     obtain ⟨e, he⟩ := h (Finset.univ.erase x₀) (Finset.notMem_erase x₀ _)
