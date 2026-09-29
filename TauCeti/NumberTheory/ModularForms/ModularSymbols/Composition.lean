@@ -50,11 +50,8 @@ composite reverses its order, so the operators being transported must commute am
 
 ## Main results
 
-* `TauCeti.ModularSymbols.mk_symbolIntRep_eq_of_rightCoset_eq`: the class of `δ · x` in
-  `𝕄_w(Γ₁; R)` depends only on the right coset `Γ₁' δ`.
-* `TauCeti.ModularSymbols.sum_mk_symbolIntRep_eq_nsmul_heckeSymbol_mk`: a family of integral
-  matrices in the double coset meeting each of its right cosets `m` times sums to
-  `m • T_D [x]`.
+* `TauCeti.ModularSymbols.sum_mk_symbolIntRep_eq_nsmul_heckeSymbol_mk`: a family of matrices
+  in the double coset meeting each of its right cosets `m` times sums to `m • T_D [x]`.
 * `TauCeti.ModularSymbols.heckeSymbol_heckeSymbol_mk` and
   `TauCeti.ModularSymbols.heckeSymbol_heckeSymbol_mk_eq_sum_of_rightCosets`: the composite of two
   Hecke operators on the class of `x`, over the chosen and over arbitrary representatives.
@@ -90,60 +87,47 @@ variable {R : Type*} [CommRing R] {w : ℕ}
 
 attribute [local instance] Fintype.ofFinite
 
-/-! ### Independence of the representative within a right coset -/
+/-! ### Families meeting each right coset equally often -/
 
 section Independence
 
 variable (Γ₁ Γ₂ : Subgroup SL(2, ℤ)) {Δ : Submonoid (GL (Fin 2) ℚ)}
-
-/-- **The class of `δ · x` in `𝕄_w(Γ₁; R)` depends only on the right coset `Γ₁' δ`.** If
-`Γ₁' δ₁ = Γ₁' δ₂` then `δ₂ = (δ₂ δ₁⁻¹) δ₁` with `δ₂ δ₁⁻¹ ∈ Γ₁'`, and the coinvariants do not see
-that factor. -/
-theorem mk_symbolIntRep_eq_of_rightCoset_eq {δ₁ δ₂ : GL (Fin 2) ℚ} (h₁ : δ₁ ∈ intEntries 2)
-    (h₂ : δ₂ ∈ intEntries 2)
-    (h : op δ₁ • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)) =
-      op δ₂ • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
-    (x : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w) :
-    (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
-        ModularSymbols R Γ₁ w) (symbolIntRep R w ⟨δ₁, h₁⟩ x) =
-      Coinvariants.mk _ (symbolIntRep R w ⟨δ₂, h₂⟩ x) :=
-  LinearMap.congr_fun (HeckeCoset.comp_eq_of_rightCoset_eq (symbolIntRep R w)
-    (map_mapGL_le_intEntries 2 Γ₁) (fun _ hγ ↦ mk_comp_symbolIntRep_of_mem Γ₁ hγ) h₁ h₂ h) x
-
-variable (D : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)))
+  (D : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)))
   (hD : (D.out : GL (Fin 2) ℚ) ∈ intEntries 2)
   [Finite (DecompQuotient (Γ₂.map (mapGL ℚ)) (Γ₁.map (mapGL ℚ)) (D.out : GL (Fin 2) ℚ)⁻¹)]
 
 /-- **A family meeting each right coset of the double coset `m` times sums to `m` times the Hecke
-operator.** If the integral matrices `aᵢ` lie in `Γ₁' D.out Γ₂'` and, for every `x` there, exactly
-`m` of them generate the right coset `Γ₁' x`, then `∑ᵢ [aᵢ · x] = m • T_D [x]`.
+operator.** If the matrices `aᵢ` lie in `Γ₁' D.out Γ₂'` — so that they are integral,
+`HeckeRing.GLn.mem_intEntries_of_mem_doubleCoset` — and, for every `x` there, exactly `m` of them
+generate the right coset `Γ₁' x`, then `∑ᵢ [aᵢ · x] = m • T_D [x]`.
 
 Covering is not a hypothesis: a right coset named by no member forces `m = 0`, and then both sides
 vanish. This is the shape in which the products `aᵢ bⱼ` of two families of representatives arrive
 once they are grouped by the double coset they lie in. -/
 theorem sum_mk_symbolIntRep_eq_nsmul_heckeSymbol_mk {ι : Type*} [Fintype ι]
-    (a : ι → GL (Fin 2) ℚ) (ha : ∀ i, a i ∈ intEntries 2) (m : ℕ)
+    (a : ι → GL (Fin 2) ℚ) (m : ℕ)
     (hmem : ∀ i, a i ∈ doubleCoset (D.out : GL (Fin 2) ℚ) (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)))
     (hcard : ∀ x ∈ doubleCoset (D.out : GL (Fin 2) ℚ) (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)),
       Nat.card {i // op (a i) • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)) =
         op x • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ))} = m)
     (x : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w) :
     ∑ i, (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
-        ModularSymbols R Γ₁ w) (symbolIntRep R w ⟨a i, ha i⟩ x) =
+        ModularSymbols R Γ₁ w)
+        (symbolIntRep R w ⟨a i, mem_intEntries_of_mem_doubleCoset 2 hD (hmem i)⟩ x) =
       m • heckeSymbol Γ₁ Γ₂ D hD (Coinvariants.mk _ x) := by
   classical
   choose g hg using fun i ↦ exists_rightCosetRep_smul_eq D (hmem i)
   rw [heckeSymbol_mk, Finset.smul_sum,
     ← Finset.sum_fiberwise_of_maps_to (fun i _ ↦ Finset.mem_univ (g i))
       fun i ↦ (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
-        ModularSymbols R Γ₁ w) (symbolIntRep R w ⟨a i, ha i⟩ x)]
+        ModularSymbols R Γ₁ w)
+        (symbolIntRep R w ⟨a i, mem_intEntries_of_mem_doubleCoset 2 hD (hmem i)⟩ x)]
   refine Finset.sum_congr rfl fun v _ ↦ ?_
   -- On the fibre of `v` every term is the class of the translate by `v`'s representative, so the
   -- fibre contributes its cardinality times that one value.
   rw [← card_filter_eq_of_rightCosetRep_smul_eq D hcard hg v, ← Finset.sum_const]
-  exact Finset.sum_congr rfl fun i hi ↦ mk_symbolIntRep_eq_of_rightCoset_eq Γ₁ (ha i)
-    (rightCosetRep_mem D hD (map_mapGL_le_intEntries 2 Γ₂) v)
-    ((Finset.mem_filter.mp hi).2 ▸ hg i) x
+  exact Finset.sum_congr rfl fun i hi ↦ mk_symbolIntRep_eq_of_rightCoset_eq Γ₁
+    (mem_intEntries_of_mem_doubleCoset 2 hD (hmem i)) ((Finset.mem_filter.mp hi).2 ▸ hg i) x
 
 end Independence
 
@@ -175,7 +159,6 @@ theorem heckeSymbol_heckeSymbol_mk (x : degreeZero R ⊗[R] homogeneousSubmodule
   rw [← Submonoid.mk_mul_mk, map_mul, Module.End.mul_apply]
 
 variable {ι κ : Type*} (a : ι → GL (Fin 2) ℚ) (b : κ → GL (Fin 2) ℚ)
-  (ha : ∀ i, a i ∈ intEntries 2) (hb : ∀ j, b j ∈ intEntries 2)
   (hcover₁ : doubleCoset (D₁.out : GL (Fin 2) ℚ) (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)) =
     ⋃ i, op (a i) • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
   (hinj₁ : Function.Injective fun i ↦ op (a i) • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
@@ -183,10 +166,10 @@ variable {ι κ : Type*} (a : ι → GL (Fin 2) ℚ) (b : κ → GL (Fin 2) ℚ)
     ⋃ j, op (b j) • (Γ₂.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
   (hinj₂ : Function.Injective fun j ↦ op (b j) • (Γ₂.map (mapGL ℚ) : Set (GL (Fin 2) ℚ)))
 
-include hcover₁ hinj₁ hcover₂ hinj₂ in
+include hinj₁ hinj₂ in
 /-- **The composite of two Hecke operators, over arbitrary representatives.** For any families
-`(aᵢ)`, `(bⱼ)` of integral matrices naming the right cosets of `Γ₁' δ₁ Γ₂'` and of `Γ₂' δ₂ Γ₃'`
-once each,
+`(aᵢ)`, `(bⱼ)` naming the right cosets of `Γ₁' δ₁ Γ₂'` and of `Γ₂' δ₂ Γ₃'` once each — such
+matrices are integral, `HeckeRing.GLn.mem_intEntries_of_cover` —
 
 `T_{D₁} (T_{D₂} [x]) = ∑_{i, j} [(aᵢ bⱼ) · x]`.
 
@@ -197,16 +180,18 @@ theorem heckeSymbol_heckeSymbol_mk_eq_sum_of_rightCosets [Fintype ι] [Fintype �
     (x : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w) :
     heckeSymbol Γ₁ Γ₂ D₁ hD₁ (heckeSymbol Γ₂ Γ₃ D₂ hD₂ (Coinvariants.mk _ x)) =
       ∑ i, ∑ j, (Coinvariants.mk _ : degreeZero R ⊗[R] homogeneousSubmodule (Fin 2) R w →ₗ[R]
-        ModularSymbols R Γ₁ w) (symbolIntRep R w ⟨a i * b j, mul_mem (ha i) (hb j)⟩ x) := by
-  rw [heckeSymbol_mk_eq_sum_of_rightCosets Γ₂ Γ₃ D₂ hD₂ b hb hcover₂ hinj₂, map_sum,
-    Finset.sum_comm]
+        ModularSymbols R Γ₁ w)
+        (symbolIntRep R w ⟨a i * b j, mul_mem (mem_intEntries_of_cover 2 hD₁ hcover₁ i)
+          (mem_intEntries_of_cover 2 hD₂ hcover₂ j)⟩ x) := by
+  rw [heckeSymbol_mk_eq_sum_of_rightCosets Γ₂ Γ₃ D₂ hD₂ b (mem_intEntries_of_cover 2 hD₂ hcover₂)
+    hcover₂ hinj₂, map_sum, Finset.sum_comm]
   refine Finset.sum_congr rfl fun j _ ↦ ?_
-  rw [heckeSymbol_mk_eq_sum_of_rightCosets Γ₁ Γ₂ D₁ hD₁ a ha hcover₁ hinj₁]
+  rw [heckeSymbol_mk_eq_sum_of_rightCosets Γ₁ Γ₂ D₁ hD₁ a (mem_intEntries_of_cover 2 hD₁ hcover₁)
+    hcover₁ hinj₁]
   refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [← Submonoid.mk_mul_mk, map_mul, Module.End.mul_apply]
 
 variable [Finite ι] [Finite κ] (D₃ : HeckeCoset Δ (Γ₁.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ)))
-  (hD₃ : (D₃.out : GL (Fin 2) ℚ) ∈ intEntries 2)
   [Finite (DecompQuotient (Γ₃.map (mapGL ℚ)) (Γ₁.map (mapGL ℚ)) (D₃.out : GL (Fin 2) ℚ)⁻¹)]
 
 include hcover₁ hinj₁ hcover₂ hinj₂ in
@@ -217,7 +202,9 @@ exactly once: `T_{D₁} ∘ T_{D₂} = T_{D₃}`.
 The hypotheses are those of `HeckeRing.GL2.heckeSlashSum_heckeSlashSum_eq_heckeSlashSum`: `hmul`
 says that the product set is the single coset `D₃`, and `hinj₃` that the products have no
 right-coset collisions. The covering half of what `heckeSymbol_mk_eq_sum_of_rightCosets` needs is
-automatic, by `DoubleCoset.doubleCoset_mul_doubleCoset_eq_iUnion_rightCosets`. -/
+automatic, by `DoubleCoset.doubleCoset_mul_doubleCoset_eq_iUnion_rightCosets`, and so is the
+integrality of `D₃.out`: it lies in the product of two double cosets of integral matrices
+(`HeckeRing.GLn.mem_intEntries_of_mem_doubleCoset_mul_doubleCoset`). -/
 theorem heckeSymbol_comp_heckeSymbol_eq_heckeSymbol
     (hmul : doubleCoset (D₃.out : GL (Fin 2) ℚ) (Γ₁.map (mapGL ℚ)) (Γ₃.map (mapGL ℚ)) =
       doubleCoset (D₁.out : GL (Fin 2) ℚ) (Γ₁.map (mapGL ℚ)) (Γ₂.map (mapGL ℚ)) *
@@ -225,22 +212,16 @@ theorem heckeSymbol_comp_heckeSymbol_eq_heckeSymbol
     (hinj₃ : Function.Injective
       fun p : ι × κ ↦ op (a p.1 * b p.2) • (Γ₁.map (mapGL ℚ) : Set (GL (Fin 2) ℚ))) :
     (heckeSymbol Γ₁ Γ₂ D₁ hD₁ ∘ₗ heckeSymbol Γ₂ Γ₃ D₂ hD₂ :
-      ModularSymbols R Γ₃ w →ₗ[R] ModularSymbols R Γ₁ w) = heckeSymbol Γ₁ Γ₃ D₃ hD₃ := by
-  -- the families lie in the double cosets they cover, hence consist of integral matrices
-  have ha : ∀ i, a i ∈ intEntries 2 := fun i ↦
-    mem_intEntries_of_mem_doubleCoset 2 hD₁ (by
-      rw [hcover₁]
-      exact Set.mem_iUnion_of_mem i (mem_own_rightCoset _ _))
-  have hb : ∀ j, b j ∈ intEntries 2 := fun j ↦
-    mem_intEntries_of_mem_doubleCoset 2 hD₂ (by
-      rw [hcover₂]
-      exact Set.mem_iUnion_of_mem j (mem_own_rightCoset _ _))
+      ModularSymbols R Γ₃ w →ₗ[R] ModularSymbols R Γ₁ w) =
+      heckeSymbol Γ₁ Γ₃ D₃ (mem_intEntries_of_mem_doubleCoset_mul_doubleCoset 2 hD₁ hD₂
+        (hmul ▸ mem_doubleCoset_self _ _ _)) := by
   refine Coinvariants.hom_ext (LinearMap.ext fun x ↦ ?_)
   simp only [LinearMap.comp_apply]
-  rw [heckeSymbol_heckeSymbol_mk_eq_sum_of_rightCosets Γ₁ Γ₂ Γ₃ D₁ D₂ hD₁ hD₂ a b ha hb hcover₁
-      hinj₁ hcover₂ hinj₂,
-    heckeSymbol_mk_eq_sum_of_rightCosets Γ₁ Γ₃ D₃ hD₃ (fun p : ι × κ ↦ a p.1 * b p.2)
-      (fun p ↦ mul_mem (ha p.1) (hb p.2))
+  rw [heckeSymbol_heckeSymbol_mk_eq_sum_of_rightCosets Γ₁ Γ₂ Γ₃ D₁ D₂ hD₁ hD₂ a b hcover₁ hinj₁
+      hcover₂ hinj₂,
+    heckeSymbol_mk_eq_sum_of_rightCosets Γ₁ Γ₃ D₃ _ (fun p : ι × κ ↦ a p.1 * b p.2)
+      (fun p ↦ mul_mem (mem_intEntries_of_cover 2 hD₁ hcover₁ p.1)
+        (mem_intEntries_of_cover 2 hD₂ hcover₂ p.2))
       (hmul.trans (doubleCoset_mul_doubleCoset_eq_iUnion_rightCosets a b hcover₁ hcover₂)) hinj₃,
     Fintype.sum_prod_type]
 
@@ -297,7 +278,7 @@ theorem heckeSymbol_comp_heckeSymbol_eq_sum_nsmul :
           mul_mem (rightCosetRep_mem D₁ (hΔ D₁.out.2) (map_mapGL_le_intEntries 2 Γ₂) q.1)
             (rightCosetRep_mem D₂ (hΔ D₂.out.2) (map_mapGL_le_intEntries 2 Γ₃) q.2)⟩ x)]
   refine Finset.sum_congr rfl fun D _ ↦ ?_
-  exact sum_mk_symbolIntRep_eq_nsmul_heckeSymbol_mk Γ₁ Γ₃ D (hΔ D.out.2) _ _ _
+  exact sum_mk_symbolIntRep_eq_nsmul_heckeSymbol_mk Γ₁ Γ₃ D (hΔ D.out.2) _ _
     (fun i ↦ pairCoset_eq_iff.mp i.2)
     (fun _ hx ↦ card_pairs_pairCoset_rightCoset_eq_multiplicity hx) x
 
@@ -322,6 +303,7 @@ At such indices the double coset of `diag(1, n)` is the union of the `n` upper-t
 cosets `Γ₁(N) · !![1, j; 0, n]`, and `HeckeRing.GL2.upperTriRep_mul_upperTriRep` matches the pairs
 of representatives with the representatives at index `n · m` bijectively. Nothing here is a
 coprimality statement: the identity holds whether or not `n` and `m` are coprime. -/
+@[simp]
 theorem heckeTSymbol_mul_of_primeFactors_subset {n m : ℕ} [NeZero n] [NeZero m]
     (hn : n.primeFactors ⊆ N.primeFactors) (hm : m.primeFactors ⊆ N.primeFactors) :
     heckeTSymbol R w N (n * m) = heckeTSymbol R w N n * heckeTSymbol R w N m := by
@@ -336,7 +318,7 @@ theorem heckeTSymbol_mul_of_primeFactors_subset {n m : ℕ} [NeZero n] [NeZero m
   refine (heckeSymbol_comp_heckeSymbol_eq_heckeSymbol (Gamma1 N) (Gamma1 N) (Gamma1 N)
     (diagCosetGamma1 N n) (diagCosetGamma1 N m) _ _ (upperTriRep n) (upperTriRep m) hcover₁
     op_upperTriRep_smul_injective hcover₂ op_upperTriRep_smul_injective
-    (diagCosetGamma1 N (n * m)) _ ?_ ?_).symm
+    (diagCosetGamma1 N (n * m)) ?_ ?_).symm
   · -- the product set is the double coset at index `n · m`: both are the union of the
     -- upper-triangular right cosets, enumerated by `Fin (n * m)` and by `Fin n × Fin m`
     rw [doubleCoset_mul_doubleCoset_eq_iUnion_rightCosets _ _ hcover₁ hcover₂,
@@ -357,6 +339,7 @@ theorem commute_heckeTSymbol_of_primeFactors_subset {n m : ℕ} [NeZero n] [NeZe
   exact heckeTSymbol_congr N (mul_comm n m)
 
 /-- **`T_{n^r} = T_n ^ r` on modular symbols, at an index supported on the level.** -/
+@[simp]
 theorem heckeTSymbol_pow_of_primeFactors_subset {n : ℕ} [NeZero n]
     (hn : n.primeFactors ⊆ N.primeFactors) (r : ℕ) :
     heckeTSymbol R w N (n ^ r) = heckeTSymbol R w N n ^ r := by
