@@ -23,9 +23,10 @@ at each of the finitely many points of a fibre, a neighbourhood on which nearby 
 exactly the multiplicity of that point, while compactness of the complement of these
 neighbourhoods keeps nearby fibres from having any further points. Over a connected `Y` the fibre
 sum is therefore the same at every point, and this common value is the **degree**
-`TauCeti.RiemannSurface.degree f`. The degree is positive, dominates every local multiplicity,
-forces `f` to be surjective, and is multiplicative under composition. Nonconstancy of the
-composite of two such maps comes from the open mapping theorem for Riemann surfaces,
+`TauCeti.RiemannSurface.degree f`. The degree dominates every local multiplicity and is
+multiplicative under composition; when `X` is nonempty (so that some fibre sum is nonzero) it is
+positive and forces `f` to be surjective. Nonconstancy of the composite of two such maps comes
+from the open mapping theorem for Riemann surfaces,
 `TauCeti.RiemannSurface.not_eventuallyConst_comp` in
 `TauCeti.Analysis.Complex.RiemannSurface.OpenMapping`.
 
