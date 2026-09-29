@@ -482,6 +482,7 @@ attribute [local instance 2000] Ring.toAddCommGroup
 /-- **The coordinates of the partial derivatives are the matrix of the degree-one form**: the
 `k`-th coordinate of `∂_i ρ` in the basis of generator classes of `gr_0(F)` is `B_ρ(χ_i, χ_k)`, the
 `(i, k)` entry of the matrix of the degree-one form of `ρ` in the dual basis of the generators. -/
+@[simp]
 theorem degreeZeroBasis_repr_degreeOneDeriv (ρ : gradedPiece p (freeProP p X) 1) (i k : X) :
     (degreeZeroBasis p X).repr (degreeOneDeriv p X i ρ) k =
       degreeOneForm ρ (dualBasis p X i) (dualBasis p X k) := by

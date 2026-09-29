@@ -247,6 +247,7 @@ private theorem gradedMk_demushkinWordNeTwo_self_eq_altClass :
 /-- **The `p`-power coordinates of the class of the `q ≠ 2` normal-form word**
 `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)`, for `p ∣ q`: the coefficient of `π ξ₁` is `q / p`, and the other
 `p`-power coordinates vanish. -/
+@[simp]
 theorem degreeOneBasis_repr_gradedMk_demushkinWordNeTwo_inl {q : ℕ} (hq : p ∣ q) (k : Fin n) :
     (degreeOneBasis p (Fin n)).repr (gradedMk p (freeProP p (Fin n)) 1
         ⟨demushkinWordNeTwo q n (freeProPGen p n),
