@@ -761,8 +761,8 @@ theorem degreeOneBasis_repr_gradedMk_inl_eq_zero_iff (y : pLowerCentralSeries p 
 
 /-- **The `p`-power coordinates are the exponent sums divided by `p`, modulo `p`**: if the `k`-th
 exponent sum of `y ∈ λ_1(F)` is `p * c`, then the coefficient of `π x'_k` in the class of `y` is the
-reduction of `c` modulo `p`. Dividing `y` by `x_k ^ (p * c̄)`, where `c̄ ∈ ℕ` lifts `c` modulo `p`,
-subtracts `c̄` from that coefficient and makes the exponent sum divisible by `p ^ 2`. -/
+reduction of `c` modulo `p`. Dividing `y` by `x_k ^ (p * c')`, where `c' ∈ ℕ` lifts `c` modulo `p`,
+subtracts `c'` from that coefficient and makes the exponent sum divisible by `p ^ 2`. -/
 theorem degreeOneBasis_repr_gradedMk_inl (y : pLowerCentralSeries p (freeProP p X) 1) (k : X)
     {c : ℤ_[p]} (hc : (exponentSum p X (y : freeProP p X)).toAdd k = p * c) :
     (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1 y) (Sum.inl k) = PadicInt.toZMod c := by
