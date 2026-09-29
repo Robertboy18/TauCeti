@@ -22,18 +22,15 @@ for every `k ≥ 1` and all `u, u'` in that class with `u' ≡ u mod π^k`,
 Then `A` has exactly one zero in the residue class of `u₀`
 (`TauCeti.IsAdicComplete.existsUnique_eq_zero_of_isUnit_det`).
 
-This is the multivariable form of Hensel's lemma with an integral linearisation, proved by Newton's
-iteration `u ↦ u - M⁻¹ (A u)`: each step improves the congruence `A u ≡ 0` by one power of `π`, so
-the iterates form a Cauchy sequence for the `π`-adic filtration, their limit is a zero by the
-linearisation, and two zeros in the class agree modulo every power of `π` by the same
-linearisation, hence coincide. No polynomiality of `A` is assumed; the linearisation hypothesis
-plays the role of the derivative. Mathlib's `Mathlib.NumberTheory.Padics.Hensel` is the
-one-variable polynomial case over `ℤ_p`.
+This is a multivariable form of Hensel's lemma with an integral linearisation. No polynomiality of
+`A` is assumed: the linearisation hypothesis plays the role of the derivative, and the unit
+determinant of `M` that of the nonvanishing of the Jacobian modulo `π`. Mathlib's
+`Mathlib.NumberTheory.Padics.Hensel` is the one-variable polynomial case over `ℤ_p`. The theorem
+supplies the canonical character of a Demushkin group: its values on the generators are the zero of
+the map recording the values of the crossed homomorphisms on the relator.
 
 ## Main results
 
-* `TauCeti.mem_span_singleton_pow_smul_top_iff`: membership in `(π)^n • ⊤` on a product module is
-  coordinatewise divisibility by `π ^ n`.
 * `TauCeti.IsAdicComplete.existsUnique_eq_zero_of_isUnit_det`: Newton's method, the existence and
   uniqueness of the zero.
 -/
@@ -44,21 +41,8 @@ namespace TauCeti
 
 open Matrix
 
-variable {R : Type*} {ι : Type*}
-
-/-- On a product module, membership in `(π)^n • ⊤` is coordinatewise divisibility by `π ^ n`. -/
-theorem mem_span_singleton_pow_smul_top_iff [CommSemiring R] (π : R) (x : ι → R) (n : ℕ) :
-    x ∈ ((Ideal.span {π}) ^ n • ⊤ : Submodule R (ι → R)) ↔ ∀ i, π ^ n ∣ x i := by
-  rw [Ideal.span_singleton_pow, Submodule.ideal_span_singleton_smul,
-    Submodule.mem_smul_pointwise_iff_exists]
-  constructor
-  · rintro ⟨y, -, rfl⟩ i
-    exact ⟨y i, rfl⟩
-  · intro h
-    choose y hy using h
-    exact ⟨y, Submodule.mem_top, funext fun i ↦ (hy i).symm⟩
-
-variable [CommRing R] (π : R) [IsAdicComplete (Ideal.span {π}) R] [Fintype ι] [DecidableEq ι]
+variable {R : Type*} {ι : Type*} [CommRing R] (π : R) [IsAdicComplete (Ideal.span {π}) R]
+  [Fintype ι] [DecidableEq ι]
 
 /-- **Newton's method over a `π`-adically complete ring.** Let `A : (ι → R) → (ι → R)`, let `M` be
 a matrix with unit determinant, and let `u₀` satisfy `A u₀ ≡ 0 mod π`. If `M` linearises `A`

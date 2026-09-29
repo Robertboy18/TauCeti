@@ -10,6 +10,7 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Free.Prescription
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.RelatorFunctional
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicUnits
 import Mathlib.NumberTheory.Padics.ProperSpace
+import TauCeti.Topology.Algebra.Group.Profinite.Free.PadicUnits
 
 /-!
 # The linearisation of crossed homomorphisms of a free pro-`p` group in the character
@@ -36,10 +37,8 @@ Newton's method uses to find the canonical character of a Demushkin group.
 
 ## Main results
 
-* `TauCeti.freeProP.pow_dvd_sub_of_forall_of`: two continuous characters congruent modulo `p ^ k`
-  on the generators are congruent modulo `p ^ k` everywhere.
 * `TauCeti.IsCrossedHom.dvd_apply_of_mem_pLowerCentralSeries_one`: a continuous crossed
-  homomorphism vanishes modulo `p` on the Frattini subgroup `λ_1(F)`.
+  homomorphism of a pro-`p` group `G` vanishes modulo `p` on the Frattini subgroup `λ_1(G)`.
 * `TauCeti.IsCrossedHom.pow_dvd_sub_of_forall_of_eq`: two continuous crossed homomorphisms with
   the same values on the generators, for characters congruent modulo `p ^ k`, are congruent modulo
   `p ^ k`.
@@ -66,35 +65,19 @@ attribute [local instance 2000] Ring.toAddCommGroup
 
 variable {p : ℕ} [Fact p.Prime] {X : Type u}
 
-/-- **Two continuous characters congruent modulo `p ^ k` on the generators are congruent modulo
-`p ^ k` everywhere**: their truncations modulo `p ^ k` are continuous homomorphisms to a finite
-group agreeing on the generators. -/
-theorem freeProP.pow_dvd_sub_of_forall_of {χ χ' : freeProP p X →ₜ* ℤ_[p]ˣ} {k : ℕ}
-    (hχ : ∀ x, (p : ℤ_[p]) ^ k ∣ (χ' (of x) : ℤ_[p]) - χ (of x)) (g : freeProP p X) :
-    (p : ℤ_[p]) ^ k ∣ (χ' g : ℤ_[p]) - χ g := by
-  have h : (PadicInt.unitsToZModPow k).comp χ' = (PadicInt.unitsToZModPow k).comp χ :=
-    hom_ext fun x ↦ Units.ext (by
-      rw [ContinuousMonoidHom.comp_toFun, ContinuousMonoidHom.comp_toFun,
-        PadicInt.coe_unitsToZModPow_apply, PadicInt.coe_unitsToZModPow_apply, ← sub_eq_zero,
-        ← map_sub, PadicInt.toZModPow_eq_zero_iff_dvd]
-      exact hχ x)
-  rw [← PadicInt.toZModPow_eq_zero_iff_dvd, map_sub, sub_eq_zero,
-    ← PadicInt.coe_unitsToZModPow_apply, ← PadicInt.coe_unitsToZModPow_apply,
-    ← ContinuousMonoidHom.comp_toFun, h, ContinuousMonoidHom.comp_toFun]
-
-/-- **A continuous crossed homomorphism vanishes modulo `p` on the Frattini subgroup.** For a
-continuous character `χ` of a free pro-`p` group and a continuous crossed homomorphism `f` for `χ`,
-the reduction of `f` modulo `p` is a continuous character with values in `𝔽_p`, because `χ ≡ 1
-mod p`, and such a character kills `λ_1(F) = Φ(F)`. -/
-theorem IsCrossedHom.dvd_apply_of_mem_pLowerCentralSeries_one {χ : freeProP p X →ₜ* ℤ_[p]ˣ}
-    {f : freeProP p X → ℤ_[p]} (hf : IsCrossedHom χ f) (hfc : Continuous f) {g : freeProP p X}
-    (hg : g ∈ pLowerCentralSeries p (freeProP p X) 1) : (p : ℤ_[p]) ∣ f g := by
+/-- **A continuous crossed homomorphism of a pro-`p` group vanishes modulo `p` on the Frattini
+subgroup.** For a continuous character `χ : G → ℤ_pˣ` of a pro-`p` group `G` and a continuous
+crossed homomorphism `f` for `χ`, the reduction of `f` modulo `p` is a continuous character with
+values in `𝔽_p`, because `χ ≡ 1 mod p`, and such a character kills `λ_1(G) = Φ(G)`. -/
+theorem IsCrossedHom.dvd_apply_of_mem_pLowerCentralSeries_one {G : Type*} [Group G]
+    [TopologicalSpace G] [IsTopologicalGroup G] (hG : IsProP p G) {χ : G →ₜ* ℤ_[p]ˣ}
+    {f : G → ℤ_[p]} (hf : IsCrossedHom χ f) (hfc : Continuous f) {g : G}
+    (hg : g ∈ pLowerCentralSeries p G 1) : (p : ℤ_[p]) ∣ f g := by
   rw [← PadicInt.toZMod_eq_zero_iff_dvd]
-  let _ : DistribMulAction (freeProP p X) (ZMod p) :=
-    DistribMulAction.compHom (ZMod p) (1 : freeProP p X →* (ZMod p)ˣ)
-  have htriv : ∀ (g : freeProP p X) (x : ZMod p), g • x = x := fun _ x ↦ one_smul (ZMod p)ˣ x
+  let _ : DistribMulAction G (ZMod p) := DistribMulAction.compHom (ZMod p) (1 : G →* (ZMod p)ˣ)
+  have htriv : ∀ (g : G) (x : ZMod p), g • x = x := fun _ x ↦ one_smul (ZMod p)ˣ x
   have hχ1 : ∀ g, PadicInt.toZMod (χ g : ℤ_[p]) = 1 := fun g ↦
-    mem_unitsPrincipal_one_iff_toZMod.1 ((isProP_freeProP p X).mem_unitsPrincipal_one χ g)
+    mem_unitsPrincipal_one_iff_toZMod.1 (hG.mem_unitsPrincipal_one χ g)
   refine apply_eq_zero_of_mem_Z1_of_mem_pLowerCentralSeries_one htriv
     (ZModModule.char_nsmul_eq_zero p) (f := fun g ↦ PadicInt.toZMod (f g))
     (mem_Z1_iff.2 ⟨PadicInt.continuous_toZMod.comp hfc, fun g h ↦ ?_⟩) hg

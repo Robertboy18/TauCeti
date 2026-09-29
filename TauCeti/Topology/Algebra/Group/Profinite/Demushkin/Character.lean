@@ -23,18 +23,15 @@ the twisted coefficients is surjective (Labute, Theorem 4). This file proves tha
 defines the character, `TauCeti.demushkinCharacter`, the *canonical character* or *orientation*
 of `G`, whose image is the second invariant of the classification of Demushkin groups.
 
-The proof is a `p`-adic Newton iteration on the relator. Write `G = ⟨x₁, …, x_n ∣ r⟩` with
-`r ∈ Φ(F)` in the free pro-`p` group `F`. A continuous character of `F` is determined by its
-values `u_i = χ(x_i) ∈ 1 + pℤ_p`, and the prescription property of the induced character of `G`
-says that every continuous crossed homomorphism `F → ℤ_p` for `χ` kills `r`; by linearity this is
-the vanishing of the `n` values `A_j(u) = f_j(r)`, where `f_j` is the crossed homomorphism with
-`f_j(x_i) = δ_{ij}`. The first-order expansion of `A` in `u`
-(`TauCeti.IsCrossedHom.pow_succ_dvd_sub_sub_sum_degreeOneForm`) has as its linear term the matrix
-of the degree-one form of `r`, which is nondegenerate exactly when `G` is Demushkin, and `A(1) ≡ 0
-mod p` because `r` lies in the Frattini subgroup. Newton's method over the `p`-adically complete
-ring `ℤ_p` (`TauCeti.IsAdicComplete.existsUnique_eq_zero_of_isUnit_det`) then produces exactly one
-zero `u ≡ 1 mod p` of `A`, and the character with those values on the generators kills `r` and is
-the canonical character. Uniqueness needs no normal form of the relator, and the argument is
+Write `G = ⟨x₁, …, x_n ∣ r⟩` with `r ∈ Φ(F)` in the free pro-`p` group `F`. A continuous character
+`χ` of `G` is determined by its values `u_i = χ(x_i)`, which are principal units `1 + pℤ_p`, and by
+the relator criterion
+(`TauCeti.presentedProP.hasPrescriptionProperty_iff_forall_isCrossedHom_eq_zero`) it has the
+prescription property exactly when every continuous crossed homomorphism `F → ℤ_p` for the induced
+character of `F` vanishes at `r`. The existence and uniqueness theorem holds for every
+one-relator pro-`p` group whose relator has nondegenerate degree-one form
+(`TauCeti.freeProP.degreeOneForm`), a condition every Demushkin group satisfies
+(`TauCeti.IsDemushkin.nondegenerate_degreeOneForm`); it needs no normal form of the relator and is
 uniform in `p`.
 
 ## Main definitions
@@ -87,10 +84,10 @@ variable [Finite X] {r : freeProP p X}
 continuous character with the prescription property** (Labute, Theorem 4, without normal forms).
 Let `F` be the free pro-`p` group on a finite type `X` and `r ∈ Φ(F)` a relator whose class in
 `gr_1(F)` has nondegenerate degree-one form. Then the presented group `⟨X ∣ r⟩` has exactly one
-continuous character `χ : ⟨X ∣ r⟩ → ℤ_pˣ` with the prescription property. The character is found
-by Newton's method: its values on the generators are the unique zero, congruent to `1` modulo
-`p`, of the map recording the values on `r` of the Kronecker crossed homomorphisms, whose
-linearisation is the matrix of the degree-one form. -/
+continuous character `χ : ⟨X ∣ r⟩ → ℤ_pˣ` with the prescription property, that is, exactly one
+continuous character for which every continuous crossed homomorphism `F → ℤ_p` for the induced
+character of `F` vanishes at `r` (the relator criterion,
+`TauCeti.presentedProP.hasPrescriptionProperty_iff_forall_isCrossedHom_eq_zero`). -/
 theorem existsUnique_hasPrescriptionProperty_presentedProP_of_nondegenerate
     (hr : r ∈ proPFrattini p (freeProP p X))
     (hnd : (degreeOneForm (gradedMk p (freeProP p X) 1
@@ -130,7 +127,7 @@ theorem existsUnique_hasPrescriptionProperty_presentedProP_of_nondegenerate
   have h₀ : ∀ j, (p : ℤ_[p]) ∣ A 1 j := fun j ↦ by
     rw [hA 1 hone j]
     exact (isCrossedHom_crossedHom _ _).dvd_apply_of_mem_pLowerCentralSeries_one
-      (continuous_crossedHom _ _) n.2
+      (isProP_freeProP p X) (continuous_crossedHom _ _) n.2
   -- The linearisation of the Newton map is the lifted matrix of the degree-one form.
   have hlin : ∀ v v' : X → ℤ_[p], (∀ i, (p : ℤ_[p]) ∣ v i - (1 : X → ℤ_[p]) i) →
       (∀ i, (p : ℤ_[p]) ∣ v' i - (1 : X → ℤ_[p]) i) → ∀ k : ℕ, 1 ≤ k →
