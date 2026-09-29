@@ -31,7 +31,9 @@ to the class of one of the normal-form relator words,
   (`exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo_zero_of_two`);
 * `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)`, which is `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)` modulo `λ_2`,
   when `p = 2`, the form is not alternating and `n` is odd
-  (`TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoOdd`);
+  (`TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoOdd`, and
+  `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoOddTop` for
+  the word at `f = ∞` itself);
 * `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`, which is
   `x₁² (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` modulo `λ_2`, when `p = 2`, the form is not alternating
   and `n` is even
@@ -52,6 +54,8 @@ nondegenerate and not alternating, which is a direct computation.
 
 ## Main results
 
+* `TauCeti.freeProP.degreeOneBasis_repr_gradedMk_demushkinWordNeTwo_inl`: the `p`-power
+  coordinates of the class of `x₁^q (x₁, x₂) ⋯` are `q / p` at `x₁` and `0` elsewhere.
 * `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo`: the
   alternating case, for every `p`.
 * `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordNeTwo`: the degree-one form of the
@@ -62,13 +66,17 @@ nondegenerate and not alternating, which is a direct computation.
   the two dyadic normal-form words are nondegenerate, for `n` odd, resp. even, for every `f ≥ 1`
   and every even `a`; under the normal-form bounds `f ≥ 2` and `4 ∣ a` they are moreover not
   alternating (`TauCeti.freeProP.not_isAlt_degreeOneForm_demushkinWordTwoOdd`,
-  `TauCeti.freeProP.not_isAlt_degreeOneForm_demushkinWordTwoEven`).
+  `TauCeti.freeProP.not_isAlt_degreeOneForm_demushkinWordTwoEven`);
+  `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordTwoOddTop` and
+  `TauCeti.freeProP.not_isAlt_degreeOneForm_demushkinWordTwoOddTop`: the same for the odd word at
+  `f = ∞`, which has the class of the odd word at `f = 2`.
 * `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_of_not_isAlt`: at `p = 2`, two
   classes with nondegenerate nonalternating degree-one forms are carried to one another by a
   continuous automorphism.
 * `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo_zero_of_two`:
   the alternating case at `p = 2`, where the `p`-power part vanishes.
 * `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoOdd`,
+  `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoOddTop`,
   `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoEven`: the
   nonalternating case at `p = 2`, of odd and of even rank.
 
@@ -245,6 +253,34 @@ private theorem gradedMk_demushkinWordNeTwo_self_eq_altClass :
       demushkinWordNeTwo_mem_pLowerCentralSeries_one dvd_rfl n _⟩ = altClass p n 1 := by
   rw [gradedMk_demushkinWordNeTwo dvd_rfl, altClass, Nat.div_self (Fact.out : p.Prime).pos,
     one_smul, one_smul]
+
+/-- **The `p`-power coordinates of the class of the `q ≠ 2` normal-form word**
+`x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)`, for `p ∣ q`: the coefficient of `π ξ₁` is `q / p`, and the other
+`p`-power coordinates vanish. -/
+@[simp]
+theorem degreeOneBasis_repr_gradedMk_demushkinWordNeTwo_inl {q : ℕ} (hq : p ∣ q) (k : Fin n) :
+    (degreeOneBasis p (Fin n)).repr (gradedMk p (freeProP p (Fin n)) 1
+        ⟨demushkinWordNeTwo q n (freeProPGen p n),
+          demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩) (Sum.inl k) =
+      if (k : ℕ) = 0 then ((q / p : ℕ) : ZMod p) else 0 := by
+  have hn : 0 < n := k.pos
+  have h0 : gradedPow p (freeProP p (Fin n)) 0
+      (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n 0)) =
+      degreeOneBasis p (Fin n) (Sum.inl ⟨0, hn⟩) := by
+    rw [degreeOneBasis_apply, degreeOneFamily_inl, freeProPGen_of_lt p hn]
+  -- The bracket summands have no `p`-power coordinates.
+  have hbr : (degreeOneBasis p (Fin n)).repr (∑ i ∈ Finset.range (n / 2),
+      gradedBracket p (freeProP p (Fin n)) 0 0
+        (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * i)))
+        (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * i + 1)))) (Sum.inl k) = 0 := by
+    rw [map_sum, Finsupp.finsetSum_apply]
+    exact Finset.sum_eq_zero fun i _ ↦ degreeOneBasis_repr_gradedBracket_inl _ _ _
+  rw [gradedMk_demushkinWordNeTwo hq, map_add, Finsupp.add_apply, hbr, add_zero, h0, map_nsmul,
+    Finsupp.smul_apply, Module.Basis.repr_self_apply]
+  by_cases hk : (k : ℕ) = 0
+  · obtain rfl : (⟨0, hn⟩ : Fin n) = k := Fin.ext hk.symm
+    simp
+  · simp [hk, Fin.ext_iff, Ne.symm hk]
 
 private theorem even_of_basis {m : ℕ}
     (b : Module.Basis (Fin m ⊕ Fin m) (ZMod p) (continuousZModDual p (freeProP p (Fin n)))) :
@@ -492,7 +528,11 @@ private theorem degreeOneForm_demushkinWordTwoOdd_dualBasis {f : ℕ} (hf : 0 < 
     degreeOneForm_gradedBracket_gradedMkZero, toMul_dualBasis_freeProPGen, Nat.choose_self,
     one_smul, mul_ite, mul_one, mul_zero]
 
-private theorem degreeOneBasis_repr_demushkinWordTwoOdd_inl {f : ℕ} (hf : 0 < f) (k : Fin n) :
+/-- **The `2`-power coordinates of the class of the `q = 2`, `n` odd normal-form word**
+`x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)`, for `f ≥ 1`: the coefficient of `π ξ₁` is `1`, that of
+`π ξ₂` is `2^{f-1}`, and the other `2`-power coordinates vanish. -/
+@[simp]
+theorem degreeOneBasis_repr_gradedMk_demushkinWordTwoOdd_inl {f : ℕ} (hf : 0 < f) (k : Fin n) :
     (degreeOneBasis 2 (Fin n)).repr
       (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoOdd f n (freeProPGen 2 n),
         demushkinWordTwoOdd_mem_pLowerCentralSeries_one hf n _⟩)
@@ -503,6 +543,19 @@ private theorem degreeOneBasis_repr_demushkinWordTwoOdd_inl {f : ℕ} (hf : 0 < 
     Finsupp.smul_apply, degreeOneBasis_repr_gradedBracket_inl, Finset.sum_const_zero, add_zero,
     degreeOneBasis_repr_gradedPow_gradedMkZero_inl, toMul_dualBasis_freeProPGen]
 
+/-- **The vanishing `2`-power coordinates of the odd dyadic normal-form word**, for `f ≥ 2`:
+all coordinates except that of `x₁` vanish. -/
+theorem degreeOneBasis_repr_gradedMk_demushkinWordTwoOdd_inl_eq_zero_iff {f : ℕ}
+    (hf : 2 ≤ f) (k : Fin n) :
+    (degreeOneBasis 2 (Fin n)).repr
+        (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoOdd f n (freeProPGen 2 n),
+          demushkinWordTwoOdd_mem_pLowerCentralSeries_one (zero_lt_two.trans_le hf) n _⟩)
+        (Sum.inl k) = 0 ↔ (k : ℕ) ≠ 0 := by
+  obtain ⟨g, hg⟩ : ∃ g, f - 1 = g + 1 := ⟨f - 2, by omega⟩
+  rw [degreeOneBasis_repr_gradedMk_demushkinWordTwoOdd_inl (zero_lt_two.trans_le hf), hg,
+    pow_succ, mul_nsmul, two_nsmul, CharTwo.add_self_eq_zero, add_zero]
+  simp
+
 /-- **The degree-one form of `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)` is not alternating**, for
 `n ≥ 1` and `f ≥ 1`: its value on the first coordinate character twice is `1`. -/
 theorem not_isAlt_degreeOneForm_demushkinWordTwoOdd (hn : 0 < n) {f : ℕ} (hf : 0 < f) :
@@ -510,8 +563,20 @@ theorem not_isAlt_degreeOneForm_demushkinWordTwoOdd (hn : 0 < n) {f : ℕ} (hf :
         demushkinWordTwoOdd_mem_pLowerCentralSeries_one hf n _⟩)).IsAlt := by
   intro h
   have := h (dualBasis 2 (Fin n) ⟨0, hn⟩)
-  rw [degreeOneForm_dualBasis_self, degreeOneBasis_repr_demushkinWordTwoOdd_inl hf] at this
+  rw [degreeOneForm_dualBasis_self, degreeOneBasis_repr_gradedMk_demushkinWordTwoOdd_inl hf] at this
   simp at this
+
+/-- **The first coordinate character splits off the degree-one form of
+`x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)`**, for `n ≥ 1` and `f ≥ 1`: pairing any character `χ` with
+the first coordinate character reads off `χ(x₁)`, because `x₁` occurs in no commutator of the
+word. In particular the first coordinate character is orthogonal to all the others. -/
+theorem degreeOneForm_gradedMk_demushkinWordTwoOdd_dualBasis_zero (hn : 0 < n) {f : ℕ}
+    (hf : 0 < f) (χ : continuousZModDual 2 (freeProP 2 (Fin n))) :
+    degreeOneForm (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoOdd f n (freeProPGen 2 n),
+        demushkinWordTwoOdd_mem_pLowerCentralSeries_one hf n _⟩) χ
+      (dualBasis 2 (Fin n) ⟨0, hn⟩) = (χ.toMul (freeProPGen 2 n 0)).toAdd := by
+  rw [degreeOneForm_demushkinWordTwoOdd_dualBasis hf]
+  simp
 
 /-- **The degree-one form of `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)` is nondegenerate for `n`
 odd and `f ≥ 1`**: pairing with the `j`-th coordinate character reads off the value of a character
@@ -532,11 +597,8 @@ theorem nondegenerate_degreeOneForm_demushkinWordTwoOdd (hn : Odd n) {f : ℕ} (
   simp only [degreeOneForm_demushkinWordTwoOdd_dualBasis hf] at hχ'
   -- The value at `x₁`.
   have hc0 : (χ.toMul (freeProPGen 2 n 0)).toAdd = 0 := by
-    have h := hχ' 0 (by omega)
-    rw [ite_eq_left rfl, ite_eq_right (by omega), smul_zero, add_zero,
-      Finset.sum_eq_zero fun a _ ↦ by
-        rw [ite_eq_right (by omega), ite_eq_right (by omega), sub_zero], add_zero] at h
-    exact h
+    rw [← degreeOneForm_gradedMk_demushkinWordTwoOdd_dualBasis_zero (by omega) hf χ]
+    exact hχ _
   -- The value at `x_{j-1}` for `j ≥ 2` even is the pairing with the `j`-th coordinate character.
   have keyEven (j : ℕ) (hjn : j < n) (hj0 : j ≠ 0) (hj : j % 2 = 0) :
       (χ.toMul (freeProPGen 2 n (j - 1))).toAdd = 0 := by
@@ -735,6 +797,38 @@ theorem exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoOdd
   exists_continuousMulEquiv_gradedMap_eq_of_not_isAlt ρ _ hnd hnalt
     (nondegenerate_degreeOneForm_demushkinWordTwoOdd hn (zero_lt_two.trans_le hf))
     (not_isAlt_degreeOneForm_demushkinWordTwoOdd hn.pos (zero_lt_two.trans_le hf))
+
+/-- **The degree-one form of `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)` is not alternating**, for `n ≥ 1`:
+the word has the class of `x₁² x₂⁴ (x₂, x₃) ⋯ (x_{n-1}, x_n)`. -/
+theorem not_isAlt_degreeOneForm_demushkinWordTwoOddTop (hn : 0 < n) :
+    ¬ (degreeOneForm (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoOddTop n (freeProPGen 2 n),
+        demushkinWordTwoOddTop_mem_pLowerCentralSeries_one n _⟩)).IsAlt := by
+  rw [← gradedMk_demushkinWordTwoOdd_eq_gradedMk_demushkinWordTwoOddTop (f := 2) le_rfl]
+  exact not_isAlt_degreeOneForm_demushkinWordTwoOdd hn two_pos
+
+/-- **The degree-one form of `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)` is nondegenerate for `n` odd**: the
+word has the class of `x₁² x₂⁴ (x₂, x₃) ⋯ (x_{n-1}, x_n)`. -/
+theorem nondegenerate_degreeOneForm_demushkinWordTwoOddTop (hn : Odd n) :
+    (degreeOneForm (gradedMk 2 (freeProP 2 (Fin n)) 1
+      ⟨demushkinWordTwoOddTop n (freeProPGen 2 n),
+        demushkinWordTwoOddTop_mem_pLowerCentralSeries_one n _⟩)).Nondegenerate := by
+  rw [← gradedMk_demushkinWordTwoOdd_eq_gradedMk_demushkinWordTwoOddTop (f := 2) le_rfl]
+  exact nondegenerate_degreeOneForm_demushkinWordTwoOdd hn two_pos
+
+/-- **Labute's normal form modulo `λ_2`, the nonalternating case of odd rank, at level
+`f = ∞`.** Let `F` be the free pro-`2` group on `n` generators, `n` odd, and let `ρ ∈ gr_1(F)`
+have nondegenerate degree-one form that is not alternating. Then a continuous automorphism of `F`
+carries `ρ` to the class of `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)`. -/
+theorem exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordTwoOddTop
+    (hnd : (degreeOneForm ρ).Nondegenerate) (hnalt : ¬ (degreeOneForm ρ).IsAlt) (hn : Odd n) :
+    ∃ e : freeProP 2 (Fin n) ≃ₜ* freeProP 2 (Fin n),
+      gradedMap 2 (e : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).toMonoidHom
+          (e : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).continuous 1 ρ =
+        gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoOddTop n (freeProPGen 2 n),
+          demushkinWordTwoOddTop_mem_pLowerCentralSeries_one n _⟩ :=
+  exists_continuousMulEquiv_gradedMap_eq_of_not_isAlt ρ _ hnd hnalt
+    (nondegenerate_degreeOneForm_demushkinWordTwoOddTop hn)
+    (not_isAlt_degreeOneForm_demushkinWordTwoOddTop hn.pos)
 
 /-- **Labute's normal form modulo `λ_2`, the nonalternating case of even rank.** Let `F` be the
 free pro-`2` group on `n` generators, `n` even, and let `ρ ∈ gr_1(F)` have nondegenerate degree-one
