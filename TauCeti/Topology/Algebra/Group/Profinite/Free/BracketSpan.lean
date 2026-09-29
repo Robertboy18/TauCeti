@@ -13,8 +13,9 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Free.BasisModification
 
 Let `F = freeProP p X` be the free pro-`p` group on a finite linearly ordered type, and let
 `ρ ∈ gr_1(F)` be a class without `p`-power part whose partial derivatives `∂_i ρ` span `gr_0(F)`,
-the class of a relator `x₀^q (x₁, x₂) (x₃, x₄) ⋯` with `q ≠ p`. The image of the basis-modification
-map `δ_ρ : gr_m(F)^X → gr_{m+1}(F)` is the commutator part `[gr_m(F), gr_0(F)]` of `gr_{m+1}(F)`
+the class of a relator `x₀^q (x₀, x₁) (x₂, x₃) ⋯` with `q ≠ p` in which every generator occurs in a
+commutator. The image of the basis-modification map `δ_ρ : gr_m(F)^X → gr_{m+1}(F)` is the
+commutator part `[gr_m(F), gr_0(F)]` of `gr_{m+1}(F)`
 (`TauCeti.freeProP.range_basisModificationDelta_eq_span_of_repr_inl_eq_zero`). The successive
 approximation of such a relator has to keep its exponent vector fixed, so its basis corrections
 `x_i ↦ x_i w_i` must take `w_{x₀}` in the commutator subgroup at the pivot `x₀` carrying the

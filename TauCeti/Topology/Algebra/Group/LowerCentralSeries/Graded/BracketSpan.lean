@@ -91,17 +91,19 @@ theorem gradedBracket_gradedPowIter_self (j : ℕ) (x : gradedPiece p G 0) :
 variable (p G) in
 /-- **The bracket span** `C_{k+1}(G) ≤ gr_{k+1}(G)`: the subspace spanned by the brackets `[x, y]`
 with `x ∈ gr_k(G)` and `y ∈ gr_0(G)`, that is by the classes of the commutators `⁅a, b⁆` with
-`a ∈ λ_k(G)` and `b ∈ G`. Its elements are classes of elements of the commutator subgroup
+`a ∈ λ_k(G)` and `b ∈ G`; it is the bilinear image `Submodule.map₂` of the bracket
+`TauCeti.gradedBracketLinear` on the whole of `gr_k(G) × gr_0(G)`. Its elements are classes of
+elements of the commutator subgroup
 (`TauCeti.exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan`), and `π` carries it into
 `C_{k+2}(G)` (`TauCeti.gradedPow_mem_gradedBracketSpan`). -/
 def gradedBracketSpan (k : ℕ) : Submodule (ZMod p) (gradedPiece p G (k + 1)) :=
-  span (ZMod p) (Set.range fun xy : gradedPiece p G k × gradedPiece p G 0 ↦
-    gradedBracket p G k 0 xy.1 xy.2)
+  Submodule.map₂ (gradedBracketLinear p G k 0) ⊤ ⊤
 
 /-- A bracket `[x, y]` with `y` of degree zero lies in the bracket span. -/
 theorem gradedBracket_mem_gradedBracketSpan {k : ℕ} (x : gradedPiece p G k)
-    (y : gradedPiece p G 0) : gradedBracket p G k 0 x y ∈ gradedBracketSpan p G k :=
-  subset_span ⟨(x, y), rfl⟩
+    (y : gradedPiece p G 0) : gradedBracket p G k 0 x y ∈ gradedBracketSpan p G k := by
+  rw [← gradedBracketLinear_apply]
+  exact Submodule.apply_mem_map₂ _ Submodule.mem_top Submodule.mem_top
 
 /-- A submodule contains the bracket span if and only if it contains every bracket `[x, y]` with
 `y` of degree zero. -/
@@ -109,16 +111,19 @@ theorem gradedBracket_mem_gradedBracketSpan {k : ℕ} (x : gradedPiece p G k)
 theorem gradedBracketSpan_le_iff {k : ℕ} {W : Submodule (ZMod p) (gradedPiece p G (k + 1))} :
     gradedBracketSpan p G k ≤ W ↔
       ∀ (x : gradedPiece p G k) (y : gradedPiece p G 0), gradedBracket p G k 0 x y ∈ W := by
-  simp only [gradedBracketSpan, span_le, Set.range_subset_iff, Prod.forall, SetLike.mem_coe]
+  simp only [gradedBracketSpan, Submodule.map₂_le, Submodule.mem_top, true_implies,
+    gradedBracketLinear_apply]
 
 /-- **Elements of the bracket span are classes of commutators**: every element of `C_{k+1}(G)` is
 the class of an element of `λ_{k+1}(G)` lying in the commutator subgroup of `G`. -/
 theorem exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan [NeZero p] {k : ℕ}
     {y : gradedPiece p G (k + 1)} (hy : y ∈ gradedBracketSpan p G k) :
     ∃ z : pLowerCentralSeries p G (k + 1), (z : G) ∈ commutator G ∧ gradedMk p G (k + 1) z = y := by
+  rw [gradedBracketSpan, Submodule.map₂_eq_span_image2] at hy
   induction hy using span_induction with
   | mem _ h =>
-    obtain ⟨⟨x, y⟩, rfl⟩ := h
+    obtain ⟨x, -, y, -, rfl⟩ := h
+    simp only [gradedBracketLinear_apply]
     obtain ⟨x, rfl⟩ := gradedMk_surjective k x
     obtain ⟨y, rfl⟩ := gradedMk_surjective 0 y
     refine ⟨⟨⁅(x : G), (y : G)⁆, commutator_mem_pLowerCentralSeries x.2 y.2⟩, ?_,
@@ -144,9 +149,10 @@ theorem gradedPow_mem_gradedBracketSpan {k : ℕ} {x : gradedPiece p G (k + 1)}
   have h : (gradedBracketSpan p G k).map
       ((gradedPowAddMonoidHom p G (Nat.le_add_left 1 k)).toZModLinearMap p) ≤
         gradedBracketSpan p G (k + 1) := by
-    rw [gradedBracketSpan, map_span, span_le]
-    rintro _ ⟨_, ⟨⟨x, y⟩, rfl⟩, rfl⟩
-    simp only [AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply, SetLike.mem_coe]
+    rw [Submodule.map_le_iff_le_comap]
+    refine Submodule.map₂_le.mpr fun x _ y _ ↦ ?_
+    rw [Submodule.mem_comap, AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply,
+      gradedBracketLinear_apply]
     cases k with
     | zero =>
       rw [gradedPow_gradedBracket_zero_zero]
@@ -156,15 +162,6 @@ theorem gradedPow_mem_gradedBracketSpan {k : ℕ} {x : gradedPiece p G (k + 1)}
       rw [gradedPow_gradedBracket_left_zero (Nat.le_add_left 1 k)]
       exact gradedBracket_mem_gradedBracketSpan _ _
   exact h ⟨x, hx, by rw [AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply]⟩
-
-/-- A bracket `[c, z]` with `c` in a submodule `C` and `z` of degree zero lies in the span of such
-brackets, `Submodule.map₂` of the bracket on `C` and `gr_0(G)`. -/
-theorem gradedBracket_mem_map₂_gradedBracketLinear {j : ℕ}
-    {C : Submodule (ZMod p) (gradedPiece p G j)} {c : gradedPiece p G j} (hc : c ∈ C)
-    (z : gradedPiece p G 0) :
-    gradedBracket p G j 0 c z ∈ Submodule.map₂ (gradedBracketLinear p G j 0) C ⊤ := by
-  rw [← gradedBracketLinear_apply]
-  exact Submodule.apply_mem_map₂ _ hc mem_top
 
 /-- **`π` carries brackets with the bracket span into brackets with the next bracket span**: if
 `w` is a sum of brackets `[c, z]` with `c ∈ C_{k+1}(G)` and `z ∈ gr_0(G)`, then `π w` is a sum of
@@ -181,8 +178,9 @@ theorem gradedPow_mem_map₂_gradedBracketLinear_gradedBracketSpan {k : ℕ}
     rw [Submodule.map_le_iff_le_comap]
     refine Submodule.map₂_le.mpr fun c hc z _ ↦ ?_
     rw [Submodule.mem_comap, AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply,
-      gradedBracketLinear_apply, gradedPow_gradedBracket_left_zero (Nat.le_add_left 1 k)]
-    exact gradedBracket_mem_map₂_gradedBracketLinear (gradedPow_mem_gradedBracketSpan hc) z
+      gradedBracketLinear_apply, gradedPow_gradedBracket_left_zero (Nat.le_add_left 1 k),
+      ← gradedBracketLinear_apply]
+    exact Submodule.apply_mem_map₂ _ (gradedPow_mem_gradedBracketSpan hc) Submodule.mem_top
   exact h ⟨w, hw, by rw [AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply]⟩
 
 /-- **The symmetrised bracket of iterated `p`-powers**: for `x, y ∈ gr_0(G)`,
@@ -213,7 +211,8 @@ theorem gradedBracket_gradedPowIter_add_swap_mem_map₂ (k : ℕ) (x y : gradedP
       abel
     rw [hsum]
     refine neg_mem (add_mem (nsmul_mem ?_ _) (nsmul_mem ?_ _)) <;>
-      exact gradedBracket_mem_map₂_gradedBracketLinear (gradedBracket_mem_gradedBracketSpan y x) _
+      rw [← gradedBracketLinear_apply] <;>
+      exact Submodule.apply_mem_map₂ _ (gradedBracket_mem_gradedBracketSpan y x) Submodule.mem_top
   | succ k ih =>
     rw [gradedPowIter_succ (k + 1) x, gradedPowIter_succ (k + 1) y,
       ← gradedPow_gradedBracket_left_zero (Nat.le_add_left 1 k) (gradedPowIter p G (k + 1) x) y,
