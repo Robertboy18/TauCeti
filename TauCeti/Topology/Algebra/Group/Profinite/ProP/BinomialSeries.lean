@@ -64,6 +64,7 @@ variable [IsTopologicalGroup A] [CompactSpace A] [TotallyDisconnectedSpace A]
 /-- **The binomial series `(1 + X) ^ u` evaluated at `χ a - 1` is `χ (a ^ u)`**, for a continuous
 character `χ` of a pro-`p` group into `ℤ_pˣ` and the `p`-adic power `a ^ u` of
 `TauCeti.IsProP.padicPow`. -/
+@[simp]
 theorem aeval_binomialSeries (a : A) (u : ℤ_[p]) :
     PowerSeries.aeval (hA.hasEval_coe_apply_sub_one χ a) (PowerSeries.binomialSeries ℤ_[p] u) =
       (χ (hA.padicPow a u) : ℤ_[p]) := by
