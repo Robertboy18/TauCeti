@@ -24,9 +24,11 @@ the representation number `r_L(min L)`.
 
 Both are defined for every integral lattice, as natural numbers: the minimum is the least natural
 number that is the norm of a nonzero lattice vector, and it is `0` when there is none, which for a
-positive definite lattice happens exactly in rank zero; the kissing number counts the nonzero
-vectors of norm `min L`, so that it is `0` in rank zero. The attainment and order properties of the
-minimum need only that norms are nonnegative, and are stated for positive semidefinite lattices:
+positive definite lattice happens exactly in rank zero; the kissing number is the cardinality of
+the set of nonzero vectors of norm `min L`, so that it is `0` in rank zero. For a positive definite
+lattice that set is finite and the kissing number is a genuine count; for a lattice whose minimal
+shell is infinite it is `0`, as for `representationNumber`. The attainment and order properties of
+the minimum need only that norms are nonnegative, and are stated for positive semidefinite lattices:
 the minimum of a nontrivial positive semidefinite lattice is attained and bounds every nonzero norm
 from below, so it is the least element of the set of norms of nonzero vectors, which is the form in
 which a stored minimum is certified. Positive definiteness enters where it is needed: the minimum
@@ -50,7 +52,8 @@ as it has a root, a vector of norm `2`. Minimum and kissing number are isometry 
   `TauCeti.IntegralLattice.IsPosDef.minimum_eq_two`: the minimum of an even positive definite
   lattice is at least `2`, and equals `2` when the lattice has a root.
 * `TauCeti.IntegralLattice.kissingNumber`: the number of nonzero minimal vectors, with
-  `TauCeti.IntegralLattice.kissingNumber_eq_representationNumber` and
+  `TauCeti.IntegralLattice.kissingNumber_eq_representationNumber`,
+  `TauCeti.IntegralLattice.kissingNumber_eq_zero_of_subsingleton` and
   `TauCeti.IntegralLattice.IsPosDef.kissingNumber_pos`.
 * `TauCeti.IntegralLattice.Isometry.minimum_eq` and
   `TauCeti.IntegralLattice.Isometry.kissingNumber_eq`: isometry invariance.
@@ -185,17 +188,26 @@ theorem IsPosDef.minimum_eq_two (hL : L.IsPosDef) (he : L.IsEven) {x : L}
 
 /-! ## The kissing number -/
 
-/-- The kissing number of an integral lattice: the number of nonzero vectors of norm `min L`. When
-the minimum is nonzero, in particular for a positive definite lattice of positive rank, this is the
-representation number `r_L(min L)` (`kissingNumber_eq_representationNumber`); in rank zero it is
-`0`, the zero vector not being a minimal vector. -/
+/-- The kissing number of an integral lattice: the number of nonzero vectors of norm `min L`. For a
+positive definite lattice the minimal shell is finite, so this is a genuine count; on an infinite
+minimal shell it is `0`. When the minimum is nonzero, in particular for a positive definite lattice
+of positive rank, this is the representation number `r_L(min L)`
+(`kissingNumber_eq_representationNumber`); in rank zero it is `0`
+(`kissingNumber_eq_zero_of_subsingleton`), the zero vector not being a minimal vector. -/
 noncomputable def kissingNumber (L : IntegralLattice V) : ℕ :=
   (L.vectorsOfNorm L.minimum \ {0}).ncard
 
-/-- The kissing number is the number of nonzero vectors in the shell of the minimum. -/
+/-- The kissing number is the cardinality of the set of nonzero vectors in the shell of the
+minimum, which is `0` when that set is infinite. -/
 theorem kissingNumber_def (L : IntegralLattice V) :
     L.kissingNumber = (L.vectorsOfNorm L.minimum \ {0}).ncard :=
   (rfl)
+
+/-- In rank zero there is no nonzero vector, so the kissing number is `0`. -/
+@[simp]
+theorem kissingNumber_eq_zero_of_subsingleton [Subsingleton L] : L.kissingNumber = 0 := by
+  rw [kissingNumber_def, minimum_eq_zero_of_subsingleton, Nat.cast_zero,
+    vectorsOfNorm_zero_of_subsingleton, sdiff_self, Set.bot_eq_empty, Set.ncard_empty]
 
 /-- When the minimum is nonzero, the kissing number is the representation number of the
 minimum. -/

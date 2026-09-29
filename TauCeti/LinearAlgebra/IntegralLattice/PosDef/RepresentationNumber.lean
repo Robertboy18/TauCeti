@@ -26,8 +26,8 @@ value `0` on an infinite shell.
 This file records the basic behaviour of these counts: the zero shell of an anisotropic lattice,
 in particular of a positive definite one, is `{0}`, so `r_L(0) = 1`; negative norms are not
 represented by a positive semidefinite lattice; in rank zero the zero shell is `{0}` and every
-other shell is empty; and an isometry carries shells onto shells, so representation numbers are
-isometry invariants.
+other shell is empty, so `r_L(0) = 1` and `r_L(n) = 0` for `n ≠ 0`; and an isometry carries shells
+onto shells, so representation numbers are isometry invariants.
 
 Representation numbers are the counts that the theta series of a positive definite lattice
 expands; that identification is not made here.
@@ -43,6 +43,9 @@ expands; that identification is not made here.
   lattice, `r_L(n) = 0` exactly when the shell of norm `n` is empty.
 * `TauCeti.IntegralLattice.IsPosSemidef.vectorsOfNorm_eq_empty_of_neg`: a positive semidefinite
   lattice represents no negative number.
+* `TauCeti.IntegralLattice.representationNumber_zero_of_subsingleton` and
+  `TauCeti.IntegralLattice.representationNumber_eq_zero_of_subsingleton`: in rank zero,
+  `r_L(0) = 1` and `r_L(n) = 0` for `n ≠ 0`.
 * `TauCeti.IntegralLattice.Isometry.carrierEquiv_image_vectorsOfNorm` and
   `TauCeti.IntegralLattice.Isometry.representationNumber_eq`: isometries carry shells onto shells
   and preserve representation numbers.
@@ -134,6 +137,17 @@ theorem vectorsOfNorm_eq_empty_of_subsingleton [Subsingleton L] {n : ℚ} (hn : 
   rw [mem_vectorsOfNorm] at hx
   rw [← hx, Subsingleton.elim x 0]
   simp
+
+/-- In rank zero `0` is represented exactly once: `r_L(0) = 1`. -/
+@[simp]
+theorem representationNumber_zero_of_subsingleton [Subsingleton L] :
+    L.representationNumber 0 = 1 := by
+  rw [representationNumber_def, vectorsOfNorm_zero_of_subsingleton, Set.ncard_singleton]
+
+/-- In rank zero no nonzero number is represented: `r_L(n) = 0` for `n ≠ 0`. -/
+theorem representationNumber_eq_zero_of_subsingleton [Subsingleton L] {n : ℚ} (hn : n ≠ 0) :
+    L.representationNumber n = 0 := by
+  rw [representationNumber_def, vectorsOfNorm_eq_empty_of_subsingleton hn, Set.ncard_empty]
 
 /-! ## Isometry invariance -/
 
