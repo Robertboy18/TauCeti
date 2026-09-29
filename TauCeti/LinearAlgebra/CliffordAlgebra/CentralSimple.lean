@@ -34,15 +34,6 @@ Quadratic Forms over Fields*, V.2.4; Chevalley, *The Algebraic Theory of Spinors
 finite-dimensional by `CliffordAlgebra.instFinite`, so its Brauer class is defined: this is the even
 half of the Clifford invariant of a regular quadratic form.
 
-The proof is by descent from a separable closure `Kˢ` of `K`. Over `Kˢ` the extended form
-`Q.baseChange Kˢ` is still nondegenerate (`TauCeti.QuadraticForm.Nondegenerate.baseChange`) and
-carries polarization data (`TauCeti.SpinPolarizationData.ofNondegenerate`), so the even-dimensional
-structure theorem identifies its Clifford algebra with the endomorphism algebra of the spinor module
-(`TauCeti.SpinPolarizationData.cliffordEquivEnd`), which is central simple. Mathlib's
-`CliffordAlgebra.equivBaseChange` identifies that Clifford algebra with the scalar extension
-`Kˢ ⊗[K] CliffordAlgebra Q`, and centrality and simplicity both descend along a field extension
-(`TauCeti.Algebra.IsCentral.of_baseChange`, `TauCeti.IsSimpleRing.of_baseChange`).
-
 Both hypotheses matter. In odd dimension the Clifford algebra is classically not central, its
 centre being spanned by `1` and the volume element, and the central simple algebra attached to the
 form is its even subalgebra instead (Lam V.2.5); that case is not treated here. For the zero form on
@@ -102,6 +93,14 @@ private theorem even_finrank_baseChange_sepClosure (heven : Even (finrank K V)) 
   rwa [Module.finrank_baseChange]
 
 variable [NeZero (2 : K)]
+
+-- Both public theorems are proved by descent from a separable closure `Kˢ` of `K`. Over `Kˢ` the
+-- extended form `Q.baseChange Kˢ` is still nondegenerate and carries polarization data
+-- (`polarizationSepClosure`), so the even-dimensional structure theorem identifies its Clifford
+-- algebra with the endomorphism algebra of the spinor module, which is central simple. Mathlib's
+-- `CliffordAlgebra.equivBaseChange` identifies that Clifford algebra with the scalar extension
+-- `Kˢ ⊗[K] CliffordAlgebra Q`, and centrality and simplicity descend along a field extension
+-- (`TauCeti.Algebra.IsCentral.of_baseChange`, `TauCeti.IsSimpleRing.of_baseChange`).
 
 /-- **The Clifford algebra of a nondegenerate form in even dimension is central.** Over a field of
 characteristic different from `2`, if `Q` is nondegenerate on a finite-dimensional space of even
