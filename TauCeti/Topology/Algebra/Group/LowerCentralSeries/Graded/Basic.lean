@@ -597,6 +597,7 @@ theorem gradedBracket_self {k : ℕ} (x : gradedPiece p G k) : gradedBracket p G
 
 /-- **The bracket of a commutative group vanishes** in every degree, since it is the class of a
 commutator. -/
+@[simp]
 theorem gradedBracket_eq_zero_of_isMulCommutative [IsMulCommutative G] {j k : ℕ}
     (x : gradedPiece p G j) (y : gradedPiece p G k) : gradedBracket p G j k x y = 0 := by
   obtain ⟨x, rfl⟩ := gradedMk_surjective j x

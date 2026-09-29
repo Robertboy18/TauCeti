@@ -10,7 +10,6 @@ public import Mathlib.LinearAlgebra.Dimension.StrongRankCondition
 public import TauCeti.GroupTheory.SpecificGroups.Heisenberg
 public import TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded.Span
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Abelianization
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.LowerCentralSeries
 import Mathlib.FieldTheory.Finiteness
 

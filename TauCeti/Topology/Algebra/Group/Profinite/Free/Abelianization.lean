@@ -164,6 +164,7 @@ theorem exponentSumZModPow_of_self (k : ℕ) (i : X) :
   rw [exponentSumZModPow_apply, exponentSum_of, toAdd_ofAdd, Pi.single_eq_same, map_one]
 
 /-- The `i`-th exponent sum modulo `p ^ k` kills the generators other than `x_i`. -/
+@[simp]
 theorem exponentSumZModPow_of_of_ne (k : ℕ) {i j : X} (hij : j ≠ i) :
     exponentSumZModPow p X k i (of j) = 1 := by
   classical
