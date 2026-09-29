@@ -48,6 +48,9 @@ of `R`; see `TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianizatio
   exponent-sum map is surjective, and its kernel is the closed commutator subgroup.
 * `TauCeti.freeProP.dvd_exponentSum_of_mem_proPFrattini`: the exponent sums of an element of the
   pro-`p` Frattini subgroup are divisible by `p`.
+* `TauCeti.freeProP.apply_eq_prod_padicPow_exponentSum`: a continuous homomorphism to a
+  commutative pro-`p` group is computed by the exponent sums, `ψ y = ∏ x, ψ (x_x) ^ (u x)` for
+  `u = exponentSum y`.
 
 ## References
 
@@ -236,6 +239,32 @@ theorem exponentSum_eq_one_iff (y : freeProP p X) :
     exponentSum p X y = 1 ↔ y ∈ (commutator (freeProP p X)).topologicalClosure := by
   rw [← abelianizationEquiv_mk, map_eq_one_iff _ (abelianizationEquiv p X).injective,
     QuotientGroup.eq_one_iff]
+
+/-- **A continuous homomorphism from a free pro-`p` group of finite rank to a commutative pro-`p`
+group is computed by the exponent sums**: `ψ y = ∏ x, ψ (x_x) ^ (u x)` for `u = exponentSum y`,
+the powers being the `p`-adic powers of the target. -/
+theorem apply_eq_prod_padicPow_exponentSum [Fintype X] {A : Type*} [CommGroup A]
+    [TopologicalSpace A] [IsTopologicalGroup A] [CompactSpace A] [TotallyDisconnectedSpace A]
+    (hA : IsProP p A) (ψ : freeProP p X →ₜ* A) (y : freeProP p X) :
+    ψ y = ∏ x, hA.padicPow (ψ (of x)) ((exponentSum p X y).toAdd x) := by
+  have hF := (isProP_freeProP p X).topologicalAbelianization_self
+  -- the class of `y` in `F^{ab}` is the product of the `p`-adic powers of the generator classes
+  have h : (y : TopologicalAbelianization (freeProP p X)) =
+      ∏ x, hF.padicPow ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X))
+        ((exponentSum p X y).toAdd x) := by
+    rw [← abelianizationEquiv_symm_ofAdd, ofAdd_toAdd, ← abelianizationEquiv_mk,
+      ContinuousMulEquiv.symm_apply_apply]
+  have h' := congrArg (TopologicalAbelianization.lift ψ) h
+  rw [TopologicalAbelianization.lift_mk, map_prod] at h'
+  rw [h']
+  refine Finset.prod_congr rfl fun x _ ↦ ?_
+  have hmap := hF.map_padicPow hA
+    (TopologicalAbelianization.lift ψ : TopologicalAbelianization (freeProP p X) →* A)
+    (TopologicalAbelianization.lift ψ).continuous
+    ((of x : freeProP p X) : TopologicalAbelianization (freeProP p X))
+    ((exponentSum p X y).toAdd x)
+  rw [MonoidHom.coe_ofClass] at hmap
+  rw [hmap, TopologicalAbelianization.lift_mk]
 
 end freeProP
 

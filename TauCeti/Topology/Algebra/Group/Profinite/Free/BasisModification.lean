@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded.Deviation
 public import TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded.Pow
+public import TauCeti.Topology.Algebra.Group.Profinite.Free.Abelianization
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.DegreeOneForm
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.Graded
 import Mathlib.Algebra.Module.Projective
@@ -86,6 +87,9 @@ classification, whose levels carry the free parameters `α` and `f` of the norma
 
 * `TauCeti.freeProP.inv_mul_basisModification_mem_pLowerCentralSeries`: `θ_w` is congruent to the
   identity modulo `λ_m(F)`.
+* `TauCeti.freeProP.exponentSum_basisModification`: `θ_w` preserves the exponent vector of `g`
+  when `w_i` lies in the closed commutator subgroup at every generator carrying a nonzero exponent
+  of `g`.
 * `TauCeti.freeProP.gradedDeviation_basisModification`,
   `TauCeti.freeProP.gradedMk_inv_mul_basisModification`: the class of `r⁻¹ * θ_w r` in
   `gr_{m+1}(F)` is `δ(ω)`; in particular it depends only on the classes `ω_i`.
@@ -169,6 +173,33 @@ theorem gradedDeviation_basisModification_gradedMkZero_of
   rw [gradedDeviation_gradedMkZero]
   congr 1
   exact Subtype.ext (by simp)
+
+section ExponentSum
+
+variable [Fact p.Prime] [Finite X]
+
+/-- **A basis modification lying in the closed commutator subgroup at every generator carrying
+a nonzero exponent preserves the exponent vector**: if `w_i ∈ closure [F, F]` for every `i` with
+`(exponentSum g)_i ≠ 0`, then `exponentSum (θ_w g) = exponentSum g`. The exponent vector of
+`θ_w g` is `Σ_i (exponentSum g)_i • (e_i + exponentSum w_i)`, and each correction term vanishes. -/
+theorem exponentSum_basisModification (w : X → pLowerCentralSeries p (freeProP p X) m)
+    {g : freeProP p X} (hw : ∀ i, (exponentSum p X g).toAdd i ≠ 0 →
+      (w i : freeProP p X) ∈ (commutator (freeProP p X)).topologicalClosure) :
+    exponentSum p X (basisModification w g) = exponentSum p X g := by
+  cases nonempty_fintype X
+  have hA := isProP_multiplicative_pi_padicInt p X
+  have h := apply_eq_prod_padicPow_exponentSum p X hA
+    ((exponentSum p X).comp (basisModification w)) g
+  rw [ContinuousMonoidHom.coe_comp, Function.comp_apply] at h
+  rw [h]
+  conv_rhs => rw [apply_eq_prod_padicPow_exponentSum p X hA (exponentSum p X) g]
+  refine Finset.prod_congr rfl fun x _ ↦ ?_
+  rw [Function.comp_apply, basisModification_of, map_mul]
+  by_cases hx : (exponentSum p X g).toAdd x = 0
+  · rw [hx, hA.padicPow_zero, hA.padicPow_zero]
+  · rw [(exponentSum_eq_one_iff p X _).mpr (hw x hx), mul_one]
+
+end ExponentSum
 
 /-! ### The maps `δ` -/
 
