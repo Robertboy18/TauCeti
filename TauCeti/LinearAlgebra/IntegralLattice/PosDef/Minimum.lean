@@ -90,6 +90,7 @@ theorem minimum_def (L : IntegralLattice V) :
 variable {L : IntegralLattice V}
 
 /-- In rank zero there is no nonzero vector, so the minimum is `0`. -/
+@[simp]
 theorem minimum_eq_zero_of_subsingleton [Subsingleton L] : L.minimum = 0 := by
   refine Nat.sInf_eq_zero.mpr (Or.inr (Set.eq_empty_of_forall_notMem ?_))
   rintro k ⟨x, hx, -⟩

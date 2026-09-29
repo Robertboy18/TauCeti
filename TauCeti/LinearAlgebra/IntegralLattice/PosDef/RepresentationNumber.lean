@@ -131,6 +131,7 @@ theorem vectorsOfNorm_zero_of_subsingleton [Subsingleton L] : L.vectorsOfNorm 0 
     simp
 
 /-- In rank zero every shell of nonzero norm is empty. -/
+@[simp]
 theorem vectorsOfNorm_eq_empty_of_subsingleton [Subsingleton L] {n : ℚ} (hn : n ≠ 0) :
     L.vectorsOfNorm n = ∅ := by
   refine Set.eq_empty_of_forall_notMem fun x hx ↦ hn ?_
@@ -145,6 +146,7 @@ theorem representationNumber_zero_of_subsingleton [Subsingleton L] :
   rw [representationNumber_def, vectorsOfNorm_zero_of_subsingleton, Set.ncard_singleton]
 
 /-- In rank zero no nonzero number is represented: `r_L(n) = 0` for `n ≠ 0`. -/
+@[simp]
 theorem representationNumber_eq_zero_of_subsingleton [Subsingleton L] {n : ℚ} (hn : n ≠ 0) :
     L.representationNumber n = 0 := by
   rw [representationNumber_def, vectorsOfNorm_eq_empty_of_subsingleton hn, Set.ncard_empty]
