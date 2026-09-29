@@ -441,10 +441,9 @@ theorem exists_topologicalClosure_zpowers_eq_unitsPrincipal {f : ℕ} (hf : 0 < 
   obtain ⟨u, hu, hu'⟩ := exists_mem_unitsPrincipal_and_notMem_succ_of_pos p hf
   exact ⟨u, topologicalClosure_zpowers_eq_unitsPrincipal hf hf₂ hu hu'⟩
 
-variable (p) in
 /-- The principal unit group `U^(f)` is infinite: `x ↦ 1 + p ^ (f + 1) x` embeds `ℤ_p` into
 it. -/
-theorem infinite_unitsPrincipal (f : ℕ) : Infinite (unitsPrincipal p f) := by
+instance infinite_unitsPrincipal (f : ℕ) : Infinite (unitsPrincipal p f) := by
   have hp0 : (p : ℤ_[p]) ^ (f + 1) ≠ 0 := pow_ne_zero _ (Nat.cast_ne_zero.mpr hp.out.ne_zero)
   have hunit (x : ℤ_[p]) : IsUnit (1 + (p : ℤ_[p]) ^ (f + 1) * x) :=
     PadicInt.isUnit_one_add_of_dvd ((dvd_pow_self _ f.succ_ne_zero).mul_right x)
@@ -470,9 +469,8 @@ theorem not_isOfFinOrder_of_mem_unitsPrincipal {f : ℕ} (hf : 0 < f) (hf₂ : p
     (fun h ↦ (hf₂ h).trans hfg) hg hg'
   have : Finite (Subgroup.zpowers u) := hfin.finite_zpowers
   rw [(Set.toFinite _).isClosed.subgroup_topologicalClosure_eq] at hclos
-  have hinf := infinite_unitsPrincipal p g
-  rw [← hclos] at hinf
-  exact hinf.not_finite this
+  rw [hclos] at this
+  exact not_finite (unitsPrincipal p g)
 
 /-! ### The subgroup of `p`-th powers -/
 

@@ -9,6 +9,8 @@ public import Mathlib.GroupTheory.Commutator.Basic
 public import TauCeti.Topology.Algebra.ContinuousMonoidHom
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicUnits
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Procyclic
+import TauCeti.GroupTheory.Commutator
+import TauCeti.Topology.Algebra.Group.Generation
 
 /-!
 # The kernel of a character with two marked generators
@@ -24,17 +26,18 @@ and the kernel of `χ` is exactly `N` as soon as every relation `(χ a) ^ s (χ 
 the marked values forces the word `a ^ s b ^ t` into `N`
 (`TauCeti.IsProP.ker_eq_of_forall_padicPow_mul_padicPow_mem`).
 
-The case of interest is a character `χ : G → ℤ_2ˣ` whose marked values are `χ a = v` with
-`-v ∈ 1 + 4ℤ_2` and `χ b = u ∈ 1 + 4ℤ_2`, `u ≠ 1`, so that the image `⟨v, u⟩` is not procyclic:
-it contains `-1` together with a nontrivial element of `1 + 4ℤ_2`. Here `v ^ 2 = u ^ m` for a
-`2`-adic exponent `m`, and the kernel of `χ` is the closed normal closure of `S`, `a ^ 2 b ^ (-m)`
-and `(a, b)` (`TauCeti.IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal`):
-a relation `v ^ s u ^ t = 1` first forces `s` to be even, by the sign of `v`
+The case of interest is a character `χ : G → ℤ_2ˣ` whose marked values are `χ a = v` of sign `-1`,
+that is `-v ∈ 1 + 4ℤ_2`, and `χ b = u ∈ 1 + 4ℤ_2` with `u ≠ 1`, so that `u` has infinite order.
+If `v ^ 2 = u ^ m` for a `2`-adic exponent `m`, the kernel of `χ` is the closed normal closure of
+`S`, `a ^ 2 b ^ (-m)` and `(a, b)`
+(`TauCeti.IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal`): a relation
+`v ^ s u ^ t = 1` first forces `s` to be even, by the sign of `v`
 (`TauCeti.two_dvd_of_padicPow_mul_padicPow_eq_one`), and then `t = -m s / 2`, because `u` has
-infinite order. This is the kernel `X = ker χ` of the orientation of a Demushkin group of even
-rank with `q = 2` whose image is `{±1} × U^(f)`, on which Labute's module `E = X ⧸ (X, X)` is
-built; the description of `X` by normal generators is what makes `E` a finitely generated module
-over `ℤ_2[[G ⧸ X]]` with named generators.
+infinite order. The intended application is the orientation of a Demushkin group of even rank
+with `q = 2` whose image is the non-procyclic group `{±1} × U^(f)`, with `v = -(1 + α)⁻¹` and `u`
+a topological generator of `U^(f)`; its kernel `X = ker χ` is the group on which Labute's module
+`E = X ⧸ (X, X)` is built, and the description of `X` by normal generators is what makes `E` a
+finitely generated module over `ℤ_2[[G ⧸ X]]` with named generators.
 
 ## Main results
 
@@ -42,7 +45,7 @@ over `ℤ_2[[G ⧸ X]]` with named generators.
   two marked generators is a closed normal subgroup `N` containing the unmarked generators and
   the commutator of the marked ones, once every relation between the marked values lifts to `N`.
 * `TauCeti.IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal`: for a
-  character to `ℤ_2ˣ` with marked values `v`, `u` generating a non-procyclic subgroup, the kernel
+  character to `ℤ_2ˣ` with marked values `v` of sign `-1` and `u ≠ 1` in `1 + 4ℤ_2`, the kernel
   is the closed normal closure of the unmarked generators, `a ^ 2 b ^ (-m)` and `(a, b)`, where
   `u ^ m = v ^ 2`.
 
@@ -83,35 +86,24 @@ theorem ker_eq_of_forall_padicPow_mul_padicPow_mem {a b : G} {S : Set G}
       hG.padicPow a s * hG.padicPow b t ∈ N) :
     χ.toMonoidHom.ker = N := by
   refine le_antisymm (fun x hx ↦ ?_) hN
-  have hQ : IsProP p (G ⧸ N) := hG.quotient N
-  -- The marked generators commute modulo `N` and topologically generate the quotient.
-  have hcomm : Commute (a : G ⧸ N) (b : G ⧸ N) := by
-    have h1 : QuotientGroup.mk' N ⁅a, b⁆ = 1 := (QuotientGroup.eq_one_iff _).2 hab
-    rw [map_commutatorElement, commutatorElement_eq_one_iff_commute] at h1
-    exact h1
+  -- The marked generators commute modulo `N` and topologically generate the quotient: the image
+  -- of the generating set is a generating set, and `S` maps to `1`.
+  have hcomm : Commute (a : G ⧸ N) (b : G ⧸ N) := QuotientGroup.commute_mk_iff.mpr hab
   have hgenQ : (Subgroup.closure ({(a : G ⧸ N), (b : G ⧸ N)} : Set (G ⧸ N))).topologicalClosure =
       ⊤ := by
-    have hpre : (Subgroup.closure (insert a (insert b S))).topologicalClosure ≤
-        (Subgroup.closure ({(a : G ⧸ N), (b : G ⧸ N)} : Set (G ⧸ N))).topologicalClosure.comap
-          (QuotientGroup.mk' N) := by
-      refine Subgroup.topologicalClosure_minimal _ ((Subgroup.closure_le _).2 ?_)
-        ((Subgroup.isClosed_topologicalClosure _).preimage QuotientGroup.continuous_mk)
-      rintro x (rfl | rfl | hx)
-      · exact Subgroup.le_topologicalClosure _ (Subgroup.subset_closure (by simp))
-      · exact Subgroup.le_topologicalClosure _ (Subgroup.subset_closure (by simp))
-      · rw [SetLike.mem_coe, Subgroup.mem_comap, QuotientGroup.mk'_apply,
-          (QuotientGroup.eq_one_iff x).2 (hS hx)]
-        exact one_mem _
-    refine top_le_iff.1 fun q _ ↦ ?_
-    obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective q
-    exact hpre (hgen ▸ Subgroup.mem_top g)
+    refine top_le_iff.1 ((topologicalClosure_closure_image_eq_top hgen (f := QuotientGroup.mk' N)
+      QuotientGroup.continuous_mk QuotientGroup.mk_surjective.denseRange).ge.trans
+      (Subgroup.topologicalClosure_mono ((Subgroup.closure_le _).2 ?_)))
+    rintro _ ⟨x, (rfl | rfl | hx), rfl⟩
+    · exact Subgroup.subset_closure (by simp)
+    · exact Subgroup.subset_closure (by simp)
+    · rw [SetLike.mem_coe, QuotientGroup.mk'_apply, (QuotientGroup.eq_one_iff x).2 (hS hx)]
+      exact one_mem _
   -- Write the class of `x` as `a ^ s b ^ t` modulo `N`.
-  obtain ⟨s, t, hst⟩ := hQ.exists_padicPow_mul_padicPow_eq_of_commute hcomm hgenQ (x : G ⧸ N)
-  have ea : ((hG.padicPow a s : G) : G ⧸ N) = hQ.padicPow (a : G ⧸ N) s :=
-    hG.map_padicPow hQ (QuotientGroup.mk' N) QuotientGroup.continuous_mk a s
-  have eb : ((hG.padicPow b t : G) : G ⧸ N) = hQ.padicPow (b : G ⧸ N) t :=
-    hG.map_padicPow hQ (QuotientGroup.mk' N) QuotientGroup.continuous_mk b t
-  rw [← ea, ← eb, ← QuotientGroup.mk_mul, QuotientGroup.eq] at hst
+  obtain ⟨s, t, hst⟩ :=
+    (hG.quotient N).exists_padicPow_mul_padicPow_eq_of_commute hcomm hgenQ (x : G ⧸ N)
+  rw [← hG.mk_padicPow_quotient, ← hG.mk_padicPow_quotient, ← QuotientGroup.mk_mul,
+    QuotientGroup.eq] at hst
   -- The word `a ^ s b ^ t` lies in the kernel, so the relation holds between the marked values.
   have hχ : hB.padicPow (χ a) s * hB.padicPow (χ b) t = 1 := by
     have ha : χ (hG.padicPow a s) = hB.padicPow (χ a) s :=
@@ -132,19 +124,20 @@ end Kernel
 
 end IsProP
 
-/-! ### Characters to `ℤ_2ˣ` with a non-procyclic image -/
+/-! ### Characters to `ℤ_2ˣ` with a marked value of sign `-1` -/
 
 section DyadicUnits
 
 variable {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
   [TotallyDisconnectedSpace G]
 
-/-- **The kernel of a character to `ℤ_2ˣ` with two marked generators of non-procyclic image.**
+/-- **The kernel of a character to `ℤ_2ˣ` with two marked generators, one of sign `-1`.**
 Let `G` be a pro-`2` group topologically generated by `a`, `b` and a set `S`, and let
-`χ : G → ℤ_2ˣ` be a continuous character trivial on `S` with `-χ a ∈ 1 + 4ℤ_2` and
-`χ b ∈ 1 + 4ℤ_2`, `χ b ≠ 1`, so that its image is generated by an element of order two and an
-element of infinite order. If `(χ b) ^ m = (χ a) ^ 2`, then `ker χ` is the closed normal closure
-of `S`, `a ^ 2 b ^ (-m)` and `(a, b)`. -/
+`χ : G → ℤ_2ˣ` be a continuous character trivial on `S` whose marked value `χ a` has sign `-1`,
+that is `-χ a ∈ 1 + 4ℤ_2`, and whose marked value `χ b ≠ 1` lies in `1 + 4ℤ_2`, so that `χ b` has
+infinite order. If `(χ b) ^ m = (χ a) ^ 2`, then `ker χ` is the closed normal closure of `S`,
+`a ^ 2 b ^ (-m)` and `(a, b)`. The intended application is the orientation of a Demushkin group
+of even rank with `q = 2` and image `{±1} × U^(f)`. -/
 theorem IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal
     (hG : IsProP 2 G) (χ : G →ₜ* ℤ_[2]ˣ) {a b : G} {S : Set G}
     (hgen : (Subgroup.closure (insert a (insert b S))).topologicalClosure = ⊤)
@@ -153,16 +146,13 @@ theorem IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal
     χ.toMonoidHom.ker = (Subgroup.normalClosure
       (insert (a ^ 2 * (hG.padicPow b m)⁻¹) (insert ⁅a, b⁆ S))).topologicalClosure := by
   set N := (Subgroup.normalClosure
-    (insert (a ^ 2 * (hG.padicPow b m)⁻¹) (insert ⁅a, b⁆ S))).topologicalClosure with hNdef
+    (insert (a ^ 2 * (hG.padicPow b m)⁻¹) (insert ⁅a, b⁆ S))).topologicalClosure
   have hRN : ∀ x ∈ insert (a ^ 2 * (hG.padicPow b m)⁻¹) (insert ⁅a, b⁆ S), x ∈ N :=
     fun x hx ↦ Subgroup.le_topologicalClosure _ (Subgroup.subset_normalClosure hx)
   have hab : ⁅a, b⁆ ∈ N := hRN _ (Set.mem_insert_of_mem _ (Set.mem_insert _ _))
   have hrel : a ^ 2 * (hG.padicPow b m)⁻¹ ∈ N := hRN _ (Set.mem_insert _ _)
   have hQ : IsProP 2 (G ⧸ N) := hG.quotient N
-  have hcomm : Commute (a : G ⧸ N) (b : G ⧸ N) := by
-    have h1 : QuotientGroup.mk' N ⁅a, b⁆ = 1 := (QuotientGroup.eq_one_iff _).2 hab
-    rw [map_commutatorElement, commutatorElement_eq_one_iff_commute] at h1
-    exact h1
+  have hcomm : Commute (a : G ⧸ N) (b : G ⧸ N) := QuotientGroup.commute_mk_iff.mpr hab
   refine hG.ker_eq_of_forall_padicPow_mul_padicPow_mem isProP_units_padicInt_two χ hgen ?_
     (fun x hx ↦ hRN x (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ hx))) hab
     fun s t hst ↦ ?_
@@ -183,28 +173,20 @@ theorem IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal
       isProP_units_padicInt_two.padicPow (χ b) (m * s') := by
     rw [IsProP.padicPow_mul, IsProP.padicPow_ofNat, ← hm, ← IsProP.padicPow_mul]
   rw [h1, ← IsProP.padicPow_add] at hst
-  have ht : m * s' + t = 0 := by
-    have hinj := isProP_units_padicInt_two.padicPowHom_injective_of_not_isOfFinOrder
+  have ht : m * s' + t = 0 :=
+    isProP_units_padicInt_two.padicPow_right_injective_of_not_isOfFinOrder
       (not_isOfFinOrder_of_mem_unitsPrincipal two_pos (fun _ ↦ le_rfl) hu hu1)
-    have := @hinj (Multiplicative.ofAdd (m * s' + t)) (Multiplicative.ofAdd 0)
-      (by rw [IsProP.padicPowHom_apply, IsProP.padicPowHom_apply, toAdd_ofAdd, toAdd_ofAdd, hst,
-        IsProP.padicPow_zero])
-    exact Multiplicative.ofAdd.injective this
+      (hst.trans (IsProP.padicPow_zero _ _).symm)
   rw [eq_neg_of_add_eq_zero_right ht]
   -- The word `a ^ (2 s') b ^ (-m s')` is `(a ^ 2 b ^ (-m)) ^ s'` modulo `N`.
-  have ea : ((hG.padicPow a (2 * s') : G) : G ⧸ N) = hQ.padicPow (a : G ⧸ N) (2 * s') :=
-    hG.map_padicPow hQ (QuotientGroup.mk' N) QuotientGroup.continuous_mk a _
-  have eb : ((hG.padicPow b (-(m * s')) : G) : G ⧸ N) = hQ.padicPow (b : G ⧸ N) (-(m * s')) :=
-    hG.map_padicPow hQ (QuotientGroup.mk' N) QuotientGroup.continuous_mk b _
-  have em : ((hG.padicPow b m : G) : G ⧸ N) = hQ.padicPow (b : G ⧸ N) m :=
-    hG.map_padicPow hQ (QuotientGroup.mk' N) QuotientGroup.continuous_mk b m
   have hrel' : (a : G ⧸ N) ^ 2 * (hQ.padicPow (b : G ⧸ N) m)⁻¹ = 1 := by
-    rw [← em, ← QuotientGroup.mk_pow, ← QuotientGroup.mk_inv, ← QuotientGroup.mk_mul,
-      QuotientGroup.eq_one_iff]
+    rw [← hG.mk_padicPow_quotient, ← QuotientGroup.mk_pow, ← QuotientGroup.mk_inv,
+      ← QuotientGroup.mk_mul, QuotientGroup.eq_one_iff]
     exact hrel
   have hc : Commute ((a : G ⧸ N) ^ 2) (hQ.padicPow (b : G ⧸ N) m)⁻¹ :=
     (hQ.commute_padicPow_right (hcomm.pow_left 2) m).inv_right
-  rw [← QuotientGroup.eq_one_iff (N := N), QuotientGroup.mk_mul, ea, eb]
+  rw [← QuotientGroup.eq_one_iff (N := N), QuotientGroup.mk_mul, hG.mk_padicPow_quotient,
+    hG.mk_padicPow_quotient]
   calc hQ.padicPow (a : G ⧸ N) (2 * s') * hQ.padicPow (b : G ⧸ N) (-(m * s'))
       = hQ.padicPow ((a : G ⧸ N) ^ 2 * (hQ.padicPow (b : G ⧸ N) m)⁻¹) s' := by
         rw [hQ.mul_padicPow _ _ hc s', hQ.padicPow_mul, hQ.padicPow_ofNat, hQ.padicPow_neg,

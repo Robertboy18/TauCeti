@@ -37,7 +37,7 @@ situation `v ^ 2 = (-v) ^ 2 ∈ U^(f)` is a `2`-adic power of a topological gene
 ## Main results
 
 * `TauCeti.isProP_units_padicInt_two`: `ℤ_2ˣ` is a pro-`2` group.
-* `TauCeti.padicPow_neg_one`, `TauCeti.two_dvd_of_padicPow_mul_padicPow_eq_one`: `(-1) ^ s` is
+* `TauCeti.neg_one_padicPow`, `TauCeti.two_dvd_of_padicPow_mul_padicPow_eq_one`: `(-1) ^ s` is
   `(-1) ^ (s mod 2)`, and a relation `v ^ s u ^ t = 1` with `-v, u ∈ 1 + 4ℤ_2` has `s` even.
 * `TauCeti.exists_padicPow_eq_sq_of_neg_mem_unitsPrincipal`: if `-v ∈ U^(f)` and `u` has exact
   level `f ≥ 2`, then `v ^ 2` is a `2`-adic power of `u`.
@@ -75,11 +75,9 @@ theorem isProP_units_padicInt_two : IsProP 2 ℤ_[2]ˣ := by
 /-! ### `2`-adic powers in `ℤ_2ˣ` -/
 
 /-- In `ℤ_2ˣ`, the `2`-adic power `(-1) ^ s` is `(-1) ^ (s mod 2)`. -/
-theorem padicPow_neg_one (s : ℤ_[2]) :
+theorem neg_one_padicPow (s : ℤ_[2]) :
     isProP_units_padicInt_two.padicPow (-1 : ℤ_[2]ˣ) s = (-1) ^ s.appr 1 := by
-  obtain ⟨k, hk⟩ : (2 : ℤ_[2]) ∣ s - s.appr 1 := by
-    have := PadicInt.appr_spec 1 s
-    rwa [pow_one, Ideal.mem_span_singleton, Nat.cast_ofNat] at this
+  obtain ⟨k, hk⟩ : (2 : ℤ_[2]) ∣ s - s.appr 1 := by simpa using PadicInt.dvd_sub_appr s 1
   have hs : s = (s.appr 1 : ℤ_[2]) + 2 * k := by rw [← hk]; ring
   calc isProP_units_padicInt_two.padicPow (-1 : ℤ_[2]ˣ) s
       = isProP_units_padicInt_two.padicPow (-1 : ℤ_[2]ˣ) ((s.appr 1 : ℤ_[2]) + 2 * k) := by
@@ -89,13 +87,11 @@ theorem padicPow_neg_one (s : ℤ_[2]) :
           IsProP.padicPow_ofNat, neg_one_sq, IsProP.one_padicPow, mul_one]
 
 /-- If `(-1) ^ s ∈ 1 + 4ℤ_2` for a `2`-adic exponent `s`, then `s` is even. -/
-theorem two_dvd_of_padicPow_neg_one_mem_unitsPrincipal {s : ℤ_[2]}
+theorem two_dvd_of_neg_one_padicPow_mem_unitsPrincipal {s : ℤ_[2]}
     (h : isProP_units_padicInt_two.padicPow (-1 : ℤ_[2]ˣ) s ∈ unitsPrincipal 2 2) :
     (2 : ℤ_[2]) ∣ s := by
-  have hspec : (2 : ℤ_[2]) ∣ s - s.appr 1 := by
-    have := PadicInt.appr_spec 1 s
-    rwa [pow_one, Ideal.mem_span_singleton, Nat.cast_ofNat] at this
-  rw [padicPow_neg_one] at h
+  have hspec : (2 : ℤ_[2]) ∣ s - s.appr 1 := by simpa using PadicInt.dvd_sub_appr s 1
+  rw [neg_one_padicPow] at h
   have hlt : s.appr 1 < 2 := PadicInt.appr_lt s 1
   interval_cases hr : s.appr 1
   · simpa using hspec
@@ -109,7 +105,7 @@ theorem two_dvd_of_padicPow_mul_padicPow_eq_one {v u : ℤ_[2]ˣ} (hv : -v ∈ u
     (h : isProP_units_padicInt_two.padicPow v s * isProP_units_padicInt_two.padicPow u t = 1) :
     (2 : ℤ_[2]) ∣ s := by
   have hv' : v = -1 * -v := by rw [neg_one_mul, neg_neg]
-  refine two_dvd_of_padicPow_neg_one_mem_unitsPrincipal (s := s) ?_
+  refine two_dvd_of_neg_one_padicPow_mem_unitsPrincipal (s := s) ?_
   have h1 := isProP_units_padicInt_two.padicPow_mem (isClosed_unitsPrincipal 2 2) hv s
   have h2 := isProP_units_padicInt_two.padicPow_mem (isClosed_unitsPrincipal 2 2) hu t
   have hinv : isProP_units_padicInt_two.padicPow (-1) s =

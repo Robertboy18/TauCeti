@@ -14,21 +14,23 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationModule
 
 Let `F` be the free pro-`2` group on `x₁, …, x_n`, `n ≥ 4`, and let `χ : F → ℤ_2ˣ` be the
 standard orientation of the normal form `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`,
-read on `F`: `χ(x₂) = v = -(1 + α)⁻¹`, `χ(x₄) = u = (1 - 2^f)⁻¹` and `χ(x_i) = 1` otherwise. In
-the branch `2^f ∣ α`, `f ≥ 2`, the image of `χ` is `{±1} × U^(f)`
-(`TauCeti.range_orientationTwoEven_eq_unitsPlusMinus_of_dvd`), which is not procyclic: `v` has
-sign `-1` and `u` topologically generates `U^(f)`. Labute's module for this normal form is
-`E = X ⧸ (X, X)` with `X = ker χ`, a module over `Λ = ℤ_2[[F ⧸ X]]` through conjugation.
+read on `F`: `χ(x₂) = v = -(1 + α)⁻¹`, `χ(x₄) = u = (1 - 2^f)⁻¹` and `χ(x_i) = 1` otherwise. For
+`4 ∣ α` and `f ≥ 2`, the marked value `v` has sign `-1` and `u ≠ 1` lies in `U^(2)`. In the branch
+`2^f ∣ α` the image of `χ` is `{±1} × U^(f)`
+(`TauCeti.range_orientationTwoEven_eq_unitsPlusMinus_of_dvd`), which is not procyclic, and `u`
+topologically generates `U^(f)`. Labute's module for this normal form is `E = X ⧸ (X, X)` with
+`X = ker χ`, a module over `Λ = ℤ_2[[F ⧸ X]]` through conjugation.
 
-This file describes `X` by normal generators and hence `E` by module generators. Writing
-`v ^ 2 = u ^ m` for a `2`-adic exponent `m`, which exists because `v ^ 2 = (-v) ^ 2 ∈ U^(f)`,
-the kernel `X` is the closed normal closure of the unmarked generators `x_i`, `i ≠ 2, 4`, together
+This file describes `X` by normal generators and hence `E` by module generators. Suppose
+`v ^ 2 = u ^ m` for a `2`-adic exponent `m`; in the branch `2^f ∣ α` such an `m` exists, because
+`v ^ 2 = (-v) ^ 2 ∈ U^(f)` (`TauCeti.exists_padicPow_eq_sq_of_neg_mem_unitsPrincipal`). Then the
+kernel `X` is the closed normal closure of the unmarked generators `x_i`, `i ≠ 2, 4`, together
 with `x₂² x₄^{-m}` and the commutator `(x₂, x₄)`
 (`TauCeti.ker_orientationTwoEven_comp_mk_of_dvd`). In particular `E` is spanned over `Λ` by the
 classes of these `n` elements
-(`TauCeti.span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_of_dvd`). For Labute's
-relator `x₁² (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯`, that is `α = 0`, the marked value is `χ(x₂) = -1`,
-`m = 0`, and the extra generators are `x₂²` and `(x₂, x₄)`
+(`TauCeti.span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_dvd`). For
+Labute's relator `x₁² (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯`, that is `α = 0`, the marked value is
+`χ(x₂) = -1`, `m = 0`, and the extra generators are `x₂²` and `(x₂, x₄)`
 (`TauCeti.ker_orientationTwoEven_comp_mk_of_eq_zero`).
 
 Together with the expression `⟦r⟧ = (1 + α + [x₂]⁻¹) • [x₁] + (2^f - 1 + [x₄]⁻¹) • [x₃]` of the
@@ -37,13 +39,13 @@ Labute's argument on `E` in the branch `Im χ = {±1} × U^(f)`, where `Λ ≅ �
 
 ## Main results
 
-* `TauCeti.ker_orientationTwoEven_comp_mk_of_dvd`: for `3 < n`, `2 ≤ f`, `2^f ∣ α` and
+* `TauCeti.ker_orientationTwoEven_comp_mk_of_dvd`: for `3 < n`, `2 ≤ f`, `4 ∣ α` and
   `u ^ m = v ^ 2`, the kernel of the standard orientation on `F` is the closed normal closure of
   the `x_i` with `i ≠ 2, 4`, of `x₂² x₄^{-m}` and of `(x₂, x₄)`.
 * `TauCeti.ker_orientationTwoEven_comp_mk_of_eq_zero`: the case `α = 0`, with `x₂²` in place of
   `x₂² x₄^{-m}`.
-* `TauCeti.span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_of_dvd`: the classes of
-  these elements span Labute's module `E = X ⧸ (X, X)` over `ℤ_2[[F ⧸ X]]`.
+* `TauCeti.span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_dvd`: the
+  classes of these elements span Labute's module `E = X ⧸ (X, X)` over `ℤ_2[[F ⧸ X]]`.
 
 ## References
 
@@ -59,30 +61,17 @@ namespace TauCeti
 
 variable (a f n : ℕ) (v u : ℤ_[2]ˣ)
 
-/-- The free generators `x_i`, `i ≠ 2, 4`, together with `x₂` and `x₄` topologically generate the
-free pro-`2` group on `n` generators. -/
-private theorem topologicalClosure_closure_insert_freeProPGen_eq_top :
-    (Subgroup.closure (insert (freeProPGen 2 n 1) (insert (freeProPGen 2 n 3)
-      (freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3})))).topologicalClosure = ⊤ := by
-  refine top_le_iff.1 ((freeProP.topologicalClosure_closure_range_of_eq_top 2 (Fin n)).ge.trans
-    (Subgroup.topologicalClosure_mono (Subgroup.closure_mono ?_)))
-  rintro _ ⟨i, rfl⟩
-  rw [← freeProPGen_val 2 i]
-  by_cases h1 : (i : ℕ) = 1
-  · exact h1 ▸ Set.mem_insert _ _
-  by_cases h3 : (i : ℕ) = 3
-  · exact Set.mem_insert_of_mem _ (h3 ▸ Set.mem_insert _ _)
-  exact Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ ⟨i, ⟨i.isLt, h1, h3⟩, rfl⟩)
-
 /-- **The kernel of the standard orientation of the even-rank dyadic normal form when
-`2^f ∣ α`.** For `3 < n` and `f ≥ 2`, let `χ` be the character of the free pro-`2` group on
+`4 ∣ α`.** For `3 < n` and `f ≥ 2`, let `χ` be the character of the free pro-`2` group on
 `x₁, …, x_n` with `χ(x₂) = v`, `χ(x₄) = u` and `χ(x_i) = 1` otherwise, where `v (1 + α) = -1`,
-`u (1 - 2^f) = 1` and `2^f ∣ α`, so that its image is `{±1} × U^(f)`. If `u ^ m = v ^ 2` for a
-`2`-adic exponent `m`, then `ker χ` is the closed normal closure of the `x_i` with `i ≠ 2, 4`, of
-`x₂² x₄^{-m}` and of the commutator `(x₂, x₄)`. -/
+`u (1 - 2^f) = 1` and `4 ∣ α`, so that `v` has sign `-1` and `u ≠ 1` lies in `U^(2)`. If
+`u ^ m = v ^ 2` for a `2`-adic exponent `m`, then `ker χ` is the closed normal closure of the `x_i`
+with `i ≠ 2, 4`, of `x₂² x₄^{-m}` and of the commutator `(x₂, x₄)`. In the branch `2^f ∣ α`, where
+the image of `χ` is `{±1} × U^(f)`, such an `m` exists by
+`TauCeti.exists_padicPow_eq_sq_of_neg_mem_unitsPrincipal`. -/
 theorem ker_orientationTwoEven_comp_mk_of_dvd (hn : 3 < n) (hf : 2 ≤ f)
     (hv : (v : ℤ_[2]) * (1 + (a : ℤ_[2])) = -1) (hu : (u : ℤ_[2]) * (1 - (2 : ℤ_[2]) ^ f) = 1)
-    (ha : (2 : ℤ_[2]) ^ f ∣ (a : ℤ_[2])) {m : ℤ_[2]}
+    (ha : 4 ∣ (a : ℤ_[2])) {m : ℤ_[2]}
     (hm : isProP_units_padicInt_two.padicPow u m = v ^ 2) :
     ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)).toMonoidHom.ker =
       (Subgroup.normalClosure (insert (freeProPGen 2 n 1 ^ 2 *
@@ -90,18 +79,27 @@ theorem ker_orientationTwoEven_comp_mk_of_dvd (hn : 3 < n) (hf : 2 ≤ f)
         (insert ⁅freeProPGen 2 n 1, freeProPGen 2 n 3⁆
           (freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3})))).topologicalClosure := by
   have hχ1 : ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)) (freeProPGen 2 n 1) =
-      v := by
-    rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, presentedProP.mk_freeProPGen,
-      orientationTwoEven_presentedProPGen_one a f n v u (by omega)]
+      v :=
+    (presentedProP.comp_mk_freeProPGen _ _ _ _ 1).trans
+      (orientationTwoEven_presentedProPGen_one a f n v u (by omega))
   have hχ3 : ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)) (freeProPGen 2 n 3) =
-      u := by
-    rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, presentedProP.mk_freeProPGen,
-      orientationTwoEven_presentedProPGen_three a f n v u hn]
+      u :=
+    (presentedProP.comp_mk_freeProPGen _ _ _ _ 3).trans
+      (orientationTwoEven_presentedProPGen_three a f n v u hn)
   have hχS : ∀ x ∈ freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3},
       ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)) x = 1 := by
     rintro _ ⟨i, ⟨-, hi1, hi3⟩, rfl⟩
-    rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, presentedProP.mk_freeProPGen,
-      orientationTwoEven_presentedProPGen_of_ne a f n v u hi1 hi3]
+    exact (presentedProP.comp_mk_freeProPGen _ _ _ _ i).trans
+      (orientationTwoEven_presentedProPGen_of_ne a f n v u hi1 hi3)
+  -- The generators `x₂`, `x₄` and the unmarked `x_i` topologically generate `F`.
+  have hgen : (Subgroup.closure (insert (freeProPGen 2 n 1) (insert (freeProPGen 2 n 3)
+      (freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3})))).topologicalClosure = ⊤ := by
+    refine topologicalClosure_closure_eq_top_of_forall_freeProPGen_mem 2 fun i hi ↦ ?_
+    by_cases h1 : i = 1
+    · exact h1 ▸ Set.mem_insert _ _
+    by_cases h3 : i = 3
+    · exact Set.mem_insert_of_mem _ (h3 ▸ Set.mem_insert _ _)
+    exact Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ ⟨i, ⟨hi, h1, h3⟩, rfl⟩)
   have hu' : (u : ℤ_[2]) * (1 - ((2 : ℕ) : ℤ_[2]) ^ f) = 1 := by exact_mod_cast hu
   have hu1 : u ≠ 1 := by
     intro h
@@ -109,11 +107,10 @@ theorem ker_orientationTwoEven_comp_mk_of_dvd (hn : 3 < n) (hf : 2 ≤ f)
       (h ▸ one_mem _)
     omega
   refine IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal
-    (isProP_freeProP 2 (Fin n)) _ (topologicalClosure_closure_insert_freeProPGen_eq_top n) hχS
-    ?_ ?_ ?_ ?_
-  · rw [hχ1]
-    exact (neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv).mpr
-      ((pow_dvd_pow 2 hf).trans ha)
+    (isProP_freeProP 2 (Fin n)) _ hgen hχS ?_ ?_ ?_ ?_
+  · rw [hχ1, neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv]
+    norm_num
+    exact ha
   · rw [hχ3]
     exact (mem_unitsPrincipal_iff_of_val_mul_one_sub_pow_eq_one hu').mpr hf
   · rw [hχ3]
@@ -141,15 +138,17 @@ theorem ker_orientationTwoEven_comp_mk_of_eq_zero (hn : 3 < n) (hf : 2 ≤ f) (h
   rw [ker_orientationTwoEven_comp_mk_of_dvd a f n v u hn hf hv hu (by rw [ha]; simp) hm,
     IsProP.padicPow_zero, inv_one, mul_one]
 
-/-- **Labute's module of the even-rank dyadic normal form with image `{±1} × U^(f)` is generated
-by the classes of the unmarked generators, of `x₂² x₄^{-m}` and of `(x₂, x₄)`.** For `3 < n`,
-`f ≥ 2`, `2^f ∣ α` and `u ^ m = v ^ 2`, with `X = ker χ` the kernel of the standard orientation on
-the free pro-`2` group `F`, the classes of the `x_i` with `i ≠ 2, 4`, of `x₂² x₄^{-m}` and of
-`(x₂, x₄)` span `E = X ⧸ (X, X)` over `Λ = ℤ_2[[F ⧸ X]]`, for the module structure
-`TauCeti.IsProP.completedGroupAlgebraModule` through conjugation. -/
-theorem span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_of_dvd (hn : 3 < n)
+/-- **Labute's module of the even-rank dyadic normal form with `4 ∣ α` is generated by the classes
+of the unmarked generators, of `x₂² x₄^{-m}` and of `(x₂, x₄)`.** For `3 < n`, `f ≥ 2`, `4 ∣ α`
+and `u ^ m = v ^ 2`, with `X = ker χ` the kernel of the standard orientation on the free pro-`2`
+group `F`, the classes of the `x_i` with `i ≠ 2, 4`, of `x₂² x₄^{-m}` and of `(x₂, x₄)` span
+`E = X ⧸ (X, X)` over `Λ = ℤ_2[[F ⧸ X]]`, for the module structure
+`TauCeti.IsProP.completedGroupAlgebraModule` through conjugation. In the branch `2^f ∣ α`, where
+the image of `χ` is `{±1} × U^(f)`, the exponent `m` exists by
+`TauCeti.exists_padicPow_eq_sq_of_neg_mem_unitsPrincipal`. -/
+theorem span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_dvd (hn : 3 < n)
     (hf : 2 ≤ f) (hv : (v : ℤ_[2]) * (1 + (a : ℤ_[2])) = -1)
-    (hu : (u : ℤ_[2]) * (1 - (2 : ℤ_[2]) ^ f) = 1) (ha : (2 : ℤ_[2]) ^ f ∣ (a : ℤ_[2]))
+    (hu : (u : ℤ_[2]) * (1 - (2 : ℤ_[2]) ^ f) = 1) (ha : 4 ∣ (a : ℤ_[2]))
     {m : ℤ_[2]} (hm : isProP_units_padicInt_two.padicPow u m = v ^ 2) :
     haveI := ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)).isClosed_ker
     letI := ((isProP_freeProP 2 (Fin n)).topologicalAbelianization
