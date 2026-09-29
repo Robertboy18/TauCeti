@@ -81,6 +81,10 @@ characters on the images of the generators. Bringing a relator into normal form 
   does not see for odd `p`, vanish on brackets, are read off by the coordinate characters on
   `p`-power classes, and transform under a continuous homomorphism through the values of the
   coordinate characters on the images of the generators.
+* `TauCeti.freeProP.degreeOneBasis_repr_gradedMk_inl`,
+  `TauCeti.freeProP.degreeOneBasis_repr_gradedMk_inl_eq_zero_iff`: the `p`-power coordinates of
+  the class of `y ∈ λ_1(F)` are the exponent sums of `y` divided by `p`, reduced modulo `p`; in
+  particular they vanish exactly when the exponent sums are divisible by `p ^ 2`.
 * `TauCeti.freeProP.exists_continuousMulEquiv_toMatrix_degreeOneForm_gradedMap`: the matrix of
   the degree-one form of a class in any basis of the dual is the matrix, in the dual basis of the
   generators, of the form of the image of the class under some continuous automorphism of `F`.
@@ -713,6 +717,85 @@ theorem degreeOneBasis_repr_gradedPow_gradedMkZero_inl (g : freeProP p X) (k : X
       Finsupp.single_apply, Pi.single_apply, Sum.inl.injEq]
   have := LinearMap.congr_fun hf (gradedMkZero p (freeProP p X) g)
   simpa [f, characterFunctional_gradedMkZero] using this
+
+/-- **The `p`-power coordinates through the exponent sums, vanishing form**: the coefficient of
+`π x'_k` in the class of `y ∈ λ_1(F)` vanishes exactly when `p ^ 2` divides the `k`-th exponent sum
+of `y`. The graded map induced on `gr_1(F)` by the `k`-th exponent sum modulo `p ^ 2` kills the
+brackets and the classes `π x'_i` for `i ≠ k`, and it does not kill `π x'_k`, so it reads off that
+coefficient. -/
+theorem degreeOneBasis_repr_gradedMk_inl_eq_zero_iff (y : pLowerCentralSeries p (freeProP p X) 1)
+    (k : X) :
+    (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1 y) (Sum.inl k) = 0 ↔
+      (p : ℤ_[p]) ^ 2 ∣ (exponentSum p X (y : freeProP p X)).toAdd k := by
+  classical
+  cases nonempty_fintype X
+  have h := gradedMap_exponentSumZModPow_gradedMk_eq_zero_iff k y
+  simp only [Nat.reduceAdd] at h
+  rw [← h]
+  set χ := exponentSumZModPow p X 2 k
+  -- The graded map of `χ` on `gr_1(F)` is the coefficient of `π x'_k` times the image of `π x'_k`.
+  have key : (gradedMap p χ.toMonoidHom χ.continuous 1).toZModLinearMap p =
+      ((degreeOneBasis p X).coord (Sum.inl k)).smulRight
+        (gradedMap p χ.toMonoidHom χ.continuous 1
+          (gradedPowIter p (freeProP p X) 1 (gradedMkZero p (freeProP p X) (of k)))) := by
+    refine (degreeOneBasis p X).ext ?_
+    rintro (i | ⟨⟨i, j⟩, hij⟩)
+    · rw [AddMonoidHom.coe_toZModLinearMap, LinearMap.smulRight_apply, Module.Basis.coord_apply,
+        Module.Basis.repr_self, Finsupp.single_apply, degreeOneBasis_apply, gradedPowIter_succ,
+        gradedPowIter_zero]
+      by_cases hik : i = k
+      · subst hik
+        simp
+      · rw [ite_eq_right (by simpa using hik), zero_smul, gradedMap_degreeOneFamily,
+          degreeOneFamily_inl, Function.comp_apply]
+        have h1 : χ.toMonoidHom (of i) = 1 := exponentSumZModPow_of_of_ne p X 2 hik
+        rw [h1, gradedMkZero_one, gradedPow_zero]
+    · rw [AddMonoidHom.coe_toZModLinearMap, LinearMap.smulRight_apply, Module.Basis.coord_apply,
+        Module.Basis.repr_self, Finsupp.single_eq_of_ne (by simp), zero_smul, degreeOneBasis_apply,
+        gradedMap_degreeOneFamily, degreeOneFamily_inr, gradedBracket_eq_zero_of_isMulCommutative]
+  have hy := LinearMap.congr_fun key (gradedMk p (freeProP p X) 1 y)
+  rw [AddMonoidHom.coe_toZModLinearMap, LinearMap.smulRight_apply, Module.Basis.coord_apply] at hy
+  rw [hy]
+  exact (smul_eq_zero_iff_left
+    (gradedMap_exponentSumZModPow_gradedPowIter_gradedMkZero_of_self_ne_zero 1 k)).symm
+
+/-- **The `p`-power coordinates are the exponent sums divided by `p`, modulo `p`**: if the `k`-th
+exponent sum of `y ∈ λ_1(F)` is `p * c`, then the coefficient of `π x'_k` in the class of `y` is the
+reduction of `c` modulo `p`. Dividing `y` by `x_k ^ (p * c̄)`, where `c̄ ∈ ℕ` lifts `c` modulo `p`,
+subtracts `c̄` from that coefficient and makes the exponent sum divisible by `p ^ 2`. -/
+theorem degreeOneBasis_repr_gradedMk_inl (y : pLowerCentralSeries p (freeProP p X) 1) (k : X)
+    {c : ℤ_[p]} (hc : (exponentSum p X (y : freeProP p X)).toAdd k = p * c) :
+    (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1 y) (Sum.inl k) = PadicInt.toZMod c := by
+  classical
+  set c' : ℕ := (PadicInt.toZMod c).val with hc'
+  set z : pLowerCentralSeries p (freeProP p X) 1 :=
+    y * ⟨of k ^ p, pow_mem_pLowerCentralSeries (mem_pLowerCentralSeries_zero p (of k))⟩⁻¹ ^ c'
+    with hz
+  -- The class of `z` has coefficient `a_k - c'` at `π x'_k`.
+  have hrepr : (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1 z) (Sum.inl k) =
+      (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1 y) (Sum.inl k) -
+        PadicInt.toZMod c := by
+    rw [hz, gradedMk_mul, gradedMk_pow, gradedMk_inv, ← gradedPow_gradedMkZero, map_add, map_nsmul,
+      map_neg, Finsupp.add_apply, Finsupp.smul_apply, Finsupp.neg_apply,
+      degreeOneBasis_repr_gradedPow_gradedMkZero_inl, toMul_dualBasis_of, toAdd_ofAdd,
+      Pi.single_eq_same, hc', nsmul_eq_mul, mul_neg, mul_one, ZMod.natCast_zmod_val, sub_eq_add_neg]
+  -- The `k`-th exponent sum of `z` is `p * (c - c')`, and `p ∣ c - c'`.
+  have hzv : (z : freeProP p X) = (y : freeProP p X) * (of k ^ p)⁻¹ ^ c' := by
+    rw [hz, Subgroup.coe_mul, Subgroup.coe_pow, Subgroup.coe_inv]
+  have hexp : (exponentSum p X (z : freeProP p X)).toAdd k = p * (c - c') := by
+    rw [hzv, map_mul, map_pow, map_inv, map_pow, exponentSum_of, toAdd_mul, toAdd_pow, toAdd_inv,
+      toAdd_pow, toAdd_ofAdd, Pi.add_apply, Pi.smul_apply, Pi.neg_apply, Pi.smul_apply,
+      Pi.single_eq_same, hc]
+    simp only [nsmul_eq_mul, mul_one]
+    ring
+  have hdvd : (p : ℤ_[p]) ^ 2 ∣ (exponentSum p X (z : freeProP p X)).toAdd k := by
+    rw [hexp, sq]
+    refine mul_dvd_mul_left _ ?_
+    rw [← Ideal.mem_span_singleton, ← PadicInt.maximalIdeal_eq_span_p, ← PadicInt.ker_toZMod,
+      RingHom.mem_ker, map_sub, map_natCast, hc', ZMod.natCast_zmod_val, sub_self]
+  have h0 := (degreeOneBasis_repr_gradedMk_inl_eq_zero_iff z k).mpr hdvd
+  rw [hrepr, sub_eq_zero] at h0
+  exact h0
 
 end PowerCoordinates
 
