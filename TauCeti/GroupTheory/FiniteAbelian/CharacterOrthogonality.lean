@@ -18,7 +18,8 @@ For a finite commutative group `G` and a domain `M` with enough roots of unity, 
 of `G` are the monoid homomorphisms `G →* Mˣ`. This file records the *column* orthogonality
 relation — the one summed over the character group — in both its punctured and its normal form,
 and shows that the commutativity it assumes is necessary: the column relation fails for every
-finite non-commutative group. The underlying group-theoretic fact, that homomorphisms into a
+finite non-commutative group whenever the number of characters is nonzero in `M`, as it is in
+characteristic zero. The underlying group-theoretic fact, that homomorphisms into a
 commutative monoid separate elements only in a commutative group, is
 `TauCeti.isMulCommutative_of_forall_exists_monoidHom_apply_ne_one` in
 `TauCeti.GroupTheory.Commutator`.
@@ -205,9 +206,10 @@ theorem sum_monoidHom_apply_of_mem_commutator {g : G} (hg : g ∈ commutator G) 
 /-- **Column orthogonality fails for every finite non-commutative group.** In a non-commutative
 group some commutator `g = ⁅a, b⁆` differs from `1`, and every character kills it, so the tagged
 sum at `σ = 1` and this `g` is the number of characters rather than the `0` that
-`CommGroup.sum_inv_mul_monoidHom_apply_eq_ite` gives for `g ≠ σ` in a commutative group. The only
-hypothesis on `M` is that this count is nonzero in `M`; in characteristic zero it is supplied by
-`Nat.cast_ne_zero.mpr Nat.card_pos.ne'`. -/
+`CommGroup.sum_inv_mul_monoidHom_apply_eq_ite` gives for `g ≠ σ` in a commutative group. Besides
+the standing assumption that `M` is a domain, the only hypothesis on `M` is that this count is
+nonzero in `M`; in characteristic zero it is supplied by `Nat.cast_ne_zero.mpr Nat.card_pos.ne'`,
+and no roots of unity are needed. -/
 theorem exists_sum_inv_mul_monoidHom_apply_ne_ite [DecidableEq G] (hG : ¬ IsMulCommutative G)
     (hcard : (Nat.card (G →* Mˣ) : M) ≠ 0) :
     ∃ σ g : G, ∑ χ : G →* Mˣ, (((χ σ)⁻¹ : Mˣ) : M) * ((χ g : Mˣ) : M) ≠
