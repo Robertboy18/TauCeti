@@ -14,9 +14,11 @@ public import TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded.Span
 
 Let `G` be a topological group with lower `p`-series `λ_k = λ_k(G)` and graded pieces
 `gr_k(G) = λ_k ⧸ λ_{k+1}`. The **bracket span** `C_{k+1}(G) ≤ gr_{k+1}(G)`
-(`TauCeti.gradedBracketSpan`) is the subspace spanned by the brackets `[x, y]` with `x ∈ gr_k(G)`
-and `y ∈ gr_0(G)`, that is by the classes of the commutators `⁅a, b⁆` with `a ∈ λ_k` and `b ∈ G`.
-Every element of it is the class of an element of `λ_{k+1}` lying in the commutator subgroup
+(`TauCeti.gradedBracketSpan`) is the `ZMod p`-submodule spanned by the brackets `[x, y]` with
+`x ∈ gr_k(G)` and `y ∈ gr_0(G)`, that is by the classes of the commutators `⁅a, b⁆` with `a ∈ λ_k`
+and `b ∈ G` (`TauCeti.gradedBracketSpan_eq_span`); membership in it is eliminated by the induction
+principle `TauCeti.gradedBracketSpan_induction`. Every element of it is the class of an element of
+`λ_{k+1}` lying in the commutator subgroup
 (`TauCeti.exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan`), and the `p`-power
 operator `π` carries `C_{k+1}(G)` into `C_{k+2}(G)`, because `π` commutes with the bracket away from
 degree zero and its degree-zero defect is again a bracket
@@ -37,8 +39,10 @@ iterated `p`-powers `π^{k+1} x` of the degree-zero classes
 (`TauCeti.gradedBracketSpan_sup_span_range_gradedPowIter_eq_top`): this is the graded form of
 `λ_{k+1} = closure (λ_kᵖ ⬝ [λ_k, G])`, iterated down to degree zero.
 
-For the free pro-`p` group of finite rank the bracket span is the commutator part of `gr_{k+1}(F)`,
-the image of the basis-modification maps of relators without `p`-power part; the statements here
+For the free pro-`p` group `F` of finite rank, the bracket span `C_{k+1}(F)` is the image of the
+basis-modification map `δ_ρ` of every relator class `ρ ∈ gr_1(F)` without `p`-power part whose
+partial derivatives span `gr_0(F)`
+(`TauCeti.freeProP.range_basisModificationDelta_eq_span_of_repr_inl_eq_zero`); the statements here
 are what the pivot-constrained span statement of the classification of Demushkin groups uses.
 
 ## Main definitions
@@ -47,6 +51,8 @@ are what the pivot-constrained span statement of the classification of Demushkin
 
 ## Main results
 
+* `TauCeti.gradedBracketSpan_eq_span` and `TauCeti.gradedBracketSpan_induction`: the bracket span
+  as a span, and induction on its elements.
 * `TauCeti.exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan`: every element of
   `C_{k+1}(G)` is the class of an element of `λ_{k+1}` in the commutator subgroup.
 * `TauCeti.gradedPow_mem_gradedBracketSpan`: `π C_{k+1}(G) ≤ C_{k+2}(G)`.
@@ -89,10 +95,11 @@ theorem gradedBracket_gradedPowIter_self (j : ℕ) (x : gradedPiece p G 0) :
 /-! ### The bracket span -/
 
 variable (p G) in
-/-- **The bracket span** `C_{k+1}(G) ≤ gr_{k+1}(G)`: the subspace spanned by the brackets `[x, y]`
-with `x ∈ gr_k(G)` and `y ∈ gr_0(G)`, that is by the classes of the commutators `⁅a, b⁆` with
-`a ∈ λ_k(G)` and `b ∈ G`; it is the bilinear image `Submodule.map₂` of the bracket
-`TauCeti.gradedBracketLinear` on the whole of `gr_k(G) × gr_0(G)`. Its elements are classes of
+/-- **The bracket span** `C_{k+1}(G) ≤ gr_{k+1}(G)`: the `ZMod p`-submodule spanned by the brackets
+`[x, y]` with `x ∈ gr_k(G)` and `y ∈ gr_0(G)`, that is by the classes of the commutators `⁅a, b⁆`
+with `a ∈ λ_k(G)` and `b ∈ G`; it is the bilinear image `Submodule.map₂` of the bracket
+`TauCeti.gradedBracketLinear` on the whole of `gr_k(G) × gr_0(G)`
+(`TauCeti.gradedBracketSpan_eq_span` restates it as a span). Its elements are classes of
 elements of the commutator subgroup
 (`TauCeti.exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan`), and `π` carries it into
 `C_{k+2}(G)` (`TauCeti.gradedPow_mem_gradedBracketSpan`). -/
@@ -100,10 +107,46 @@ def gradedBracketSpan (k : ℕ) : Submodule (ZMod p) (gradedPiece p G (k + 1)) :
   Submodule.map₂ (gradedBracketLinear p G k 0) ⊤ ⊤
 
 /-- A bracket `[x, y]` with `y` of degree zero lies in the bracket span. -/
+@[simp]
 theorem gradedBracket_mem_gradedBracketSpan {k : ℕ} (x : gradedPiece p G k)
     (y : gradedPiece p G 0) : gradedBracket p G k 0 x y ∈ gradedBracketSpan p G k := by
   rw [← gradedBracketLinear_apply]
   exact Submodule.apply_mem_map₂ _ Submodule.mem_top Submodule.mem_top
+
+/-- **The bracket span as a span**: `C_{k+1}(G)` is the span of the brackets `[x, y]` with
+`x ∈ gr_k(G)` and `y ∈ gr_0(G)`. -/
+theorem gradedBracketSpan_eq_span (k : ℕ) :
+    gradedBracketSpan p G k =
+      span (ZMod p) (Set.range fun xy : gradedPiece p G k × gradedPiece p G 0 ↦
+        gradedBracket p G k 0 xy.1 xy.2) := by
+  rw [gradedBracketSpan, Submodule.map₂_eq_span_image2]
+  congr 1
+  ext z
+  simp only [Set.mem_image2, Submodule.top_coe, Set.mem_univ, true_and, Set.mem_range, Prod.exists,
+    gradedBracketLinear_apply]
+
+/-- **Induction on the bracket span**: a predicate that holds on the brackets `[x, y]` with `y` of
+degree zero and on `0`, and is closed under addition and scalar multiplication, holds on all of
+`C_{k+1}(G)`. -/
+@[elab_as_elim]
+theorem gradedBracketSpan_induction {k : ℕ}
+    {motive : (z : gradedPiece p G (k + 1)) → z ∈ gradedBracketSpan p G k → Prop}
+    (bracket : ∀ (x : gradedPiece p G k) (y : gradedPiece p G 0),
+      motive (gradedBracket p G k 0 x y) (gradedBracket_mem_gradedBracketSpan x y))
+    (zero : motive 0 (zero_mem _))
+    (add : ∀ x y hx hy, motive x hx → motive y hy → motive (x + y) (add_mem hx hy))
+    (smul : ∀ (c : ZMod p) x hx, motive x hx → motive (c • x) (smul_mem _ c hx))
+    {z : gradedPiece p G (k + 1)} (hz : z ∈ gradedBracketSpan p G k) : motive z hz := by
+  have hz' : z ∈ span (ZMod p) (Set.range fun xy : gradedPiece p G k × gradedPiece p G 0 ↦
+      gradedBracket p G k 0 xy.1 xy.2) := (gradedBracketSpan_eq_span k).le hz
+  refine span_induction (p := fun z h ↦ motive z ((gradedBracketSpan_eq_span k).ge h))
+    ?_ zero ?_ ?_ hz'
+  · rintro _ ⟨⟨x, y⟩, rfl⟩
+    exact bracket x y
+  · intro x y _ _ ihx ihy
+    exact add x y _ _ ihx ihy
+  · intro c x _ ih
+    exact smul c x _ ih
 
 /-- A submodule contains the bracket span if and only if it contains every bracket `[x, y]` with
 `y` of degree zero. -/
@@ -119,11 +162,8 @@ the class of an element of `λ_{k+1}(G)` lying in the commutator subgroup of `G`
 theorem exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan [NeZero p] {k : ℕ}
     {y : gradedPiece p G (k + 1)} (hy : y ∈ gradedBracketSpan p G k) :
     ∃ z : pLowerCentralSeries p G (k + 1), (z : G) ∈ commutator G ∧ gradedMk p G (k + 1) z = y := by
-  rw [gradedBracketSpan, Submodule.map₂_eq_span_image2] at hy
-  induction hy using span_induction with
-  | mem _ h =>
-    obtain ⟨x, -, y, -, rfl⟩ := h
-    simp only [gradedBracketLinear_apply]
+  induction hy using gradedBracketSpan_induction with
+  | bracket x y =>
     obtain ⟨x, rfl⟩ := gradedMk_surjective k x
     obtain ⟨y, rfl⟩ := gradedMk_surjective 0 y
     refine ⟨⟨⁅(x : G), (y : G)⁆, commutator_mem_pLowerCentralSeries x.2 y.2⟩, ?_,

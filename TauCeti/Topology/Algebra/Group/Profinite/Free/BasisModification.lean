@@ -451,6 +451,7 @@ theorem basisModificationDelta_smul [Fintype X] (hm : 1 ≤ m) (ρ : gradedPiece
 
 /-- **`δ` on a family supported at one generator**: for `v ∈ gr_m(F)`,
 `δ_ρ(single i v) = c_i • π v + [v, ∂_i ρ]`, where `c_i` is the coefficient of `π ξ_i` in `ρ`. -/
+@[simp]
 theorem basisModificationDelta_single [DecidableEq X] (hm : 1 ≤ m)
     (ρ : gradedPiece p (freeProP p X) 1) (i : X) (v : gradedPiece p (freeProP p X) m) :
     basisModificationDelta p X hm ρ (Pi.single i v) =
