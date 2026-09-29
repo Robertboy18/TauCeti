@@ -7,8 +7,9 @@ module
 
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.LowRank.Four
 -- Private: the Clifford-group characterization of the Lipschitz group, the reversal calculus on
--- odd elements in dimension five, the volume element, the orthogonal basis and the vanishing of
--- central vectors are used only inside the proofs.
+-- odd elements in dimension five, the volume element, the orthogonal basis, the vanishing of
+-- central vectors and the dichotomy for a vector plus a central element are used only inside the
+-- proofs.
 import TauCeti.LinearAlgebra.CliffordAlgebra.Lipschitz.CliffordGroup
 import TauCeti.LinearAlgebra.CliffordAlgebra.Reversal.Five
 import TauCeti.LinearAlgebra.CliffordAlgebra.Vectors
@@ -62,35 +63,6 @@ universe u v
 
 variable {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V] [Invertible (2 : K)]
   {Q : QuadraticForm K V}
-
-/-- Let `ω` be central with `ω * ω` the nonzero scalar `s`. If `(ι Q w + c • ω) ^ 2` is a scalar,
-then either `c = 0` or `ι Q w` is a multiple of `ω`: the cross term `2 c • (ω * ι Q w)` is a
-scalar. -/
-private theorem eq_zero_or_exists_ι_eq_smul_of_mul_self_eq_algebraMap {ω : CliffordAlgebra Q}
-    (hω : ∀ z, Commute ω z) {s : K} (hsq : ω * ω = algebraMap K _ s) (hs : s ≠ 0) {w : V}
-    {c q : K} (h : (ι Q w + c • ω) * (ι Q w + c • ω) = algebraMap K _ q) :
-    c = 0 ∨ ∃ t : K, ι Q w = t • ω := by
-  have hwω : ι Q w * ω = ω * ι Q w := (hω (ι Q w)).symm.eq
-  have hexp : (2 * c) • (ω * ι Q w) = algebraMap K _ (q - Q w - c * c * s) := by
-    have hsq' : (ι Q w + c • ω) * (ι Q w + c • ω) =
-        algebraMap K _ (Q w) + (2 * c) • (ω * ι Q w) + algebraMap K _ (c * c * s) := by
-      simp only [add_mul, mul_add, smul_mul_assoc, mul_smul_comm, ι_sq_scalar, hwω, hsq,
-        smul_smul, Algebra.algebraMap_eq_smul_one]
-      module
-    rw [map_sub, map_sub, ← h, hsq']
-    abel
-  by_cases hc : c = 0
-  · exact Or.inl hc
-  · right
-    have h2c : (2 * c) ≠ 0 := mul_ne_zero (Invertible.ne_zero 2) hc
-    have hωw : ω * ι Q w = algebraMap K _ ((2 * c)⁻¹ * (q - Q w - c * c * s)) := by
-      rw [map_mul, ← Algebra.smul_def, ← hexp, smul_smul, inv_mul_cancel₀ h2c, one_smul]
-    refine ⟨s⁻¹ * ((2 * c)⁻¹ * (q - Q w - c * c * s)), ?_⟩
-    -- Multiply by `ω` on the left: `s • ι Q w = r • ω`.
-    have hmul : ω * (ω * ι Q w) = ω * algebraMap K _ ((2 * c)⁻¹ * (q - Q w - c * c * s)) := by
-      rw [hωw]
-    rw [← mul_assoc, hsq, ← Algebra.smul_def, ← Algebra.commutes, ← Algebra.smul_def] at hmul
-    rw [mul_smul, ← hmul, smul_smul, inv_mul_cancel₀ hs, one_smul]
 
 /-- **In dimension five, the even unitary carrier lies in the Lipschitz group.** -/
 theorem evenUnitaryGroup_le_lipschitzGroup_of_finrank_eq_five (Q : QuadraticForm K V)
@@ -179,8 +151,8 @@ trivial while the even unitary carrier is `μ₂`. The bound five is sharp, by
 theorem evenUnitaryGroup_le_lipschitzGroup (Q : QuadraticForm K V) (hQ : Q.Nondegenerate)
     (hV0 : 0 < finrank K V) (hV : finrank K V ≤ 5) : evenUnitaryGroup Q ≤ lipschitzGroup Q := by
   have : FiniteDimensional K V := Module.finite_of_finrank_pos hV0
-  rcases (show finrank K V ≤ 4 ∨ finrank K V = 5 by omega) with h | h
-  · exact evenUnitaryGroup_le_lipschitzGroup_of_finrank_le_four Q hQ hV0 h
+  rcases hV.lt_or_eq with h | h
+  · exact evenUnitaryGroup_le_lipschitzGroup_of_finrank_le_four Q hQ hV0 (Nat.le_of_lt_succ h)
   · exact evenUnitaryGroup_le_lipschitzGroup_of_finrank_eq_five Q hQ h
 
 /-- For a nondegenerate quadratic space of dimension between one and five, the Spin group fills

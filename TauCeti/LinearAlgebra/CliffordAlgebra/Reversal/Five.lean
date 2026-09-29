@@ -70,30 +70,28 @@ theorem add_reverse_mem_range_ι_sup_span_of_mem_evenOdd_one_of_length_eq_five {
     rintro _ ⟨t, ht, rfl⟩
     simp only [SetLike.mem_coe, P, Submodule.mem_comap, LinearMap.add_apply, LinearMap.id_apply]
     rw [reverse_prod_map_ι_of_pairwise_isOrtho (hl.sublist ht)]
-    have hev := prod_map_ι_mem_evenOdd (Q := Q) t
     have hpow := prod_map_ι_mem_pow Q t
     have hk : t.length ≤ 5 := hlen ▸ ht.length_le
     have heq : t.length = l.length → t = l := ht.eq_of_length
-    generalize t.length = k at hev hpow hk heq ⊢
+    generalize hlt : t.length = k at hpow hk heq ⊢
     interval_cases k
-    · rw [Nat.choose_zero_succ, pow_zero, one_smul]
+    · have hev := prod_map_ι_mem_evenOdd_zero_of_even_length (Q := Q) (l := t) (by rw [hlt]; decide)
+      rw [Nat.choose_zero_succ, pow_zero, one_smul]
       exact Submodule.mem_sup_right (add_mem hev hev)
     · rw [pow_one] at hpow
-      rw [show Nat.choose 1 2 = 0 by decide, pow_zero, one_smul]
+      rw [Nat.choose_eq_zero_of_lt Nat.one_lt_two, pow_zero, one_smul]
       exact Submodule.mem_sup_left (Submodule.mem_sup_left (add_mem hpow hpow))
     · rw [Nat.choose_self, pow_one, neg_one_smul, add_neg_cancel]
       exact zero_mem _
-    · rw [show Nat.choose 3 2 = 3 by decide, Odd.neg_one_pow (by decide), neg_one_smul,
-        add_neg_cancel]
+    · rw [Odd.neg_one_pow (by decide), neg_one_smul, add_neg_cancel]
       exact zero_mem _
-    · rw [show Nat.choose 4 2 = 6 by decide, Even.neg_one_pow (by decide), one_smul]
-      rw [show ((4 : ℕ) : ZMod 2) = 0 by decide] at hev
+    · have hev := prod_map_ι_mem_evenOdd_zero_of_even_length (Q := Q) (l := t) (by rw [hlt]; decide)
+      rw [Even.neg_one_pow (by decide), one_smul]
       exact Submodule.mem_sup_right (add_mem hev hev)
-    · rw [show Nat.choose 5 2 = 10 by decide, Even.neg_one_pow (by decide), one_smul,
-        heq hlen.symm]
+    · rw [Even.neg_one_pow (by decide), one_smul, heq hlen.symm]
       exact Submodule.mem_sup_left (Submodule.mem_sup_right
         (add_mem (Submodule.mem_span_singleton_self _) (Submodule.mem_span_singleton_self _)))
-  have hyP : y ∈ P := hP (by rw [span_prod_map_ι_sublist_eq_top hl hspan]; exact Submodule.mem_top)
+  have hyP : y ∈ P := hP (by rw [span_prod_map_ι_sublist_eq_top hspan]; exact Submodule.mem_top)
   simp only [P, Submodule.mem_comap, LinearMap.add_apply, LinearMap.id_apply] at hyP
   obtain ⟨o, ho, e, he, hoe⟩ := Submodule.mem_sup.mp hyP
   -- The even term vanishes, since `y + reverse y` and the term in `T` are both odd.

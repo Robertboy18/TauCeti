@@ -60,6 +60,9 @@ the scalars and the vectors, the disjointness of the two pins that step down to 
   proportional, once the first has unit value under `Q`.
 * `CliffordAlgebra.eq_zero_of_commute_ι_of_isOrtho`: over a field, a vector commuting with two
   orthogonal anisotropic vectors is zero.
+* `CliffordAlgebra.eq_zero_or_exists_ι_eq_smul_of_mul_self_eq_algebraMap`: over a field, if a
+  vector plus a multiple of a central element with nonzero scalar square has scalar square, then
+  the multiple vanishes or the vector is a multiple of the central element.
 * `CliffordAlgebra.mul_ι_notMem_range_ι_of_mul_ι_eq_neg`: over a field, a nonzero element
   anticommuting with two orthogonal anisotropic companions of an anisotropic vector `v` sends
   `ι Q v` outside the vectors.
@@ -315,6 +318,40 @@ theorem eq_zero_of_commute_ι_of_isOrtho {u₁ u₂ w : V} (hu₁ : Q u₁ ≠ 0
     · exact h
     · exact absurd h (mul_ne_zero (Invertible.ne_zero (2 : K)) hu₁)
   rw [hc₁, hc₁0, zero_smul]
+
+/-! ### A vector plus a central element with scalar square -/
+
+variable {Q} in
+/-- **A vector plus a multiple of a central element with nonzero scalar square has scalar square
+only if the multiple vanishes or the vector is itself a multiple of the central element.** Let `ω`
+be central with `ω * ω` the nonzero scalar `s`. If `(ι Q w + c • ω) ^ 2` is a scalar, then either
+`c = 0` or `ι Q w` is a multiple of `ω`: the cross term `2 c • (ω * ι Q w)` is a scalar, and
+multiplying it by `ω` once more isolates `ι Q w`. -/
+theorem eq_zero_or_exists_ι_eq_smul_of_mul_self_eq_algebraMap {ω : CliffordAlgebra Q}
+    (hω : ∀ z, Commute ω z) {s : K} (hsq : ω * ω = algebraMap K _ s) (hs : s ≠ 0) {w : V}
+    {c q : K} (h : (ι Q w + c • ω) * (ι Q w + c • ω) = algebraMap K _ q) :
+    c = 0 ∨ ∃ t : K, ι Q w = t • ω := by
+  have hwω : ι Q w * ω = ω * ι Q w := (hω (ι Q w)).symm.eq
+  have hexp : (2 * c) • (ω * ι Q w) = algebraMap K _ (q - Q w - c * c * s) := by
+    have hsq' : (ι Q w + c • ω) * (ι Q w + c • ω) =
+        algebraMap K _ (Q w) + (2 * c) • (ω * ι Q w) + algebraMap K _ (c * c * s) := by
+      simp only [add_mul, mul_add, smul_mul_assoc, mul_smul_comm, ι_sq_scalar, hwω, hsq,
+        smul_smul, Algebra.algebraMap_eq_smul_one]
+      module
+    rw [map_sub, map_sub, ← h, hsq']
+    abel
+  by_cases hc : c = 0
+  · exact Or.inl hc
+  · right
+    have h2c : (2 * c) ≠ 0 := mul_ne_zero (Invertible.ne_zero 2) hc
+    have hωw : ω * ι Q w = algebraMap K _ ((2 * c)⁻¹ * (q - Q w - c * c * s)) := by
+      rw [map_mul, ← Algebra.smul_def, ← hexp, smul_smul, inv_mul_cancel₀ h2c, one_smul]
+    refine ⟨s⁻¹ * ((2 * c)⁻¹ * (q - Q w - c * c * s)), ?_⟩
+    -- Multiply by `ω` on the left: `s • ι Q w = r • ω`.
+    have hmul : ω * (ω * ι Q w) = ω * algebraMap K _ ((2 * c)⁻¹ * (q - Q w - c * c * s)) := by
+      rw [hωw]
+    rw [← mul_assoc, hsq, ← Algebra.smul_def, ← Algebra.commutes, ← Algebra.smul_def] at hmul
+    rw [mul_smul, ← hmul, smul_smul, inv_mul_cancel₀ hs, one_smul]
 
 /-! ### An anticommuting element moves an anisotropic vector out of the vectors -/
 
