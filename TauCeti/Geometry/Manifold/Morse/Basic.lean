@@ -166,6 +166,11 @@ theorem isMorseOn_modelSpace_iff {V : Type*} [NormedAddCommGroup V] [NormedSpace
 def IsMorse (I : ModelWithCorners ℝ E H) (f : M → ℝ) : Prop :=
   IsMorseOn I f univ
 
+/-- Being Morse on the whole manifold is being a Morse function. -/
+@[simp]
+theorem isMorseOn_univ {I : ModelWithCorners ℝ E H} : IsMorseOn I f univ ↔ IsMorse I f :=
+  Iff.rfl
+
 /-- A function is Morse exactly when it is smooth and all of its critical points are
 nondegenerate. -/
 theorem isMorse_iff {I : ModelWithCorners ℝ E H} :
