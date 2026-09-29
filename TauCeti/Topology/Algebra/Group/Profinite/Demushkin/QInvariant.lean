@@ -11,6 +11,7 @@ public import TauCeti.Topology.Algebra.ContinuousMulEquiv
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianization
 import Mathlib.Topology.Algebra.Module.Equiv.Prod
+import TauCeti.NumberTheory.Padics.PadicIntegers
 import TauCeti.Topology.Algebra.Group.Profinite.ProP.Torsion
 
 /-!
@@ -327,6 +328,43 @@ theorem demushkinQ_presentedProP_eq_pow_valuation (hG : IsDemushkin p (presented
     (hpq : (p : ℤ_[p]) ∣ q) (hq : q ≠ 0) : demushkinQ hG = p ^ q.valuation :=
   demushkinQ_eq_pow_valuation_of_mulEquiv hG
     (presentedProP.oneRelatorAbelianizationEquiv r x₀ w hw q hr).toMulEquiv hpq hq
+
+/-- **The `q`-invariant of a one-relator Demushkin group is `p` exactly when some exponent sum of
+the relator is not divisible by `p ^ 2`**, for a relator all of whose exponent sums are divisible
+by `p`, as they are for a relator in `Φ(F)`. Writing the exponent vector as `q • w` with a
+coordinate `w x₀ = 1`, the `q`-invariant is `p^{v_p(q)}`, and it is `p` exactly when
+`v_p(q) = 1`. -/
+theorem demushkinQ_presentedProP_eq_iff_exists_not_dvd (hG : IsDemushkin p (presentedProP p X {r}))
+    (hpr : ∀ x, (p : ℤ_[p]) ∣ (freeProP.exponentSum p X r).toAdd x) :
+    demushkinQ hG = p ↔ ∃ x, ¬ (p : ℤ_[p]) ^ 2 ∣ (freeProP.exponentSum p X r).toAdd x := by
+  have hp : p.Prime := Fact.out
+  have : Nonempty X := (Nat.card_pos_iff.1 hG.card_pos_presentedProP).1
+  obtain ⟨x₀, q, w, hw, hv⟩ :=
+    PadicInt.exists_apply_eq_one_and_eq_smul (freeProP.exponentSum p X r).toAdd
+  have hqx₀ : (freeProP.exponentSum p X r).toAdd x₀ = q := by
+    rw [hv, Pi.smul_apply, hw, smul_eq_mul, mul_one]
+  have hq : (p : ℤ_[p]) ∣ q := hqx₀ ▸ hpr x₀
+  -- Some exponent sum escapes `p ^ 2` exactly when `q` does.
+  have hiff : (∃ x, ¬ (p : ℤ_[p]) ^ 2 ∣ (freeProP.exponentSum p X r).toAdd x) ↔
+      ¬ (p : ℤ_[p]) ^ 2 ∣ q := by
+    refine ⟨fun ⟨x, hx⟩ h ↦ hx ?_, fun h ↦ ⟨x₀, hqx₀ ▸ h⟩⟩
+    rw [hv, Pi.smul_apply, smul_eq_mul]
+    exact h.mul_right _
+  rw [hiff]
+  by_cases hq0 : q = 0
+  · rw [(demushkinQ_presentedProP_eq_zero_iff hw hv hG hq).2 hq0, hq0]
+    exact ⟨fun h ↦ absurd h.symm hp.ne_zero, fun h ↦ absurd (dvd_zero _) h⟩
+  rw [demushkinQ_presentedProP_eq_pow_valuation hw hv hG hq hq0, ← Ideal.mem_span_singleton,
+    PadicInt.mem_span_pow_iff_le_valuation q hq0, not_le]
+  have h1 : 1 ≤ q.valuation := by
+    rw [← PadicInt.mem_span_pow_iff_le_valuation q hq0, Ideal.mem_span_singleton, pow_one]
+    exact hq
+  constructor
+  · intro h
+    have := Nat.pow_right_injective hp.two_le (h.trans (pow_one p).symm)
+    omega
+  · intro h
+    rw [show q.valuation = 1 by omega, pow_one]
 
 end OneRelator
 
