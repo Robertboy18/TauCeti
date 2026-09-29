@@ -18,8 +18,9 @@ relator word. This file presents these forms by the words
 * `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`, for `q = 2` and `n` even,
 
 where `(x, y) = x⁻¹y⁻¹xy` is Labute's commutator. In the two `q = 2` forms Labute also allows
-`f = ∞`, meaning that the factor `x₂^{2^f}`, resp. `x₃^{2^f}`, is absent. The three words above
-take a natural number `f`; two `f = ∞` forms have words of their own, with no level: the odd form
+`f = ∞`, meaning that the factor `x₂^{2^f}`, resp. `x₃^{2^f}`, is absent. The first word above
+takes a natural number `q`, and the two `q = 2` words take a natural-number level `f`; two
+`f = ∞` forms have words of their own, with no level: the odd form
 `x₁² (x₂, x₃)(x₄, x₅) ⋯ (x_{n-1}, x_n)` is `demushkinWordTwoOddTop`, and the even form of rank two,
 `x₁^{2+α} (x₁, x₂)`, where `x₃ = 1` makes the even word read the same for every `f`, is
 `demushkinWordTwoRankTwo`. The even `f = ∞` form of rank at least four is not presented here.

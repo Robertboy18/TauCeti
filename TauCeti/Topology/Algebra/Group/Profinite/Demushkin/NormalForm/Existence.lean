@@ -41,7 +41,7 @@ the principal unit groups for odd `p` and Labute's four families
 | `{±1}`, `n` even           | `x₁² (x₁, x₂) ⋯ (x_{n-1}, x_n)`, `q = 2`                |
 | `{±1} × U^(f)`, `n` even   | `x₁² (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`, `n ≥ 4` |
 | `{±1} × U^(f)`, `n` odd    | `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)`                |
-| `{±1}`, `n` odd            | `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)`, the level `f = ∞`      |
+| `{±1}`, `n` odd, `n ≥ 3`   | `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)`, the level `f = ∞`      |
 | `U^[g]`, `n = 2`           | `x₁^{2 + 2^g} (x₁, x₂)`                                |
 | `U^[g]`, `n ≥ 4`           | `x₁^{2 + 2^g} (x₁, x₂) x₃^{2^{g+1}} (x₃, x₄) ⋯`         |
 | `{±1}`, `n = 1`            | `x₁²`, the group `ℤ/2`                                |
