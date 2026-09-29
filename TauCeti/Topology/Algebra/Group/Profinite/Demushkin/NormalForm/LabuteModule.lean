@@ -17,7 +17,8 @@ Labute's classification of Demushkin groups runs on the module `E = X ⧸ (X, X)
 character `χ` of the group `G = F ⧸ (r)` in normal form (Labute, §4 Definition, p. 121). The
 module structure is over `Λ = ℤ_p[[Γ]]`, `Γ = F ⧸ X ≅ Im χ`, through conjugation
 (`TauCeti.IsProP.completedGroupAlgebraModule`), and Labute's computations are read in the classes
-`⟦y_i⟧ ∈ E` of basis elements lying in `X`, which generate `E` over `Λ`.
+`⟦y_i⟧ ∈ E` of the basis elements lying in `X`, which generate `E` over `Λ` once a second marked
+generator, if any, is corrected by a power of the first.
 
 This file establishes that generation for the two normal forms whose orientation has procyclic
 image, so that `Λ` is the power-series ring `TauCeti.completedGroupAlgebra.powerSeriesCoordinate`:
@@ -95,11 +96,11 @@ theorem orientationNeTwo_comp_mk_freeProPGen_one (hn : 1 < n) :
     orientationNeTwo_presentedProPGen_one q n u hu hn]
 
 /-- **The kernel of the standard orientation of the `q ≠ 2` normal form on the free pro-`p`
-group.** For `1 < n` and `q = p^f` with `f ≥ 1`, and `f ≥ 2` when `p = 2`, the kernel on
+group.** For `1 < n` and `q = p^f`, with `f ≥ 2` when `p = 2`, the kernel on
 `F = freeProP p (Fin n)` of the character with `χ(x₂) = (1 - q)⁻¹` and `χ(x_i) = 1` otherwise is
 the closed normal closure of the generators `x_i`, `i ≠ 2`: this is Labute's `X = ker χ`. -/
-theorem ker_orientationNeTwo_comp_mk (hn : 1 < n) {f : ℕ} (hq : q = p ^ f) (hf : 0 < f)
-    (hf₂ : p = 2 → 2 ≤ f) (hu' : (u : ℤ_[p]) * (1 - (q : ℤ_[p])) = 1) :
+theorem ker_orientationNeTwo_comp_mk (hn : 1 < n) {f : ℕ} (hq : q = p ^ f) (hf₂ : p = 2 → 2 ≤ f)
+    (hu' : (u : ℤ_[p]) * (1 - (q : ℤ_[p])) = 1) :
     ((orientationNeTwo q n u hu).comp (presentedProP.mk p _)).toMonoidHom.ker =
       (Subgroup.normalClosure (freeProPGen p n '' {i | i ≠ 1})).topologicalClosure := by
   subst hq
@@ -109,17 +110,17 @@ theorem ker_orientationNeTwo_comp_mk (hn : 1 < n) {f : ℕ} (hq : q = p ^ f) (hf
     (fun i hi ↦ orientationNeTwo_comp_mk_freeProPGen_of_ne _ n u hu hi) ?_
   rw [ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_ofClass,
     orientationNeTwo_comp_mk_freeProPGen_one _ n u hu hn]
-  exact not_isOfFinOrder_of_val_mul_one_sub_pow_eq_one hf hf₂ hu'
+  exact not_isOfFinOrder_of_val_mul_one_sub_pow_eq_one hf₂ hu'
 
 /-- **Labute's module `E` of the `q ≠ 2` normal form is spanned by the classes of the generators
-other than `x₂`.** For `1 < n` and `q = p^f` with `f ≥ 1`, and `f ≥ 2` when `p = 2`, let `X` be
-the kernel on `F = freeProP p (Fin n)` of the standard orientation, the character with
+other than `x₂`.** For `1 < n` and `q = p^f`, with `f ≥ 2` when `p = 2`, let `X` be the kernel on
+`F = freeProP p (Fin n)` of the standard orientation, the character with
 `χ(x₂) = (1 - q)⁻¹` and `χ(x_i) = 1` otherwise. Then `E = X^{ab}` is spanned over
 `Λ = ℤ_p[[F ⧸ X]]`, for the module structure `TauCeti.IsProP.completedGroupAlgebraModule` through
 conjugation, by the classes `⟦y_i⟧` of the generators `x_i`, `i ≠ 2`, the basis elements lying in
 `X` (Labute, §4, p. 121). -/
 theorem span_topologicalAbelianization_ker_orientationNeTwo_comp_mk_eq_top
-    (hn : 1 < n) {f : ℕ} (hq : q = p ^ f) (hf : 0 < f) (hf₂ : p = 2 → 2 ≤ f)
+    (hn : 1 < n) {f : ℕ} (hq : q = p ^ f) (hf₂ : p = 2 → 2 ≤ f)
     (hu' : (u : ℤ_[p]) * (1 - (q : ℤ_[p])) = 1) :
     haveI := ((orientationNeTwo q n u hu).comp (presentedProP.mk p _)).isClosed_ker
     letI := ((isProP_freeProP p (Fin n)).topologicalAbelianization
@@ -136,7 +137,7 @@ theorem span_topologicalAbelianization_ker_orientationNeTwo_comp_mk_eq_top
           (Subtype.val ⁻¹' (freeProPGen p n '' {i | i ≠ 1})))) = ⊤ :=
   (isProP_freeProP p (Fin n)).span_completedGroupAlgebraModule_topologicalAbelianization_eq_top _
     ((finite_range_freeProPGen p n).subset (Set.image_subset_range _ _))
-    (ker_orientationNeTwo_comp_mk q n u hu hn hq hf hf₂ hu').symm
+    (ker_orientationNeTwo_comp_mk q n u hu hn hq hf₂ hu').symm
 
 end NeTwo
 

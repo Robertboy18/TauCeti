@@ -32,13 +32,15 @@ traded for `b * (a ^ l)⁻¹`, which `χ` kills, so the kernel is the closed nor
 together with that element. For finite `S`, the abelianized kernel `(ker χ)^{ab}`, a module over
 the completed group algebra `ℤ_p[[G ⧸ ker χ]]` through conjugation
 (`TauCeti.IsProP.completedGroupAlgebraModule`), is then spanned by the classes of the elements of
-`S`: this is the kernel equality read through
+`S` in the first case, and by the classes of the elements of `S` together with the class of
+`b * (a ^ l)⁻¹` in the second: this is each kernel equality read through
 `TauCeti.IsProP.span_completedGroupAlgebraModule_topologicalAbelianization_eq_top`.
 
 This is the situation of the orientation character of a Demushkin group in Labute's normal form
 (Labute, §4, p. 121): the character is trivial on all but one or two of the generators, and the
 module `E = X ⧸ (X, X)`, `X = ker χ`, on which his classification argument runs is generated over
-`Λ = ℤ_p[[Γ]]`, `Γ = Im χ`, by the classes of the generators lying in `X`.
+`Λ = ℤ_p[[Γ]]`, `Γ = Im χ`, by the classes of the generators lying in `X`, together with the class
+of the corrected second marked generator when there are two.
 
 ## Main results
 
@@ -100,7 +102,7 @@ theorem ker_eq_topologicalClosure_normalClosure_of_not_isOfFinOrder {S : Set G} 
     · exact Subgroup.mem_sup_left (Subgroup.le_topologicalClosure _ (Subgroup.subset_closure rfl))
     · exact Subgroup.mem_sup_right
         (Subgroup.le_topologicalClosure _ (Subgroup.subset_normalClosure hx))
-  exact MonoidHom.ker_eq_of_sup_eq_top_of_inf_ker_eq_bot
+  exact MonoidHom.ker_eq_of_sup_eq_top_of_inf_ker_eq_bot Subgroup.le_normalizer_of_normal
     (Subgroup.topologicalClosure_minimal _
       (Subgroup.normalClosure_le_normal fun s hs ↦ MonoidHom.mem_ker.2 (hS s hs)) hker)
     hHN (hG.topologicalClosure_closure_singleton_inf_ker_eq_bot χ hker ha)

@@ -30,7 +30,8 @@ spanned by the classes of the generators other than `x_j` (and of `x_k * (x_j ^ 
 the module `E = X ⧸ (X, X)`, `X = ker χ`, of Labute's classification of Demushkin groups, for the
 orientation `χ` of a group in normal form, which is trivial on all but one or two generators
 (Labute, §4, p. 121): `E` is generated over `Λ = ℤ_p[[F ⧸ X]]` by the classes of the generators
-lying in `X`.
+other than `x_j`, together with the class of `x_k * (x_j ^ l)⁻¹` when a second generator `x_k` is
+marked.
 
 ## Main results
 
