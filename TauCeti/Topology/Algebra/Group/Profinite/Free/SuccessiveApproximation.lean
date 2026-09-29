@@ -8,7 +8,6 @@ module
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.BasisModification
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Comparison
 import TauCeti.Algebra.Group.Subgroup.Congruence
-import TauCeti.Topology.Algebra.Group.Profinite.ProP.Burnside
 
 /-!
 # Successive approximation of a relator by basis modifications

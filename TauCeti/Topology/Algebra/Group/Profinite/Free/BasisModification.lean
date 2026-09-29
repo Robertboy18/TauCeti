@@ -198,8 +198,7 @@ theorem toAdd_exponentSum_basisModification [Fintype X] [DecidableEq X]
 
 /-- **A basis modification lying in the closed commutator subgroup at every generator carrying
 a nonzero exponent preserves the exponent vector**: if `w_i ∈ closure [F, F]` for every `i` with
-`(exponentSum g)_i ≠ 0`, then `exponentSum (θ_w g) = exponentSum g`, since each correction term
-of `toAdd_exponentSum_basisModification` vanishes. -/
+`(exponentSum g)_i ≠ 0`, then `exponentSum (θ_w g) = exponentSum g`. -/
 theorem exponentSum_basisModification [Finite X] (w : X → pLowerCentralSeries p (freeProP p X) m)
     {g : freeProP p X} (hw : ∀ i, (exponentSum p X g).toAdd i ≠ 0 →
       (w i : freeProP p X) ∈ (commutator (freeProP p X)).topologicalClosure) :
@@ -207,6 +206,8 @@ theorem exponentSum_basisModification [Finite X] (w : X → pLowerCentralSeries 
   cases nonempty_fintype X
   classical
   refine Multiplicative.toAdd.injective ?_
+  -- Every correction term `exponentSum w_i` of `toAdd_exponentSum_basisModification` vanishes
+  -- where it is weighted by a nonzero exponent.
   rw [toAdd_exponentSum_basisModification]
   conv_rhs => rw [← Finset.univ_sum_single (exponentSum p X g).toAdd]
   refine Finset.sum_congr rfl fun x _ ↦ ?_

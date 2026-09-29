@@ -26,10 +26,10 @@ namespace TauCeti
 variable {G : Type*} [Group G]
 
 /-- **Maps congruent to the identity modulo a subgroup compose.** If `g⁻¹ * θ g ∈ N` and
-`g⁻¹ * φ g ∈ N` for every `g`, then `g⁻¹ * θ (φ g) ∈ N` for every `g`, since
-`g⁻¹ * θ (φ g) = (g⁻¹ * φ g) * ((φ g)⁻¹ * θ (φ g))`. -/
+`g⁻¹ * φ g ∈ N` for every `g`, then `g⁻¹ * θ (φ g) ∈ N` for every `g`. -/
 theorem inv_mul_apply_apply_mem {N : Subgroup G} {θ φ : G → G} (hθ : ∀ g, g⁻¹ * θ g ∈ N)
     (hφ : ∀ g, g⁻¹ * φ g ∈ N) (g : G) : g⁻¹ * θ (φ g) ∈ N := by
+  -- `g⁻¹ * θ (φ g) = (g⁻¹ * φ g) * ((φ g)⁻¹ * θ (φ g))`.
   have := mul_mem (hφ g) (hθ (φ g))
   rwa [mul_assoc, mul_inv_cancel_left] at this
 

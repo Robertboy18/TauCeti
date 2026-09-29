@@ -190,17 +190,15 @@ variable {p G} [CompactSpace G] [TotallyDisconnectedSpace G]
 
 /-- **From finite approximations to an automorphism.** Let `G` be a topologically finitely
 generated pro-`p` group. If for every `k` some continuous surjective endomorphism `φ_k` of `G` has
-`φ_k r ≡ w mod λ_k(G)`, then a continuous automorphism of `G` carries `r` to `w`. The level-`k`
-comparison data are the surjective endomorphisms of the finite group `G ⧸ λ_k(G)` carrying the
-class of `r` to the class of `w`; the approximations show that each level is nonempty, and descent
-along the series bonds the levels. -/
+`φ_k r ≡ w mod λ_k(G)`, then a continuous automorphism of `G` carries `r` to `w`. -/
 theorem IsProP.exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective (hG : IsProP p G)
     (hfg : IsTopologicallyFinitelyGenerated G) (hp : p.Prime) (r w : G)
     (h : ∀ k, ∃ φ : G →ₜ* G, Function.Surjective φ ∧ (φ r)⁻¹ * w ∈ pLowerCentralSeries p G k) :
     ∃ e : G ≃ₜ* G, e r = w := by
   have : ∀ k, DiscreteTopology (G ⧸ pLowerCentralSeries p G k) :=
     fun k ↦ QuotientGroup.discreteTopology (hfg.isOpen_pLowerCentralSeries hp k)
-  -- The level-`k` comparison data: surjective endomorphisms of `G ⧸ λ_k` carrying `r` to `w`.
+  -- The level-`k` comparison data: surjective endomorphisms of the finite group `G ⧸ λ_k`
+  -- carrying `r` to `w`; descent along the series bonds the levels.
   let S (k : ℕ) : Type _ :=
     {ψ : G ⧸ pLowerCentralSeries p G k →ₜ* G ⧸ pLowerCentralSeries p G k //
       Function.Surjective ψ ∧ ψ r = w}
