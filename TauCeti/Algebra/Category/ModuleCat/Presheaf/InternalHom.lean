@@ -114,17 +114,6 @@ commutative rings. -/
 abbrev freeYoneda (U : C) : PresheafOfModulesOfCommRing.{u} R :=
   PresheafOfModules.freeObj (yoneda.obj U)
 
-variable {R}
-
-/-- The restriction map of a tensor product of presheaves of modules acts on pure tensors
-factorwise. This restates `PresheafOfModulesOfCommRing.Monoidal.tensorObj_map_tmul` for the
-tensor product written with the monoidal notation. -/
-@[simp]
-theorem tensor_map_tmul {M N : PresheafOfModulesOfCommRing.{u} R} {X Y : Cᵒᵖ} (f : X ⟶ Y)
-    (m : M.obj X) (n : N.obj X) :
-    (M ⊗ N).map f (m ⊗ₜ n) = M.map f m ⊗ₜ N.map f n :=
-  rfl
-
 end PresheafOfModulesOfCommRing
 
 namespace TauCeti
