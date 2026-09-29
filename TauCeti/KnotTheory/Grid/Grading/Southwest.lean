@@ -53,7 +53,9 @@ distinguished state, since each summand is bounded by `min c (x c)`
 ## References
 
 The winding-number form of the Alexander grading is Ozsváth--Stipsicz--Szabó, *Grid Homology for
-Knots and Links*, Chapter 4.3.
+Knots and Links*, Section 4.7, Proposition 4.7.2. The column-sum form above is that formula with
+each winding number written as a difference of southwest counts and with the constant term kept
+as the non-inversion counts of the marking permutations.
 -/
 
 public section
