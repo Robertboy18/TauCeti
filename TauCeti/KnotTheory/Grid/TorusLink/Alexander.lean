@@ -5,10 +5,10 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.KnotTheory.Grid.CyclicInterval
 public import TauCeti.KnotTheory.Grid.TorusLink.Basic
 public import TauCeti.KnotTheory.Grid.Grading.Southwest
 public import TauCeti.KnotTheory.Grid.Grading.Parity
+import TauCeti.Data.Fin.Basic
 import Mathlib.Algebra.BigOperators.Intervals
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.LinearCombination
@@ -66,7 +66,7 @@ variable (p q : ℕ)
 column index shifted by `q + 1` modulo the grid number. -/
 theorem torusLink_X_val (c : Fin (p + 1 + (q + 1))) :
     ((torusLink p q).X c : ℕ) = (c + (q + 1)) % (p + 1 + (q + 1)) := by
-  rw [torusLink_X_apply, Grid.coe_finRotate_pow]
+  rw [torusLink_X_apply, Fin.coe_finRotate_pow]
 
 /-- In the first `p + 1` columns of a torus link grid the `X`-marking sits `q + 1` rows above the
 diagonal. -/

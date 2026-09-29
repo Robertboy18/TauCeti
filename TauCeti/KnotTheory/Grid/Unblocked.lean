@@ -358,6 +358,7 @@ theorem unblockedRectangles_self (x : GridState n) : G.unblockedRectangles x x =
 /-- Every rectangle leaving the `X`-marking state `G.X`, the grid state whose points are the
 lower-left corners of the `X`-marked squares, covers the `X`-marking at its own lower-left corner,
 so the unblocked differential counts no rectangle from `G.X`. -/
+@[simp]
 theorem unblockedRectangles_X_eq_empty (y : GridState n) : G.unblockedRectangles G.X y = ∅ := by
   rw [Finset.eq_empty_iff_forall_notMem]
   intro r hr

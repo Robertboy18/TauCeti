@@ -50,8 +50,7 @@ directions before taking products.
 * `TauCeti.Grid.mem_cIoo_finRotate_finRotate`, `TauCeti.Grid.mem_cIco_finRotate_finRotate`: the
   cyclic permutation `finRotate n` preserves the open and half-open arcs, as do its powers
   (`TauCeti.Grid.mem_cIoo_finRotate_pow_finRotate_pow`,
-  `TauCeti.Grid.mem_cIco_finRotate_pow_finRotate_pow`), whose values are computed by
-  `TauCeti.Grid.coe_finRotate_pow`.
+  `TauCeti.Grid.mem_cIco_finRotate_pow_finRotate_pow`).
 * `TauCeti.Grid.finRotate_ne_self`: on a cycle of length at least two, the cyclic successor has
   no fixed point.
 * `TauCeti.Grid.cIoo_finRotate_eq_empty`, `TauCeti.Grid.cIco_eq_singleton_iff`: the arcs from a
@@ -662,15 +661,6 @@ theorem mem_cIco_finRotate_pow_finRotate_pow (k : ℕ) (a b x : Fin n) :
   | succ k ih =>
     rw [pow_succ', Equiv.Perm.mul_apply, Equiv.Perm.mul_apply, Equiv.Perm.mul_apply,
       mem_cIco_finRotate_finRotate, ih]
-
-/-- The value of a power of the cyclic permutation `finRotate n`: it adds `k` modulo `n`. -/
-theorem coe_finRotate_pow (k : ℕ) (c : Fin n) : ((finRotate n ^ k) c : ℕ) = (c + k) % n := by
-  induction k with
-  | zero => simp [Nat.mod_eq_of_lt c.isLt]
-  | succ k ih =>
-    have : NeZero n := ⟨Nat.pos_iff_ne_zero.mp c.pos⟩
-    rw [pow_succ', Equiv.Perm.mul_apply, finRotate_apply, Fin.val_add, ih, Fin.val_one',
-      ← Nat.add_mod, ← add_assoc]
 
 /-- Replacing a point by its cyclic successor preserves membership in a half-open cyclic interval
 when the successor is not an endpoint. -/
