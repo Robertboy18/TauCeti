@@ -17,24 +17,21 @@ by its rank `n` and the image of its canonical character, which for `p` odd is `
 `q = p`, in intrinsic form: the hypotheses are the rank and the `q`-invariant of the group, and no
 presentation is chosen in the statement.
 
-The input is Labute's exact normal form `x₁^p (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` for a relator with
-nondegenerate degree-one form and a nonzero `p`-power part
-(`TauCeti.IsDemushkin.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_odd`). The
-`p`-power part of the class of a relator `r ∈ Φ(F)` in `gr_1(F)` is nonzero exactly when the
-`q`-invariant of the presented group is `p`
-(`TauCeti.demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero`); so the
-presentation-level hypothesis of the normal form is the intrinsic condition `q(G) = p`, checked on
-a minimal presentation of `G` on `Fin (demushkinRank hG)`
-(`TauCeti.IsDemushkin.exists_mem_proPFrattini_continuousMulEquiv_presentedProP_fin`).
+The input is Labute's exact normal form `x₁^p (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`, in its intrinsic
+form: a Demushkin group at an odd prime with `q`-invariant `p` is presented by that word on
+`demushkinRank hG` generators
+(`TauCeti.IsDemushkin.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_demushkinQ_eq`),
+and a relator in `Φ(F)` presenting a Demushkin group with `q`-invariant `p` is carried to that word
+by a continuous automorphism of `F`
+(`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_odd`, through
+`TauCeti.demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero`). Two groups, or
+two relators, with the same invariants are then compared through their common normal form.
 
 ## Main results
 
 * `TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_odd_of_demushkinQ_eq`: Labute's
   Theorem 2 in this case, two relators in `Φ(F)` presenting Demushkin groups with `q = p` are
   carried to each other by a continuous automorphism of `F`.
-* `TauCeti.IsDemushkin.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_demushkinQ_eq`
-  a Demushkin group at an odd prime with `q = p` is topologically isomorphic to
-  `⟨x₁, …, x_n ∣ x₁^p (x₁, x₂) ⋯ (x_{n-1}, x_n)⟩` on `n = demushkinRank hG` generators.
 * `TauCeti.IsDemushkin.nonempty_continuousMulEquiv_of_odd_of_demushkinQ_eq`: two Demushkin groups
   at an odd prime with `q = p` and the same rank are topologically isomorphic.
 
@@ -84,23 +81,6 @@ end Relator
 
 variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
   [TotallyDisconnectedSpace G]
-
-/-- **Labute's normal form for a Demushkin group at an odd prime with `q = p`, intrinsic form**
-(Labute, Theorem 3, the case `q = p`). A Demushkin group `G` at an odd prime `p` with `q`-invariant
-`p` is topologically isomorphic to `⟨x₁, …, x_n ∣ x₁^p (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)⟩` on
-`n = demushkinRank hG` generators. -/
-theorem IsDemushkin.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_demushkinQ_eq
-    (hG : IsDemushkin p G) (hp : Odd p) (hq : demushkinQ hG = p) :
-    Nonempty (G ≃ₜ* presentedProP p (Fin (demushkinRank hG))
-      {demushkinWordNeTwo p (demushkinRank hG) (freeProPGen p (demushkinRank hG))}) := by
-  obtain ⟨r, hr, ⟨e⟩⟩ := hG.exists_mem_proPFrattini_continuousMulEquiv_presentedProP_fin
-  have : Nonempty (Fin (demushkinRank hG)) := ⟨⟨0, hG.demushkinRank_pos⟩⟩
-  have hG' : IsDemushkin p (presentedProP p (Fin (demushkinRank hG)) {r}) :=
-    isDemushkin_of_nondegenerate_degreeOneForm hr (ContinuousMulEquiv.refl _)
-      (hG.nondegenerate_degreeOneForm hr e)
-  exact hG.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_odd hp hr e
-    ((demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero hr hG').1
-      ((demushkinQ_congr hG' hG e).trans hq))
 
 /-- **Uniqueness of Demushkin groups at an odd prime with `q = p`** (Labute, Theorems 2 and 3).
 Two Demushkin groups at an odd prime `p` with `q`-invariant `p` and the same rank are
