@@ -17,11 +17,12 @@ the presheaf of `X`. Its stalk at `x` is the stalk of `X` at `f x`, and its valu
 the valuation of `X` at `f x`, transported along this identification. The canonical morphism
 `X.ofRestrict h : X.restrict h ⟶ X` is a morphism of pre-adic spaces.
 
-Restrictions are the local pieces from which pre-adic spaces are assembled: a pre-adic space
-is an object of `𝒱^pre` with an open cover whose members, with the restricted structure, are
-isomorphic in `𝒱^pre` to affinoid pre-adic spaces. The canonical morphism is a monomorphism
-whose stalk maps are isomorphisms, and the restriction of `X` to the whole space is isomorphic
-to `X`, because the forgetful functor to presheafed spaces reflects isomorphisms.
+Restrictions are the infrastructure for the locally affinoid condition, which is not defined
+here: an adic space will be a pre-adic space admitting an open cover whose members, with the
+restricted structure, are isomorphic in `𝒱^pre` to affinoid pre-adic spaces. A general
+`PreAdicSpace` carries no such cover. The canonical morphism is a monomorphism whose stalk maps
+are isomorphisms, and the restriction of `X` to the whole space is isomorphic to `X`, because
+the forgetful functor to presheafed spaces reflects isomorphisms.
 
 ## Main definitions
 
