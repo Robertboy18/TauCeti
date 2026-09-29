@@ -17,7 +17,7 @@ Labute's classification of Demushkin groups runs on the module `E = X ⧸ (X, X)
 character `χ` of the group `G = F ⧸ (r)` in normal form (Labute, §4 Definition, p. 121). The
 module structure is over `Λ = ℤ_p[[Γ]]`, `Γ = F ⧸ X ≅ Im χ`, through conjugation
 (`TauCeti.IsProP.completedGroupAlgebraModule`), and Labute's computations are read in the classes
-`ȳ_i ∈ E` of basis elements lying in `X`, which generate `E` over `Λ`.
+`⟦y_i⟧ ∈ E` of basis elements lying in `X`, which generate `E` over `Λ`.
 
 This file establishes that generation for the two normal forms whose orientation has procyclic
 image, so that `Λ` is the power-series ring `TauCeti.completedGroupAlgebra.powerSeriesCoordinate`:
@@ -29,7 +29,7 @@ image, so that `Λ` is the power-series ring `TauCeti.completedGroupAlgebra.powe
   (`TauCeti.ker_orientationNeTwo_comp_mk`), and `E` is spanned over `Λ` by their classes, by
   `TauCeti.span_topologicalAbelianization_ker_orientationNeTwo_comp_mk_eq_top`.
   Together with the relator class `TauCeti.IsProP.ofMul_mk_demushkinWordNeTwo_ker`,
-  `r̄ = (q - 1 + [x₂]⁻¹) • [x₁]`, this is the expression of the relator image in generators of `E`;
+  `⟦r⟧ = (q - 1 + [x₂]⁻¹) • [x₁]`, this is the expression of the relator image in generators of `E`;
   the image `Γ = 1 + qℤ_p` is `TauCeti.range_orientationNeTwo_eq_unitsPrincipal`;
 * the `q = 2`, `n` even normal form `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` in the
   branch `4 ∣ α`, `2^f ∤ α`, whose standard orientation `TauCeti.orientationTwoEven` takes `x₂` to
@@ -116,7 +116,7 @@ other than `x₂`.** For `1 < n` and `q = p^f` with `f ≥ 1`, and `f ≥ 2` whe
 the kernel on `F = freeProP p (Fin n)` of the standard orientation, the character with
 `χ(x₂) = (1 - q)⁻¹` and `χ(x_i) = 1` otherwise. Then `E = X^{ab}` is spanned over
 `Λ = ℤ_p[[F ⧸ X]]`, for the module structure `TauCeti.IsProP.completedGroupAlgebraModule` through
-conjugation, by the classes `ȳ_i` of the generators `x_i`, `i ≠ 2`, the basis elements lying in
+conjugation, by the classes `⟦y_i⟧` of the generators `x_i`, `i ≠ 2`, the basis elements lying in
 `X` (Labute, §4, p. 121). -/
 theorem span_topologicalAbelianization_ker_orientationNeTwo_comp_mk_eq_top
     (hn : 1 < n) {f : ℕ} (hq : q = p ^ f) (hf : 0 < f) (hf₂ : p = 2 → 2 ≤ f)
