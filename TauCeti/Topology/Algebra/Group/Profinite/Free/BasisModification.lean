@@ -87,6 +87,8 @@ classification, whose levels carry the free parameters `α` and `f` of the norma
 
 * `TauCeti.freeProP.inv_mul_basisModification_mem_pLowerCentralSeries`: `θ_w` is congruent to the
   identity modulo `λ_m(F)`.
+* `TauCeti.freeProP.toAdd_exponentSum_basisModification`: the exponent vector of `θ_w g` is
+  `Σ_i (exponentSum g)_i • (e_i + exponentSum w_i)`.
 * `TauCeti.freeProP.exponentSum_basisModification`: `θ_w` preserves the exponent vector of `g`
   when `w_i` lies in the closed commutator subgroup at every generator carrying a nonzero exponent
   of `g`.
@@ -176,28 +178,42 @@ theorem gradedDeviation_basisModification_gradedMkZero_of
 
 section ExponentSum
 
-variable [Fact p.Prime] [Finite X]
+variable [Fact p.Prime]
+
+/-- **The exponent vector of a basis modification.** For `u = exponentSum g`, the exponent vector
+of `θ_w g` is `Σ_i u_i • (e_i + exponentSum w_i)`: the generator `x_i` contributes `e_i` and its
+correction `w_i` contributes `exponentSum w_i`, each `u_i` times. -/
+theorem toAdd_exponentSum_basisModification [Fintype X] [DecidableEq X]
+    (w : X → pLowerCentralSeries p (freeProP p X) m) (g : freeProP p X) :
+    (exponentSum p X (basisModification w g)).toAdd =
+      ∑ x, (exponentSum p X g).toAdd x • (Pi.single x 1 + (exponentSum p X (w x)).toAdd) := by
+  have h := apply_eq_prod_padicPow_exponentSum p X (isProP_multiplicative_pi_padicInt p X)
+    ((exponentSum p X).comp (basisModification w)) g
+  rw [ContinuousMonoidHom.coe_comp, Function.comp_apply] at h
+  rw [h, toAdd_prod]
+  refine Finset.sum_congr rfl fun x _ ↦ ?_
+  rw [Function.comp_apply, basisModification_of, map_mul, exponentSum_of,
+    ← ofAdd_toAdd (exponentSum p X (w x)), ← ofAdd_add, IsProP.padicPow_ofAdd_pi, toAdd_ofAdd,
+    toAdd_ofAdd]
 
 /-- **A basis modification lying in the closed commutator subgroup at every generator carrying
 a nonzero exponent preserves the exponent vector**: if `w_i ∈ closure [F, F]` for every `i` with
-`(exponentSum g)_i ≠ 0`, then `exponentSum (θ_w g) = exponentSum g`. The exponent vector of
-`θ_w g` is `Σ_i (exponentSum g)_i • (e_i + exponentSum w_i)`, and each correction term vanishes. -/
-theorem exponentSum_basisModification (w : X → pLowerCentralSeries p (freeProP p X) m)
+`(exponentSum g)_i ≠ 0`, then `exponentSum (θ_w g) = exponentSum g`, since each correction term
+of `toAdd_exponentSum_basisModification` vanishes. -/
+theorem exponentSum_basisModification [Finite X] (w : X → pLowerCentralSeries p (freeProP p X) m)
     {g : freeProP p X} (hw : ∀ i, (exponentSum p X g).toAdd i ≠ 0 →
       (w i : freeProP p X) ∈ (commutator (freeProP p X)).topologicalClosure) :
     exponentSum p X (basisModification w g) = exponentSum p X g := by
   cases nonempty_fintype X
-  have hA := isProP_multiplicative_pi_padicInt p X
-  have h := apply_eq_prod_padicPow_exponentSum p X hA
-    ((exponentSum p X).comp (basisModification w)) g
-  rw [ContinuousMonoidHom.coe_comp, Function.comp_apply] at h
-  rw [h]
-  conv_rhs => rw [apply_eq_prod_padicPow_exponentSum p X hA (exponentSum p X) g]
-  refine Finset.prod_congr rfl fun x _ ↦ ?_
-  rw [Function.comp_apply, basisModification_of, map_mul]
+  classical
+  refine Multiplicative.toAdd.injective ?_
+  rw [toAdd_exponentSum_basisModification]
+  conv_rhs => rw [← Finset.univ_sum_single (exponentSum p X g).toAdd]
+  refine Finset.sum_congr rfl fun x _ ↦ ?_
   by_cases hx : (exponentSum p X g).toAdd x = 0
-  · rw [hx, hA.padicPow_zero, hA.padicPow_zero]
-  · rw [(exponentSum_eq_one_iff p X _).mpr (hw x hx), mul_one]
+  · rw [hx, zero_smul, Pi.single_zero]
+  · rw [(exponentSum_eq_one_iff p X _).mpr (hw x hx), toAdd_one, add_zero, ← Pi.single_smul,
+      smul_eq_mul, mul_one]
 
 end ExponentSum
 

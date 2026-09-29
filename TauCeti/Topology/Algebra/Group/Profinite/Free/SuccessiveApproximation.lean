@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.BasisModification
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Comparison
+import TauCeti.Algebra.Group.Subgroup.Congruence
 import TauCeti.Topology.Algebra.Group.Profinite.ProP.Burnside
 
 /-!
@@ -22,19 +23,20 @@ basis modification at level `m` as soon as the class of the deviation `r⁻¹ * 
 lies in the image of `δ_ρ` (`TauCeti.freeProP.inv_basisModification_mul_mem_pLowerCentralSeries`),
 and finitely many modifications carry `r` to `w` modulo any term of the series.
 
-The limit is taken through the levelwise comparison schema
-`TauCeti.PLowerCentralSeriesComparison`: the level-`k` comparison data are the surjective
-endomorphisms of the finite group `F ⧸ λ_k` carrying the class of `r` to the class of `w`, the
-finite approximations show that each level is nonempty, and descent along the series
-(`ContinuousMonoidHom.pLowerCentralSeriesDesc`) bonds the levels. The schema produces a continuous
-automorphism `e` of `F` with `e r = w`
-(`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective`).
+The limit is taken by
+`TauCeti.IsProP.exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective` of
+`TauCeti.Topology.Algebra.Group.Profinite.ProP.Comparison`, which holds in any topologically
+finitely generated pro-`p` group: the finite approximations are surjective endomorphisms of `F` by
+Burnside's criterion (`TauCeti.IsProP.surjective_of_forall_inv_mul_mem_pLowerCentralSeries_one`),
+and the levelwise comparison schema assembles them into a continuous automorphism `e` of `F` with
+`e r = w`.
 
 Two successive-approximation theorems follow, according to the span statement available for `ρ`.
 
 * When `δ_ρ` is onto `gr_{m+1}(F)` for every `m ≥ 1`, every deviation is absorbed
   (`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_top`).
-  This is the case of the relators `x₁^p (x₁, x₂) (x₃, x₄) ⋯` at odd `p`.
+  This hypothesis is established for the relators `x₁^p (x₁, x₂) (x₃, x₄) ⋯` at odd `p`
+  (`TauCeti.freeProP.range_basisModificationDelta_eq_top_of_odd`).
 * When `ρ` has no `p`-power part, `Im δ_ρ` misses the classes `π^{m+1} ξ_i` of the `p`-powers of
   the generators, and only deviations lying in the closed commutator subgroup `K = closure [F, F]`
   can be absorbed. The **relative** theorem
@@ -43,14 +45,17 @@ Two successive-approximation theorems follow, according to the span statement av
   `λ_{m+1}(F) ∩ K` is `δ_ρ` of a level-`m` correction `ω` with `ω_i ∈ K` at every generator `i`
   with `v_i ≠ 0`. Such a correction preserves the exponent vector of the relator
   (`TauCeti.freeProP.exponentSum_basisModification`), so the deviation stays in `K` at every
-  level and the induction closes. This is the case of the relators `x₁^q (x₁, x₂) (x₃, x₄) ⋯` with
-  `q ≠ p`, whose `p`-power part lies in `λ_2(F)`; for `q = 0` the relator lies in `K`, the
-  exponent vector vanishes and the constraint on `ω` is empty.
+  level and the induction closes. The intended application is to the relators
+  `x₁^q (x₁, x₂) (x₃, x₄) ⋯` with `q ≠ p`, whose `p`-power part lies in `λ_2(F)`; this file does
+  not establish the hypothesis on the corrections for them, and the theorem is conditional on it.
+  For `q = 0` the relator lies in `K`, the exponent vector vanishes and the constraint on `ω` is
+  empty, so the hypothesis reduces to `Im δ_ρ` containing every class of an element of
+  `λ_{m+1}(F) ∩ K`.
 
-This is the successive-approximation argument of Labute's classification of Demushkin groups: the
-span statements of `TauCeti.Topology.Algebra.Group.Profinite.Free.BasisModification` supply the
-hypotheses on `δ_ρ`, and the conclusions bring a relator congruent to a normal-form word modulo
-`λ_2(F)` to that word exactly.
+This is the successive-approximation argument of Labute's classification of Demushkin groups: span
+statements for `δ_ρ`, such as those of
+`TauCeti.Topology.Algebra.Group.Profinite.Free.BasisModification`, supply the hypotheses, and the
+conclusions bring a relator congruent to a normal-form word modulo `λ_2(F)` to that word exactly.
 
 ## Main results
 
@@ -59,8 +64,6 @@ hypotheses on `δ_ρ`, and the conclusions bring a relator congruent to a normal
 * `TauCeti.freeProP.exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries` and its
   relative form `…_of_exponentSum_eq`: the finite approximations, one basis modification per
   level, in the two settings.
-* `TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective`: finite
-  approximations by surjective endomorphisms assemble into an automorphism carrying `r` to `w`.
 * `TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_top`
   is **the successive-approximation theorem**: a continuous automorphism of `F` carries `r` to `w`
   when `δ_ρ` is onto in every degree.
@@ -203,53 +206,6 @@ theorem exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries_of_expo
 
 /-! ### The limit -/
 
-omit [LinearOrder X] in
-/-- **From finite approximations to an automorphism.** If for every `k` some continuous surjective
-endomorphism `φ_k` of `F` has `φ_k r ≡ w mod λ_k(F)`, then a continuous automorphism of `F`
-carries `r` to `w`. The level-`k` comparison data of the levelwise comparison schema are the
-surjective endomorphisms of the finite group `F ⧸ λ_k(F)` carrying the class of `r` to the class
-of `w`; the approximations show that each level is nonempty, and descent along the series bonds
-the levels. -/
-theorem exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective (r w : freeProP p X)
-    (h : ∀ k, ∃ φ : freeProP p X →ₜ* freeProP p X, Function.Surjective φ ∧
-      (φ r)⁻¹ * w ∈ pLowerCentralSeries p (freeProP p X) k) :
-    ∃ e : freeProP p X ≃ₜ* freeProP p X, e r = w := by
-  have hp : p.Prime := Fact.out
-  have hfg := isTopologicallyFinitelyGenerated_freeProP p X
-  have hP := isProP_freeProP p X
-  have : ∀ k, DiscreteTopology (freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) k) :=
-    fun k ↦ QuotientGroup.discreteTopology (hfg.isOpen_pLowerCentralSeries hp k)
-  -- The level-`k` comparison data: surjective endomorphisms of `F ⧸ λ_k` carrying `r` to `w`.
-  let S (k : ℕ) : Type u :=
-    {ψ : freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) k →ₜ*
-        freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) k //
-      Function.Surjective ψ ∧ ψ r = w}
-  have : ∀ k, Finite (S k) := fun k ↦ by
-    have := hfg.finite_quotient_pLowerCentralSeries hp k
-    exact Finite.of_injective (fun s : S k ↦ ⇑s.1)
-      (DFunLike.coe_injective.comp Subtype.val_injective)
-  -- Each level is nonempty: a surjective endomorphism of `F` induces a surjection of `F ⧸ λ_k`.
-  have : ∀ k, Nonempty (S k) := fun k ↦ by
-    obtain ⟨φ, hsurj, hr⟩ := h k
-    have hle : pLowerCentralSeries p (freeProP p X) k ≤
-        (pLowerCentralSeries p (freeProP p X) k).comap φ.toMonoidHom :=
-      Subgroup.map_le_iff_le_comap.mp (φ.toMonoidHom.map_pLowerCentralSeries_le φ.continuous k)
-    refine ⟨⟨⟨QuotientGroup.map _ _ φ.toMonoidHom hle, continuous_of_discreteTopology⟩,
-      QuotientGroup.map_surjective_of_surjective _ _ _ (QuotientGroup.mk_surjective.comp hsurj) hle,
-      ?_⟩⟩
-    rw [ContinuousMonoidHom.coe_mk, QuotientGroup.map_mk]
-    exact QuotientGroup.eq.mpr hr
-  let C : PLowerCentralSeriesComparison p (freeProP p X) (freeProP p X) S :=
-    { map := fun _ s ↦ s.1
-      map_surjective := fun _ s ↦ s.2.1
-      bond := fun _ s ↦ ⟨s.1.pLowerCentralSeriesDesc, s.1.pLowerCentralSeriesDesc_surjective s.2.1,
-        by rw [ContinuousMonoidHom.pLowerCentralSeriesDesc_mk, s.2.2, QuotientGroup.mapOfLE_mk]⟩
-      commutes := fun _ s x ↦ (s.1.pLowerCentralSeriesDesc_mapOfLE x).symm }
-  obtain ⟨_, e, -, -, he, -⟩ := C.exists_continuousMulEquiv_preserving hP hfg hp
-    (fun _ : Unit ↦ r) (fun _ ↦ w) (1 : freeProP p X →ₜ* freeProP p X) 1 (fun _ s _ ↦ s.2.2)
-    (fun _ ↦ ⟨0, fun _ _ _ _ ↦ by simp⟩)
-  exact ⟨e, he ()⟩
-
 /-- **The successive-approximation theorem.** Let `r, w ∈ λ_1(F)` be relators of the free pro-`p`
 group `F` on a finite linearly ordered type with the same class `ρ ∈ gr_1(F)`, and suppose the
 basis-modification map `δ_ρ` is onto `gr_{m+1}(F)` for every `m ≥ 1`. Then a continuous
@@ -260,8 +216,8 @@ theorem exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_to
     (hspan : ∀ m (hm : 1 ≤ m),
       LinearMap.range (basisModificationDelta p X hm (gradedMk p (freeProP p X) 1 r)) = ⊤) :
     ∃ e : freeProP p X ≃ₜ* freeProP p X, e r = w := by
-  refine exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective (r : freeProP p X) w
-    fun k ↦ ?_
+  refine (isProP_freeProP p X).exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective
+    (isTopologicallyFinitelyGenerated_freeProP p X) Fact.out (r : freeProP p X) w fun k ↦ ?_
   obtain ⟨φ, hφ, hr⟩ :=
     exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries r w h k fun m hm _ ↦ hspan m hm
   exact ⟨φ, (isProP_freeProP p X).surjective_of_forall_inv_mul_mem_pLowerCentralSeries_one
@@ -274,9 +230,11 @@ same exponent vector `v = exponentSum r`, and suppose that for every `m ≥ 1` e
 `ω : X → λ_m(F)` with `ω_i ∈ K` at every generator `i` with `v_i ≠ 0`. Then a continuous
 automorphism of `F` carries `r` to `w`.
 
-This is the form of the argument for a relator whose `p`-power part lies in `λ_2(F)`, where the
-image of `δ_ρ` is the commutator part of `gr_{m+1}(F)` and the exponent vector has to be kept fixed
-along the approximation. -/
+This is the form of the argument for a relator whose `p`-power part lies in `λ_2(F)`: there `Im δ_ρ`
+misses the classes `π^{m+1} ξ_i`, so only deviations in `K` can be absorbed and the exponent vector
+has to be kept fixed along the approximation. The hypothesis on the corrections is the constrained
+form of the span statement `Im δ_ρ ⊇ ` (classes of `λ_{m+1}(F) ∩ K`); it is assumed here, not
+established. -/
 theorem exists_continuousMulEquiv_apply_eq_of_exponentSum_eq
     (r w : pLowerCentralSeries p (freeProP p X) 1)
     (h : gradedMk p (freeProP p X) 1 r = gradedMk p (freeProP p X) 1 w)
@@ -289,8 +247,8 @@ theorem exists_continuousMulEquiv_apply_eq_of_exponentSum_eq
         basisModificationDelta p X hm (gradedMk p (freeProP p X) 1 r)
           (fun i ↦ gradedMk p (freeProP p X) m (ω i)) = gradedMk p (freeProP p X) (m + 1) z) :
     ∃ e : freeProP p X ≃ₜ* freeProP p X, e r = w := by
-  refine exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective (r : freeProP p X) w
-    fun k ↦ ?_
+  refine (isProP_freeProP p X).exists_continuousMulEquiv_apply_eq_of_forall_exists_surjective
+    (isTopologicallyFinitelyGenerated_freeProP p X) Fact.out (r : freeProP p X) w fun k ↦ ?_
   obtain ⟨φ, hφ, -, hr⟩ :=
     exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries_of_exponentSum_eq r w h hrw k
       fun m hm _ ↦ hspan m hm

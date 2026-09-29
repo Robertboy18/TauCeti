@@ -45,7 +45,6 @@ developed in
 
 ## Main results
 
-* `TauCeti.inv_mul_apply_apply_mem`: maps congruent to the identity modulo a subgroup compose.
 * `TauCeti.inv_mul_apply_mem_pLowerCentralSeries`: `g⁻¹ * θ g ∈ λ_{m+k}` for `g ∈ λ_k`.
 * `TauCeti.gradedMap_eq_id_of_one_le`: for `m ≥ 1`, `θ` induces the identity on every graded piece.
 * `TauCeti.gradedDeviation_gradedBracket`, `TauCeti.gradedDeviation_gradedBracket_zero`: the
@@ -70,15 +69,6 @@ namespace TauCeti
 universe u
 
 variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
-
-omit [TopologicalSpace G] [IsTopologicalGroup G] in
-/-- **Maps congruent to the identity modulo a subgroup compose.** If `g⁻¹ * θ g ∈ N` and
-`g⁻¹ * φ g ∈ N` for every `g`, then `g⁻¹ * θ (φ g) ∈ N` for every `g`, since
-`g⁻¹ * θ (φ g) = (g⁻¹ * φ g) * ((φ g)⁻¹ * θ (φ g))`. -/
-theorem inv_mul_apply_apply_mem {N : Subgroup G} {θ φ : G → G} (hθ : ∀ g, g⁻¹ * θ g ∈ N)
-    (hφ : ∀ g, g⁻¹ * φ g ∈ N) (g : G) : g⁻¹ * θ (φ g) ∈ N := by
-  have := mul_mem (hφ g) (hθ (φ g))
-  rwa [mul_assoc, mul_inv_cancel_left] at this
 
 /-! ### The deviation of an endomorphism congruent to the identity -/
 
