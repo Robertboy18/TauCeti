@@ -54,6 +54,8 @@ nondegenerate and not alternating, which is a direct computation.
 
 * `TauCeti.freeProP.exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo`: the
   alternating case, for every `p`.
+* `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordNeTwo`: the degree-one form of the
+  alternating normal-form word `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` is nondegenerate for `n` even.
 * `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordTwoOdd`,
   `TauCeti.freeProP.nondegenerate_degreeOneForm_demushkinWordTwoEven`: the degree-one forms of
   the two dyadic normal-form words are nondegenerate, for `n` odd, resp. even, and are not
@@ -363,6 +365,71 @@ theorem exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo_zero_
     simp [powerPartFunctional, hc]
   obtain ⟨hn, e, he⟩ := exists_gradedMap_eq_altClass_zero ρ hnd halt hℓ
   exact ⟨hn, e, he.trans gradedMk_demushkinWordNeTwo_zero_eq_altClass.symm⟩
+
+
+/-! ### The alternating normal forms are nondegenerate -/
+
+/-- The value of the degree-one form of the class of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` on a
+character and the `j`-th coordinate character. -/
+private theorem degreeOneForm_demushkinWordNeTwo_dualBasis {q : ℕ} (hq : p ∣ q)
+    (χ : continuousZModDual p (freeProP p (Fin n))) (j : Fin n) :
+    degreeOneForm (gradedMk p (freeProP p (Fin n)) 1 ⟨demushkinWordNeTwo q n (freeProPGen p n),
+        demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩) χ (dualBasis p (Fin n) j) =
+      (q / p) • p.choose 2 • (if (j : ℕ) = 0 then (χ.toMul (freeProPGen p n 0)).toAdd else 0) +
+        ∑ a ∈ Finset.range (n / 2),
+          ((if (j : ℕ) = 2 * a + 1 then (χ.toMul (freeProPGen p n (2 * a))).toAdd else 0) -
+            if (j : ℕ) = 2 * a then (χ.toMul (freeProPGen p n (2 * a + 1))).toAdd else 0) := by
+  rw [gradedMk_demushkinWordNeTwo hq]
+  simp only [map_add, map_sum, map_nsmul, LinearMap.add_apply, LinearMap.sum_apply,
+    LinearMap.smul_apply, degreeOneForm_gradedPow_gradedMkZero,
+    degreeOneForm_gradedBracket_gradedMkZero, toMul_dualBasis_freeProPGen, mul_ite, mul_one,
+    mul_zero]
+
+/-- **The degree-one form of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` is nondegenerate for `n` even** and
+`p ∣ q`: pairing with the `j`-th coordinate character reads off the value of a character at the
+partner `x_{j±1}` of `x_j` in the commutator pairs, up to the `p`-power term, which involves only
+the value at `x₁` and is read off first. This covers `q = 0`. -/
+theorem nondegenerate_degreeOneForm_demushkinWordNeTwo (hn : Even n) {q : ℕ} (hq : p ∣ q) :
+    (degreeOneForm (gradedMk p (freeProP p (Fin n)) 1
+      ⟨demushkinWordNeTwo q n (freeProPGen p n),
+        demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩)).Nondegenerate := by
+  obtain ⟨N, hN⟩ := hn
+  refine ((isRefl_degreeOneForm (gradedMk p (freeProP p (Fin n)) 1
+    ⟨demushkinWordNeTwo q n (freeProPGen p n),
+      demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩)).nondegenerate_iff_separatingLeft).2
+    fun χ hχ ↦ ?_
+  rw [(dualBasis p (Fin n)).ext_elem_iff]
+  intro i
+  have hin := i.isLt
+  rw [map_zero, Finsupp.zero_apply, dualBasis_repr, ← freeProPGen_val]
+  have hχ' (j : ℕ) (hj : j < n) := hχ (dualBasis p (Fin n) ⟨j, hj⟩)
+  simp only [degreeOneForm_demushkinWordNeTwo_dualBasis hq] at hχ'
+  -- Pairing with the coordinate character at `x_{2a+2}` reads off the value at `x_{2a+1}`.
+  have heven (a : ℕ) (ha : 2 * a < n) : (χ.toMul (freeProPGen p n (2 * a))).toAdd = 0 := by
+    have h := hχ' (2 * a + 1) (by omega)
+    rw [ite_eq_right (by omega), smul_zero, smul_zero, zero_add,
+      Finset.sum_eq_single a (fun b _ hb ↦ by
+        rw [ite_eq_right (by omega), ite_eq_right (by omega), sub_zero])
+      (fun ha' ↦ by rw [Finset.mem_range] at ha'; omega),
+      ite_eq_left rfl, ite_eq_right (by omega), sub_zero] at h
+    exact h
+  -- Pairing with the coordinate character at `x_{2a+1}` reads off the value at `x_{2a+2}`, once
+  -- the `p`-power term, which involves only the value at `x₁`, is known to vanish.
+  have hodd (a : ℕ) (ha : 2 * a + 1 < n) :
+      (χ.toMul (freeProPGen p n (2 * a + 1))).toAdd = 0 := by
+    have h := hχ' (2 * a) (by omega)
+    have h0 : (χ.toMul (freeProPGen p n 0)).toAdd = 0 := by simpa using heven 0 (by omega)
+    rw [h0, ite_self, smul_zero, smul_zero, zero_add,
+      Finset.sum_eq_single a (fun b _ hb ↦ by
+        rw [ite_eq_right (by omega), ite_eq_right (by omega), sub_zero])
+      (fun ha' ↦ by rw [Finset.mem_range] at ha'; omega),
+      ite_eq_right (by omega), ite_eq_left rfl, zero_sub, neg_eq_zero] at h
+    exact h
+  rcases Nat.even_or_odd (i : ℕ) with ⟨a, ha⟩ | ⟨a, ha⟩
+  · rw [ha, ← two_mul]
+    exact heven a (by omega)
+  · rw [ha]
+    exact hodd a (by omega)
 
 
 /-! ### The dyadic nonalternating normal forms -/
