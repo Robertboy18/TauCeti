@@ -297,7 +297,8 @@ theorem ofMul_mk_demushkinWordNeTwo_ker (q : ℕ) {n : ℕ} (hn : 1 < n) {x : �
     letI := (hG.topologicalAbelianization χ.toMonoidHom.ker).completedGroupAlgebraModule
       (G ⧸ χ.toMonoidHom.ker)
     Additive.ofMul ((⟨_, demushkinWordNeTwo_mem_ker χ.toMonoidHom q n
-        (hx 0 zero_ne_one (by omega))⟩ : χ.toMonoidHom.ker) :
+        ((congrArg (· ^ q) (hx 0 zero_ne_one (by omega))).trans (one_pow q))⟩ :
+          χ.toMonoidHom.ker) :
           TopologicalAbelianization χ.toMonoidHom.ker) =
       ((q : completedGroupAlgebra ℤ_[p] (G ⧸ χ.toMonoidHom.ker)) - 1 +
           completedGroupAlgebra.of ℤ_[p] (G ⧸ χ.toMonoidHom.ker)
@@ -318,7 +319,8 @@ theorem ofMul_mk_demushkinWordTwoOdd_ker (f : ℕ) {n : ℕ} (hn : 1 < n) {x : �
     letI := (hG.topologicalAbelianization χ.toMonoidHom.ker).completedGroupAlgebraModule
       (G ⧸ χ.toMonoidHom.ker)
     Additive.ofMul ((⟨_, demushkinWordTwoOdd_mem_ker χ.toMonoidHom f n hx₀
-        (hx 1 one_ne_zero (by decide) (by omega))⟩ : χ.toMonoidHom.ker) :
+        ((congrArg (· ^ 2 ^ f) (hx 1 one_ne_zero (by decide) (by omega))).trans (one_pow _))⟩ :
+          χ.toMonoidHom.ker) :
           TopologicalAbelianization χ.toMonoidHom.ker) =
       Additive.ofMul ((⟨x 0 ^ 2, MonoidHom.mem_ker.mpr ((map_pow χ.toMonoidHom _ _).trans hx₀)⟩ :
           χ.toMonoidHom.ker) : TopologicalAbelianization χ.toMonoidHom.ker) +
@@ -345,7 +347,8 @@ theorem ofMul_mk_demushkinWordTwoEven_ker (a f : ℕ) {n : ℕ} (hn : 3 < n) {x 
     letI := (hG.topologicalAbelianization χ.toMonoidHom.ker).completedGroupAlgebraModule
       (G ⧸ χ.toMonoidHom.ker)
     Additive.ofMul ((⟨_, demushkinWordTwoEven_mem_ker χ.toMonoidHom a f n
-        (hx 0 zero_ne_one (by decide) (by omega)) (hx 2 (by decide) (by decide) (by omega))⟩ :
+        ((congrArg (· ^ (2 + a)) (hx 0 zero_ne_one (by decide) (by omega))).trans (one_pow _))
+        ((congrArg (· ^ 2 ^ f) (hx 2 (by decide) (by decide) (by omega))).trans (one_pow _))⟩ :
           χ.toMonoidHom.ker) :
           TopologicalAbelianization χ.toMonoidHom.ker) =
       (1 + (a : completedGroupAlgebra ℤ_[p] (G ⧸ χ.toMonoidHom.ker)) +
@@ -375,8 +378,10 @@ theorem ofMul_mk_demushkinWordTwoEven_ker_of_le_three (a f : ℕ) {n : ℕ} (hn 
     haveI := χ.isClosed_ker
     letI := (hG.topologicalAbelianization χ.toMonoidHom.ker).completedGroupAlgebraModule
       (G ⧸ χ.toMonoidHom.ker)
-    Additive.ofMul ((⟨_, demushkinWordTwoEven_mem_ker χ.toMonoidHom a f n h0 h2⟩ :
-        χ.toMonoidHom.ker) : TopologicalAbelianization χ.toMonoidHom.ker) =
+    Additive.ofMul ((⟨_, demushkinWordTwoEven_mem_ker χ.toMonoidHom a f n
+        ((congrArg (· ^ (2 + a)) h0).trans (one_pow _))
+        ((congrArg (· ^ 2 ^ f) h2).trans (one_pow _))⟩ : χ.toMonoidHom.ker) :
+          TopologicalAbelianization χ.toMonoidHom.ker) =
       (1 + (a : completedGroupAlgebra ℤ_[p] (G ⧸ χ.toMonoidHom.ker)) +
             completedGroupAlgebra.of ℤ_[p] (G ⧸ χ.toMonoidHom.ker)
               (x 1 : G ⧸ χ.toMonoidHom.ker)⁻¹) •

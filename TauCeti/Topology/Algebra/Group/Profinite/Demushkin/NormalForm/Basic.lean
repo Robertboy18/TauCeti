@@ -345,30 +345,30 @@ theorem map_demushkinWordTwoRankTwo_eq_one (a : ℕ) {x : ℕ → G} (h₀ : χ 
   rw [map_demushkinWordTwoRankTwo, demushkinWordTwoRankTwo_eq_of_commGroup, Function.comp_apply,
     h₀]
 
-/-- The `q ≠ 2` word lies in the kernel of a character into a commutative group that is trivial
-on `x₁`. -/
-theorem demushkinWordNeTwo_mem_ker (q n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) = 1) :
+/-- The `q ≠ 2` word lies in the kernel of a character into a commutative group whose value on
+`x₁` has trivial `q`-th power. -/
+theorem demushkinWordNeTwo_mem_ker (q n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ q = 1) :
     demushkinWordNeTwo q n x ∈ MonoidHom.ker (χ : G →* A) :=
-  MonoidHom.mem_ker.mpr (map_demushkinWordNeTwo_eq_one χ q n (by rw [h₀, one_pow]))
+  MonoidHom.mem_ker.mpr (map_demushkinWordNeTwo_eq_one χ q n h₀)
 
 /-- The `q = 2`, `n` odd word lies in the kernel of a character into a commutative group whose
-value on `x₁` squares to `1` and which is trivial on `x₂`. -/
+value on `x₁` squares to `1` and whose value on `x₂` has trivial `2^f`-th power. -/
 theorem demushkinWordTwoOdd_mem_ker (f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ 2 = 1)
-    (h₁ : χ (x 1) = 1) : demushkinWordTwoOdd f n x ∈ MonoidHom.ker (χ : G →* A) :=
-  MonoidHom.mem_ker.mpr (map_demushkinWordTwoOdd_eq_one χ f n h₀ (by rw [h₁, one_pow]))
+    (h₁ : χ (x 1) ^ 2 ^ f = 1) : demushkinWordTwoOdd f n x ∈ MonoidHom.ker (χ : G →* A) :=
+  MonoidHom.mem_ker.mpr (map_demushkinWordTwoOdd_eq_one χ f n h₀ h₁)
 
-/-- The `q = 2`, `n` even word lies in the kernel of a character into a commutative group that is
-trivial on `x₁` and `x₃`. -/
-theorem demushkinWordTwoEven_mem_ker (a f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) = 1)
-    (h₂ : χ (x 2) = 1) : demushkinWordTwoEven a f n x ∈ MonoidHom.ker (χ : G →* A) :=
-  MonoidHom.mem_ker.mpr
-    (map_demushkinWordTwoEven_eq_one χ a f n (by rw [h₀, one_pow]) (by rw [h₂, one_pow]))
+/-- The `q = 2`, `n` even word lies in the kernel of a character into a commutative group whose
+value on `x₁` has trivial `(2 + a)`-th power and whose value on `x₃` has trivial `2^f`-th
+power. -/
+theorem demushkinWordTwoEven_mem_ker (a f n : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ (2 + a) = 1)
+    (h₂ : χ (x 2) ^ 2 ^ f = 1) : demushkinWordTwoEven a f n x ∈ MonoidHom.ker (χ : G →* A) :=
+  MonoidHom.mem_ker.mpr (map_demushkinWordTwoEven_eq_one χ a f n h₀ h₂)
 
-/-- The rank-two `q = 2` word lies in the kernel of a character into a commutative group that is
-trivial on `x₁`. -/
-theorem demushkinWordTwoRankTwo_mem_ker (a : ℕ) {x : ℕ → G} (h₀ : χ (x 0) = 1) :
+/-- The rank-two `q = 2` word lies in the kernel of a character into a commutative group whose
+value on `x₁` has trivial `(2 + a)`-th power. -/
+theorem demushkinWordTwoRankTwo_mem_ker (a : ℕ) {x : ℕ → G} (h₀ : χ (x 0) ^ (2 + a) = 1) :
     demushkinWordTwoRankTwo a x ∈ MonoidHom.ker (χ : G →* A) :=
-  MonoidHom.mem_ker.mpr (map_demushkinWordTwoRankTwo_eq_one χ a (by rw [h₀, one_pow]))
+  MonoidHom.mem_ker.mpr (map_demushkinWordTwoRankTwo_eq_one χ a h₀)
 
 end Words
 
