@@ -19,8 +19,8 @@ abelianization, a compact module over the completed group algebra `Λ = ℤ_p[[G
 conjugation action `[g] • [x] = [g x g⁻¹]` (`TauCeti.IsProP.completedGroupAlgebraModule`). This
 file computes the classes in `N^{ab}` of the three Demushkin normal-form relator words of
 `TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Basic`, read on a tuple `x` whose
-entries other than the marked generators lie in `N`, as explicit `Λ`-combinations of the classes
-of the entries lying in `N`.
+entries occurring in the word, other than the marked generators, lie in `N`, as explicit
+`Λ`-combinations of the classes of the entries lying in `N`.
 
 The computation rests on two facts about classes in `N^{ab}`. Labute's commutator
 `(x, g) = x⁻¹ (g⁻¹ x g)` of `x ∈ N` with `g ∈ G` has class `([g]⁻¹ - 1) • [x]`
@@ -33,15 +33,16 @@ pair is `(x_{n-1}, x_n)` when `n` has the parity of the normal form in question)
 the classes
 
 * `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{2m-1}, x_{2m}) ↦ (q - 1 + [x₂]⁻¹) • [x₁]`, for `x_i ∈ N` when
-  `i ≠ 2`;
+  `i ≤ 2m`, `i ≠ 2`;
 * `x₁² x₂^{2^f} (x₂, x₃)(x₄, x₅) ⋯ (x_{2m}, x_{2m+1}) ↦ [x₁²] + (2^f - 1 + [x₃]⁻¹) • [x₂]`, for
-  `x₁² ∈ N` and `x_i ∈ N` when `i ≠ 1, 3`;
+  `x₁² ∈ N` and `x_i ∈ N` when `i ≤ 2m + 1`, `i ≠ 1, 3`;
 * `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{2m-1}, x_{2m}) ↦ (1 + a + [x₂]⁻¹) • [x₁] +
-  (2^f - 1 + [x₄]⁻¹) • [x₃]`, for `x_i ∈ N` when `i ≠ 2, 4` and `n ≥ 4`; for `n ≤ 3` the
-  second coefficient is `2^f`.
+  (2^f - 1 + [x₄]⁻¹) • [x₃]`, for `x_i ∈ N` when `i ≤ 2m`, `i ≠ 2, 4`, and `n ≥ 4`; for `n ≤ 3`
+  the word is `x₁^{2+a} (x₁, x₂) x₃^{2^f}`, and the second coefficient is `2^f`.
 
-The membership of the words themselves in `N` is `TauCeti.demushkinWordNeTwo_mem` and its
-companions.
+The entries of `x` beyond those occurring in a word do not enter its hypotheses. The membership
+of the words themselves in `N` is `TauCeti.demushkinWordNeTwo_mem` and its companions, which ask
+only for the power factors and the left entries of the commutators.
 
 The case of interest is `N = X = ker χ` for a continuous character `χ : G → ℤ_pˣ`, with the
 membership hypotheses read as `χ (x_i) = 1`; the second half of the file states the three
@@ -71,12 +72,13 @@ numbers, as in the definitions of the words.
 * `TauCeti.IsProP.ofMul_mk_demushkinWordNeTwo`, `TauCeti.IsProP.ofMul_mk_demushkinWordTwoOdd`,
   `TauCeti.IsProP.ofMul_mk_demushkinWordTwoEven`,
   `TauCeti.IsProP.ofMul_mk_demushkinWordTwoEven_of_le_three`: the relator classes of the three
-  normal-form words in `N^{ab}`, for a tuple whose unmarked entries lie in `N`.
+  normal-form words in `N^{ab}`, for a tuple whose unmarked entries occurring in the word lie in
+  `N`.
 * `TauCeti.IsProP.ofMul_mk_demushkinWordNeTwo_ker`,
   `TauCeti.IsProP.ofMul_mk_demushkinWordTwoOdd_ker`,
   `TauCeti.IsProP.ofMul_mk_demushkinWordTwoEven_ker`,
   `TauCeti.IsProP.ofMul_mk_demushkinWordTwoEven_ker_of_le_three`: the same in the abelianized
-  kernel of a continuous character trivial on the unmarked generators.
+  kernel of a continuous character trivial on the unmarked generators occurring in the word.
 
 ## References
 
@@ -138,25 +140,29 @@ theorem ofMul_mk_pow_mul_labuteComm {x : G} (hx : x ∈ N) (g : G) (k : ℕ) :
     hG.ofMul_mk_labuteComm hx g, ← Nat.cast_smul_eq_nsmul (completedGroupAlgebra ℤ_[p] (G ⧸ N)),
     ← add_smul, ← add_sub_assoc, add_sub_right_comm]
 
-/-- **The relator class of the `q ≠ 2` normal form.** For a tuple `x` all of whose entries other
-than `x₂ = x 1` lie in `N`, the class of `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{2m-1}, x_{2m})`,
-`m = n / 2`, in `N^{ab}` is `(q - 1 + [x₂]⁻¹) • [x₁]` over `ℤ_p[[G ⧸ N]]`. -/
+/-- **The relator class of the `q ≠ 2` normal form.** For a tuple `x` whose entries
+`x₁, …, x_{2m}` other than `x₂ = x 1` lie in `N`, `m = n / 2`, the class of
+`x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{2m-1}, x_{2m})` in `N^{ab}` is `(q - 1 + [x₂]⁻¹) • [x₁]` over
+`ℤ_p[[G ⧸ N]]`. -/
 theorem ofMul_mk_demushkinWordNeTwo (q : ℕ) {n : ℕ} (hn : 1 < n) {x : ℕ → G}
-    (hx : ∀ i, i ≠ 1 → x i ∈ N) :
+    (hx : ∀ i, i ≠ 1 → i < 2 * (n / 2) → x i ∈ N) :
     letI := (hG.topologicalAbelianization N).completedGroupAlgebraModule (G ⧸ N)
-    Additive.ofMul ((⟨_, demushkinWordNeTwo_mem q n hx⟩ : N) : TopologicalAbelianization N) =
+    Additive.ofMul ((⟨_, demushkinWordNeTwo_mem q n (pow_mem (hx 0 zero_ne_one (by omega)) q)
+        fun i hi ↦ hx _ (by omega) (by omega)⟩ : N) : TopologicalAbelianization N) =
       ((q : completedGroupAlgebra ℤ_[p] (G ⧸ N)) - 1 +
           completedGroupAlgebra.of ℤ_[p] (G ⧸ N) (x 1 : G ⧸ N)⁻¹) •
-        Additive.ofMul ((⟨x 0, hx 0 zero_ne_one⟩ : N) : TopologicalAbelianization N) := by
+        Additive.ofMul ((⟨x 0, hx 0 zero_ne_one (by omega)⟩ : N) :
+          TopologicalAbelianization N) := by
   let _ := (hG.topologicalAbelianization N).completedGroupAlgebraModule (G ⧸ N)
   obtain ⟨m, hm⟩ : ∃ m, n / 2 = m + 1 := ⟨n / 2 - 1, by omega⟩
-  have h0 : x 0 ∈ N := hx 0 zero_ne_one
+  have h0 : x 0 ∈ N := hx 0 zero_ne_one (by omega)
   -- The commutators after `(x₁, x₂)` pair elements of `N`, so their product lies in `⁅N, N⁆`.
   have ht : ((List.range m).map fun i ↦ labuteComm (x (2 * (i + 1))) (x (2 * (i + 1) + 1))).prod ∈
       ⁅N, N⁆ :=
-    list_prod_map_labuteComm_range_mem_commutator m (fun i _ ↦ hx _ (by omega))
-      (fun i _ ↦ hx _ (by omega))
-  have h : (⟨_, demushkinWordNeTwo_mem q n hx⟩ : N) = ⟨x 0 ^ q * labuteComm (x 0) (x 1),
+    list_prod_map_labuteComm_range_mem_commutator m (fun i hi ↦ hx _ (by omega) (by omega))
+      (fun i hi ↦ hx _ (by omega) (by omega))
+  have h : (⟨_, demushkinWordNeTwo_mem q n (pow_mem h0 q) fun i hi ↦ hx _ (by omega) (by omega)⟩ :
+      N) = ⟨x 0 ^ q * labuteComm (x 0) (x 1),
       mul_mem (pow_mem h0 q) (labuteComm_mem_of_mem_left h0 _)⟩ *
         ⟨_, Subgroup.commutator_le_left N N ht⟩ := by
     ext
@@ -165,28 +171,31 @@ theorem ofMul_mk_demushkinWordNeTwo (q : ℕ) {n : ℕ} (hn : 1 < n) {x : ℕ �
     TopologicalAbelianization.ofMul_mk_eq_zero_of_mem_commutator _ ht, add_zero]
 
 /-- **The relator class of the `q = 2`, `n` odd normal form.** For a tuple `x` with `x₁² ∈ N`
-and all entries other than `x₁ = x 0` and `x₃ = x 2` in `N`, the class of
-`x₁² x₂^{2^f} (x₂, x₃)(x₄, x₅) ⋯ (x_{2m}, x_{2m+1})`, `m = n / 2`, in `N^{ab}` is
+whose entries `x₁, …, x_{2m+1}` other than `x₁ = x 0` and `x₃ = x 2` lie in `N`, `m = n / 2`, the
+class of `x₁² x₂^{2^f} (x₂, x₃)(x₄, x₅) ⋯ (x_{2m}, x_{2m+1})` in `N^{ab}` is
 `[x₁²] + (2^f - 1 + [x₃]⁻¹) • [x₂]` over `ℤ_p[[G ⧸ N]]`. -/
 theorem ofMul_mk_demushkinWordTwoOdd (f : ℕ) {n : ℕ} (hn : 1 < n) {x : ℕ → G}
-    (hx₀ : x 0 ^ 2 ∈ N) (hx : ∀ i, i ≠ 0 → i ≠ 2 → x i ∈ N) :
+    (hx₀ : x 0 ^ 2 ∈ N) (hx : ∀ i, i ≠ 0 → i ≠ 2 → i ≤ 2 * (n / 2) → x i ∈ N) :
     letI := (hG.topologicalAbelianization N).completedGroupAlgebraModule (G ⧸ N)
-    Additive.ofMul ((⟨_, demushkinWordTwoOdd_mem f n hx₀ hx⟩ : N) :
-        TopologicalAbelianization N) =
+    Additive.ofMul ((⟨_, demushkinWordTwoOdd_mem f n hx₀
+        (pow_mem (hx 1 one_ne_zero (by decide) (by omega)) _)
+        fun i hi ↦ hx _ (by omega) (by omega) (by omega)⟩ : N) : TopologicalAbelianization N) =
       Additive.ofMul ((⟨x 0 ^ 2, hx₀⟩ : N) : TopologicalAbelianization N) +
         ((2 : completedGroupAlgebra ℤ_[p] (G ⧸ N)) ^ f - 1 +
             completedGroupAlgebra.of ℤ_[p] (G ⧸ N) (x 2 : G ⧸ N)⁻¹) •
-          Additive.ofMul ((⟨x 1, hx 1 one_ne_zero (by decide)⟩ : N) :
+          Additive.ofMul ((⟨x 1, hx 1 one_ne_zero (by decide) (by omega)⟩ : N) :
             TopologicalAbelianization N) := by
   let _ := (hG.topologicalAbelianization N).completedGroupAlgebraModule (G ⧸ N)
   obtain ⟨m, hm⟩ : ∃ m, n / 2 = m + 1 := ⟨n / 2 - 1, by omega⟩
-  have h1 : x 1 ∈ N := hx 1 one_ne_zero (by decide)
+  have h1 : x 1 ∈ N := hx 1 one_ne_zero (by decide) (by omega)
   -- The commutators after `(x₂, x₃)` pair elements of `N`, so their product lies in `⁅N, N⁆`.
   have ht : ((List.range m).map fun i ↦
       labuteComm (x (2 * (i + 1) + 1)) (x (2 * (i + 1) + 2))).prod ∈ ⁅N, N⁆ :=
-    list_prod_map_labuteComm_range_mem_commutator m (fun i _ ↦ hx _ (by omega) (by omega))
-      (fun i _ ↦ hx _ (by omega) (by omega))
-  have h : (⟨_, demushkinWordTwoOdd_mem f n hx₀ hx⟩ : N) =
+    list_prod_map_labuteComm_range_mem_commutator m
+      (fun i hi ↦ hx _ (by omega) (by omega) (by omega))
+      (fun i hi ↦ hx _ (by omega) (by omega) (by omega))
+  have h : (⟨_, demushkinWordTwoOdd_mem f n hx₀ (pow_mem h1 _)
+      fun i hi ↦ hx _ (by omega) (by omega) (by omega)⟩ : N) =
       ⟨x 0 ^ 2, hx₀⟩ * (⟨x 1 ^ 2 ^ f * labuteComm (x 1) (x 2),
       mul_mem (pow_mem h1 _) (labuteComm_mem_of_mem_left h1 _)⟩ *
         ⟨_, Subgroup.commutator_le_left N N ht⟩) := by
@@ -198,34 +207,37 @@ theorem ofMul_mk_demushkinWordTwoOdd (f : ℕ) {n : ℕ} (hn : 1 < n) {x : ℕ �
     TopologicalAbelianization.ofMul_mk_eq_zero_of_mem_commutator _ ht, add_zero, Nat.cast_pow,
     Nat.cast_ofNat]
 
-/-- **The relator class of the `q = 2`, `n` even normal form**, for `n ≥ 4`. For a tuple `x` all
-of whose entries other than `x₂ = x 1` and `x₄ = x 3` lie in `N`, the class of
-`x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{2m-1}, x_{2m})`, `m = n / 2`, in `N^{ab}` is
+/-- **The relator class of the `q = 2`, `n` even normal form**, for `n ≥ 4`. For a tuple `x`
+whose entries `x₁, …, x_{2m}` other than `x₂ = x 1` and `x₄ = x 3` lie in `N`, `m = n / 2`, the
+class of `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{2m-1}, x_{2m})` in `N^{ab}` is
 `(1 + a + [x₂]⁻¹) • [x₁] + (2^f - 1 + [x₄]⁻¹) • [x₃]` over `ℤ_p[[G ⧸ N]]`. This is the expression
 Labute computes on p. 122, up to the inversion of the acting group. -/
 theorem ofMul_mk_demushkinWordTwoEven (a f : ℕ) {n : ℕ} (hn : 3 < n) {x : ℕ → G}
-    (hx : ∀ i, i ≠ 1 → i ≠ 3 → x i ∈ N) :
+    (hx : ∀ i, i ≠ 1 → i ≠ 3 → i < 2 * (n / 2) → x i ∈ N) :
     letI := (hG.topologicalAbelianization N).completedGroupAlgebraModule (G ⧸ N)
-    Additive.ofMul ((⟨_, demushkinWordTwoEven_mem a f n hx⟩ : N) :
-        TopologicalAbelianization N) =
+    Additive.ofMul ((⟨_, demushkinWordTwoEven_mem a f n (hx 0 zero_ne_one (by decide) (by omega))
+        (pow_mem (hx 2 (by decide) (by decide) (by omega)) _)
+        fun i hi ↦ hx _ (by omega) (by omega) (by omega)⟩ : N) : TopologicalAbelianization N) =
       (1 + (a : completedGroupAlgebra ℤ_[p] (G ⧸ N)) +
             completedGroupAlgebra.of ℤ_[p] (G ⧸ N) (x 1 : G ⧸ N)⁻¹) •
-          Additive.ofMul ((⟨x 0, hx 0 zero_ne_one (by decide)⟩ : N) :
+          Additive.ofMul ((⟨x 0, hx 0 zero_ne_one (by decide) (by omega)⟩ : N) :
             TopologicalAbelianization N) +
         ((2 : completedGroupAlgebra ℤ_[p] (G ⧸ N)) ^ f - 1 +
             completedGroupAlgebra.of ℤ_[p] (G ⧸ N) (x 3 : G ⧸ N)⁻¹) •
-          Additive.ofMul ((⟨x 2, hx 2 (by decide) (by decide)⟩ : N) :
+          Additive.ofMul ((⟨x 2, hx 2 (by decide) (by decide) (by omega)⟩ : N) :
             TopologicalAbelianization N) := by
   let _ := (hG.topologicalAbelianization N).completedGroupAlgebraModule (G ⧸ N)
   obtain ⟨m, hm⟩ : ∃ m, n / 2 - 1 = m + 1 := ⟨n / 2 - 2, by omega⟩
-  have h0 : x 0 ∈ N := hx 0 zero_ne_one (by decide)
-  have h2 : x 2 ∈ N := hx 2 (by decide) (by decide)
+  have h0 : x 0 ∈ N := hx 0 zero_ne_one (by decide) (by omega)
+  have h2 : x 2 ∈ N := hx 2 (by decide) (by decide) (by omega)
   -- The commutators after `(x₃, x₄)` pair elements of `N`, so their product lies in `⁅N, N⁆`.
   have ht : ((List.range m).map fun i ↦
       labuteComm (x (2 * (i + 1) + 2)) (x (2 * (i + 1) + 3))).prod ∈ ⁅N, N⁆ :=
-    list_prod_map_labuteComm_range_mem_commutator m (fun i _ ↦ hx _ (by omega) (by omega))
-      (fun i _ ↦ hx _ (by omega) (by omega))
-  have h : (⟨_, demushkinWordTwoEven_mem a f n hx⟩ : N) =
+    list_prod_map_labuteComm_range_mem_commutator m
+      (fun i hi ↦ hx _ (by omega) (by omega) (by omega))
+      (fun i hi ↦ hx _ (by omega) (by omega) (by omega))
+  have h : (⟨_, demushkinWordTwoEven_mem a f n h0 (pow_mem h2 _)
+      fun i hi ↦ hx _ (by omega) (by omega) (by omega)⟩ : N) =
       ⟨x 0 ^ (2 + a) * labuteComm (x 0) (x 1),
         mul_mem (pow_mem h0 _) (labuteComm_mem_of_mem_left h0 _)⟩ *
         (⟨x 2 ^ 2 ^ f * labuteComm (x 2) (x 3),
@@ -247,8 +259,8 @@ theorem ofMul_mk_demushkinWordTwoEven (a f : ℕ) {n : ℕ} (hn : 3 < n) {x : �
 theorem ofMul_mk_demushkinWordTwoEven_of_le_three (a f : ℕ) {n : ℕ} (hn : n ≤ 3) {x : ℕ → G}
     (h0 : x 0 ∈ N) (h2 : x 2 ∈ N) :
     letI := (hG.topologicalAbelianization N).completedGroupAlgebraModule (G ⧸ N)
-    Additive.ofMul ((⟨_, demushkinWordTwoEven_mem_of_le_three a f hn h0 h2⟩ : N) :
-        TopologicalAbelianization N) =
+    Additive.ofMul ((⟨_, demushkinWordTwoEven_mem a f n h0 (pow_mem h2 _)
+        fun i hi ↦ absurd hi (by omega)⟩ : N) : TopologicalAbelianization N) =
       (1 + (a : completedGroupAlgebra ℤ_[p] (G ⧸ N)) +
             completedGroupAlgebra.of ℤ_[p] (G ⧸ N) (x 1 : G ⧸ N)⁻¹) •
           Additive.ofMul ((⟨x 0, h0⟩ : N) : TopologicalAbelianization N) +
@@ -256,7 +268,8 @@ theorem ofMul_mk_demushkinWordTwoEven_of_le_three (a f : ℕ) {n : ℕ} (hn : n 
           Additive.ofMul ((⟨x 2, h2⟩ : N) : TopologicalAbelianization N) := by
   let _ := (hG.topologicalAbelianization N).completedGroupAlgebraModule (G ⧸ N)
   have hm : n / 2 - 1 = 0 := by omega
-  have h : (⟨_, demushkinWordTwoEven_mem_of_le_three a f hn h0 h2⟩ : N) =
+  have h : (⟨_, demushkinWordTwoEven_mem a f n h0 (pow_mem h2 _)
+      fun i hi ↦ absurd hi (by omega)⟩ : N) =
       ⟨x 0 ^ (2 + a) * labuteComm (x 0) (x 1),
         mul_mem (pow_mem h0 _) (labuteComm_mem_of_mem_left h0 _)⟩ * (⟨x 2, h2⟩ : N) ^ 2 ^ f := by
     ext
@@ -274,76 +287,81 @@ variable {A : Type*} [CommGroup A] [TopologicalSpace A] [T1Space A] (χ : G →�
 
 /-- **The relator class of the `q ≠ 2` normal form in the abelianized kernel of a character.**
 For a continuous character `χ` of a pro-`p` group `G` to a commutative `T1` group and a tuple `x`
-with `χ (x i) = 1` for `i ≠ 1`, the class of `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{2m-1}, x_{2m})`,
-`m = n / 2`, in `X^{ab}`, `X = ker χ`, is `(q - 1 + [x₂]⁻¹) • [x₁]` over `ℤ_p[[G ⧸ X]]`. For `G`
-free pro-`p` on `x₁, …, x_n` and `χ` the standard orientation, `X^{ab}` is Labute's module `E`. -/
+with `χ (x i) = 1` for `i ≠ 1`, `i < 2 * (n / 2)`, the class of
+`x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{2m-1}, x_{2m})`, `m = n / 2`, in `X^{ab}`, `X = ker χ`, is
+`(q - 1 + [x₂]⁻¹) • [x₁]` over `ℤ_p[[G ⧸ X]]`. For `G` free pro-`p` on `x₁, …, x_n` and `χ` the
+standard orientation, `X^{ab}` is Labute's module `E`. -/
 theorem ofMul_mk_demushkinWordNeTwo_ker (q : ℕ) {n : ℕ} (hn : 1 < n) {x : ℕ → G}
-    (hx : ∀ i, i ≠ 1 → χ (x i) = 1) :
+    (hx : ∀ i, i ≠ 1 → i < 2 * (n / 2) → χ (x i) = 1) :
     haveI := χ.isClosed_ker
     letI := (hG.topologicalAbelianization χ.toMonoidHom.ker).completedGroupAlgebraModule
       (G ⧸ χ.toMonoidHom.ker)
-    Additive.ofMul ((⟨_, demushkinWordNeTwo_mem_ker χ.toMonoidHom q n (hx 0 zero_ne_one)⟩ :
-        χ.toMonoidHom.ker) : TopologicalAbelianization χ.toMonoidHom.ker) =
+    Additive.ofMul ((⟨_, demushkinWordNeTwo_mem_ker χ.toMonoidHom q n
+        (hx 0 zero_ne_one (by omega))⟩ : χ.toMonoidHom.ker) :
+          TopologicalAbelianization χ.toMonoidHom.ker) =
       ((q : completedGroupAlgebra ℤ_[p] (G ⧸ χ.toMonoidHom.ker)) - 1 +
           completedGroupAlgebra.of ℤ_[p] (G ⧸ χ.toMonoidHom.ker)
             (x 1 : G ⧸ χ.toMonoidHom.ker)⁻¹) •
-        Additive.ofMul ((⟨x 0, MonoidHom.mem_ker.mpr (hx 0 zero_ne_one)⟩ : χ.toMonoidHom.ker) :
-          TopologicalAbelianization χ.toMonoidHom.ker) :=
+        Additive.ofMul ((⟨x 0, MonoidHom.mem_ker.mpr (hx 0 zero_ne_one (by omega))⟩ :
+          χ.toMonoidHom.ker) : TopologicalAbelianization χ.toMonoidHom.ker) :=
   haveI := χ.isClosed_ker
-  hG.ofMul_mk_demushkinWordNeTwo q hn fun i hi ↦ MonoidHom.mem_ker.mpr (hx i hi)
+  hG.ofMul_mk_demushkinWordNeTwo q hn fun i hi hi' ↦ MonoidHom.mem_ker.mpr (hx i hi hi')
 
 /-- **The relator class of the `q = 2`, `n` odd normal form in the abelianized kernel of a
 character.** For a continuous character `χ` of a pro-`p` group `G` to a commutative `T1` group and
-a tuple `x` with `χ (x 0) ^ 2 = 1` and `χ (x i) = 1` for `i ≠ 0, 2`, the class of
-`x₁² x₂^{2^f} (x₂, x₃)(x₄, x₅) ⋯ (x_{2m}, x_{2m+1})`, `m = n / 2`, in `X^{ab}`, `X = ker χ`,
-is
-`[x₁²] + (2^f - 1 + [x₃]⁻¹) • [x₂]` over `ℤ_p[[G ⧸ X]]`. -/
+a tuple `x` with `χ (x 0) ^ 2 = 1` and `χ (x i) = 1` for `i ≠ 0, 2`, `i ≤ 2 * (n / 2)`, the
+class of `x₁² x₂^{2^f} (x₂, x₃)(x₄, x₅) ⋯ (x_{2m}, x_{2m+1})`, `m = n / 2`, in `X^{ab}`,
+`X = ker χ`, is `[x₁²] + (2^f - 1 + [x₃]⁻¹) • [x₂]` over `ℤ_p[[G ⧸ X]]`. -/
 theorem ofMul_mk_demushkinWordTwoOdd_ker (f : ℕ) {n : ℕ} (hn : 1 < n) {x : ℕ → G}
-    (hx₀ : χ (x 0) ^ 2 = 1) (hx : ∀ i, i ≠ 0 → i ≠ 2 → χ (x i) = 1) :
+    (hx₀ : χ (x 0) ^ 2 = 1) (hx : ∀ i, i ≠ 0 → i ≠ 2 → i ≤ 2 * (n / 2) → χ (x i) = 1) :
     haveI := χ.isClosed_ker
     letI := (hG.topologicalAbelianization χ.toMonoidHom.ker).completedGroupAlgebraModule
       (G ⧸ χ.toMonoidHom.ker)
     Additive.ofMul ((⟨_, demushkinWordTwoOdd_mem_ker χ.toMonoidHom f n hx₀
-        (hx 1 one_ne_zero (by decide))⟩ : χ.toMonoidHom.ker) :
+        (hx 1 one_ne_zero (by decide) (by omega))⟩ : χ.toMonoidHom.ker) :
           TopologicalAbelianization χ.toMonoidHom.ker) =
       Additive.ofMul ((⟨x 0 ^ 2, MonoidHom.mem_ker.mpr ((map_pow χ.toMonoidHom _ _).trans hx₀)⟩ :
           χ.toMonoidHom.ker) : TopologicalAbelianization χ.toMonoidHom.ker) +
         ((2 : completedGroupAlgebra ℤ_[p] (G ⧸ χ.toMonoidHom.ker)) ^ f - 1 +
             completedGroupAlgebra.of ℤ_[p] (G ⧸ χ.toMonoidHom.ker)
               (x 2 : G ⧸ χ.toMonoidHom.ker)⁻¹) •
-          Additive.ofMul ((⟨x 1, MonoidHom.mem_ker.mpr (hx 1 one_ne_zero (by decide))⟩ :
+          Additive.ofMul ((⟨x 1, MonoidHom.mem_ker.mpr (hx 1 one_ne_zero (by decide) (by omega))⟩ :
             χ.toMonoidHom.ker) : TopologicalAbelianization χ.toMonoidHom.ker) :=
   haveI := χ.isClosed_ker
-  hG.ofMul_mk_demushkinWordTwoOdd f hn _ fun i hi₀ hi₂ ↦ MonoidHom.mem_ker.mpr (hx i hi₀ hi₂)
+  hG.ofMul_mk_demushkinWordTwoOdd f hn _ fun i hi₀ hi₂ hi ↦
+    MonoidHom.mem_ker.mpr (hx i hi₀ hi₂ hi)
 
 /-- **The relator class of the `q = 2`, `n` even normal form in the abelianized kernel of a
 character**, for `n ≥ 4`. For a continuous character `χ` of a pro-`p` group `G` to a commutative
-`T1` group and a tuple `x` with `χ (x i) = 1` for `i ≠ 1, 3`, the class of
+`T1` group and a tuple `x` with `χ (x i) = 1` for `i ≠ 1, 3`, `i < 2 * (n / 2)`, the class of
 `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{2m-1}, x_{2m})`, `m = n / 2`, in `X^{ab}`,
 `X = ker χ`, is
 `(1 + a + [x₂]⁻¹) • [x₁] + (2^f - 1 + [x₄]⁻¹) • [x₃]` over `ℤ_p[[G ⧸ X]]`. For `G` free pro-`2` on
 `x₁, …, x_n` and `χ` the standard orientation, this is the expression of Labute, p. 122, up to
 the inversion of the acting group. -/
 theorem ofMul_mk_demushkinWordTwoEven_ker (a f : ℕ) {n : ℕ} (hn : 3 < n) {x : ℕ → G}
-    (hx : ∀ i, i ≠ 1 → i ≠ 3 → χ (x i) = 1) :
+    (hx : ∀ i, i ≠ 1 → i ≠ 3 → i < 2 * (n / 2) → χ (x i) = 1) :
     haveI := χ.isClosed_ker
     letI := (hG.topologicalAbelianization χ.toMonoidHom.ker).completedGroupAlgebraModule
       (G ⧸ χ.toMonoidHom.ker)
     Additive.ofMul ((⟨_, demushkinWordTwoEven_mem_ker χ.toMonoidHom a f n
-        (hx 0 zero_ne_one (by decide)) (hx 2 (by decide) (by decide))⟩ : χ.toMonoidHom.ker) :
+        (hx 0 zero_ne_one (by decide) (by omega)) (hx 2 (by decide) (by decide) (by omega))⟩ :
+          χ.toMonoidHom.ker) :
           TopologicalAbelianization χ.toMonoidHom.ker) =
       (1 + (a : completedGroupAlgebra ℤ_[p] (G ⧸ χ.toMonoidHom.ker)) +
             completedGroupAlgebra.of ℤ_[p] (G ⧸ χ.toMonoidHom.ker)
               (x 1 : G ⧸ χ.toMonoidHom.ker)⁻¹) •
-          Additive.ofMul ((⟨x 0, MonoidHom.mem_ker.mpr (hx 0 zero_ne_one (by decide))⟩ :
+          Additive.ofMul ((⟨x 0, MonoidHom.mem_ker.mpr (hx 0 zero_ne_one (by decide) (by omega))⟩ :
             χ.toMonoidHom.ker) : TopologicalAbelianization χ.toMonoidHom.ker) +
         ((2 : completedGroupAlgebra ℤ_[p] (G ⧸ χ.toMonoidHom.ker)) ^ f - 1 +
             completedGroupAlgebra.of ℤ_[p] (G ⧸ χ.toMonoidHom.ker)
               (x 3 : G ⧸ χ.toMonoidHom.ker)⁻¹) •
-          Additive.ofMul ((⟨x 2, MonoidHom.mem_ker.mpr (hx 2 (by decide) (by decide))⟩ :
-            χ.toMonoidHom.ker) : TopologicalAbelianization χ.toMonoidHom.ker) :=
+          Additive.ofMul ((⟨x 2, MonoidHom.mem_ker.mpr
+            (hx 2 (by decide) (by decide) (by omega))⟩ : χ.toMonoidHom.ker) :
+              TopologicalAbelianization χ.toMonoidHom.ker) :=
   haveI := χ.isClosed_ker
-  hG.ofMul_mk_demushkinWordTwoEven a f hn fun i hi₁ hi₃ ↦ MonoidHom.mem_ker.mpr (hx i hi₁ hi₃)
+  hG.ofMul_mk_demushkinWordTwoEven a f hn fun i hi₁ hi₃ hi ↦
+    MonoidHom.mem_ker.mpr (hx i hi₁ hi₃ hi)
 
 /-- **The relator class of the `q = 2`, `n` even normal form in the abelianized kernel of a
 character**, for `n ≤ 3`, where the word is `x₁^{2+a} (x₁, x₂) x₃^{2^f}`. For a continuous
