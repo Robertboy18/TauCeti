@@ -74,8 +74,7 @@ is `q e₁`. -/
 theorem toAdd_exponentSum_demushkinWordNeTwo (q : ℕ) :
     (exponentSum p (Fin n) (demushkinWordNeTwo q n (freeProPGen p n))).toAdd =
       (q : ℤ_[p]) • (exponentSum p (Fin n) (freeProPGen p n 0)).toAdd := by
-  rw [map_demushkinWordNeTwo, demushkinWordNeTwo_eq_of_commGroup, Function.comp_apply, toAdd_pow,
-    Nat.cast_smul_eq_nsmul]
+  simp [← Nat.cast_smul_eq_nsmul ℤ_[p]]
 
 /-- The exponent vector of the `q = 2`, `n` odd word `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)` on
 the free generators is `2 e₁ + 2^f e₂`. -/
@@ -83,9 +82,7 @@ theorem toAdd_exponentSum_demushkinWordTwoOdd (f : ℕ) :
     (exponentSum p (Fin n) (demushkinWordTwoOdd f n (freeProPGen p n))).toAdd =
       (2 : ℤ_[p]) • (exponentSum p (Fin n) (freeProPGen p n 0)).toAdd +
         (2 : ℤ_[p]) ^ f • (exponentSum p (Fin n) (freeProPGen p n 1)).toAdd := by
-  rw [map_demushkinWordTwoOdd, demushkinWordTwoOdd_eq_of_commGroup, Function.comp_apply,
-    Function.comp_apply, toAdd_mul, toAdd_pow, toAdd_pow, ← Nat.cast_smul_eq_nsmul ℤ_[p],
-    ← Nat.cast_smul_eq_nsmul ℤ_[p] (2 ^ f), Nat.cast_pow, Nat.cast_ofNat]
+  simp [← Nat.cast_smul_eq_nsmul ℤ_[p]]
 
 /-- The exponent vector of the `q = 2`, `n` even word
 `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` on the free generators is
@@ -94,32 +91,13 @@ theorem toAdd_exponentSum_demushkinWordTwoEven (a f : ℕ) :
     (exponentSum p (Fin n) (demushkinWordTwoEven a f n (freeProPGen p n))).toAdd =
       (2 + (a : ℤ_[p])) • (exponentSum p (Fin n) (freeProPGen p n 0)).toAdd +
         (2 : ℤ_[p]) ^ f • (exponentSum p (Fin n) (freeProPGen p n 2)).toAdd := by
-  rw [map_demushkinWordTwoEven, demushkinWordTwoEven_eq_of_commGroup, Function.comp_apply,
-    Function.comp_apply, toAdd_mul, toAdd_pow, toAdd_pow, ← Nat.cast_smul_eq_nsmul ℤ_[p],
-    ← Nat.cast_smul_eq_nsmul ℤ_[p] (2 ^ f), Nat.cast_pow, Nat.cast_add, Nat.cast_ofNat]
+  simp [← Nat.cast_smul_eq_nsmul ℤ_[p]]
 
 end freeProP
 
 /-! ### The `q`-invariant of the normal forms -/
 
 open freeProP
-
-/-- A presentation on `Fin n` of a Demushkin group has at least one generator: the rank of the
-group is positive and at most `n`. -/
-private theorem pos_of_isDemushkin_presentedProP {rels : Set (freeProP p (Fin n))}
-    (hG : IsDemushkin p (presentedProP p (Fin n) rels)) : 0 < n := by
-  have h := hG.demushkinRank_pos
-  rw [demushkinRank_def] at h
-  refine h.trans_le ((topologicalGeneratorRankNat_le_of_surjective
-    (presentedProP.mk p rels : freeProP p (Fin n) →* _) (map_continuous (presentedProP.mk p rels))
-    (presentedProP.mk_surjective p rels) (isTopologicallyFinitelyGenerated_freeProP p _)).trans_eq
-    ?_)
-  rw [topologicalGeneratorRankNat_freeProP, Nat.card_fin]
-
-/-- The exponent vector `e₁` of the first generator has coordinate `1` at `x₁`. -/
-private theorem exponentSum_freeProPGen_zero_apply (hn : 0 < n) :
-    (exponentSum p (Fin n) (freeProPGen p n 0)).toAdd ⟨0, hn⟩ = 1 := by
-  rw [toAdd_exponentSum_freeProPGen_apply, ite_eq_left rfl]
 
 section NeTwo
 
@@ -130,22 +108,23 @@ if `⟨x₁, …, xₙ ∣ x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)⟩` is a Demus
 if and only if `q = 0`. -/
 theorem demushkinQ_presentedProP_demushkinWordNeTwo_eq_zero_iff (hq : p ∣ q)
     (hG : IsDemushkin p (presentedProP p (Fin n) {demushkinWordNeTwo q n (freeProPGen p n)})) :
-    demushkinQ hG = 0 ↔ q = 0 :=
-  (demushkinQ_presentedProP_eq_zero_iff
-    (exponentSum_freeProPGen_zero_apply (pos_of_isDemushkin_presentedProP hG))
-    (toAdd_exponentSum_demushkinWordNeTwo p q) hG (map_dvd (Nat.castRingHom ℤ_[p]) hq)).trans
-    Nat.cast_eq_zero
+    demushkinQ hG = 0 ↔ q = 0 := by
+  have hn : 0 < n := by simpa using hG.card_pos_presentedProP
+  have hw : (exponentSum p (Fin n) (freeProPGen p n 0)).toAdd ⟨0, hn⟩ = 1 := by simp
+  rw [demushkinQ_presentedProP_eq_zero_iff hw (toAdd_exponentSum_demushkinWordNeTwo p q) hG
+    (map_dvd (Nat.castRingHom ℤ_[p]) hq), Nat.cast_eq_zero]
 
 /-- **The `q`-invariant of the `q ≠ 2` normal form is `p^{v_p(q)}`**: for `p ∣ q` and `q ≠ 0`, if
 `⟨x₁, …, xₙ ∣ x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)⟩` is a Demushkin group, its `q`-invariant is
 `p ^ padicValNat p q`. -/
+@[simp]
 theorem demushkinQ_presentedProP_demushkinWordNeTwo (hq : p ∣ q) (hq0 : q ≠ 0)
     (hG : IsDemushkin p (presentedProP p (Fin n) {demushkinWordNeTwo q n (freeProPGen p n)})) :
     demushkinQ hG = p ^ padicValNat p q := by
-  rw [demushkinQ_presentedProP_eq_pow_valuation
-    (exponentSum_freeProPGen_zero_apply (pos_of_isDemushkin_presentedProP hG))
-    (toAdd_exponentSum_demushkinWordNeTwo p q) hG (map_dvd (Nat.castRingHom ℤ_[p]) hq)
-    (Nat.cast_ne_zero.2 hq0), PadicInt.valuation_natCast]
+  have hn : 0 < n := by simpa using hG.card_pos_presentedProP
+  have hw : (exponentSum p (Fin n) (freeProPGen p n 0)).toAdd ⟨0, hn⟩ = 1 := by simp
+  rw [demushkinQ_presentedProP_eq_pow_valuation hw (toAdd_exponentSum_demushkinWordNeTwo p q) hG
+    (map_dvd (Nat.castRingHom ℤ_[p]) hq) (Nat.cast_ne_zero.2 hq0), PadicInt.valuation_natCast]
 
 /-- **The `q ≠ 2` normal form with parameter `q = p^f`, `f ≥ 1`, has `q`-invariant `q`**: if
 `⟨x₁, …, xₙ ∣ x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)⟩` is a Demushkin group, its `q`-invariant is `q`. -/
@@ -169,7 +148,7 @@ variable {f : ℕ}
 theorem demushkinQ_presentedProP_demushkinWordTwoOdd (hf : 0 < f)
     (hG : IsDemushkin 2 (presentedProP 2 (Fin n) {demushkinWordTwoOdd f n (freeProPGen 2 n)})) :
     demushkinQ hG = 2 := by
-  have hn : 0 < n := pos_of_isDemushkin_presentedProP hG
+  have hn : 0 < n := by simpa using hG.card_pos_presentedProP
   set e : ℕ → Fin n → ℤ_[2] := fun i ↦ (exponentSum 2 (Fin n) (freeProPGen 2 n i)).toAdd with he
   -- The exponent vector is `2 (e₁ + 2^{f-1} e₂)`, and the second factor is `1` at `x₁`.
   have hw : (e 0 + (2 : ℤ_[2]) ^ (f - 1) • e 1) ⟨0, hn⟩ = 1 := by
@@ -189,7 +168,7 @@ theorem demushkinQ_presentedProP_demushkinWordTwoEven {a : ℕ} (ha : 4 ∣ a) (
     (hG : IsDemushkin 2
       (presentedProP 2 (Fin n) {demushkinWordTwoEven a f n (freeProPGen 2 n)})) :
     demushkinQ hG = 2 := by
-  have hn : 0 < n := pos_of_isDemushkin_presentedProP hG
+  have hn : 0 < n := by simpa using hG.card_pos_presentedProP
   obtain ⟨b, rfl⟩ := ha
   -- `2 + 4b = 2u` for the unit `u = 1 + 2b` of `ℤ₂`.
   obtain ⟨u, hu⟩ : IsUnit (1 + 2 * (b : ℤ_[2])) :=
