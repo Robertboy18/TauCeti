@@ -449,6 +449,24 @@ theorem basisModificationDelta_smul [Fintype X] (hm : 1 ≤ m) (ρ : gradedPiece
       map_smul, AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply]
   · simp only [← gradedBracketLinear_apply, map_sum, map_smul, LinearMap.smul_apply]
 
+/-- **`δ` on a family supported at one generator**: for `v ∈ gr_m(F)`,
+`δ_ρ(single i v) = c_i • π v + [v, ∂_i ρ]`, where `c_i` is the coefficient of `π ξ_i` in `ρ`. -/
+theorem basisModificationDelta_single [DecidableEq X] (hm : 1 ≤ m)
+    (ρ : gradedPiece p (freeProP p X) 1) (i : X) (v : gradedPiece p (freeProP p X) m) :
+    basisModificationDelta p X hm ρ (Pi.single i v) =
+      (degreeOneBasis p X).repr ρ (Sum.inl i) • gradedPow p (freeProP p X) m v +
+        gradedBracket p (freeProP p X) m 0 v (degreeOneDeriv p X i ρ) := by
+  cases nonempty_fintype X
+  rw [basisModificationDelta_eq_gradedPow_add_sum]
+  congr 1
+  · rw [Finset.sum_eq_single i (fun j _ hji ↦ by rw [Pi.single_eq_of_ne hji, smul_zero])
+      (fun h ↦ (h (Finset.mem_univ i)).elim), Pi.single_eq_same, ← gradedPowAddMonoidHom_apply hm,
+      ← AddMonoidHom.coe_toZModLinearMap p, map_smul, AddMonoidHom.coe_toZModLinearMap,
+      gradedPowAddMonoidHom_apply]
+  · rw [Finset.sum_eq_single i (fun j _ hji ↦ by
+      rw [Pi.single_eq_of_ne hji, map_zero, AddMonoidHom.zero_apply])
+      (fun h ↦ (h (Finset.mem_univ i)).elim), Pi.single_eq_same]
+
 /-- **Naturality of `δ` under `π`**: for `m ≥ 1`, `π (δ_ρ(v)) = δ_ρ(π v)`, where `δ_ρ` on the left
 is the map in degree `m` and on the right the map in degree `m + 1`. -/
 theorem gradedPow_basisModificationDelta (hm : 1 ≤ m)
