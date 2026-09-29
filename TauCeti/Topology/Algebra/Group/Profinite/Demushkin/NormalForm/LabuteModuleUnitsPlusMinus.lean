@@ -31,7 +31,7 @@ relator `x₁² (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯`, that is `α = 0`, the
 `m = 0`, and the extra generators are `x₂²` and `(x₂, x₄)`
 (`TauCeti.ker_orientationTwoEven_comp_mk_of_eq_zero`).
 
-Together with the expression `r̄ = (1 + α + [x₂]⁻¹) • [x₁] + (2^f - 1 + [x₄]⁻¹) • [x₃]` of the
+Together with the expression `⟦r⟧ = (1 + α + [x₂]⁻¹) • [x₁] + (2^f - 1 + [x₄]⁻¹) • [x₃]` of the
 relator class in `E` (`TauCeti.IsProP.ofMul_mk_demushkinWordTwoEven_ker`), this is the input to
 Labute's argument on `E` in the branch `Im χ = {±1} × U^(f)`, where `Λ ≅ ℤ_2[C₂] ⊗ ℤ_2[[T]]`.
 
