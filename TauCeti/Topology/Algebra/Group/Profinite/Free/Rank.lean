@@ -78,7 +78,7 @@ continuous dual is the transpose of a continuous automorphism of `freeProP p X`.
 * `TauCeti.freeProP.exists_continuousMulEquiv_continuousZModDualMap_eq`: for finite `X`, every
   linear automorphism of the continuous `𝔽_p`-dual of `freeProP p X` is the transpose of a
   continuous automorphism.
-* `TauCeti.freeProP.exists_continuousMulEquiv_continuousZModDualMap_eq_of_forall_toMul_of_eq`:
+* `exists_continuousMulEquiv_continuousZModDualMap_eq_and_apply_of_eq_of_forall_toMul_of_eq`:
   the continuous automorphism can be chosen to fix every generator at which the linear
   automorphism does not change the values of characters.
 
@@ -324,11 +324,8 @@ theorem exists_continuousMulEquiv_continuousZModDualMap_eq
 /-- **A linear automorphism of the dual is the transpose of an automorphism fixing prescribed
 generators.** If `S` acts trivially on the values at the generators `x_j`, `j ∈ T`, in the sense
 that `(S χ) (x_j) = χ (x_j)` for every character `χ`, then `S` is the transpose of a continuous
-automorphism `e` with `e (x_j) = x_j` for every `j ∈ T`. Some transpose `e₀` of `S` sends each
-such `x_j` to an element congruent to `x_j` modulo the Frattini subgroup, and composing `e₀` with
-the automorphism `x_j ↦ e₀⁻¹ (x_j)` (`j ∈ T`), `x_j ↦ x_j` (`j ∉ T`), which exists by Burnside's
-basis theorem and has trivial transpose, corrects it. -/
-theorem exists_continuousMulEquiv_continuousZModDualMap_eq_of_forall_toMul_of_eq
+automorphism `e` with `e (x_j) = x_j` for every `j ∈ T`. -/
+theorem exists_continuousMulEquiv_continuousZModDualMap_eq_and_apply_of_eq_of_forall_toMul_of_eq
     (S : continuousZModDual p (freeProP p X) ≃ₗ[ZMod p] continuousZModDual p (freeProP p X))
     {T : Set X} (hT : ∀ j ∈ T, ∀ χ : continuousZModDual p (freeProP p X),
       (S χ).toMul (of j) = χ.toMul (of j)) :
@@ -337,6 +334,10 @@ theorem exists_continuousMulEquiv_continuousZModDualMap_eq_of_forall_toMul_of_eq
         (e : freeProP p X →ₜ* freeProP p X).continuousZModDualMap χ = S χ) ∧
       ∀ j ∈ T, e (of j) = of j := by
   classical
+  -- Some transpose `e₀` of `S` sends each `x_j`, `j ∈ T`, to an element congruent to `x_j` modulo
+  -- the Frattini subgroup; composing `e₀` with the automorphism `x_j ↦ e₀⁻¹ (x_j)` (`j ∈ T`),
+  -- `x_j ↦ x_j` (`j ∉ T`), which exists by Burnside's basis theorem and has trivial transpose,
+  -- corrects it.
   obtain ⟨e₀, he₀⟩ := exists_continuousMulEquiv_continuousZModDualMap_eq S
   let y : X → freeProP p X := fun j ↦ if j ∈ T then e₀.symm (of j) else of j
   -- Every character takes the same value at `y_j` as at `x_j`.

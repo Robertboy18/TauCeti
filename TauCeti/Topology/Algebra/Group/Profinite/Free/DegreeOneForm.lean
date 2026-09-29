@@ -720,9 +720,7 @@ theorem degreeOneBasis_repr_gradedPow_gradedMkZero_inl (g : freeProP p X) (k : X
 
 /-- **The `p`-power coordinates through the exponent sums, vanishing form**: the coefficient of
 `π x'_k` in the class of `y ∈ λ_1(F)` vanishes exactly when `p ^ 2` divides the `k`-th exponent sum
-of `y`. The graded map induced on `gr_1(F)` by the `k`-th exponent sum modulo `p ^ 2` kills the
-brackets and the classes `π x'_i` for `i ≠ k`, and it does not kill `π x'_k`, so it reads off that
-coefficient. -/
+of `y`. -/
 theorem degreeOneBasis_repr_gradedMk_inl_eq_zero_iff (y : pLowerCentralSeries p (freeProP p X) 1)
     (k : X) :
     (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1 y) (Sum.inl k) = 0 ↔
@@ -732,6 +730,8 @@ theorem degreeOneBasis_repr_gradedMk_inl_eq_zero_iff (y : pLowerCentralSeries p 
   have h := gradedMap_exponentSumZModPow_gradedMk_eq_zero_iff k y
   simp only [Nat.reduceAdd] at h
   rw [← h]
+  -- The graded map induced by the `k`-th exponent sum modulo `p ^ 2` kills the brackets and the
+  -- classes `π x'_i` for `i ≠ k`, and does not kill `π x'_k`, so it reads off the coefficient.
   set χ := exponentSumZModPow p X 2 k
   -- The graded map of `χ` on `gr_1(F)` is the coefficient of `π x'_k` times the image of `π x'_k`.
   have key : (gradedMap p χ.toMonoidHom χ.continuous 1).toZModLinearMap p =
@@ -761,12 +761,13 @@ theorem degreeOneBasis_repr_gradedMk_inl_eq_zero_iff (y : pLowerCentralSeries p 
 
 /-- **The `p`-power coordinates are the exponent sums divided by `p`, modulo `p`**: if the `k`-th
 exponent sum of `y ∈ λ_1(F)` is `p * c`, then the coefficient of `π x'_k` in the class of `y` is the
-reduction of `c` modulo `p`. Dividing `y` by `x_k ^ (p * c')`, where `c' ∈ ℕ` lifts `c` modulo `p`,
-subtracts `c'` from that coefficient and makes the exponent sum divisible by `p ^ 2`. -/
+reduction of `c` modulo `p`. -/
 theorem degreeOneBasis_repr_gradedMk_inl (y : pLowerCentralSeries p (freeProP p X) 1) (k : X)
     {c : ℤ_[p]} (hc : (exponentSum p X (y : freeProP p X)).toAdd k = p * c) :
     (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1 y) (Sum.inl k) = PadicInt.toZMod c := by
   classical
+  -- Dividing `y` by `x_k ^ (p * c')`, where `c' ∈ ℕ` lifts `c` modulo `p`, subtracts `c'` from the
+  -- coefficient and makes the exponent sum divisible by `p ^ 2`, where the coefficient vanishes.
   set c' : ℕ := (PadicInt.toZMod c).val with hc'
   set z : pLowerCentralSeries p (freeProP p X) 1 :=
     y * ⟨of k ^ p, pow_mem_pLowerCentralSeries (mem_pLowerCentralSeries_zero p (of k))⟩⁻¹ ^ c'

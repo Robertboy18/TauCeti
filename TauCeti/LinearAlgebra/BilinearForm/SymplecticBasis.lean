@@ -313,8 +313,7 @@ theorem IsAlt.even_finrank : Even (finrank K V) := by
 /-- **Every nonzero vector heads a symplectic basis.** For a nondegenerate alternating form on a
 finite-dimensional space and a nonzero vector `e`, there is a basis indexed by
 `Fin (m + 1) ⊕ Fin (m + 1)` in which the matrix of the form is `Matrix.J` and whose vector at the
-position `inl 0` is `e`. The partner `f` at `inr 0` is any vector with `B f e = 1`, and the rest is
-a symplectic basis of the orthogonal complement of `span {e, f}`. -/
+position `inl 0` is `e`. -/
 theorem IsAlt.exists_basis_apply_eq_J_inl_zero_eq {e : V} (he : e ≠ 0) :
     ∃ (m : ℕ) (b : Basis (Fin (m + 1) ⊕ Fin (m + 1)) K V),
       (∀ x y, B (b x) (b y) = Matrix.J (Fin (m + 1)) K x y) ∧ b (Sum.inl 0) = e := by

@@ -309,8 +309,8 @@ private theorem exists_apply_eq_gradedMap_eq_altClass_of_basis
       Module.Basis.coord_apply, dualBasis_repr] at h
     exact Multiplicative.toAdd.injective h
   obtain ⟨e, he, hfix⟩ :=
-    exists_continuousMulEquiv_continuousZModDualMap_eq_of_forall_toMul_of_eq (interleaveEquiv hn b)
-      hT
+    exists_continuousMulEquiv_continuousZModDualMap_eq_and_apply_of_eq_of_forall_toMul_of_eq
+      (interleaveEquiv hn b) hT
   refine ⟨e, by rw [hx₀]; exact hfix _ rfl, gradedMap_eq_altClass_of_basis ρ hn b hb c₀ hℓ e
     fun k ↦ by rw [he, interleaveEquiv_dualBasis]⟩
 
@@ -457,10 +457,7 @@ theorem exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo_zero_
 `ρ ∈ gr_1(F)` have nondegenerate alternating degree-one form and `p`-power part `(q / p) • π ξ₁`
 concentrated on the first generator, for some `q` divisible by `p`. Then `n` is even, and a
 continuous automorphism of `F` **fixing `x₁`** carries `ρ` to the class of
-`x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`. The symplectic basis realized by the automorphism is
-headed by the vector representing evaluation at `x₁` through the form, whose partner is then the
-first coordinate character; a relator whose exponent sums vanish off `x₁` keeps that property
-under the automorphism. -/
+`x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`. -/
 theorem exists_continuousMulEquiv_freeProPGen_zero_eq_gradedMap_eq_gradedMk_demushkinWordNeTwo
     (ρ : gradedPiece p (freeProP p (Fin n)) 1) (hnd : (degreeOneForm ρ).Nondegenerate)
     (halt : (degreeOneForm ρ).IsAlt) {q : ℕ} (hq : p ∣ q)
