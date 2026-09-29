@@ -720,9 +720,10 @@ theorem degreeOneBasis_repr_gradedPow_gradedMkZero_inl (g : freeProP p X) (k : X
 
 /-- **The `p`-power coordinates of a power of a generator**: the class of `x_i ^ (p * n)` in
 `gr_1(F)` has coefficient `n` at `π x'_i` and `0` at the other `π x'_k`. -/
-theorem degreeOneBasis_repr_gradedMk_of_pow_mul_inl (i : X) (n : ℕ)
-    (h : of i ^ (p * n) ∈ pLowerCentralSeries p (freeProP p X) 1) (k : X) :
-    (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1 ⟨of i ^ (p * n), h⟩) (Sum.inl k) =
+@[simp]
+theorem degreeOneBasis_repr_gradedMk_of_pow_mul_inl (i : X) (n : ℕ) (k : X) :
+    (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1
+      ⟨of i ^ (p * n), pow_mul_mem_pLowerCentralSeries_one p (of i) n⟩) (Sum.inl k) =
       if i = k then n else 0 := by
   rw [gradedMk_pow_mul, map_nsmul, Finsupp.smul_apply,
     degreeOneBasis_repr_gradedPow_gradedMkZero_inl, toMul_dualBasis_of, toAdd_ofAdd,
@@ -781,9 +782,8 @@ theorem degreeOneBasis_repr_gradedMk_inl (y : pLowerCentralSeries p (freeProP p 
   -- `x_k ^ (p * c')` contributes exactly `c'` to the coefficient, and the `k`-th exponent sum of
   -- `z` is divisible by `p ^ 2`, so the coefficient of `π x'_k` in the class of `z` vanishes.
   set c' : ℕ := (PadicInt.toZMod c).val with hc'
-  have hmem : of k ^ (p * c') ∈ pLowerCentralSeries p (freeProP p X) 1 := by
-    rw [pow_mul]
-    exact pow_mem (pow_mem_pLowerCentralSeries (mem_pLowerCentralSeries_zero p (of k))) c'
+  have hmem : of k ^ (p * c') ∈ pLowerCentralSeries p (freeProP p X) 1 :=
+    pow_mul_mem_pLowerCentralSeries_one p (of k) c'
   set z : pLowerCentralSeries p (freeProP p X) 1 := y * ⟨of k ^ (p * c'), hmem⟩⁻¹ with hz
   have hyz : y = z * ⟨of k ^ (p * c'), hmem⟩ := by rw [hz, inv_mul_cancel_right]
   -- The coefficient of `π x'_k` in the class of `y` is that of `z` plus `c'`.

@@ -453,23 +453,18 @@ theorem exists_continuousMulEquiv_gradedMap_eq_gradedMk_demushkinWordNeTwo_zero_
   obtain ⟨hn, e, he⟩ := exists_gradedMap_eq_altClass_zero ρ hnd halt hℓ
   exact ⟨hn, e, he.trans gradedMk_demushkinWordNeTwo_zero_eq_altClass.symm⟩
 
-/-- **Labute's normal form modulo `λ_2`, the alternating case, fixing the first generator.** Let
-`ρ ∈ gr_1(F)` have nondegenerate alternating degree-one form and `p`-power part `(q / p) • π ξ₁`
-concentrated on the first generator, for some `q` divisible by `p`. Then `n` is even, and a
-continuous automorphism of `F` **fixing `x₁`** carries `ρ` to the class of
-`x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`. -/
-theorem exists_continuousMulEquiv_freeProPGen_zero_eq_gradedMap_eq_gradedMk_demushkinWordNeTwo
+/-- The alternating case with `p`-power part `c₀ • π ξ₁` concentrated on the first generator: `n`
+is even, and a continuous automorphism of `F` fixing `x₁` carries `ρ` to
+`c₀ • π ξ₁ + [ξ₁, ξ₂] + ⋯ + [ξ_{n-1}, ξ_n]`. -/
+private theorem exists_freeProPGen_zero_eq_gradedMap_eq_altClass
     (ρ : gradedPiece p (freeProP p (Fin n)) 1) (hnd : (degreeOneForm ρ).Nondegenerate)
-    (halt : (degreeOneForm ρ).IsAlt) {q : ℕ} (hq : p ∣ q)
+    (halt : (degreeOneForm ρ).IsAlt) (c₀ : ZMod p)
     (hc : ∀ k : Fin n, (degreeOneBasis p (Fin n)).repr ρ (Sum.inl k) =
-      if (k : ℕ) = 0 then ((q / p : ℕ) : ZMod p) else 0) :
+      if (k : ℕ) = 0 then c₀ else 0) :
     Even n ∧ ∃ e : freeProP p (Fin n) ≃ₜ* freeProP p (Fin n),
       e (freeProPGen p n 0) = freeProPGen p n 0 ∧
       gradedMap p (e : freeProP p (Fin n) →ₜ* freeProP p (Fin n)).toMonoidHom
-          (e : freeProP p (Fin n) →ₜ* freeProP p (Fin n)).continuous 1 ρ =
-        gradedMk p (freeProP p (Fin n)) 1 ⟨demushkinWordNeTwo q n (freeProPGen p n),
-          demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩ := by
-  rw [gradedMk_demushkinWordNeTwo_eq_altClass hq]
+        (e : freeProP p (Fin n) →ₜ* freeProP p (Fin n)).continuous 1 ρ = altClass p n c₀ := by
   rcases Nat.eq_zero_or_pos n with rfl | hn0
   · -- At rank zero there is nothing to fix and every class is the target class.
     have hx : freeProPGen p 0 0 = 1 := freeProPGen_eq_one_of_le p le_rfl
@@ -494,9 +489,9 @@ theorem exists_continuousMulEquiv_freeProPGen_zero_eq_gradedMap_eq_gradedMk_demu
   have hbx : ∀ x, ((b x).toMul (freeProPGen p n 0)).toAdd = if x = Sum.inr 0 then 1 else 0 := by
     intro x
     rw [hx₀, ← dualBasis_repr, ← Module.Basis.coord_apply, ← hθ, ← hb0, hb, J_apply_inl_zero]
-  -- The `p`-power part of `ρ` is `(q / p)` times evaluation at `x₁`.
+  -- The `p`-power part of `ρ` is `c₀` times evaluation at `x₁`.
   have hℓ : ∀ k : Fin n, powerPartFunctional ρ (b (interleave hn k)) =
-      if (k : ℕ) = 0 then ((q / p : ℕ) : ZMod p) else 0 := by
+      if (k : ℕ) = 0 then c₀ else 0 := by
     intro k
     rw [powerPartFunctional_apply, Finset.sum_eq_single ⟨0, hn0⟩ (fun i _ hi ↦ by
       rw [hc, ite_eq_right (fun h ↦ hi (Fin.ext h)), zero_mul])
@@ -504,6 +499,25 @@ theorem exists_continuousMulEquiv_freeProPGen_zero_eq_gradedMap_eq_gradedMk_demu
     simp [interleave_eq_inr_zero_iff]
   obtain ⟨e, he0, he⟩ := exists_apply_eq_gradedMap_eq_altClass_of_basis ρ hn b hb _ hℓ hbx
   exact ⟨⟨m + 1, by omega⟩, e, he0, he⟩
+
+/-- **Labute's normal form modulo `λ_2`, the alternating case, fixing the first generator.** Let
+`ρ ∈ gr_1(F)` have nondegenerate alternating degree-one form and `p`-power part `(q / p) • π ξ₁`
+concentrated on the first generator, for some `q` divisible by `p`. Then `n` is even, and a
+continuous automorphism of `F` **fixing `x₁`** carries `ρ` to the class of
+`x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`. -/
+theorem exists_continuousMulEquiv_freeProPGen_zero_eq_gradedMap_eq_gradedMk_demushkinWordNeTwo
+    (ρ : gradedPiece p (freeProP p (Fin n)) 1) (hnd : (degreeOneForm ρ).Nondegenerate)
+    (halt : (degreeOneForm ρ).IsAlt) {q : ℕ} (hq : p ∣ q)
+    (hc : ∀ k : Fin n, (degreeOneBasis p (Fin n)).repr ρ (Sum.inl k) =
+      if (k : ℕ) = 0 then ((q / p : ℕ) : ZMod p) else 0) :
+    Even n ∧ ∃ e : freeProP p (Fin n) ≃ₜ* freeProP p (Fin n),
+      e (freeProPGen p n 0) = freeProPGen p n 0 ∧
+      gradedMap p (e : freeProP p (Fin n) →ₜ* freeProP p (Fin n)).toMonoidHom
+          (e : freeProP p (Fin n) →ₜ* freeProP p (Fin n)).continuous 1 ρ =
+        gradedMk p (freeProP p (Fin n)) 1 ⟨demushkinWordNeTwo q n (freeProPGen p n),
+          demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩ := by
+  rw [gradedMk_demushkinWordNeTwo_eq_altClass hq]
+  exact exists_freeProPGen_zero_eq_gradedMap_eq_altClass ρ hnd halt _ hc
 
 /-- **Labute's normal form modulo `λ_2` for a relator with exponent vector `q e₁`, fixing the first
 generator.** Let `r ∈ λ_1(F)` have nondegenerate alternating degree-one form and exponent sums `q`
