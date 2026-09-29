@@ -11,6 +11,7 @@ import Mathlib.Algebra.MvPolynomial.Basic
 public import Mathlib.Algebra.Order.BigOperators.Group.LocallyFinite
 import Mathlib.Data.Nat.Choose.Vandermonde
 import Mathlib.Tactic.NormDet
+import Mathlib.Tactic.NormNum.IsSquare
 public import Mathlib.FieldTheory.Separable
 public import Mathlib.GroupTheory.Perm.Fin
 public import Mathlib.RingTheory.Discriminant
@@ -53,6 +54,8 @@ depressed specialization of that formula is used to compare a quartic with its c
 * `Polynomial.Monic.discr_mul`: the product formula for discriminants, with the square of the
   resultant as its cross term.
 * `Polynomial.discr_X_pow_sub_C`: the discriminant of a binomial `X ^ n - C a`.
+* `TauCeti.not_isSquare_discr_X_pow_five_sub_C`: the discriminant `3125a⁴` of a pure quintic
+  `X ^ 5 - C a` over `ℚ` with `a ≠ 0` is not a square.
 * `TauCeti.discr_C_mul`, `TauCeti.isSquare_discr_iff_mem_range`: the scaling law and
   square-root criterion for a not-necessarily-monic polynomial over a field.
 * `Polynomial.discr_map_of_natDegree_eq`, `Polynomial.Monic.discr_map`: base change whenever the
@@ -142,6 +145,17 @@ are `1`. -/
       = ((-1 : R) ^ (n * (n - 1) / 2)) ^ 2 * (X ^ n - C a).discr := by rw [hsq, one_mul]
     _ = (-1) ^ (n * (n - 1) / 2) * ((-1) ^ (n * (n - 1) / 2) * (X ^ n - C a).discr) := by ring
     _ = _ := by rw [← h]; ring
+
+/-- The discriminant `3125a⁴` of a pure quintic `X⁵ - a` over `ℚ`, with `a ≠ 0`, is not a
+square in `ℚ`. -/
+theorem not_isSquare_discr_X_pow_five_sub_C {a : ℚ} (ha : a ≠ 0) :
+    ¬ IsSquare (X ^ 5 - C a : ℚ[X]).discr := by
+  rw [discr_X_pow_sub_C]
+  rintro ⟨r, hr⟩
+  have h5 : IsSquare (5 : ℚ) := ⟨r / (25 * a ^ 2), by
+    rw [div_mul_div_comm, eq_div_iff (by positivity)]
+    linear_combination hr⟩
+  exact absurd h5 (by norm_num)
 
 private noncomputable def Polynomial.sylvesterDerivIndexEquiv {f : R[X]} (φ : R →+* S)
     (hdeg : (f.map φ).natDegree = f.natDegree) :

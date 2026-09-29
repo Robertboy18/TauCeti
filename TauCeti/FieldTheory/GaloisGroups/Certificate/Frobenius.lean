@@ -59,17 +59,6 @@ theorem hasSexticRoot_X_pow_five_sub_C {a : ℤ} (ha : a ≠ 0) :
   rw [(monic_resolventSextic _).discr_ne_zero_iff_separable_map ℚ, algebraMap_int_eq]
   exact separable_map_resolventSextic_X_pow_five_sub_C ha
 
-/-- The discriminant `3125a⁴` of a pure quintic `X⁵ - a` over `ℚ`, with `a ≠ 0`, is not a
-square in `ℚ`. -/
-theorem not_isSquare_discr_X_pow_five_sub_C {a : ℚ} (ha : a ≠ 0) :
-    ¬ IsSquare (X ^ 5 - C a : ℚ[X]).discr := by
-  rw [discr_X_pow_sub_C]
-  rintro ⟨r, hr⟩
-  have h5 : IsSquare (5 : ℚ) := ⟨r / (25 * a ^ 2), by
-    rw [div_mul_div_comm, eq_div_iff (by positivity)]
-    linear_combination hr⟩
-  exact absurd h5 (by norm_num)
-
 /-- **An irreducible pure quintic `X⁵ - a` with `a : ℤ` has the label `5T3`.** For an integer
 `a` with `X⁵ - a` irreducible over `ℚ`, the Galois group of `X⁵ - a` acting on its five roots is
 the Frobenius group `F₂₀ = AGL(1, 5)` of order `20`: the discriminant `3125a⁴` is not a square,
