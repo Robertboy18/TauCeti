@@ -18,8 +18,8 @@ Let `V ◁ U` be a finite normal layer of a formation with coefficient module `A
 * `H²(H, A^V)` has exactly `#H` elements,
 * the restriction of `u` to `H` generates `H²(H, A^V)`,
 
-then cup product with `u` is an isomorphism `Ĥʳ(U/V, ℤ) ≃ Ĥʳ⁺²(U/V, A^V)` in every integer degree
-`r` (`TauCeti.ClassFieldTheory.tateTheorem`). The three hypotheses are separate explicit
+then cup product with `u` is an isomorphism `H^r(U/V, ℤ) ≃ H^{r+2}(U/V, A^V)` in every integer
+degree `r` (`TauCeti.ClassFieldTheory.tateTheorem`). The three hypotheses are separate explicit
 arguments, quantified over the finite quotient system `H ↦ subgroupLayer H` of the layer, and
 the underlying homomorphism of the isomorphism is the cup-product map `cupClass`
 (`tateTheorem_toAddMonoidHom`). For a class formation the hypotheses hold for the fundamental
@@ -129,8 +129,8 @@ section TateTheorem
 
 variable (F : Formation G) (L : NormalLayer G) (u : L.H F 2)
 
-/-- Cup product with a class `u` generating `H²(U/V, A^V)` is bijective from `Ĥʳ(U/V, ℤ)` to
-`Ĥʳ⁺²(U/V, A^V)` in every integer degree `r`, provided `H¹(H, A^V) = 0` and `H²(H, A^V)` has
+/-- Cup product with a class `u` generating `H²(U/V, A^V)` is bijective from `H^r(U/V, ℤ)` to
+`H^{r+2}(U/V, A^V)` in every integer degree `r`, provided `H¹(H, A^V) = 0` and `H²(H, A^V)` has
 exactly `#H` elements for every subgroup `H` of `U/V`. This is Tate's theorem with the generation
 hypothesis stated on the whole Galois group only; its restricted forms on subgroups follow. -/
 theorem cupClass_bijective
@@ -174,7 +174,7 @@ the finite quotient system `H ↦ L.subgroupLayer H`:
 * `hcard`: `H²(H, A^V)` has exactly `#H` elements;
 * `hgen`: the restriction of `u` to the layer of `H` generates that layer's `H²`.
 
-Then cup product with `u` is an isomorphism `Ĥʳ(U/V, ℤ) ≃ Ĥʳ⁺²(U/V, A^V)` in every integer
+Then cup product with `u` is an isomorphism `H^r(U/V, ℤ) ≃ H^{r+2}(U/V, A^V)` in every integer
 degree `r`; its underlying homomorphism is `cupClass F L u r` (`tateTheorem_toAddMonoidHom`). -/
 def tateTheorem
     (h1 : ∀ H : Subgroup L.Gal, Subsingleton ((L.subgroupLayer H).H F 1))

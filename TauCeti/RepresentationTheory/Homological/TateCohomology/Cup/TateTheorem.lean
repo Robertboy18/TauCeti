@@ -13,16 +13,17 @@ public import TauCeti.RepresentationTheory.Homological.TateCohomology.Restrictio
 /-!
 # Tate's theorem: cup product with a degree-two class
 
-Let `G` be a finite group, `N` a representation of `G` over `ℤ` and `u ∈ Ĥ²(G, N)` a class
-which generates `Ĥ²(G, N)`, a group of order `|G|`. Suppose that for every subgroup `S` of `G` of
-prime-power order, `Ĥ¹(S, N) = 0` and `Ĥ²(S, N)` has order `|S|`. Then cup product with `u` is
-a bijection `Ĥʳ(G, ℤ) → Ĥʳ⁺²(G, ℤ ⊗ N)` in every integer degree `r`
+Let `G` be a finite group, `N` a representation of `G` over `ℤ` and `u ∈ H²(G, N)` a class
+which generates `H²(G, N)`, a group of order `|G|`. Suppose that for every subgroup `S` of `G` of
+prime-power order, `H¹(S, N) = 0` and `H²(S, N)` has order `|S|`. Then cup product with `u` is
+a bijection `H^r(G, ℤ) → H^{r+2}(G, ℤ ⊗ N)` in every integer degree `r`
 (`TauCeti.TateCohomology.cup_bijective_of_forall_isPGroup`). This is Tate's theorem (J. Tate,
 *The higher dimensional cohomology groups of class field theory*, Ann. of Math. 56, 1952), in
-the form used to derive the reciprocity isomorphisms of class field theory.
+the form used to derive the reciprocity isomorphisms of class field theory. Throughout this file,
+`H^n(G, M)` denotes Tate cohomology in the integer degree `n`.
 
 The classical statement also asks that the restriction of `u` to each subgroup `S` generate
-`Ĥ²(S, N)`. That hypothesis is not needed: corestriction after restriction is multiplication by
+`H²(S, N)`. That hypothesis is not needed: corestriction after restriction is multiplication by
 the index, so the restricted class already has order `|S|` in a group of order `|S|`. The proof
 here makes exactly this observation, in degree zero after dimension shifting.
 
@@ -30,19 +31,19 @@ here makes exactly this observation, in degree zero after dimension shifting.
 
 The cup product with a degree-two class is not induced by a morphism of representations, but
 after two upward dimension shifts it is: writing `N₂` for the twice-shifted representation,
-`u` corresponds to the class of an invariant `a ∈ Ĥ⁰(G, N₂)`, and cup product with `u` is, up to
+`u` corresponds to the class of an invariant `a ∈ H⁰(G, N₂)`, and cup product with `u` is, up to
 the dimension-shifting isomorphisms, the map induced on Tate cohomology by `ℤ ⟶ ℤ ⊗ N₂`,
 `1 ↦ 1 ⊗ a` (`cup_dimensionShiftUpTwoIso_hom`). Tate's isomorphism criterion for a morphism of
 representations (`TauCeti.TateCohomology.map_bijective_of_forall_isPGroup`) then reduces the
 theorem to the three degrees `-1`, `0`, `1` on subgroups of prime-power order. In degree `-1` the
-target vanishes because `Ĥ¹(S, N) = 0`, in degree `1` the source `Ĥ¹(S, ℤ)` vanishes, and in
-degree `0` the map `Ĥ⁰(S, ℤ) → Ĥ⁰(S, ℤ ⊗ N₂)` is a bijection between groups of order `|S|` by
+target vanishes because `H¹(S, N) = 0`, in degree `1` the source `H¹(S, ℤ)` vanishes, and in
+degree `0` the map `H⁰(S, ℤ) → H⁰(S, ℤ ⊗ N₂)` is a bijection between groups of order `|S|` by
 the corestriction argument above.
 
 ## Main statements
 
 * `TauCeti.TateCohomology.dimensionShiftUpTwoIso`: two upward dimension shifts,
-  `Ĥ⁰(G, N₂) ≅ Ĥ²(G, N)`.
+  `H⁰(G, N₂) ≅ H²(G, N)`.
 * `TauCeti.TateCohomology.cup_dimensionShiftUpTwoIso_hom`: cup product with a class shifted
   twice is the degree-zero cup product, shifted twice.
 * `TauCeti.TateCohomology.trivialResIso`: Tate cohomology of the trivial integral representation
@@ -51,7 +52,7 @@ the corestriction argument above.
   subgroup, by the corestriction argument.
 * `TauCeti.TateCohomology.cup_bijective_of_cupTrivialInt_bijective`,
   `TauCeti.TateCohomology.cup_bijective_of_forall_isPGroup`: Tate's theorem, with the degree-zero
-  bijection respectively the generation and order of `Ĥ²(G, N)` as hypothesis.
+  bijection respectively the generation and order of `H²(G, N)` as hypothesis.
 
 ## References
 
@@ -194,8 +195,8 @@ attribute [local instance] Subgroup.fintypeOfFinite
 /-! ### The degree-zero step on a subgroup -/
 
 /-- The degree-zero step of Tate's theorem on a subgroup `S`. Let `f : ℤ ⟶ B` be a morphism from
-the trivial integral representation which is injective on `Ĥ⁰(G, ℤ) → Ĥ⁰(G, B)`, and suppose
-`Ĥ⁰(S, B)` has order `|S|`. Then `f` is bijective on `Ĥ⁰(S, ℤ) → Ĥ⁰(S, B)`: the image of the
+the trivial integral representation which is injective on `H⁰(G, ℤ) → H⁰(G, B)`, and suppose
+`H⁰(S, B)` has order `|S|`. Then `f` is bijective on `H⁰(S, ℤ) → H⁰(S, B)`: the image of the
 class of `1` on `S` is the restriction of the image of the class of `1` on `G`, which has order
 `|G|`, and corestriction after restriction is multiplication by `[G : S]`, so the restricted class
 has order `|S|` in a group of order `|S|`. -/
@@ -251,13 +252,13 @@ private def resTensorDimensionShiftUpTwoIso (N : Rep ℤ G) (S : Subgroup G) (n 
 /-! ### Tate's theorem -/
 
 /-- **Tate's theorem**, with the degree-zero bijection as hypothesis. Let `G` be a finite group,
-`N` a representation of `G` over `ℤ` and `u ∈ Ĥ²(G, N)`. Suppose that
+`N` a representation of `G` over `ℤ` and `u ∈ H²(G, N)`. Suppose that
 
-* cup product with `u` is a bijection `Ĥ⁰(G, ℤ) → Ĥ²(G, N)`;
-* for every subgroup `S` of `G` of prime-power order, `Ĥ¹(S, N) = 0` and `Ĥ²(S, N)` has order
+* cup product with `u` is a bijection `H⁰(G, ℤ) → H²(G, N)`;
+* for every subgroup `S` of `G` of prime-power order, `H¹(S, N) = 0` and `H²(S, N)` has order
   `|S|`.
 
-Then cup product with `u` is a bijection `Ĥʳ(G, ℤ) → Ĥʳ⁺²(G, ℤ ⊗ N)` in every integer degree
+Then cup product with `u` is a bijection `H^r(G, ℤ) → H^{r+2}(G, ℤ ⊗ N)` in every integer degree
 `r`. -/
 theorem cup_bijective_of_cupTrivialInt_bijective (N : Rep ℤ G) (u : tateCohomology N 2)
     (hbij : Function.Bijective (cupTrivialInt N u))
@@ -301,7 +302,7 @@ theorem cup_bijective_of_cupTrivialInt_bijective (N : Rep ℤ G) (u : tateCohomo
   -- The three hypotheses of the criterion quantify over an arbitrary `Fintype` structure on `S`,
   -- which is replaced by the one attached to the finiteness of `G`.
   refine map_bijective_of_forall_isPGroup f (q := 0) ?_ ?_ ?_ r
-  · -- Degree `-1`: the target `Ĥ⁻¹(S, ℤ ⊗ N₂) ≅ Ĥ¹(S, N)` vanishes.
+  · -- Degree `-1`: the target `H^{-1}(S, ℤ ⊗ N₂) ≅ H¹(S, N)` vanishes.
     intro p _ S inst hS
     obtain rfl : inst = Subgroup.fintypeOfFinite S := Subsingleton.elim _ _
     have : Subsingleton (tateCohomology
@@ -309,13 +310,13 @@ theorem cup_bijective_of_cupTrivialInt_bijective (N : Rep ℤ G) (u : tateCohomo
       ModuleCat.subsingleton_of_isZero
         ((h1 p S hS).of_iso (resTensorDimensionShiftUpTwoIso N S (0 - 1)))
     exact Function.surjective_to_subsingleton _
-  · -- Degree `0`: the corestriction argument, with `Ĥ⁰(S, ℤ ⊗ N₂) ≅ Ĥ²(S, N)` of order `|S|`.
+  · -- Degree `0`: the corestriction argument, with `H⁰(S, ℤ ⊗ N₂) ≅ H²(S, N)` of order `|S|`.
     intro p _ S inst hS
     obtain rfl : inst = Subgroup.fintypeOfFinite S := Subsingleton.elim _ _
     exact map_res_zero_bijective_of_injective f hinj S
       ((Nat.card_congr (resTensorDimensionShiftUpTwoIso N S 0).toLinearEquiv.toEquiv).trans
         (hcard p S hS))
-  · -- Degree `1`: the source `Ĥ¹(S, ℤ)` vanishes.
+  · -- Degree `1`: the source `H¹(S, ℤ)` vanishes.
     intro p _ S inst hS
     obtain rfl : inst = Subgroup.fintypeOfFinite S := Subsingleton.elim _ _
     have : Subsingleton (tateCohomology (Rep.res S.subtype (Rep.trivial ℤ G ℤ)) (0 + 1)) :=
@@ -323,14 +324,14 @@ theorem cup_bijective_of_cupTrivialInt_bijective (N : Rep ℤ G) (u : tateCohomo
     exact Function.injective_of_subsingleton _
 
 /-- **Tate's theorem.** Let `G` be a finite group, `N` a representation of `G` over `ℤ` and
-`u ∈ Ĥ²(G, N)`. Suppose that
+`u ∈ H²(G, N)`. Suppose that
 
-* `u` generates `Ĥ²(G, N)`, a group of order `|G|`;
-* for every subgroup `S` of `G` of prime-power order, `Ĥ¹(S, N) = 0` and `Ĥ²(S, N)` has order
+* `u` generates `H²(G, N)`, a group of order `|G|`;
+* for every subgroup `S` of `G` of prime-power order, `H¹(S, N) = 0` and `H²(S, N)` has order
   `|S|`.
 
-Then cup product with `u` is a bijection `Ĥʳ(G, ℤ) → Ĥʳ⁺²(G, ℤ ⊗ N)` in every integer degree
-`r`. The classical hypothesis that the restriction of `u` to each subgroup generates its `Ĥ²` is
+Then cup product with `u` is a bijection `H^r(G, ℤ) → H^{r+2}(G, ℤ ⊗ N)` in every integer degree
+`r`. The classical hypothesis that the restriction of `u` to each subgroup generates its `H²` is
 a consequence of these and is not assumed. -/
 theorem cup_bijective_of_forall_isPGroup (N : Rep ℤ G) (u : tateCohomology N 2)
     (hgen : ∀ y : tateCohomology N 2, ∃ m : ℤ, m • u = y)
