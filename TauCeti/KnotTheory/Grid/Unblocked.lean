@@ -72,6 +72,9 @@ assignment, a later stage of the roadmap.
   whose degree is the number of `O`-markings the rectangle covers.
 * `TauCeti.GridDiagram.OMonomial_eq_prod_coveredSquares`: the weight of a rectangle as a product
   over the squares it covers.
+* `TauCeti.GridDiagram.unblockedRectangles_X_eq_empty` and
+  `TauCeti.GridDiagram.unblockedDifferential_single_X`: no counted rectangle leaves the
+  `X`-marking state, which is therefore a cycle of `GC⁻`.
 * `TauCeti.GridDiagram.unblockedDifferentialOnGenerator_support_subset`: the differential of a
   generator is supported on the column transpositions of that generator.
 * `TauCeti.GridDiagram.unblockedDifferential_sq_single_apply`: the matrix of `∂⁻ ∘ ∂⁻` is a
@@ -352,6 +355,18 @@ diagonal term. -/
 theorem unblockedRectangles_self (x : GridState n) : G.unblockedRectangles x x = ∅ := by
   simp [unblockedRectangles]
 
+/-- Every rectangle leaving the `X`-marking state `G.X`, the grid state whose points are the
+lower-left corners of the `X`-marked squares, covers the `X`-marking at its own lower-left corner,
+so the unblocked differential counts no rectangle from `G.X`. -/
+theorem unblockedRectangles_X_eq_empty (y : GridState n) : G.unblockedRectangles G.X y = ∅ := by
+  rw [Finset.eq_empty_iff_forall_notMem]
+  intro r hr
+  have hsq : (r.left, r.bottom) ∈ r.toGridRectangle.coveredSquares := by
+    rw [← GridRectangle.squares_eq_coveredSquares]
+    exact r.left_bottom_mem_squares
+  exact Finset.disjoint_left.mp (G.disjoint_XSet_of_mem_unblockedRectangles hr) hsq
+    ((G.mk_mem_XSet _ _).mpr r.bottom_def.symm)
+
 /-! ### The unblocked complex and its differential -/
 
 /-- The matrix coefficient of the unblocked differential from `x` to `y`: the sum of the weights
@@ -494,6 +509,19 @@ weights of the contributing rectangles. -/
 theorem unblockedDifferential_single_apply (x y : GridState n) :
     G.unblockedDifferential R (Finsupp.single x 1) y = G.unblockedCoefficient R x y := by
   simp
+
+/-- A grid state that no counted rectangle leaves is a cycle of `GC⁻`. -/
+theorem unblockedDifferential_single_eq_zero {z : GridState n}
+    (hz : ∀ y : GridState n, G.unblockedRectangles z y = ∅) :
+    G.unblockedDifferential R (Finsupp.single z 1) = 0 := by
+  ext y
+  rw [unblockedDifferential_single_apply, unblockedCoefficient_def, hz y, Finset.sum_empty,
+    Finsupp.zero_apply]
+
+/-- The `X`-marking state is a cycle of `GC⁻`. -/
+theorem unblockedDifferential_single_X :
+    G.unblockedDifferential R (Finsupp.single G.X 1) = 0 :=
+  G.unblockedDifferential_single_eq_zero R G.unblockedRectangles_X_eq_empty
 
 /-- The unblocked differential is the finite sum of its generator rows over the support of a
 chain. -/
