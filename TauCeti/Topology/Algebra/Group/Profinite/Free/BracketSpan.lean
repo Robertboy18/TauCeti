@@ -26,14 +26,8 @@ family `ω` whose component at any prescribed generator `x₀` lies in the brack
 `C_m(F) = [gr_{m-1}(F), gr_0(F)]`**
 (`TauCeti.freeProP.exists_apply_mem_gradedBracketSpan_basisModificationDelta_eq`), hence is the
 class of an element of `λ_m(F)` in the commutator subgroup
-(`TauCeti.freeProP.exists_apply_mem_commutator_basisModificationDelta_eq_of_mem_range`). The
-argument writes the pivot component as `c + t` with `c ∈ C_m(F)` and `t` a combination of iterated
-`p`-powers `π^m x` of degree-zero classes, and trades the brackets `[π^m x, ∂_{x₀} ρ]` for brackets
-at the other generators: `[π^m x, ∂_{x₀} ρ] = -[π^m ∂_{x₀} ρ, x]` up to brackets with `C_m(F)`, the
-class `x` is a combination of the derivatives `∂_j ρ`, and the term at `j = x₀` is
-`[π^m ∂_{x₀} ρ, ∂_{x₀} ρ] = 0`. Brackets `[c, z]` with `c ∈ C_m(F)` are values `δ_ρ(b • c)` with
-pivot component `b_{x₀} • c ∈ C_m(F)`, by the spanning of the derivatives. No hypothesis on `x₀`
-is needed.
+(`TauCeti.freeProP.exists_apply_mem_commutator_basisModificationDelta_eq_of_mem_range`). No
+hypothesis on `x₀` is needed.
 
 ## Main results
 

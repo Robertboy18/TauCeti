@@ -20,19 +20,15 @@ and `b ∈ G` (`TauCeti.gradedBracketSpan_eq_span`); membership in it is elimina
 principle `TauCeti.gradedBracketSpan_induction`. Every element of it is the class of an element of
 `λ_{k+1}` lying in the commutator subgroup
 (`TauCeti.exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan`), and the `p`-power
-operator `π` carries `C_{k+1}(G)` into `C_{k+2}(G)`, because `π` commutes with the bracket away from
-degree zero and its degree-zero defect is again a bracket
-(`TauCeti.gradedPow_mem_gradedBracketSpan`).
+operator `π` carries `C_{k+1}(G)` into `C_{k+2}(G)` (`TauCeti.gradedPow_mem_gradedBracketSpan`).
 
 Two identities on the iterated `p`-powers `π^j x` of degree-zero classes accompany it. The bracket
 `[π^j x, x]` vanishes, being the class of `⁅g ^ (p ^ j), g⁆ = 1`
 (`TauCeti.gradedBracket_gradedPowIter_self`), and the symmetrised bracket
 `[π^{k+1} x, y] + [π^{k+1} y, x]` lies in the span of the brackets `[c, z]` with
-`c ∈ C_{k+1}(G)` and `z ∈ gr_0(G)`
-(`TauCeti.gradedBracket_gradedPowIter_add_swap_mem_map₂`). For odd `p` that sum is zero, since
-`π` is bilinear against the bracket; for `p = 2` the degree-zero defect
-`[π x, y] = π [x, y] + [[x, y], x]` leaves the iterated brackets `[[y, x], x] + [[y, x], y]`, which
-are brackets with a class of `C_1(G)`, and `π` propagates them up the degrees.
+`c ∈ C_{k+1}(G)` and `z ∈ gr_0(G)` (`TauCeti.gradedBracket_gradedPowIter_add_swap_mem_map₂`); for
+odd `p` that sum is zero, and for `p = 2` it need not be, which is why the statement is a
+membership rather than a vanishing.
 
 Finally, when `λ_{k+2}` is open, `gr_{k+1}(G)` is the sum of `C_{k+1}(G)` and the span of the
 iterated `p`-powers `π^{k+1} x` of the degree-zero classes
@@ -225,15 +221,16 @@ theorem gradedPow_mem_map₂_gradedBracketLinear_gradedBracketSpan {k : ℕ}
 
 /-- **The symmetrised bracket of iterated `p`-powers**: for `x, y ∈ gr_0(G)`,
 `[π^{k+1} x, y] + [π^{k+1} y, x]` is a sum of brackets `[c, z]` with `c ∈ C_{k+1}(G)` and
-`z ∈ gr_0(G)`. In degree one it is `-(p choose 2) • ([[y, x], x] + [[y, x], y])`, by expanding
-`[π (x + y), x + y] = 0`, and `π` propagates the statement up the degrees. For odd `p` the sum is
-zero, and for `p = 2` it is the trace of the degree-zero defect of `π` against the bracket. -/
+`z ∈ gr_0(G)`. For odd `p` the sum is zero, and for `p = 2` it is the trace of the degree-zero
+defect of `π` against the bracket. -/
 theorem gradedBracket_gradedPowIter_add_swap_mem_map₂ (k : ℕ) (x y : gradedPiece p G 0) :
     gradedBracket p G (k + 1) 0 (gradedPowIter p G (k + 1) x) y +
         gradedBracket p G (k + 1) 0 (gradedPowIter p G (k + 1) y) x ∈
       Submodule.map₂ (gradedBracketLinear p G (k + 1) 0) (gradedBracketSpan p G k) ⊤ := by
   induction k with
   | zero =>
+    -- Expand `[π (x + y), x + y] = 0` with the degree-zero formula for `π (x + y)`: the sum is
+    -- `-(p choose 2) • ([[y, x], x] + [[y, x], y])`, brackets with the class `[y, x] ∈ C_1(G)`.
     have hself : ∀ z : gradedPiece p G 0, gradedBracket p G 1 0 (gradedPow p G 0 z) z = 0 :=
       fun z ↦ by
         simpa only [gradedPowIter_succ, gradedPowIter_zero] using
@@ -254,6 +251,7 @@ theorem gradedBracket_gradedPowIter_add_swap_mem_map₂ (k : ℕ) (x y : gradedP
       rw [← gradedBracketLinear_apply] <;>
       exact Submodule.apply_mem_map₂ _ (gradedBracket_mem_gradedBracketSpan y x) Submodule.mem_top
   | succ k ih =>
+    -- Away from degree zero `π` commutes with the bracket, so `π` propagates the statement.
     rw [gradedPowIter_succ (k + 1) x, gradedPowIter_succ (k + 1) y,
       ← gradedPow_gradedBracket_left_zero (Nat.le_add_left 1 k) (gradedPowIter p G (k + 1) x) y,
       ← gradedPow_gradedBracket_left_zero (Nat.le_add_left 1 k) (gradedPowIter p G (k + 1) y) x,
@@ -264,9 +262,7 @@ theorem gradedBracket_gradedPowIter_add_swap_mem_map₂ (k : ℕ) (x y : gradedP
 
 /-- **The bracket span and the iterated `p`-powers span the graded piece**: when `λ_{k+2}` is open,
 `gr_{k+1}(G) = C_{k+1}(G) + span {π^{k+1} x | x ∈ gr_0(G)}`. This is the graded form of
-`λ_{k+1} = closure (λ_kᵖ ⬝ [λ_k, G])` iterated down to degree zero: the `p`-powers of the
-bracket span stay in the bracket span, and the `p`-powers of the iterated `p`-powers are the next
-iterated `p`-powers. -/
+`λ_{k+1} = closure (λ_kᵖ ⬝ [λ_k, G])` iterated down to degree zero. -/
 theorem gradedBracketSpan_sup_span_range_gradedPowIter_eq_top {k : ℕ}
     (h : IsOpen (pLowerCentralSeries p G (k + 1 + 1) : Set G)) :
     gradedBracketSpan p G k ⊔ span (ZMod p) (Set.range (gradedPowIter p G (k + 1))) = ⊤ := by
