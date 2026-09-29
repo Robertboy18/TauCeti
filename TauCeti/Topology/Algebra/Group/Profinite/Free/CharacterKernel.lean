@@ -16,19 +16,17 @@ Let `F = freeProP p (Fin n)` with its `ℕ`-indexed generators `x_i = freeProPGe
 continuous homomorphism to a `T1` group, by `ContinuousMonoidHom.isClosed_ker`) with `χ (x_i) = 1`
 for every `i ≠ j` and `χ (x_j)` of infinite order. Then `ker χ` is the closed normal closure of
 the `x_i` with `i ≠ j`
-(`TauCeti.freeProP.ker_eq_topologicalClosure_normalClosure_image_freeProPGen`), and the
-abelianized kernel `(ker χ)^{ab}`, a module over `ℤ_p[[F ⧸ ker χ]]` through conjugation, is
-spanned by the classes of those generators
-(`TauCeti.freeProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top`). If a
-second generator `x_k` is not killed but `χ (x_k)` is the `p`-adic power `χ (x_j ^ l)`, then `x_k`
-is traded for `x_k * (x_j ^ l)⁻¹` and the same holds
+(`TauCeti.freeProP.ker_eq_topologicalClosure_normalClosure_image_freeProPGen`). If a second
+generator `x_k` is not killed but `χ (x_k)` is the `p`-adic power `χ (x_j ^ l)`, then `x_k` is
+traded for `x_k * (x_j ^ l)⁻¹` and the same holds
 (`TauCeti.freeProP.ker_eq_topologicalClosure_normalClosure_insert_image_freeProPGen`).
 
 These are the specializations to a free pro-`p` group of finite rank of the kernel theorem
 `TauCeti.IsProP.ker_eq_topologicalClosure_normalClosure_of_not_isOfFinOrder`: the generators
-generate topologically, and the hypotheses on `χ` are read on the generator tuple; the span
-statements are the kernel statements read through
-`TauCeti.IsProP.span_completedGroupAlgebraModule_topologicalAbelianization_eq_top`. They describe
+generate topologically, and the hypotheses on `χ` are read on the generator tuple. Read through
+`TauCeti.IsProP.span_completedGroupAlgebraModule_topologicalAbelianization_eq_top`, they say that
+the abelianized kernel `(ker χ)^{ab}`, a module over `ℤ_p[[F ⧸ ker χ]]` through conjugation, is
+spanned by the classes of the generators other than `x_j` (and of `x_k * (x_j ^ l)⁻¹`). This is
 the module `E = X ⧸ (X, X)`, `X = ker χ`, of Labute's classification of Demushkin groups, for the
 orientation `χ` of a group in normal form, which is trivial on all but one or two generators
 (Labute, §4, p. 121): `E` is generated over `Λ = ℤ_p[[F ⧸ X]]` by the classes of the generators
@@ -41,11 +39,6 @@ lying in `X`.
   normal closure of the other generators.
 * `TauCeti.freeProP.ker_eq_topologicalClosure_normalClosure_insert_image_freeProPGen`: the same
   with a second marked generator `x_k` with `χ (x_k) = χ (x_j ^ l)`, traded for `x_k * (x_j ^ l)⁻¹`.
-* `TauCeti.freeProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top`: the
-  abelianized kernel is spanned over `ℤ_p[[F ⧸ ker χ]]` by the classes of the generators other
-  than `x_j`;
-  `TauCeti.freeProP.span_completedGroupAlgebraModule_topologicalAbelianization_ker_insert_eq_top`:
-  with a second marked generator, by the classes of the other generators and of `x_k * (x_j ^ l)⁻¹`.
 
 ## References
 
@@ -96,48 +89,5 @@ theorem ker_eq_topologicalClosure_normalClosure_insert_image_freeProPGen {j k : 
       · exact Or.inr (Or.inl (by rw [hik]))
       exact Or.inr (Or.inr ⟨i, ⟨hij, hik⟩, rfl⟩)))
     (fun s hs ↦ by obtain ⟨i, hi, rfl⟩ := hs; exact hχ i hi.1 hi.2) hj hk
-
-/-- **The abelianized kernel of a character trivial on every generator but one is spanned by the
-classes of those generators.** If `χ` has closed kernel, `χ (x_i) = 1` for `i ≠ j` and `χ (x_j)`
-has infinite order, then `(ker χ)^{ab}` is spanned over `ℤ_p[[F ⧸ ker χ]]`, for the module structure
-`TauCeti.IsProP.completedGroupAlgebraModule` through conjugation, by the classes of the `x_i`,
-`i ≠ j`. For the orientation of a Demushkin normal form this is the generation of Labute's module
-`E` by the classes of the basis elements lying in `X = ker χ` (Labute, §4, p. 121). -/
-theorem span_completedGroupAlgebraModule_topologicalAbelianization_ker_eq_top {j : ℕ}
-    (hχ : ∀ i, i ≠ j → χ (freeProPGen p n i) = 1) (hj : ¬ IsOfFinOrder (χ (freeProPGen p n j))) :
-    haveI := hker
-    letI := ((isProP_freeProP p (Fin n)).topologicalAbelianization
-      χ.ker).completedGroupAlgebraModule (freeProP p (Fin n) ⧸ χ.ker)
-    Submodule.span (completedGroupAlgebra ℤ_[p] (freeProP p (Fin n) ⧸ χ.ker))
-      (Additive.ofMul ''
-        ((QuotientGroup.mk : χ.ker → TopologicalAbelianization χ.ker) ''
-          (Subtype.val ⁻¹' (freeProPGen p n '' {i | i ≠ j})))) = ⊤ :=
-  (isProP_freeProP p (Fin n)).span_completedGroupAlgebraModule_topologicalAbelianization_eq_top _
-    ((finite_range_freeProPGen p n).subset (Set.image_subset_range _ _))
-    (ker_eq_topologicalClosure_normalClosure_image_freeProPGen χ hker hχ hj).symm
-
-/-- **The abelianized kernel of a character with two marked generators is spanned by the classes
-of the other generators and of `x_k * (x_j ^ l)⁻¹`.** If `χ` has closed kernel, `χ (x_i) = 1` for
-`i ≠ j, k`, `χ (x_j)` has infinite order and `χ (x_k) = χ (x_j ^ l)`, then `(ker χ)^{ab}` is
-spanned over `ℤ_p[[F ⧸ ker χ]]`, for the module structure
-`TauCeti.IsProP.completedGroupAlgebraModule` through conjugation, by the classes of the `x_i`,
-`i ≠ j, k`, and of `x_k * (x_j ^ l)⁻¹`. -/
-theorem span_completedGroupAlgebraModule_topologicalAbelianization_ker_insert_eq_top {j k : ℕ}
-    (hχ : ∀ i, i ≠ j → i ≠ k → χ (freeProPGen p n i) = 1)
-    (hj : ¬ IsOfFinOrder (χ (freeProPGen p n j))) {l : ℤ_[p]}
-    (hk : χ (freeProPGen p n k) =
-      χ ((isProP_freeProP p (Fin n)).padicPow (freeProPGen p n j) l)) :
-    haveI := hker
-    letI := ((isProP_freeProP p (Fin n)).topologicalAbelianization
-      χ.ker).completedGroupAlgebraModule (freeProP p (Fin n) ⧸ χ.ker)
-    Submodule.span (completedGroupAlgebra ℤ_[p] (freeProP p (Fin n) ⧸ χ.ker))
-      (Additive.ofMul ''
-        ((QuotientGroup.mk : χ.ker → TopologicalAbelianization χ.ker) ''
-          (Subtype.val ⁻¹' insert
-            (freeProPGen p n k * ((isProP_freeProP p (Fin n)).padicPow (freeProPGen p n j) l)⁻¹)
-            (freeProPGen p n '' {i | i ≠ j ∧ i ≠ k})))) = ⊤ :=
-  (isProP_freeProP p (Fin n)).span_completedGroupAlgebraModule_topologicalAbelianization_eq_top _
-    (((finite_range_freeProPGen p n).subset (Set.image_subset_range _ _)).insert _)
-    (ker_eq_topologicalClosure_normalClosure_insert_image_freeProPGen χ hker hχ hj hk).symm
 
 end TauCeti.freeProP
