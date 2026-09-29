@@ -116,10 +116,8 @@ theorem demushkinCharacter_demushkinD0 (hG : IsDemushkin 2 demushkinD0) :
 
 /-- **The image of the canonical character of `D₀` is `ℤ₂ˣ`**, which is `{±1} × U^(2)`
 (`TauCeti.unitsPlusMinus_two`): the invariants of `D₀` are `(n, Im χ) = (3, ℤ₂ˣ)`. -/
-@[simp]
 theorem range_demushkinCharacter_demushkinD0 (hG : IsDemushkin 2 demushkinD0) :
     (demushkinCharacter hG).toMonoidHom.range = ⊤ := by
-  rw [demushkinCharacter_demushkinD0]
-  exact MonoidHom.range_eq_top_of_surjective _ standardD0Orientation_surjective
+  simp
 
 end TauCeti
