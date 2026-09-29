@@ -5,8 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Generator
 public import Mathlib.Algebra.Category.ModuleCat.Presheaf.Pushforward
+public import TauCeti.Algebra.Category.ModuleCat.Monoidal.Free
+public import TauCeti.Algebra.Category.ModuleCat.Presheaf.FreeYoneda
 public import TauCeti.Algebra.Category.ModuleCat.Presheaf.MonoidalClosed
 
 /-!
@@ -19,27 +20,30 @@ characterized by the tensor--Hom adjunction (it is produced by the adjoint funct
 `𝓗om(M, N)` over `U` is a morphism of presheaves of modules `M|_U ⟶ N|_U` on the slice over `U`,
 where restriction to the slice is `PresheafOfModulesOfCommRing.pushforward₀ (Over.forget U) R`.
 
-The computation rests on a restriction--extension correspondence: morphisms
-`M ⊗ (free on `yoneda U`) ⟶ N` are the same as morphisms of restrictions `M|_U ⟶ N|_U`. A
-morphism `ψ` out of the tensor product restricts to the map sending a section `m` over `g : V ⟶ U`
-to `ψ (m ⊗ g)`; conversely a morphism of restrictions `φ` extends to the map sending a pure tensor
-`m ⊗ g` to the value of the component of `φ` at `g` on `m`. Combined with Mathlib's
-`PresheafOfModules.freeYonedaEquiv`, this identifies the sections of the internal Hom with
-morphisms of restrictions, compatibly with restriction along morphisms of `C`. This is the
-sectionwise description of the internal Hom which restriction and stalk comparisons of internal
-Homs of sheaves of modules rest on.
+The computation rests on a restriction--extension correspondence, valid over any category:
+morphisms `M ⊗ freeYoneda R U ⟶ N` out of the tensor product with the free presheaf of modules
+`TauCeti.PresheafOfModules.freeYoneda R U` on the presheaf represented by `U` are the same as
+morphisms of restrictions `M|_U ⟶ N|_U`. A morphism `ψ` out of the tensor product restricts to the
+map sending a section `m` over `g : V ⟶ U` to `ψ (m ⊗ g)`; conversely a morphism of restrictions
+`φ` extends to the map sending a pure tensor `m ⊗ g` to the value of the component of `φ` at `g` on
+`m`. Combined with Mathlib's `PresheafOfModules.freeYonedaEquiv`, this identifies the sections of
+the internal Hom with morphisms of restrictions, compatibly with restriction along morphisms of `C`
+and naturally in both arguments. This is the sectionwise description of the internal Hom which
+restriction and stalk comparisons of internal Homs of sheaves of modules rest on.
 
 ## Main declarations
 
 * `TauCeti.PresheafOfModules.tensorFreeYonedaHomEquiv`: the restriction--extension
-  correspondence `(M ⊗ free (yoneda U) ⟶ N) ≃ (M|_U ⟶ N|_U)`, with the characteristic
+  correspondence `(M ⊗ freeYoneda R U ⟶ N) ≃ (M|_U ⟶ N|_U)`, with the characteristic
   formulas `TauCeti.PresheafOfModules.restrictOfTensorFreeYoneda_app_apply` and
   `TauCeti.PresheafOfModules.tensorFreeYonedaOfRestrict_app_tmul_freeMk` and naturality in both
   arguments;
 * `TauCeti.PresheafOfModules.ihomObjEquiv`: the sections of `𝓗om(M, N)` over `U` are the
   morphisms `M|_U ⟶ N|_U`, characterized by `TauCeti.PresheafOfModules.ihomObjEquiv_apply_app`
-  (a section acts by evaluation of its restrictions) and compatible with restriction along
-  morphisms of `C` by `TauCeti.PresheafOfModules.ihomObjEquiv_map_app`.
+  (a section acts by evaluation of its restrictions), compatible with restriction along
+  morphisms of `C` by `TauCeti.PresheafOfModules.ihomObjEquiv_map_app`, and natural in the target
+  and in the source by `TauCeti.PresheafOfModules.ihomObjEquiv_ihom_map_app` and
+  `TauCeti.PresheafOfModules.ihomObjEquiv_pre_app_app`.
 
 ## References
 
@@ -56,74 +60,16 @@ universe v u
 
 noncomputable section
 
-namespace ModuleCat.MonoidalCategory
-
-variable {S : Type u} [CommRing S] {M₁ M₂ : ModuleCat.{u} S} {X : Type u}
-
-/-- Two morphisms out of the tensor product of a module with a free module agree once they agree
-on pure tensors with basis elements. -/
-theorem tensor_free_hom_ext {f g : M₁ ⊗ (ModuleCat.free S).obj X ⟶ M₂}
-    (h : ∀ (m : M₁) (x : X), f (m ⊗ₜ ModuleCat.freeMk x) = g (m ⊗ₜ ModuleCat.freeMk x)) :
-    f = g := by
-  refine tensor_ext fun m s ↦ ?_
-  have := ModuleCat.free_hom_ext
-    (f := ModuleCat.ofHom (f.hom ∘ₗ TensorProduct.mk S M₁ ((ModuleCat.free S).obj X) m))
-    (g := ModuleCat.ofHom (g.hom ∘ₗ TensorProduct.mk S M₁ ((ModuleCat.free S).obj X) m))
-    (fun x ↦ h m x)
-  exact ConcreteCategory.congr_hom this s
-
-end ModuleCat.MonoidalCategory
-
-namespace PresheafOfModules
-
-variable {C : Type u} [Category.{v} C] {R : Cᵒᵖ ⥤ RingCat.{v}}
-
-/-- The free presheaf of modules on the presheaf of sets represented by `U` restricts the basis
-element indexed by `g : X.unop ⟶ U` along `f : X ⟶ Y` to the basis element indexed by
-`f.unop ≫ g`.
-
-This is not a simp lemma: `PresheafOfModules.freeObj_map` already unfolds the restriction map
-of a free presheaf, so the left-hand side is not in simp normal form. -/
-theorem freeObj_yoneda_map_freeMk {U : C} {X Y : Cᵒᵖ} (f : X ⟶ Y) (g : X.unop ⟶ U) :
-    (freeObj (R := R) (yoneda.obj U)).map f (ModuleCat.freeMk g) =
-      ModuleCat.freeMk (f.unop ≫ g) := by
-  rw [freeObj_map]
-  exact ModuleCat.freeDesc_apply _ _
-
-variable {P : PresheafOfModules.{v} R}
-
-/-- The morphism out of the free presheaf of modules on the presheaf of sets represented by `U`
-corresponding to a section `x` over `U` sends the basis element indexed by `g : V ⟶ U` to the
-restriction of `x` along `g`. -/
-@[simp]
-theorem freeYonedaEquiv_symm_app_freeMk {U V : C} (x : P.obj (op U)) (g : V ⟶ U) :
-    (freeYonedaEquiv.symm x).app (op V) (ModuleCat.freeMk g) = P.map g.op x := by
-  have h : freeYonedaEquiv.symm x = freeObjDesc (yonedaEquiv.symm x) := rfl
-  rw [h, freeObjDesc_app]
-  exact (ModuleCat.freeDesc_apply _ _).trans
-    (yonedaEquiv_symm_app_apply (F := P.presheaf ⋙ forget _) x (op V) g)
-
-end PresheafOfModules
-
-namespace PresheafOfModulesOfCommRing
-
-variable {C : Type u} [SmallCategory C] (R : Cᵒᵖ ⥤ CommRingCat.{u})
-
-/-- The free presheaf of modules on the presheaf of sets represented by `U`, over a presheaf of
-commutative rings. -/
-abbrev freeYoneda (U : C) : PresheafOfModulesOfCommRing.{u} R :=
-  PresheafOfModules.freeObj (yoneda.obj U)
-
-end PresheafOfModulesOfCommRing
-
 namespace TauCeti
 
 namespace PresheafOfModules
 
 open _root_.PresheafOfModules PresheafOfModulesOfCommRing
 
-variable {C : Type u} [SmallCategory C] {R : Cᵒᵖ ⥤ CommRingCat.{u}}
-variable (U : C) (M N : PresheafOfModulesOfCommRing.{u} R)
+section RestrictionExtension
+
+variable {C : Type u} [Category.{v} C] {R : Cᵒᵖ ⥤ CommRingCat.{v}}
+variable (U : C) (M N : PresheafOfModulesOfCommRing.{v} R)
 
 /-- The morphism of restrictions to the slice over `U` induced by a morphism out of the tensor
 product with the free presheaf represented by `U`: over `g : V ⟶ U`, it tensors a section with
@@ -184,7 +130,7 @@ def tensorFreeYonedaOfRestrict
       -- On the pure tensor `m ⊗ g`, both sides are the component of `φ` at `f.unop ≫ g` applied
       -- to the restriction of `m`, respectively the restriction of the component at `g` applied
       -- to `m`; `h` is the naturality of `φ` along `f.unop`, viewed as a morphism of the slice.
-      refine ModuleCat.MonoidalCategory.tensor_free_hom_ext fun m g ↦ ?_
+      refine ModuleCat.tensor_free_hom_ext fun m g ↦ ?_
       have h := PresheafOfModulesOfCommRing.naturality_apply φ (Over.homMk f.unop :
         Over.mk (f.unop ≫ g) ⟶ Over.mk g).op m
       have e₁ : (ModuleCat.freeDesc (M := ModuleCat.of (R.obj W) (M.obj W →ₗ[R.obj W] N.obj W))
@@ -217,7 +163,7 @@ theorem tensorFreeYonedaOfRestrict_app_tmul_freeMk
       (↾fun g : V ⟶ U ↦ componentLinearMap U M N φ g) g)
 
 /-- Restricting to the slice over `U` and tensoring with the free presheaf represented by `U`
-are inverse: morphisms `M ⊗ (free on `yoneda U`) ⟶ N` correspond to morphisms of restrictions
+are inverse: morphisms `M ⊗ freeYoneda R U ⟶ N` correspond to morphisms of restrictions
 `M|_U ⟶ N|_U`. -/
 def tensorFreeYonedaHomEquiv :
     (M ⊗ freeYoneda R U ⟶ N) ≃
@@ -225,8 +171,9 @@ def tensorFreeYonedaHomEquiv :
   toFun := restrictOfTensorFreeYoneda U M N
   invFun := tensorFreeYonedaOfRestrict U M N
   left_inv ψ := by
-    refine hom_ext fun V ↦ ModuleCat.MonoidalCategory.tensor_free_hom_ext fun m g ↦ ?_
-    exact tensorFreeYonedaOfRestrict_app_tmul_freeMk U M N _ m g
+    refine hom_ext fun ⟨V⟩ ↦ ModuleCat.tensor_free_hom_ext fun m g ↦ ?_
+    exact (tensorFreeYonedaOfRestrict_app_tmul_freeMk U M N _ m g).trans
+      (restrictOfTensorFreeYoneda_app_apply U M N ψ g m)
   right_inv φ := by
     refine hom_ext fun X ↦ ?_
     obtain ⟨⟨V, ⟨⟨⟩⟩, g⟩⟩ := X
@@ -250,29 +197,72 @@ theorem tensorFreeYonedaHomEquiv_symm_apply
   rfl
 
 /-- The restriction--extension correspondence is natural in the target. -/
-theorem tensorFreeYonedaHomEquiv_comp {N' : PresheafOfModulesOfCommRing.{u} R}
+theorem tensorFreeYonedaHomEquiv_comp {N' : PresheafOfModulesOfCommRing.{v} R}
     (ψ : M ⊗ freeYoneda R U ⟶ N) (α : N ⟶ N') :
     tensorFreeYonedaHomEquiv U M N' (ψ ≫ α) =
       tensorFreeYonedaHomEquiv U M N ψ ≫ (pushforward₀ (Over.forget U) R).map α := by
   refine hom_ext fun X ↦ ?_
   obtain ⟨⟨V, ⟨⟨⟩⟩, g⟩⟩ := X
   refine ModuleCat.hom_ext (LinearMap.ext fun (m : M.obj (op V)) ↦ ?_)
-  exact restrictOfTensorFreeYoneda_app_apply U M N' _ g m
+  -- The pushforward of `α` has the components of `α`, by definition of `pushforward₀`.
+  have hα (y : N.obj (op V)) :
+      ((pushforward₀ (Over.forget U) R).map α).app' (op (Over.mk g)) y = α.app' (op V) y := rfl
+  rw [tensorFreeYonedaHomEquiv_apply, tensorFreeYonedaHomEquiv_apply]
+  -- The left-hand side is `(ψ ≫ α) (m ⊗ g) = α (ψ (m ⊗ g))`.
+  refine (restrictOfTensorFreeYoneda_app_apply U M N' (ψ ≫ α) g m).trans ?_
+  refine (congrArg (fun φ ↦ φ (m ⊗ₜ ModuleCat.freeMk g)) (comp_app ψ α (op V))).trans ?_
+  refine (ModuleCat.comp_apply _ _ _).trans ?_
+  -- The right-hand side is the pushforward of `α` applied to the component of the restriction of
+  -- `ψ` at `g`, which is `α (ψ (m ⊗ g))` as well.
+  refine (congrArg (fun y ↦ α.app' (op V) y)
+    (restrictOfTensorFreeYoneda_app_apply U M N ψ g m)).symm.trans ?_
+  refine (hα _).symm.trans ?_
+  exact ((congrArg (fun φ ↦ φ m) (comp_app (restrictOfTensorFreeYoneda U M N ψ)
+    ((pushforward₀ (Over.forget U) R).map α) (op (Over.mk g)))).trans
+    (ModuleCat.comp_apply _ _ _)).symm
 
 /-- The restriction--extension correspondence is natural in the source. -/
-theorem tensorFreeYonedaHomEquiv_whiskerRight_comp {M' : PresheafOfModulesOfCommRing.{u} R}
+theorem tensorFreeYonedaHomEquiv_whiskerRight_comp {M' : PresheafOfModulesOfCommRing.{v} R}
     (β : M' ⟶ M) (ψ : M ⊗ freeYoneda R U ⟶ N) :
     tensorFreeYonedaHomEquiv U M' N (β ▷ freeYoneda R U ≫ ψ) =
       (pushforward₀ (Over.forget U) R).map β ≫ tensorFreeYonedaHomEquiv U M N ψ := by
   refine hom_ext fun X ↦ ?_
   obtain ⟨⟨V, ⟨⟨⟩⟩, g⟩⟩ := X
   refine ModuleCat.hom_ext (LinearMap.ext fun (m : M'.obj (op V)) ↦ ?_)
-  exact restrictOfTensorFreeYoneda_app_apply U M' N _ g m
+  -- The pushforward of `β` has the components of `β`, by definition of `pushforward₀`.
+  have hβ (y : M'.obj (op V)) :
+      ((pushforward₀ (Over.forget U) R).map β).app' (op (Over.mk g)) y = β.app' (op V) y := rfl
+  rw [tensorFreeYonedaHomEquiv_apply, tensorFreeYonedaHomEquiv_apply]
+  -- The left-hand side is `(β ▷ _ ≫ ψ) (m ⊗ g) = ψ (β m ⊗ g)`.
+  refine (restrictOfTensorFreeYoneda_app_apply U M' N _ g m).trans ?_
+  refine (congrArg (fun φ ↦ φ (m ⊗ₜ ModuleCat.freeMk g))
+    (comp_app (β ▷ freeYoneda R U) ψ (op V))).trans ?_
+  refine (ModuleCat.comp_apply _ _ _).trans ?_
+  refine (congrArg (fun φ : (M' ⊗ freeYoneda R U).obj (op V) ⟶ (M ⊗ freeYoneda R U).obj (op V) ↦
+    ψ.app' (op V) (φ (m ⊗ₜ ModuleCat.freeMk g)))
+    (PresheafOfModulesOfCommRing.whiskerRight_app β (freeYoneda R U) (op V))).trans ?_
+  refine (congrArg (fun y ↦ ψ.app' (op V) y)
+    (ModuleCat.MonoidalCategory.whiskerRight_apply _ _ m (ModuleCat.freeMk g))).trans ?_
+  -- The right-hand side is the component of the restriction of `ψ` at `g` applied to the
+  -- pushforward of `β` applied to `m`, which is `ψ (β m ⊗ g)` as well.
+  refine (restrictOfTensorFreeYoneda_app_apply U M N ψ g (β.app' (op V) m)).symm.trans ?_
+  refine (congrArg (fun y ↦ (restrictOfTensorFreeYoneda U M N ψ).app' (op (Over.mk g)) y)
+    (hβ m)).symm.trans ?_
+  exact ((congrArg (fun φ ↦ φ m) (comp_app ((pushforward₀ (Over.forget U) R).map β)
+    (restrictOfTensorFreeYoneda U M N ψ) (op (Over.mk g)))).trans
+    (ModuleCat.comp_apply _ _ _)).symm
+
+end RestrictionExtension
+
+section Sections
+
+variable {C : Type u} [SmallCategory C] {R : Cᵒᵖ ⥤ CommRingCat.{u}}
+variable (U : C) (M N : PresheafOfModulesOfCommRing.{u} R)
 
 /-- The sections over `U` of the internal Hom `𝓗om(M, N)` are the morphisms of presheaves of
 modules `M|_U ⟶ N|_U` on the slice over `U`: a section corresponds to a morphism out of the free
 presheaf represented by `U`, hence, by the tensor--Hom adjunction, to a morphism out of
-`M ⊗ (free on yoneda U)`, and these are the morphisms of restrictions. -/
+`M ⊗ freeYoneda R U`, and these are the morphisms of restrictions. -/
 def ihomObjEquiv :
     ((ihom M).obj N).obj (op U) ≃
       ((pushforward₀ (Over.forget U) R).obj M ⟶ (pushforward₀ (Over.forget U) R).obj N) :=
@@ -285,15 +275,20 @@ uncurrying the corresponding morphism out of the free presheaf represented by `U
 restricting. -/
 theorem ihomObjEquiv_apply (s : ((ihom M).obj N).obj (op U)) :
     ihomObjEquiv U M N s =
-      restrictOfTensorFreeYoneda U M N (uncurry (freeYonedaEquiv.symm s)) := by
-  rfl
+      restrictOfTensorFreeYoneda U M N (uncurry (freeYonedaEquiv.symm s)) :=
+  (Equiv.trans_apply _ _ _).trans ((Equiv.trans_apply _ _ _).trans
+    ((congrArg (tensorFreeYonedaHomEquiv U M N) (homEquiv_symm_apply_eq _)).trans
+      (tensorFreeYonedaHomEquiv_apply U M N _)))
 
 /-- The section of `𝓗om(M, N)` corresponding to a morphism of restrictions is obtained by
 extending it to the tensor product with the free presheaf represented by `U` and currying. -/
 theorem ihomObjEquiv_symm_apply
     (φ : (pushforward₀ (Over.forget U) R).obj M ⟶ (pushforward₀ (Over.forget U) R).obj N) :
-    (ihomObjEquiv U M N).symm φ = freeYonedaEquiv (curry (tensorFreeYonedaOfRestrict U M N φ)) := by
-  rfl
+    (ihomObjEquiv U M N).symm φ = freeYonedaEquiv (curry (tensorFreeYonedaOfRestrict U M N φ)) :=
+  (Equiv.symm_trans_apply _ _ _).trans ((Equiv.symm_symm_apply _ _).trans
+    (congrArg freeYonedaEquiv ((Equiv.symm_trans_apply _ _ _).trans
+      ((Equiv.symm_symm_apply _ _).trans ((homEquiv_apply_eq _).trans
+        (congrArg (fun f ↦ curry f) (tensorFreeYonedaHomEquiv_symm_apply U M N φ)))))))
 
 /-- The morphism of restrictions corresponding to a section `s` of `𝓗om(M, N)` over `U` acts at
 `g : V ⟶ U` by evaluating the restriction of `s` along `g`.
@@ -323,6 +318,32 @@ theorem ihomObjEquiv_map_app (s : ((ihom M).obj N).obj (op U)) {V : C} (g : V �
   exact congrArg (fun x : PresheafOfModulesOfCommRing.obj ((ihom M).obj N) (op W) ↦
     ((ihom.ev M).app N).app' (op W) (TensorProduct.tmul (R.obj (op W)) m x))
     (map_comp_apply ((ihom M).obj N) g.op h.op s).symm
+
+/-- The sections equivalence is natural in the target: applying `𝓗om(M, α)` to a section
+corresponds to postcomposing the morphism of restrictions with the restriction of `α`. -/
+theorem ihomObjEquiv_ihom_map_app {N' : PresheafOfModulesOfCommRing.{u} R} (α : N ⟶ N')
+    (s : ((ihom M).obj N).obj (op U)) :
+    ihomObjEquiv U M N' (((ihom M).map α).app (op U) s) =
+      ihomObjEquiv U M N s ≫ (pushforward₀ (Over.forget U) R).map α := by
+  rw [ihomObjEquiv_apply, ihomObjEquiv_apply, ← tensorFreeYonedaHomEquiv_apply,
+    ← tensorFreeYonedaHomEquiv_apply, ← tensorFreeYonedaHomEquiv_comp]
+  exact congrArg (tensorFreeYonedaHomEquiv U M N')
+    ((congrArg (fun f ↦ uncurry f) (freeYonedaEquiv_symm_comp s ((ihom M).map α)).symm).trans
+      (uncurry_natural_right _ _))
+
+/-- The sections equivalence is natural in the source: applying `𝓗om(β, N)` to a section
+corresponds to precomposing the morphism of restrictions with the restriction of `β`. -/
+theorem ihomObjEquiv_pre_app_app {M' : PresheafOfModulesOfCommRing.{u} R} (β : M' ⟶ M)
+    (s : ((ihom M).obj N).obj (op U)) :
+    ihomObjEquiv U M' N (((pre β).app N).app (op U) s) =
+      (pushforward₀ (Over.forget U) R).map β ≫ ihomObjEquiv U M N s := by
+  rw [ihomObjEquiv_apply, ihomObjEquiv_apply, ← tensorFreeYonedaHomEquiv_apply,
+    ← tensorFreeYonedaHomEquiv_apply, ← tensorFreeYonedaHomEquiv_whiskerRight_comp]
+  exact congrArg (tensorFreeYonedaHomEquiv U M' N)
+    ((congrArg (fun f ↦ uncurry f) (freeYonedaEquiv_symm_comp s ((pre β).app N)).symm).trans
+      (uncurry_pre_app _ _ _))
+
+end Sections
 
 end PresheafOfModules
 
