@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.GroupCohomology.LowDegree
 public import TauCeti.RepresentationTheory.Homological.TateCohomology.Cup.TrivialInt
 public import TauCeti.RepresentationTheory.Homological.TateCohomology.IsoCriterion
 public import TauCeti.RepresentationTheory.Homological.TateCohomology.Restriction.Basic
@@ -33,26 +32,23 @@ The cup product with a degree-two class is not induced by a morphism of represen
 after two upward dimension shifts it is: writing `N₂` for the twice-shifted representation,
 `u` corresponds to the class of an invariant `a ∈ H⁰(G, N₂)`, and cup product with `u` is, up to
 the dimension-shifting isomorphisms, the map induced on Tate cohomology by `ℤ ⟶ ℤ ⊗ N₂`,
-`1 ↦ 1 ⊗ a` (`cup_dimensionShiftUpTwoIso_hom`). Tate's isomorphism criterion for a morphism of
-representations (`TauCeti.TateCohomology.map_bijective_of_forall_isPGroup`) then reduces the
-theorem to the three degrees `-1`, `0`, `1` on subgroups of prime-power order. In degree `-1` the
-target vanishes because `H¹(S, N) = 0`, in degree `1` the source `H¹(S, ℤ)` vanishes, and in
-degree `0` the map `H⁰(S, ℤ) → H⁰(S, ℤ ⊗ N₂)` is a bijection between groups of order `|S|` by
-the corestriction argument above.
+`1 ↦ 1 ⊗ a` (`TauCeti.TateCohomology.cup_dimensionShiftUpTwoIso_hom`). Tate's isomorphism
+criterion for a morphism of representations
+(`TauCeti.TateCohomology.map_bijective_of_forall_isPGroup`) then reduces the theorem to the three
+degrees `-1`, `0`, `1` on subgroups of prime-power order. In degree `-1` the target vanishes
+because `H¹(S, N) = 0`, in degree `1` the source `H¹(S, ℤ)` vanishes
+(`TauCeti.TateCohomology.isZero_tateCohomology_one_res_trivial_int`), and in degree `0` the map
+`H⁰(S, ℤ) → H⁰(S, ℤ ⊗ N₂)` is a bijection between groups of order `|S|` by the corestriction
+argument above. On the whole group only the injectivity of the degree-zero cup product is used, so
+that is the hypothesis of the generic statement.
 
 ## Main statements
 
-* `TauCeti.TateCohomology.dimensionShiftUpTwoIso`: two upward dimension shifts,
-  `H⁰(G, N₂) ≅ H²(G, N)`.
-* `TauCeti.TateCohomology.cup_dimensionShiftUpTwoIso_hom`: cup product with a class shifted
-  twice is the degree-zero cup product, shifted twice.
-* `TauCeti.TateCohomology.trivialResIso`: Tate cohomology of the trivial integral representation
-  of a subgroup, as Tate cohomology of the restricted trivial representation.
 * `TauCeti.TateCohomology.map_res_zero_bijective_of_injective`: the degree-zero step on a
   subgroup, by the corestriction argument.
-* `TauCeti.TateCohomology.cup_bijective_of_cupTrivialInt_bijective`,
+* `TauCeti.TateCohomology.cup_bijective_of_cupTrivialInt_injective`,
   `TauCeti.TateCohomology.cup_bijective_of_forall_isPGroup`: Tate's theorem, with the degree-zero
-  bijection respectively the generation and order of `H²(G, N)` as hypothesis.
+  injection respectively the generation and order of `H²(G, N)` as hypothesis.
 
 ## References
 
@@ -66,53 +62,9 @@ the corestriction argument above.
 
 public noncomputable section
 
-universe u
-
 open CategoryTheory Limits MonoidalCategory Rep
 
 namespace TauCeti.TateCohomology
-
-section DimensionShift
-
-variable {k G : Type u} [CommRing k] [Group G] [Fintype G]
-
-/-- Two upward dimension shifts identify degree-zero Tate cohomology of the twice-shifted
-representation with degree-two Tate cohomology of the representation itself. -/
-def dimensionShiftUpTwoIso (N : Rep k G) :
-    tateCohomology (dimensionShiftUp (dimensionShiftUp N)) 0 ≅ tateCohomology N 2 :=
-  dimensionShiftUpIso (dimensionShiftUp N) 0 ≪≫ dimensionShiftUpIso N 1
-
-/-- The double shift is the composite of the two upward dimension shifts. -/
-theorem dimensionShiftUpTwoIso_hom (N : Rep k G) :
-    (dimensionShiftUpTwoIso N).hom =
-      (dimensionShiftUpIso (dimensionShiftUp N) 0).hom ≫ (dimensionShiftUpIso N 1).hom := by
-  rw [dimensionShiftUpTwoIso, Iso.trans_hom]
-
-/-- Cup product with a degree-two class obtained by shifting a degree-zero class `z` twice is the
-degree-zero cup product with `z`, followed by the two tensored dimension shifts. The two signs
-`(-1)^p` of the shifting rule cancel. -/
-theorem cup_dimensionShiftUpTwoIso_hom (M N : Rep k G) (p : ℤ) (x : tateCohomology M p)
-    (z : tateCohomology (dimensionShiftUp (dimensionShiftUp N)) 0) :
-    cup M N p 2 (p + 2) rfl x ((dimensionShiftUpTwoIso N).hom z) =
-      (tensorDimensionShiftUpIso N M (p + 1) (p + 2) (by omega)).hom
-        ((tensorDimensionShiftUpIso (dimensionShiftUp N) M p (p + 1) rfl).hom
-          (cupH0 M (dimensionShiftUp (dimensionShiftUp N)) p x z)) := by
-  -- The first shift, in bidegree `(p, 0 + 1)`; `0 + 1` is `1` by definition.
-  have h₁ : cup M (dimensionShiftUp N) p 1 (p + 1) rfl x
-        ((dimensionShiftUpIso (dimensionShiftUp N) 0).hom z) =
-      p.negOnePow • (tensorDimensionShiftUpIso (dimensionShiftUp N) M p (p + 1) rfl).hom
-        (cupH0 M (dimensionShiftUp (dimensionShiftUp N)) p x z) := by
-    refine (cup_dimensionShiftUpIso_hom M (dimensionShiftUp N) le_rfl (add_zero p) rfl x
-      z).trans ?_
-    rw [cup_zero_right]
-  -- The second shift, in bidegree `(p, 1 + 1)`; `1 + 1` is `2` by definition.
-  have h₂ := cup_dimensionShiftUpIso_hom M N (q := 1) (r := p + 2) zero_le_one rfl (by omega) x
-    ((dimensionShiftUpIso (dimensionShiftUp N) 0).hom z)
-  rw [dimensionShiftUpTwoIso_hom, ModuleCat.comp_apply]
-  refine h₂.trans ?_
-  rw [h₁, map_zsmul_unit, negOnePow_smul_negOnePow_smul]
-
-end DimensionShift
 
 section Subgroup
 
@@ -121,44 +73,6 @@ variable {G : Type} [Group G] [Finite G]
 attribute [local instance] Subgroup.fintypeOfFinite
 
 /-! ### Trivial integral coefficients on a subgroup -/
-
-omit [Finite G] in
-/-- The identity of `ℤ` intertwines the trivial representation of a subgroup `S` of `G` with the
-restriction to `S` of the trivial representation of `G`. -/
-theorem isIntertwiningMap_trivial_res (S : Subgroup G) :
-    (Rep.trivial ℤ S ℤ).ρ.IsIntertwiningMap
-      ((Rep.res S.subtype (Rep.trivial ℤ G ℤ)).ρ.comp ((MulEquiv.refl S : S ≃* S) : S →* S))
-      (LinearEquiv.refl ℤ ℤ) :=
-  ⟨fun _ _ ↦ rfl⟩
-
-/-- Tate cohomology of the trivial integral representation of a subgroup `S` of `G`, identified
-with Tate cohomology of the restriction to `S` of the trivial integral representation of `G`. -/
-def trivialResIso (S : Subgroup G) (n : ℤ) :
-    tateCohomology (Rep.trivial ℤ S ℤ) n ≅
-      tateCohomology (Rep.res S.subtype (Rep.trivial ℤ G ℤ)) n :=
-  mapIso (e := MulEquiv.refl S) (e' := LinearEquiv.refl ℤ ℤ) (isIntertwiningMap_trivial_res S) n
-
-/-- The comparison `trivialResIso` is the Tate map attached to the compatible pair
-`isIntertwiningMap_trivial_res`. -/
-theorem trivialResIso_hom (S : Subgroup G) (n : ℤ) :
-    (trivialResIso S n).hom =
-      map (e := MulEquiv.refl S) (isIntertwiningMap_trivial_res S) n := by
-  rw [trivialResIso, mapIso_hom]
-
-/-- Degree-zero Tate cohomology of the restricted trivial integral representation has the order
-of the subgroup. -/
-theorem natCard_tateCohomology_zero_res_trivial_int_eq_card (S : Subgroup G) :
-    Nat.card (tateCohomology (Rep.res S.subtype (Rep.trivial ℤ G ℤ)) 0) = Nat.card S :=
-  (Nat.card_congr (trivialResIso S 0).toLinearEquiv.toEquiv).symm.trans
-    (natCard_tateCohomology_zero_trivial_int_eq_card S)
-
-/-- Degree-one Tate cohomology of the restricted trivial integral representation vanishes: it is
-`H¹(S, ℤ) = Hom(S, ℤ) = 0`. -/
-theorem isZero_tateCohomology_one_res_trivial_int (S : Subgroup G) :
-    IsZero (tateCohomology (Rep.res S.subtype (Rep.trivial ℤ G ℤ)) 1) :=
-  ((TauCeti.groupCohomology.isZero_H1_of_isTrivial (Rep.trivial ℤ S ℤ)).of_iso
-    ((TateCohomology.isoGroupCohomology 1).app (Rep.trivial ℤ S ℤ))).of_iso
-      (trivialResIso S 1).symm
 
 /-- The invariant `1` of the restricted trivial integral representation. -/
 private def resTrivialOne (S : Subgroup G) :
@@ -251,17 +165,17 @@ private def resTensorDimensionShiftUpTwoIso (N : Rep ℤ G) (S : Subgroup G) (n 
 
 /-! ### Tate's theorem -/
 
-/-- **Tate's theorem**, with the degree-zero bijection as hypothesis. Let `G` be a finite group,
+/-- **Tate's theorem**, with the degree-zero injection as hypothesis. Let `G` be a finite group,
 `N` a representation of `G` over `ℤ` and `u ∈ H²(G, N)`. Suppose that
 
-* cup product with `u` is a bijection `H⁰(G, ℤ) → H²(G, N)`;
+* cup product with `u` is injective `H⁰(G, ℤ) → H²(G, N)`;
 * for every subgroup `S` of `G` of prime-power order, `H¹(S, N) = 0` and `H²(S, N)` has order
   `|S|`.
 
 Then cup product with `u` is a bijection `H^r(G, ℤ) → H^{r+2}(G, ℤ ⊗ N)` in every integer degree
 `r`. -/
-theorem cup_bijective_of_cupTrivialInt_bijective (N : Rep ℤ G) (u : tateCohomology N 2)
-    (hbij : Function.Bijective (cupTrivialInt N u))
+theorem cup_bijective_of_cupTrivialInt_injective (N : Rep ℤ G) (u : tateCohomology N 2)
+    (hinj₀ : Function.Injective (cupTrivialInt N u))
     (h1 : ∀ (p : ℕ) [Fact p.Prime] (S : Subgroup G) [Fintype S], IsPGroup p S →
       IsZero (tateCohomology (Rep.res S.subtype N) 1))
     (hcard : ∀ (p : ℕ) [Fact p.Prime] (S : Subgroup G) [Fintype S], IsPGroup p S →
@@ -287,15 +201,15 @@ theorem cup_bijective_of_cupTrivialInt_bijective (N : Rep ℤ G) (u : tateCohomo
     rw [hu, cup_dimensionShiftUpTwoIso_hom, cupH0_H0π]
     -- Unfold the function composition.
     rfl
-  -- In degree zero on `G`, cup product with `u` is bijective, so the map induced by `f` is
+  -- In degree zero on `G`, cup product with `u` is injective, so the map induced by `f` is
   -- injective there.
   have hinj : Function.Injective ((tateCohomologyFunctor 0).map f) := by
     have : ⇑(cupTrivialInt N u) = ⇑((tateCohomologyFunctor 2).map (λ_ N).hom) ∘
         fun x : tateCohomology (Rep.trivial ℤ G ℤ) 0 ↦
           cup (Rep.trivial ℤ G ℤ) N 0 2 (0 + 2) rfl x u :=
       funext fun x ↦ cupTrivialInt_apply N u x
-    rw [this, hcup 0] at hbij
-    exact hbij.injective.of_comp.of_comp.of_comp
+    rw [this, hcup 0] at hinj₀
+    exact hinj₀.of_comp.of_comp.of_comp
   rw [hcup r]
   refine (ConcreteCategory.bijective_of_isIso _).comp
     ((ConcreteCategory.bijective_of_isIso _).comp ?_)
@@ -343,8 +257,9 @@ theorem cup_bijective_of_forall_isPGroup (N : Rep ℤ G) (u : tateCohomology N 2
     (r r' : ℤ) (h : r + 2 = r') :
     Function.Bijective fun x : tateCohomology (Rep.trivial ℤ G ℤ) r ↦
       cup (Rep.trivial ℤ G ℤ) N r 2 r' h x u :=
-  cup_bijective_of_cupTrivialInt_bijective N u
-    (cupTrivialInt_bijective N u hgen (hcardG.trans Nat.card_eq_fintype_card)) h1 hcard r r' h
+  cup_bijective_of_cupTrivialInt_injective N u
+    (cupTrivialInt_bijective N u hgen (hcardG.trans Nat.card_eq_fintype_card)).injective h1 hcard
+    r r' h
 
 end TateTheorem
 
