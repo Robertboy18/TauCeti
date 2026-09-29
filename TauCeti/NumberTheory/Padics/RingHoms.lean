@@ -33,6 +33,8 @@ to a `p`-adic exponent: `g ^ x.appr n` does not change when `n` grows past the o
 * `PadicInt.continuous_toZModPow`, `PadicInt.continuous_toZMod`: truncation modulo `p ^ n` and
   reduction modulo `p` are continuous, `ZMod (p ^ n)` and `ZMod p` carrying the discrete
   topology.
+* `PadicInt.toZMod_eq_zero_iff_dvd`, `PadicInt.toZModPow_eq_zero_iff_dvd`: the kernels of
+  reduction and truncation, as divisibility statements.
 * `PadicInt.cast_toZModPow_eq_toZMod`: reducing the truncation modulo `p ^ n` further modulo `p`
   recovers `toZMod`.
 * `PadicInt.appr_modEq`, `PadicInt.appr_add_modEq`, `PadicInt.appr_mul_modEq`,
@@ -104,6 +106,15 @@ theorem continuous_toZMod : Continuous (toZMod : ℤ_[p] → ZMod p) := by
       ker_toZModPow, maximalIdeal_eq_span_p, pow_one]
   rw [h]
   exact (continuous_toZModPow 1).isOpen_preimage _ (isOpen_discrete _)
+
+/-- A `p`-adic integer reduces to `0` modulo `p` exactly when `p` divides it. -/
+theorem toZMod_eq_zero_iff_dvd (x : ℤ_[p]) : toZMod x = 0 ↔ (p : ℤ_[p]) ∣ x := by
+  rw [← RingHom.mem_ker, ker_toZMod, maximalIdeal_eq_span_p, Ideal.mem_span_singleton]
+
+/-- A `p`-adic integer truncates to `0` modulo `p ^ n` exactly when `p ^ n` divides it. -/
+theorem toZModPow_eq_zero_iff_dvd (n : ℕ) (x : ℤ_[p]) :
+    toZModPow n x = 0 ↔ (p : ℤ_[p]) ^ n ∣ x := by
+  rw [← RingHom.mem_ker, ker_toZModPow, Ideal.mem_span_singleton]
 
 /-- Reducing the truncation `x mod p ^ n` further modulo `p` gives `x mod p`. -/
 @[simp]
