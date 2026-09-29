@@ -8,35 +8,36 @@ module
 public import Mathlib.Algebra.Ring.GeomSum
 public import Mathlib.Topology.Algebra.Group.Subgroup
 public import Mathlib.Topology.Separation.Basic
-import TauCeti.RepresentationTheory.Homological.ContCohomology.LowDegree
 
 /-!
-# Crossed homomorphisms twisted by a character
+# Crossed homomorphisms twisted by a unit-valued function
 
-Let `H` be a group, `R` a semiring and `χ : H →* Rˣ` a character. A function `F : H → R` is a
-**crossed homomorphism** for `χ` when
+Let `H` be a group, `R` a semiring and `χ : H → Rˣ` a unit-valued function. A function
+`F : H → R` is a **crossed homomorphism** for `χ` when
 
   `F (x * y) = χ x * F y + F x`
 
-for all `x y : H` (`TauCeti.IsCrossedHom`). These are the `1`-cocycles of `H` with values in `R`
-on which `H` acts through `χ`, written without a module structure on `R`: for `R = ℤ_p` and a
-continuous character `χ : G →ₜ* ℤ_pˣ` of a pro-`p` group, the continuous crossed homomorphisms
-`G → ℤ_p` for `χ` are the compatible systems of continuous `1`-cocycles with values in the twisted
-coefficients `I(χ)/pⁱ`, and their values on a minimal generating tuple are what Labute's
-prescription property of `χ` prescribes.
+for all `x y : H` (`TauCeti.IsCrossedHom`). The predicate itself only reads the values of `χ`, so
+it is stated for any `χ` with a `FunLike` coercion to `H → Rˣ`; when `χ : H →* Rˣ` is a character
+(a monoid homomorphism), `H` acts on `R` through `χ` and the crossed homomorphisms for `χ` are
+exactly the `1`-cocycles of `H` with values in this action, written without a module structure on
+`R`. For `R = ℤ_p` and a continuous character `χ : G →ₜ* ℤ_pˣ` of a pro-`p` group, the continuous
+crossed homomorphisms `G → ℤ_p` for `χ` are the compatible systems of continuous `1`-cocycles with
+values in the twisted coefficients `I(χ)/pⁱ`, and their values on a minimal generating tuple are
+what Labute's prescription property of `χ` prescribes.
 
 This file records the elementary calculus of crossed homomorphisms. The definition, the cocycle
-identity and the composite with a homomorphism need only a semiring; the values at `1`, at an
-inverse and at a power, the value on a product of elements on which the character is trivial, and
-the fact that two continuous crossed homomorphisms for the same character into a `T1` topological
-ring agreeing on a topological generating set of `H` are equal, which is the corresponding
-statement for continuous `1`-cocycles
-(`TauCeti.ContCohomology.eq_of_mem_Z1_of_eqOn_of_topologicalClosure_closure_eq_top`) read
-through the action of `H` on `R` by `χ`, use additive inverses and are stated for a ring.
+identity and the composite with a homomorphism need only a semiring and an arbitrary unit-valued
+`χ`; the values at `1`, at an inverse and at a power, the value on a product of elements on which
+`χ` is trivial, and the fact that two continuous crossed homomorphisms for the same `χ` into a
+`T1` topological ring agreeing on a topological generating set of `H` are equal (the analogue for
+crossed homomorphisms of the uniqueness of continuous `1`-cocycles on a topological generating
+set) use additive inverses and the multiplicativity of `χ`, and are stated for a ring and a
+character `χ`.
 
 ## Main definitions
 
-* `TauCeti.IsCrossedHom`: `F : H → R` is a crossed homomorphism for `χ : H →* Rˣ`.
+* `TauCeti.IsCrossedHom`: `F : H → R` is a crossed homomorphism for the unit-valued `χ`.
 
 ## Main results
 
@@ -62,9 +63,10 @@ section Semiring
 
 variable [Semiring R] {F' : Type*} [FunLike F' H Rˣ]
 
-/-- A function `F : H → R` is a **crossed homomorphism** for the character `χ : H →* Rˣ` when
-`F (x * y) = χ x * F y + F x` for all `x y : H`: it is a `1`-cocycle for the action of `H` on `R`
-through `χ`. -/
+/-- A function `F : H → R` is a **crossed homomorphism** for the unit-valued function `χ` when
+`F (x * y) = χ x * F y + F x` for all `x y : H`. Here `χ` is any function `H → Rˣ` (via a `FunLike`
+coercion); when `χ : H →* Rˣ` is a character, this is the `1`-cocycle condition for the action of
+`H` on `R` through `χ`. -/
 def IsCrossedHom (χ : F') (F : H → R) : Prop :=
   ∀ x y, F (x * y) = (χ x : R) * F y + F x
 
@@ -84,7 +86,7 @@ theorem map_mul (x y : H) : F (x * y) = (χ x : R) * F y + F x :=
   hF x y
 
 /-- The composite of a crossed homomorphism for `χ` with a homomorphism `φ` is a crossed
-homomorphism for the character `χ ∘ φ`. -/
+homomorphism for the unit-valued function `χ ∘ φ`. -/
 theorem comp {H' : Type*} [Group H'] {F'' : Type*} [FunLike F'' H' H] [MonoidHomClass F'' H' H]
     (φ : F'') {F''' : Type*} [FunLike F''' H' Rˣ] {χ' : F'''} (hχ' : ∀ x, χ' x = χ (φ x)) :
     IsCrossedHom χ' (F ∘ φ) := fun x y ↦ by
@@ -155,16 +157,30 @@ variable [TopologicalSpace H] [IsTopologicalGroup H] [TopologicalSpace R] [IsTop
 
 omit hF in
 /-- **Two continuous crossed homomorphisms for the same character agreeing on a topological
-generating set are equal.** They are continuous `1`-cocycles for the action of `H` on `R` through
-`χ`, and continuous `1`-cocycles are determined by their values on a topological generating set. -/
+generating set are equal.** Their difference is a continuous crossed homomorphism whose zero locus
+is a closed subgroup containing the generating set, hence all of `H`. -/
 theorem eq_of_eqOn_of_topologicalClosure_closure_eq_top {F₁ F₂ : H → R} (h₁ : IsCrossedHom χ F₁)
     (h₂ : IsCrossedHom χ F₂) (hc₁ : Continuous F₁) (hc₂ : Continuous F₂) {s : Set H}
     (hs : (Subgroup.closure s).topologicalClosure = ⊤) (h : Set.EqOn F₁ F₂ s) : F₁ = F₂ := by
-  -- `R` with the action `x • r = χ x * r`, for which the crossed homomorphisms are the cocycles.
-  let _ : DistribMulAction H R := DistribMulAction.compHom R (χ : H →* Rˣ)
-  exact ContCohomology.eq_of_mem_Z1_of_eqOn_of_topologicalClosure_closure_eq_top
-    (ContCohomology.mem_Z1_iff.2 ⟨hc₁, fun x y ↦ h₁ x y⟩)
-    (ContCohomology.mem_Z1_iff.2 ⟨hc₂, fun x y ↦ h₂ x y⟩) hs h
+  have hsub : IsCrossedHom χ (F₁ - F₂) := fun x y ↦ by
+    simp only [Pi.sub_apply, h₁ x y, h₂ x y, mul_sub, add_sub_add_comm]
+  -- The zero locus of the difference is a subgroup: the cocycle identity closes it under
+  -- multiplication and the inverse formula closes it under inversion.
+  let Z : Subgroup H :=
+    { carrier := {g | (F₁ - F₂) g = 0}
+      one_mem' := hsub.map_one
+      mul_mem' := fun {g g'} hg hg' ↦ by
+        simp only [Set.mem_ofPred_eq] at hg hg' ⊢
+        rw [hsub.map_mul, hg, hg', mul_zero, add_zero]
+      inv_mem' := fun {g} hg ↦ by
+        simp only [Set.mem_ofPred_eq] at hg ⊢
+        rw [hsub.map_inv, hg, mul_zero] }
+  have hZ : IsClosed (Z : Set H) := isClosed_singleton.preimage (hc₁.sub hc₂)
+  have hle : (Subgroup.closure s).topologicalClosure ≤ Z :=
+    Subgroup.topologicalClosure_minimal _
+      ((Subgroup.closure_le _).2 fun g hg ↦ sub_eq_zero.2 (h hg)) hZ
+  funext g
+  exact sub_eq_zero.1 (hle (hs ▸ Subgroup.mem_top g))
 
 end Topology
 
