@@ -7,8 +7,6 @@ module
 
 public import TauCeti.NumberTheory.Padics.GeneratedClosedSubgroups
 public import TauCeti.NumberTheory.Padics.PadicIntegers
-public import TauCeti.NumberTheory.Padics.PrincipalUnits
-public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicInt.Basic
 
 /-!
