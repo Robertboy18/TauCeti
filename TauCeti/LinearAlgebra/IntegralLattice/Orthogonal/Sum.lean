@@ -20,8 +20,9 @@ its canonical carrier maps and product bases, and proves several invariant laws:
 Gram matrices are block diagonal, determinant and discriminant are multiplicative, and evenness
 and nondegeneracy are componentwise. Orthogonal sums are functorial under lattice isometries and
 are associative and commutative up to canonical lattice isometry, and the product of the isometry
-groups `O(L) × O(M)` embeds in `O(L ⊕ M)`, acting componentwise; the embedding is not onto, the
-factor swap of `L ⊕ L` lying outside its range. The radical is the product of the component
+groups `O(L) × O(M)` embeds in `O(L ⊕ M)`, acting componentwise. This embedding need not be onto:
+when the ambient space of `L` is nonzero, the factor swap of `L ⊕ L` is a self-isometry of `L ⊕ L`
+outside the range of `O(L) × O(L) → O(L ⊕ L)`. The radical is the product of the component
 radicals, and the signature is componentwise additive.
 
 ## Main definitions
@@ -653,9 +654,9 @@ theorem orthogonalSumHom_injective (L : IntegralLattice V) (M : IntegralLattice 
   · simpa only [orthogonalSumHom_apply, orthogonalSum_apply] using
       congrArg (fun e : Isometry (L.orthogonalSum M) (L.orthogonalSum M) ↦ (e (0, y)).2) h
 
-/-- The obstruction to `O(L) × O(L) = O(L ⊕ L)`: for a nonzero lattice the factor swap is a
-self-isometry of `L ⊕ L` preserving neither summand, so it is not in the image of `O(L) × O(L)`.
--/
+/-- The obstruction to `O(L) × O(L) = O(L ⊕ L)`: when the ambient space `V` is nonzero (in
+particular when `L` itself is nonzero), the factor swap is a self-isometry of `L ⊕ L` preserving
+neither summand, so it is not in the image of `O(L) × O(L)`. -/
 theorem orthogonalSumComm_not_mem_range_orthogonalSumHom (L : IntegralLattice V) [Nontrivial V] :
     orthogonalSumComm L L ∉ (orthogonalSumHom L L).range := by
   rintro ⟨p, hp⟩
