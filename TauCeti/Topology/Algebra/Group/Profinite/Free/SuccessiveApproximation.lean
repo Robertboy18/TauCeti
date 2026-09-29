@@ -89,7 +89,7 @@ variable {p : ℕ} [Fact p.Prime] {X : Type u} [Finite X] [LinearOrder X]
 
 /-- **One step of the successive approximation.** Let `s, w ∈ λ_1(F)` with
 `s⁻¹ * w ∈ λ_{m+1}(F)`, `m ≥ 1`, and let `ω : X → λ_m(F)` be a family whose classes satisfy
-`δ_σ(ω̄) = ` the class of `s⁻¹ * w` in `gr_{m+1}(F)`, where `σ ∈ gr_1(F)` is the class of `s`. Then
+`δ_σ(⟦ω⟧) = ` the class of `s⁻¹ * w` in `gr_{m+1}(F)`, where `σ ∈ gr_1(F)` is the class of `s`. Then
 the basis modification `θ_ω` improves the congruence by one level: `(θ_ω s)⁻¹ * w ∈ λ_{m+2}(F)`. -/
 theorem inv_basisModification_mul_mem_pLowerCentralSeries {m : ℕ} (hm : 1 ≤ m)
     (s w : pLowerCentralSeries p (freeProP p X) 1)
@@ -149,7 +149,7 @@ theorem exists_continuousMonoidHom_inv_mul_apply_mem_pLowerCentralSeries
 
 /-- **Finite successive approximation, relative form.** Let `r, w ∈ λ_1(F)` have the same class
 `ρ ∈ gr_1(F)` and the same exponent vector `v = exponentSum r`, and suppose that for `1 ≤ m ≤ k`
-every element of `λ_{m+1}(F)` lying in the closed commutator subgroup `K` has class `δ_ρ(ω̄)` for a
+every element of `λ_{m+1}(F)` lying in the closed commutator subgroup `K` has class `δ_ρ(⟦ω⟧)` for a
 family `ω : X → λ_m(F)` with `ω_i ∈ K` at every generator `i` with `v_i ≠ 0`. Then there is a
 continuous endomorphism `φ` of `F`, congruent to the identity modulo `λ_1(F)`, preserving the
 exponent vector of `r`, with `φ r ≡ w mod λ_{k+2}(F)`. -/
@@ -270,7 +270,7 @@ theorem exists_continuousMulEquiv_apply_eq_of_range_basisModificationDelta_eq_to
 /-- **The relative successive-approximation theorem.** Let `r, w ∈ λ_1(F)` be relators of the
 free pro-`p` group `F` on a finite linearly ordered type with the same class `ρ ∈ gr_1(F)` and the
 same exponent vector `v = exponentSum r`, and suppose that for every `m ≥ 1` each element of
-`λ_{m+1}(F)` lying in the closed commutator subgroup `K` has class `δ_ρ(ω̄)` for a family
+`λ_{m+1}(F)` lying in the closed commutator subgroup `K` has class `δ_ρ(⟦ω⟧)` for a family
 `ω : X → λ_m(F)` with `ω_i ∈ K` at every generator `i` with `v_i ≠ 0`. Then a continuous
 automorphism of `F` carries `r` to `w`.
 
