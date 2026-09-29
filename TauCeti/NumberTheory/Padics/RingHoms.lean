@@ -7,6 +7,8 @@ module
 
 public import Mathlib.GroupTheory.OrderOfElement
 public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.Topology.Algebra.Constructions
+public import Mathlib.Topology.Algebra.ContinuousMonoidHom
 public import Mathlib.Topology.Instances.ZMod
 public import Mathlib.Topology.LocallyConstant.Basic
 public import Mathlib.Topology.MetricSpace.Ultra.Basic
@@ -53,6 +55,8 @@ to a `p`-adic exponent: `g ^ x.appr n` does not change when `n` grows past the o
   continuous ring homomorphism out of `ℤ_[p] ⧸ (q)`.
 * `PadicInt.surjective_units_map_toZModPow`: every unit of `ZMod (p ^ n)` lifts to a unit of
   `ℤ_[p]`.
+* `PadicInt.unitsToZModPow`: truncation modulo `p ^ n` on the units of `ℤ_[p]`, as a continuous
+  homomorphism to the units of `ZMod (p ^ n)`.
 * `PadicInt.finite_residueField`, `PadicInt.card_residueField`: the residue field of `ℤ_[p]` is
   finite of cardinality `p`.
 -/
@@ -251,6 +255,19 @@ theorem surjective_units_map_toZModPow (n : ℕ) :
   · have : Fact (1 < p ^ n) := ⟨Nat.one_lt_pow hn.ne' hp.out.one_lt⟩
     exact IsLocalRing.surjective_units_map_of_local_ringHom _ (ZMod.ringHom_surjective _)
       (IsLocalHom.of_surjective _ (ZMod.ringHom_surjective _))
+
+/-- Truncation modulo `p ^ n` on the units of `ℤ_[p]`, as a continuous homomorphism to the units of
+`ZMod (p ^ n)`. -/
+noncomputable def unitsToZModPow (n : ℕ) : ℤ_[p]ˣ →ₜ* (ZMod (p ^ n))ˣ where
+  toMonoidHom := Units.map (toZModPow n : ℤ_[p] →+* ZMod (p ^ n)).toMonoidHom
+  continuous_toFun :=
+    Units.continuous_map (f := (toZModPow n : ℤ_[p] →+* ZMod (p ^ n)).toMonoidHom)
+      (continuous_toZModPow n)
+
+@[simp]
+theorem coe_unitsToZModPow_apply (n : ℕ) (u : ℤ_[p]ˣ) :
+    ((unitsToZModPow n u : (ZMod (p ^ n))ˣ) : ZMod (p ^ n)) = toZModPow n (u : ℤ_[p]) :=
+  (rfl)
 
 variable {M : Type*} [Monoid M] {g : M} {n : ℕ}
 

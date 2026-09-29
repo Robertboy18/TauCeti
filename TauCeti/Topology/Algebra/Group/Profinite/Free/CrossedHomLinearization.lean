@@ -66,34 +66,21 @@ attribute [local instance 2000] Ring.toAddCommGroup
 
 variable {p : ℕ} [Fact p.Prime] {X : Type u}
 
-/-- Truncation modulo `p ^ k`, as a monoid homomorphism on `ℤ_p`. -/
-private noncomputable abbrev toZModPowMonoidHom (p k : ℕ) [Fact p.Prime] :
-    ℤ_[p] →* ZMod (p ^ k) :=
-  (PadicInt.toZModPow (p := p) k : ℤ_[p] →+* ZMod (p ^ k))
-
-/-- Truncation modulo `p ^ k` on the units of `ℤ_p`, as a continuous homomorphism. -/
-private noncomputable def unitsToZModPow (k : ℕ) : ℤ_[p]ˣ →ₜ* (ZMod (p ^ k))ˣ where
-  toMonoidHom := Units.map (toZModPowMonoidHom p k)
-  continuous_toFun :=
-    Units.continuous_map (f := toZModPowMonoidHom p k) (PadicInt.continuous_toZModPow k)
-
-private theorem unitsToZModPow_apply (k : ℕ) (u : ℤ_[p]ˣ) :
-    ((unitsToZModPow k u : (ZMod (p ^ k))ˣ) : ZMod (p ^ k)) = PadicInt.toZModPow k (u : ℤ_[p]) :=
-  (rfl)
-
 /-- **Two continuous characters congruent modulo `p ^ k` on the generators are congruent modulo
 `p ^ k` everywhere**: their truncations modulo `p ^ k` are continuous homomorphisms to a finite
 group agreeing on the generators. -/
 theorem freeProP.pow_dvd_sub_of_forall_of {χ χ' : freeProP p X →ₜ* ℤ_[p]ˣ} {k : ℕ}
     (hχ : ∀ x, (p : ℤ_[p]) ^ k ∣ (χ' (of x) : ℤ_[p]) - χ (of x)) (g : freeProP p X) :
     (p : ℤ_[p]) ^ k ∣ (χ' g : ℤ_[p]) - χ g := by
-  have h : (unitsToZModPow k).comp χ' = (unitsToZModPow k).comp χ := hom_ext fun x ↦
-    Units.ext (by
-      rw [ContinuousMonoidHom.comp_toFun, ContinuousMonoidHom.comp_toFun, unitsToZModPow_apply,
-        unitsToZModPow_apply, ← sub_eq_zero, ← map_sub, PadicInt.toZModPow_eq_zero_iff_dvd]
+  have h : (PadicInt.unitsToZModPow k).comp χ' = (PadicInt.unitsToZModPow k).comp χ :=
+    hom_ext fun x ↦ Units.ext (by
+      rw [ContinuousMonoidHom.comp_toFun, ContinuousMonoidHom.comp_toFun,
+        PadicInt.coe_unitsToZModPow_apply, PadicInt.coe_unitsToZModPow_apply, ← sub_eq_zero,
+        ← map_sub, PadicInt.toZModPow_eq_zero_iff_dvd]
       exact hχ x)
-  rw [← PadicInt.toZModPow_eq_zero_iff_dvd, map_sub, sub_eq_zero, ← unitsToZModPow_apply,
-    ← unitsToZModPow_apply, ← ContinuousMonoidHom.comp_toFun, h, ContinuousMonoidHom.comp_toFun]
+  rw [← PadicInt.toZModPow_eq_zero_iff_dvd, map_sub, sub_eq_zero,
+    ← PadicInt.coe_unitsToZModPow_apply, ← PadicInt.coe_unitsToZModPow_apply,
+    ← ContinuousMonoidHom.comp_toFun, h, ContinuousMonoidHom.comp_toFun]
 
 /-- **A continuous crossed homomorphism vanishes modulo `p` on the Frattini subgroup.** For a
 continuous character `χ` of a free pro-`p` group and a continuous crossed homomorphism `f` for `χ`,
@@ -123,8 +110,9 @@ theorem IsCrossedHom.pow_dvd_sub_of_forall_of_eq {χ χ' : freeProP p X →ₜ* 
     (hfc : Continuous f) (hf'c : Continuous f') (hff' : ∀ x, f (of x) = f' (of x))
     (g : freeProP p X) : (p : ℤ_[p]) ^ k ∣ f' g - f g := by
   -- The truncated characters agree.
-  have hχeq : (Units.map (toZModPowMonoidHom p k)).comp χ'.toMonoidHom =
-      (Units.map (toZModPowMonoidHom p k)).comp χ.toMonoidHom := by
+  have hχeq :
+      (Units.map (PadicInt.toZModPow (p := p) k : ℤ_[p] →* ZMod (p ^ k))).comp χ'.toMonoidHom =
+        (Units.map (PadicInt.toZModPow (p := p) k : ℤ_[p] →* ZMod (p ^ k))).comp χ.toMonoidHom := by
     refine MonoidHom.ext fun g ↦ Units.ext ?_
     rw [MonoidHom.comp_apply, MonoidHom.comp_apply, Units.coe_map, Units.coe_map,
       MonoidHom.coe_ofClass, ← sub_eq_zero, ← map_sub, PadicInt.toZModPow_eq_zero_iff_dvd]

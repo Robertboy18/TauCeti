@@ -44,10 +44,10 @@ namespace TauCeti
 
 open Matrix
 
-variable {R : Type*} [CommRing R] (π : R) {ι : Type*}
+variable {R : Type*} {ι : Type*}
 
 /-- On a product module, membership in `(π)^n • ⊤` is coordinatewise divisibility by `π ^ n`. -/
-theorem mem_span_singleton_pow_smul_top_iff (x : ι → R) (n : ℕ) :
+theorem mem_span_singleton_pow_smul_top_iff [CommSemiring R] (π : R) (x : ι → R) (n : ℕ) :
     x ∈ ((Ideal.span {π}) ^ n • ⊤ : Submodule R (ι → R)) ↔ ∀ i, π ^ n ∣ x i := by
   rw [Ideal.span_singleton_pow, Submodule.ideal_span_singleton_smul,
     Submodule.mem_smul_pointwise_iff_exists]
@@ -58,7 +58,7 @@ theorem mem_span_singleton_pow_smul_top_iff (x : ι → R) (n : ℕ) :
     choose y hy using h
     exact ⟨y, Submodule.mem_top, funext fun i ↦ (hy i).symm⟩
 
-variable [IsAdicComplete (Ideal.span {π}) R] [Fintype ι] [DecidableEq ι]
+variable [CommRing R] (π : R) [IsAdicComplete (Ideal.span {π}) R] [Fintype ι] [DecidableEq ι]
 
 /-- **Newton's method over a `π`-adically complete ring.** Let `A : (ι → R) → (ι → R)`, let `M` be
 a matrix with unit determinant, and let `u₀` satisfy `A u₀ ≡ 0 mod π`. If `M` linearises `A`
