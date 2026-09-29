@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 module
 
+public import Mathlib.Analysis.Complex.UpperHalfPlane.FunctionsBoundedAtInfty
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Manifold
 public import Mathlib.Geometry.Manifold.Notation
 
@@ -43,6 +44,9 @@ constant is not determined by the goal.
 * `UpperHalfPlane.differentiableAt_resToImagAxis`: the restriction is real-differentiable at
   `t > 0` when `F ∘ ofComplex` is, and `differentiableAt_resToImagAxis_of_mDiffAt`: the same
   from manifold differentiability at the corresponding point.
+* `UpperHalfPlane.tendsto_ofComplex_I_mul_atTop_atImInfty`: `i t → i∞` as `t → ∞`, and
+  `Asymptotics.IsBigO.resToImagAxis`: an asymptotic bound at `i∞` restricts to a bound on the
+  imaginary axis at `+∞`.
 
 Ported from the AINTLIB `LeanModularForms` project
 (`LeanModularForms/Modularforms/ResToImagAxis.lean`, Chris Birkbeck,
@@ -129,6 +133,27 @@ theorem resToImagAxis_smul (c : ℂ) (F : ℍ → ℂ) :
 private theorem resToImagAxis_real_smul (c : ℝ) (F : ℍ → ℂ) :
     resToImagAxis (c • F) = c • resToImagAxis F := by
   simpa [Complex.real_smul] using resToImagAxis_smul (c : ℂ) F
+
+/-! ### Behaviour at `i∞` -/
+
+/-- Along the imaginary axis, `i t` tends to `i∞` as `t → ∞`. (This is the argument of the
+private lemma behind Mathlib's `ModularForm.weakFEPair`.) -/
+theorem tendsto_ofComplex_I_mul_atTop_atImInfty :
+    Tendsto (fun t : ℝ ↦ ofComplex (Complex.I * t)) atTop atImInfty := by
+  rw [atImInfty, tendsto_comap_iff]
+  refine tendsto_id.congr' ?_
+  filter_upwards [eventually_gt_atTop 0] with t ht
+  simp [ofComplex_apply_of_im_pos, ht, ← coe_im]
+
+/-- **An asymptotic bound at `i∞` restricts to the imaginary axis**: if `F = O(G)` along
+`atImInfty`, then `resToImagAxis F = O(t ↦ G (i t))` along `atTop`. -/
+theorem _root_.Asymptotics.IsBigO.resToImagAxis {E : Type*} [Norm E] {F : ℍ → ℂ} {G : ℍ → E}
+    (h : F =O[atImInfty] G) :
+    resToImagAxis F =O[atTop] fun t ↦ G (ofComplex (Complex.I * t)) := by
+  refine (h.comp_tendsto tendsto_ofComplex_I_mul_atTop_atImInfty).congr' ?_ EventuallyEq.rfl
+  filter_upwards [eventually_gt_atTop 0] with t ht
+  rw [Function.comp_apply, resToImagAxis_of_pos _ ht,
+    ofComplex_apply_of_im_pos (by simpa using ht)]
 
 /-! ### Real-valuedness, positivity, and eventual positivity -/
 
