@@ -36,8 +36,8 @@ commutative monoid separate elements only in a commutative group, is
   element `σ`, giving `Nat.card G` when `g = σ` and `0` otherwise.
 * `AddChar.sum_units_mul_eq_neg_one`: a nontrivial additive character of a finite field
   sums to `-1` over the nonzero elements, even after multiplication by a unit.
-* `TauCeti.sum_monoidHom_apply_of_mem_commutator`: at an element of the commutator subgroup the
-  character sum is the number of characters, every summand being `1`.
+* `TauCeti.sum_monoidHom_apply_eq_card_of_mem_commutator`: at an element of the commutator
+  subgroup the character sum is the number of characters, every summand being `1`.
 * `TauCeti.exists_sum_inv_mul_monoidHom_apply_ne_ite`: **column orthogonality fails for every
   finite non-commutative group** whenever the number of characters is nonzero in `M`, as in
   characteristic zero: at the tag `1` and a nontrivial commutator the tagged sum is the number
@@ -198,7 +198,7 @@ column sum is `1`. For a commutative group the commutator subgroup is trivial an
 `g = 1` case of `CommGroup.sum_monoidHom_apply_eq_ite`; for a non-commutative group it is the
 value at which the column relation breaks. -/
 @[simp]
-theorem sum_monoidHom_apply_of_mem_commutator {g : G} (hg : g ∈ commutator G) :
+theorem sum_monoidHom_apply_eq_card_of_mem_commutator {g : G} (hg : g ∈ commutator G) :
     ∑ χ : G →* Mˣ, (χ g : M) = Nat.card (G →* Mˣ) := by
   have h (χ : G →* Mˣ) : (χ g : M) = 1 := by
     rw [MonoidHom.mem_ker.mp (Abelianization.commutator_subset_ker χ hg), Units.val_one]
@@ -221,7 +221,7 @@ theorem exists_sum_inv_mul_monoidHom_apply_ne_ite [DecidableEq G] (hG : ¬ IsMul
   refine ⟨1, ⁅a, b⁆, ?_⟩
   rw [ite_eq_right hab]
   simp only [map_one, inv_one, Units.val_one, one_mul]
-  rw [sum_monoidHom_apply_of_mem_commutator
+  rw [sum_monoidHom_apply_eq_card_of_mem_commutator
     (Subgroup.commutator_mem_commutator (Subgroup.mem_top a) (Subgroup.mem_top b))]
   exact hcard
 

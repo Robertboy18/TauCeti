@@ -15,8 +15,9 @@ public import TauCeti.GroupTheory.Perm.FinThree.Basic
 `Equiv.Perm (Fin 3)` is the symmetric group `S₃`, the smallest non-commutative group, and this
 file records what that does to its linear characters, the homomorphisms `S₃ →* Mˣ` into the units
 of a commutative monoid `M`. The commutator subgroup of `S₃` is the alternating subgroup `A₃` and
-the abelianization has order two and exponent two (`TauCeti.commutator_perm_fin_three` and its
-companions in `TauCeti.GroupTheory.Perm.FinThree.Basic`), so every linear character kills the
+the abelianization has order two and exponent two
+(`TauCeti.commutator_perm_fin_three_eq_alternatingGroup` and its companions in
+`TauCeti.GroupTheory.Perm.FinThree.Basic`), so every linear character kills the
 three-cycle, and once `M` has a primitive square root of unity there are exactly two linear
 characters: the trivial character and a single nontrivial one.
 
@@ -82,12 +83,15 @@ section Domain
 
 variable (M : Type*) [CommRing M] [IsDomain M] [HasEnoughRootsOfUnity M 2]
 
-/-- **The character sum of `S₃` at the three-cycle is `2`**: the number of linear characters, each
-of which takes the value `1` there. -/
+/-- **The character sum of `S₃` at the three-cycle is `2`**: the three-cycle lies in the commutator
+subgroup `A₃`, so by `TauCeti.sum_monoidHom_apply_eq_card_of_mem_commutator` the sum counts the
+linear characters, of which there are two. -/
 theorem sum_monoidHom_apply_finRotate_three :
     ∑ χ : Perm (Fin 3) →* Mˣ, (χ (finRotate 3) : M) = 2 := by
-  simp only [monoidHom_apply_finRotate_three, Units.val_one, Finset.sum_const, Finset.card_univ,
-    nsmul_eq_mul, mul_one, ← Nat.card_eq_fintype_card, card_monoidHom_perm_fin_three,
+  have hrot : finRotate 3 ∈ commutator (Perm (Fin 3)) := by
+    rw [commutator_perm_fin_three_eq_alternatingGroup]
+    exact Perm.mem_alternatingGroup.mpr (by decide)
+  rw [sum_monoidHom_apply_eq_card_of_mem_commutator hrot, card_monoidHom_perm_fin_three,
     Nat.cast_ofNat]
 
 /-- **Column orthogonality fails on `S₃`.** At the tag `σ = 1` and the three-cycle `g`, the sum

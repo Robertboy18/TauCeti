@@ -56,7 +56,7 @@ permutations.
 * `TauCeti.sign_mul_card_fixedPoints_fin_three`: the ring-valued form of that disjunction, the
   sign times the number of fixed points as their sum less one.
 * `TauCeti.card_alternatingGroup_fin_three`: the alternating subgroup has order three.
-* `TauCeti.commutator_perm_fin_three`: the commutator subgroup of `S₃` is `A₃`.
+* `TauCeti.commutator_perm_fin_three_eq_alternatingGroup`: the commutator subgroup of `S₃` is `A₃`.
 * `TauCeti.card_abelianization_perm_fin_three` and
   `TauCeti.exponent_abelianization_perm_fin_three`: the abelianization of `S₃` has order two and
   exponent two.
@@ -190,7 +190,8 @@ private theorem commutatorElement_swap_finRotate_three :
 /-- **The commutator subgroup of `S₃` is `A₃`.** The commutator subgroup of any permutation group
 lies in the alternating subgroup, and on three points the alternating subgroup consists of the
 identity and the two rotations, each of which is a commutator. -/
-theorem commutator_perm_fin_three : commutator (Equiv.Perm (Fin 3)) = alternatingGroup (Fin 3) := by
+theorem commutator_perm_fin_three_eq_alternatingGroup :
+    commutator (Equiv.Perm (Fin 3)) = alternatingGroup (Fin 3) := by
   refine le_antisymm alternatingGroup.commutator_perm_le fun g hg ↦ ?_
   have hrot : finRotate 3 ∈ commutator (Equiv.Perm (Fin 3)) :=
     commutatorElement_swap_finRotate_three ▸
@@ -209,7 +210,7 @@ inside a group of order `6`. -/
 theorem card_abelianization_perm_fin_three :
     Nat.card (Abelianization (Equiv.Perm (Fin 3))) = 2 := by
   have hcomm : Nat.card (commutator (Equiv.Perm (Fin 3))) = 3 := by
-    rw [commutator_perm_fin_three, card_alternatingGroup_fin_three]
+    rw [commutator_perm_fin_three_eq_alternatingGroup, card_alternatingGroup_fin_three]
   have hsix : Nat.card (Equiv.Perm (Fin 3)) = 6 := by
     rw [Nat.card_eq_fintype_card, Fintype.card_perm, Fintype.card_fin]
     rfl
