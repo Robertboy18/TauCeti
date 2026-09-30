@@ -219,9 +219,10 @@ theorem IsCollaredTrack.reverseTime {f g : M → N} {F : M × ℝ → N × ℝ}
     simp
   snd_apply_mem_Ioo x t ht := by
     rw [reverseTime_apply]
-    have hmem := (hF.snd_apply_mem_Ioo_iff x).2 (show 1 - t ∈ Ioo 0 1 by
+    have hrev : 1 - t ∈ Ioo 0 1 := by
       simp only [mem_Ioo] at ht ⊢
-      constructor <;> linarith)
+      constructor <;> linarith
+    have hmem := (hF.snd_apply_mem_Ioo_iff x).2 hrev
     simp only [mem_Ioo] at hmem ⊢
     constructor <;> linarith
 

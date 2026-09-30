@@ -87,7 +87,8 @@ on a collar of the initial end and `g × id` on a collar of the final end, and m
 structure TopologicalConcordance (f g : N → M) where
   /-- The track of the concordance. -/
   toFun : N × ℝ → M × ℝ
-  /-- The track is a locally flat embedding, with the complementary model `F'` of its ends. -/
+  /-- The track is a locally flat embedding, with tangential model `F × ℝ` and complementary model
+  `F'`. -/
   isLocallyFlat_toFun : IsLocallyFlat (F × ℝ) F' toFun
   /-- The track is `f × id` near the initial end and `g × id` near the final end, and maps the open
   slab `N × (0, 1)` into `M × (0, 1)`. -/
@@ -290,7 +291,8 @@ def ofAmbientIsotopy (Φ : AmbientIsotopy M) {f : N → M} (hf : IsLocallyFlat F
     { exists_pos_apply_eq_left := ⟨1 / 4, by norm_num, fun x t ht => by
         simp [collarClamp_eq_zero_of_le ht]⟩
       exists_pos_apply_eq_right := ⟨1 / 4, by norm_num, fun x t ht => by
-        simp [collarClamp_eq_one_of_le (show 3 / 4 ≤ t by linarith)]⟩
+        have ht' : 3 / 4 ≤ t := by linarith
+        simp [collarClamp_eq_one_of_le ht']⟩
       snd_apply_mem_Ioo := fun x t ht => by simpa using ht }
 
 @[simp]

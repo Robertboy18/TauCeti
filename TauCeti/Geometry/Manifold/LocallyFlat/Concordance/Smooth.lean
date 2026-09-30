@@ -63,9 +63,7 @@ def Concordance.toTopologicalConcordance (Φ : Concordance f g) :
   toFun := Φ
   isLocallyFlat_toFun := by
     simpa only [Concordance.coe_toSmoothEmbedding] using Φ.toSmoothEmbedding.isLocallyFlat
-  isCollaredTrack_toFun :=
-    ⟨Φ.exists_pos_apply_eq_left, Φ.exists_pos_apply_eq_right,
-      fun x _ ht => (Φ.snd_apply_mem_Ioo_iff x).2 ht⟩
+  isCollaredTrack_toFun := Φ.isCollaredTrack
 
 @[simp]
 theorem Concordance.coe_toTopologicalConcordance (Φ : Concordance f g) :
