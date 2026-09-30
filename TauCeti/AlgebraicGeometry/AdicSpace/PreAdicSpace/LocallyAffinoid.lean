@@ -18,7 +18,7 @@ to `U` is an affinoid pre-adic space. `X` is *locally affinoid* if its open affi
 cover it. Wedhorn's pre-adic spaces are the locally affinoid objects whose structure presheaf is
 adapted to the open affinoid subspaces: on every open `V`, the presheaf is the limit of its values
 on the open affinoid subspaces contained in `V`. Their full subcategory of `𝒱^pre` is Wedhorn's
-category `(PreAd)`, here `TauCeti.PreAd`.
+category `(PreAd)`, here `TauCeti.WedhornPreAdicSpace`.
 
 Adaptedness is what lets the sheaf condition on an object of `𝒱^pre` be checked on its open
 affinoid subspaces alone, once those form a basis of the topology: an object whose open affinoid
@@ -38,8 +38,8 @@ onto the restriction to its image (`TauCeti.PreAdicSpace.restrictIso`).
 * `TauCeti.PreAdicSpace.affinoidOpens`: the open affinoid subspaces of an object of `𝒱^pre`.
 * `TauCeti.PreAdicSpace.isLocallyAffinoid`: the locally affinoid objects of `𝒱^pre`.
 * `TauCeti.PreAdicSpace.isPreAdic`: Wedhorn's pre-adic spaces.
-* `TauCeti.PreAd`: Wedhorn's category `(PreAd)`, the full subcategory of `𝒱^pre` of pre-adic
-  spaces.
+* `TauCeti.WedhornPreAdicSpace`: Wedhorn's category `(PreAd)`, the full subcategory of `𝒱^pre` of
+  pre-adic spaces.
 
 ## Main results
 
@@ -114,7 +114,7 @@ instance isLocallyAffinoid.instIsClosedUnderIsomorphisms :
 /-- Wedhorn's pre-adic spaces: the locally affinoid objects of `𝒱^pre` whose structure presheaf
 is adapted to the open affinoid subspaces, in the sense that on every open `V` it is the limit of
 its values on the open affinoid subspaces contained in `V`. Their full subcategory of `𝒱^pre` is
-Wedhorn's category `(PreAd)`, `TauCeti.PreAd`. -/
+Wedhorn's category `(PreAd)`, `TauCeti.WedhornPreAdicSpace`. -/
 @[expose] def isPreAdic : ObjectProperty PreAdicSpace.{u} :=
   fun X ↦ isLocallyAffinoid X ∧ X.toPresheafedSpace.presheaf.IsAdapted X.affinoidOpens
 
@@ -147,7 +147,7 @@ end PreAdicSpace
 /-- Wedhorn's category `(PreAd)` of pre-adic spaces: the full subcategory of `𝒱^pre` whose objects
 are the locally affinoid objects with structure presheaf adapted to their open affinoid subspaces
 (`PreAdicSpace.isPreAdic`). -/
-abbrev PreAd : Type (u + 1) :=
+abbrev WedhornPreAdicSpace : Type (u + 1) :=
   PreAdicSpace.isPreAdic.{u}.FullSubcategory
 
 end TauCeti
