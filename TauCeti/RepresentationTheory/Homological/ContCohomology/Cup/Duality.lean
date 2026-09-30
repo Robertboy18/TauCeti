@@ -281,27 +281,13 @@ noncomputable def H2InternalHomZModEquiv :
   explicitCoeff2Equiv G (InternalHom G (ZMod n) (ZMod n)) (InternalHom.zmodEquiv G)
     continuous_of_discreteTopology continuous_of_discreteTopology (zmodEquiv_smul htriv)
 
-/-- `H1InternalHomZModEquiv` is the change of coefficients along evaluation at `1`. -/
-theorem H1InternalHomZModEquiv_def :
-    H1InternalHomZModEquiv htriv =
-      explicitCoeff1Equiv G (InternalHom G (ZMod n) (ZMod n)) (InternalHom.zmodEquiv G)
-        continuous_of_discreteTopology continuous_of_discreteTopology (zmodEquiv_smul htriv) :=
-  (rfl)
-
-/-- `H2InternalHomZModEquiv` is the change of coefficients along evaluation at `1`. -/
-theorem H2InternalHomZModEquiv_def :
-    H2InternalHomZModEquiv htriv =
-      explicitCoeff2Equiv G (InternalHom G (ZMod n) (ZMod n)) (InternalHom.zmodEquiv G)
-        continuous_of_discreteTopology continuous_of_discreteTopology (zmodEquiv_smul htriv) :=
-  (rfl)
-
 /-- **`α₀` at trivial `ZMod n` coefficients is scalar multiplication**: `α₀ m b = m • b`, reading
 `b` in `H²(G, ZMod n)` through evaluation at `1`. -/
 theorem dualityMap0_zmod (m : H0 G (ZMod n)) (b : H2 G (InternalHom G (ZMod n) (ZMod n))) :
     dualityMap0 G (ZMod n) (ZMod n) m b = (m : ZMod n) • H2InternalHomZModEquiv htriv b := by
   induction b using QuotientAddGroup.induction_on with
   | _ c =>
-    rw [dualityMap0_mk, H2InternalHomZModEquiv_def, explicitCoeff2Equiv_mk, zmod_smul_mk]
+    rw [dualityMap0_mk, H2InternalHomZModEquiv, explicitCoeff2Equiv_mk, zmod_smul_mk]
     refine congrArg (fun z : Z2 G (ZMod n) => (z : H2 G (ZMod n)))
       (Subtype.ext (funext fun q => ?_))
     obtain ⟨g, h⟩ := q
@@ -337,7 +323,7 @@ theorem dualityMap1_zmod (a : H1 G (ZMod n)) (b : H1 G (InternalHom G (ZMod n) (
   | _ x =>
     induction b using QuotientAddGroup.induction_on with
     | _ y =>
-      rw [dualityMap1_mk, H1InternalHomZModEquiv_def, explicitCoeff1Equiv_mk]
+      rw [dualityMap1_mk, H1InternalHomZModEquiv, explicitCoeff1Equiv_mk]
       -- `explicitCup11_mk` is applied as a term: the continuity of multiplication is stated at
       -- `fun p => p.1 * p.2`, which `rw` does not identify with the pairing `AddMonoidHom.mul`
       refine Eq.trans ?_ (explicitCup11_mk G (ZMod n) (ZMod n) (ZMod n) AddMonoidHom.mul
