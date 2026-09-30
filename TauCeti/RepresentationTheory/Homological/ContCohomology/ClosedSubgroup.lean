@@ -7,6 +7,7 @@ module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CompactDiscrete
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Functoriality
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Shapiro.AllDegrees
 public import TauCeti.Topology.Algebra.Group.Profinite.Basic
 public import TauCeti.Topology.Separation.Profinite
 
@@ -49,6 +50,8 @@ for smooth discrete `X`, so the action of `G` on `X` is required to be continuou
   every positive degree also on invariant elements.
 * `TauCeti.ContinuousCohomology.exists_openSubgroup_le_res_eq_zero`: a class restricting to zero
   on a closed subgroup restricts to zero on an open subgroup containing it.
+* `TauCeti.ContinuousCohomology.exists_openSubgroup_res_eq_zero`: a class of positive degree
+  restricts to zero on some open subgroup.
 * `TauCeti.ContinuousCohomology.exists_openSubgroup_le_resLE_eq`: every class of a closed subgroup
   is restricted from an open subgroup containing it.
 
@@ -259,8 +262,25 @@ theorem exists_openSubgroup_le_res_eq_zero (hX : IsSmoothDiscrete k X) {H : Subg
   rw [res_def]
   refine h.trans ((KV.homologyπ_eq_zero_iff n hm).2 ⟨φV.f m Wc, KV.iCycles_injective n ?_⟩)
   refine ((KV.iCycles_toCycles_apply m _).trans h₂).trans (Eq.trans ?_ h₁.symm)
-  calc φV.f n (K.d m n Wc) = φV.f n (F + K.d m n Wc) := by rw [map_add, hFV, zero_add]
+  calc φV.f n (K.d m n Wc) = φV.f n (F + K.d m n Wc) := by rw [_root_.map_add, hFV, zero_add]
     _ = φV.f n (K.iCycles n z) := by rw [hFdef, sub_add_cancel]
+
+/-- **Every class of positive degree dies on some open subgroup.** For a profinite group `G` and a
+discrete `G`-module `M`, every class of `Hⁿ⁺¹(G, M)` restricts to zero on some open subgroup of
+`G`: it restricts to zero on the closed trivial subgroup, which has no cohomology in positive
+degrees, hence on an open subgroup containing it. -/
+theorem exists_openSubgroup_res_eq_zero (M : Type v) [AddCommGroup M] [TopologicalSpace M]
+    [DiscreteTopology M] [DistribMulAction G M] [ContinuousSMul G M]
+    (x : continuousCohomology (n + 1) (ofDiscreteModule ℤ G M)) :
+    ∃ V : OpenSubgroup G, (res (V : Subgroup G) (ofDiscreteModule ℤ G M) (n + 1)).hom x = 0 := by
+  -- the restriction of the canonical object to the trivial subgroup is the canonical object over
+  -- the trivial subgroup, whose positive-degree cohomology vanishes
+  have : Subsingleton (continuousCohomology (n + 1)
+      (TopRep.res ((⊥ : Subgroup G).subtype : (⊥ : Subgroup G) →* G) (ofDiscreteModule ℤ G M))) :=
+    subsingleton_continuousCohomology_bot_succ M n
+  obtain ⟨V, -, hV⟩ := exists_openSubgroup_le_res_eq_zero (ofDiscreteModule_isSmoothDiscrete ℤ G M)
+    (H := ⊥) (Subgroup.coe_bot (G := G) ▸ isClosed_singleton) (x := x) (Subsingleton.elim _ _)
+  exact ⟨V, hV⟩
 
 /-- **Every class of a closed subgroup is restricted from an open subgroup containing it.** For a
 profinite group `G`, a smooth discrete representation `X` and a closed subgroup `H`, every class

@@ -62,6 +62,8 @@ right needs a closed subgroup.
   resp. bijective, in every degree.
 * `TauCeti.ContinuousCohomology.subsingleton_continuousCohomology_discreteCoind_iff`: `Hⁿ(U, A)`
   vanishes exactly when `Hⁿ(G, Coind_U^G A)` does.
+* `TauCeti.ContinuousCohomology.subsingleton_continuousCohomology_bot_succ`: the trivial subgroup
+  has no cohomology in positive degrees.
 
 ## References
 
@@ -181,5 +183,21 @@ theorem subsingleton_continuousCohomology_discreteCoind_iff (n : ℕ) :
   (Equiv.ofBijective _ (bijective_shapiroMap U hU A n)).subsingleton_congr
 
 end Shapiro
+
+/-! ### The trivial subgroup -/
+
+section Bot
+
+variable [TotallyDisconnectedSpace G] (A : Type u) [AddCommGroup A] [TopologicalSpace A]
+  [DiscreteTopology A] [DistribMulAction (⊥ : Subgroup G) A] [ContinuousSMul (⊥ : Subgroup G) A]
+
+/-- **The trivial subgroup of a profinite group has no cohomology in positive degrees**: Shapiro's
+lemma at `U = ⊥` identifies `Hⁿ⁺¹(1, A)` with `Hⁿ⁺¹(G, Coind_1^G A)`, which vanishes. -/
+instance subsingleton_continuousCohomology_bot_succ (n : ℕ) :
+    Subsingleton (continuousCohomology (n + 1) (ofDiscreteModule ℤ (⊥ : Subgroup G) A)) :=
+  (subsingleton_continuousCohomology_discreteCoind_iff (⊥ : Subgroup G)
+    (Subgroup.coe_bot (G := G) ▸ isClosed_singleton) A (n + 1)).1 inferInstance
+
+end Bot
 
 end TauCeti.ContinuousCohomology
