@@ -31,6 +31,9 @@ integrals of cusp forms along geodesics between cusps.
   `i ^ (-k) t ^ (-k)` times the restriction of `F` at `1 / t`, and
   `UpperHalfPlane.resToImagAxis_slash_two_S`: in weight `2` this is `-t⁻²` times the restriction
   of `F` at `1 / t`.
+* `UpperHalfPlane.resToImagAxis_slash_two_of_diagonal`: in weight `2`, the restriction of
+  `F ∣[2] d` for a positive diagonal rational matrix `d = diag(a, b)` at `t` is `r` times the
+  restriction of `F` at `r t`, where `r = a / b`.
 * `UpperHalfPlane.exists_isBigO_resToImagAxis_rat_slash_exp`: for a cusp form `f` on an
   arithmetic subgroup and `g ∈ GL(2, ℚ)`, the restriction of `f ∣[k] g` to the imaginary axis is
   `O(exp (-c t))` for some `c > 0`.
@@ -81,6 +84,60 @@ theorem resToImagAxis_slash_two_S (F : ℍ → ℂ) {t : ℝ} (ht : 0 < t) :
     norm_num
   rw [hI, zpow_neg, zpow_two, sq]
   ring
+
+/-- **A positive diagonal matrix rescales the imaginary axis**: for `d = diag(a, b) ∈ GL(2, ℚ)`
+with `ab > 0`, the weight-`2` slash by `d` restricts to the axis as `(F ∣[2] d) (i t) = r F (i r t)`
+with `r = a / b > 0`, the rescaling `t ↦ r t` of the axis together with its Jacobian. -/
+theorem resToImagAxis_slash_two_of_diagonal (F : ℍ → ℂ) {d : GL (Fin 2) ℚ} (h₁₀ : d 1 0 = 0)
+    (h₀₁ : d 0 1 = 0) (hd : 0 < (d : Matrix (Fin 2) (Fin 2) ℚ).det) (t : ℝ) :
+    resToImagAxis (F ∣[(2 : ℤ)] d) t =
+      (((d 0 0 : ℝ) / d 1 1 : ℝ) : ℂ) * resToImagAxis F ((d 0 0 : ℝ) / d 1 1 * t) := by
+  have hdet : (d : Matrix (Fin 2) (Fin 2) ℚ).det = d 0 0 * d 1 1 := by
+    rw [Matrix.det_fin_two, h₁₀, h₀₁]
+    ring
+  have hd' : 0 < d 0 0 * d 1 1 := hdet ▸ hd
+  have h₁₁ : (d 1 1 : ℝ) ≠ 0 := by
+    have : d 1 1 ≠ 0 := fun h ↦ by simp [h] at hd'
+    exact_mod_cast this
+  -- the axis is rescaled by the positive ratio `r = d₀₀ / d₁₁`
+  set r : ℝ := (d 0 0 : ℝ) / d 1 1 with hr
+  have hr0 : 0 < r := by
+    have : (0 : ℚ) < d 0 0 / d 1 1 := div_pos_iff.mpr (mul_pos_iff.mp hd')
+    rw [hr]
+    exact_mod_cast this
+  rcases le_or_gt t 0 with ht | ht
+  · rw [resToImagAxis_of_nonpos _ ht, resToImagAxis_of_nonpos _ (by nlinarith), mul_zero]
+  have hrt : 0 < r * t := mul_pos hr0 ht
+  have hdet_pos : 0 < ((Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) d).det : ℝ) := by
+    rw [Matrix.GeneralLinearGroup.val_det_apply]
+    exact ModularForm.det_map_ratCast_pos hd
+  have hdetd : ((Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) d).det : ℝ) =
+      (d 0 0 : ℝ) * d 1 1 := by
+    rw [Matrix.GeneralLinearGroup.val_det_apply, Matrix.GeneralLinearGroup.val_map_apply,
+      ← RingHom.mapMatrix_apply, ← RingHom.map_det, hdet, eq_ratCast, Rat.cast_mul]
+  rw [resToImagAxis_of_pos _ ht, resToImagAxis_of_pos _ hrt,
+    ModularForm.rat_slash_apply_of_det_pos _ hd]
+  -- `d` fixes `∞`, so its denominator is the constant `d₁₁`
+  have hden : denom (Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) d)
+      (⟨Complex.I * t, by simpa using ht⟩ : ℍ) = ((d 1 1 : ℝ) : ℂ) := by
+    simp [denom, Matrix.GeneralLinearGroup.map_apply, h₁₀]
+  -- `d` acts on the axis as the rescaling `i t ↦ i (r t)`
+  have hsmul : Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) d •
+      (⟨Complex.I * t, by simpa using ht⟩ : ℍ) =
+        ⟨Complex.I * ((r * t : ℝ) : ℂ), by simpa using hrt⟩ := by
+    ext1
+    rw [coe_smul_of_det_pos hdet_pos, hden]
+    simp only [num, Matrix.GeneralLinearGroup.map_apply, eq_ratCast, h₀₁, Rat.cast_zero, hr]
+    push_cast
+    ring
+  -- the automorphy factor `det d ^ (2 - 1) · d₁₁ ^ (-2)` of `d` in weight `2` is the constant `r`
+  have h21 : (2 : ℤ) - 1 = 1 := by norm_num
+  have hc : ((((d 0 0 : ℝ) * (d 1 1 : ℝ) : ℝ)) : ℂ) ^ ((2 : ℤ) - 1) *
+      ((d 1 1 : ℝ) : ℂ) ^ (-(2 : ℤ)) = (r : ℂ) := by
+    rw [hr, h21, zpow_one, zpow_neg, zpow_two]
+    push_cast
+    field_simp
+  rw [hsmul, hden, hdetd, abs_of_pos (by exact_mod_cast hd'), mul_assoc, hc, mul_comm]
 
 open Asymptotics Filter in
 /-- **A cusp form slashed by a rational matrix decays exponentially along the imaginary axis**:

@@ -8,6 +8,7 @@ module
 public import Mathlib.Analysis.Complex.UpperHalfPlane.FunctionsBoundedAtInfty
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Manifold
 public import Mathlib.Geometry.Manifold.Notation
+public import TauCeti.Analysis.Asymptotics.MvPolynomial
 
 /-!
 # Restriction of a function on the upper half-plane to the imaginary axis
@@ -47,6 +48,8 @@ constant is not determined by the goal.
 * `UpperHalfPlane.tendsto_ofComplex_I_mul_atTop_atImInfty`: `i t → i∞` as `t → ∞`, and
   `Asymptotics.IsBigO.resToImagAxis`: an asymptotic bound at `i∞` restricts to a bound on the
   imaginary axis at `+∞`.
+* `UpperHalfPlane.isBigO_aeval_num_denom`: along the imaginary axis, a polynomial in the
+  numerator and denominator of a Möbius transformation grows at most polynomially.
 
 Ported from the AINTLIB `LeanModularForms` project
 (`LeanModularForms/Modularforms/ResToImagAxis.lean`, Chris Birkbeck,
@@ -136,10 +139,10 @@ private theorem resToImagAxis_real_smul (c : ℝ) (F : ℍ → ℂ) :
 
 /-! ### Behaviour at `i∞` -/
 
-/-- Along the imaginary axis, `i t` tends to `i∞` as `t → ∞`. (This is the argument of the
-private lemma behind Mathlib's `ModularForm.weakFEPair`.) -/
+/-- Along the imaginary axis, `i t` tends to `i∞` as `t → ∞`. -/
 theorem tendsto_ofComplex_I_mul_atTop_atImInfty :
     Tendsto (fun t : ℝ ↦ ofComplex (Complex.I * t)) atTop atImInfty := by
+  -- the argument of the private lemma behind Mathlib's `ModularForm.weakFEPair`
   rw [atImInfty, tendsto_comap_iff]
   refine tendsto_id.congr' ?_
   filter_upwards [eventually_gt_atTop 0] with t ht
@@ -154,6 +157,24 @@ theorem _root_.Asymptotics.IsBigO.resToImagAxis {E : Type*} [Norm E] {F : ℍ �
   filter_upwards [eventually_gt_atTop 0] with t ht
   rw [Function.comp_apply, resToImagAxis_of_pos _ ht,
     ofComplex_apply_of_im_pos (by simpa using ht)]
+
+open Asymptotics in
+/-- Along the imaginary axis, a polynomial `P` in the numerator `a i t + b` and denominator
+`c i t + d` of the Möbius transformation of a real matrix grows at most like `t ^ n` for
+`n ≥ P.totalDegree`. -/
+theorem isBigO_aeval_num_denom {R : Type*} [CommRing R] [Algebra R ℂ] {P : MvPolynomial (Fin 2) R}
+    {n : ℕ} (hP : P.totalDegree ≤ n) (g : GL (Fin 2) ℝ) :
+    (fun t : ℝ ↦ MvPolynomial.aeval ![num g (Complex.I * t), denom g (Complex.I * t)] P) =O[atTop]
+      fun t ↦ t ^ n := by
+  have hI : (fun t : ℝ ↦ Complex.I * (t : ℂ)) =O[atTop] fun t : ℝ ↦ t :=
+    isBigO_of_le _ fun t ↦ by simp
+  have haffine (a b : ℂ) : (fun t : ℝ ↦ a * (Complex.I * (t : ℂ)) + b) =O[atTop] fun t : ℝ ↦ t :=
+    (hI.const_mul_left a).add (isLittleO_const_id_atTop b).isBigO
+  refine TauCeti.isBigO_aeval_of_totalDegree_le hP (fun i ↦ ?_)
+    (isLittleO_const_id_atTop (1 : ℝ)).isBigO
+  fin_cases i
+  · simpa [num] using haffine (g 0 0 : ℂ) (g 0 1 : ℂ)
+  · simpa [denom] using haffine (g 1 0 : ℂ) (g 1 1 : ℂ)
 
 /-! ### Real-valuedness, positivity, and eventual positivity -/
 

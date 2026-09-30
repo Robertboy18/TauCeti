@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Analysis.Asymptotics.MvPolynomial
 public import TauCeti.Analysis.Complex.UpperHalfPlane.Manifold
 public import TauCeti.NumberTheory.ModularForms.BinaryForms
 public import TauCeti.NumberTheory.ModularForms.GeodesicIntegral
@@ -42,6 +41,9 @@ the exponential decay of a cusp form there, which beats the polynomial growth of
 
 ## Main results
 
+* `TauCeti.ModularSymbols.periodIntegrand_add`, `TauCeti.ModularSymbols.periodIntegrand_smul`:
+  the integrand is `R`-linear in the binary form, so that the periods extend linearly to the
+  module of modular symbols.
 * `TauCeti.ModularSymbols.periodIntegrand_slash_apply`: the weight-`2` slash of the integrand by a
   rational matrix `g` of positive determinant is
   `(det g)⁻ʷ · (f ∣[k] g)(τ) · P(aτ + b, cτ + d)`.
@@ -85,6 +87,27 @@ noncomputable def periodIntegrand (f : ℍ → ℂ) (P : homogeneousSubmodule (F
 theorem periodIntegrand_apply (f : ℍ → ℂ) (P : homogeneousSubmodule (Fin 2) R w) (z : ℍ) :
     periodIntegrand f P z = f z * aeval ![(z : ℂ), 1] (P : MvPolynomial (Fin 2) R) := by
   rw [periodIntegrand]
+
+/-- The period integrand against the zero form vanishes. -/
+@[simp]
+theorem periodIntegrand_zero (f : ℍ → ℂ) :
+    periodIntegrand f (0 : homogeneousSubmodule (Fin 2) R w) = 0 := by
+  funext z
+  simp [periodIntegrand]
+
+/-- The period integrand is additive in the binary form. -/
+@[simp]
+theorem periodIntegrand_add (f : ℍ → ℂ) (P Q : homogeneousSubmodule (Fin 2) R w) :
+    periodIntegrand f (P + Q) = periodIntegrand f P + periodIntegrand f Q := by
+  funext z
+  simp [periodIntegrand, mul_add]
+
+/-- The period integrand is `R`-linear in the binary form. -/
+@[simp]
+theorem periodIntegrand_smul (f : ℍ → ℂ) (r : R) (P : homogeneousSubmodule (Fin 2) R w) :
+    periodIntegrand f (r • P) = r • periodIntegrand f P := by
+  funext z
+  simp [periodIntegrand, Algebra.smul_def, mul_left_comm]
 
 /-! ### The transformation law -/
 
@@ -177,21 +200,6 @@ variable {Γ : Subgroup (GL (Fin 2) ℝ)} {F : Type*} [FunLike F ℍ ℂ] {k : �
 theorem mdifferentiable_periodIntegrand {f : ℍ → ℂ} (hf : MDiff f)
     (P : homogeneousSubmodule (Fin 2) R w) : MDiff (periodIntegrand f P) :=
   hf.mul (TauCeti.UpperHalfPlane.mdifferentiable_aeval_coe _)
-
-/-- Along the imaginary axis, the polynomial factor `P(a i t + b, c i t + d)` of the slashed
-integrand grows at most like `t ^ n` for `n ≥ P.totalDegree`. -/
-theorem isBigO_aeval_num_denom {P : MvPolynomial (Fin 2) R} {n : ℕ} (hP : P.totalDegree ≤ n)
-    (g : GL (Fin 2) ℝ) :
-    (fun t : ℝ ↦ aeval ![num g (Complex.I * t), denom g (Complex.I * t)] P) =O[atTop]
-      fun t ↦ t ^ n := by
-  have hI : (fun t : ℝ ↦ Complex.I * (t : ℂ)) =O[atTop] fun t : ℝ ↦ t :=
-    isBigO_of_le _ fun t ↦ by simp
-  have haffine (a b : ℂ) : (fun t : ℝ ↦ a * (Complex.I * (t : ℂ)) + b) =O[atTop] fun t : ℝ ↦ t :=
-    (hI.const_mul_left a).add (isLittleO_const_id_atTop b).isBigO
-  refine isBigO_aeval_of_totalDegree_le hP (fun i ↦ ?_) (isLittleO_const_id_atTop (1 : ℝ)).isBigO
-  fin_cases i
-  · simpa [num] using haffine (g 0 0 : ℂ) (g 0 1 : ℂ)
-  · simpa [denom] using haffine (g 1 0 : ℂ) (g 1 1 : ℂ)
 
 /-- **Convergence at `i∞`**: for a cusp form `f` of weight `w + 2` and a binary form `P` of degree
 `w`, the slashed integrand `(f(z) P(z, 1)) ∣[2] g` is integrable along the imaginary axis away

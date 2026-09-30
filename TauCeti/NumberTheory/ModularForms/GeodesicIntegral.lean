@@ -138,55 +138,15 @@ theorem geodesicIntegral_mul_of_diagonal (g : GL (Fin 2) ℚ) {d : GL (Fin 2) �
     (h₁₀ : d 1 0 = 0) (h₀₁ : d 0 1 = 0) (hd : 0 < (d : Matrix (Fin 2) (Fin 2) ℚ).det)
     (F : ℍ → ℂ) : geodesicIntegral (g * d) F = geodesicIntegral g F := by
   rw [geodesicIntegral_mul, geodesicIntegral_def, geodesicIntegral_def]
-  set G := F ∣[(2 : ℤ)] g
-  have hdet : (d : Matrix (Fin 2) (Fin 2) ℚ).det = d 0 0 * d 1 1 := by
-    rw [Matrix.det_fin_two, h₁₀, h₀₁]
-    ring
-  have hd' : 0 < d 0 0 * d 1 1 := hdet ▸ hd
-  have h₁₁ : (d 1 1 : ℝ) ≠ 0 := by
-    have : d 1 1 ≠ 0 := fun h ↦ by simp [h] at hd'
-    exact_mod_cast this
   -- the axis is rescaled by the positive ratio `r = d₀₀ / d₁₁`
-  set r : ℝ := (d 0 0 : ℝ) / d 1 1 with hr
-  have hr0 : 0 < r := by
-    have : (0 : ℚ) < d 0 0 / d 1 1 := div_pos_iff.mpr (mul_pos_iff.mp hd')
-    rw [hr]
-    exact_mod_cast this
-  have hdet_pos : 0 < ((Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) d).det : ℝ) := by
-    rw [Matrix.GeneralLinearGroup.val_det_apply]
-    exact ModularForm.det_map_ratCast_pos hd
-  have hdetd : ((Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) d).det : ℝ) =
-      (d 0 0 : ℝ) * d 1 1 := by
-    rw [Matrix.GeneralLinearGroup.val_det_apply, Matrix.GeneralLinearGroup.val_map_apply,
-      ← RingHom.mapMatrix_apply, ← RingHom.map_det, hdet, eq_ratCast, Rat.cast_mul]
-  have key : ∀ t : ℝ, resToImagAxis (G ∣[(2 : ℤ)] d) t = r * resToImagAxis G (r * t) := by
-    intro t
-    rcases le_or_gt t 0 with ht | ht
-    · rw [resToImagAxis_of_nonpos _ ht, resToImagAxis_of_nonpos _ (by nlinarith), mul_zero]
-    · have hrt : 0 < r * t := mul_pos hr0 ht
-      rw [resToImagAxis_of_pos _ ht, resToImagAxis_of_pos _ hrt,
-        ModularForm.rat_slash_apply_of_det_pos _ hd]
-      have hden : denom (Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) d)
-          (⟨Complex.I * t, by simpa using ht⟩ : ℍ) = ((d 1 1 : ℝ) : ℂ) := by
-        simp [denom, Matrix.GeneralLinearGroup.map_apply, h₁₀]
-      have hsmul : Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) d •
-          (⟨Complex.I * t, by simpa using ht⟩ : ℍ) =
-            ⟨Complex.I * ((r * t : ℝ) : ℂ), by simpa using hrt⟩ := by
-        ext1
-        rw [coe_smul_of_det_pos hdet_pos, hden]
-        simp only [num, Matrix.GeneralLinearGroup.map_apply, eq_ratCast, h₀₁, Rat.cast_zero, hr]
-        push_cast
-        ring
-      -- the automorphy factor of `d` in weight `2` is the constant `r`
-      have hc : ((((d 0 0 : ℝ) * (d 1 1 : ℝ) : ℝ)) : ℂ) ^ ((2 : ℤ) - 1) *
-          ((d 1 1 : ℝ) : ℂ) ^ (-(2 : ℤ)) = (r : ℂ) := by
-        rw [hr, show (2 : ℤ) - 1 = 1 by norm_num, zpow_one, zpow_neg, zpow_two]
-        push_cast
-        field_simp
-      rw [hsmul, hden, hdetd, abs_of_pos (by exact_mod_cast hd'), mul_assoc, hc, mul_comm]
-  simp only [key]
+  have hr0 : (0 : ℝ) < d 0 0 / d 1 1 := by
+    have hd' : 0 < d 0 0 * d 1 1 := by
+      rw [Matrix.det_fin_two, h₁₀, h₀₁] at hd
+      simpa using hd
+    exact_mod_cast div_pos_iff.mpr (mul_pos_iff.mp hd')
+  simp only [resToImagAxis_slash_two_of_diagonal _ h₁₀ h₀₁ hd]
   rw [integral_const_mul, integral_comp_mul_left_Ioi _ _ hr0, mul_zero, Complex.real_smul,
-    Complex.ofReal_inv, ← mul_assoc (r : ℂ), mul_inv_cancel₀ (by exact_mod_cast hr0.ne'), one_mul]
+    Complex.ofReal_inv, mul_inv_cancel_left₀ (by exact_mod_cast hr0.ne')]
 
 /-- **The geodesic integral only depends on the endpoints.** Two matrices of positive
 determinant sending `(0, ∞)` to the same pair of cusps give the same integral. -/
@@ -239,10 +199,11 @@ theorem geodesicIntegral_mul_S (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
       (Ioi 0) := by
     intro t ht
     have ht : (0 : ℝ) < t := ht
+    -- the Jacobian `|p| t ^ (p - 1)` of `t ↦ t ^ p` at `p = -1` is `t⁻²`
+    have hexp : (-1 : ℝ) - 1 = -2 := by norm_num
     simp only
-    rw [resToImagAxis_slash_two_S G ht, Real.rpow_neg_one,
-      show ((-1 : ℝ) - 1) = -(2 : ℝ) by norm_num, Real.rpow_neg ht.le, Real.rpow_two, abs_neg,
-      abs_one, one_mul]
+    rw [resToImagAxis_slash_two_S G ht, Real.rpow_neg_one, hexp, Real.rpow_neg ht.le,
+      Real.rpow_two, abs_neg, abs_one, one_mul]
     push_cast
     ring
   rw [(setIntegral_congr_fun measurableSet_Ioi key).trans hsub, integral_neg, mul_neg]
@@ -271,10 +232,11 @@ theorem integrableOn_resToImagAxis_Ioi_of_slash_S {G : ℍ → ℂ}
     intro x hx
     have hx : (0 : ℝ) < x := hx
     have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
+    -- the Jacobian `|p| x ^ (p - 1)` of `x ↦ x ^ p` at `p = -1` is `x⁻²`
+    have hexp : (-1 : ℝ) - 1 = -2 := by norm_num
     simp only [Pi.neg_apply, indicator_apply, mem_Ici, mem_Ioc, Real.rpow_neg_one,
       one_le_inv₀ hx, hx, true_and]
-    rw [show ((-1 : ℝ) - 1) = -(2 : ℝ) by norm_num, Real.rpow_neg hx.le, Real.rpow_two, abs_neg,
-      abs_one, one_mul]
+    rw [hexp, Real.rpow_neg hx.le, Real.rpow_two, abs_neg, abs_one, one_mul]
     split_ifs with hx1
     · rw [resToImagAxis_slash_two_S G (inv_pos.mpr hx), inv_inv]
       push_cast
