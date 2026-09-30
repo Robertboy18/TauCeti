@@ -632,6 +632,7 @@ theorem finSuccRetract_map_succ (y : freeProP p (Fin n)) :
   DFunLike.congr_fun finSuccRetract_comp_map_succ y
 
 /-- The map induced by `Fin.succ` shifts the `ℕ`-indexed generators by one. -/
+@[simp]
 theorem map_succ_freeProPGen (i : ℕ) :
     map (p := p) (Fin.succ : Fin n → Fin (n + 1)) (freeProPGen p n i) =
       freeProPGen p (n + 1) (i + 1) := by
@@ -647,18 +648,12 @@ hence on the closed subgroup they generate. -/
 theorem map_succ_finSuccRetract_of_mem_topologicalClosure_closure {y : freeProP p (Fin (n + 1))}
     (hy : y ∈ (Subgroup.closure (Set.range fun j : Fin n ↦ of j.succ)).topologicalClosure) :
     map (Fin.succ : Fin n → Fin (n + 1)) (finSuccRetract y) = y := by
-  have h : Set.EqOn (⇑(((map Fin.succ).comp finSuccRetract :
+  have h := MonoidHom.eqOn_topologicalClosure_closure
+    (f := (((map Fin.succ).comp finSuccRetract :
       freeProP p (Fin (n + 1)) →ₜ* freeProP p (Fin (n + 1))) : freeProP p (Fin (n + 1)) →* _))
-      (⇑(MonoidHom.id (freeProP p (Fin (n + 1)))))
-      (SetLike.coe (Subgroup.closure
-        (Set.range fun j : Fin n ↦ (of j.succ : freeProP p (Fin (n + 1))))).topologicalClosure) :=
-      by
-    rw [Subgroup.topologicalClosure_coe]
-    refine Set.EqOn.closure (MonoidHom.eqOn_closure ?_)
-      ((map Fin.succ).comp finSuccRetract).continuous continuous_id
-    rintro _ ⟨j, rfl⟩
-    simp
-  simpa using h hy
+    (g := MonoidHom.id _) ((map Fin.succ).comp finSuccRetract).continuous continuous_id
+    (by rintro _ ⟨j, rfl⟩; simp) hy
+  simpa using h
 
 end FinSucc
 

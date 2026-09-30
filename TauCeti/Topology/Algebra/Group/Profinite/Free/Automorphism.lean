@@ -37,7 +37,9 @@ exponent, are shown to be automorphisms.
 ## Main results
 
 * `TauCeti.freeProP.finSuccExtend_map_succ`: the extension along `Fin.succ` intertwines
-  `freeProP.map Fin.succ` with the given automorphism.
+  `freeProP.map Fin.succ` with the given automorphism; `TauCeti.freeProP.finSuccExtend_refl`,
+  `TauCeti.freeProP.finSuccExtend_trans` and `TauCeti.freeProP.finSuccExtend_symm` say that it
+  is compatible with the identity, composition and inversion.
 * `TauCeti.freeProP.exists_continuousAut_of_topologicallyGenerates`: every topological generating
   family of `F` indexed by `X` is the image of the basis under a continuous automorphism.
 * `TauCeti.IsProP.exists_continuousAut_apply_eq_conj_padicPow`: for every family of units `u` and
@@ -66,22 +68,25 @@ section FinSucc
 
 variable {n : ℕ}
 
+/-- The continuous endomorphism of `freeProP p (Fin (n + 1))` fixing the first generator and
+acting on the others through `e` intertwines `map Fin.succ` with `e`: both composites agree on the
+generators. -/
+private theorem lift_cons_comp_map_succ (e : freeProP p (Fin n) →ₜ* freeProP p (Fin n)) :
+    (lift (isProP_freeProP p _) (Fin.cons (of 0) fun j ↦ map Fin.succ (e (of j)))).comp
+      (map (Fin.succ : Fin n → Fin (n + 1))) = (map Fin.succ).comp e :=
+  hom_ext fun j ↦ by simp
+
 /-- The two continuous endomorphisms of `freeProP p (Fin (n + 1))` fixing the first generator and
 acting on the others through `e₁`, resp. `e₂`, compose to the one acting through `e₁ ∘ e₂`. -/
 private theorem lift_cons_comp_lift_cons (e₁ e₂ : freeProP p (Fin n) →ₜ* freeProP p (Fin n)) :
     (lift (isProP_freeProP p _) (Fin.cons (of 0) fun j ↦ map Fin.succ (e₁ (of j)))).comp
         (lift (isProP_freeProP p _) (Fin.cons (of 0) fun j ↦ map Fin.succ (e₂ (of j)))) =
       lift (isProP_freeProP p _) (Fin.cons (of 0) fun j ↦ map Fin.succ (e₁ (e₂ (of j)))) := by
-  -- The first factor intertwines `map Fin.succ` with `e₁`, because both composites agree on the
-  -- generators.
-  have h : (lift (isProP_freeProP p _) (Fin.cons (of 0) fun j ↦ map Fin.succ (e₁ (of j)))).comp
-      (map (Fin.succ : Fin n → Fin (n + 1))) = (map Fin.succ).comp e₁ :=
-    hom_ext fun j ↦ by simp
   refine hom_ext fun i ↦ Fin.cases (by simp) (fun j ↦ ?_) i
   simp only [ContinuousMonoidHom.coe_comp, Function.comp_apply, lift_of, Fin.cons_succ]
-  have h' := DFunLike.congr_fun h (e₂ (of j))
-  simp only [ContinuousMonoidHom.coe_comp, Function.comp_apply] at h'
-  exact h'
+  have h := DFunLike.congr_fun (lift_cons_comp_map_succ e₁) (e₂ (of j))
+  simp only [ContinuousMonoidHom.coe_comp, Function.comp_apply] at h
+  exact h
 
 /-- The continuous endomorphism of `freeProP p (Fin (n + 1))` fixing the first generator and
 acting on the others through the identity is the identity. -/
@@ -135,18 +140,35 @@ theorem finSuccExtend_of_succ (j : Fin n) :
   rw [coe_finSuccExtend, lift_of, Fin.cons_succ]
 
 /-- The extension of `e` along `Fin.succ` intertwines `freeProP.map Fin.succ` with `e`. -/
+@[simp]
 theorem finSuccExtend_map_succ (y : freeProP p (Fin n)) :
     finSuccExtend e (map (Fin.succ : Fin n → Fin (n + 1)) y) = map Fin.succ (e y) := by
-  have h : ((finSuccExtend e : freeProP p (Fin (n + 1)) →ₜ* freeProP p (Fin (n + 1))).comp
-      (map (Fin.succ : Fin n → Fin (n + 1)))) =
-        (map Fin.succ).comp (e : freeProP p (Fin n) →ₜ* freeProP p (Fin n)) :=
-    hom_ext fun j ↦ by simp
-  simpa using DFunLike.congr_fun h y
+  rw [coe_finSuccExtend]
+  exact DFunLike.congr_fun (lift_cons_comp_map_succ (e : freeProP p (Fin n) →ₜ* freeProP p (Fin n)))
+    y
 
 /-- The inverse of the extension of `e` along `Fin.succ` is the extension of `e.symm`. -/
 @[simp]
 theorem finSuccExtend_symm : (finSuccExtend e).symm = finSuccExtend e.symm :=
   ContinuousMulEquiv.ext fun _ ↦ rfl
+
+/-- The extension of the identity along `Fin.succ` is the identity. -/
+@[simp]
+theorem finSuccExtend_refl :
+    finSuccExtend (ContinuousMulEquiv.refl (freeProP p (Fin n))) = ContinuousMulEquiv.refl _ :=
+  ContinuousMulEquiv.ext fun y ↦ by
+    rw [coe_finSuccExtend]
+    exact DFunLike.congr_fun (lift_cons_id (p := p) (n := n)) y
+
+/-- Extension along `Fin.succ` is compatible with composition. -/
+@[simp]
+theorem finSuccExtend_trans (e₁ e₂ : freeProP p (Fin n) ≃ₜ* freeProP p (Fin n)) :
+    finSuccExtend (e₁.trans e₂) = (finSuccExtend e₁).trans (finSuccExtend e₂) :=
+  ContinuousMulEquiv.ext fun y ↦ by
+    rw [ContinuousMulEquiv.trans_apply, coe_finSuccExtend, coe_finSuccExtend, coe_finSuccExtend]
+    exact (DFunLike.congr_fun (lift_cons_comp_lift_cons
+      (e₂ : freeProP p (Fin n) →ₜ* freeProP p (Fin n))
+      (e₁ : freeProP p (Fin n) →ₜ* freeProP p (Fin n))) y).symm
 
 /-- The extension of `e` along `Fin.succ` fixes the first `ℕ`-indexed generator. -/
 theorem finSuccExtend_freeProPGen_zero :
