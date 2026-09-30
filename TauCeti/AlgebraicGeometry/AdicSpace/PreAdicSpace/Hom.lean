@@ -326,6 +326,16 @@ instance : forgetToPresheafedSpace.{u}.ReflectsIsomorphisms where
     have : IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) f.toHom := hf
     exact ⟨⟨Hom.ofFac (𝟙 Y) f g hg₂, Hom.ext' hg₁, Hom.ext' hg₂⟩⟩
 
+/-- A morphism of pre-adic spaces whose underlying morphism of presheafed spaces is an
+isomorphism is an isomorphism: the converse of `isIso_toHom`, by reflection of isomorphisms
+along the forgetful functor. -/
+theorem isIso_of_isIso_toHom (f : X ⟶ Y)
+    [hf : IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) f.toHom] : IsIso f :=
+  -- Instance search does not see `forgetToPresheafedSpace.map f` as `f.toHom`, so the instance
+  -- is restated.
+  have : IsIso (forgetToPresheafedSpace.map f) := hf
+  isIso_of_reflects_iso f forgetToPresheafedSpace
+
 end ReflectsIsomorphisms
 
 end PreAdicSpace

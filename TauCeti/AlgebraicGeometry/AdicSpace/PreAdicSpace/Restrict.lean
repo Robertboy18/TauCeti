@@ -191,9 +191,8 @@ instance : Mono (X.ofRestrict h) :=
 
 /-- The restriction of a pre-adic space to the whole space is isomorphic to the space. -/
 noncomputable def restrictTopIso : X.restrict (Opens.isOpenEmbedding ⊤) ≅ X :=
-  haveI : IsIso (forgetToPresheafedSpace.map (X.ofRestrict (Opens.isOpenEmbedding ⊤))) :=
-    (PresheafedSpace.restrictTopIso X.toPresheafedSpace).isIso_hom
-  haveI := isIso_of_reflects_iso (X.ofRestrict (Opens.isOpenEmbedding ⊤)) forgetToPresheafedSpace
+  haveI := isIso_of_isIso_toHom (X.ofRestrict (Opens.isOpenEmbedding ⊤))
+    (hf := (PresheafedSpace.restrictTopIso X.toPresheafedSpace).isIso_hom)
   asIso (X.ofRestrict (Opens.isOpenEmbedding ⊤))
 
 @[simp]
@@ -258,13 +257,11 @@ unique morphism compatible with the canonical morphisms from the restrictions
 (`restrictIso_hom_ofRestrict`). -/
 noncomputable def restrictIso :
     X.restrict U.isOpenEmbedding ≅ Y.restrict ((Opens.map e.inv.base).obj U).isOpenEmbedding :=
-  haveI : IsIso (forgetToPresheafedSpace.map (restrictHom e U)) := by
-    -- the objects of the isomorphism are the presheafed spaces of the restrictions only up to
-    -- unfolding the forgetful functor, so the instance is supplied as a term
-    rw [forgetToPresheafedSpace_map, restrictHom_toHom]
-    exact (restrictIsoPresheafedSpace e U).isIso_hom
-  haveI := isIso_of_reflects_iso (restrictHom e U) forgetToPresheafedSpace
+  haveI := isIso_of_isIso_toHom (restrictHom e U)
+    (hf := restrictHom_toHom e U ▸ (restrictIsoPresheafedSpace e U).isIso_hom)
   asIso (restrictHom e U)
+
+private theorem restrictIso_hom : (restrictIso e U).hom = restrictHom e U := rfl
 
 /-- The transported restriction composed with the canonical morphism from the restriction of
 `Y` is the canonical morphism from the restriction of `X` followed by `e`. -/
@@ -273,9 +270,7 @@ theorem restrictIso_hom_ofRestrict :
     (restrictIso e U).hom ≫ Y.ofRestrict ((Opens.map e.inv.base).obj U).isOpenEmbedding =
       X.ofRestrict U.isOpenEmbedding ≫ e.hom := by
   apply Hom.ext'
-  have h : (restrictIso e U).hom.toHom = (restrictIsoPresheafedSpace e U).hom :=
-    restrictHom_toHom e U
-  rw [comp_toHom, comp_toHom, h]
+  rw [comp_toHom, comp_toHom, restrictIso_hom, restrictHom_toHom]
   exact restrictIsoPresheafedSpace_hom_ofRestrict e U
 
 /-- The inverse of the transported restriction composed with the canonical morphism from the
