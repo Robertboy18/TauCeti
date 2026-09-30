@@ -55,7 +55,7 @@ it.
   `TauCeti.IsDemushkin.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_range_eq`:
   such a Demushkin group is topologically isomorphic to
   `⟨x₁, …, x_n ∣ x₁^{2 + 2^f} (x₁, x₂) ⋯ (x_{n-1}, x_n)⟩` on `n = demushkinRank hG` generators.
-* `TauCeti.IsDemushkin.nonempty_continuousMulEquiv_of_range_demushkinCharacter_eq`:
+* `TauCeti.IsDemushkin.nonempty_continuousMulEquiv_of_even_demushkinRank_of_range_eq`:
   **uniqueness**: two Demushkin groups at `p = 2` of the same even rank whose canonical characters
   have the same twisted image `U^[f]` are topologically isomorphic.
 
@@ -308,7 +308,7 @@ theorem IsDemushkin.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_o
 /-- **Uniqueness of the dyadic Demushkin groups of even rank with twisted image** (Labute,
 Theorem 5). Two Demushkin groups at `p = 2` of the same even rank whose canonical characters have
 the same twisted image `U^[f]`, `f ≥ 2` finite, are topologically isomorphic. -/
-theorem IsDemushkin.nonempty_continuousMulEquiv_of_range_demushkinCharacter_eq
+theorem IsDemushkin.nonempty_continuousMulEquiv_of_even_demushkinRank_of_range_eq
     {H : Type v} [Group H] [TopologicalSpace H] [IsTopologicalGroup H] [CompactSpace H]
     [TotallyDisconnectedSpace H] (hG : IsDemushkin 2 G) (hH : IsDemushkin 2 H)
     (hn : demushkinRank hG = demushkinRank hH) (heven : Even (demushkinRank hG)) {f : ℕ}
