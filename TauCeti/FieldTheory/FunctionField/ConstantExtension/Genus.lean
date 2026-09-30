@@ -31,9 +31,10 @@ genus identity; it enters only where the canonical class of `F' / k'` is spoken 
 
 * `TauCeti.Divisor.degree_conorm_of_constantCompositum_eq_top`: `deg (Con D) = deg D`.
 * `TauCeti.genus_eq_genus_of_constantCompositum_eq_top`: `g(F' / k') = g(F / k)`.
-* `TauCeti.conormClassGroup_canonicalClass`: the conorm of the canonical class is the canonical
-  class.
-* `TauCeti.conormClassGroup_injective`: the conorm is injective on divisor classes.
+* `TauCeti.conormClassGroup_canonicalClass_of_constantCompositum_eq_top`: the conorm of the
+  canonical class is the canonical class.
+* `TauCeti.conormClassGroup_injective_of_constantCompositum_eq_top`: the conorm is injective on
+  divisor classes.
 
 ## Reference
 
@@ -56,6 +57,7 @@ variable [FiniteDimensional F F'] [Algebra.IsSeparable k k']
 /-- **The conorm along a constant field extension preserves degrees** (Stichtenoth,
 Theorem 3.6.3(c)): `deg (Con D) = deg D`.  Linear disjointness of `F` and `k'` over `k` gives
 `[F' : F] = [k' : k]`, so the geometric degree by which the conorm multiplies degrees is one. -/
+@[simp]
 theorem Divisor.degree_conorm_of_constantCompositum_eq_top (hF : IsFunctionField k F)
     (hex : IsIntegrallyClosedIn k F) (h : constantCompositum F k' F' = ⊤) (D : Divisor k F) :
     Divisor.degree (Divisor.conorm k' F' D) = Divisor.degree D := by
@@ -69,7 +71,10 @@ Theorem 3.6.3(b)): if `k` is the exact constant field of `F`, then `g(F · k' / 
 Exactness of `k'` in `F · k'` is not assumed: both inequalities come from Riemann's theorem alone,
 through the invariance of degrees and Riemann–Roch dimensions under the conorm.  When `k'` is
 perfect, `TauCeti.isIntegrallyClosedIn_of_constantCompositum_eq_top` supplies that exactness, and
-the identity is Stichtenoth's statement of record. -/
+the identity is Stichtenoth's statement of record.
+
+Not a `simp` lemma: `k` and `F` occur only in the hypotheses, so `simp` could never infer them
+(the `simpNF` linter rejects the attribute). -/
 theorem genus_eq_genus_of_constantCompositum_eq_top (hF : IsFunctionField k F)
     (hex : IsIntegrallyClosedIn k F) (h : constantCompositum F k' F' = ⊤) :
     genus k' F' = genus k F := by
@@ -91,10 +96,13 @@ theorem genus_eq_genus_of_constantCompositum_eq_top (hF : IsFunctionField k F)
 Theorem 3.6.3(e)): for a finite separable constant field extension `F · k' / k'` of `F / k` with
 exact constant fields `k` and `k'`, the conorm on divisor classes sends the canonical class of
 `F / k` to the canonical class of `F · k' / k'`. -/
-theorem conormClassGroup_canonicalClass (hF : IsFunctionField k F) (hF' : IsFunctionField k' F')
+@[simp]
+theorem conormClassGroup_canonicalClass_of_constantCompositum_eq_top (hF : IsFunctionField k F)
     (hex : IsIntegrallyClosedIn k F) (hex' : IsIntegrallyClosedIn k' F')
     (h : constantCompositum F k' F' = ⊤) :
-    Divisor.conormClassGroup k' F' hF hF' (canonicalClass hF hex) = canonicalClass hF' hex' := by
+    Divisor.conormClassGroup k' F' hF (hF.of_constantCompositum_eq_top h) (canonicalClass hF hex) =
+      canonicalClass (hF.of_constantCompositum_eq_top h) hex' := by
+  have hF' : IsFunctionField k' F' := hF.of_constantCompositum_eq_top h
   obtain ⟨W, hW⟩ := (Place.orderSystem hF).divisorClass_surjective (canonicalClass hF hex)
   have hW' := (divisorClass_eq_canonicalClass_iff hF hex W).1 hW
   rw [← hW, Divisor.conormClassGroup_divisorClass, divisorClass_eq_canonicalClass_iff hF' hex',
@@ -106,9 +114,10 @@ theorem conormClassGroup_canonicalClass (hF : IsFunctionField k F) (hF' : IsFunc
 separable constant field extension of a function field with exact constant field, a divisor whose
 conorm is principal is itself principal.  A principal conorm has degree zero and a nonzero
 Riemann–Roch space, and both properties descend to the original divisor. -/
-theorem conormClassGroup_injective (hF : IsFunctionField k F) (hF' : IsFunctionField k' F')
+theorem conormClassGroup_injective_of_constantCompositum_eq_top (hF : IsFunctionField k F)
     (hex : IsIntegrallyClosedIn k F) (h : constantCompositum F k' F' = ⊤) :
-    Function.Injective (Divisor.conormClassGroup k' F' hF hF') := by
+    Function.Injective (Divisor.conormClassGroup k' F' hF (hF.of_constantCompositum_eq_top h)) := by
+  have hF' : IsFunctionField k' F' := hF.of_constantCompositum_eq_top h
   rw [injective_iff_map_eq_zero]
   intro c hc
   obtain ⟨D, rfl⟩ := (Place.orderSystem hF).divisorClass_surjective c

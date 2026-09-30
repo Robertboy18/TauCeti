@@ -192,9 +192,10 @@ theorem geometricDegree_eq_finrank_of_constantCompositum_eq_bot
   rw [geometricDegree_def, h, IntermediateField.finrank_bot']
 
 /-- **The geometric degree of a constant field extension is one**: when `F'` is the compositum
-`F · k'`, nothing is left after the constants have been adjoined.  This is the degree form of
-Stichtenoth's Theorem 3.6.3(c), through which the conorm along a constant field extension
-preserves degrees. -/
+`F · k'`, nothing is left after the constants have been adjoined.  Combined with the conorm degree
+formula `TauCeti.Divisor.degree_conorm`, this is the ingredient that makes the conorm along a
+constant field extension preserve degrees. -/
+@[simp]
 theorem geometricDegree_eq_one_of_constantCompositum_eq_top
     (h : constantCompositum F k' F' = ⊤) : geometricDegree F k' F' = 1 := by
   rw [geometricDegree_def, h, IntermediateField.finrank_top]
