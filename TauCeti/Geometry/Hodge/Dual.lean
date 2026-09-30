@@ -197,6 +197,9 @@ section WeilOperator
 weight `-n`: `(-1)^n i^{-2p-n} = i^{2p+n}` since `i^4 = 1`. -/
 private theorem neg_one_zpow_mul_I_zpow (n p : ℤ) :
     (-1 : ℂ) ^ n * Complex.I ^ (2 * -p - n) = Complex.I ^ (2 * p + n) := by
+  -- Split the exponent on the right as `2p + n = 2n + (2(-p) - n) + 4p`: the summand `2(-p) - n`
+  -- matches the left-hand exponent, and the two remaining factors `i^(2n) = (i^2)^n = (-1)^n` and
+  -- `i^(4p) = (i^4)^p = 1` are closed by `simp` once `zpow_mul` peels off the exponents `2`, `4`.
   rw [show (2 : ℤ) * p + n = 2 * n + (2 * -p - n) + 4 * p by ring, zpow_add₀ Complex.I_ne_zero,
     zpow_add₀ Complex.I_ne_zero, zpow_mul, zpow_mul]
   simp
