@@ -16,7 +16,7 @@ completeness, both at corresponding base points and globally, as well as the pro
 exponential map has its full tangent space as domain.
 
 These statements are purely geodesic: unlike the Hopf–Rinow theorem, they need neither a metric on
-the manifolds nor Hausdorffness of the tangent bundles.
+the manifolds, nor Hausdorffness of the tangent bundles, nor boundarylessness.
 -/
 
 public section
@@ -33,13 +33,13 @@ open TauCeti.Manifold
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-  [FiniteDimensional ℝ E] [I.Boundaryless]
+  [FiniteDimensional ℝ E]
   [RiemannianBundle (fun x : M ↦ TangentSpace I x)] [IsManifold I ∞ M]
   [IsContMDiffRiemannianBundle I ∞ E (fun x : M ↦ TangentSpace I x)]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {H' : Type*} [TopologicalSpace H'] {J : ModelWithCorners ℝ F H'}
   {N : Type*} [TopologicalSpace N] [ChartedSpace H' N]
-  [FiniteDimensional ℝ F] [J.Boundaryless]
+  [FiniteDimensional ℝ F]
   [RiemannianBundle (fun y : N ↦ TangentSpace J y)] [IsManifold J ∞ N]
   [IsContMDiffRiemannianBundle J ∞ F (fun y : N ↦ TangentSpace J y)]
 

@@ -28,8 +28,8 @@ Riemannian Manifolds*, 2nd ed., Chapter 5 (naturality of the exponential map), a
 * `RiemannianIsometry.geodesicInterval_mfderiv`: an isometry preserves maximal geodesic
   intervals.
 * `RiemannianIsometry.maximalGeodesic_mfderiv`: an isometry intertwines maximal geodesics.
-* `RiemannianIsometry.expDomain_mfderiv`: the differential of an isometry maps the domain of the
-  exponential map onto the domain at the image point.
+* `RiemannianIsometry.mfderiv_image_expDomain`: the differential of an isometry maps the domain of
+  the exponential map onto the domain at the image point.
 * `RiemannianIsometry.riemannianExp_mfderiv`: an isometry intertwines the exponential maps.
 -/
 
@@ -104,14 +104,14 @@ theorem mfderiv_mem_expDomain_iff (Φ : RiemannianIsometry I J M N) {p : M}
 
 /-- The differential of a smooth Riemannian isometry maps the domain of the exponential map at
 `p` onto the domain of the exponential map at `Φ p`. -/
-theorem expDomain_mfderiv (Φ : RiemannianIsometry I J M N) (p : M) :
-    expDomain J N (Φ p) = mfderiv I J Φ p '' expDomain I M p := by
+theorem mfderiv_image_expDomain (Φ : RiemannianIsometry I J M N) (p : M) :
+    mfderiv I J Φ p '' expDomain I M p = expDomain J N (Φ p) := by
   ext w
   obtain ⟨v, rfl⟩ := (Φ.mfderivToLinearIsometryEquiv p).surjective w
   have hinj : Function.Injective (mfderiv I J Φ p) := by
     simpa only [coe_mfderivToLinearIsometryEquiv] using
       (Φ.mfderivToLinearIsometryEquiv p).injective
-  rw [mfderivToLinearIsometryEquiv_apply, Φ.mfderiv_mem_expDomain_iff, hinj.mem_set_image]
+  rw [mfderivToLinearIsometryEquiv_apply, hinj.mem_set_image, Φ.mfderiv_mem_expDomain_iff]
 
 /-- A smooth Riemannian isometry intertwines the exponential maps, `Φ ∘ exp_p = exp_{Φ p} ∘ dΦ_p`,
 on every tangent vector: on the natural domain this is naturality of geodesics, and off it both
