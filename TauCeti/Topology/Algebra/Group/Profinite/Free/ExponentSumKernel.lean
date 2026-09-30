@@ -78,7 +78,7 @@ The graded pieces `gr_m(X_i) ≤ gr_m(F)` of `X_i` along the lower `p`-series
   (`ContinuousMonoidHom.apply_eq_one_of_mem_exponentSumKer_of_mem_pLowerCentralSeries_one`).
 * `ContinuousMonoidHom.exponentSumKer_eq_ker`: `X_i` is the kernel of every continuous character
   trivial on the generators `x_j`, `j ≠ i`, and of infinite order at `x_i`.
-* `TauCeti.freeProP.apply_mem_exponentSumKer_iff_of_forall_inv_mul_apply_mem`: a continuous
+* `ContinuousMonoidHom.apply_mem_exponentSumKer_iff_of_forall_inv_mul_apply_mem`: a continuous
   endomorphism moving each generator inside `X_i` preserves `X_i`.
 * `TauCeti.freeProP.gradedMk_mem_gradedPieceOf_exponentSumKer_iff`: the class of `y ∈ λ_m(F)`
   lies in `gr_m(X_i)` exactly when `p ^ (m + 1)` divides its `i`-th exponent sum.
@@ -217,7 +217,8 @@ theorem _root_.ContinuousMonoidHom.exponentSumKer_le_ker {H : Type*} [Group H]
 /-- **An endomorphism moving each generator inside `X` preserves the `i`-th exponent sum**, for
 `X` the kernel of that exponent sum: `φ(y) = Σ_x v_x(y) • exponentSum (φ x_x)` and the `i`-th
 coordinate of `exponentSum (φ x_x)` is `δ_{xi}`. -/
-theorem toAdd_exponentSum_apply_apply_eq_of_forall_inv_mul_apply_mem [Finite X]
+theorem _root_.ContinuousMonoidHom.toAdd_exponentSum_apply_apply_eq_of_forall_inv_mul_apply_mem
+    [Finite X]
     (φ : freeProP p X →ₜ* freeProP p X) {i : X}
     (hφ : ∀ j, (of j)⁻¹ * φ (of j) ∈ exponentSumKer p X i) (y : freeProP p X) :
     (exponentSum p X (φ y)).toAdd i = (exponentSum p X y).toAdd i := by
@@ -232,12 +233,13 @@ theorem toAdd_exponentSum_apply_apply_eq_of_forall_inv_mul_apply_mem [Finite X]
 
 /-- **An endomorphism moving each generator inside `X` preserves `X`**, for `X` the kernel of an
 exponent sum. -/
-theorem apply_mem_exponentSumKer_iff_of_forall_inv_mul_apply_mem [Finite X]
+theorem _root_.ContinuousMonoidHom.apply_mem_exponentSumKer_iff_of_forall_inv_mul_apply_mem
+    [Finite X]
     (φ : freeProP p X →ₜ* freeProP p X) {i : X}
     (hφ : ∀ j, (of j)⁻¹ * φ (of j) ∈ exponentSumKer p X i) (y : freeProP p X) :
     φ y ∈ exponentSumKer p X i ↔ y ∈ exponentSumKer p X i := by
   rw [mem_exponentSumKer_iff, mem_exponentSumKer_iff,
-    toAdd_exponentSum_apply_apply_eq_of_forall_inv_mul_apply_mem φ hφ]
+    φ.toAdd_exponentSum_apply_apply_eq_of_forall_inv_mul_apply_mem hφ]
 
 /-- **The kernel of a character trivial on all generators but one is the kernel of the exponent
 sum at that generator**, when the value at that generator has infinite order: both are the closed

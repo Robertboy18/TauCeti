@@ -223,7 +223,7 @@ theorem exists_continuousMulEquiv_apply_demushkinWordNeTwo_eq_of_crossedHom_sing
     ⟨_, demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩ r hr.symm ?_ ?_
   · -- Stability: a basis modification by elements of `X` preserves `X`.
     intro ω hω i c hc
-    exact (apply_mem_exponentSumKer_iff_of_forall_inv_mul_apply_mem (basisModification ω)
+    exact ((basisModification ω).apply_mem_exponentSumKer_iff_of_forall_inv_mul_apply_mem
       (fun j ↦ by rw [basisModification_of, inv_mul_cancel_left]; exact hω j) c).2 hc
   · -- The invariant: the deviation lies in `X` and is killed by every `D_i`.
     intro φ _ hφ
@@ -231,7 +231,7 @@ theorem exists_continuousMulEquiv_apply_demushkinWordNeTwo_eq_of_crossedHom_sing
       have := DFunLike.congr_fun
         (χ.comp_eq_of_forall_inv_mul_apply_mem_ker φ fun j ↦ hXker (hφ j)) g
       rwa [ContinuousMonoidHom.coe_comp, Function.comp_apply] at this
-    refine ⟨mul_mem (inv_mem ((apply_mem_exponentSumKer_iff_of_forall_inv_mul_apply_mem φ hφ _).2
+    refine ⟨mul_mem (inv_mem ((φ.apply_mem_exponentSumKer_iff_of_forall_inv_mul_apply_mem hφ _).2
       (demushkinWordNeTwo_freeProPGen_mem_exponentSumKer hn1 q))) hrX, fun i hi ↦ ?_⟩
     have hDi : IsCrossedHom χ (crossedHom χ (Pi.single i 1)) := isCrossedHom_crossedHom χ _
     rw [hDi.map_mul, hD i hi, mul_zero, zero_add, hDi.map_inv,
