@@ -150,14 +150,6 @@ noncomputable def dualityMap1 : H1 G M →+ H1 G (InternalHom G M N) →+ H2 G N
   explicitCup11 G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
     continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G))
 
-/-- **Tate's duality map in degree `2`**,
-`α₂ : H²(G, M) → Hom(H⁰(G, InternalHom G M N), H²(G, N))`: the `(2,0)` cup along the opposite
-evaluation pairing, `α₂ b φ = ⟨b, φ⟩`, the class of the cocycle `(g, h) ↦ φ (b (g, h))` for an
-invariant `φ`. -/
-noncomputable def dualityMap2 : H2 G M →+ H0 G (InternalHom G M N) →+ H2 G N :=
-  explicitCup20 G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
-    continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G))
-
 /-- On cocycles, `α₀` evaluates the cocycle at the invariant element. -/
 @[simp]
 theorem dualityMap0_mk (m : H0 G M) (b : Z2 G (InternalHom G M N)) :
@@ -184,7 +176,44 @@ theorem dualityMap1_mk (a : Z1 G M) (b : Z1 G (InternalHom G M N)) :
     explicitCup11_mk G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
       continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G)) a b
 
-omit [Finite M] in
+/-- `α₀` is the `(2,0)` evaluation cup with its arguments swapped: graded commutativity in
+bidegree `(0,2)`, where the sign is `1` (`explicitCup02_eq_cup20_flip` along the opposite
+evaluation pairing). -/
+theorem dualityMap0_eq_explicitDualityPairing20 (m : H0 G M) (b : H2 G (InternalHom G M N)) :
+    dualityMap0 G M N m b = explicitDualityPairing20 G M N b m :=
+  explicitCup02_eq_cup20_flip G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
+    continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G)) m b
+
+/-- `α₁` is the negative of the `(1,1)` evaluation cup with its arguments swapped: graded
+commutativity in bidegree `(1,1)`, where the sign is `-1` (`explicitCup11_eq_neg_flip` along the
+opposite evaluation pairing). -/
+theorem dualityMap1_eq_neg_explicitDualityPairing11 (a : H1 G M)
+    (b : H1 G (InternalHom G M N)) :
+    dualityMap1 G M N a b = -explicitDualityPairing11 G M N b a :=
+  explicitCup11_eq_neg_flip G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
+    continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G)) a b
+
+end DualityMap
+
+section DualityMapTwo
+
+/-! In degree `2` the internal hom sits in the degree-zero slot of the cup, whose continuity is
+never used, so `α₂` needs neither continuous inversion on `G` nor finiteness of `M`. -/
+
+variable (G : Type uG) [Group G] [TopologicalSpace G] [ContinuousMul G]
+  (M : Type uM) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+    [DistribMulAction G M] [ContinuousSMul G M]
+  (N : Type uN) [AddCommGroup N] [TopologicalSpace N] [DiscreteTopology N]
+    [DistribMulAction G N] [ContinuousSMul G N]
+
+/-- **Tate's duality map in degree `2`**,
+`α₂ : H²(G, M) → Hom(H⁰(G, InternalHom G M N), H²(G, N))`: the `(2,0)` cup along the opposite
+evaluation pairing, `α₂ b φ = ⟨b, φ⟩`, the class of the cocycle `(g, h) ↦ φ (b (g, h))` for an
+invariant `φ`. -/
+noncomputable def dualityMap2 : H2 G M →+ H0 G (InternalHom G M N) →+ H2 G N :=
+  explicitCup20 G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
+    continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G))
+
 /-- On cocycles, `α₂` applies the translate of the invariant homomorphism to the cocycle. -/
 @[simp]
 theorem dualityMap2_mk (b : Z2 G M) (φ : H0 G (InternalHom G M N)) :
@@ -198,15 +227,6 @@ theorem dualityMap2_mk (b : Z2 G M) (φ : H0 G (InternalHom G M N)) :
     explicitCup20_mk G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
       continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G)) b φ
 
-/-- `α₀` is the `(2,0)` evaluation cup with its arguments swapped: graded commutativity in
-bidegree `(0,2)`, where the sign is `1` (`explicitCup02_eq_cup20_flip` along the opposite
-evaluation pairing). -/
-theorem dualityMap0_eq_explicitDualityPairing20 (m : H0 G M) (b : H2 G (InternalHom G M N)) :
-    dualityMap0 G M N m b = explicitDualityPairing20 G M N b m :=
-  explicitCup02_eq_cup20_flip G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
-    continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G)) m b
-
-omit [Finite M] in
 /-- `α₂` is the `(0,2)` evaluation cup with its arguments swapped: graded commutativity in
 bidegree `(2,0)`, where the sign is `1` (`explicitCup02_eq_cup20_flip` along the evaluation
 pairing, read backwards). -/
@@ -215,16 +235,7 @@ theorem dualityMap2_eq_explicitDualityPairing02 (b : H2 G M) (φ : H0 G (Interna
   (explicitCup02_eq_cup20_flip G (InternalHom G M N) M N (InternalHom.evalPairing G)
     continuous_of_discreteTopology (InternalHom.evalPairing_equivariant (G := G)) φ b).symm
 
-/-- `α₁` is the negative of the `(1,1)` evaluation cup with its arguments swapped: graded
-commutativity in bidegree `(1,1)`, where the sign is `-1` (`explicitCup11_eq_neg_flip` along the
-opposite evaluation pairing). -/
-theorem dualityMap1_eq_neg_explicitDualityPairing11 (a : H1 G M)
-    (b : H1 G (InternalHom G M N)) :
-    dualityMap1 G M N a b = -explicitDualityPairing11 G M N b a :=
-  explicitCup11_eq_neg_flip G M (InternalHom G M N) N (InternalHom.evalPairing G).flip
-    continuous_of_discreteTopology (InternalHom.evalPairing_flip_equivariant (G := G)) a b
-
-end DualityMap
+end DualityMapTwo
 
 section TrivialZMod
 
@@ -246,7 +257,58 @@ variable {n : ℕ} {G : Type uG} [Group G] [DistribMulAction G (ZMod n)]
 
 include htriv
 
-variable [NeZero n] [TopologicalSpace G] [IsTopologicalGroup G] [ContinuousSMul G (ZMod n)]
+variable [NeZero n] [TopologicalSpace G] [ContinuousSMul G (ZMod n)]
+
+section ContinuousMul
+
+/-! The two statements about `α₂` need only continuous multiplication on `G`. -/
+
+variable [ContinuousMul G]
+
+/-- **`α₂` at trivial `ZMod n` coefficients is scalar multiplication**: `α₂ b φ = φ 1 • b`. -/
+theorem dualityMap2_zmod (b : H2 G (ZMod n)) (φ : H0 G (InternalHom G (ZMod n) (ZMod n))) :
+    dualityMap2 G (ZMod n) (ZMod n) b φ =
+      InternalHom.zmodEquiv G (φ : InternalHom G (ZMod n) (ZMod n)) • b := by
+  induction b using QuotientAddGroup.induction_on with
+  | _ c =>
+    rw [dualityMap2_mk, zmod_smul_mk]
+    refine congrArg (fun z : Z2 G (ZMod n) => (z : H2 G (ZMod n)))
+      (Subtype.ext (funext fun q => ?_))
+    dsimp only
+    rw [InternalHom.smul_eq_self_of_smul_eq_self htriv htriv, AddMonoidHom.flip_apply,
+      InternalHom.evalPairing_apply, InternalHom.toAddMonoidHom_apply_eq_smul]
+    simp [nsmul_eq_mul, mul_comm]
+
+/-- **`α₂` at trivial `ZMod n` coefficients is bijective**, for every group `G` with continuous
+multiplication acting trivially on `ZMod n`: under evaluation at `1` it sends `b` to `c ↦ c • b`,
+and a homomorphism out of `ZMod n` into a group killed by `n` is determined by its value at `1`. -/
+theorem dualityMap2_zmod_bijective : Function.Bijective (dualityMap2 G (ZMod n) (ZMod n)) := by
+  -- the identity of `ZMod n` is an invariant element of the internal hom, with value `1` at `1`
+  have hid : InternalHom.of G (AddMonoidHom.id (ZMod n)) ∈
+      H0 G (InternalHom G (ZMod n) (ZMod n)) :=
+    (FixedPoints.mem_addSubgroup _ _ _).2 fun g =>
+      InternalHom.smul_eq_self_of_smul_eq_self htriv htriv g _
+  constructor
+  · intro b b' h
+    have := congrArg
+      (fun f : H0 G (InternalHom G (ZMod n) (ZMod n)) →+ H2 G (ZMod n) => f ⟨_, hid⟩) h
+    simpa [dualityMap2_zmod htriv] using this
+  · intro f
+    refine ⟨f ⟨_, hid⟩, AddMonoidHom.ext fun φ => ?_⟩
+    -- an invariant homomorphism `φ` is `φ 1` times the identity
+    have hφ : φ = (InternalHom.zmodEquiv G (φ : InternalHom G (ZMod n) (ZMod n))).val •
+        (⟨_, hid⟩ : H0 G (InternalHom G (ZMod n) (ZMod n))) := by
+      ext x
+      rw [InternalHom.toAddMonoidHom_apply_eq_smul]
+      simp [nsmul_eq_mul, mul_comm]
+    have hf : f φ = (InternalHom.zmodEquiv G (φ : InternalHom G (ZMod n) (ZMod n))).val •
+        f ⟨_, hid⟩ := by
+      rw [← map_nsmul, ← hφ]
+    rw [dualityMap2_zmod htriv, hf, ← Nat.cast_smul_eq_nsmul (ZMod n), ZMod.natCast_zmod_val]
+
+end ContinuousMul
+
+variable [IsTopologicalGroup G]
 
 /-- For a trivial action on `ZMod n`, the first cohomology of `InternalHom G (ZMod n) (ZMod n)` is
 that of `ZMod n`, along evaluation at `1`. -/
@@ -301,20 +363,6 @@ theorem dualityMap0_zmod (m : H0 G (ZMod n)) (b : H2 G (InternalHom G (ZMod n) (
       InternalHom.toAddMonoidHom_apply_eq_smul]
     simp [nsmul_eq_mul]
 
-/-- **`α₂` at trivial `ZMod n` coefficients is scalar multiplication**: `α₂ b φ = φ 1 • b`. -/
-theorem dualityMap2_zmod (b : H2 G (ZMod n)) (φ : H0 G (InternalHom G (ZMod n) (ZMod n))) :
-    dualityMap2 G (ZMod n) (ZMod n) b φ =
-      InternalHom.zmodEquiv G (φ : InternalHom G (ZMod n) (ZMod n)) • b := by
-  induction b using QuotientAddGroup.induction_on with
-  | _ c =>
-    rw [dualityMap2_mk, zmod_smul_mk]
-    refine congrArg (fun z : Z2 G (ZMod n) => (z : H2 G (ZMod n)))
-      (Subtype.ext (funext fun q => ?_))
-    dsimp only
-    rw [InternalHom.smul_eq_self_of_smul_eq_self htriv htriv, AddMonoidHom.flip_apply,
-      InternalHom.evalPairing_apply, InternalHom.toAddMonoidHom_apply_eq_smul]
-    simp [nsmul_eq_mul, mul_comm]
-
 /-- **`α₁` at trivial `ZMod n` coefficients is the cup product of multiplication**:
 `α₁ a b = a ⌣ b`, reading `b` in `H¹(G, ZMod n)` through evaluation at `1`. -/
 theorem dualityMap1_zmod (a : H1 G (ZMod n)) (b : H1 G (InternalHom G (ZMod n) (ZMod n))) :
@@ -337,33 +385,6 @@ theorem dualityMap1_zmod (a : H1 G (ZMod n)) (b : H1 G (InternalHom G (ZMod n) (
       rw [InternalHom.smul_eq_self_of_smul_eq_self htriv htriv, AddMonoidHom.flip_apply,
         InternalHom.evalPairing_apply, InternalHom.toAddMonoidHom_apply_eq_smul]
       simp [htriv]
-
-/-- **`α₂` at trivial `ZMod n` coefficients is bijective**, for every topological group `G` acting
-trivially on `ZMod n`: under evaluation at `1` it sends `b` to `c ↦ c • b`, and a homomorphism out
-of `ZMod n` into a group killed by `n` is determined by its value at `1`. -/
-theorem dualityMap2_zmod_bijective : Function.Bijective (dualityMap2 G (ZMod n) (ZMod n)) := by
-  -- the identity of `ZMod n` is an invariant element of the internal hom, with value `1` at `1`
-  have hid : InternalHom.of G (AddMonoidHom.id (ZMod n)) ∈
-      H0 G (InternalHom G (ZMod n) (ZMod n)) :=
-    (FixedPoints.mem_addSubgroup _ _ _).2 fun g =>
-      InternalHom.smul_eq_self_of_smul_eq_self htriv htriv g _
-  constructor
-  · intro b b' h
-    have := congrArg
-      (fun f : H0 G (InternalHom G (ZMod n) (ZMod n)) →+ H2 G (ZMod n) => f ⟨_, hid⟩) h
-    simpa [dualityMap2_zmod htriv] using this
-  · intro f
-    refine ⟨f ⟨_, hid⟩, AddMonoidHom.ext fun φ => ?_⟩
-    -- an invariant homomorphism `φ` is `φ 1` times the identity
-    have hφ : φ = (InternalHom.zmodEquiv G (φ : InternalHom G (ZMod n) (ZMod n))).val •
-        (⟨_, hid⟩ : H0 G (InternalHom G (ZMod n) (ZMod n))) := by
-      ext x
-      rw [InternalHom.toAddMonoidHom_apply_eq_smul]
-      simp [nsmul_eq_mul, mul_comm]
-    have hf : f φ = (InternalHom.zmodEquiv G (φ : InternalHom G (ZMod n) (ZMod n))).val •
-        f ⟨_, hid⟩ := by
-      rw [← map_nsmul, ← hφ]
-    rw [dualityMap2_zmod htriv, hf, ← Nat.cast_smul_eq_nsmul (ZMod n), ZMod.natCast_zmod_val]
 
 /-- **`α₀` at trivial `𝔽_p` coefficients is bijective when `H²(G, 𝔽_p)` is one-dimensional**:
 under evaluation at `1` it sends `c` to multiplication by `c`, and every endomorphism of a
