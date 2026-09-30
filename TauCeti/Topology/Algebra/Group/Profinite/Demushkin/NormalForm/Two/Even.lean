@@ -29,9 +29,10 @@ squared generator `x₁` occurs in a bracket, and the spanning set is not indexe
 with vanishing `2`-power coefficient: it includes `π^{m+1} ξ₁` although `x₁` carries the `2`-power
 part of `ρ`, and excludes `π^{m+1} ξ₂`, the power of its bracket partner. The statement is the
 instance of
-`TauCeti.freeProP.range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two` at the
-pair `(x₁, x₂)`: the degree-one form of `ρ` is nondegenerate, `x₁` is the only generator with a
-`2`-power coefficient, and the second coordinate character pairs only with the first.
+`TauCeti.freeProP.range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two` at `x₂`:
+the degree-one form of `ρ` is nondegenerate, and its column at the second coordinate character is
+the vector of `2`-power coefficients of `ρ`, since `x₁` is the only generator with a `2`-power
+coefficient and the second coordinate character pairs only with the first.
 
 ## Main results
 
@@ -82,23 +83,18 @@ theorem range_basisModificationDelta_sup_gradedPowIterSpan_eq_top_demushkinWordT
   refine range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two hm
     (ρ := gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoEven a f n (freeProPGen 2 n),
       demushkinWordTwoEven_mem_pLowerCentralSeries_one ha2 hf0 n _⟩)
-    (i₀ := ⟨0, hn0⟩) (i₁ := ⟨1, hn1⟩) ?_ (fun k hk ↦ ?_) ?_ fun i hi ↦ ?_
+    (i₁ := ⟨1, hn1⟩) ?_ fun i ↦ ?_
   · rw [span_range_degreeOneDeriv_eq_top_iff_nondegenerate_degreeOneForm]
     exact nondegenerate_degreeOneForm_demushkinWordTwoEven hn ha2 hf0
-  · exact (degreeOneBasis_repr_gradedMk_demushkinWordTwoEven_inl_eq_zero_iff ha hf k).2
-      fun h ↦ hk (Fin.ext h)
-  · -- Both sides are `1`: the form entry is `χ₁(x₁)`, and the coefficient of `π ξ₁` is
-    -- `1 + a/2 ≡ 1` since `4 ∣ a`.
+  · -- The column of the form at `χ₂` is `χ_i(x₁)`, and the coefficients of the `π ξ_i` are
+    -- `1 + a/2 ≡ 1` at `i = 1`, since `4 ∣ a`, and `2^{f-1} ≡ 0` at `i = 3`, since `f ≥ 2`.
     rw [degreeOneForm_gradedMk_demushkinWordTwoEven_dualBasis_one hn1 ha2 hf0,
-      toMul_dualBasis_freeProPGen, ite_eq_left rfl,
-      degreeOneBasis_repr_gradedMk_demushkinWordTwoEven_inl ha2 hf0]
+      toMul_dualBasis_freeProPGen, degreeOneBasis_repr_gradedMk_demushkinWordTwoEven_inl ha2 hf0]
     obtain ⟨g, hg⟩ : ∃ g, f - 1 = g + 1 := ⟨f - 2, by omega⟩
     obtain ⟨b, rfl⟩ := ha
     have hb : 4 * b / 2 = 2 * b := by omega
     rw [hg, hb]
     simp [nsmul_eq_mul, CharTwo.two_eq_zero]
-  · rw [degreeOneForm_gradedMk_demushkinWordTwoEven_dualBasis_one hn1 ha2 hf0,
-      toMul_dualBasis_freeProPGen, ite_eq_right fun h ↦ hi (Fin.ext h)]
 
 end freeProP
 

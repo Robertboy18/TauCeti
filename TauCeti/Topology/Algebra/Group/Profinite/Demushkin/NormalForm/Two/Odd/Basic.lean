@@ -24,9 +24,10 @@ with `q = 2` of odd rank: the class in `gr_{m+1}(F)` of a discrepancy between tw
 class `ρ` is the class of a basis modification up to the classes of the powers `x_i^{2^{m+1}}`,
 `i ≥ 2`, which the argument carries along rather than absorbs; in Labute's proof they give rise to
 the factor `x₂^{2^f}` of the normal form. It is the instance of
-`TauCeti.freeProP.range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two` at the
-pair `(x₁, x₁)`: the degree-one form of `ρ` is nondegenerate, `x₁` is the only generator with a
-`2`-power coefficient, and the first coordinate character is orthogonal to the others, so that
+`TauCeti.freeProP.range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two` at `x₁`:
+the degree-one form of `ρ` is nondegenerate, and its column at the first coordinate character is
+the vector of `2`-power coefficients of `ρ`, since `x₁` is the only generator with a `2`-power
+coefficient and the first coordinate character is orthogonal to the others, with
 `B_ρ(χ₁, χ₁) = c₁`; the spanning powers `π^{m+1} ξ_i`, `i ≠ 1`, all lie in the tail `T_{m+1}(ρ)`.
 
 ## Main results
@@ -76,17 +77,18 @@ theorem range_basisModificationDelta_sup_basisModificationTail_eq_top_demushkinW
   have hc (k : Fin n) (hk : k ≠ ⟨0, hn0⟩) : (degreeOneBasis 2 (Fin n)).repr ρ (Sum.inl k) = 0 :=
     (degreeOneBasis_repr_gradedMk_demushkinWordTwoOdd_inl_eq_zero_iff hf k).2
       fun h ↦ hk (Fin.ext h)
-  -- The general dyadic statement at `i₀ = i₁ = x₁`.
+  -- The general dyadic statement at `i₁ = x₁`.
   have h : LinearMap.range (basisModificationDelta 2 (Fin n) hm ρ) ⊔
       gradedPowIterSpan 2 (Fin n) {(⟨0, hn0⟩ : Fin n)}ᶜ (m + 1) = ⊤ := by
-    refine range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two hm ?_ hc ?_
-      fun i hi ↦ ?_
+    refine range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two hm ?_ fun i ↦ ?_
     · rw [span_range_degreeOneDeriv_eq_top_iff_nondegenerate_degreeOneForm]
       exact nondegenerate_degreeOneForm_demushkinWordTwoOdd hn hf0
-    · -- `B_ρ(χ₁, χ₁) = (2 choose 2) c₁ = c₁`.
-      rw [degreeOneForm_dualBasis_self, Nat.choose_self, one_smul]
-    · rw [hρ, degreeOneForm_gradedMk_demushkinWordTwoOdd_dualBasis_zero hn0 hf0,
-        toMul_dualBasis_freeProPGen, ite_eq_right fun h ↦ hi (Fin.ext h)]
+    · -- The column of the form at `χ₁`: `B_ρ(χ₁, χ₁) = (2 choose 2) c₁ = c₁`, and for `i ≠ 1`
+      -- the entry `χ_i(x₁)` and the coefficient of `π ξ_i` both vanish.
+      by_cases hi : i = ⟨0, hn0⟩
+      · rw [hi, degreeOneForm_dualBasis_self, Nat.choose_self, one_smul]
+      · rw [hc i hi, hρ, degreeOneForm_gradedMk_demushkinWordTwoOdd_dualBasis_zero hn0 hf0,
+          toMul_dualBasis_freeProPGen, ite_eq_right fun h ↦ hi (Fin.ext h)]
   -- Its spanning set `{i ≠ 1}` lies in the tail `T_{m+1}(ρ)`.
   rw [basisModificationTail_def]
   exact top_le_iff.1

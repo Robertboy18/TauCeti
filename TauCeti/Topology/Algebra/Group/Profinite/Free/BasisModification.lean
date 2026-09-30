@@ -75,16 +75,17 @@ the second that of `x₁^p (x₁, x₂) (x₃, x₄) ⋯` at odd `p`. Both rest 
 `gr_{m+1}(F)` by `π gr_m(F)` and `[gr_m(F), gr_0(F)]` and on the naturality `π ∘ δ_ρ = δ_ρ ∘ π`,
 which carries the image of `δ_ρ` in degree `m` into its image in degree `m + 1`. For `p = 2` and a
 class with a `p`-power part the odd-`p` argument breaks down at the degree-zero defect of `π`. It
-survives when a single generator `x_{i₀}` carries the `2`-power part and some generator class
-`ξ_{i₁}` pairs under the degree-one form only with `ξ_{i₀}`, with entry `c_{i₀}`: then
+survives when some generator class `ξ_{i₁}` has the column `B_ρ(χ_i, χ_{i₁})` of the degree-one
+form at its coordinate character equal to the vector `c_i` of `2`-power coefficients: then
 `gr_{m+1}(F) = Im δ_ρ + ⟨π^{m+1} ξ_i : i ≠ i₁⟩`. The key membership is
 `ψ(y) • π v + [v, y] ∈ Im δ_ρ` for `ψ` the coordinate at `ξ_{i₁}`, which makes every bracket
 `[v, y]` available once `π v` is, and the degree-zero defect of `π` is absorbed by the brackets
 `[[ξ_a, y], ξ_a]` with `a ≠ i₁`. For the dyadic relators `x₁² x₂^{2^f} (x₂, x₃) ⋯` of odd rank,
-`ξ₁` occurs in no bracket and `i₁ = i₀` is the index of `x₁`, so the span is the tail `T_{m+1}(ρ)`
-and the level `f` is the free parameter it accounts for. For the even-rank relators
-`x₁^{2+α} (x₁, x₂) x₃^{2^f} ⋯`, `i₀` is the index of `x₁` and `i₁` that of its bracket partner
-`x₂`, so the spanning powers include `π^{m+1} ξ₁` although `c₁ ≠ 0`, and exclude `π^{m+1} ξ₂`.
+`x₁` carries the `2`-power part, `ξ₁` occurs in no bracket and `i₁` is the index of `x₁`, so the
+span is the tail `T_{m+1}(ρ)` and the level `f` is the free parameter it accounts for. For the
+even-rank relators `x₁^{2+α} (x₁, x₂) x₃^{2^f} ⋯`, `x₁` carries the `2`-power part and `i₁` is the
+index of its bracket partner `x₂`, so the spanning powers include `π^{m+1} ξ₁` although `c₁ ≠ 0`,
+and exclude `π^{m+1} ξ₂`.
 
 ## Main definitions
 
@@ -134,10 +135,11 @@ and the level `f` is the free parameter it accounts for. For the even-rank relat
 * `TauCeti.freeProP.range_basisModificationDelta_eq_top_of_odd`: for odd `p` and a class with a
   `p`-power part whose derivatives span `gr_0(F)`, `gr_{m+1}(F) = Im δ_ρ`.
 * `TauCeti.freeProP.range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two`: for
-  `p = 2` and a class whose derivatives span `gr_0(F)`, whose `2`-power part sits on a single
-  generator `x_{i₀}`, and for which `ξ_{i₁}` pairs only with `ξ_{i₀}`, with entry `c_{i₀}`,
-  `gr_{m+1}(F) = Im δ_ρ + ⟨π^{m+1} ξ_i : i ≠ i₁⟩`; at `i₁ = i₀`, for a generator `x_{i₀}` not
-  occurring in the brackets, this is `gr_{m+1}(F) = Im δ_ρ + T_{m+1}(ρ)`.
+  `p = 2` and a class whose derivatives span `gr_0(F)`, and a generator class `ξ_{i₁}` whose
+  column `B_ρ(χ_i, χ_{i₁})` of the degree-one form is the vector of `2`-power coefficients of the
+  class, `gr_{m+1}(F) = Im δ_ρ + ⟨π^{m+1} ξ_i : i ≠ i₁⟩`; for a class whose `2`-power part sits
+  on a single generator `x_{i₁}` not occurring in the brackets, this is
+  `gr_{m+1}(F) = Im δ_ρ + T_{m+1}(ρ)`.
 
 ## References
 
@@ -1153,17 +1155,15 @@ variable [Finite X] [LinearOrder X]
 -- dual is an additive group over the module structure of `ZMod 2` on itself.
 attribute [local instance 2000] Ring.toAddCommGroup
 
-/-- The membership behind the dyadic span statements: if `x_{i₀}` is the only generator with a
-`2`-power coefficient in `ρ`, and the coordinate character `χ_{i₁}` pairs under the degree-one
-form only with `χ_{i₀}`, with `B_ρ(χ_{i₀}, χ_{i₁}) = c_{i₀}`, then
-`ψ(y) • π v + [v, y] ∈ Im δ_ρ`, where `ψ(y)` is the coordinate of `y ∈ gr_0(F)` at `ξ_{i₁}`. -/
+/-- The membership behind the dyadic span statements: if the column `B_ρ(χ_i, χ_{i₁})` of the
+degree-one form of `ρ` at the coordinate character `χ_{i₁}` is the vector `c_i` of `2`-power
+coefficients of `ρ`, then `ψ(y) • π v + [v, y] ∈ Im δ_ρ`, where `ψ(y)` is the coordinate of
+`y ∈ gr_0(F)` at `ξ_{i₁}`. -/
 private theorem repr_smul_gradedPow_add_gradedBracket_mem_range_two (hm : 1 ≤ m)
     {ρ : gradedPiece 2 (freeProP 2 X) 1}
-    (hρ : span (ZMod 2) (Set.range fun i ↦ degreeOneDeriv 2 X i ρ) = ⊤) {i₀ i₁ : X}
-    (hc : ∀ i, i ≠ i₀ → (degreeOneBasis 2 X).repr ρ (Sum.inl i) = 0)
-    (ha : degreeOneForm ρ (dualBasis 2 X i₀) (dualBasis 2 X i₁) =
-      (degreeOneBasis 2 X).repr ρ (Sum.inl i₀))
-    (hd : ∀ i, i ≠ i₀ → degreeOneForm ρ (dualBasis 2 X i) (dualBasis 2 X i₁) = 0)
+    (hρ : span (ZMod 2) (Set.range fun i ↦ degreeOneDeriv 2 X i ρ) = ⊤) {i₁ : X}
+    (hcol : ∀ i, degreeOneForm ρ (dualBasis 2 X i) (dualBasis 2 X i₁) =
+      (degreeOneBasis 2 X).repr ρ (Sum.inl i))
     (v : gradedPiece 2 (freeProP 2 X) m) (y : gradedPiece 2 (freeProP 2 X) 0) :
     (degreeZeroBasis 2 X).repr y i₁ • gradedPow 2 (freeProP 2 X) m v +
         gradedBracket 2 (freeProP 2 X) m 0 v y ∈
@@ -1174,41 +1174,38 @@ private theorem repr_smul_gradedPow_add_gradedBracket_mem_range_two (hm : 1 ≤ 
   refine ⟨fun i ↦ b i • v, ?_⟩
   rw [basisModificationDelta_smul, hb]
   congr 2
-  -- `Σ_i b_i c_i = Σ_i b_i ψ(∂_i ρ)`, termwise: both factors vanish away from `i₀`, and at `i₀`
-  -- the entry `B_ρ(χ_{i₀}, χ_{i₁})` of the degree-one form is `c_{i₀}`.
+  -- `Σ_i b_i c_i = Σ_i b_i ψ(∂_i ρ)`, termwise: `ψ(∂_i ρ)` is the entry `B_ρ(χ_i, χ_{i₁})` of the
+  -- degree-one form, which is `c_i`.
   rw [← hb, map_sum, Finsupp.finsetSum_apply]
   refine Finset.sum_congr rfl fun i _ ↦ ?_
-  rw [map_smul, Finsupp.smul_apply, smul_eq_mul, degreeZeroBasis_repr_degreeOneDeriv]
-  by_cases hi : i = i₀
-  · rw [hi, ha]
-  · rw [hc i hi, hd i hi]
+  rw [map_smul, Finsupp.smul_apply, smul_eq_mul, degreeZeroBasis_repr_degreeOneDeriv, hcol i]
 
 /-- **The dyadic span statement** (Labute, Proposition 5, the cases `q = 2`): let `ρ ∈ gr_1(F)`,
-for `F` free pro-`2`, have its partial derivatives `∂_i ρ` spanning `gr_0(F)`, let `x_{i₀}` be the
-only generator whose coefficient `c_i` of `π ξ_i` in `ρ` may be nonzero, and let `ξ_{i₁}` be a
-generator class that pairs under the degree-one form of `ρ` only with `ξ_{i₀}`, with
-`B_ρ(χ_{i₀}, χ_{i₁}) = c_{i₀}`. Then for every `m ≥ 1`
+for `F` free pro-`2`, have its partial derivatives `∂_i ρ` spanning `gr_0(F)`, and let `ξ_{i₁}` be
+a generator class such that the column `B_ρ(χ_i, χ_{i₁})` of the degree-one form of `ρ` at its
+coordinate character is the vector `c_i` of coefficients of the `π ξ_i` in `ρ`. Then for every
+`m ≥ 1`
   `gr_{m+1}(F) = Im δ_ρ + ⟨π^{m+1} ξ_i : i ≠ i₁⟩`.
-Two cases occur among the dyadic Demushkin relators. For `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)`
-of odd rank, with `f ≥ 2`, whose class is `π ξ₁ + [ξ₂, ξ₃] + ⋯`, the generator `x₁` occurs in no
-bracket and `i₁ = i₀` is the index of `x₁`. For `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯` of even
-rank, with `4 ∣ α` and `f ≥ 2`, whose class is `π ξ₁ + [ξ₁, ξ₂] + [ξ₃, ξ₄] + ⋯`, the index `i₀` is
-that of `x₁` and `i₁` that of its bracket partner `x₂`, so the spanning powers include
+Two cases occur among the dyadic Demushkin relators, in both of which `x₁` is the only generator
+with `c_i ≠ 0`. For `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)` of odd rank, with `f ≥ 2`, whose
+class is `π ξ₁ + [ξ₂, ξ₃] + ⋯`, the generator `x₁` occurs in no bracket, `χ₁` is orthogonal to the
+other coordinate characters with `B_ρ(χ₁, χ₁) = c₁`, and `i₁` is the index of `x₁`. For
+`x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯` of even rank, with `4 ∣ α` and `f ≥ 2`, whose class is
+`π ξ₁ + [ξ₁, ξ₂] + [ξ₃, ξ₄] + ⋯`, the character `χ₂` of the bracket partner `x₂` pairs only with
+`χ₁`, with `B_ρ(χ₁, χ₂) = c₁`, and `i₁` is the index of `x₂`, so the spanning powers include
 `π^{m+1} ξ₁` although `c₁ ≠ 0`, and exclude `π^{m+1} ξ₂`. -/
 theorem range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two (hm : 1 ≤ m)
     {ρ : gradedPiece 2 (freeProP 2 X) 1}
-    (hρ : span (ZMod 2) (Set.range fun i ↦ degreeOneDeriv 2 X i ρ) = ⊤) {i₀ i₁ : X}
-    (hc : ∀ i, i ≠ i₀ → (degreeOneBasis 2 X).repr ρ (Sum.inl i) = 0)
-    (ha : degreeOneForm ρ (dualBasis 2 X i₀) (dualBasis 2 X i₁) =
-      (degreeOneBasis 2 X).repr ρ (Sum.inl i₀))
-    (hd : ∀ i, i ≠ i₀ → degreeOneForm ρ (dualBasis 2 X i) (dualBasis 2 X i₁) = 0) :
+    (hρ : span (ZMod 2) (Set.range fun i ↦ degreeOneDeriv 2 X i ρ) = ⊤) {i₁ : X}
+    (hcol : ∀ i, degreeOneForm ρ (dualBasis 2 X i) (dualBasis 2 X i₁) =
+      (degreeOneBasis 2 X).repr ρ (Sum.inl i)) :
     LinearMap.range (basisModificationDelta 2 X hm ρ) ⊔ gradedPowIterSpan 2 X {i₁}ᶜ (m + 1) =
       ⊤ := by
   have hopen (k : ℕ) :
       IsOpen (pLowerCentralSeries 2 (freeProP 2 X) k : Set (freeProP 2 X)) :=
     (isTopologicallyFinitelyGenerated_freeProP 2 X).isOpen_pLowerCentralSeries Nat.prime_two k
   have hkey := fun (m : ℕ) (hm : 1 ≤ m) ↦
-    repr_smul_gradedPow_add_gradedBracket_mem_range_two hm hρ hc ha hd
+    repr_smul_gradedPow_add_gradedBracket_mem_range_two hm hρ hcol
   -- The coordinate of a generator class at `ξ_{i₁}`.
   have hψ (a : X) : (degreeZeroBasis 2 X).repr (gradedMkZero 2 (freeProP 2 X) (of a)) i₁ =
       if a = i₁ then 1 else 0 := by
