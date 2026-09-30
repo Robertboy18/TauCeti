@@ -6,7 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.LinearAlgebra.Dual.Lemmas
-public import TauCeti.Geometry.Hodge.Structure
+public import TauCeti.Geometry.Hodge.Morphism
+public import TauCeti.Geometry.Hodge.WeilOperator
 
 /-!
 # The dual of a pure Hodge structure
@@ -18,11 +19,17 @@ the original conjugation, sending a functional `φ` to `v ↦ conj (φ (ω v))`.
 The dual pairing then respects Hodge components of complementary indices: the `p`-th component
 of the dual pairs nontrivially only against the component of index `-p`, and, when `W` is
 finite-dimensional, has the same dimension as the `(-p)`-th component, so dualizing reflects
-the table of Hodge numbers.
+the table of Hodge numbers. The pairing is invariant under the Weil operators, so the Weil
+operator of the dual is the transpose of the inverse Weil operator.
 
-This is one of the companion constructions of Layer L0 of `TauCetiRoadmap/HodgeStructures/README.md`
-(the `⊗`/`Hom`/dual companions), following Peters–Steenbrink, *Mixed Hodge Structures*, §2; it is
-the base on which the internal hom of Hodge structures is to be built.
+For an integral pure Hodge structure the dual is carried by the dual lattice `Hom_ℤ(V, ℤ)`: the
+complex dual of the complexification is a complexification of the dual lattice, whose lattice
+conjugation is the twisted transpose (`TauCeti.Hodge.latticeConjugation_dual`). Dualizing is
+contravariantly functorial in morphisms, at both the complex and the integral level.
+
+This is the dual companion to tensor products and internal homs of pure Hodge structures,
+following Peters–Steenbrink, *Mixed Hodge Structures*, §2; it is the base on which the internal
+hom of Hodge structures is built.
 
 ## Main declarations
 
@@ -38,6 +45,17 @@ the base on which the internal hom of Hodge structures is to be built.
   dimension of the `p`-th component of the dual equals that of the `(-p)`-th component.
 * `TauCeti.Hodge.HodgeStructureOn.apply_eq_zero_of_mem_piece_of_ne`: the dual pairing vanishes
   between components unless their indices are complementary.
+* `TauCeti.Hodge.HodgeStructureOn.weilOperator_dual`: the Weil operator of the dual is the
+  transpose of the inverse Weil operator, so that the dual pairing is Weil-invariant
+  (`TauCeti.Hodge.HodgeStructureOn.weilOperator_dual_apply_weilOperator`).
+* `TauCeti.Hodge.HodgeStructureOn.IsMorphism.dualMap`: the transpose of a morphism of pure Hodge
+  structures is a morphism between the duals.
+* `TauCeti.Hodge.HodgeStructure.dual`: the dual of an integral pure Hodge structure, on the dual
+  lattice, with `TauCeti.Hodge.HodgeStructure.dual_F`, `…dual_piece` and `…dual_weilOperator`
+  identifying its filtration, components and Weil operator with those of the complex dual.
+* `TauCeti.Hodge.HodgeStructure.Hom.dualMap`: the transpose of a morphism of integral pure Hodge
+  structures, with `TauCeti.Hodge.HodgeStructure.Hom.dualMap_id` and `…dualMap_comp` its
+  contravariant functoriality.
 -/
 
 public section
@@ -172,6 +190,144 @@ theorem apply_eq_zero_of_mem_piece_of_ne {a p : ℤ}
   · have hle : 1 - p ≤ a := by omega
     exact hφ u (Submodule.mem_sup_left (hs.F_antitone hle hpair.1))
 
+section WeilOperator
+
+/-- **The Weil operator of the dual is the transpose of the inverse Weil operator.** On the
+`p`-th component of the dual, of weight `-n`, it acts by `i^{2p+n}`, and that is the inverse of
+the scalar `i^{-2p-n}` by which the Weil operator acts on the complementary component of index
+`-p`. -/
+@[simp]
+theorem weilOperator_dual :
+    hs.dual.weilOperator = hs.weilOperatorEquiv.symm.toLinearMap.dualMap := by
+  refine (hs.dual.weilOperator_unique _ fun p φ hφ ↦ ?_).symm
+  refine hs.linearMap_ext_of_piece fun a x hx ↦ ?_
+  rw [LinearMap.dualMap_apply, LinearEquiv.coe_coe, weilOperatorEquiv_symm_apply,
+    hs.weilOperator_apply_of_mem hx, LinearMap.smul_apply, map_smul, map_smul, smul_eq_mul,
+    smul_eq_mul]
+  by_cases ha : a = -p
+  · subst ha
+    -- The scalars agree: `(-1)^n i^{-2p-n} = i^{2p+n}` because `i^4 = 1`.
+    have h2 : (-1 : ℂ) = Complex.I ^ (2 : ℤ) := by simp
+    rw [h2, ← zpow_mul, ← mul_assoc, ← zpow_add₀ Complex.I_ne_zero,
+      show 2 * n + (2 * -p - n) = (2 * p - -n) + 4 * (-p) by ring, zpow_add₀ Complex.I_ne_zero,
+      zpow_mul]
+    simp
+  · rw [hs.apply_eq_zero_of_mem_piece_of_ne hx hφ ha, mul_zero, mul_zero, smul_zero]
+
+/-- **The dual pairing is Weil-invariant:** `⟨C φ, C x⟩ = ⟨φ, x⟩`. -/
+theorem weilOperator_dual_apply_weilOperator (φ : Module.Dual ℂ W) (x : W) :
+    hs.dual.weilOperator φ (hs.weilOperator x) = φ x := by
+  rw [weilOperator_dual, LinearMap.dualMap_apply, LinearEquiv.coe_coe, ← weilOperatorEquiv_apply,
+    LinearEquiv.symm_apply_apply]
+
+end WeilOperator
+
+section Morphism
+
+variable {W₂ : Type*} [AddCommGroup W₂] [Module ℂ W₂] {ω₂ : Conjugation W₂}
+
+/-- The transpose of a morphism of pure Hodge structures is a morphism between the duals, in the
+opposite direction. -/
+theorem IsMorphism.dualMap {hs₂ : HodgeStructureOn W₂ ω₂ n} {g : W →ₗ[ℂ] W₂}
+    (h : IsMorphism hs hs₂ g) : IsMorphism hs₂.dual hs.dual g.dualMap where
+  commutes_conj φ := by
+    ext v
+    simp [h.commutes_conj]
+  map_F_le p := by
+    rintro _ ⟨φ, hφ, rfl⟩
+    rw [SetLike.mem_coe, dual_F, Submodule.mem_dualAnnihilator] at hφ
+    rw [dual_F, Submodule.mem_dualAnnihilator]
+    intro x hx
+    exact hφ (g x) (h.map_F_le _ ⟨x, hx, rfl⟩)
+
+end Morphism
+
 end HodgeStructureOn
+
+/-! ### The dual of an integral Hodge structure -/
+
+namespace HodgeStructure
+
+variable {V : Type*} {Vℂ : Type*} [AddCommGroup V] [AddCommGroup Vℂ] [Module ℂ Vℂ]
+variable {ιℂ : V →ₗ[ℤ] Vℂ} [Module.Free ℤ V] [Module.Finite ℤ V] {hℂ : IsBaseChange ℂ ιℂ}
+variable {n : ℤ}
+
+/-- The dual of an integral pure Hodge structure of weight `n`, of weight `-n`. It is carried by
+the dual lattice `Hom_ℤ(V, ℤ)`, and its Hodge filtration is that of the dual of the complex Hodge
+structure (`HodgeStructure.dual_F`). -/
+noncomputable def dual (hs : HodgeStructure hℂ n) :
+    HodgeStructure (isBaseChange_dualLatticeMap hℂ) (-n) :=
+  (HodgeStructureOn.dual hs).comap (LinearEquiv.refl ℂ _) fun x ↦ by
+    rw [latticeConjugation_dual, LinearEquiv.refl_apply, LinearEquiv.refl_apply]
+
+variable (hs : HodgeStructure hℂ n)
+
+/-- The Hodge filtration of the dual of an integral Hodge structure is that of the dual of the
+complex Hodge structure. -/
+@[simp]
+theorem dual_F (p : ℤ) : hs.dual.F p = (HodgeStructureOn.dual hs).F p := by
+  rw [dual, HodgeStructureOn.comap_F, LinearEquiv.refl_toLinearMap, Submodule.comap_id]
+
+/-- The Hodge components of the dual of an integral Hodge structure are those of the dual of the
+complex Hodge structure. -/
+@[simp]
+theorem dual_piece (p : ℤ) : hs.dual.piece p = (HodgeStructureOn.dual hs).piece p := by
+  rw [dual, HodgeStructureOn.comap_piece, LinearEquiv.refl_toLinearMap, Submodule.comap_id]
+
+/-- The Weil operator of the dual of an integral Hodge structure is the transpose of the inverse
+Weil operator. -/
+@[simp]
+theorem dual_weilOperator :
+    hs.dual.weilOperator = hs.weilOperatorEquiv.symm.toLinearMap.dualMap := by
+  simp [dual, HodgeStructureOn.weilOperator_comap]
+
+namespace Hom
+
+variable {V₁ V₂ : Type*} {W₁ W₂ : Type*} [AddCommGroup V₁] [AddCommGroup V₂]
+variable [AddCommGroup W₁] [Module ℂ W₁] [AddCommGroup W₂] [Module ℂ W₂]
+variable {ι₁ : V₁ →ₗ[ℤ] W₁} {ι₂ : V₂ →ₗ[ℤ] W₂} {h₁ : IsBaseChange ℂ ι₁} {h₂ : IsBaseChange ℂ ι₂}
+variable [Module.Free ℤ V₁] [Module.Finite ℤ V₁] [Module.Free ℤ V₂] [Module.Finite ℤ V₂]
+variable {source : HodgeStructure h₁ n} {target : HodgeStructure h₂ n}
+
+/-- The transpose of a morphism of integral pure Hodge structures, a morphism between the duals in
+the opposite direction. -/
+noncomputable def dualMap (f : Hom source target) : Hom target.dual source.dual where
+  toIntLinearMap := f.toIntLinearMap.dualMap
+  map_mem_F p φ hφ := by
+    rw [integralMapToComplex_dualMap h₁ h₂, ← toLinearMap_def, dual_F]
+    rw [dual_F] at hφ
+    exact f.isMorphism.dualMap.map_F_le p ⟨φ, hφ, rfl⟩
+
+/-- The integral map underlying the transpose of a Hodge morphism is the transpose of its integral
+map. -/
+@[simp]
+theorem dualMap_toIntLinearMap (f : Hom source target) :
+    f.dualMap.toIntLinearMap = f.toIntLinearMap.dualMap :=
+  (rfl)
+
+/-- The transpose of a Hodge morphism acts on a functional by precomposition. -/
+@[simp]
+theorem dualMap_apply (f : Hom source target) (φ : Module.Dual ℂ W₂) (x : W₁) :
+    f.dualMap φ x = φ (f x) := by
+  rw [toLinearMap_def, dualMap_toIntLinearMap, integralMapToComplex_dualMap h₁ h₂,
+    LinearMap.dualMap_apply, toLinearMap_def]
+
+/-- The transpose of the identity is the identity. -/
+@[simp]
+theorem dualMap_id : (id source).dualMap = id source.dual := by
+  ext φ
+  simp
+
+/-- Transposition reverses composition of Hodge morphisms. -/
+theorem dualMap_comp {V₃ W₃ : Type*} [AddCommGroup V₃] [AddCommGroup W₃] [Module ℂ W₃]
+    {ι₃ : V₃ →ₗ[ℤ] W₃} {h₃ : IsBaseChange ℂ ι₃} [Module.Free ℤ V₃] [Module.Finite ℤ V₃]
+    {third : HodgeStructure h₃ n} (g : Hom target third) (f : Hom source target) :
+    (g.comp f).dualMap = f.dualMap.comp g.dualMap := by
+  ext φ
+  simp [← LinearMap.dualMap_comp_dualMap]
+
+end Hom
+
+end HodgeStructure
 
 end TauCeti.Hodge
