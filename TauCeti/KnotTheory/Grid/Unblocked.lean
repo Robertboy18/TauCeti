@@ -393,15 +393,11 @@ theorem disjoint_coveredSquares_XSet_of_X_toPerm_eq_finRotate_pow
     (hX : G.X.toPerm = finRotate n ^ k) (r : GridRectangleBetween y G.X) :
     Disjoint r.toGridRectangle.coveredSquares G.XSet := by
   rw [Finset.disjoint_left]
-  rintro ⟨c, s⟩ hcs hcsX
-  rw [GridRectangle.mem_coveredSquares, GridRectangle.mem_coveredColumns,
-    GridRectangle.mem_coveredRows, GridRectangleBetween.toGridRectangle_left,
-    GridRectangleBetween.toGridRectangle_right, GridRectangleBetween.toGridRectangle_bottom,
-    GridRectangleBetween.toGridRectangle_top, r.bottom_def, r.top_def, ← r.map_right,
-    ← r.map_left] at hcs
-  rw [mk_mem_XSet] at hcsX
-  obtain ⟨hc, hs⟩ := hcs
-  rw [← hcsX, hX, Grid.mem_cIco_finRotate_pow_finRotate_pow] at hs
+  intro p hp hpX
+  rw [GridRectangleBetween.mem_toGridRectangle_coveredSquares_target] at hp
+  rw [mem_XSet] at hpX
+  obtain ⟨hc, hs⟩ := hp
+  rw [← hpX, hX, Grid.mem_cIco_finRotate_pow_finRotate_pow] at hs
   exact Finset.disjoint_left.mp (Grid.disjoint_cIco_swap r.left r.right) hc hs
 
 /-- When the `X`-marking permutation is a power of the cyclic shift, a rectangle into the
@@ -410,11 +406,9 @@ sides are `X`-corners, which lie in the cyclic interval of rows complementary to
 spans. -/
 theorem isEmpty_of_X_toPerm_eq_finRotate_pow (hX : G.X.toPerm = finRotate n ^ k)
     (r : GridRectangleBetween y G.X) : r.IsEmpty := by
-  rw [GridRectangleBetween.isEmpty_iff_forall_notMem_cIoo]
+  rw [GridRectangleBetween.isEmpty_iff_forall_notMem_cIoo_target]
   intro c hc hcy
-  rw [← r.map_of_ne c (Grid.ne_left_of_mem_cIoo hc) (Grid.ne_right_of_mem_cIoo hc),
-    r.bottom_def, r.top_def, ← r.map_right, ← r.map_left, hX,
-    Grid.mem_cIoo_finRotate_pow_finRotate_pow] at hcy
+  rw [hX, Grid.mem_cIoo_finRotate_pow_finRotate_pow] at hcy
   exact Finset.disjoint_left.mp (Grid.disjoint_cIoo_swap r.left r.right) hc hcy
 
 variable (y)
@@ -609,8 +603,10 @@ theorem unblockedDifferential_single_X :
     G.unblockedDifferential R (Finsupp.single G.X 1) = 0 :=
   G.unblockedDifferential_single_eq_zero R G.unblockedRectangles_X_eq_empty
 
-/-- The row of `∂⁻` at the `X`-marking state vanishes; this is the `simp` normal form of
-`unblockedDifferential_single_X`, since `simp` rewrites `∂⁻` of a single generator to its row. -/
+-- `simp` rewrites `∂⁻` of a single generator to its row, so this is the form of
+-- `unblockedDifferential_single_X` that `simp` can use.
+/-- The row of `∂⁻` at the `X`-marking state vanishes: the `X`-marking state is a cycle of
+`GC⁻`. -/
 @[simp]
 theorem unblockedDifferentialOnGenerator_X : G.unblockedDifferentialOnGenerator R G.X = 0 := by
   rw [← unblockedDifferential_single, unblockedDifferential_single_X]

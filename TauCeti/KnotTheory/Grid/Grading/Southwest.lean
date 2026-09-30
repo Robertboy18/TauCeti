@@ -171,35 +171,11 @@ theorem alexanderTwoℤ_eq_sum_southwestCount (x : GridState n) :
       2 * ∑ c : Fin n, ((G.X.southwestCount c (x c) : ℤ) - G.O.southwestCount c (x c)) +
         ∑ c : Fin n, (G.O.southwestCount c (G.O c) : ℤ) -
           ∑ c : Fin n, (G.X.southwestCount c (G.X c) : ℤ) - ((n : ℤ) - 1) := by
-  have h := G.two_mul_alexander_eq_intCast x
-  rw [alexander_eq, JX_def, JO_def, XSet, OSet, GridState.J_def, GridState.J_def,
-    GridPoint.J_self, GridPoint.J_self, mul_div_cancel₀ _ two_ne_zero, mul_sub,
-    GridPoint.two_mul_JCenter, GridPoint.two_mul_JCenter,
+  simp only [alexanderTwoℤ_def, maslovOℤ_def, maslovXℤ_def, OSet, XSet,
     GridState.I_self_pointSet_eq_sum_southwestCount,
-    GridState.I_self_pointSet_eq_sum_southwestCount] at h
-  have hX := GridState.JNumCenter_pointSet_eq_sum_southwestCount x G.X
-  have hO := GridState.JNumCenter_pointSet_eq_sum_southwestCount x G.O
-  have hq : ((G.alexanderTwoℤ x : ℤ) : ℚ) =
-      ((2 * ∑ c : Fin n, ((G.X.southwestCount c (x c) : ℤ) - G.O.southwestCount c (x c)) +
-        ∑ c : Fin n, (G.O.southwestCount c (G.O c) : ℤ) -
-          ∑ c : Fin n, (G.X.southwestCount c (G.X c) : ℤ) - ((n : ℤ) - 1) : ℤ) : ℚ) := by
-    rw [← h]
-    have hX' : ((GridPoint.JNumCenter x.pointSet G.X.pointSet : ℕ) : ℚ) =
-        ∑ c : Fin n, ((n : ℚ) + 2 * G.X.southwestCount c (x c) - c - x c) := by
-      exact_mod_cast hX
-    have hO' : ((GridPoint.JNumCenter x.pointSet G.O.pointSet : ℕ) : ℚ) =
-        ∑ c : Fin n, ((n : ℚ) + 2 * G.O.southwestCount c (x c) - c - x c) := by
-      exact_mod_cast hO
-    rw [hX', hO']
-    have hsum : (∑ c : Fin n, ((n : ℚ) + 2 * G.X.southwestCount c (x c) - c - x c)) -
-        ∑ c : Fin n, ((n : ℚ) + 2 * G.O.southwestCount c (x c) - c - x c) =
-        2 * ∑ c : Fin n, ((G.X.southwestCount c (x c) : ℚ) - G.O.southwestCount c (x c)) := by
-      rw [← Finset.sum_sub_distrib, Finset.mul_sum]
-      exact Finset.sum_congr rfl fun c _ => by ring
-    rw [hsum]
-    push_cast
-    ring
-  exact_mod_cast hq
+    GridState.JNumCenter_pointSet_eq_sum_southwestCount, Nat.cast_sum, Finset.sum_sub_distrib,
+    Finset.sum_add_distrib, ← Finset.mul_sum]
+  ring
 
 end GridDiagram
 
