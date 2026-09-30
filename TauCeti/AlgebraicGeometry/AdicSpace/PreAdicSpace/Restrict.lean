@@ -216,7 +216,13 @@ private theorem range_ofRestrict_comp_base :
     congrArg (fun φ : X ⟶ X => φ.base x) e.hom_inv_id
   have h₂ : Function.RightInverse e.inv.base e.hom.base := fun y ↦
     congrArg (fun φ : Y ⟶ Y => φ.base y) e.inv_hom_id
-  -- both sides are ranges of inclusions of opens, composed with `e` on the left
+  -- Both sides are ranges of inclusions of opens, composed with `e` on the left. The passage
+  -- from `(ofRestrict ≫ e.hom.toHom).base` to `e.hom.base ∘ Opens.inclusion' U` is the pair of
+  -- `rfl`-lemmas `PresheafedSpace.comp_base` and `PresheafedSpace.ofRestrict_base`, but it cannot
+  -- be performed by rewriting: the source of `ofRestrict_base`'s right-hand side is the open
+  -- `(Opens.toTopCat X).obj U`, while the source of the left-hand side is the carrier of
+  -- `X.toPresheafedSpace.restrict _`, which unfolds to it only at default transparency, so the
+  -- rewritten composite is ill-typed for `rw` and `TopCat.coe_comp` no longer fires on it.
   change Set.range (e.hom.base ∘ Opens.inclusion' U) = Set.range (Opens.inclusion' _)
   rw [Set.range_comp, Opens.set_range_inclusion', Opens.set_range_inclusion', Opens.map_coe,
     Set.image_eq_preimage_of_inverse h₁ h₂]

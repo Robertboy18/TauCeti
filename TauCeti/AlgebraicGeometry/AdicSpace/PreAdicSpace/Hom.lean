@@ -26,7 +26,8 @@ residue-field valuations is `PreAdicSpace.Hom.valuation_eq_comap`.
 * `TauCeti.PreAdicSpace.Hom.stalkMap`: the ring homomorphism induced on stalks.
 * `TauCeti.PreAdicSpace.Hom.residueFieldMap`: the homomorphism induced on residue fields.
 * `TauCeti.PreAdicSpace.Hom.ofFac`: a morphism of presheafed spaces factoring a morphism of
-  pre-adic spaces through one whose stalk maps are isomorphisms is a morphism of pre-adic spaces.
+  pre-adic spaces through one whose stalk maps over its image are isomorphisms is a morphism of
+  pre-adic spaces.
 * `TauCeti.PreAdicSpace.forgetToPresheafedSpace`, `TauCeti.PreAdicSpace.forgetToTop`: the
   forgetful functors to presheafed spaces and to topological spaces. The first is faithful and
   reflects isomorphisms: the inverse of an isomorphism of presheafed spaces is automatically
@@ -319,11 +320,11 @@ section OfFac
 variable {X Y Z : PreAdicSpace.{u}}
 
 /-- A morphism of presheafed spaces `g` with `g ≫ j = i`, for morphisms `i : X ⟶ Z` and
-`j : Y ⟶ Z` of pre-adic spaces whose stalk maps of `j` are isomorphisms, is a morphism of
-pre-adic spaces: pulling back along the invertible stalk maps of `j` recovers the compatibility of
-`g` with the stalk valuations from that of `i` and `j`. -/
-def Hom.ofFac (i : X ⟶ Z) (j : Y ⟶ Z) [hj : ∀ y, IsIso (j.stalkMap y)]
-    (g : X.toPresheafedSpace ⟶ Y.toPresheafedSpace) (h : g ≫ j.toHom = i.toHom) : X ⟶ Y where
+`j : Y ⟶ Z` of pre-adic spaces such that the stalk maps of `j` at the points of the image of `g`
+are isomorphisms, is a morphism of pre-adic spaces: pulling back along those invertible stalk maps
+recovers the compatibility of `g` with the stalk valuations from that of `i` and `j`. -/
+def Hom.ofFac (i : X ⟶ Z) (j : Y ⟶ Z) (g : X.toPresheafedSpace ⟶ Y.toPresheafedSpace)
+    [hj : ∀ x : X, IsIso (j.stalkMap (g.base x))] (h : g ≫ j.toHom = i.toHom) : X ⟶ Y where
   toHom := g
   stalkValuation_eq x := by
     obtain ⟨i, hi⟩ := i
@@ -338,15 +339,19 @@ def Hom.ofFac (i : X ⟶ Z) (j : Y ⟶ Z) [hj : ∀ y, IsIso (j.stalkMap y)]
     -- hand
     have hiso : IsIso ((toRingPresheafedSpaceHom j.toHom).stalkMap
         ((toRingPresheafedSpaceHom g).base x)) :=
-      (congrArg (fun φ ↦ IsIso φ) (Hom.stalkMap_def j _)).mp (hj _)
+      (congrArg (fun φ ↦ IsIso φ) (Hom.stalkMap_def j (g.base x))).mp (hj x)
     refine ValuationSpectrum.comap_injective (ConcreteCategory.bijective_of_isIso
       ((toRingPresheafedSpaceHom j.toHom).stalkMap ((toRingPresheafedSpaceHom g).base x))).2 ?_
-    -- the base point `(g' ≫ j').base x` is definitionally `j'.base (g'.base x)`
+    -- `hi'` is stated at the point `(g' ≫ j').base x`, which is `j'.base (g'.base x)` by the
+    -- `rfl`-lemma `PresheafedSpace.comp_base`. It cannot be rewritten with that lemma: the point
+    -- occurs in the types of both sides of `hi'` (the stalk valuations and the stalk map live on
+    -- the stalk at that point), so the motive is not type correct. The two forms are identified
+    -- definitionally here instead.
     exact hj'.symm.trans (hi'.trans (ValuationSpectrum.comap_hom_comap_hom _ _ _).symm)
 
 @[simp]
-theorem Hom.ofFac_toHom (i : X ⟶ Z) (j : Y ⟶ Z) [∀ y, IsIso (j.stalkMap y)]
-    (g : X.toPresheafedSpace ⟶ Y.toPresheafedSpace) (h : g ≫ j.toHom = i.toHom) :
+theorem Hom.ofFac_toHom (i : X ⟶ Z) (j : Y ⟶ Z) (g : X.toPresheafedSpace ⟶ Y.toPresheafedSpace)
+    [∀ x : X, IsIso (j.stalkMap (g.base x))] (h : g ≫ j.toHom = i.toHom) :
     (Hom.ofFac i j g h).toHom = g := by
   rfl
 

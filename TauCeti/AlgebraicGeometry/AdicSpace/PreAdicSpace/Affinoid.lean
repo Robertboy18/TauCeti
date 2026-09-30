@@ -23,7 +23,7 @@ pre-adic space has a spectral underlying topological space. The latter is the qu
 input used to distinguish genuinely non-affinoid spaces later.
 
 The further condition defining a pre-adic space in Wedhorn's sense is local: it asks for an
-affinoid open cover and for the structure presheaf to be adapted to the basis of all affinoid open
+affinoid open cover and for the structure presheaf to be adapted to the set of all affinoid open
 subspaces. That condition is not imposed here.
 
 ## Main definitions

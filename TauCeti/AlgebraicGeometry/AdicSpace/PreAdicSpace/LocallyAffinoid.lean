@@ -18,12 +18,15 @@ to `U` is an affinoid pre-adic space. `X` is *locally affinoid* if its open affi
 cover it. Wedhorn's pre-adic spaces are the locally affinoid objects whose structure presheaf is
 adapted to the open affinoid subspaces: on every open `V`, the presheaf is the limit of its values
 on the open affinoid subspaces contained in `V`. Their full subcategory of `𝒱^pre` is Wedhorn's
-category `(PreAd)`, here `PreAdicSpace.isPreAdic.FullSubcategory`.
+category `(PreAd)`, here `TauCeti.PreAd`.
 
 Adaptedness is what lets the sheaf condition on a pre-adic space be checked on its open affinoid
-subspaces alone: a pre-adic space whose presheaf is a sheaf on the open affinoid subspaces, for the
-topology restricted to them, is sheafy. This is the mechanism behind Wedhorn's Remark 8.27, which
-produces adic spaces from pre-adic spaces covered by sheafy affinoids.
+subspaces alone, once those form a basis of the topology: a pre-adic space whose open affinoid
+subspaces form a basis and whose presheaf is a sheaf on them, for the topology restricted to them,
+is sheafy. That the open affinoid subspaces of a locally affinoid object form a basis is not proved
+here, so the basis is a hypothesis of `isSheafy_of_isPreAdic`. This is the mechanism behind
+Wedhorn's Remark 8.27, which produces adic spaces from pre-adic spaces covered by sheafy
+affinoids.
 
 Affinoid pre-adic spaces are locally affinoid, and being locally affinoid is invariant under
 isomorphism in `𝒱^pre`, since an isomorphism carries the restriction to an open isomorphically
@@ -34,13 +37,15 @@ onto the restriction to its image (`TauCeti.PreAdicSpace.restrictIso`).
 * `TauCeti.PreAdicSpace.affinoidOpens`: the open affinoid subspaces of an object of `𝒱^pre`.
 * `TauCeti.PreAdicSpace.isLocallyAffinoid`: the locally affinoid objects of `𝒱^pre`.
 * `TauCeti.PreAdicSpace.isPreAdic`: Wedhorn's pre-adic spaces.
+* `TauCeti.PreAd`: Wedhorn's category `(PreAd)`, the full subcategory of `𝒱^pre` of pre-adic
+  spaces.
 
 ## Main results
 
 * `TauCeti.PreAdicSpace.isLocallyAffinoid_of_isAffinoid`: affinoid pre-adic spaces are locally
   affinoid.
-* `TauCeti.PreAdicSpace.isSheafy_of_isPreAdic`: a pre-adic space whose presheaf is a sheaf on the
-  open affinoid subspaces is sheafy.
+* `TauCeti.PreAdicSpace.isSheafy_of_isPreAdic`: a pre-adic space whose open affinoid subspaces
+  form a basis and whose presheaf is a sheaf on them is sheafy.
 * `TauCeti.PreAdicSpace.isLocallyAffinoid.instIsClosedUnderIsomorphisms`: being locally affinoid is
   invariant under isomorphism.
 
@@ -115,7 +120,7 @@ instance isLocallyAffinoid.instIsClosedUnderIsomorphisms :
 /-- Wedhorn's pre-adic spaces: the locally affinoid objects of `𝒱^pre` whose structure presheaf
 is adapted to the open affinoid subspaces, in the sense that on every open `V` it is the limit of
 its values on the open affinoid subspaces contained in `V`. Their full subcategory of `𝒱^pre` is
-Wedhorn's category `(PreAd)`. -/
+Wedhorn's category `(PreAd)`, `TauCeti.PreAd`. -/
 @[expose] def isPreAdic : ObjectProperty PreAdicSpace.{u} :=
   fun X ↦ isLocallyAffinoid X ∧ X.toPresheafedSpace.presheaf.IsAdapted X.affinoidOpens
 
@@ -142,6 +147,12 @@ theorem isSheafy_of_isPreAdic {X : PreAdicSpace.{u}} (h : isPreAdic X)
   TopCat.Presheaf.isSheaf_of_isAdapted _ _ hB h.isAdapted hs
 
 end PreAdicSpace
+
+/-- Wedhorn's category `(PreAd)` of pre-adic spaces: the full subcategory of `𝒱^pre` whose objects
+are the locally affinoid objects with structure presheaf adapted to their open affinoid subspaces
+(`PreAdicSpace.isPreAdic`). -/
+abbrev PreAd : Type (u + 1) :=
+  PreAdicSpace.isPreAdic.{u}.FullSubcategory
 
 end TauCeti
 
