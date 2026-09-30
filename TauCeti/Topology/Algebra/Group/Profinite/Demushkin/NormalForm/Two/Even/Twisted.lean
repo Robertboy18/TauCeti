@@ -34,8 +34,8 @@ successive approximation of
    (`TauCeti.exists_continuousMulEquiv_gradedMap_eq_of_not_isAlt`), so a change of basis carries
    `r` to the class of the normal-form word modulo `λ_2(F)`.
 2. In that basis the values of `χ` on the generators are pinned modulo `4`: `χ(x_i) ∈ 1 + 4ℤ_2`
-   for `i ≠ 2`, since every crossed homomorphism for `χ` kills `r`
-   (`TauCeti.freeProP.apply_of_mem_unitsPrincipal_two_of_isCrossedHom_eq_zero`), and
+   for `i ≠ 2`, since the Kronecker crossed homomorphisms for `χ` kill `r`
+   (`TauCeti.freeProP.apply_mem_unitsPrincipal_two_of_crossedHom_single_eq_zero`), and
    `χ(x₂) ∉ 1 + 4ℤ_2`, since otherwise the image of `χ` would lie in `1 + 4ℤ_2`. Inside `U^[f]`
    this says `χ(x_i) ∈ U^(f+1)` for `i ≠ 2` and that `χ(x₂)` topologically generates `U^[f]`.
 3. A basis modification `x_i ↦ x_i · x₂^{2 s_i}` with `2`-adic exponents `s_i`, which does not
@@ -148,8 +148,8 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
       hD _ rfl
   -- Step 2: the values of `χ₁` on the generators modulo `4`.
   have hU2 : ∀ j, j ≠ ⟨1, hn1⟩ → χ₁ (of j) ∈ unitsPrincipal 2 2 := fun j hj ↦
-    apply_of_mem_unitsPrincipal_two_of_isCrossedHom_eq_zero hn hn1 hq ⟨e₁ r, hr₁₁⟩ hclass
-      hkill hj
+    apply_mem_unitsPrincipal_two_of_crossedHom_single_eq_zero hn hn1 hq ⟨e₁ r, hr₁₁⟩ hclass
+      (fun k _ ↦ hkill _ (continuous_crossedHom χ₁ _) (isCrossedHom_crossedHom χ₁ _)) hj
   have hu2 : χ₁ (of ⟨1, hn1⟩) ∉ unitsPrincipal 2 2 := by
     intro hu2
     -- Every generator would then map into `1 + 4ℤ_2`, hence all of `F`, but `w` is a value.
@@ -237,12 +237,12 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
   have hχ₂r₂ : χ₂ (e₂.symm (e₁ r)) = 1 := by
     rw [hχ₂apply, e₂.apply_symm_apply, hχ₁, ContinuousMonoidHom.coe_comp, Function.comp_apply,
       presentedProP.mk_relator _ (Set.mem_singleton _), map_one]
+  -- `4 ∣ 2^f` since `f ≥ 2`, so `v = -(1 + 2^f)⁻¹` has infinite order.
+  have h4 : (4 : ℤ_[2]) ∣ 2 ^ f := (by norm_num : (4 : ℤ_[2]) ∣ 2 ^ 2).trans (pow_dvd_pow 2 hf)
   have hkerX : exponentSumKer 2 (Fin n) ⟨1, hn1⟩ = χ₂.toMonoidHom.ker :=
     χ₂.exponentSumKer_eq_ker hχ₂ne (by
       rw [hχ₂of, ite_eq_left rfl]
-      exact not_isOfFinOrder_of_val_mul_one_add_eq_neg_one hv
-        (by rw [show (4 : ℤ_[2]) = 2 ^ 2 by norm_num]; exact pow_dvd_pow 2 hf)
-        (pow_ne_zero _ two_ne_zero))
+      exact not_isOfFinOrder_of_val_mul_one_add_eq_neg_one hv h4 (pow_ne_zero _ two_ne_zero))
   have hr₂X : e₂.symm (e₁ r) ∈ exponentSumKer 2 (Fin n) ⟨1, hn1⟩ := by
     rw [hkerX]
     exact hχ₂r₂
@@ -253,8 +253,9 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
         rw [hχ₂apply, ContinuousMonoidHom.coe_coe, e₂.apply_symm_apply])
   -- The successive approximation inside `X`.
   obtain ⟨e₃, -, he₃⟩ :=
-    exists_continuousMulEquiv_apply_demushkinWordNeTwo_eq_of_isCrossedHom_eq_zero hn hn1 hq
-      hχ₂₁ hχ₂ne ⟨e₂.symm (e₁ r), hr₂₁⟩ hclass₂ hr₂X hkill₂
+    exists_continuousMulEquiv_apply_demushkinWordNeTwo_eq_of_crossedHom_single_eq_zero hn hn1 hq
+      hχ₂₁ hχ₂ne ⟨e₂.symm (e₁ r), hr₂₁⟩ hclass₂ hr₂X
+      fun i _ ↦ hkill₂ _ (continuous_crossedHom χ₂ _) (isCrossedHom_crossedHom χ₂ _)
   refine ⟨(e₁.trans e₂.symm).trans e₃.symm, ?_⟩
   have h := congrArg e₃.symm he₃
   rw [e₃.symm_apply_apply] at h
