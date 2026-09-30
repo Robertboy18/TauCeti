@@ -22,13 +22,12 @@ principle `TauCeti.gradedBracketSpan_induction`. Every element of it is the clas
 (`TauCeti.exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan`), and the `p`-power
 operator `π` carries `C_{k+1}(G)` into `C_{k+2}(G)` (`TauCeti.gradedPow_mem_gradedBracketSpan`).
 
-Two identities on the iterated `p`-powers `π^j x` of degree-zero classes accompany it. The bracket
-`[π^j x, x]` vanishes, being the class of `⁅g ^ (p ^ j), g⁆ = 1`
-(`TauCeti.gradedBracket_gradedPowIter_self`), and the symmetrised bracket
-`[π^{k+1} x, y] + [π^{k+1} y, x]` lies in the span of the brackets `[c, z]` with
+One identity on the iterated `p`-powers `π^j x` of degree-zero classes accompanies it: the
+symmetrised bracket `[π^{k+1} x, y] + [π^{k+1} y, x]` lies in the span of the brackets `[c, z]` with
 `c ∈ C_{k+1}(G)` and `z ∈ gr_0(G)` (`TauCeti.gradedBracket_gradedPowIter_add_swap_mem_map₂`); for
 odd `p` that sum is zero, and for `p = 2` it need not be, which is why the statement is a
-membership rather than a vanishing.
+membership rather than a vanishing. The vanishing `[π^j x, x] = 0` that it rests on is
+`TauCeti.gradedBracket_gradedPowIter_self` in `Graded/Pow.lean`.
 
 Finally, when `λ_{k+2}` is open, `gr_{k+1}(G)` is the sum of `C_{k+1}(G)` and the span of the
 iterated `p`-powers `π^{k+1} x` of the degree-zero classes
@@ -52,7 +51,6 @@ are what the pivot-constrained span statement of the classification of Demushkin
 * `TauCeti.exists_mem_commutator_gradedMk_eq_of_mem_gradedBracketSpan`: every element of
   `C_{k+1}(G)` is the class of an element of `λ_{k+1}` in the commutator subgroup.
 * `TauCeti.gradedPow_mem_gradedBracketSpan`: `π C_{k+1}(G) ≤ C_{k+2}(G)`.
-* `TauCeti.gradedBracket_gradedPowIter_self`: `[π^j x, x] = 0` for `x` of degree zero.
 * `TauCeti.gradedBracket_gradedPowIter_add_swap_mem_map₂`:
   `[π^{k+1} x, y] + [π^{k+1} y, x] ∈ [C_{k+1}(G), gr_0(G)]`.
 * `TauCeti.gradedBracketSpan_sup_span_range_gradedPowIter_eq_top`:
@@ -74,19 +72,6 @@ open scoped commutatorElement
 universe u
 
 variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
-
-/-! ### Brackets with iterated `p`-powers -/
-
-/-- **A degree-zero class brackets trivially with its iterated `p`-powers**: `[π^j x, x] = 0`, since
-it is the class of the commutator `⁅g ^ (p ^ j), g⁆ = 1`. -/
-@[simp]
-theorem gradedBracket_gradedPowIter_self (j : ℕ) (x : gradedPiece p G 0) :
-    gradedBracket p G j 0 (gradedPowIter p G j x) x = 0 := by
-  obtain ⟨g, rfl⟩ := gradedMkZero_surjective x
-  rw [gradedPowIter_gradedMkZero, ← gradedMk_zero ⟨g, mem_pLowerCentralSeries_zero p g⟩,
-    gradedBracket_gradedMk, gradedMk_eq_zero_iff]
-  simp only [commutatorElement_eq_one_iff_commute.mpr (Commute.pow_self g _)]
-  exact one_mem _
 
 /-! ### The bracket span -/
 
