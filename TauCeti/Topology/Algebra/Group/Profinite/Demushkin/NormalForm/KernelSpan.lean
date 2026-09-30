@@ -11,29 +11,33 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Free.ExponentSumKernel
 /-!
 # The constrained span statement at the normal form `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)`
 
-Let `F = freeProP p (Fin n)` with `n` even, let `r = x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` with
-`p ∣ q` be the alternating normal-form word, and let `ρ ∈ gr_1(F)` be its class. The partial
-derivatives of `ρ` are `∂_{2a+1} ρ = -ξ_{2a}` and `∂_{2a} ρ = ξ_{2a+1}` for `a ≥ 1`, while
-`∂_0 ρ = (p choose 2)(q / p) ξ₁ + ξ₂`
+Let `F = freeProP p (Fin n)` with `n` even, let `r` be the normal-form word
+`TauCeti.demushkinWordNeTwo q n` on the generators of `F` with `p ∣ q`, and let `ρ ∈ gr_1(F)` be
+its class. Throughout this file indices are the `0`-based indices of `Fin n`: `x_j = of j` is the
+`j`-th generator, `ξ_j` its class in `gr_0(F)`, and `∂_j` is the partial derivative
+`TauCeti.freeProP.degreeOneDeriv p (Fin n) j` at `x_j`; in these indices the word is
+`r = x_0^q (x_0, x_1)(x_2, x_3) ⋯ (x_{n-2}, x_{n-1})`. The partial derivatives of `ρ` at the
+generators other than `x_0` are `∂_{2a+1} ρ = -ξ_{2a}` whenever `2a + 1 < n`, and
+`∂_{2a} ρ = ξ_{2a+1}` whenever `1 ≤ a` and `2a + 1 < n`
 (`TauCeti.freeProP.degreeOneDeriv_gradedMk_demushkinWordNeTwo_odd`,
-`TauCeti.freeProP.degreeOneDeriv_gradedMk_demushkinWordNeTwo_even`). So the derivatives at the
-generators other than `x₁` span exactly the classes `ξ_j` with `j ≠ 2`, which is the hypothesis of
-the constrained span statement of `Free/ExponentSumKernel.lean`, with `i₀ = x₁` and `i₁ = x₂`. The
-conclusion is Labute's Lemma 3: for the kernel `X` of the exponent sum at `x₂` and every `m ≥ 1`,
+`TauCeti.freeProP.degreeOneDeriv_gradedMk_demushkinWordNeTwo_even`). So every generator class
+`ξ_j` with `j ≠ 1` is a combination of these derivatives, which is the hypothesis of the
+constrained span statement of `Free/ExponentSumKernel.lean` with `i₀ = 0` and `i₁ = 1`. The
+conclusion is Labute's Lemma 3: for the kernel `X` of the exponent sum at `x_1` and every `m ≥ 1`,
 
   `gr_{m+1}(X) = δ_ρ(gr_m(X)^n) + T_{m+1}`,
 
-where `T_{m+1}` is spanned by the `π^{m+1} ξ_j` with `j ≠ 2`. This is the span statement that the
+where `T_{m+1}` is spanned by the `π^{m+1} ξ_j` with `j ≠ 1`. This is the span statement that the
 uniqueness argument for the dyadic even-rank Demushkin groups with orientation image `U^[f]` runs
-on: the relator `x₁^{2+2^f} (x₁, x₂)(x₃, x₄) ⋯` is this word at `p = 2` and `q = 2 + 2^f`, the
-orientation is the exponent sum at `x₂` composed with `γ ↦ χ(x₂)^γ`, and the basis corrections must
-be taken inside its kernel.
+on: their relator `x₁^{2+2^f} (x₁, x₂)(x₃, x₄) ⋯` is this word at `p = 2` and `q = 2 + 2^f`, the
+orientation is the exponent sum at `x_1` composed with `γ ↦ χ(x_1)^γ`, and the basis corrections
+must be taken inside its kernel.
 
 ## Main results
 
 * `TauCeti.freeProP.degreeOneDeriv_gradedMk_demushkinWordNeTwo_odd`,
   `TauCeti.freeProP.degreeOneDeriv_gradedMk_demushkinWordNeTwo_even`: the partial derivatives of
-  the class of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` at the generators other than `x₁`.
+  the class of the word at the generators other than `x_0`.
 * `gradedPieceOf_exponentSumKer_demushkinWordNeTwo_eq_map_basisModificationDelta_sup` (in
   `TauCeti.freeProP`): the constrained span statement at this normal form.
 
@@ -53,70 +57,67 @@ namespace freeProP
 
 variable {p : ℕ} [Fact p.Prime] {n : ℕ}
 
-omit [Fact p.Prime] in
-/-- The class of the `ℕ`-indexed generator `x_j` of `freeProP p (Fin n)`, for `j < n`. -/
-private theorem gradedMkZero_freeProPGen_eq (j : ℕ) (hj : j < n) :
-    gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n j) =
-      gradedMkZero p (freeProP p (Fin n)) (of ⟨j, hj⟩) := by
-  rw [freeProPGen_of_lt p hj]
-
-/-- The derivative `∂_k` of the class of the commutator part `(x₁, x₂) ⋯ (x_{n-1}, x_n)` at a
-bracket `[ξ_{2b}, ξ_{2b+1}]` whose two indices differ from `k`. -/
+/-- The derivative `∂_k` of a bracket `[ξ_{2b}, ξ_{2b+1}]` of the commutator part of the word, when
+`k` differs from both `2b` and `2b + 1`. -/
 private theorem degreeOneDeriv_gradedBracket_freeProPGen_of_ne (k : Fin n) {b : ℕ}
     (hb : 2 * b + 1 < n) (h₁ : (k : ℕ) ≠ 2 * b) (h₂ : (k : ℕ) ≠ 2 * b + 1) :
     degreeOneDeriv p (Fin n) k (gradedBracket p (freeProP p (Fin n)) 0 0
       (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * b)))
       (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * b + 1)))) = 0 := by
-  rw [gradedMkZero_freeProPGen_eq _ (by omega), gradedMkZero_freeProPGen_eq _ hb]
+  rw [freeProPGen_of_lt p (show 2 * b < n by omega), freeProPGen_of_lt p hb]
   exact degreeOneDeriv_gradedBracket_gradedMkZero_of_of_ne (Fin.mk_lt_mk.2 (Nat.lt_succ_self _))
     (fun h ↦ h₁ (congrArg Fin.val h).symm) fun h ↦ h₂ (congrArg Fin.val h).symm
 
-/-- **The derivative of the class of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` at an even-indexed generator**
-`x_{2a+1}` (the generator `x_{2a}` in `0`-based indexing) for `a ≥ 1`: `∂_{2a} ρ = ξ_{2a+1}`. -/
+/-- The derivative `∂_k` of the class of the word at a generator `x_k` with `k ≠ 0` and
+`k ∈ {2a, 2a + 1}`: the `p`-power term and the brackets not containing `k` drop out, leaving the
+derivative of the single bracket `[ξ_{2a}, ξ_{2a+1}]`. -/
+private theorem degreeOneDeriv_gradedMk_demushkinWordNeTwo_eq {q : ℕ} (hq : p ∣ q) {a : ℕ}
+    (ha : 2 * a + 1 < n) (k : Fin n) (hk₀ : (k : ℕ) ≠ 0)
+    (hk : (k : ℕ) = 2 * a ∨ (k : ℕ) = 2 * a + 1) :
+    degreeOneDeriv p (Fin n) k (gradedMk p (freeProP p (Fin n)) 1
+        ⟨demushkinWordNeTwo q n (freeProPGen p n),
+          demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩) =
+      degreeOneDeriv p (Fin n) k (gradedBracket p (freeProP p (Fin n)) 0 0
+        (gradedMkZero p (freeProP p (Fin n)) (of ⟨2 * a, by omega⟩))
+        (gradedMkZero p (freeProP p (Fin n)) (of ⟨2 * a + 1, ha⟩))) := by
+  rw [gradedMk_demushkinWordNeTwo hq, map_add, map_nsmul, map_sum,
+    freeProPGen_of_lt p (show 0 < n by omega),
+    degreeOneDeriv_gradedPow_gradedMkZero_of_of_ne (fun h ↦ hk₀ (congrArg Fin.val h).symm),
+    nsmul_zero, zero_add,
+    Finset.sum_eq_single a (fun b hb hba ↦ degreeOneDeriv_gradedBracket_freeProPGen_of_ne _
+      (by rw [Finset.mem_range] at hb; omega) (by omega) (by omega))
+      (fun h ↦ (h (Finset.mem_range.2 (by omega))).elim),
+    freeProPGen_of_lt p (show 2 * a < n by omega), freeProPGen_of_lt p ha]
+
+/-- **The derivative of the class of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` at the generator `x_{2a}`**
+(in the `0`-based indexing of `Fin n`), for `a ≥ 1`: `∂_{2a} ρ = ξ_{2a+1}`. -/
 theorem degreeOneDeriv_gradedMk_demushkinWordNeTwo_even {q : ℕ} (hq : p ∣ q) {a : ℕ} (ha₀ : 0 < a)
     (ha : 2 * a + 1 < n) :
     degreeOneDeriv p (Fin n) ⟨2 * a, by omega⟩ (gradedMk p (freeProP p (Fin n)) 1
         ⟨demushkinWordNeTwo q n (freeProPGen p n),
           demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩) =
       gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * a + 1)) := by
-  rw [gradedMk_demushkinWordNeTwo hq, map_add, map_nsmul, map_sum,
-    gradedMkZero_freeProPGen_eq 0 (by omega),
-    degreeOneDeriv_gradedPow_gradedMkZero_of_of_ne (fun h ↦ by
-      have := congrArg Fin.val h
-      simp only at this
-      omega),
-    nsmul_zero, zero_add,
-    Finset.sum_eq_single a (fun b hb hba ↦ degreeOneDeriv_gradedBracket_freeProPGen_of_ne _
-      (by rw [Finset.mem_range] at hb; omega) (by simp only; omega)
-      (by simp only; omega))
-      (fun h ↦ (h (Finset.mem_range.2 (by omega))).elim),
-    gradedMkZero_freeProPGen_eq _ (by omega), gradedMkZero_freeProPGen_eq _ ha,
-    degreeOneDeriv_gradedBracket_gradedMkZero_of_left (Fin.mk_lt_mk.2 (Nat.lt_succ_self _))]
+  rw [degreeOneDeriv_gradedMk_demushkinWordNeTwo_eq hq ha ⟨2 * a, by omega⟩
+      (by simp only; omega) (Or.inl rfl),
+    degreeOneDeriv_gradedBracket_gradedMkZero_of_left (Fin.mk_lt_mk.2 (Nat.lt_succ_self _)),
+    freeProPGen_of_lt p ha]
 
-/-- **The derivative of the class of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` at an odd-indexed generator**
-`x_{2a+2}` (the generator `x_{2a+1}` in `0`-based indexing): `∂_{2a+1} ρ = -ξ_{2a}`. -/
+/-- **The derivative of the class of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` at the generator `x_{2a+1}`**
+(in the `0`-based indexing of `Fin n`): `∂_{2a+1} ρ = -ξ_{2a}`. -/
 theorem degreeOneDeriv_gradedMk_demushkinWordNeTwo_odd {q : ℕ} (hq : p ∣ q) {a : ℕ}
     (ha : 2 * a + 1 < n) :
     degreeOneDeriv p (Fin n) ⟨2 * a + 1, ha⟩ (gradedMk p (freeProP p (Fin n)) 1
         ⟨demushkinWordNeTwo q n (freeProPGen p n),
           demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩) =
       -gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * a)) := by
-  rw [gradedMk_demushkinWordNeTwo hq, map_add, map_nsmul, map_sum,
-    gradedMkZero_freeProPGen_eq 0 (by omega),
-    degreeOneDeriv_gradedPow_gradedMkZero_of_of_ne (fun h ↦ by
-      have := congrArg Fin.val h
-      simp only at this
-      omega),
-    nsmul_zero, zero_add,
-    Finset.sum_eq_single a (fun b hb hba ↦ degreeOneDeriv_gradedBracket_freeProPGen_of_ne _
-      (by rw [Finset.mem_range] at hb; omega) (by simp only; omega)
-      (by simp only; omega))
-      (fun h ↦ (h (Finset.mem_range.2 (by omega))).elim),
-    gradedMkZero_freeProPGen_eq _ (by omega), gradedMkZero_freeProPGen_eq _ ha,
-    degreeOneDeriv_gradedBracket_gradedMkZero_of_right (Fin.mk_lt_mk.2 (Nat.lt_succ_self _))]
+  rw [degreeOneDeriv_gradedMk_demushkinWordNeTwo_eq hq ha ⟨2 * a + 1, ha⟩ (Nat.succ_ne_zero _)
+      (Or.inr rfl),
+    degreeOneDeriv_gradedBracket_gradedMkZero_of_right (Fin.mk_lt_mk.2 (Nat.lt_succ_self _)),
+    freeProPGen_of_lt p (show 2 * a < n by omega)]
 
-/-- **Every generator class other than `ξ₂` is a combination of the derivatives at the generators
-other than `x₁`**, for the class of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` with `n` even. -/
+/-- **Every generator class other than `ξ_1` is a combination of the derivatives at the generators
+other than `x_0`** (in the `0`-based indexing of `Fin n`), for the class of
+`x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` with `n` even. -/
 theorem exists_sum_smul_degreeOneDeriv_gradedMk_demushkinWordNeTwo_eq (hn : Even n) {q : ℕ}
     (hq : p ∣ q) (hn1 : 1 < n) (j : Fin n) (hj : j ≠ ⟨1, hn1⟩) :
     ∃ b : Fin n → ZMod p, b ⟨0, by omega⟩ = 0 ∧
@@ -146,7 +147,7 @@ theorem exists_sum_smul_degreeOneDeriv_gradedMk_demushkinWordNeTwo_eq (hn : Even
     have ha' : 2 * a + 1 < n := by omega
     refine key ⟨2 * a + 1, ha'⟩ ((-1 : ℤ) : ZMod p) (fun h ↦ by simp [Fin.ext_iff] at h) ?_
     rw [degreeOneDeriv_gradedMk_demushkinWordNeTwo_odd hq ha', Int.cast_smul_eq_zsmul,
-      neg_one_zsmul, neg_neg, gradedMkZero_freeProPGen_eq _ (by omega)]
+      neg_one_zsmul, neg_neg, freeProPGen_of_lt p (by omega)]
     congr 2
     exact Fin.ext (by simp only; omega)
   · -- `ξ_{2a+1} = ∂_{2a} ρ`, where `a ≥ 1` since `j ≠ 1`.
@@ -154,17 +155,17 @@ theorem exists_sum_smul_degreeOneDeriv_gradedMk_demushkinWordNeTwo_eq (hn : Even
     have ha' : 2 * a + 1 < n := by omega
     refine key ⟨2 * a, by omega⟩ 1 (fun h ↦ by simp [Fin.ext_iff] at h; omega) ?_
     rw [degreeOneDeriv_gradedMk_demushkinWordNeTwo_even hq ha₀ ha', one_smul,
-      gradedMkZero_freeProPGen_eq _ ha']
+      freeProPGen_of_lt p ha']
     congr 2
     exact Fin.ext (by simp only; omega)
 
 /-- **The constrained span statement at the normal form `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)`**
 (Labute, §4, Lemma 3). For `n` even, `p ∣ q`, the class `ρ` of the word, `X` the kernel of the
-exponent sum at `x₂` and every `m ≥ 1`,
+exponent sum at the generator `x_1` (in the `0`-based indexing of `Fin n`) and every `m ≥ 1`,
 
   `gr_{m+1}(X) = δ_ρ(gr_m(X)^n) + T_{m+1}`,
 
-where the tail `T_{m+1}` is spanned by the `p`-powers `π^{m+1} ξ_j` with `j ≠ 2`. At `p = 2` and
+where the tail `T_{m+1}` is spanned by the `p`-powers `π^{m+1} ξ_j` with `j ≠ 1`. At `p = 2` and
 `q = 2 + 2^f` this is the span statement for the relators `x₁^{2+2^f} (x₁, x₂)(x₃, x₄) ⋯` whose
 basis corrections must respect the orientation. -/
 theorem gradedPieceOf_exponentSumKer_demushkinWordNeTwo_eq_map_basisModificationDelta_sup

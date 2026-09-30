@@ -102,6 +102,7 @@ noncomputable def exponentSumKer (i : X) : Subgroup (freeProP p X) :=
   ((Pi.evalAddMonoidHom (fun _ : X ↦ ℤ_[p]) i).toMultiplicative.comp
     (exponentSum p X).toMonoidHom).ker
 
+@[simp]
 theorem mem_exponentSumKer_iff {i : X} {y : freeProP p X} :
     y ∈ exponentSumKer p X i ↔ (exponentSum p X y).toAdd i = 0 := by
   rw [exponentSumKer, MonoidHom.mem_ker, MonoidHom.comp_apply,
@@ -125,7 +126,9 @@ theorem commutator_le_exponentSumKer (i : X) :
     commutator (freeProP p X) ≤ exponentSumKer p X i :=
   Abelianization.commutator_subset_ker _
 
-/-- The generator `x_j` lies in the kernel of the `i`-th exponent sum exactly when `j ≠ i`. -/
+/-- The generator `x_j` lies in the kernel of the `i`-th exponent sum exactly when `j ≠ i`. Not a
+`simp` lemma: `simp` rewrites the left-hand side with `TauCeti.freeProP.mem_exponentSumKer_iff`
+first (and, given `DecidableEq X`, evaluates the resulting exponent sum itself). -/
 theorem of_mem_exponentSumKer_iff {i j : X} : of j ∈ exponentSumKer p X i ↔ j ≠ i := by
   classical
   rw [mem_exponentSumKer_iff, exponentSum_of, toAdd_ofAdd, Pi.single_apply]
@@ -179,6 +182,7 @@ variable (i : X) {m : ℕ}
 lies in `gr_m(X)`, for `X` the kernel of the `i`-th exponent sum, exactly when `p ^ (m + 1)` divides
 the `i`-th exponent sum of `y`; the exponent sums of an element of `λ_m(F)` are always divisible by
 `p ^ m`. -/
+@[simp]
 theorem gradedMk_mem_gradedPieceOf_exponentSumKer_iff (y : pLowerCentralSeries p (freeProP p X) m) :
     gradedMk p (freeProP p X) m y ∈ gradedPieceOf p (exponentSumKer p X i) m ↔
       (p : ℤ_[p]) ^ (m + 1) ∣ (exponentSum p X (y : freeProP p X)).toAdd i := by
