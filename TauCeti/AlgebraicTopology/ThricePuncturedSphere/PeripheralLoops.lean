@@ -190,11 +190,11 @@ Since `mob01` fixes the basepoint, it induces an automorphism of `π₁(ℂ ∖ 
 choice of connecting path. It exchanges the two peripheral loops on the nose, so it exchanges
 `periph0` and `periph1`, and it carries `periphInf` to its conjugate by `periph1`. These are the
 values that make the pullback of a cover along `z ↦ 1 − z` exchange the roles of `0` and `1` in
-its monodromy triple. -/
+its monodromy triple. The three lemmas are not `simp` lemmas: `homeomorphMulEquivOfEq_apply`
+already rewrites their left-hand sides to `FundamentalGroup.mapOfEq`, so they are used by `rw`. -/
 
 /-- The automorphism of the fundamental group induced by `z ↦ 1 − z` sends `periph0` to
 `periph1`. -/
-@[simp]
 theorem homeomorphMulEquivOfEq_mob01_periph0 :
     FundamentalGroup.homeomorphMulEquivOfEq mob01 mob01_basePt periph0 = periph1 := by
   rw [FundamentalGroup.homeomorphMulEquivOfEq_apply, FundamentalGroup.mapOfEq_apply, periph0_def,
@@ -210,7 +210,6 @@ theorem homeomorphMulEquivOfEq_mob01_periph0 :
 
 /-- The automorphism of the fundamental group induced by `z ↦ 1 − z` sends `periph1` to
 `periph0`. -/
-@[simp]
 theorem homeomorphMulEquivOfEq_mob01_periph1 :
     FundamentalGroup.homeomorphMulEquivOfEq mob01 mob01_basePt periph1 = periph0 := by
   rw [FundamentalGroup.homeomorphMulEquivOfEq_apply, FundamentalGroup.mapOfEq_apply, periph0_def,
@@ -227,7 +226,6 @@ theorem homeomorphMulEquivOfEq_mob01_periph1 :
 /-- The automorphism of the fundamental group induced by `z ↦ 1 − z` sends `periphInf` to its
 conjugate `periph1⁻¹ * periphInf * periph1`, the third component of the branch-point operation
 exchanging `0` and `1`. -/
-@[simp]
 theorem homeomorphMulEquivOfEq_mob01_periphInf :
     FundamentalGroup.homeomorphMulEquivOfEq mob01 mob01_basePt periphInf =
       periph1⁻¹ * periphInf * periph1 := by
