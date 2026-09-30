@@ -161,6 +161,9 @@ theorem coeffMap_unit_comp_shapiroMap (M : Type u) [AddCommGroup M] [Topological
   refine (coeffMap_comp_res_assoc U _ n _).trans
     ((congrArg (res U _ n ≫ ·) ((coeffMap_comp _ _ n).symm.trans
       ((congrArg (coeffMap · n) ?_).trans (coeffMap_id _ n)))).trans (Category.comp_id _))
+  -- The unit is a section of the counit. Stated for `m : M` before the extensionality step, since
+  -- `simp` does not see through the restricted carrier `TopRep.res U.subtype (ofDiscreteModule …)`.
+  have hm : ∀ m : M, DiscreteCoind.eval G U M (DiscreteCoind.unit G U M m) = m := fun m => by simp
   refine TopRep.hom_ext (DFunLike.ext _ _ fun m => ?_)
   -- Not `rfl`: `DiscreteCoind.eval` and `DiscreteCoind.unit` are not exposed, so the evaluation
   -- lemmas are applied with their morphisms spelled out, the middle object of the composite being
@@ -173,7 +176,7 @@ theorem coeffMap_unit_comp_shapiroMap (M : Type u) [AddCommGroup M] [Topological
         fun u f => DiscreteCoind.eval_smul u f) m).trans
     (((ofDiscreteModuleMap_hom_apply (G := U) (DiscreteCoind.eval G U M).toIntLinearMap
         (fun u f => DiscreteCoind.eval_smul u f) (DiscreteCoind.unit G U M m)).trans
-      (DiscreteCoind.eval_unit (G := G) (U := U) (M := M) m)).trans
+      (hm m)).trans
       (TopRep.id_apply (TopRep.res (U.subtype : U →* G) (ofDiscreteModule ℤ G M)) m).symm)
 
 /-- **The Shapiro map is natural in the coefficient module**: for a `U`-equivariant homomorphism

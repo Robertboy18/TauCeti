@@ -41,9 +41,9 @@ and the one Shapiro's lemma is stated against.
   discrete carrier is continuous, so `Coind_U^G A` is a discrete `G`-module;
 * `TauCeti.DiscreteCoind.instContinuousSMulScalar`: for compact `G` and discrete coefficients,
   scalar multiplication is continuous;
-* `TauCeti.DiscreteCoind.unit_smul`, `TauCeti.DiscreteCoind.eval_unit`,
-  `TauCeti.DiscreteCoind.unit_injective` and `TauCeti.DiscreteCoind.map_unit`: the unit is
-  `G`-equivariant, a section of the counit, hence injective, and natural in the coefficients;
+* `TauCeti.DiscreteCoind.unit_smul`, `TauCeti.DiscreteCoind.unit_injective` and
+  `TauCeti.DiscreteCoind.map_unit`: the unit is `G`-equivariant, injective (a section of the
+  counit) and natural in the coefficients;
 * `TauCeti.DiscreteCoind.trace_apply`, `TauCeti.DiscreteCoind.trace_eq_sum_transversal` and
   `TauCeti.DiscreteCoind.trace_map`: the trace formula, along any transversal, and its naturality
   in the coefficients;
@@ -335,7 +335,7 @@ variable (G U M) in
 `U`-module by restriction: `m` goes to its orbit map `x ↦ x • m`, which is locally constant because
 the action is continuous and `M` is discrete, and `U`-equivariant because the action is. It is
 `G`-equivariant for the right-translation action (`TauCeti.DiscreteCoind.unit_smul`) and a section
-of the counit (`TauCeti.DiscreteCoind.eval_unit`), hence injective. -/
+of the counit, hence injective (`TauCeti.DiscreteCoind.unit_injective`). -/
 def unit : M →+ DiscreteCoind G U M where
   toFun m := mk G U M (fun x => x • m)
     ((IsLocallyConstant.iff_continuous _).2 (continuous_id.smul continuous_const))
@@ -346,15 +346,11 @@ def unit : M →+ DiscreteCoind G U M where
 @[simp]
 theorem unit_apply (m : M) (x : G) : unit G U M m x = x • m := (rfl)
 
-/-- The unit is a section of the counit: evaluating the orbit map of `m` at `1` gives back `m`.
-Not a `simp` lemma: `simp` already proves it from `TauCeti.DiscreteCoind.eval_apply`,
-`TauCeti.DiscreteCoind.unit_apply` and `one_smul`. -/
-theorem eval_unit (m : M) : eval G U M (unit G U M m) = m := by
-  rw [eval_apply, unit_apply, one_smul]
-
 variable (G U M) in
+/-- The unit is injective, being a section of the counit: evaluating the orbit map of `m` at `1`
+gives back `m`. -/
 theorem unit_injective : Function.Injective (unit G U M) :=
-  Function.LeftInverse.injective (eval_unit (G := G) (U := U))
+  Function.LeftInverse.injective (g := eval G U M) fun m => by simp
 
 variable (G U M) in
 /-- The unit is `G`-equivariant for the right-translation action on `Coind_U^G M`. -/
