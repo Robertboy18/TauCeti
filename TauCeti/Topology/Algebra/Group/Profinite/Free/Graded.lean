@@ -463,12 +463,17 @@ theorem gradedPowIterSpan_def (S : Set X) (j : ℕ) :
         ((fun i ↦ gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of i))) '' S) :=
   (rfl)
 
-/-- An iterated power `π^j x'_i` with `i ∈ S` belongs to the span of the `p`-power classes over
-`S`. -/
-theorem gradedPowIter_mem_gradedPowIterSpan {S : Set X} {i : X} (hi : i ∈ S) (j : ℕ) :
+/-- **Generator membership in the span of the `p`-power classes**: an iterated power `π^j x'_i`
+belongs to the span over `S` if and only if `i ∈ S`, because the `π^j x'_i` are linearly
+independent (`TauCeti.freeProP.linearIndependent_gradedPowIter_gradedMkZero_of`). -/
+-- `simp↓`: this must fire before `TauCeti.gradedPowIter_gradedMkZero` rewrites the generator.
+@[simp↓]
+theorem gradedPowIter_mem_gradedPowIterSpan_iff {S : Set X} {i : X} {j : ℕ} :
     gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of i)) ∈
-      gradedPowIterSpan p X S j :=
-  subset_span ⟨i, hi, rfl⟩
+      gradedPowIterSpan p X S j ↔ i ∈ S :=
+  ⟨fun h ↦ by_contra fun hi ↦
+    (linearIndependent_gradedPowIter_gradedMkZero_of p X j).notMem_span_image hi h,
+    fun hi ↦ subset_span ⟨i, hi, rfl⟩⟩
 
 /-- A submodule contains the span of the `p`-power classes over `S` if and only if it contains
 every generator `π^j x'_i` with `i ∈ S`. -/

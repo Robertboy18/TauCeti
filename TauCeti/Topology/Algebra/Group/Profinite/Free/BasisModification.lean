@@ -731,8 +731,7 @@ theorem gradedPowIter_mem_basisModificationTail {ρ : gradedPiece p (freeProP p 
     gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of i)) ∈
       basisModificationTail p X ρ j := by
   rw [basisModificationTail_def]
-  exact gradedPowIter_mem_gradedPowIterSpan
-    (S := {i | (degreeOneBasis p X).repr ρ (Sum.inl i) = 0}) hi j
+  exact gradedPowIter_mem_gradedPowIterSpan_iff.2 hi
 
 /-- A submodule contains `T_j(ρ)` if and only if it contains every generator `π^j ξ_i`
 whose coefficient `c_i` in `ρ` vanishes. -/
@@ -1239,8 +1238,8 @@ theorem range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two (hm 
               (gradedMkZero 2 (freeProP 2 X) (of a)) y) ∈
             LinearMap.range (basisModificationDelta 2 X le_rfl ρ) ⊔
               gradedPowIterSpan 2 X {i₁}ᶜ (1 + 1) := by
-        have hspan := gradedPowIter_mem_gradedPowIterSpan (p := 2)
-          (Set.mem_compl_singleton_iff.2 ha) 2
+        have hspan := (gradedPowIter_mem_gradedPowIterSpan_iff (p := 2) (j := 2)).2
+          (Set.mem_compl_singleton_iff.2 ha)
         simp only [gradedPowIter_succ, gradedPowIter_zero] at hspan
         have h₂ := hkey 1 le_rfl (gradedBracket 2 (freeProP 2 X) 0 0
           (gradedMkZero 2 (freeProP 2 X) (of a)) y) (gradedMkZero 2 (freeProP 2 X) (of a))
@@ -1262,9 +1261,10 @@ theorem range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two (hm 
           rw [hψ, ite_eq_left hi, one_smul, gradedBracket_gradedPow_self, add_zero] at h
           exact Submodule.mem_sup_left h
         · -- `π² ξ_i` lies in the span, since `i ≠ i₁`.
-          exact Submodule.mem_sup_right (by
-            simpa using gradedPowIter_mem_gradedPowIterSpan (p := 2)
-              (Set.mem_compl_singleton_iff.2 hi) 2)
+          have hspan := (gradedPowIter_mem_gradedPowIterSpan_iff (p := 2) (j := 2)).2
+            (Set.mem_compl_singleton_iff.2 hi)
+          simp only [gradedPowIter_succ, gradedPowIter_zero] at hspan
+          exact Submodule.mem_sup_right hspan
       · rw [degreeOneFamily_inr]
         dsimp only
         by_cases hj : j = i₁
