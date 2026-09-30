@@ -28,7 +28,7 @@ variable {R : Type*} [Semiring R] [DecidableEq R]
 /-- A polynomial of degree below `n` is recovered from its vector of first `n` coefficients.
 This is the `degree` form of `Polynomial.ofFn_comp_toFn_eq_id_of_natDegree_lt`, which also covers
 the zero polynomial. -/
-theorem _root_.Polynomial.ofFn_toFn_of_degree_lt {n : ℕ} {p : R[X]} (h : p.degree < n) :
+theorem _root_.Polynomial.ofFn_comp_toFn_eq_id_of_degree_lt {n : ℕ} {p : R[X]} (h : p.degree < n) :
     ofFn n (toFn n p) = p := by
   rcases eq_or_ne p 0 with rfl | hp
   · simp

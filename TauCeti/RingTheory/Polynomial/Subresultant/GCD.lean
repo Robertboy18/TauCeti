@@ -8,6 +8,8 @@ module
 public import Mathlib.Algebra.Polynomial.FieldDivision
 public import TauCeti.RingTheory.Polynomial.Subresultant.Basic
 import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
+import TauCeti.Algebra.Polynomial.Degree.Operations
+import TauCeti.Algebra.Polynomial.FieldDivision
 import TauCeti.Algebra.Polynomial.OfFn
 
 /-!
@@ -50,18 +52,6 @@ namespace TauCeti
 
 open Polynomial
 
-/-- The product of a polynomial of degree below `a` with one of degree at most `n` has degree
-below `a + n`; the zero polynomial is allowed on either side. -/
-private theorem degree_mul_lt_of_degree_lt_of_natDegree_le {R : Type*} [Semiring R]
-    {A q : R[X]} {a n : ℕ} (hA : A.degree < a) (hq : q.natDegree ≤ n) :
-    (A * q).degree < ((a + n : ℕ) : WithBot ℕ) := by
-  rcases eq_or_ne q 0 with rfl | hq0
-  · simp
-  · calc (A * q).degree ≤ A.degree + q.degree := degree_mul_le A q
-      _ < (a : WithBot ℕ) + n :=
-        WithBot.add_lt_add_of_lt_of_le (degree_ne_bot.mpr hq0) hA (degree_le_of_natDegree_le hq)
-      _ = ((a + n : ℕ) : WithBot ℕ) := by push_cast; rfl
-
 section Domain
 
 variable {R : Type*} [CommRing R] [IsDomain R]
@@ -82,12 +72,12 @@ theorem _root_.Polynomial.psc_eq_zero_of_mul_add_mul_eq_zero {p q A B : R[X]} {m
     have hB0 : toFn (n - j) B = 0 := funext fun k => by
       simpa using congrFun h0 (Fin.natAdd (m - j) k)
     rcases hne with hne | hne
-    · exact hne (by rw [← ofFn_toFn_of_degree_lt hA, hA0, map_zero])
-    · exact hne (by rw [← ofFn_toFn_of_degree_lt hB, hB0, map_zero])
+    · exact hne (by rw [← ofFn_comp_toFn_eq_id_of_degree_lt hA, hA0, map_zero])
+    · exact hne (by rw [← ofFn_comp_toFn_eq_id_of_degree_lt hB, hB0, map_zero])
   · funext i
     rw [subresultantMatrix_mulVec hm hn]
     simp only [Fin.append_left, Fin.append_right, Pi.zero_apply]
-    rw [ofFn_toFn_of_degree_lt hA, ofFn_toFn_of_degree_lt hB, hAB, coeff_zero]
+    rw [ofFn_comp_toFn_eq_id_of_degree_lt hA, ofFn_comp_toFn_eq_id_of_degree_lt hB, hAB, coeff_zero]
 
 end Domain
 
@@ -138,41 +128,6 @@ theorem _root_.Polynomial.psc_eq_zero_of_lt_natDegree_gcd {p q : K[X]}
       rw [h, mul_zero] at hpg
       exact hpg.symm
 
-/-- In a relation `A * q + B * p = 0` with `p ≠ 0`, if `A` has degree below
-`deg p - deg (gcd p q)`, then `A = 0`: dividing by the gcd and using its Bézout identity shows that
-`p / gcd p q` divides `A`. -/
-private theorem eq_zero_of_mul_add_mul_eq_zero {p q A B : K[X]} (hp : p ≠ 0)
-    (hAB : A * q + B * p = 0)
-    (hA : A.degree < ((p.natDegree - (EuclideanDomain.gcd p q).natDegree : ℕ) : WithBot ℕ)) :
-    A = 0 := by
-  set g := EuclideanDomain.gcd p q with hg
-  clear_value g
-  have hg0 : g ≠ 0 := fun h => hp (EuclideanDomain.gcd_eq_zero_iff.mp (hg ▸ h)).1
-  obtain ⟨p', hp'⟩ : g ∣ p := hg ▸ EuclideanDomain.gcd_dvd_left p q
-  obtain ⟨q', hq'⟩ : g ∣ q := hg ▸ EuclideanDomain.gcd_dvd_right p q
-  set u := EuclideanDomain.gcdA p q
-  set w := EuclideanDomain.gcdB p q
-  have hone : p' * u + q' * w = 1 := by
-    refine mul_left_cancel₀ hg0 ?_
-    calc g * (p' * u + q' * w) = (g * p') * u + (g * q') * w := by ring
-      _ = p * u + q * w := by rw [← hp', ← hq']
-      _ = g * 1 := by rw [mul_one, hg]; exact (EuclideanDomain.gcd_eq_gcd_ab p q).symm
-  have hrel : A * q' + B * p' = 0 := by
-    refine mul_left_cancel₀ hg0 ?_
-    calc g * (A * q' + B * p') = A * (g * q') + B * (g * p') := by ring
-      _ = A * q + B * p := by rw [← hp', ← hq']
-      _ = g * 0 := by rw [hAB, mul_zero]
-  have hpA : p' ∣ A := ⟨A * u - B * w, by linear_combination (-A) * hone + w * hrel⟩
-  have hp'0 : p' ≠ 0 := by
-    rintro rfl
-    rw [mul_zero] at hp'
-    exact hp hp'
-  refine eq_zero_of_dvd_of_degree_lt hpA (hA.trans_le ?_)
-  rw [degree_eq_natDegree hp'0]
-  have := natDegree_mul hg0 hp'0
-  rw [← hp'] at this
-  exact WithBot.coe_le_coe.mpr (by omega : p.natDegree - g.natDegree ≤ p'.natDegree)
-
 /-- At the degree of the gcd, the principal subresultant coefficient is nonzero, provided the left
 bound is the actual degree of the nonzero left polynomial and the right bound dominates the degree
 of the right polynomial. -/
@@ -220,7 +175,7 @@ theorem _root_.Polynomial.psc_natDegree_gcd_ne_zero {p q : K[X]} {m n : ℕ}
       (by rw [degree_eq_natDegree hg0, ← hd]; exact hdeg)
   -- Divide the relation by `g` and use Bézout to see that `A = 0`, then `B = 0`.
   have hA0 : A = 0 :=
-    eq_zero_of_mul_add_mul_eq_zero hp hzero (by rw [hm, ← hg, ← hd]; exact hAdeg)
+    eq_zero_of_mul_add_mul_eq_zero_of_degree_lt hp hzero (by rw [hm, ← hg, ← hd]; exact hAdeg)
   have hB0 : B = 0 := by
     rw [hA0, zero_mul, zero_add] at hzero
     exact (mul_eq_zero.mp hzero).resolve_right hp
