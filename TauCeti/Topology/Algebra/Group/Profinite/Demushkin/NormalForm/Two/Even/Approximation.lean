@@ -90,8 +90,9 @@ theorem exists_continuousMulEquiv_apply_eq_padicPow_mul_demushkinWordNeTwo_mul_p
   -- statement is stated.
   have hcls : gradedMk 2 (freeProP 2 (Fin n)) 1 r = gradedMk 2 (freeProP 2 (Fin n)) 1
       ⟨demushkinWordTwoEven 0 2 n (freeProPGen 2 n),
-        demushkinWordTwoEven_mem_pLowerCentralSeries_one (dvd_zero 2) two_pos n _⟩ := by
-    rw [h, gradedMk_demushkinWordTwoEven_eq_gradedMk_demushkinWordNeTwo_two hn2 (dvd_zero 4) le_rfl]
+        demushkinWordTwoEven_mem_pLowerCentralSeries_one (dvd_zero 2) two_pos n _⟩ :=
+    h.trans
+      (gradedMk_demushkinWordTwoEven_eq_gradedMk_demushkinWordNeTwo (dvd_zero 2) le_rfl hn2 _).symm
   have hspan : ∀ k (hk : 1 ≤ k), LinearMap.range (basisModificationDelta 2 (Fin n) hk
       (gradedMk 2 (freeProP 2 (Fin n)) 1 r)) ⊔
         gradedPowIterSpan 2 (Fin n) {i | (i : ℕ) ≠ 1} (k + 1) = ⊤ := by
