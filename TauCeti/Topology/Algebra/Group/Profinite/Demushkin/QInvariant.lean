@@ -9,6 +9,7 @@ public import TauCeti.GroupTheory.Torsion
 public import TauCeti.NumberTheory.Padics.RingHoms
 public import TauCeti.Topology.Algebra.ContinuousMulEquiv
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Basic
+public import TauCeti.Topology.Algebra.Group.Profinite.Free.DegreeOneForm
 public import TauCeti.Topology.Algebra.Group.Profinite.Presentation.Abelianization
 import Mathlib.Topology.Algebra.Module.Equiv.Prod
 import TauCeti.NumberTheory.Padics.PadicIntegers
@@ -61,6 +62,11 @@ together with the rank, that classify Demushkin groups with `q ≠ 2`.
   one-relator presentation `⟨X ∣ r⟩` with `exponentSum r = q • w`, `w x₀ = 1` and `p ∣ q`, the
   `q`-invariant is `0` exactly when `q = 0`, that is when `r` lies in the closed commutator
   subgroup, and is `p^{v_p(q)}` otherwise.
+* `TauCeti.demushkinQ_presentedProP_eq_iff_exists_not_dvd`,
+  `TauCeti.demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero`: for a relator
+  `r ∈ Φ(F)` presenting a Demushkin group, `q = p` exactly when some exponent sum of `r` is not
+  divisible by `p ^ 2`, that is, when the class of `r` in `gr_1(F)` has a nonzero `p`-power
+  coordinate.
 
 ## References
 
@@ -367,6 +373,28 @@ theorem demushkinQ_presentedProP_eq_iff_exists_not_dvd (hG : IsDemushkin p (pres
     -- `p ∣ q` and `¬ p ^ 2 ∣ q` pin the valuation of `q` to `1`.
     have hval : q.valuation = 1 := by omega
     rw [hval, pow_one]
+
+section DegreeOne
+
+-- Preferring the ring path keeps a single additive structure on `ZMod p`, so that the coordinate
+-- statement below is stated over the module structure of `ZMod p` on itself.
+attribute [local instance 2000] Ring.toAddCommGroup
+
+variable [LinearOrder X]
+
+/-- **The `q`-invariant is `p` exactly when the relator has a `p`-power part.** For a relator
+`r ∈ Φ(F)` presenting a Demushkin group, the `q`-invariant of the group is `p` exactly when the
+class of `r` in `gr_1(F)` has a nonzero `p`-power coordinate, that is, when some exponent sum of
+`r` is not divisible by `p ^ 2`. -/
+theorem demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero
+    (hr : r ∈ proPFrattini p (freeProP p X)) (hG : IsDemushkin p (presentedProP p X {r})) :
+    demushkinQ hG = p ↔ ∃ i, (freeProP.degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1
+      ⟨r, (pLowerCentralSeries_one_eq_proPFrattini Fact.out).symm.le hr⟩) (Sum.inl i) ≠ 0 := by
+  rw [demushkinQ_presentedProP_eq_iff_exists_not_dvd hG
+    (freeProP.dvd_exponentSum_of_mem_proPFrattini p X hr)]
+  simp only [ne_eq, freeProP.degreeOneBasis_repr_gradedMk_inl_eq_zero_iff]
+
+end DegreeOne
 
 end OneRelator
 

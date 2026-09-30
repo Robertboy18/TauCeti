@@ -7,9 +7,7 @@ module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.QInvariant
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.Graded
 import TauCeti.NumberTheory.Padics.PadicIntegers
-import TauCeti.Topology.Algebra.Group.Profinite.Free.DegreeOneForm
 
 /-!
 # The `q`-invariant of the Demushkin normal forms
@@ -35,12 +33,6 @@ hypothesis `4 ∣ a` in the third word is Labute's normalisation `α ∈ 4ℤ₂
 the `q`-invariant would be at least `4`. (For `f = 1` the coordinate `2` at `x₃` alone gives
 `q`-invariant `2`, whatever `a` is.)
 
-Conversely, the `q`-invariant of a one-relator Demushkin presentation on `r ∈ Φ(F)` is read off
-the class of `r` in `gr_1(F)`: it is `p` exactly when that class has a nonzero `p`-power
-coordinate, that is, when some exponent sum of `r` is not divisible by `p ^ 2`
-(`TauCeti.demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero`). This is the
-form in which the hypothesis of Labute's normal form for odd `p` is checked on a Demushkin group.
-
 ## Main results
 
 * `TauCeti.freeProP.toAdd_exponentSum_demushkinWordNeTwo`,
@@ -55,9 +47,6 @@ form in which the hypothesis of Labute's normal form for odd `p` is checked on a
 * `TauCeti.demushkinQ_presentedProP_demushkinWordTwoOdd`,
   `TauCeti.demushkinQ_presentedProP_demushkinWordTwoEven`: the two dyadic normal forms have
   `q`-invariant `2`.
-* `TauCeti.demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero`: for a relator
-  `r ∈ Φ(F)` presenting a Demushkin group, `q = p` exactly when the class of `r` in `gr_1(F)` has a
-  nonzero `p`-power coordinate.
 
 ## References
 
@@ -205,31 +194,5 @@ theorem demushkinQ_presentedProP_demushkinWordTwoEven {a : ℕ} (ha : 4 ∣ a) (
     (by rw [hq]; exact mul_ne_zero two_ne_zero u.ne_zero), hq, hval, pow_one]
 
 end Two
-
-/-! ### The `q`-invariant through the degree-one coordinates of the relator -/
-
-section Presentation
-
-universe u
-
--- Preferring the ring path keeps a single additive structure on `ZMod p`, so that the coordinate
--- statement below is stated over the module structure of `ZMod p` on itself.
-attribute [local instance 2000] Ring.toAddCommGroup
-
-variable {X : Type u} [Finite X] [LinearOrder X] {r : freeProP p X}
-
-/-- **The `q`-invariant is `p` exactly when the relator has a `p`-power part.** For a relator
-`r ∈ Φ(F)` presenting a Demushkin group, the `q`-invariant of the group is `p` exactly when the
-class of `r` in `gr_1(F)` has a nonzero `p`-power coordinate, that is, when some exponent sum of
-`r` is not divisible by `p ^ 2`. -/
-theorem demushkinQ_presentedProP_eq_iff_exists_degreeOneBasis_repr_inl_ne_zero
-    (hr : r ∈ proPFrattini p (freeProP p X)) (hG : IsDemushkin p (presentedProP p X {r})) :
-    demushkinQ hG = p ↔ ∃ i, (degreeOneBasis p X).repr (gradedMk p (freeProP p X) 1
-      ⟨r, (pLowerCentralSeries_one_eq_proPFrattini Fact.out).symm.le hr⟩) (Sum.inl i) ≠ 0 := by
-  rw [demushkinQ_presentedProP_eq_iff_exists_not_dvd hG
-    (dvd_exponentSum_of_mem_proPFrattini p X hr)]
-  simp only [ne_eq, degreeOneBasis_repr_gradedMk_inl_eq_zero_iff]
-
-end Presentation
 
 end TauCeti

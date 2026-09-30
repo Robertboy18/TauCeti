@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Criterion
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.QInvariant
+public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.QInvariant
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.SuccessiveApproximation
 
 /-!
