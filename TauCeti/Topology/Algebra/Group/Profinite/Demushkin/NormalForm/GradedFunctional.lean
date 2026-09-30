@@ -36,24 +36,24 @@ homomorphisms `D_i : F → ℤ_p` for `χ` with `D_i(x_j) = δ_{ij}` (`TauCeti.f
 * on `δ_ρ(ω)` with `ω ∈ gr_m(X)^n` every `Δ_{m+1}(D)` vanishes
   (`TauCeti.freeProP.gradedFunctional_basisModificationDelta_demushkinWordNeTwo_eq_zero`):
   `δ_ρ(ω)` is the class of `r⁻¹ · θ_w(r)` for a basis modification `θ_w : x_i ↦ x_i w_i` with
-  `w_i ∈ X`, and a crossed homomorphism for `χ` kills both `r` and `θ_w(r)`, since `χ` takes the
-  same values on the tuple `(x_i w_i)` as on `(x_i)` and at those values the word is killed
-  (`TauCeti.IsCrossedHom.map_demushkinWordNeTwo_eq_zero`).
+  `w_i ∈ X ≤ ker χ`, and a crossed homomorphism for `χ` kills both `r` and `θ_w(r)`, since `χ`
+  takes the same values on the tuple `(x_i w_i)` as on `(x_i)` and at those values the word is
+  killed (`TauCeti.IsCrossedHom.map_demushkinWordNeTwo_eq_zero`).
 
 Hence a class of `gr_{m+1}(X)` lies in `δ_ρ(gr_m(X)^n)` exactly when it is killed by every
 `Δ_{m+1}(D_i)` with `i ≠ 2`
 (`TauCeti.freeProP.mem_map_basisModificationDelta_iff_forall_gradedFunctional_crossedHom_eq_zero`).
-This is Labute's Lemma 4. At `p = 2` and `q = 2 + 2^f`, `χ` is the orientation of the Demushkin
-relator `x₁^{2+2^f} (x₁, x₂)(x₃, x₄) ⋯` with image `U^[f]`, and the lemma is the finite step of the
-successive approximation proving that every Demushkin group with these invariants has a basis in
-which its relator is exactly this word: the deviation of the relator from the word, once it lies in
-`gr_{m+1}(X)` and is killed by all crossed homomorphisms of `F` into `ℤ_p`, is removed by a basis
-correction inside `X`.
+This is Labute's Lemma 4. At `p = 2` and `q = 2 + 2^f` with `f ≥ 2`, `χ` is the orientation of the
+Demushkin relator `x₁^{2+2^f} (x₁, x₂)(x₃, x₄) ⋯` with image `U^[f]`, and the lemma is the finite
+step of the successive approximation proving that every Demushkin group with these invariants has a
+basis in which its relator is exactly this word: the deviation of the relator from the word, once it
+lies in `gr_{m+1}(X)` and is killed by all crossed homomorphisms of `F` into `ℤ_p`, is removed by a
+basis correction inside `X`.
 
 ## Main results
 
 * `TauCeti.IsCrossedHom.map_inv_mul_basisModification_demushkinWordNeTwo_eq_zero`: a crossed
-  homomorphism for `χ` kills `r⁻¹ · θ_w(r)` for every basis modification by elements of `X`.
+  homomorphism for `χ` kills `r⁻¹ · θ_w(r)` for every basis modification by elements of `ker χ`.
 * `TauCeti.freeProP.gradedFunctional_basisModificationDelta_demushkinWordNeTwo_eq_zero`: the graded
   functional of a crossed homomorphism for `χ` vanishes on `δ_ρ(gr_m(X)^n)`.
 * `TauCeti.freeProP.mem_map_basisModificationDelta_iff_forall_gradedFunctional_crossedHom_eq_zero`:
@@ -75,20 +75,19 @@ open Subgroup Submodule
 variable {p : ℕ} [Fact p.Prime] {n q : ℕ} {χ : freeProP p (Fin n) →ₜ* ℤ_[p]ˣ}
 
 /-- **A crossed homomorphism for the orientation kills the relator moved by a basis modification
-inside the kernel.** For `χ` with `χ(x₂) (1 - q) = 1` and `χ(x_i) = 1` for `i ≠ 2`, a crossed
-homomorphism `f` for `χ`, and a family `w` of elements of `λ_m(F)` lying in the kernel `X` of the
-exponent sum at `x₂`, `f (r⁻¹ · θ_w(r)) = 0` for `r = x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)`: the
-character takes the same values on the modified tuple `(x_i w_i)` as on `(x_i)`, and at those
-values a crossed homomorphism kills the word. -/
+inside the kernel of the character.** For `χ` with `χ(x₂) (1 - q) = 1` and `χ(x_i) = 1` for
+`i ≠ 2`, a crossed homomorphism `f` for `χ`, and a family `w` of elements of `λ_m(F)` on which `χ`
+is trivial (for instance elements of the kernel `X` of the exponent sum at `x₂`, since `X ≤ ker χ`),
+`f (r⁻¹ · θ_w(r)) = 0` for `r = x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)`: the character takes the same
+values on the modified tuple `(x_i w_i)` as on `(x_i)`, and at those values a crossed homomorphism
+kills the word. -/
 theorem IsCrossedHom.map_inv_mul_basisModification_demushkinWordNeTwo_eq_zero (hn1 : 1 < n)
     (h₁ : (χ (freeProP.of ⟨1, hn1⟩) : ℤ_[p]) * (1 - q) = 1)
     (h : ∀ j, j ≠ ⟨1, hn1⟩ → χ (freeProP.of j) = 1) {f : freeProP p (Fin n) → ℤ_[p]}
     (hf : IsCrossedHom χ f) {m : ℕ} (w : Fin n → pLowerCentralSeries p (freeProP p (Fin n)) m)
-    (hw : ∀ i, (w i : freeProP p (Fin n)) ∈ freeProP.exponentSumKer p (Fin n) ⟨1, hn1⟩) :
+    (hw : ∀ i, χ (w i) = 1) :
     f ((demushkinWordNeTwo q n (freeProPGen p n))⁻¹ *
       freeProP.basisModification w (demushkinWordNeTwo q n (freeProPGen p n))) = 0 := by
-  have hker : ∀ i, χ (w i) = 1 := fun i ↦
-    MonoidHom.mem_ker.1 (χ.exponentSumKer_le_ker h (hw i))
   -- The values of `χ` on the generator tuple and on the modified tuple.
   have hgen : ∀ i, i ≠ 1 → χ (freeProPGen p n i) = 1 := fun i hi ↦ by
     by_cases hi' : i < n
@@ -101,7 +100,7 @@ theorem IsCrossedHom.map_inv_mul_basisModification_demushkinWordNeTwo_eq_zero (h
   have hθ : ∀ i, χ (freeProP.basisModification w (freeProPGen p n i)) = χ (freeProPGen p n i) :=
     fun i ↦ by
       by_cases hi' : i < n
-      · rw [freeProPGen_of_lt p hi', freeProP.basisModification_of, _root_.map_mul, hker, mul_one]
+      · rw [freeProPGen_of_lt p hi', freeProP.basisModification_of, _root_.map_mul, hw, mul_one]
       · rw [freeProPGen_eq_one_of_le p (not_lt.1 hi'), _root_.map_one]
   have hr : f (demushkinWordNeTwo q n (freeProPGen p n)) = 0 :=
     hf.map_demushkinWordNeTwo_eq_zero hn1 hgen₁ hgen
@@ -121,6 +120,7 @@ namespace freeProP
 `r = x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` and a family `v` of classes in `gr_m(X)`, where `X` is the
 kernel of the exponent sum at `x₂`, `Δ_{m+1}(f) (δ_ρ(v)) = 0`: `δ_ρ(v)` is the class of
 `r⁻¹ · θ_w(r)` for a basis modification `θ_w` by elements of `X`, which `f` kills. -/
+@[simp]
 theorem gradedFunctional_basisModificationDelta_demushkinWordNeTwo_eq_zero (hn1 : 1 < n)
     (hq : p ∣ q) {m : ℕ} (hm : 1 ≤ m) (h₁ : (χ (of ⟨1, hn1⟩) : ℤ_[p]) * (1 - q) = 1)
     (h : ∀ j, j ≠ ⟨1, hn1⟩ → χ (of j) = 1) {f : freeProP p (Fin n) → ℤ_[p]}
@@ -136,7 +136,8 @@ theorem gradedFunctional_basisModificationDelta_demushkinWordNeTwo_eq_zero (hn1 
   rw [hv', ← gradedMk_inv_mul_basisModification hm w, hf.gradedFunctional_gradedMk _ _ _ _ (c := 0)
     (by
       rw [mul_zero]
-      exact hf.map_inv_mul_basisModification_demushkinWordNeTwo_eq_zero hn1 h₁ h w hwX),
+      exact hf.map_inv_mul_basisModification_demushkinWordNeTwo_eq_zero hn1 h₁ h w fun i ↦
+        MonoidHom.mem_ker.1 (χ.exponentSumKer_le_ker h (hwX i))),
     map_zero]
 
 /-- **The image of `δ_ρ` on `gr_m(X)^n` is the common kernel in `gr_{m+1}(X)` of the graded

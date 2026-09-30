@@ -38,12 +38,16 @@ is trivial, `Δ_k(f) (π^k ξ) = f g mod p`
 p ^ k f g` when `χ g = 1`. In degree zero, `Δ_0(f)` is the reduction of `f` modulo `p`, the
 `𝔽_p`-character of `G` that `f` induces on the Frattini quotient.
 
-These functionals are the linear maps `Δ` of Labute's Lemma 4: for the crossed homomorphisms of a
-free pro-`p` group taking the value `1` at one generator and `0` at the others, they detect the
-coefficient of the corresponding `p`-power `π^k ξ_i` in a class of `gr_k(F)`, and they vanish on
-the image of the basis-modification map `δ` for the orientation of a Demushkin group in normal
-form. That is what cuts the image of `δ` out of the graded pieces of the kernel of the orientation
-in the classification of the dyadic Demushkin groups of even rank.
+These functionals are the linear maps `Δ` of Labute's Lemma 4. For the crossed homomorphisms `D_i`
+of a free pro-`p` group `F` taking the value `1` at the generator `x_i` and `0` at the others,
+`Δ_k(D_i)` takes the value `δ_{ij}` on the `p`-power `π^k ξ_j` of the class of a generator `x_j`
+on which the character is trivial, and it vanishes on the image of the basis-modification map `δ`
+for the orientation of a Demushkin group in normal form. So when a class of a graded piece of the
+kernel of the orientation is written as an element of that image plus a combination
+`Σ_j c_j π^k ξ_j` of these `p`-powers, as the constrained span statement of the normal form
+allows, the `Δ_k(D_i)` read off the coefficients `c_j`. That is what cuts the image of `δ` out of
+the graded pieces of the kernel of the orientation in the classification of the dyadic Demushkin
+groups of even rank.
 
 ## Main definitions
 
