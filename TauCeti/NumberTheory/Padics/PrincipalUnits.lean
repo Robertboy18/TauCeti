@@ -455,9 +455,7 @@ theorem exists_topologicalClosure_zpowers_eq_unitsPrincipal {f : ℕ} (hf : 0 < 
   obtain ⟨u, hu, hu'⟩ := exists_mem_unitsPrincipal_and_notMem_succ_of_pos p hf
   exact ⟨u, topologicalClosure_zpowers_eq_unitsPrincipal hf hf₂ hu hu'⟩
 
-/-- A principal unit `u ≠ 1` of level `f ≥ 1`, with `f ≥ 2` when `p = 2`, has infinite order:
-its exact level `g ≥ f` makes it a topological generator of the infinite group `U^(g)`, which a
-unit of finite order, generating a finite closed subgroup, cannot be. -/
+/-- A principal unit `u ≠ 1` of level `f ≥ 1`, with `f ≥ 2` when `p = 2`, has infinite order. -/
 theorem not_isOfFinOrder_of_mem_unitsPrincipal {f : ℕ} (hf : 0 < f) (hf₂ : p = 2 → 2 ≤ f)
     {u : ℤ_[p]ˣ} (hu : u ∈ unitsPrincipal p f) (hu1 : u ≠ 1) : ¬ IsOfFinOrder u := by
   intro hfin
