@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Homology.Curved.Algebra.Defs
-public import TauCeti.Algebra.Homology.DG.Algebra.Opposite
+public import TauCeti.RingTheory.GradedAlgebra.Opposite
 
 /-!
 # Opposites of curved differential graded algebras

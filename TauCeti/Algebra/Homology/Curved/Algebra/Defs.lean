@@ -18,10 +18,14 @@ rule, and a *curvature* `w ∈ A²` which measures the failure of `d` to square 
 `d (d a) = a * w - w * a` and `d w = 0`.
 
 The square of `d` is thus the commutator with the curvature, with the sign fixed by the
-**right-module convention**: a right curved module `M` over `A` has `d (d m) = m • w`, and the
-algebra equation is the case `M = A`. Positselski's curvature element `h` satisfies
-`d (d a) = h * a - a * h`; in his convention our curvature is `w = -h`. This sign is
-load-bearing: storing `h` while using the right-module square `m • w` is inconsistent.
+**right-module convention**: a right curved module `M` over `A` has `d (d m) = m • w`. The
+commutator equation is what makes this square compatible with the graded Leibniz rule
+`d (m • a) = d m • a + (-1) ^ |m| • (m • d a)`: applying `d` twice to `m • a` gives
+`d (d m) • a + m • d (d a) = m • (w * a) + m • d (d a)`, and this is `(m • a) • w` in every
+right module (equivalently, for `m = 1` in `M = A`) exactly when `d (d a) = a * w - w * a`.
+Positselski's curvature element `h` satisfies `d (d a) = h * a - a * h`; in his convention our
+curvature is `w = -h`. This sign is load-bearing: storing `h` while using the right-module square
+`m • w` is inconsistent.
 
 The curvature is not assumed central. If it is, or more generally if it commutes with every
 element, then `d` squares to zero and `A` is an ordinary differential graded algebra. Conversely
@@ -90,18 +94,13 @@ namespace IsCurvedDGAlgebra
 @[simp]
 theorem map_decompose (h : IsCurvedDGAlgebra 𝒜 d w) (p : ℤ) (a : A) :
     d (DirectSum.decompose 𝒜 a p : A) = (DirectSum.decompose 𝒜 (d a) (p + 1) : A) :=
-  DirectSum.map_decompose_shift 𝒜 𝒜 d (· + 1) (add_left_injective 1)
-    (fun _ _ ha ↦ h.map_mem ha) p a
+  map_decompose_of_map_mem h.map_mem p a
 
 /-- The Leibniz rule against a cycle in the right factor. The vanishing signed term permits an
 arbitrary left factor, without a homogeneity hypothesis. -/
 theorem leibniz_of_map_eq_zero (h : IsCurvedDGAlgebra 𝒜 d w) (a : A) {b : A} (hb : d b = 0) :
-    d (a * b) = d a * b := by
-  classical
-  conv_lhs => rw [← DirectSum.sum_support_decompose 𝒜 a, Finset.sum_mul, map_sum]
-  conv_rhs => rw [← DirectSum.sum_support_decompose 𝒜 a, map_sum, Finset.sum_mul]
-  refine Finset.sum_congr rfl fun p _ ↦ ?_
-  rw [h.leibniz (SetLike.coe_mem _) b, hb, mul_zero, smul_zero, add_zero]
+    d (a * b) = d a * b :=
+  map_mul_of_leibniz_of_map_eq_zero h.leibniz a hb
 
 /-- The Leibniz rule against the curvature in the right factor: the curvature is a cycle. -/
 theorem map_mul_curvature (h : IsCurvedDGAlgebra 𝒜 d w) (a : A) : d (a * w) = d a * w :=
@@ -109,15 +108,13 @@ theorem map_mul_curvature (h : IsCurvedDGAlgebra 𝒜 d w) (a : A) : d (a * w) =
 
 /-- The differential of a curved differential graded algebra annihilates the unit: the Leibniz
 rule for `1 * 1` reads `d 1 = d 1 + d 1`. -/
-theorem map_one_eq_zero (h : IsCurvedDGAlgebra 𝒜 d w) : d 1 = 0 := by
-  have key := h.leibniz (SetLike.one_mem_graded 𝒜) 1
-  simp only [mul_one, one_mul, Int.negOnePow_zero, one_smul] at key
-  exact left_eq_add.mp key
+theorem map_one_eq_zero (h : IsCurvedDGAlgebra 𝒜 d w) : d 1 = 0 :=
+  map_one_eq_zero_of_leibniz h.leibniz
 
 /-- The differential of a curved differential graded algebra annihilates the image of the ground
 ring. -/
-theorem map_algebraMap (h : IsCurvedDGAlgebra 𝒜 d w) (r : R) : d (algebraMap R A r) = 0 := by
-  rw [Algebra.algebraMap_eq_smul_one, map_smul, h.map_one_eq_zero, smul_zero]
+theorem map_algebraMap (h : IsCurvedDGAlgebra 𝒜 d w) (r : R) : d (algebraMap R A r) = 0 :=
+  map_algebraMap_of_leibniz h.leibniz r
 
 /-- **The graded-commutator form of the curvature equation.** The square of the differential is
 the commutator `⁅-w, a⁆ = -w * a - a * -w` with the negative of the curvature. Since the curvature
