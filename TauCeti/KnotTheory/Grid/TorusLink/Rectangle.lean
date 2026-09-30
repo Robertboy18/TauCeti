@@ -45,8 +45,7 @@ variable {p q : ℕ} (y : GridState (p + 1 + (q + 1)))
 state. -/
 @[simp]
 theorem unblockedRectangles_torusLink_X :
-    (torusLink p q).unblockedRectangles y (torusLink p q).X =
-      GridRectangleBetween.all y (torusLink p q).X :=
+    (torusLink p q).unblockedRectangles y (torusLink p q).X = Finset.univ :=
   (torusLink p q).unblockedRectangles_X_of_X_toPerm_eq_finRotate_pow y (torusLink_X_toPerm p q)
 
 /-- Every grid state of a torus link grid has an even number, zero or two, of rectangles into the

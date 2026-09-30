@@ -367,11 +367,8 @@ so the unblocked differential counts no rectangle from `G.X`. -/
 theorem unblockedRectangles_X_eq_empty (y : GridState n) : G.unblockedRectangles G.X y = ∅ := by
   rw [Finset.eq_empty_iff_forall_notMem]
   intro r hr
-  have hsq : (r.left, r.bottom) ∈ r.toGridRectangle.coveredSquares := by
-    rw [← GridRectangle.squares_eq_coveredSquares]
-    exact r.left_bottom_mem_squares
-  exact Finset.disjoint_left.mp (G.disjoint_XSet_of_mem_unblockedRectangles hr) hsq
-    ((G.mk_mem_XSet _ _).mpr r.bottom_def.symm)
+  exact Finset.disjoint_left.mp (G.disjoint_XSet_of_mem_unblockedRectangles hr)
+    r.left_bottom_mem_coveredSquares ((G.mk_mem_XSet _ _).mpr r.bottom_def.symm)
 
 /-! ### Rectangles into the `X`-marking state of a cyclic-shift grid
 
@@ -425,7 +422,7 @@ variable (y)
 /-- When the `X`-marking permutation is a power of the cyclic shift, the unblocked differential
 counts every rectangle into the `X`-marking state. -/
 theorem unblockedRectangles_X_of_X_toPerm_eq_finRotate_pow (hX : G.X.toPerm = finRotate n ^ k) :
-    G.unblockedRectangles y G.X = GridRectangleBetween.all y G.X := by
+    G.unblockedRectangles y G.X = Finset.univ := by
   ext r
   simp [G.isEmpty_of_X_toPerm_eq_finRotate_pow hX,
     G.disjoint_coveredSquares_XSet_of_X_toPerm_eq_finRotate_pow hX]
@@ -435,11 +432,11 @@ number, zero or two, of rectangles into the `X`-marking state counted by the unb
 differential. -/
 theorem even_card_unblockedRectangles_X_of_X_toPerm_eq_finRotate_pow
     (hX : G.X.toPerm = finRotate n ^ k) : Even (G.unblockedRectangles y G.X).card := by
-  rw [G.unblockedRectangles_X_of_X_toPerm_eq_finRotate_pow y hX]
-  rcases (GridRectangleBetween.all y G.X).eq_empty_or_nonempty with h | h
-  · rw [h, Finset.card_empty]
+  rw [G.unblockedRectangles_X_of_X_toPerm_eq_finRotate_pow y hX, Finset.card_univ]
+  rcases isEmpty_or_nonempty (GridRectangleBetween y G.X) with h | h
+  · rw [Fintype.card_eq_zero]
     exact Even.zero
-  · rw [GridRectangleBetween.card_all_eq_two_of_nonempty h]
+  · rw [GridRectangleBetween.card_eq_two_of_nonempty]
     exact even_two
 
 end CyclicShift
