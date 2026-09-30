@@ -6,8 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.ConnectingMap
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Product
-public import TauCeti.Topology.Algebra.GroupAction.InternalHom
 
 import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Naturality
 
@@ -22,16 +20,22 @@ These are the underlying cohomological pairings used in duality statements.
 The cochain formulas below fix the order of the two inputs: the internal hom is always the first
 factor, so in degree `(1,1)` the evaluation is `a(g) (g • b(h))`.
 
-The three pairings are compatible with the maps of coefficients in two ways, which together say
-that they form a morphism of `δ`-functors (Serre, exposé 252, §9.1, following Tate). First, they are
-**natural in the module**: a `G`-map `f : M →+[G] M'` and its dual `InternalHom.precomp G f` are
-adjoint, `⟨φ, f_* b⟩ = ⟨f^* φ, b⟩` in every shape. Second, they are **compatible with the connecting
-maps** of a short exact sequence `0 → A → B → C → 0` of modules killed by a prime and of its dual
-sequence `0 → C' → B' → A' → 0`: the connecting map of the dual sequence, paired against a class of
-the original one, is the connecting map of the original sequence paired against the dual class, with
-the Leibniz sign `(-1)^(p+1)` of the degree `p` of the dual class. These are the identities that let
-the duality maps `Hⁱ(G, M) → Hom(H²⁻ⁱ(G, M'), H²(G, N))` be compared along the long exact sequences
-of `M` and of `M'`, one short exact sequence at a time.
+The three pairings are compatible with the maps of coefficients in two ways (Serre, exposé 252,
+§9.1, following Tate). First, they are **natural in the module**: a `G`-map `f : M →+[G] M'` and
+its dual `InternalHom.precomp G f` are adjoint, `⟨φ, f_* b⟩ = ⟨f^* φ, b⟩` in each of the three
+shapes. Second, they are **compatible with the connecting maps** of a short exact sequence
+`0 → A → B → C → 0` of modules killed by a prime and of its dual sequence `0 → C' → B' → A' → 0`:
+in the two shapes of total degree two that involve a connecting map, the connecting map of the dual
+sequence, paired against a class of the original one, is the connecting map of the original
+sequence paired against the dual class, with the Leibniz sign `(-1)^(p+1)` of the degree `p` of the
+dual class. These are the low-degree identities needed to compare the duality maps
+`Hⁱ(G, M) → Hom(H²⁻ⁱ(G, M'), H²(G, N))`, `i = 0, 1, 2`, along the segment
+
+```text
+H⁰(G, A) → H⁰(G, B) → H⁰(G, C) → H¹(G, A) → H¹(G, B) → H¹(G, C) → H²(G, A) → H²(G, B) → H²(G, C)
+```
+
+of the long exact sequence of a short exact sequence and the corresponding segment for its dual.
 
 ## Main statements
 
@@ -41,10 +45,11 @@ of `M` and of `M'`, one short exact sequence at a time.
 * `TauCeti.ContCohomology.explicitDualityPairing02_explicitCoeff2`,
   `explicitDualityPairing11_explicitCoeff1` and `explicitDualityPairing20_explicitCoeff0`:
   **naturality in the module**, `⟨φ, f_* b⟩ = ⟨f^* φ, b⟩`, one identity per shape.
-* `TauCeti.ContCohomology.explicitDualityPairing11_explicitDelta0_dual` and
-  `explicitDualityPairing20_explicitDelta1_dual`: **compatibility with the connecting maps** of a
-  short exact sequence and of its dual sequence, `⟨δ x, y⟩ = (-1)^(p+1) ⟨x, δ y⟩`, in the two shapes
-  of total degree two.
+* `explicitDualityPairing11_explicitDelta0_dual_eq_neg_explicitDualityPairing02_explicitDelta1` and
+  `explicitDualityPairing20_explicitDelta1_dual_eq_explicitDualityPairing11_explicitDelta0`:
+  **compatibility with the connecting maps** of a short exact sequence and of its dual sequence,
+  `⟨δ x, y⟩ = (-1)^(p+1) ⟨x, δ y⟩`, in the two shapes of total degree two that involve a
+  connecting map.
 
 ## References
 
@@ -295,7 +300,7 @@ omit [Finite A] in
 anti-adjoint under the evaluation pairings.** For an invariant `x` of `A' = InternalHom G A N` and
 a class `y ∈ H¹(G, C)`, the `(1,1)` pairing of `δ⁰ x ∈ H¹(G, C')` with `y` is the negative of the
 `(0,2)` pairing of `x` with `δ¹ y ∈ H²(G, A)`. -/
-theorem explicitDualityPairing11_explicitDelta0_dual
+theorem explicitDualityPairing11_explicitDelta0_dual_eq_neg_explicitDualityPairing02_explicitDelta1
     (x : H0 G (InternalHom G A N)) (y : H1 G C) :
     explicitDualityPairing11 G C N ((S.dual N hB).explicitDelta0 x) y =
       -explicitDualityPairing02 G A N x (S.explicitDelta1 y) :=
@@ -308,7 +313,7 @@ theorem explicitDualityPairing11_explicitDelta0_dual
 under the evaluation pairings.** For a class `x ∈ H¹(G, A')`, `A' = InternalHom G A N`, and an
 invariant `y` of `C`, the `(2,0)` pairing of `δ¹ x ∈ H²(G, C')` with `y` is the `(1,1)` pairing of
 `x` with `δ⁰ y ∈ H¹(G, A)`; the Leibniz sign is `1` because `x` has degree one. -/
-theorem explicitDualityPairing20_explicitDelta1_dual
+theorem explicitDualityPairing20_explicitDelta1_dual_eq_explicitDualityPairing11_explicitDelta0
     (x : H1 G (InternalHom G A N)) (y : H0 G C) :
     explicitDualityPairing20 G C N ((S.dual N hB).explicitDelta1 x) y =
       explicitDualityPairing11 G A N x (S.explicitDelta0 y) :=
