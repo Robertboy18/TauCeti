@@ -319,7 +319,7 @@ variable (x₀ : X) (u : ℤ_[p]ˣ)
 
 /-- The dilation `x₀ ↦ x₀ ^ u` is the lift of the family sending `x₀` to `x₀ ^ u` and every other
 generator to itself. -/
-theorem coe_dilation [DecidableEq X] :
+private theorem coe_dilation [DecidableEq X] :
     ⇑(dilation x₀ u) = ⇑(lift (isProP_freeProP p X)
       (Function.update of x₀ ((isProP_freeProP p X).padicPow (of x₀) u))) := by
   -- `dilation` is built with the classical instance; identify the two `DecidableEq X`.

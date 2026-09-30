@@ -22,26 +22,17 @@ where the basis-modification map `δ_ρ` is onto in every degree. This file prov
 cases `q ≠ p`, that is `q = 0` and `q = p^f` with `f ≥ 2`, for every prime `p` including `p = 2`,
 and assembles the theorem for every `q ≠ 2`.
 
-For `q ≠ p` every exponent sum of `r` is divisible by `p ^ 2`, the class `ρ` of `r` in `gr_1(F)` has
-no `p`-power part, and `Im δ_ρ` misses the classes `π^{m+1} ξ_i`, so the successive approximation
-has to keep the exponent vector of the relator fixed. The argument has three steps.
-
-1. The exponent vector of `r` generates the ideal `(q₀)` of `ℤ_p`, where `q(G) = p^{v_p(q₀)}`, or
-   `q(G) = 0` when `q₀ = 0`. Transvections, a permutation of the generators and a dilation
-   `x₁ ↦ x₁ ^ u` by a unit carry the exponent vector to `q e₁`
-   (`TauCeti.freeProP.exists_continuousMulEquiv_toAdd_exponentSum_eq_single`,
-   `TauCeti.freeProP.dilation`).
-2. An automorphism fixing `x₁` brings the class of the relator to the class of the normal-form word
-   modulo `λ_2(F)` without changing the exponent vector, by
-   `TauCeti.freeProP.exists_continuousMulEquiv_freeProPGen_zero_eq_inv_mul_demushkinWordNeTwo_mem`.
-3. The relative successive-approximation theorem
-   (`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_exponentSum_eq`) turns the congruence
-   into an equality. Its hypothesis is discharged by the span statement for a class without
-   `p`-power part, `Im δ_ρ ⊇ ` the classes of `λ_{m+1}(F) ∩ closure [F, F]`, which is
-   `freeProP.gradedMk_mem_range_basisModificationDelta_of_mem_topologicalClosure_commutator`,
-   and by the pivot-constrained span statement, which places the correction at `x₁` in the
-   commutator subgroup so that the exponent vector is preserved
-   (`TauCeti.freeProP.exists_apply_mem_commutator_basisModificationDelta_eq_of_mem_range`).
+For `q ≠ p` every exponent sum of `r` is divisible by `p ^ 2`, so the class of `r` in `gr_1(F)` has
+no `p`-power part and the basis-modification map `δ_ρ` is no longer onto in every degree: the
+successive approximation cannot change the exponent vector of the relator, and has to be run with
+that vector held fixed. The normal form is therefore first proved for a relator whose exponent
+vector is already `q e₁`, with `p ^ 2 ∣ q` and nondegenerate degree-one form. The elementary
+automorphisms of `TauCeti.Topology.Algebra.Group.Profinite.Free.ElementaryAutomorphism` carry the
+exponent vector of any relator presenting a Demushkin group with `q(G) ≠ p` to `q(G) e₁`, which
+gives the theorem for `q(G) ≠ p`; together with the case `q = p` this is Labute's Theorem 3 for
+every `q ≠ 2`. The normal form is the input to the uniqueness theorem of
+`TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Uniqueness`: two Demushkin groups
+with the same rank and the same `q`-invariant `q ≠ 2` are topologically isomorphic.
 
 ## Main results
 
