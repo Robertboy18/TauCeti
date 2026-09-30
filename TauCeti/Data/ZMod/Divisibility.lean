@@ -5,7 +5,6 @@ Authors: Chris Birkbeck
 -/
 module
 
-public import Mathlib.Data.Nat.Factorization.Basic
 public import Mathlib.Data.ZMod.Units
 public import Mathlib.Data.ZMod.Basic
 public import Mathlib.Data.ZMod.QuotientRing

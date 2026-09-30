@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Data.ZMod.QuotientRing
+public import TauCeti.Data.Nat.Prime.Basic
 public import TauCeti.Data.ZMod.Divisibility
 public import TauCeti.Topology.Algebra.Group.Profinite.ZHat.Component
 
@@ -48,8 +48,9 @@ domain (`zHat.not_isDomain`).
 * `TauCeti.zHat.continuous_ringEquivPiPadicInt`, `TauCeti.zHat.continuous_ringEquivPiPadicInt_symm`:
   the decomposition is an isomorphism of topological rings.
 * `TauCeti.zHat.component_idem`, `TauCeti.zHat.isIdempotentElem_idem`,
-  `TauCeti.zHat.idem_mul_idem_of_ne`, `TauCeti.zHat.idem_mul_eq_self_iff`: the components of
-  `ω_ℓ`, its idempotence and orthogonality, and the characterization of `ω_ℓ * a = a`.
+  `TauCeti.zHat.idem_mul_idem`, `TauCeti.zHat.idem_mul_idem_of_ne`,
+  `TauCeti.zHat.idem_mul_eq_self_iff`: the components of `ω_ℓ`, its idempotence and orthogonality,
+  and the characterization of `ω_ℓ * a = a`.
 * `TauCeti.zHat.toZMod_idem_of_dvd_pow`, `TauCeti.zHat.toZMod_idem_of_not_dvd`: the reductions of
   `ω_ℓ` at the finite levels.
 * `TauCeti.zHat.not_isDomain`: the profinite integers are not a domain.
@@ -60,10 +61,6 @@ domain (`zHat.not_isDomain`).
 -/
 
 public section
-
-/-- A prime, as an element of the subtype `Nat.Primes`, is prime: the `Fact` instance under which
-the `ℓ`-adic integers `ℤ_[ℓ]` can be written for `ℓ : Nat.Primes`. -/
-instance Nat.Primes.instFactPrime (ℓ : Nat.Primes) : Fact (ℓ : ℕ).Prime := ⟨ℓ.2⟩
 
 namespace TauCeti
 
@@ -230,6 +227,11 @@ theorem isIdempotentElem_idem : IsIdempotentElem (idem.{u} ℓ) :=
     rw [map_mul, component_idem]
     split_ifs <;> simp
 
+/-- `ω_ℓ * ω_ℓ = ω_ℓ`: the idempotence of `ω_ℓ` as a rewrite rule. -/
+@[simp]
+theorem idem_mul_idem : idem.{u} ℓ * idem ℓ = idem ℓ :=
+  (isIdempotentElem_idem ℓ).eq
+
 /-- The idempotents of distinct primes are orthogonal. -/
 theorem idem_mul_idem_of_ne {ℓ' : ℕ} [Fact ℓ'.Prime] (h : ℓ ≠ ℓ') :
     idem.{u} ℓ * idem ℓ' = 0 :=
@@ -295,7 +297,7 @@ theorem idem_ne_one : idem.{u} ℓ ≠ 1 := fun h ↦ by
 nonzero. -/
 theorem not_isDomain : ¬ IsDomain (Additive zHat.{u}) := fun _ ↦ by
   have h : idem.{u} 2 * (1 - idem 2) = 0 := by
-    rw [mul_sub, mul_one, (isIdempotentElem_idem 2).eq, sub_self]
+    rw [mul_sub, mul_one, idem_mul_idem, sub_self]
   rcases mul_eq_zero.mp h with h | h
   · exact idem_ne_zero 2 h
   · exact idem_ne_one 2 (sub_eq_zero.mp h).symm
