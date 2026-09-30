@@ -68,23 +68,6 @@ local instance isIntegrallyClosed_coordinateRing_target : IsIntegrallyClosed W�
 local instance isDedekindDomain_coordinateRing_target : IsDedekindDomain W₂.CoordinateRing :=
   W₂.isDedekindDomain_coordinateRing_of_isIntegrallyClosed
 
-/-- **The pullback of a function vanishing at `φ(Q)` vanishes at `Q`**: if `φ` sends `Q` to the
-affine point `(x', y')` and `z` vanishes there, then `φ^* z` vanishes at `Q`. -/
-theorem valuation_fieldPullback_lt_one_of_toPointHom_eq_some {Q : W₁.Point} {x' y' : F}
-    {h' : W₂.Nonsingular x' y'} (hQ : φ.toPointHom Q = .some x' y' h') {z : W₂.FunctionField}
-    (hz : (Place.ofPrime F W₂.FunctionField (CoordinateRing.pointPlace h'.1)).valuation z < 1) :
-    (pointEquivDegreeOnePlace W₁ Q).1.valuation (φ.fieldPullback z) < 1 := by
-  let _ := φ.fieldPullback.toRingHom.toAlgebra
-  have := φ.isScalarTower_of_algebraMap_eq_fieldPullback fun _ ↦ rfl
-  have := φ.finiteDimensional_functionField fun _ ↦ rfl
-  -- the place of `Q` restricts along `φ^*` to the place of `(x', y')`
-  have h := φ.coe_pointEquivDegreeOnePlace_toPointHom (fun _ ↦ rfl) Q
-  rw [hQ, coe_pointEquivDegreeOnePlace_some] at h
-  have he := (Place.restrict_eq_iff_isEquiv_comap F W₂.FunctionField _ _).mp h.symm
-  have := (Valuation.isEquiv_iff_val_lt_one.mp he).mpr hz
-  rwa [Valuation.comap_apply, RingHom.algebraMap_toAlgebra, AlgHom.toRingHom_eq_coe,
-    RingHom.coe_coe] at this
-
 /-- Translation by a point of the fibre over `O₂` fixes the pullback of every function regular at
 all affine points of `W₂`: both `τ_P^* φ^* z` and `φ^* z` take at a point `Q` off the fibre the
 value of `z` at `φ(Q) = φ(Q + P)`, so their difference has infinitely many zeros. -/
