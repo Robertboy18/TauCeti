@@ -346,8 +346,9 @@ def unit : M →+ DiscreteCoind G U M where
 @[simp]
 theorem unit_apply (m : M) (x : G) : unit G U M m x = x • m := (rfl)
 
-/-- The unit is a section of the counit: evaluating the orbit map of `m` at `1` gives back `m`. -/
-@[simp]
+/-- The unit is a section of the counit: evaluating the orbit map of `m` at `1` gives back `m`.
+Not a `simp` lemma: `simp` already proves it from `TauCeti.DiscreteCoind.eval_apply`,
+`TauCeti.DiscreteCoind.unit_apply` and `one_smul`. -/
 theorem eval_unit (m : M) : eval G U M (unit G U M m) = m := by
   rw [eval_apply, unit_apply, one_smul]
 
