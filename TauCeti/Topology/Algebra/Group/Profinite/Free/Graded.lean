@@ -460,10 +460,10 @@ theorem gradedPowIterSpan_succ (S : Set X) {j : ℕ} (hj : 1 ≤ j) :
 /-- **The dimension of the span of the `p`-power classes over `S`** is the cardinality of `S`,
 because the `π^j x'_i` are linearly independent
 (`TauCeti.freeProP.linearIndependent_gradedPowIter_gradedMkZero_of`). -/
-theorem finrank_gradedPowIterSpan [Finite X] (S : Set X) (j : ℕ) :
+theorem finrank_gradedPowIterSpan (S : Set X) [Finite S] (j : ℕ) :
     Module.finrank (ZMod p) (gradedPowIterSpan p X S j) = Nat.card S := by
   classical
-  have := Fintype.ofFinite X
+  have := Fintype.ofFinite S
   rw [gradedPowIterSpan, Set.image_eq_range]
   exact (finrank_span_eq_card ((linearIndependent_gradedPowIter_gradedMkZero_of p X j).comp
     (Subtype.val : S → X) Subtype.val_injective)).trans Nat.card_eq_fintype_card.symm
