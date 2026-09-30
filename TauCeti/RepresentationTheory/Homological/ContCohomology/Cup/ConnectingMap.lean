@@ -45,16 +45,18 @@ Six instances have all three of `p`, `q` and `p + q + 1` at most `2`, so six the
 the low-degree model can state.
 
 The third family moves a connecting map from one variable to the other. Its input is a **pair**
-of short exact sequences `0 → A₁ → A → A₂ → 0` and `0 → B₂ → B → B₁ → 0`, paired into one
-discrete module `C` by `μ : A →+ B →+ C`, `μ₁ : A₁ →+ B₁ →+ C` and `μ₂ : A₂ →+ B₂ →+ C` with
+of short exact sequences `0 → A₁ → A → A₂ → 0` and `0 → B₂ → B → B₁ → 0` of discrete
+`G`-modules, compatibly paired into one topological `G`-module `C` by `μ : A →+ B →+ C`,
+`μ₁ : A₁ →+ B₁ →+ C` and `μ₂ : A₂ →+ B₂ →+ C` with
 
 ```text
 μ (incl a₁) b = μ₁ a₁ (proj b),      μ a (incl b₂) = μ₂ (proj a) b₂,
 ```
 
 so that the sub-object `A₁` is orthogonal to the sub-object `B₂` and pairs with the quotient
-`B₁`, while the quotient `A₂` pairs with the sub-object `B₂`. This is the shape of a short exact
-sequence and its dual sequence under an evaluation pairing. For `x ∈ H^p(G, A₂)` and
+`B₁`, while the quotient `A₂` pairs with the sub-object `B₂`. No nondegeneracy is assumed; the
+motivating instance is a short exact sequence and its dual sequence under an evaluation pairing.
+For `x ∈ H^p(G, A₂)` and
 `y ∈ H^q(G, B₁)` the two connecting maps are adjoint up to the Leibniz sign:
 
 ```text
@@ -77,7 +79,8 @@ exact sequences, the step of Tate's argument that Serre records.
 * `TauCeti.ContCohomology.explicitCup10_explicitDelta0_eq_neg_explicitCup01_explicitDelta0`,
   `explicitCup11_explicitDelta0_eq_neg_explicitCup02_explicitDelta1` and
   `explicitCup20_explicitDelta1_eq_explicitCup11_explicitDelta0`: the three adjointness
-  identities for a pair of dual short exact sequences, in bidegrees `(0,0)`, `(0,1)` and `(1,0)`.
+  identities for a pair of compatibly paired short exact sequences, in bidegrees `(0,0)`, `(0,1)`
+  and `(1,0)`.
 
 ## References
 
@@ -279,13 +282,14 @@ theorem explicitDelta1_explicitCup10_right [ContinuousMul G] (x : H1 G A) (y : H
 
 end SecondVariable
 
-section DualPair
+section CompatiblyPaired
 
-/-! ### A pair of dual short exact sequences
+/-! ### A pair of compatibly paired short exact sequences
 
 The connecting maps of `0 → A₁ → A → A₂ → 0` and of `0 → B₂ → B → B₁ → 0` are adjoint under
-pairings that make `A₁` orthogonal to `B₂`. Every module is discrete here, so the joint
-continuity of each pairing is automatic and is not taken as a hypothesis. -/
+pairings that make `A₁` orthogonal to `B₂`. Every coefficient module of the two sequences is
+discrete here, so the joint continuity of each pairing is automatic and is not taken as a
+hypothesis; the common target `C` is any topological `G`-module. -/
 
 -- As above, the left-hand sides do not determine the second sequence and the other pairings.
 
@@ -320,7 +324,7 @@ private theorem pairing_proj_incl {a : A} {x : A₂} (ha : SA.proj a = x) (b : B
 
 variable [TopologicalSpace G] [ContinuousSMul G A₁] [ContinuousSMul G A] [ContinuousSMul G A₂]
   [ContinuousSMul G B₂] [ContinuousSMul G B] [ContinuousSMul G B₁]
-  [TopologicalSpace C] [DiscreteTopology C] [DistribMulAction G C] [ContinuousSMul G C]
+  [TopologicalSpace C] [IsTopologicalAddGroup C] [DistribMulAction G C] [ContinuousSMul G C]
   (hequiv : ∀ (g : G) (a : A) (b : B), μ (g • a) (g • b) = g • μ a b)
   (hequiv₁ : ∀ (g : G) (a : A₁) (b : B₁), μ₁ (g • a) (g • b) = g • μ₁ a b)
   (hequiv₂ : ∀ (g : G) (a : A₂) (b : B₂), μ₂ (g • a) (g • b) = g • μ₂ a b)
@@ -328,7 +332,7 @@ variable [TopologicalSpace G] [ContinuousSMul G A₁] [ContinuousSMul G A] [Cont
 include hequiv hincl hproj
 
 omit [ContinuousSMul G A₂] [ContinuousSMul G B₁] in
-/-- **`δ⁰` is anti-self-adjoint under the `(1,0)` and `(0,1)` cups.** For invariants `x` of `A₂`
+/-- **The two `δ⁰` are anti-adjoint under the `(1,0)` and `(0,1)` cups.** For invariants `x` of `A₂`
 and `y` of `B₁`, the class `δ⁰ x ⌣ y ∈ H¹(G, C)` is `-(x ⌣ δ⁰ y)`. -/
 theorem explicitCup10_explicitDelta0_eq_neg_explicitCup01_explicitDelta0
     (x : H0 G A₂) (y : H0 G B₁) :
@@ -435,6 +439,6 @@ theorem explicitCup20_explicitDelta1_eq_explicitCup11_explicitDelta0 [Continuous
       AddMonoidHom.add_apply, ← hequiv]
     abel
 
-end DualPair
+end CompatiblyPaired
 
 end TauCeti.ContCohomology
