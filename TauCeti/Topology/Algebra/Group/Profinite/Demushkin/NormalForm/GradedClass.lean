@@ -295,4 +295,39 @@ theorem gradedMk_demushkinWordTwoEven {a f : ℕ} (ha : 2 ∣ a) (hf : 0 < f) (n
   rw [this, gradedMk_mul, gradedMk_mul, gradedMk_mul, gradedMk_pow_mul, gradedMk_pow_mul,
     gradedMk_labuteComm, gradedMk_list_prod_labuteComm, Nat.mul_div_cancel_left b two_pos]
 
+/-- For `n ≥ 2`, `4 ∣ a` and `f ≥ 2`, the `q = 2`, `n` even normal-form word
+`x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` has the `gr_1`-class of the `q ≠ 2` word at
+`q = 2`, that is of `x₁² (x₁, x₂) (x₃, x₄) ⋯ (x_{n-1}, x_n)`: the factors `x₁^a` and `x₃^{2^f}` are
+fourth powers, hence lie in `λ_2`. -/
+theorem gradedMk_demushkinWordTwoEven_eq_gradedMk_demushkinWordNeTwo_two {n : ℕ} (hn : 2 ≤ n)
+    {a f : ℕ} (ha : 4 ∣ a) (hf : 2 ≤ f) (x : ℕ → H) :
+    gradedMk 2 H 1 ⟨demushkinWordTwoEven a f n x,
+        demushkinWordTwoEven_mem_pLowerCentralSeries_one (dvd_trans (Dvd.intro 2 rfl) ha)
+          (zero_lt_two.trans_le hf) n x⟩ =
+      gradedMk 2 H 1 ⟨demushkinWordNeTwo 2 n x,
+        demushkinWordNeTwo_mem_pLowerCentralSeries_one dvd_rfl n x⟩ := by
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  obtain ⟨b, rfl⟩ := ha
+  obtain ⟨g, rfl⟩ : ∃ g, f = g + 2 := ⟨f - 2, by omega⟩
+  obtain ⟨k, hk⟩ : ∃ k, n / 2 = k + 1 := ⟨n / 2 - 1, by omega⟩
+  have ha2 : 2 ∣ 4 * b := ⟨2 * b, by ring⟩
+  have hf0 : 0 < g + 2 := Nat.succ_pos _
+  rw [gradedMk_demushkinWordTwoEven ha2 hf0,
+    gradedMk_demushkinWordNeTwo dvd_rfl, hk, Finset.sum_range_succ', Nat.add_sub_cancel,
+    Nat.div_self two_pos, one_nsmul, ← Nat.cast_smul_eq_nsmul (ZMod 2) (1 + 4 * b / 2),
+    ← Nat.cast_smul_eq_nsmul (ZMod 2) (2 ^ (g + 2 - 1))]
+  have h1 : ((1 + 4 * b / 2 : ℕ) : ZMod 2) = 1 := by
+    rw [show 4 * b / 2 = 2 * b by omega, Nat.cast_add, Nat.cast_one, Nat.cast_mul,
+      ZMod.natCast_self, zero_mul, add_zero]
+  have h2 : ((2 ^ (g + 2 - 1) : ℕ) : ZMod 2) = 0 := by
+    rw [show g + 2 - 1 = g + 1 by omega, pow_succ, Nat.cast_mul, ZMod.natCast_self, mul_zero]
+  rw [h1, h2, one_smul, zero_smul]
+  have h3 : ∀ i, gradedBracket 2 H 0 0 (gradedMkZero 2 H (x (2 * (i + 1))))
+      (gradedMkZero 2 H (x (2 * (i + 1) + 1))) =
+        gradedBracket 2 H 0 0 (gradedMkZero 2 H (x (2 * i + 2)))
+          (gradedMkZero 2 H (x (2 * i + 3))) :=
+    fun i ↦ by ring_nf
+  simp only [h3, mul_zero, zero_add, add_zero]
+  abel
+
 end TauCeti
