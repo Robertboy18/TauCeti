@@ -41,9 +41,12 @@ the exponential decay of a cusp form there, which beats the polynomial growth of
 
 ## Main results
 
-* `TauCeti.ModularSymbols.periodIntegrand_add`, `TauCeti.ModularSymbols.periodIntegrand_smul`:
-  the integrand is `R`-linear in the binary form, so that the periods extend linearly to the
-  module of modular symbols.
+* `TauCeti.ModularSymbols.periodIntegrand_add_left`,
+  `TauCeti.ModularSymbols.periodIntegrand_smul_left`: the integrand is `ℂ`-linear in the
+  function, so that the periods define a linear map on cusp forms.
+* `TauCeti.ModularSymbols.periodIntegrand_add_right`,
+  `TauCeti.ModularSymbols.periodIntegrand_smul_right`: the integrand is `R`-linear in the binary
+  form, so that the periods extend linearly to the module of modular symbols.
 * `TauCeti.ModularSymbols.periodIntegrand_slash_apply`: the weight-`2` slash of the integrand by a
   rational matrix `g` of positive determinant is
   `(det g)⁻ʷ · (f ∣[k] g)(τ) · P(aτ + b, cτ + d)`.
@@ -84,30 +87,52 @@ are the periods of `f`. -/
 noncomputable def periodIntegrand (f : ℍ → ℂ) (P : homogeneousSubmodule (Fin 2) R w) : ℍ → ℂ :=
   fun z ↦ f z * aeval ![(z : ℂ), 1] (P : MvPolynomial (Fin 2) R)
 
+@[simp]
 theorem periodIntegrand_apply (f : ℍ → ℂ) (P : homogeneousSubmodule (Fin 2) R w) (z : ℍ) :
     periodIntegrand f P z = f z * aeval ![(z : ℂ), 1] (P : MvPolynomial (Fin 2) R) := by
   rw [periodIntegrand]
 
+/-- The period integrand of the zero function vanishes. -/
+@[simp]
+theorem periodIntegrand_zero_left (P : homogeneousSubmodule (Fin 2) R w) :
+    periodIntegrand (0 : ℍ → ℂ) P = 0 := by
+  funext z
+  simp
+
+/-- The period integrand is additive in the function. -/
+@[simp]
+theorem periodIntegrand_add_left (f g : ℍ → ℂ) (P : homogeneousSubmodule (Fin 2) R w) :
+    periodIntegrand (f + g) P = periodIntegrand f P + periodIntegrand g P := by
+  funext z
+  simp [add_mul]
+
+/-- The period integrand is `ℂ`-linear in the function. -/
+@[simp]
+theorem periodIntegrand_smul_left (c : ℂ) (f : ℍ → ℂ) (P : homogeneousSubmodule (Fin 2) R w) :
+    periodIntegrand (c • f) P = c • periodIntegrand f P := by
+  funext z
+  simp [mul_assoc]
+
 /-- The period integrand against the zero form vanishes. -/
 @[simp]
-theorem periodIntegrand_zero (f : ℍ → ℂ) :
+theorem periodIntegrand_zero_right (f : ℍ → ℂ) :
     periodIntegrand f (0 : homogeneousSubmodule (Fin 2) R w) = 0 := by
   funext z
-  simp [periodIntegrand]
+  simp
 
 /-- The period integrand is additive in the binary form. -/
 @[simp]
-theorem periodIntegrand_add (f : ℍ → ℂ) (P Q : homogeneousSubmodule (Fin 2) R w) :
+theorem periodIntegrand_add_right (f : ℍ → ℂ) (P Q : homogeneousSubmodule (Fin 2) R w) :
     periodIntegrand f (P + Q) = periodIntegrand f P + periodIntegrand f Q := by
   funext z
-  simp [periodIntegrand, mul_add]
+  simp [mul_add]
 
 /-- The period integrand is `R`-linear in the binary form. -/
 @[simp]
-theorem periodIntegrand_smul (f : ℍ → ℂ) (r : R) (P : homogeneousSubmodule (Fin 2) R w) :
+theorem periodIntegrand_smul_right (f : ℍ → ℂ) (r : R) (P : homogeneousSubmodule (Fin 2) R w) :
     periodIntegrand f (r • P) = r • periodIntegrand f P := by
   funext z
-  simp [periodIntegrand, Algebra.smul_def, mul_left_comm]
+  simp [Algebra.smul_def, mul_left_comm]
 
 /-! ### The transformation law -/
 
