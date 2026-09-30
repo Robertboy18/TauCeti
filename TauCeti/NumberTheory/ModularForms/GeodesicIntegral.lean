@@ -26,9 +26,11 @@ the **geodesic integral** `TauCeti.geodesicIntegral g F` and proves that it is i
 oriented geodesic: it depends only on the pair of endpoints `(g • 0, g • ∞)`, changes sign when
 the endpoints are swapped, and transforms under a further matrix by slashing the integrand. Both
 endpoints are improper, and the integral is a Bochner integral, so it vanishes when the integrand
-is not integrable; the convergence criterion `integrableOn_resToImagAxis_Ioi_of_slash_S` reduces
-integrability near the finite end `g • 0` to integrability near `i∞` of the reflected integrand
-`F ∣[2] (g S)`, so that both ends are handled by decay at `i∞`.
+is not integrable; the convergence criterion
+`UpperHalfPlane.integrableOn_resToImagAxis_Ioi_of_slash_S` (in
+`TauCeti.NumberTheory.ModularForms.ResToImagAxis`) reduces integrability near the finite end
+`g • 0` to integrability near `i∞` of the reflected integrand `F ∣[2] (g S)`, so that both ends are
+handled by decay at `i∞`.
 
 The definition is total in `g`, following the convention of the rational slash action itself
 (`TauCeti.NumberTheory.ModularForms.SlashActionRat`) and of the Hecke modules, which work in
@@ -59,8 +61,6 @@ symbols, whose integrand `f(z) P(z, 1)` and convergence are treated in
   `∫_{g • ∞}^{g • 0} F(z) dz = -∫_{g • 0}^{g • ∞} F(z) dz`.
 * `TauCeti.geodesicIntegral_add`, `TauCeti.geodesicIntegral_smul`: linearity in the integrand,
   for integrable integrands.
-* `TauCeti.integrableOn_resToImagAxis_Ioi_of_slash_S`: an integrand integrable near `i∞` whose
-  `S`-reflection is also integrable near `i∞` is integrable along the whole imaginary axis.
 
 ## References
 
@@ -207,46 +207,6 @@ theorem geodesicIntegral_mul_S (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
     push_cast
     ring
   rw [(setIntegral_congr_fun measurableSet_Ioi key).trans hsub, integral_neg, mul_neg]
-
-/-! ### Convergence at both ends -/
-
-/-- **Convergence at the finite end from convergence at `i∞` of the reflection.** If the
-restriction of `G` to the imaginary axis is integrable near `i∞`, and so is that of the weight-`2`
-reflection `G ∣[2] S`, then the restriction of `G` is integrable on the whole positive axis: the
-substitution `t ↦ 1 / t` carries the tail of `G ∣[2] S` onto the initial segment of `G`. -/
-theorem integrableOn_resToImagAxis_Ioi_of_slash_S {G : ℍ → ℂ}
-    (h : IntegrableOn (resToImagAxis G) (Ici 1))
-    (hS : IntegrableOn (resToImagAxis (G ∣[(2 : ℤ)] S)) (Ici 1)) :
-    IntegrableOn (resToImagAxis G) (Ioi 0) := by
-  rw [← Ioc_union_Ioi_eq_Ioi zero_le_one]
-  refine IntegrableOn.union ?_ (h.mono_set Ioi_subset_Ici_self)
-  -- the tail of the reflection, as a function on the whole axis
-  have hψ : IntegrableOn ((Ici 1).indicator (resToImagAxis (G ∣[(2 : ℤ)] S))) (Ioi 0) :=
-    ((integrable_indicator_iff measurableSet_Ici).mpr hS).integrableOn
-  have hsub := (integrableOn_Ioi_comp_rpow_iff _ (by norm_num : (-1 : ℝ) ≠ 0)).mpr hψ
-  simp only [Complex.real_smul] at hsub
-  -- under `t ↦ 1 / t`, that tail becomes minus the initial segment of `G`
-  have key : EqOn (fun x : ℝ ↦ ((|(-1 : ℝ)| * x ^ ((-1 : ℝ) - 1) : ℝ) : ℂ) *
-      (Ici 1).indicator (resToImagAxis (G ∣[(2 : ℤ)] S)) (x ^ (-1 : ℝ)))
-      (-(Ioc 0 1).indicator (resToImagAxis G)) (Ioi 0) := by
-    intro x hx
-    have hx : (0 : ℝ) < x := hx
-    have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
-    -- the Jacobian `|p| x ^ (p - 1)` of `x ↦ x ^ p` at `p = -1` is `x⁻²`
-    have hexp : (-1 : ℝ) - 1 = -2 := by norm_num
-    simp only [Pi.neg_apply, indicator_apply, mem_Ici, mem_Ioc, Real.rpow_neg_one,
-      one_le_inv₀ hx, hx, true_and]
-    rw [hexp, Real.rpow_neg hx.le, Real.rpow_two, abs_neg, abs_one, one_mul]
-    split_ifs with hx1
-    · rw [resToImagAxis_slash_two_S G (inv_pos.mpr hx), inv_inv]
-      push_cast
-      field_simp
-    · simp
-  have hneg := (hsub.congr_fun key measurableSet_Ioi).neg
-  rw [neg_neg] at hneg
-  have := (integrable_indicator_iff measurableSet_Ioc).mp hneg
-  rwa [IntegrableOn, Measure.restrict_restrict measurableSet_Ioc,
-    inter_eq_left.mpr Ioc_subset_Ioi_self] at this
 
 end TauCeti
 

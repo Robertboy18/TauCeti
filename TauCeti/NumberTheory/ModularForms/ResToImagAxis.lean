@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 module
 
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 public import Mathlib.NumberTheory.ModularForms.Identities
 public import Mathlib.NumberTheory.ModularForms.NormTrace
@@ -31,6 +32,9 @@ integrals of cusp forms along geodesics between cusps.
   `i ^ (-k) t ^ (-k)` times the restriction of `F` at `1 / t`, and
   `UpperHalfPlane.resToImagAxis_slash_two_S`: in weight `2` this is `-t⁻²` times the restriction
   of `F` at `1 / t`.
+* `UpperHalfPlane.integrableOn_resToImagAxis_Ioi_of_slash_S`: a function whose restriction is
+  integrable near `i∞` and whose weight-`2` `S`-reflection is also integrable near `i∞` has
+  restriction integrable along the whole positive imaginary axis.
 * `UpperHalfPlane.resToImagAxis_slash_two_of_diagonal`: in weight `2`, the restriction of
   `F ∣[2] d` for a positive diagonal rational matrix `d = diag(a, b)` at `t` is `r` times the
   restriction of `F` at `r t`, where `r = a / b`.
@@ -84,6 +88,45 @@ theorem resToImagAxis_slash_two_S (F : ℍ → ℂ) {t : ℝ} (ht : 0 < t) :
     norm_num
   rw [hI, zpow_neg, zpow_two, sq]
   ring
+
+open MeasureTheory Set in
+/-- **Convergence at the finite end from convergence at `i∞` of the reflection.** If the
+restriction of `G` to the imaginary axis is integrable near `i∞`, and so is that of the weight-`2`
+reflection `G ∣[2] S`, then the restriction of `G` is integrable on the whole positive axis: the
+substitution `t ↦ 1 / t` carries the tail of `G ∣[2] S` onto the initial segment of `G`. -/
+theorem integrableOn_resToImagAxis_Ioi_of_slash_S {G : ℍ → ℂ}
+    (h : IntegrableOn (resToImagAxis G) (Ici 1))
+    (hS : IntegrableOn (resToImagAxis (G ∣[(2 : ℤ)] S)) (Ici 1)) :
+    IntegrableOn (resToImagAxis G) (Ioi 0) := by
+  rw [← Ioc_union_Ioi_eq_Ioi zero_le_one]
+  refine IntegrableOn.union ?_ (h.mono_set Ioi_subset_Ici_self)
+  -- the tail of the reflection, as a function on the whole axis
+  have hψ : IntegrableOn ((Ici 1).indicator (resToImagAxis (G ∣[(2 : ℤ)] S))) (Ioi 0) :=
+    ((integrable_indicator_iff measurableSet_Ici).mpr hS).integrableOn
+  have hsub := (integrableOn_Ioi_comp_rpow_iff _ (by norm_num : (-1 : ℝ) ≠ 0)).mpr hψ
+  simp only [Complex.real_smul] at hsub
+  -- under `t ↦ 1 / t`, that tail becomes minus the initial segment of `G`
+  have key : EqOn (fun x : ℝ ↦ ((|(-1 : ℝ)| * x ^ ((-1 : ℝ) - 1) : ℝ) : ℂ) *
+      (Ici 1).indicator (resToImagAxis (G ∣[(2 : ℤ)] S)) (x ^ (-1 : ℝ)))
+      (-(Ioc 0 1).indicator (resToImagAxis G)) (Ioi 0) := by
+    intro x hx
+    have hx : (0 : ℝ) < x := hx
+    have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
+    -- the Jacobian `|p| x ^ (p - 1)` of `x ↦ x ^ p` at `p = -1` is `x⁻²`
+    have hexp : (-1 : ℝ) - 1 = -2 := by norm_num
+    simp only [Pi.neg_apply, indicator_apply, mem_Ici, mem_Ioc, Real.rpow_neg_one,
+      one_le_inv₀ hx, hx, true_and]
+    rw [hexp, Real.rpow_neg hx.le, Real.rpow_two, abs_neg, abs_one, one_mul]
+    split_ifs with hx1
+    · rw [resToImagAxis_slash_two_S G (inv_pos.mpr hx), inv_inv]
+      push_cast
+      field_simp
+    · simp
+  have hneg := (hsub.congr_fun key measurableSet_Ioi).neg
+  rw [neg_neg] at hneg
+  have := (integrable_indicator_iff measurableSet_Ioc).mp hneg
+  rwa [IntegrableOn, Measure.restrict_restrict measurableSet_Ioc,
+    inter_eq_left.mpr Ioc_subset_Ioi_self] at this
 
 /-- **A positive diagonal matrix rescales the imaginary axis**: for `d = diag(a, b) ∈ GL(2, ℚ)`
 with `ab > 0`, the weight-`2` slash by `d` restricts to the axis as `(F ∣[2] d) (i t) = r F (i r t)`
