@@ -6,12 +6,9 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Kernel.Approximation
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.DegreeOneForm
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Character.Basic
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Criterion
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Equiv
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.CharacterImage
-public import TauCeti.NumberTheory.Padics.GeneratedClosedSubgroups
 
 /-!
 # Labute's normal form for the dyadic Demushkin groups of even rank with twisted image
