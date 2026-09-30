@@ -67,6 +67,10 @@ ring or pair of definition. -/
 def isAffinoid : ObjectProperty PreAdicSpace.{u} :=
   isAffinoidModel.isoClosure
 
+/-- Being affinoid is invariant under isomorphism in `𝒱^pre`. -/
+instance : isAffinoid.{u}.IsClosedUnderIsomorphisms :=
+  inferInstanceAs isAffinoidModel.isoClosure.IsClosedUnderIsomorphisms
+
 /-- Characterisation of an affinoid pre-adic space by an affinoid presentation and an
 isomorphism in `𝒱^pre`. -/
 theorem isAffinoid_iff (X : PreAdicSpace.{u}) : isAffinoid X ↔

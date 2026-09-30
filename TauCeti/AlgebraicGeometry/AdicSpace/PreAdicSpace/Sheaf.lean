@@ -35,6 +35,10 @@ not merely its underlying presheaf of sets or rings. -/
 def PreAdicSpace.isSheafy : ObjectProperty PreAdicSpace.{u} :=
   fun X ↦ X.toPresheafedSpace.presheaf.IsSheaf
 
+theorem PreAdicSpace.isSheafy_iff (X : PreAdicSpace.{u}) :
+    PreAdicSpace.isSheafy X ↔ X.toPresheafedSpace.presheaf.IsSheaf :=
+  Iff.rfl
+
 /-- The category of pre-adic spaces with sheaf structure presheaves. It is the full
 subcategory of pre-adic spaces cut out by the sheaf condition. -/
 abbrev SheafyPreAdicSpace : Type (u + 1) :=

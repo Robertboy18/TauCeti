@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.Category.Ring.Instances
+public import Mathlib.Geometry.RingedSpace.OpenImmersion
 public import TauCeti.AlgebraicGeometry.AdicSpace.PreAdicSpace.Hom
 
 /-!
@@ -22,7 +23,11 @@ here: an adic space will be a pre-adic space admitting an open cover whose membe
 restricted structure, are isomorphic in `𝒱^pre` to affinoid pre-adic spaces. A general
 `PreAdicSpace` carries no such cover. The canonical morphism is a monomorphism whose stalk maps
 are isomorphisms, and the restriction of `X` to the whole space is isomorphic to `X`, because
-the forgetful functor to presheafed spaces reflects isomorphisms.
+the forgetful functor to presheafed spaces reflects isomorphisms. An isomorphism `X ≅ Y` carries
+the restriction of `X` to an open `U` isomorphically onto the restriction of `Y` to the image of
+`U`: the two open immersions into `Y` have the same range, so Mathlib's
+`PresheafedSpace.IsOpenImmersion.isoOfRangeEq` identifies the underlying presheafed spaces, and the
+identification is a morphism of pre-adic spaces because it factors one through the other.
 
 ## Main definitions
 
@@ -32,6 +37,7 @@ the forgetful functor to presheafed spaces reflects isomorphisms.
   `X` at `f x`.
 * `TauCeti.PreAdicSpace.restrictTopIso`: the restriction to the whole space is isomorphic to
   `X`.
+* `TauCeti.PreAdicSpace.restrictIso`: the transport of a restriction along an isomorphism.
 
 The design follows `AlgebraicGeometry.LocallyRingedSpace.restrict`.
 
@@ -195,6 +201,94 @@ theorem restrictTopIso_hom : X.restrictTopIso.hom = X.ofRestrict (Opens.isOpenEm
   rfl
 
 end Restrict
+
+section RestrictIso
+
+variable {X Y : PreAdicSpace.{u}} (e : X ≅ Y) (U : Opens X)
+
+-- The image of an open of `X` under an isomorphism `e : X ≅ Y` is the preimage under the
+-- inverse; it is the range of the restriction of `X` to `U` followed by `e`.
+private theorem range_ofRestrict_comp_base :
+    Set.range (X.toPresheafedSpace.ofRestrict U.isOpenEmbedding ≫ e.hom.toHom).base =
+      Set.range (Y.toPresheafedSpace.ofRestrict
+        ((Opens.map e.inv.base).obj U).isOpenEmbedding).base := by
+  have h₁ : Function.LeftInverse e.inv.base e.hom.base := fun x ↦
+    congrArg (fun φ : X ⟶ X => φ.base x) e.hom_inv_id
+  have h₂ : Function.RightInverse e.inv.base e.hom.base := fun y ↦
+    congrArg (fun φ : Y ⟶ Y => φ.base y) e.inv_hom_id
+  -- both sides are ranges of inclusions of opens, composed with `e` on the left
+  change Set.range (e.hom.base ∘ Opens.inclusion' U) = Set.range (Opens.inclusion' _)
+  rw [Set.range_comp, Opens.set_range_inclusion', Opens.set_range_inclusion', Opens.map_coe,
+    Set.image_eq_preimage_of_inverse h₁ h₂]
+
+/-- The underlying isomorphism of presheafed spaces of `restrictIso`: the two open immersions
+`X.restrict U ⟶ X ⟶ Y` and `Y.restrict e(U) ⟶ Y` have the same range. -/
+private noncomputable def restrictIsoPresheafedSpace :
+    X.toPresheafedSpace.restrict U.isOpenEmbedding ≅
+      Y.toPresheafedSpace.restrict ((Opens.map e.inv.base).obj U).isOpenEmbedding :=
+  haveI : IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) e.hom.toHom :=
+    (forgetToPresheafedSpace.mapIso e).isIso_hom
+  PresheafedSpace.IsOpenImmersion.isoOfRangeEq
+    (X.toPresheafedSpace.ofRestrict U.isOpenEmbedding ≫ e.hom.toHom)
+    (Y.toPresheafedSpace.ofRestrict ((Opens.map e.inv.base).obj U).isOpenEmbedding)
+    (range_ofRestrict_comp_base e U)
+
+private theorem restrictIsoPresheafedSpace_hom_ofRestrict :
+    (restrictIsoPresheafedSpace e U).hom ≫
+        Y.toPresheafedSpace.ofRestrict ((Opens.map e.inv.base).obj U).isOpenEmbedding =
+      X.toPresheafedSpace.ofRestrict U.isOpenEmbedding ≫ e.hom.toHom :=
+  haveI : IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) e.hom.toHom :=
+    (forgetToPresheafedSpace.mapIso e).isIso_hom
+  PresheafedSpace.IsOpenImmersion.lift_fac _ _ (le_of_eq (range_ofRestrict_comp_base e U))
+
+-- The isomorphism of presheafed spaces factors `X.ofRestrict ≫ e.hom` through `Y.ofRestrict`,
+-- whose stalk maps are isomorphisms, so it is a morphism of pre-adic spaces.
+private noncomputable def restrictHom :
+    X.restrict U.isOpenEmbedding ⟶ Y.restrict ((Opens.map e.inv.base).obj U).isOpenEmbedding :=
+  Hom.ofFac (X.ofRestrict U.isOpenEmbedding ≫ e.hom)
+    (Y.ofRestrict ((Opens.map e.inv.base).obj U).isOpenEmbedding)
+    (restrictIsoPresheafedSpace e U).hom (restrictIsoPresheafedSpace_hom_ofRestrict e U)
+
+private theorem restrictHom_toHom :
+    (restrictHom e U).toHom = (restrictIsoPresheafedSpace e U).hom :=
+  Hom.ofFac_toHom _ _ _ _
+
+/-- An isomorphism `e : X ≅ Y` of pre-adic spaces restricts to an isomorphism from the
+restriction of `X` to an open `U` onto the restriction of `Y` to the image of `U`. It is the
+unique morphism compatible with the canonical morphisms from the restrictions
+(`restrictIso_hom_ofRestrict`). -/
+noncomputable def restrictIso :
+    X.restrict U.isOpenEmbedding ≅ Y.restrict ((Opens.map e.inv.base).obj U).isOpenEmbedding :=
+  haveI : IsIso (forgetToPresheafedSpace.map (restrictHom e U)) := by
+    -- the objects of the isomorphism are the presheafed spaces of the restrictions only up to
+    -- unfolding the forgetful functor, so the instance is supplied as a term
+    rw [forgetToPresheafedSpace_map, restrictHom_toHom]
+    exact (restrictIsoPresheafedSpace e U).isIso_hom
+  haveI := isIso_of_reflects_iso (restrictHom e U) forgetToPresheafedSpace
+  asIso (restrictHom e U)
+
+/-- The transported restriction composed with the canonical morphism from the restriction of
+`Y` is the canonical morphism from the restriction of `X` followed by `e`. -/
+@[reassoc (attr := simp)]
+theorem restrictIso_hom_ofRestrict :
+    (restrictIso e U).hom ≫ Y.ofRestrict ((Opens.map e.inv.base).obj U).isOpenEmbedding =
+      X.ofRestrict U.isOpenEmbedding ≫ e.hom := by
+  apply Hom.ext'
+  have h : (restrictIso e U).hom.toHom = (restrictIsoPresheafedSpace e U).hom :=
+    restrictHom_toHom e U
+  rw [comp_toHom, comp_toHom, h]
+  exact restrictIsoPresheafedSpace_hom_ofRestrict e U
+
+/-- The inverse of the transported restriction composed with the canonical morphism from the
+restriction of `X` is the canonical morphism from the restriction of `Y` followed by `e⁻¹`. -/
+@[reassoc (attr := simp)]
+theorem restrictIso_inv_ofRestrict :
+    (restrictIso e U).inv ≫ X.ofRestrict U.isOpenEmbedding =
+      Y.ofRestrict ((Opens.map e.inv.base).obj U).isOpenEmbedding ≫ e.inv := by
+  rw [Iso.inv_comp_eq, ← Category.assoc, restrictIso_hom_ofRestrict, Category.assoc,
+    e.hom_inv_id, Category.comp_id]
+
+end RestrictIso
 
 end PreAdicSpace
 
