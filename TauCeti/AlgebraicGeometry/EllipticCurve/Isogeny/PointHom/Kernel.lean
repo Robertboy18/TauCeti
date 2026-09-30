@@ -9,7 +9,6 @@ public import TauCeti.AlgebraicGeometry.EllipticCurve.Isogeny.Kernel
 public import TauCeti.AlgebraicGeometry.EllipticCurve.Isogeny.PointHom.Fiber
 import TauCeti.AlgebraicGeometry.EllipticCurve.Affine.FunctionField.Translation.Place
 import TauCeti.AlgebraicGeometry.EllipticCurve.Isogeny.MulByInt.IsSepClosed
-import TauCeti.FieldTheory.FunctionField.Place.Extension.Galois
 import TauCeti.FieldTheory.FunctionField.Place.Zeros
 
 /-!
