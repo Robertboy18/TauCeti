@@ -7,11 +7,12 @@ module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.ClosedSubgroup
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.FiniteIndex
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Shapiro.AllDegrees
 public import TauCeti.Topology.Algebra.Group.OpenSubgroup.FiniteIndex
 public import TauCeti.Topology.Algebra.GroupAction.QuotientAddGroup
 
 /-!
-# Right exactness of `Hⁿ` on finite `𝔽_p[G]`-modules kills `Hⁿ⁺¹`
+# Right exactness of `Hⁿ` on finite discrete `G`-modules killed by `p` kills `Hⁿ⁺¹`
 
 Let `G` be a profinite group, `p` a natural number and `n` a degree. Suppose that the functor
 `Hⁿ(G, -)` is right exact on the finite discrete `G`-modules killed by `p`: for every short exact
@@ -59,10 +60,10 @@ universe u
 variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   [CompactSpace G] [TotallyDisconnectedSpace G]
 
-/-- **Right exactness of `Hⁿ` on finite `𝔽_p[G]`-modules kills `Hⁿ⁺¹`.** Let `G` be a profinite
-group. If for every short exact sequence `0 → A → B → C → 0` of finite discrete `G`-modules killed
-by `p` the map `Hⁿ(G, B) → Hⁿ(G, C)` is surjective, then `Hⁿ⁺¹(G, M)` vanishes for every finite
-discrete `G`-module `M` killed by `p`. -/
+/-- **Right exactness of `Hⁿ` on finite discrete `G`-modules killed by `p` kills `Hⁿ⁺¹`.** Let `G`
+be a profinite group and `p` a natural number. If for every short exact sequence `0 → A → B → C → 0`
+of finite discrete `G`-modules killed by `p` the map `Hⁿ(G, B) → Hⁿ(G, C)` is surjective, then
+`Hⁿ⁺¹(G, M)` vanishes for every finite discrete `G`-module `M` killed by `p`. -/
 theorem subsingleton_continuousCohomology_succ_of_forall_coeffMap_proj_surjective {n : ℕ}
     (h : ∀ (A B C : Type u) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
       [DistribMulAction G A] [ContinuousSMul G A] [Finite A]

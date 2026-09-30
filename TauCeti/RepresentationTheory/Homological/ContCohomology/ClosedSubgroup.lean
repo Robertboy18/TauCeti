@@ -7,7 +7,7 @@ module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.CompactDiscrete
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Functoriality
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Shapiro.AllDegrees
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialGroup
 public import TauCeti.Topology.Algebra.Group.Profinite.Basic
 public import TauCeti.Topology.Separation.Profinite
 
@@ -262,7 +262,7 @@ theorem exists_openSubgroup_le_res_eq_zero (hX : IsSmoothDiscrete k X) {H : Subg
   rw [res_def]
   refine h.trans ((KV.homologyπ_eq_zero_iff n hm).2 ⟨φV.f m Wc, KV.iCycles_injective n ?_⟩)
   refine ((KV.iCycles_toCycles_apply m _).trans h₂).trans (Eq.trans ?_ h₁.symm)
-  calc φV.f n (K.d m n Wc) = φV.f n (F + K.d m n Wc) := by rw [_root_.map_add, hFV, zero_add]
+  calc φV.f n (K.d m n Wc) = φV.f n (F + K.d m n Wc) := by rw [map_add, hFV, zero_add]
     _ = φV.f n (K.iCycles n z) := by rw [hFdef, sub_add_cancel]
 
 /-- **Every class of positive degree dies on some open subgroup.** For a profinite group `G` and a
@@ -273,11 +273,7 @@ theorem exists_openSubgroup_res_eq_zero (M : Type v) [AddCommGroup M] [Topologic
     [DiscreteTopology M] [DistribMulAction G M] [ContinuousSMul G M]
     (x : continuousCohomology (n + 1) (ofDiscreteModule ℤ G M)) :
     ∃ V : OpenSubgroup G, (res (V : Subgroup G) (ofDiscreteModule ℤ G M) (n + 1)).hom x = 0 := by
-  -- the restriction of the canonical object to the trivial subgroup is the canonical object over
-  -- the trivial subgroup, whose positive-degree cohomology vanishes
-  have : Subsingleton (continuousCohomology (n + 1)
-      (TopRep.res ((⊥ : Subgroup G).subtype : (⊥ : Subgroup G) →* G) (ofDiscreteModule ℤ G M))) :=
-    subsingleton_continuousCohomology_bot_succ M n
+  -- the trivial subgroup is a subsingleton, so its positive-degree cohomology vanishes
   obtain ⟨V, -, hV⟩ := exists_openSubgroup_le_res_eq_zero (ofDiscreteModule_isSmoothDiscrete ℤ G M)
     (H := ⊥) (Subgroup.coe_bot (G := G) ▸ isClosed_singleton) (x := x) (Subsingleton.elim _ _)
   exact ⟨V, hV⟩
