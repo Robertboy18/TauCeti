@@ -30,7 +30,7 @@ completed algebra.
 
 Bounding the cohomological degree is what makes the completion a *graded* algebra in the
 direct-sum sense.  It lies inside the completion `TauCeti.gradedCompletion 𝒜` of the ungraded
-algebra along the Adams grading, which has no such bound, and the two are not interchanged.
+algebra along the Adams grading, which imposes no such bound, so the inclusion can be strict.
 
 The two gradings are used through two compatibility conditions, `SetLike.IsHomogeneous 𝒜 (𝒞 p)`
 and `SetLike.IsHomogeneous 𝒞 (𝒜 n)`: the components for one grading of an element homogeneous
@@ -166,8 +166,8 @@ theorem adamsCompletionPiece_le_adamsCompletion (p : ℤ) :
     (mem_adamsCompletion_iff_mem_iSup 𝒜 𝒞).2 (Submodule.mem_iSup_of_mem p hf)
 
 /-- **The Adams completion lies in the completion of the ungraded algebra along the Adams
-grading.**  The two differ: the latter has no bound on the cohomological degrees of the
-coefficients. -/
+grading.**  The ungraded completion imposes no uniform bound on the cohomological degrees of the
+coefficients, so the inclusion can be strict. -/
 theorem adamsCompletion_le_gradedCompletion : adamsCompletion 𝒜 𝒞 ≤ gradedCompletion 𝒜 :=
   fun _ hf =>
     Submodule.iSup_induction _ (motive := fun f => f ∈ gradedCompletion 𝒜)
@@ -346,14 +346,18 @@ theorem isDGAlgebra_adamsCompletionDifferential :
       Subalgebra.coe_zero, map_zero]
   leibniz {p f} hf g := by
     have hf' := (mem_adamsCompletionGrading_iff 𝒜 𝒞).1 hf
-    apply Subtype.ext
-    ext n
-    rw [coeff_adamsCompletionDifferential, Subalgebra.coe_mul, coeff_mul, map_sum,
-      Finset.sum_congr rfl fun ij _ => h.leibniz (hf' ij.1).2 _, Finset.sum_add_distrib,
-      ← Finset.smul_sum, Subalgebra.coe_add, map_add, Subalgebra.coe_mul, coeff_mul,
-      Subalgebra.coe_smul, Units.smul_def, Units.smul_def, map_zsmul, Subalgebra.coe_mul,
-      coeff_mul]
-    simp only [coeff_adamsCompletionDifferential]
+    -- the Leibniz rule for each coefficient of the Cauchy product, as an identity in `A`
+    have key (n : ℕ) : d (coeff n ((f : PowerSeries A) * (g : PowerSeries A))) =
+        coeff n ((adamsCompletionDifferential 𝒜 𝒞 h hd f : PowerSeries A) * (g : PowerSeries A)) +
+          p.negOnePow • coeff n ((f : PowerSeries A) *
+            (adamsCompletionDifferential 𝒜 𝒞 h hd g : PowerSeries A)) := by
+      simp only [coeff_mul, map_sum, coeff_adamsCompletionDifferential, Finset.smul_sum,
+        ← Finset.sum_add_distrib]
+      exact Finset.sum_congr rfl fun ij _ => h.leibniz (hf' ij.1).2 _
+    -- the identity in the completion is the coefficientwise one after unfolding the coercions
+    refine Subtype.ext (PowerSeries.ext fun n => ?_)
+    simpa only [coeff_adamsCompletionDifferential, Subalgebra.coe_add, Subalgebra.coe_mul,
+      Subalgebra.coe_smul, Units.smul_def, map_add, map_zsmul] using key n
 
 /-! ### The comparison morphism -/
 
