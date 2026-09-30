@@ -289,7 +289,9 @@ section CompatiblyPaired
 The connecting maps of `0 → A₁ → A → A₂ → 0` and of `0 → B₂ → B → B₁ → 0` are adjoint under
 pairings that make `A₁` orthogonal to `B₂`. Every coefficient module of the two sequences is
 discrete here, so the joint continuity of each pairing is automatic and is not taken as a
-hypothesis; the common target `C` is any topological `G`-module. -/
+hypothesis, and the equivariance of `μ₁` and `μ₂` follows from that of `μ` through the two
+compatibilities, so only `μ` is assumed equivariant; the common target `C` is any topological
+`G`-module. -/
 
 -- As above, the left-hand sides do not determine the second sequence and the other pairings.
 
@@ -322,12 +324,26 @@ private theorem pairing_proj_incl {a : A} {x : A₂} (ha : SA.proj a = x) (b : B
     μ₂ x b = μ a (SB.incl b) := by
   rw [hproj, ha]
 
+variable [DistribMulAction G C]
+  (hequiv : ∀ (g : G) (a : A) (b : B), μ (g • a) (g • b) = g • μ a b)
+
+include hequiv hincl in
+/-- **The pairing of the sub-object `A₁` with the quotient `B₁` is equivariant.** Lift `b` to
+`B` and read `μ₁` through `μ` on `SA.incl a`. -/
+theorem equivariant_of_incl (g : G) (a : A₁) (b : B₁) : μ₁ (g • a) (g • b) = g • μ₁ a b := by
+  obtain ⟨b, rfl⟩ := SB.proj_surjective b
+  rw [← SB.proj_equivariant, ← hincl, ← hincl, SA.incl_equivariant, hequiv]
+
+include hequiv hproj in
+/-- **The pairing of the quotient `A₂` with the sub-object `B₂` is equivariant.** Lift `a` to
+`A` and read `μ₂` through `μ` on `SB.incl b`. -/
+theorem equivariant_of_proj (g : G) (a : A₂) (b : B₂) : μ₂ (g • a) (g • b) = g • μ₂ a b := by
+  obtain ⟨a, rfl⟩ := SA.proj_surjective a
+  rw [← SA.proj_equivariant, ← hproj, ← hproj, SB.incl_equivariant, hequiv]
+
 variable [TopologicalSpace G] [ContinuousSMul G A₁] [ContinuousSMul G A] [ContinuousSMul G A₂]
   [ContinuousSMul G B₂] [ContinuousSMul G B] [ContinuousSMul G B₁]
-  [TopologicalSpace C] [IsTopologicalAddGroup C] [DistribMulAction G C] [ContinuousSMul G C]
-  (hequiv : ∀ (g : G) (a : A) (b : B), μ (g • a) (g • b) = g • μ a b)
-  (hequiv₁ : ∀ (g : G) (a : A₁) (b : B₁), μ₁ (g • a) (g • b) = g • μ₁ a b)
-  (hequiv₂ : ∀ (g : G) (a : A₂) (b : B₂), μ₂ (g • a) (g • b) = g • μ₂ a b)
+  [TopologicalSpace C] [IsTopologicalAddGroup C] [ContinuousSMul G C]
 
 include hequiv hincl hproj
 
@@ -336,9 +352,10 @@ omit [ContinuousSMul G A₂] [ContinuousSMul G B₁] in
 and `y` of `B₁`, the class `δ⁰ x ⌣ y ∈ H¹(G, C)` is `-(x ⌣ δ⁰ y)`. -/
 theorem explicitCup10_explicitDelta0_eq_neg_explicitCup01_explicitDelta0
     (x : H0 G A₂) (y : H0 G B₁) :
-    explicitCup10 G A₁ B₁ C μ₁ continuous_of_discreteTopology hequiv₁ (SA.explicitDelta0 x) y =
-      -explicitCup01 G A₂ B₂ C μ₂ continuous_of_discreteTopology hequiv₂ x
-        (SB.explicitDelta0 y) := by
+    explicitCup10 G A₁ B₁ C μ₁ continuous_of_discreteTopology
+        (equivariant_of_incl SA SB μ μ₁ hincl hequiv) (SA.explicitDelta0 x) y =
+      -explicitCup01 G A₂ B₂ C μ₂ continuous_of_discreteTopology
+        (equivariant_of_proj SA SB μ μ₂ hproj hequiv) x (SB.explicitDelta0 y) := by
   obtain ⟨a, ha⟩ := SA.proj_surjective (x : A₂)
   obtain ⟨α, -, hαi⟩ :=
     SA.exists_continuous_incl_comp_eq (continuous_d0_apply (G := G) a)
@@ -368,9 +385,10 @@ omit [ContinuousSMul G A₂] in
 of `A₂` and a class `y ∈ H¹(G, B₁)`, the class `δ⁰ x ⌣ y ∈ H²(G, C)` is `-(x ⌣ δ¹ y)`. -/
 theorem explicitCup11_explicitDelta0_eq_neg_explicitCup02_explicitDelta1 [ContinuousMul G]
     (x : H0 G A₂) (y : H1 G B₁) :
-    explicitCup11 G A₁ B₁ C μ₁ continuous_of_discreteTopology hequiv₁ (SA.explicitDelta0 x) y =
-      -explicitCup02 G A₂ B₂ C μ₂ continuous_of_discreteTopology hequiv₂ x
-        (SB.explicitDelta1 y) := by
+    explicitCup11 G A₁ B₁ C μ₁ continuous_of_discreteTopology
+        (equivariant_of_incl SA SB μ μ₁ hincl hequiv) (SA.explicitDelta0 x) y =
+      -explicitCup02 G A₂ B₂ C μ₂ continuous_of_discreteTopology
+        (equivariant_of_proj SA SB μ μ₂ hproj hequiv) x (SB.explicitDelta1 y) := by
   induction y using QuotientAddGroup.induction_on with
   | _ β =>
     obtain ⟨a, ha⟩ := SA.proj_surjective (x : A₂)
@@ -405,9 +423,10 @@ omit [ContinuousSMul G B₁] in
 the sign `(-1)^(p+1)` is `1` because `x` has degree `1`. -/
 theorem explicitCup20_explicitDelta1_eq_explicitCup11_explicitDelta0 [ContinuousMul G]
     (x : H1 G A₂) (y : H0 G B₁) :
-    explicitCup20 G A₁ B₁ C μ₁ continuous_of_discreteTopology hequiv₁ (SA.explicitDelta1 x) y =
-      explicitCup11 G A₂ B₂ C μ₂ continuous_of_discreteTopology hequiv₂ x
-        (SB.explicitDelta0 y) := by
+    explicitCup20 G A₁ B₁ C μ₁ continuous_of_discreteTopology
+        (equivariant_of_incl SA SB μ μ₁ hincl hequiv) (SA.explicitDelta1 x) y =
+      explicitCup11 G A₂ B₂ C μ₂ continuous_of_discreteTopology
+        (equivariant_of_proj SA SB μ μ₂ hproj hequiv) x (SB.explicitDelta0 y) := by
   induction x using QuotientAddGroup.induction_on with
   | _ α =>
     obtain ⟨hαc, hα1⟩ := mem_Z1_iff.1 α.2
