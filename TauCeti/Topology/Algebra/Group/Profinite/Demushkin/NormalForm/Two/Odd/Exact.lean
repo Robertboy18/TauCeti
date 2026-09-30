@@ -27,14 +27,15 @@ normal form modulo `λ_2(F)` carries the class of `r` to that of the level-`∞`
 successive approximation with tails carries `r` itself to the intermediate form
 `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n) t₂ ⋯ t_n`, with `t_i = x_i^{a_i}` a `2`-adic power of `x_i` whose
 exponent `a_i ∈ ℤ_2` is divisible by `4`
-(`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_demushkinWordTwoOddTop_mul_padicPow`), and
-the tail
-relator `r' = (x₂, x₃) ⋯ (x_{n-1}, x_n) t₂ ⋯ t_n` is a word in `x₂, …, x_n` alone. Read in the free
-pro-`2` group on those `n - 1` generators, `r'` has the class of `(x₂, x₃) ⋯ (x_{n-1}, x_n)` in
-`gr_1`, so it presents a Demushkin group whose `q`-invariant is not `2`, and the normal-form theorem
-for `q ≠ 2` (`freeProP.exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_demushkinQ_ne`)
-carries `r'` to `x₂^{q'} (x₂, x₃) ⋯ (x_{n-1}, x_n)` with `q' = 0` or `q' = 2^f`, `f ≥ 2`. Extending
-that automorphism to `F` by fixing `x₁` (`TauCeti.freeProP.finSuccExtend`) gives the theorem.
+(`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_demushkinWordTwoOddTop_mul_padicPow`). At
+rank `n = 1` there is no tail: the intermediate form is already `x₁²`, the level-`∞` word, and the
+theorem is proved. For `n > 1`, the tail relator `r' = (x₂, x₃) ⋯ (x_{n-1}, x_n) t₂ ⋯ t_n` is a
+word in `x₂, …, x_n` alone. Read in the free pro-`2` group on those `n - 1 ≥ 2` generators, `r'`
+has the class of `(x₂, x₃) ⋯ (x_{n-1}, x_n)` in `gr_1`, so it presents a Demushkin group whose
+`q`-invariant is not `2`, and the normal-form theorem for `q ≠ 2`
+(`freeProP.exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_demushkinQ_ne`) carries `r'`
+to `x₂^{q'} (x₂, x₃) ⋯ (x_{n-1}, x_n)` with `q' = 0` or `q' = 2^f`, `f ≥ 2`. Extending that
+automorphism to `F` by fixing `x₁` (`TauCeti.freeProP.finSuccExtend`) gives the theorem.
 
 The level `f` is an invariant of `G`, the level of the image `{±1} × U^(f)` of its canonical
 character; this file proves only the existence of the normal form, and does not identify `f`.
