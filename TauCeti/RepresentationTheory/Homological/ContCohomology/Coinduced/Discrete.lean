@@ -41,9 +41,9 @@ and the one Shapiro's lemma is stated against.
   discrete carrier is continuous, so `Coind_U^G A` is a discrete `G`-module;
 * `TauCeti.DiscreteCoind.instContinuousSMulScalar`: for compact `G` and discrete coefficients,
   scalar multiplication is continuous;
-* `TauCeti.DiscreteCoind.unit_smul`, `TauCeti.DiscreteCoind.eval_unit` and
-  `TauCeti.DiscreteCoind.unit_injective`: the unit is `G`-equivariant and a section of the counit,
-  hence injective;
+* `TauCeti.DiscreteCoind.unit_smul`, `TauCeti.DiscreteCoind.eval_unit`,
+  `TauCeti.DiscreteCoind.unit_injective` and `TauCeti.DiscreteCoind.map_unit`: the unit is
+  `G`-equivariant, a section of the counit, hence injective, and natural in the coefficients;
 * `TauCeti.DiscreteCoind.trace_apply`, `TauCeti.DiscreteCoind.trace_eq_sum_transversal` and
   `TauCeti.DiscreteCoind.trace_map`: the trace formula, along any transversal, and its naturality
   in the coefficients;
@@ -361,6 +361,20 @@ variable (G U M) in
 theorem unit_smul [ContinuousMul G] (g : G) (m : M) :
     unit G U M (g • m) = g • unit G U M m :=
   ext fun x => (mul_smul x g m).symm
+
+variable {R : Type*} [Semiring R] [Module R M] [SMulCommClass U R M]
+  {N : Type*} [AddCommGroup N] [TopologicalSpace N] [DiscreteTopology N] [DistribMulAction G N]
+  [ContinuousSMul G N] [Module R N] [SMulCommClass U R N]
+
+/-- **The unit is natural in the coefficient module**: for a `G`-equivariant linear map
+`f : M → N` of discrete `G`-modules, coinducing `f` carries the orbit map of `m` to the orbit map
+of `f m`. The `U`-equivariance `TauCeti.DiscreteCoind.map` asks for is the restriction of the
+`G`-equivariance `hf`. -/
+@[simp]
+theorem map_unit (f : M →ₗ[R] N) (hf : ∀ (g : G) (m : M), f (g • m) = g • f m) (m : M) :
+    map f (fun u m => hf u m) (unit G U M m) = unit G U N (f m) := by
+  ext x
+  rw [map_apply, unit_apply, unit_apply, hf]
 
 end Unit
 
