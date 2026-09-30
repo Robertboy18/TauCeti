@@ -97,7 +97,6 @@ theorem maximalGeodesic_mfderiv [I.Boundaryless] [J.Boundaryless]
 
 /-- A tangent vector at `Φ p` of the form `dΦ_p v` lies in the domain of the exponential map at
 `Φ p` exactly when `v` lies in the domain of the exponential map at `p`. -/
-@[simp]
 theorem mfderiv_mem_expDomain_iff (Φ : RiemannianIsometry I J M N) {p : M}
     {v : TangentSpace I p} :
     mfderiv I J Φ p v ∈ expDomain J N (Φ p) ↔ v ∈ expDomain I M p := by
