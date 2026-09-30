@@ -209,9 +209,10 @@ theorem isAdapted_presentationLimitPresheaf :
 is the step in the proof of Wedhorn's Proposition A.4 from a sheaf on the basis to a sheaf on the
 whole space: `presentationLimitPresheaf` is adapted to the basis of rational opens, and a presheaf
 adapted to a basis is a sheaf once it is a sheaf on the basis
-(`TopCat.Presheaf.isSheaf_of_isAdapted`). A sieve on a rational open covers for the restricted
-topology exactly when its image covers in `Spa(A, A⁺)` (`Functor.mem_restrictedTopology_iff`), so
-the hypothesis only involves covers of rational opens by rational opens. -/
+(`TopCat.Presheaf.isSheaf_of_isAdapted_of_isSheaf_restrictedTopology`). A sieve on a rational
+open covers for the restricted topology exactly when its image covers in `Spa(A, A⁺)`
+(`Functor.mem_restrictedTopology_iff`), so the hypothesis only involves covers of rational opens
+by rational opens. -/
 theorem isSheaf_presentationLimitPresheaf_of_isSheaf_rational (h : Presheaf.IsSheaf
       ((rationalOpensFunctor Aplus).restrictedTopology (Opens.grothendieckTopology ↥(spa Aplus)))
       ((rationalOpensFunctor Aplus).op ⋙ presentationLimitPresheaf P Aplus)) :
@@ -219,8 +220,8 @@ theorem isSheaf_presentationLimitPresheaf_of_isSheaf_rational (h : Presheaf.IsSh
       (presentationLimitPresheaf P Aplus) :=
   -- `P` makes `A` a Huber ring, so the rational opens form a basis
   have : IsHuberRing A := ⟨⟨P⟩⟩
-  TopCat.Presheaf.isSheaf_of_isAdapted (X := TopCat.of ↥(spa Aplus)) _ _
-    (isBasis_spaRationalOpens Aplus)
+  TopCat.Presheaf.isSheaf_of_isAdapted_of_isSheaf_restrictedTopology (X := TopCat.of ↥(spa Aplus))
+    _ _ (isBasis_spaRationalOpens Aplus)
     (isAdapted_presentationLimitPresheaf (P := P) (Aplus := Aplus)) h
 
 end TauCeti.ValuationSpectrum

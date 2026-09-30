@@ -207,15 +207,12 @@ section RestrictIso
 variable {X Y : PreAdicSpace.{u}} (e : X ≅ Y) (U : Opens X)
 
 -- The image of an open of `X` under an isomorphism `e : X ≅ Y` is the preimage under the
--- inverse; it is the range of the restriction of `X` to `U` followed by `e`.
+-- inverse, `e` being a homeomorphism on the underlying spaces; it is the range of the restriction
+-- of `X` to `U` followed by `e`.
 private theorem range_ofRestrict_comp_base :
     Set.range (X.toPresheafedSpace.ofRestrict U.isOpenEmbedding ≫ e.hom.toHom).base =
       Set.range (Y.toPresheafedSpace.ofRestrict
         ((Opens.map e.inv.base).obj U).isOpenEmbedding).base := by
-  have h₁ : Function.LeftInverse e.inv.base e.hom.base := fun x ↦
-    congrArg (fun φ : X ⟶ X => φ.base x) e.hom_inv_id
-  have h₂ : Function.RightInverse e.inv.base e.hom.base := fun y ↦
-    congrArg (fun φ : Y ⟶ Y => φ.base y) e.inv_hom_id
   -- Both sides are ranges of inclusions of opens, composed with `e` on the left. The passage
   -- from `(ofRestrict ≫ e.hom.toHom).base` to `e.hom.base ∘ Opens.inclusion' U` is the pair of
   -- `rfl`-lemmas `PresheafedSpace.comp_base` and `PresheafedSpace.ofRestrict_base`, but it cannot
@@ -224,8 +221,8 @@ private theorem range_ofRestrict_comp_base :
   -- `X.toPresheafedSpace.restrict _`, which unfolds to it only at default transparency, so the
   -- rewritten composite is ill-typed for `rw` and `TopCat.coe_comp` no longer fires on it.
   change Set.range (e.hom.base ∘ Opens.inclusion' U) = Set.range (Opens.inclusion' _)
-  rw [Set.range_comp, Opens.set_range_inclusion', Opens.set_range_inclusion', Opens.map_coe,
-    Set.image_eq_preimage_of_inverse h₁ h₂]
+  rw [Set.range_comp, Opens.set_range_inclusion', Opens.set_range_inclusion', Opens.map_coe]
+  exact (TopCat.homeoOfIso (forgetToTop.mapIso e)).image_eq_preimage_symm (U : Set X)
 
 /-- The underlying isomorphism of presheafed spaces of `restrictIso`: the two open immersions
 `X.restrict U ⟶ X ⟶ Y` and `Y.restrict e(U) ⟶ Y` have the same range. -/

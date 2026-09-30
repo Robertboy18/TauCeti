@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.CategoryTheory.Sites.DenseSubsite.InducedTopology
-public import Mathlib.Topology.Sheaves.SheafCondition.Sites
+public import TauCeti.CategoryTheory.Sites.TopologicalBasis
 
 /-!
 # Presheaves adapted to a basis
@@ -29,8 +29,8 @@ adaptedness; the other direction holds for every sheaf.
 
 ## Main results
 
-* `TopCat.Presheaf.isSheaf_of_isAdapted`: an adapted presheaf whose restriction to `B` is a sheaf
-  for the restricted topology is a sheaf.
+* `TopCat.Presheaf.isSheaf_of_isAdapted_of_isSheaf_restrictedTopology`: an adapted presheaf whose
+  restriction to `B` is a sheaf for the restricted topology is a sheaf.
 * `TopCat.Presheaf.IsSheaf.isSheaf_restrictedTopology`: the restriction of a sheaf to a basis is a
   sheaf for the restricted topology.
 * `TopCat.Presheaf.isSheaf_iff_of_isAdapted`: for a presheaf adapted to a basis, the two sheaf
@@ -68,15 +68,15 @@ covers in `X` (`Functor.mem_restrictedTopology_iff`), so the hypothesis involves
 members of `B` by members of `B`. The inclusion of a basis is cocontinuous for the restricted
 topology, and a pointwise right Kan extension of a sheaf along a cocontinuous functor is a sheaf
 (SGA 4 III 2.2). -/
-theorem isSheaf_of_isAdapted (hB : Opens.IsBasis B) (hF : F.IsAdapted B)
+theorem isSheaf_of_isAdapted_of_isSheaf_restrictedTopology (hB : Opens.IsBasis B)
+    (hF : F.IsAdapted B)
     (h : CategoryTheory.Presheaf.IsSheaf
       ((inducedFunctor (Subtype.val : B → Opens X)).restrictedTopology
         (Opens.grothendieckTopology X))
       ((inducedFunctor (Subtype.val : B → Opens X)).op ⋙ F)) :
     F.IsSheaf :=
   -- a basis is cover-dense, so its inclusion is cocontinuous for the restricted topology
-  have := TopCat.Opens.coverDense_inducedFunctor (X := X) (B := (Subtype.val : B → Opens X))
-    (Subtype.range_val ▸ hB)
+  have := TauCeti.TopologicalSpace.Opens.coverDense_inducedFunctor_subtypeVal hB
   (Presheaf.isSheaf_iff_multifork _ _).mpr fun _ S ↦
     ⟨RanIsSheafOfIsCocontinuous.isLimitMultifork h hF.some S⟩
 
@@ -88,8 +88,7 @@ theorem IsSheaf.isSheaf_restrictedTopology {B : Set (Opens X)} (hB : Opens.IsBas
         (Opens.grothendieckTopology X))
       ((inducedFunctor (Subtype.val : B → Opens X)).op ⋙ F) :=
   -- a basis is cover-dense, hence a dense subsite for the restricted topology, hence continuous
-  have := TopCat.Opens.coverDense_inducedFunctor (X := X) (B := (Subtype.val : B → Opens X))
-    (Subtype.range_val ▸ hB)
+  have := TauCeti.TopologicalSpace.Opens.coverDense_inducedFunctor_subtypeVal hB
   Functor.op_comp_isSheaf_of_isSheaf _ _ _ F hF
 
 /-- **A presheaf adapted to a basis is a sheaf exactly when it is a sheaf on the basis**, for the
@@ -99,7 +98,8 @@ theorem isSheaf_iff_of_isAdapted (hB : Opens.IsBasis B) (hF : F.IsAdapted B) :
       ((inducedFunctor (Subtype.val : B → Opens X)).restrictedTopology
         (Opens.grothendieckTopology X))
       ((inducedFunctor (Subtype.val : B → Opens X)).op ⋙ F) :=
-  ⟨fun h ↦ h.isSheaf_restrictedTopology hB, isSheaf_of_isAdapted F B hB hF⟩
+  ⟨fun h ↦ h.isSheaf_restrictedTopology hB,
+    isSheaf_of_isAdapted_of_isSheaf_restrictedTopology F B hB hF⟩
 
 end TopCat.Presheaf
 
