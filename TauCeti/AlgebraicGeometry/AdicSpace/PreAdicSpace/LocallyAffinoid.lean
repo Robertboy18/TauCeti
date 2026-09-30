@@ -66,12 +66,8 @@ variable (X : PreAdicSpace.{u})
 
 /-- The open affinoid subspaces of an object `X` of `𝒱^pre`: the opens `U` such that `X`
 restricted to `U` is an affinoid pre-adic space. -/
-def affinoidOpens : Set (Opens X) :=
+@[expose] def affinoidOpens : Set (Opens X) :=
   {U | isAffinoid (X.restrict U.isOpenEmbedding)}
-
-theorem mem_affinoidOpens_iff {U : Opens X} :
-    U ∈ X.affinoidOpens ↔ isAffinoid (X.restrict U.isOpenEmbedding) :=
-  Iff.rfl
 
 /-- The whole space is an open affinoid subspace exactly when `X` is affinoid. -/
 theorem top_mem_affinoidOpens_iff : ⊤ ∈ X.affinoidOpens ↔ isAffinoid X :=
@@ -84,15 +80,11 @@ theorem map_inv_base_mem_affinoidOpens {Y : PreAdicSpace.{u}} (e : X ≅ Y) {U :
   ObjectProperty.prop_of_iso isAffinoid (restrictIso e U) hU
 
 /-- An object of `𝒱^pre` is locally affinoid when its open affinoid subspaces cover it. -/
-def isLocallyAffinoid : ObjectProperty PreAdicSpace.{u} :=
+@[expose] def isLocallyAffinoid : ObjectProperty PreAdicSpace.{u} :=
   fun X ↦ ∀ x : X, ∃ U ∈ X.affinoidOpens, x ∈ U
-
-theorem isLocallyAffinoid_iff : isLocallyAffinoid X ↔ ∀ x : X, ∃ U ∈ X.affinoidOpens, x ∈ U :=
-  Iff.rfl
 
 /-- `X` is locally affinoid exactly when the union of its open affinoid subspaces is `X`. -/
 theorem isLocallyAffinoid_iff_sSup_eq_top : isLocallyAffinoid X ↔ sSup X.affinoidOpens = ⊤ := by
-  rw [isLocallyAffinoid_iff]
   refine ⟨fun h ↦ SetLike.ext fun x ↦ ?_, fun h x ↦ Opens.mem_sSup.mp ?_⟩
   · simpa [Opens.mem_sSup] using h x
   · rw [h]
@@ -124,12 +116,8 @@ instance isLocallyAffinoid.instIsClosedUnderIsomorphisms :
 is adapted to the open affinoid subspaces, in the sense that on every open `V` it is the limit of
 its values on the open affinoid subspaces contained in `V`. Their full subcategory of `𝒱^pre` is
 Wedhorn's category `(PreAd)`. -/
-def isPreAdic : ObjectProperty PreAdicSpace.{u} :=
+@[expose] def isPreAdic : ObjectProperty PreAdicSpace.{u} :=
   fun X ↦ isLocallyAffinoid X ∧ X.toPresheafedSpace.presheaf.IsAdapted X.affinoidOpens
-
-theorem isPreAdic_iff :
-    isPreAdic X ↔ isLocallyAffinoid X ∧ X.toPresheafedSpace.presheaf.IsAdapted X.affinoidOpens :=
-  Iff.rfl
 
 theorem isPreAdic.isLocallyAffinoid {X : PreAdicSpace.{u}} (h : isPreAdic X) :
     isLocallyAffinoid X :=
@@ -151,7 +139,7 @@ theorem isSheafy_of_isPreAdic {X : PreAdicSpace.{u}} (h : isPreAdic X)
       ((inducedFunctor (Subtype.val : X.affinoidOpens → Opens X)).op ⋙
         X.toPresheafedSpace.presheaf)) :
     isSheafy X :=
-  (isSheafy_iff X).mpr (TopCat.Presheaf.isSheaf_of_isAdapted _ _ hB h.isAdapted hs)
+  TopCat.Presheaf.isSheaf_of_isAdapted _ _ hB h.isAdapted hs
 
 end PreAdicSpace
 

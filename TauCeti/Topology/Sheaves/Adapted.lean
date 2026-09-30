@@ -58,14 +58,9 @@ variable {C : Type u} [Category.{v} C] {X : TopCat.{w}} (F : X.Presheaf C) (B : 
 /-- A presheaf `F` on `X` is adapted to a set `B` of opens if, at every open `V`, the restriction
 maps to the members of `B` contained in `V` make `F.obj (op V)` the limit of `F` over them: `F`
 is the pointwise right Kan extension of its restriction to `B`. -/
-def IsAdapted : Prop :=
+@[expose] def IsAdapted : Prop :=
   Nonempty (Functor.RightExtension.mk F
     (𝟙 ((inducedFunctor (Subtype.val : B → Opens X)).op ⋙ F))).IsPointwiseRightKanExtension
-
-theorem isAdapted_iff :
-    F.IsAdapted B ↔ Nonempty (Functor.RightExtension.mk F
-      (𝟙 ((inducedFunctor (Subtype.val : B → Opens X)).op ⋙ F))).IsPointwiseRightKanExtension :=
-  Iff.rfl
 
 /-- **The sheaf condition on a basis `B` suffices for an adapted presheaf.** If `F` is adapted to
 the basis `B` and its restriction to `B` is a sheaf for the topology restricted to `B`, then `F` is

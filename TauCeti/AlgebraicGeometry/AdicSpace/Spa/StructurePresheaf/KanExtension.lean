@@ -189,7 +189,7 @@ in the sense of Wedhorn's Remark and Definition 8.9. -/
 theorem isAdapted_presentationLimitPresheaf :
     TopCat.Presheaf.IsAdapted (X := TopCat.of ↥(spa Aplus)) (presentationLimitPresheaf P Aplus)
       (spaRationalOpens Aplus) :=
-  (TopCat.Presheaf.isAdapted_iff _ _).mpr ⟨presentationLimitPresheafIsPointwiseRightKanExtension⟩
+  ⟨presentationLimitPresheafIsPointwiseRightKanExtension⟩
 
 /-- **The sheaf condition on the rational opens suffices**: if the restriction of
 `presentationLimitPresheaf` to the rational opens is a sheaf for the restricted topology, then
