@@ -5,33 +5,30 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Analysis.InnerProductSpace.Basic
 public import TauCeti.MeasureTheory.OptimalTransport.CTransform.Rockafellar
+public import TauCeti.MeasureTheory.OptimalTransport.Cost.Quadratic
 
 /-!
 # The quadratic cost and convex analysis
 
 On a real inner product space `E`, the quadratic transport cost `c (x, y) = ‖x - y‖ ^ 2 / 2`
-differs from the pairing cost `-⟪x, y⟫` by the split term `‖x‖ ^ 2 / 2 + ‖y‖ ^ 2 / 2`. Split
-terms are invisible to cyclical monotonicity and are absorbed by the `c`-transform vocabulary,
-so the whole `c`-transform theory of the quadratic cost is the Legendre–Fenchel theory of the
-inner product: a potential `φ` is `c`-concave exactly when `u = ‖·‖ ^ 2 / 2 - φ` is a
-Legendre–Fenchel conjugate, its `c`-transform is `‖y‖ ^ 2 / 2 - u⋆ y`, its `c`-superdifferential
-is the graph of the subdifferential `∂u`, and a set is `c`-cyclically monotone exactly when it is
-cyclically monotone in the classical sense `∑ i, ⟪x i, y (σ i)⟫ ≤ ∑ i, ⟪x i, y i⟫`. Rockafellar's
-theorem then produces, from a `c`-cyclically monotone set, a conjugate `u` whose subdifferential
-graph contains it. This is the algebraic step of Brenier's theorem: applied to the support of a
-quadratic optimal plan, it yields the convex potential from which the Brenier map is later
-extracted, once finite dimension, absolute continuity of the source and almost-everywhere
-differentiability of `u` enter; none of these analytic and measure-theoretic hypotheses is used
-here. Every bridge in this file accounts for the factor `1 / 2` in the cost.
+differs from the pairing cost `-⟪x, y⟫` by the split term `‖x‖ ^ 2 / 2 + ‖y‖ ^ 2 / 2`
+(`TauCeti.MeasureTheory.OptimalTransport.Cost.Quadratic`, which also identifies the
+`c`-cyclically monotone sets of the quadratic cost with the classically cyclically monotone
+sets). Split terms are absorbed by the `c`-transform vocabulary, so the whole `c`-transform
+theory of the quadratic cost is the Legendre–Fenchel theory of the inner product: a potential
+`φ` is `c`-concave exactly when `u = ‖·‖ ^ 2 / 2 - φ` is a Legendre–Fenchel conjugate, its
+`c`-transform is `‖y‖ ^ 2 / 2 - u⋆ y`, and its `c`-superdifferential is the graph of the
+subdifferential `∂u`. Rockafellar's theorem then produces, from a `c`-cyclically monotone set, a
+conjugate `u` whose subdifferential graph contains it. This is the algebraic step of Brenier's
+theorem: applied to the support of a quadratic optimal plan, it yields the convex potential from
+which the Brenier map is later extracted, once finite dimension, absolute continuity of the
+source and almost-everywhere differentiability of `u` enter; none of these analytic and
+measure-theoretic hypotheses is used here. Every bridge in this file accounts for the factor
+`1 / 2` in the cost.
 
 ## Main statements
 
-* `TauCeti.isCyclicallyMonotone_norm_sub_sq_div_two_iff` — `c`-cyclical monotonicity for the
-  quadratic cost is cyclical monotonicity for the inner-product pairing, with
-  `TauCeti.isCyclicallyMonotone_norm_sub_sq_div_two_iff_forall_sum_inner_le` its classical
-  sum form;
 * `TauCeti.cTransform_norm_sub_sq_div_two`, `TauCeti.cTransformSymm_norm_sub_sq_div_two`,
   `TauCeti.isCConcave_norm_sub_sq_div_two_iff`, `TauCeti.isCConcaveSymm_norm_sub_sq_div_two_iff`
   and `TauCeti.cSuperdifferential_norm_sub_sq_div_two` — the two `c`-transforms, `c`-concavity
@@ -58,34 +55,6 @@ open scoped RealInnerProductSpace
 namespace TauCeti
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-
-/-- The quadratic cost is the inner-product pairing cost plus the split term
-`‖x‖ ^ 2 / 2 + ‖y‖ ^ 2 / 2`. -/
-theorem norm_sub_sq_div_two_eq_pairingCost_add_add :
-    (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) =
-      fun p => pairingCost (innerₗ E) p + ‖p.1‖ ^ 2 / 2 + ‖p.2‖ ^ 2 / 2 := by
-  funext p
-  rw [pairingCost_apply, innerₗ_apply_apply, norm_sub_sq_real]
-  ring
-
-/-- `c`-cyclical monotonicity for the quadratic cost is cyclical monotonicity for the
-inner-product pairing. -/
-theorem isCyclicallyMonotone_norm_sub_sq_div_two_iff {S : Set (E × E)} :
-    IsCyclicallyMonotone (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) S ↔
-      IsCyclicallyMonotone (pairingCost (innerₗ E)) S := by
-  rw [norm_sub_sq_div_two_eq_pairingCost_add_add,
-    isCyclicallyMonotone_add_add_iff (pairingCost (innerₗ E)) (fun x => ‖x‖ ^ 2 / 2)
-      fun y => ‖y‖ ^ 2 / 2]
-
-/-- `c`-cyclical monotonicity for the quadratic cost is the classical cyclical monotonicity
-condition: rearranging the targets of finitely many points of the set does not increase the
-total inner product. -/
-theorem isCyclicallyMonotone_norm_sub_sq_div_two_iff_forall_sum_inner_le {S : Set (E × E)} :
-    IsCyclicallyMonotone (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) S ↔
-      ∀ (n : ℕ) (x y : Fin n → E), (∀ i, (x i, y i) ∈ S) →
-        ∀ σ : Equiv.Perm (Fin n), ∑ i, ⟪x i, y (σ i)⟫ ≤ ∑ i, ⟪x i, y i⟫ := by
-  rw [isCyclicallyMonotone_norm_sub_sq_div_two_iff, isCyclicallyMonotone_pairingCost_iff]
-  simp only [innerₗ_apply_apply]
 
 /-- The `c`-transform of a potential `φ` for the quadratic cost is `‖y‖ ^ 2 / 2 - u⋆ y`, where
 `u = ‖·‖ ^ 2 / 2 - φ` and `u⋆` is its Legendre–Fenchel conjugate for the inner product. -/

@@ -422,7 +422,11 @@ absorbed into the potential and the target term is added to the result. -/
 theorem cTransform_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (φ : X → EReal) (y : Y) :
     cTransform (fun p => c p + a p.1 + b p.2) φ y =
       (b y : EReal) + cTransform c (fun x => φ x - (a x : EReal)) y := by
-  rw [cTransform_apply, cTransform_apply, EReal.coe_add_iInf]
+  have hb : ∀ z : EReal, z - ((-b y : ℝ) : EReal) = (b y : EReal) + z := fun z => by
+    rw [EReal.coe_neg, sub_eq_add_neg, neg_neg, add_comm]
+  have h := EReal.iInf_sub_coe (fun x => (c (x, y) : EReal) - (φ x - (a x : EReal))) (-b y)
+  simp only [hb] at h
+  rw [cTransform_apply, cTransform_apply, ← h]
   refine iInf_congr fun x => ?_
   rw [EReal.sub_sub_coe_eq_add_coe_sub, ← add_sub_assoc, ← EReal.coe_add, ← EReal.coe_add,
     add_comm (b y)]

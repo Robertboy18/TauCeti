@@ -24,7 +24,6 @@ the last two a real minuend.
   the minuend is real;
 * `EReal.coe_sub_le_comm` — the two subtrahends of a real minuend can be exchanged across an
   inequality, as in `sub_le_comm` for groups;
-* `EReal.coe_add_iInf` — adding a real constant commutes with an infimum;
 * `EReal.neg_sub_coe` and `EReal.neg_coe_sub` — negating a difference with one real operand
   exchanges the operands, with no finiteness hypothesis on the other;
 * `EReal.sub_sub_coe_eq_add_coe_sub` and `EReal.sub_coe_add_eq_add_sub` — a real subtrahend
@@ -74,14 +73,6 @@ finiteness hypothesis on `a` or `b`. -/
 theorem _root_.EReal.coe_sub_le_comm {r : ℝ} {a b : EReal} :
     (r : EReal) - a ≤ b ↔ (r : EReal) - b ≤ a := by
   induction a <;> induction b <;> simp [← EReal.coe_sub, add_comm]
-
-/-- Adding a real constant commutes with an infimum in `EReal`; both sides are `⊤` when the
-index type is empty. -/
-theorem _root_.EReal.coe_add_iInf {ι : Sort*} (a : ℝ) (f : ι → EReal) :
-    (a : EReal) + ⨅ i, f i = ⨅ i, ((a : EReal) + f i) := by
-  have h := EReal.iInf_sub_coe f (-a)
-  simp only [EReal.coe_neg, sub_eq_add_neg, neg_neg, add_comm _ (a : EReal)] at h
-  exact h.symm
 
 /-- Negating a difference with a real subtrahend exchanges the operands, for every extended-real
 minuend. -/
