@@ -46,8 +46,9 @@ is `ℤ`, which is not profinite, and no lift exists.
 
 * `TauCeti.zHat.cast_toZMod`, `TauCeti.zHat.castHom_comp_toZMod`: the projections are compatible
   along divisibility.
-* `TauCeti.zHat.ext_of_toZMod`, `TauCeti.zHat.existsUnique_forall_toZMod_eq`: a profinite integer
-  is determined by its projections, and every compatible family of residues comes from one.
+* `TauCeti.zHat.ext_of_toZMod`, `TauCeti.zHat.ext_iff_toZMod`,
+  `TauCeti.zHat.existsUnique_forall_toZMod_eq`: a profinite integer is determined by its
+  projections, and every compatible family of residues comes from one.
 * `TauCeti.zHat.toZMod_ringLift`, `TauCeti.zHat.ringLift_unique`,
   `TauCeti.zHat.continuous_ringLift`: the universal property of `Additive zHat` as the inverse
   limit of the `ZMod n`.
@@ -58,6 +59,13 @@ is `ℤ`, which is not profinite, and no lift exists.
 ## References
 
 * L. Ribes and P. Zalesskii, *Profinite Groups*, Sections 2.3 and 4.1.
+* Mathlib's `Mathlib.NumberTheory.Padics.RingHoms`, the same inverse-limit API for the `p`-adic
+  integers, whose structure this file follows: `PadicInt.toZModPow`, `PadicInt.cast_toZModPow`,
+  `PadicInt.zmod_cast_comp_toZModPow`, `PadicInt.ext_of_toZModPow`, `PadicInt.lift`,
+  `PadicInt.lift_spec`, `PadicInt.lift_unique` and `PadicInt.lift_self` correspond to
+  `TauCeti.zHat.toZMod`, `TauCeti.zHat.cast_toZMod`, `TauCeti.zHat.castHom_comp_toZMod`,
+  `TauCeti.zHat.ext_iff_toZMod`, `TauCeti.zHat.ringLift`, `TauCeti.zHat.toZMod_comp_ringLift`,
+  `TauCeti.zHat.ringLift_unique` and `TauCeti.zHat.ringLift_toZMod`.
 -/
 
 public section
@@ -182,11 +190,17 @@ theorem exists_monoidHom_mk_eq_toZMod (U : OpenNormalSubgroup zHat.{u}) :
   rwa [lift_ofAdd_one_apply, ofMul_toMul] at hφa
 
 /-- **A profinite integer is determined by its projections.** -/
+@[ext (iff := false)]
 theorem ext_of_toZMod {a b : Additive zHat.{u}} (h : ∀ n : ℕ+, toZMod n a = toZMod n b) :
     a = b := by
   refine toMul.injective (eq_of_forall_mk_eq fun U ↦ ?_)
   obtain ⟨n, ψ, hψ⟩ := exists_monoidHom_mk_eq_toZMod U
   rw [hψ a, hψ b, h n]
+
+/-- Two profinite integers are equal exactly when their reductions modulo every `n` agree. -/
+theorem ext_iff_toZMod {a b : Additive zHat.{u}} :
+    a = b ↔ ∀ n : ℕ+, toZMod n a = toZMod n b :=
+  ⟨fun h _ ↦ h ▸ rfl, ext_of_toZMod⟩
 
 /-- **Continuity into `ℤ̂` is detected by the projections.** A map into the profinite integers
 is continuous exactly when all of its reductions modulo `n` are. -/
