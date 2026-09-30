@@ -233,6 +233,7 @@ theorem idem_mul_idem : idem.{u} ℓ * idem ℓ = idem ℓ :=
   (isIdempotentElem_idem ℓ).eq
 
 /-- The idempotents of distinct primes are orthogonal. -/
+@[simp]
 theorem idem_mul_idem_of_ne {ℓ' : ℕ} [Fact ℓ'.Prime] (h : ℓ ≠ ℓ') :
     idem.{u} ℓ * idem ℓ' = 0 :=
   ext_of_component fun p _ ↦ by
