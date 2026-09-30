@@ -14,9 +14,9 @@ public import TauCeti.RingTheory.GradedAlgebra.Completion
 Let `A` be a differential graded algebra over a commutative ring `R`, with cohomological grading
 `𝒞 : ℤ → Submodule R A` and differential `d`, and let `𝒜 : ℕ → Submodule R A` be a second,
 nonnegative **Adams grading** of the underlying algebra which the differential preserves.  For the
-two-dimensional Ginzburg algebra of a quiver the Adams grading is the path-length grading, with
-doubled arrows in degree `1` and adjoined loops in degree `2`, and the differential has bidegree
-`(1, 0)`.
+two-dimensional Ginzburg algebra of a quiver the Adams grading is the weighted path-length grading
+in which the doubled arrows have weight `1` and the adjoined loops weight `2`, and the differential
+has bidegree `(1, 0)`.
 
 The **Adams completion** of `A` is its completion along the Adams grading taken in the category of
 graded modules: in each cohomological degree `p` the piece `𝒞 p` is completed along the Adams
