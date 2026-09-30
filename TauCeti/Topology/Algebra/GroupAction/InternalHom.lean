@@ -24,9 +24,8 @@ which is the action for which evaluation `(φ, m) ↦ φ m` is equivariant, in t
 continuous action on a discrete module when `M` is finite discrete and `N` is discrete: the set of
 group elements fixing a given `φ` is open, and over a compact `G` it contains an open normal
 subgroup. The internal hom is contravariantly functorial in its source, by precomposition with an
-equivariant homomorphism, and `Hom(-, N)` is exact on the modules killed by a prime `p` when `N` is
-one of them: this is the algebra behind the dual of a short exact sequence of finite
-`𝔽_p[G]`-modules.
+equivariant homomorphism, and `Hom(-, N)` is exact on the modules killed by a prime `p`, for every
+`N`: this is the algebra behind the dual of a short exact sequence of finite `𝔽_p[G]`-modules.
 
 ## Main definitions
 
@@ -60,9 +59,10 @@ one of them: this is the algebra behind the dual of a short exact sequence of fi
   set contains an open normal subgroup.
 * `TauCeti.InternalHom.precomp_injective`, `TauCeti.InternalHom.exact_precomp` and
   `TauCeti.InternalHom.precomp_surjective`: `Hom(-, N)` takes a surjection to an injection, an
-  exact pair with surjective second map to an exact pair, and, when the modules are killed by a
-  prime `p`, an injection to a surjection. The internal hom of finite modules is finite, and it is
-  killed by any natural number killing the codomain (`TauCeti.InternalHom.nsmul_eq_zero`).
+  exact pair with surjective second map to an exact pair, and, when the target of the injection is
+  killed by a prime `p`, an injection to a surjection. The internal hom of finite modules is
+  finite, and it is killed by any natural number killing the codomain
+  (`TauCeti.InternalHom.nsmul_eq_zero`).
 
 ## Implementation notes
 
@@ -546,17 +546,17 @@ end Exact
 section Surjective
 
 variable {G : Type*} [Group G] {M M' : Type*} [AddCommGroup M] [AddCommGroup M']
-  [DistribMulAction G M] [DistribMulAction G M'] {N : Type*} [AddCommGroup N]
+  [DistribMulAction G M] [DistribMulAction G M'] {N : Type*} [AddCommMonoid N]
   [DistribMulAction G N]
 
-/-- Precomposition with an injection is surjective when the target modules are killed by a prime
-`p`: `Hom(-, N)` is exact on the modules killed by `p`. This is
+/-- Precomposition with an injection into a module killed by a prime `p` is surjective, for any
+`N`: `Hom(-, N)` is exact on the modules killed by `p`. This is
 `AddMonoidHom.exists_comp_eq_of_injective` on the internal hom. -/
 theorem precomp_surjective {p : ℕ} [Fact p.Prime] (hM' : ∀ x : M', p • x = 0)
-    (hN : ∀ x : N, p • x = 0) {f : M →+[G] M'} (hf : Function.Injective f) :
+    {f : M →+[G] M'} (hf : Function.Injective f) :
     Function.Surjective (precomp G f (N := N)) := fun φ => by
   obtain ⟨ψ, hψ⟩ :=
-    AddMonoidHom.exists_comp_eq_of_injective hM' hN (f := (f : M →+ M')) hf φ.toAddMonoidHom
+    AddMonoidHom.exists_comp_eq_of_injective hM' (f := (f : M →+ M')) hf φ.toAddMonoidHom
   exact ⟨of G ψ, InternalHom.ext hψ⟩
 
 end Surjective
