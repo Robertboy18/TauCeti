@@ -50,8 +50,8 @@ theorem isGeodesicallyCompleteAt_iff (Φ : RiemannianIsometry I J M N) (p : M) :
     isGeodesicallyCompleteAt_iff_forall_one_mem_geodesicInterval]
   constructor
   · intro h w
-    obtain ⟨v, rfl⟩ := (Φ.mfderivToLinearIsometryEquiv p).surjective w
-    rw [mfderivToLinearIsometryEquiv_apply, Φ.geodesicInterval_mfderiv]
+    obtain ⟨v, rfl⟩ := Φ.mfderiv_surjective p w
+    rw [Φ.geodesicInterval_mfderiv]
     exact h v
   · intro h v
     rw [← Φ.geodesicInterval_mfderiv]

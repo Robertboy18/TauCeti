@@ -107,11 +107,8 @@ theorem mfderiv_mem_expDomain_iff (Φ : RiemannianIsometry I J M N) {p : M}
 theorem mfderiv_image_expDomain (Φ : RiemannianIsometry I J M N) (p : M) :
     mfderiv I J Φ p '' expDomain I M p = expDomain J N (Φ p) := by
   ext w
-  obtain ⟨v, rfl⟩ := (Φ.mfderivToLinearIsometryEquiv p).surjective w
-  have hinj : Function.Injective (mfderiv I J Φ p) := by
-    simpa only [coe_mfderivToLinearIsometryEquiv] using
-      (Φ.mfderivToLinearIsometryEquiv p).injective
-  rw [mfderivToLinearIsometryEquiv_apply, hinj.mem_set_image, Φ.mfderiv_mem_expDomain_iff]
+  obtain ⟨v, rfl⟩ := Φ.mfderiv_surjective p w
+  rw [(Φ.mfderiv_injective p).mem_set_image, Φ.mfderiv_mem_expDomain_iff]
 
 /-- A smooth Riemannian isometry intertwines the exponential maps, `Φ ∘ exp_p = exp_{Φ p} ∘ dΦ_p`,
 on every tangent vector: on the natural domain this is naturality of geodesics, and off it both

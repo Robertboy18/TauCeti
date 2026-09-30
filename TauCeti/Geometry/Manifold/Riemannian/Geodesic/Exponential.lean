@@ -387,8 +387,7 @@ theorem expDomain_eq_univ_iff {p : M} :
   · have h1 : ∀ w : TangentSpace I p, (1 : ℝ) ∈ geodesicInterval I M p w := fun w ↦
       mem_expDomain_iff.1 (eq_univ_iff_forall.1 h w)
     rcases eq_or_ne t 0 with rfl | ht
-    · obtain ⟨γ, a, b, hγ, -⟩ := (mem_geodesicInterval_iff (I := I) (M := M)).1 (h1 v)
-      exact hγ.subset_geodesicInterval hγ.zero_mem
+    · exact zero_mem_geodesicInterval_of_mem (h1 v)
     · simpa only [mul_one] using (mem_geodesicInterval_smul_iff ht).1 (h1 (t • v))
   · rw [mem_expDomain_iff, h v]
     exact mem_univ _
