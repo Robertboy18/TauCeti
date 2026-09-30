@@ -298,7 +298,8 @@ theorem exists_two_le_demushkinQ_eq_pow_of_ne (hq0 : demushkinQ hG ≠ 0)
   obtain ⟨k, hk, hqk⟩ := hG.exists_demushkinQ_eq_pow hq0
   refine ⟨k, ?_, hqk⟩
   by_contra hlt
-  exact hqp (by rw [hqk, show k = 1 by omega, pow_one])
+  have hk1 : k = 1 := by omega
+  exact hqp (by rw [hqk, hk1, pow_one])
 
 end IsDemushkin
 
