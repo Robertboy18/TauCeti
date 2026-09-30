@@ -199,7 +199,7 @@ theorem trace_eq_relIndex_nsmul_of_forall_smul_eq (hVU : V ≤ U)
 /-- **The trace kills the invariants once the relative index kills the module.** For finite-index
 subgroups `V ≤ U` with `U` acting trivially on `M` and `[U : V] • m = 0` for every `m`, the trace
 `Coind_V^G M → M` vanishes on the `G`-invariants: the map `H⁰(G, Coind_V^G M) → H⁰(G, M)` induced
-by the surjection `trace` is zero. -/
+by `trace` is zero. -/
 theorem trace_eq_zero_of_forall_smul_eq (hVU : V ≤ U) (htriv : ∀ u ∈ U, ∀ m : M, u • m = m)
     (hkill : ∀ m : M, V.relIndex U • m = 0) {f : DiscreteCoind G V M} (hf : ∀ g : G, g • f = f) :
     trace G V M f = 0 := by
