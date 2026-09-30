@@ -75,6 +75,7 @@ theorem isProP_units_padicInt_two : IsProP 2 ℤ_[2]ˣ := by
 /-! ### `2`-adic powers in `ℤ_2ˣ` -/
 
 /-- In `ℤ_2ˣ`, the `2`-adic power `(-1) ^ s` is `(-1) ^ (s mod 2)`. -/
+@[simp]
 theorem neg_one_padicPow (s : ℤ_[2]) :
     isProP_units_padicInt_two.padicPow (-1 : ℤ_[2]ˣ) s = (-1) ^ s.appr 1 := by
   obtain ⟨k, hk⟩ : (2 : ℤ_[2]) ∣ s - s.appr 1 := by simpa using PadicInt.dvd_sub_appr s 1

@@ -136,6 +136,7 @@ theorem cast_toZModPow_eq_toZMod {n : ℕ} (hn : n ≠ 0) (x : ℤ_[p]) :
 
 /-- The truncation `appr x n` agrees with `x` modulo `p ^ n`: the divisibility form of
 `PadicInt.appr_spec`. -/
+@[simp]
 theorem dvd_sub_appr (x : ℤ_[p]) (n : ℕ) : (p : ℤ_[p]) ^ n ∣ x - x.appr n :=
   Ideal.mem_span_singleton.mp (appr_spec n x)
 

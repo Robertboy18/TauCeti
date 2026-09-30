@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.LabuteModule
+public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.LabuteModule.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.CharacterKernelTwoGenerators
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationModule
 
@@ -80,24 +80,10 @@ theorem ker_orientationTwoEven_comp_mk_of_four_dvd (hn : 3 < n) (hf : 2 ≤ f)
           (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3})))).topologicalClosure := by
   have hχ1 := orientationTwoEven_comp_mk_freeProPGen_one a f n v u (by omega)
   have hχ3 := orientationTwoEven_comp_mk_freeProPGen_three a f n v u hn
-  -- The generators `x₂`, `x₄` and the unmarked `x_i` topologically generate `F`.
-  have hgen : (Subgroup.closure (insert (freeProPGen 2 n 1) (insert (freeProPGen 2 n 3)
-      (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3})))).topologicalClosure = ⊤ := by
-    refine topologicalClosure_closure_eq_top_of_range_freeProPGen_subset 2 ?_
-    rintro _ ⟨i, rfl⟩
-    by_cases h1 : i = 1
-    · exact h1 ▸ Set.mem_insert _ _
-    by_cases h3 : i = 3
-    · exact Set.mem_insert_of_mem _ (h3 ▸ Set.mem_insert _ _)
-    exact Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ ⟨i, ⟨h1, h3⟩, rfl⟩)
   have hu' : (u : ℤ_[2]) * (1 - ((2 : ℕ) : ℤ_[2]) ^ f) = 1 := by exact_mod_cast hu
-  have hu1 : u ≠ 1 := by
-    intro h
-    have := (mem_unitsPrincipal_iff_of_val_mul_one_sub_pow_eq_one hu' (k := f + 1)).mp
-      (h ▸ one_mem _)
-    omega
   refine IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal
-    (isProP_freeProP 2 (Fin n)) _ hgen
+    (isProP_freeProP 2 (Fin n)) _
+    (topologicalClosure_closure_insert_insert_image_freeProPGen_eq_top 2 1 3)
     (fun _ ⟨i, hi, hs⟩ ↦ hs ▸ orientationTwoEven_comp_mk_freeProPGen_of_ne a f n v u hi.1 hi.2)
     ?_ ?_ ?_ ?_
   · rw [hχ1, neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv]
@@ -106,7 +92,7 @@ theorem ker_orientationTwoEven_comp_mk_of_four_dvd (hn : 3 < n) (hf : 2 ≤ f)
   · rw [hχ3]
     exact (mem_unitsPrincipal_iff_of_val_mul_one_sub_pow_eq_one hu').mpr hf
   · rw [hχ3]
-    exact hu1
+    exact not_isOfFinOrder_of_val_mul_one_sub_pow_eq_one (fun _ ↦ hf) hu'
   · rw [hχ1, hχ3]
     exact hm
 
