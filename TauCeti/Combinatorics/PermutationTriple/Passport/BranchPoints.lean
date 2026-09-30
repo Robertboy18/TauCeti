@@ -15,7 +15,8 @@ import Mathlib.SetTheory.Cardinal.NatCard
 Permuting the branch points reorders the three cycle partitions and leaves the reference
 monodromy subgroup unchanged. Reindexing is contravariant, so this is a right action of
 `Perm (Fin 3)`, written as a left action of its opposite group. The action preserves
-admissibility and agrees with the branch-point operations on connected triples.
+admissibility and agrees with the branch-point operations on connected triples, which are
+recorded here together with the induced action on isomorphism classes of connected triples.
 
 `OrderedPassport` carries an admissible specification, including its reference subgroup.
 Its branch-point orbit has at most six elements. Passing from an ordered passport to its
@@ -48,7 +49,52 @@ def reindexBranchPoints (t : ConnectedTriple n) (ρ : Perm (Fin 3)) : ConnectedT
 theorem coe_reindexBranchPoints (t : ConnectedTriple n) (ρ : Perm (Fin 3)) :
     (t.reindexBranchPoints ρ).1 = t.1.reindexBranchPoints ρ := (rfl)
 
+/-- Reordering the branch points commutes with relabeling the sheets. -/
+@[simp]
+theorem reindexBranchPoints_smul (τ : Perm (Fin n)) (t : ConnectedTriple n) (ρ : Perm (Fin 3)) :
+    (τ • t).reindexBranchPoints ρ = τ • t.reindexBranchPoints ρ :=
+  Subtype.ext (PermutationTriple.reindexBranchPoints_smul t.1 ρ τ)
+
 end ConnectedTriple
+
+namespace ConnectedIsoClass
+
+variable {n : ℕ}
+
+/-- Reordering the branch points of the isomorphism class of a connected triple: `MulOpposite.op ρ`
+sends the class of `t` to the class of `t.reindexBranchPoints ρ`. -/
+instance : SMul (Perm (Fin 3))ᵐᵒᵖ (ConnectedIsoClass n) where
+  smul ρ c := Quotient.liftOn' c (fun t => mk (t.reindexBranchPoints ρ.unop)) fun t t' h => by
+    obtain ⟨τ, rfl⟩ := MulAction.mem_orbit_iff.1 (MulAction.orbitRel_apply.1 h)
+    exact mk_eq_mk_iff_exists_smul.2 ⟨τ, (ConnectedTriple.reindexBranchPoints_smul τ t' _).symm⟩
+
+/-- Acting by `MulOpposite.op ρ` on the class represented by `t` computes by reindexing that
+representative along `ρ`. -/
+@[simp]
+theorem op_smul_mk (ρ : Perm (Fin 3)) (t : ConnectedTriple n) :
+    MulOpposite.op ρ • mk t = mk (t.reindexBranchPoints ρ) :=
+  (rfl)
+
+/-- Reordering the branch points is a right action of `Perm (Fin 3)` on isomorphism classes of
+connected triples, written as a left action of the opposite group; it is the restriction of the
+action on `TauCeti.PermutationTriple.IsoClass` to the connected classes. -/
+instance : MulAction (Perm (Fin 3))ᵐᵒᵖ (ConnectedIsoClass n) where
+  one_smul c := by
+    obtain ⟨t, rfl⟩ := mk_surjective c
+    rw [← MulOpposite.op_one, op_smul_mk]
+    exact congrArg mk (Subtype.ext (PermutationTriple.reindexBranchPoints_one _))
+  mul_smul ρ ρ' c := by
+    obtain ⟨t, rfl⟩ := mk_surjective c
+    induction ρ using MulOpposite.rec' with | h ρ => ?_
+    induction ρ' using MulOpposite.rec' with | h ρ' => ?_
+    rw [← MulOpposite.op_mul, op_smul_mk, op_smul_mk, op_smul_mk, mk_eq_mk_iff_equivalent]
+    simp only [ConnectedTriple.coe_reindexBranchPoints]
+    exact (PermutationTriple.equivalent_iff_exists_smul_eq.2 (by
+      obtain ⟨τ, hτ⟩ := PermutationTriple.equivalent_iff_exists_smul_eq.1
+        (PermutationTriple.equivalent_reindexBranchPoints_reindexBranchPoints t.1 ρ ρ')
+      exact ⟨τ⁻¹, by rw [← hτ, inv_smul_smul]⟩))
+
+end ConnectedIsoClass
 
 namespace PassportSpec
 
