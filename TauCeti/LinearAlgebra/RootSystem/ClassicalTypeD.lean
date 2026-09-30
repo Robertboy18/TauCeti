@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.LinearAlgebra.RootSystem.DynkinType
-import Mathlib.LinearAlgebra.Matrix.Dual
+import TauCeti.LinearAlgebra.Matrix.Dual
 import TauCeti.LinearAlgebra.Matrix.Gram
 
 /-!
@@ -82,7 +82,7 @@ private abbrev TypeDRawIndex (n : ℕ) := Fin 2 × TypeDPair n
 private def typeDRawVector (r : TypeDRawIndex n) : Fin n → ℤ :=
   if r.1 = 0 then typeDPairVector r.2 else -typeDPairVector r.2
 
-private lemma typeDPairVector_dot_self (p : TypeDPair n) :
+private lemma typeDPairVector_dotProduct_self (p : TypeDPair n) :
     typeDPairVector p ⬝ᵥ typeDPairVector p = 2 := by
   have hp : p.val.1 ≠ p.val.2 := p.property
   by_cases h : p.val.1 < p.val.2
@@ -90,18 +90,19 @@ private lemma typeDPairVector_dot_self (p : TypeDPair n) :
   · have h' : p.val.2 ≠ p.val.1 := Ne.symm hp
     simp [typeDPairVector, h, dotProduct_add, dotProduct_single, hp, h']
 
-private lemma typeDRawVector_dot_self (r : TypeDRawIndex n) :
+private lemma typeDRawVector_dotProduct_self (r : TypeDRawIndex n) :
     typeDRawVector r ⬝ᵥ typeDRawVector r = 2 := by
   by_cases h : r.1 = 0
-  · simpa [typeDRawVector, h] using typeDPairVector_dot_self r.2
-  · simpa [typeDRawVector, h, neg_dotProduct, dotProduct_neg] using typeDPairVector_dot_self r.2
+  · simpa [typeDRawVector, h] using typeDPairVector_dotProduct_self r.2
+  · simpa [typeDRawVector, h, neg_dotProduct, dotProduct_neg] using
+      typeDPairVector_dotProduct_self r.2
 
 /-- The integral vectors of squared length two. For `n ≥ 2`, these are exactly the classical
 roots `±e_a ±e_b` of type `Dₙ`. -/
 abbrev TypeDRoot (n : ℕ) := {x : Fin n → ℤ // x ⬝ᵥ x = 2}
 
 private def typeDRawRoot (r : TypeDRawIndex n) : TypeDRoot n :=
-  ⟨typeDRawVector r, typeDRawVector_dot_self r⟩
+  ⟨typeDRawVector r, typeDRawVector_dotProduct_self r⟩
 
 private lemma support_typeDPairVector (p : TypeDPair n) :
     Function.support (typeDPairVector p) = {p.val.1, p.val.2} := by
@@ -232,7 +233,7 @@ private lemma typeDRawRootEquiv_apply (r : TypeDRawIndex n) :
 
 /-! ### The Bourbaki order -/
 
-private lemma one_le_typeDDifference {n : ℕ} (hn : 1 ≤ n) (p : TypeDPair n) :
+private lemma one_le_val_sub {n : ℕ} (hn : 1 ≤ n) (p : TypeDPair n) :
     1 ≤ ((p.val.2 - p.val.1 : Fin n) : ℕ) := by
   let _ : NeZero n := ⟨by omega⟩
   have h : (p.val.2 - p.val.1 : Fin n) ≠ 0 := fun h =>
@@ -243,7 +244,7 @@ private lemma one_le_typeDDifference {n : ℕ} (hn : 1 ≤ n) (p : TypeDPair n) 
 
 private def typeDDifference (hn : 1 ≤ n) (p : TypeDPair n) : Fin (n - 1) :=
   ⟨((p.val.2 - p.val.1 : Fin n) : ℕ) - 1, by
-    have h₁ := one_le_typeDDifference hn p
+    have h₁ := one_le_val_sub hn p
     have h₂ := (p.val.2 - p.val.1 : Fin n).isLt
     omega⟩
 
@@ -266,7 +267,7 @@ private def typeDPairEquiv (n : ℕ) (hn : 1 ≤ n) : TypeDPair n ≃ Fin (n - 1
       have h0 : q.2 + 0 = q.2 + typeDSucc q.1 := by simpa using h
       exact (add_left_cancel h0).symm⟩), ?_, ?_⟩
   · intro p
-    have h₁ := one_le_typeDDifference hn p
+    have h₁ := one_le_val_sub hn p
     have hx : typeDSucc (typeDDifference hn p) = p.val.2 - p.val.1 :=
       Fin.ext (by simp [typeDSucc, typeDDifference]; omega)
     refine Subtype.ext (Prod.ext rfl ?_)
@@ -484,27 +485,20 @@ theorem det_cartanMatrixD_eq_det_typeDSimpleRoot_sq (hn : 4 ≤ n) :
     simp [typeDSimpleRawIndex, typeDRawRoot, typeDRawVector, typeDPairVector,
       typeDSimpleRoot, hi, hlt]
 
-private lemma typeDRoot_sum (x : TypeDRoot n) :
-    (∑ i : Fin n, x.1 i) = -2 ∨ (∑ i : Fin n, x.1 i) = 0 ∨
-      (∑ i : Fin n, x.1 i) = 2 := by
-  let r := (typeDRawRootEquiv n).symm x
-  have hx : typeDRawRoot r = x :=
-    (typeDRawRootEquiv_apply r).symm.trans (Equiv.apply_symm_apply _ x)
-  have hxv : typeDRawVector r = x.1 := congrArg Subtype.val hx
-  rw [← hxv]
-  rcases r with ⟨s, p⟩
-  fin_cases s <;> by_cases hp : p.val.1 < p.val.2 <;>
-    simp [typeDRawVector, typeDPairVector, hp, Finset.sum_sub_distrib,
-      Finset.sum_add_distrib]
+/-- The coordinate sum of a squared-length-two integral vector is even: it differs from
+`x ⬝ᵥ x = 2` by a sum of products of consecutive integers. -/
+private lemma even_sum_typeDRoot (x : TypeDRoot n) : Even (∑ i : Fin n, x.1 i) := by
+  have h : ∑ i : Fin n, x.1 i = x.1 ⬝ᵥ x.1 - ∑ i : Fin n, x.1 i * (x.1 i - 1) := by
+    simp [dotProduct, mul_sub, Finset.sum_sub_distrib]
+  rw [h, x.2]
+  exact even_two.sub (Finset.even_sum _ fun i _ => Int.even_mul_pred_self _)
 
 /-- Half the sum of the classical coordinates. It is integral on type `Dₙ` roots. -/
-private def typeDHalfTotal (x : TypeDRoot n) : ℤ :=
-  if (∑ i : Fin n, x.1 i) = 2 then 1
-  else if (∑ i : Fin n, x.1 i) = -2 then -1 else 0
+private def typeDHalfTotal (x : TypeDRoot n) : ℤ := (∑ i : Fin n, x.1 i) / 2
 
 private lemma two_mul_typeDHalfTotal (x : TypeDRoot n) :
-    2 * typeDHalfTotal x = ∑ i : Fin n, x.1 i := by
-  rcases typeDRoot_sum x with h | h | h <;> simp [typeDHalfTotal, h]
+    2 * typeDHalfTotal x = ∑ i : Fin n, x.1 i :=
+  Int.two_mul_ediv_two_of_even (even_sum_typeDRoot x)
 
 /-- The coefficients of a type `Dₙ` root in the Bourbaki simple-root basis. -/
 def typeDSimpleRootCoordinates (n : ℕ) (hn : 4 ≤ n) (x : TypeDRoot n) : Fin n → ℤ := fun k =>
@@ -553,15 +547,16 @@ private lemma typeDDoubleCoweight_dotProduct_sum_smul (hn : 4 ≤ n) (c : Fin n 
     Fin.val_inj, mul_ite, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ite_true]
   ring
 
-/-- **The Bourbaki simple roots of type `Dₙ` are linearly independent.** Pairing a relation with a
-doubled fundamental coweight isolates twice one coefficient, and `ℤ` is torsion free. -/
+/-- **The Bourbaki simple roots of type `Dₙ` are linearly independent.** The doubled fundamental
+coweights pair with them diagonally, by `2`, and `2` is regular in `ℤ`. -/
 theorem linearIndependent_typeDSimpleRoot (hn : 4 ≤ n) :
-    LinearIndependent ℤ (typeDSimpleRoot n hn) := by
-  rw [Fintype.linearIndependent_iff]
-  intro g hg k
-  have h := typeDDoubleCoweight_dotProduct_sum_smul hn g k
-  rw [hg, dotProduct_zero] at h
-  omega
+    LinearIndependent ℤ (typeDSimpleRoot n hn) :=
+  linearIndependent_of_dotProduct_diagonal (c := fun _ => 2) (w := typeDDoubleCoweight n)
+    (fun _ => (IsRegular.of_ne_zero (by norm_num)).right)
+    (fun i => by rw [dotProduct_comm, typeDDoubleCoweight_dotProduct_typeDSimpleRoot]; simp)
+    (fun i j hij => by
+      rw [dotProduct_comm, typeDDoubleCoweight_dotProduct_typeDSimpleRoot]
+      simp [Fin.val_inj, Ne.symm hij])
 
 /-- Twice the coefficients of a root in the Bourbaki simple-root basis are the dot products with
 the doubled fundamental coweights. -/
