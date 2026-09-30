@@ -7,24 +7,21 @@ module
 
 public import Mathlib.Algebra.Field.ZMod
 public import Mathlib.Algebra.Module.ZMod
+public import Mathlib.LinearAlgebra.Basis.VectorSpace
 public import Mathlib.LinearAlgebra.Dual.Basis
-public import Mathlib.LinearAlgebra.Dual.Lemmas
-public import Mathlib.LinearAlgebra.FiniteDimensional.Defs
 
 /-!
 # The `𝔽_p`-dual of an additive group killed by a prime
 
 An additive commutative group `M` killed by a prime `p` is an `𝔽_p`-vector space, through
 `AddCommGroup.zmodModule`, and its additive homomorphisms to `ZMod p` are exactly its linear
-functionals. This file records the two consequences of linear algebra over `𝔽_p` that the duality
-of finite `𝔽_p[G]`-modules rests on, phrased on `M →+ ZMod p` so that no module instance has to be
-installed by the caller: the homomorphisms to `ZMod p` separate the points of `M`, and for finite
-`M` there are exactly as many of them as elements of `M`.
+functionals. This file records the consequence of linear algebra over `𝔽_p` that the duality of
+finite `𝔽_p[G]`-modules rests on, phrased on `M →+ ZMod p` so that no module instance has to be
+installed by the caller: for finite `M` there are exactly as many homomorphisms `M →+ ZMod p` as
+elements of `M`.
 
 ## Main results
 
-* `TauCeti.exists_addMonoidHom_zmod_apply_ne_zero`: a nonzero element of a group killed by `p` is
-  detected by an additive homomorphism to `ZMod p`.
 * `TauCeti.natCard_addMonoidHom_zmod`: `Nat.card (M →+ ZMod p) = Nat.card M` for finite `M` killed
   by `p`.
 -/
@@ -34,15 +31,6 @@ public section
 namespace TauCeti
 
 variable {p : ℕ} [Fact p.Prime] {M : Type*} [AddCommGroup M]
-
-/-- **Homomorphisms to `ZMod p` separate points.** If `p` is prime and `M` is killed by `p`, every
-nonzero `m : M` has an additive homomorphism `φ : M →+ ZMod p` with `φ m ≠ 0`. This is the
-existence of a linear functional not vanishing at `m` on the `𝔽_p`-vector space `M`. -/
-theorem exists_addMonoidHom_zmod_apply_ne_zero (hM : ∀ x : M, p • x = 0) {m : M} (hm : m ≠ 0) :
-    ∃ φ : M →+ ZMod p, φ m ≠ 0 := by
-  have _i : Module (ZMod p) M := AddCommGroup.zmodModule hM
-  obtain ⟨φ, hφ⟩ := Module.Projective.exists_dual_ne_zero (ZMod p) (V := M) hm
-  exact ⟨φ.toAddMonoidHom, hφ⟩
 
 /-- **The `𝔽_p`-dual of a finite group killed by `p` has the same order.** If `p` is prime and `M`
 is finite and killed by `p`, then `Nat.card (M →+ ZMod p) = Nat.card M`: the homomorphisms to

@@ -418,11 +418,15 @@ theorem evalPairing_dual_proj (ψ : InternalHom G B N) (a : A) :
   rw [dual_proj]
   exact InternalHom.evalPairing_precomp S.inclDistribMulActionHom ψ a
 
+/-- The equivariant inclusion of the dual sequence is precomposition with the equivariant projection
+of the original sequence. -/
 @[simp]
 theorem dual_inclDistribMulActionHom :
     (S.dual N hB).inclDistribMulActionHom = InternalHom.precomp G S.projDistribMulActionHom :=
   DistribMulActionHom.ext fun _ => rfl
 
+/-- The equivariant projection of the dual sequence is precomposition with the equivariant inclusion
+of the original sequence. -/
 @[simp]
 theorem dual_projDistribMulActionHom :
     (S.dual N hB).projDistribMulActionHom = InternalHom.precomp G S.inclDistribMulActionHom :=

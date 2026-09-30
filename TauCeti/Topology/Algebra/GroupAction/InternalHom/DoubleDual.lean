@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Algebra.Module.ZMod.Dual
 public import TauCeti.Topology.Algebra.GroupAction.InternalHom.Basic
+import Mathlib.LinearAlgebra.Dual.Lemmas
 
 /-!
 # Double duality for internal homs of discrete modules
@@ -19,9 +20,9 @@ hom `M →+ N` with its conjugation action. Evaluation
 is a `G`-equivariant additive homomorphism from `M` to the double internal dual
 `InternalHom G (InternalHom G M N) N`, and it is natural in `M`: precomposing twice with an
 equivariant `f : M →+[G] M'` carries `eval m` to `eval (f m)`. When `N = ZMod p` for a prime `p` and
-`M` is killed by `p`, evaluation is injective, because the homomorphisms to `ZMod p` separate the
-points of an `𝔽_p`-vector space; when `M` is moreover finite it is bijective, by counting: the
-internal hom `InternalHom G M (ZMod p)` has the order of `M`. So a finite discrete `G`-module killed
+`M` is killed by `p`, evaluation is injective, because it is evaluation of the `𝔽_p`-vector space
+`M` into its double dual; when `M` is moreover finite it is bijective, by counting: the internal
+hom `InternalHom G M (ZMod p)` has the order of `M`. So a finite discrete `G`-module killed
 by `p` is canonically and equivariantly its own double dual, which is what identifies the dual of
 the dual of a short exact sequence of such modules with the sequence itself, and what turns the
 duality statements about a module `M` into statements about its dual `InternalHom G M (ZMod p)`.
@@ -67,6 +68,8 @@ def eval : M →+[G] InternalHom G (InternalHom G M N) N where
 
 variable {G M N}
 
+/-- Forgetting the action, `eval m` is the flipped evaluation pairing at `m`, the additive
+homomorphism `φ ↦ φ m` on `InternalHom G M N`. -/
 @[simp]
 theorem toAddMonoidHom_eval (m : M) :
     (eval G M N m).toAddMonoidHom = (evalPairing G).flip m := (rfl)
@@ -99,16 +102,15 @@ theorem natCard_zmod [Finite M] (hM : ∀ x : M, p • x = 0) :
 variable [Group G] [DistribMulAction G M] [DistribMulAction G (ZMod p)]
 
 /-- For a module `M` killed by a prime `p`, evaluation into the double dual with values in `ZMod p`
-is injective: the homomorphisms `M →+ ZMod p` separate the points of `M`. -/
+is injective: it is evaluation of the `𝔽_p`-vector space `M` into its double dual. -/
 theorem eval_injective (hM : ∀ x : M, p • x = 0) : Function.Injective (eval G M (ZMod p)) := by
-  refine (injective_iff_map_eq_zero _).mpr fun m hm => ?_
-  by_contra h
-  obtain ⟨φ, hφ⟩ := exists_addMonoidHom_zmod_apply_ne_zero hM h
-  have := congrArg
-    (fun ψ : InternalHom G (InternalHom G M (ZMod p)) (ZMod p) => evalPairing G ψ (of G φ)) hm
-  simp only [evalPairing_apply, toAddMonoidHom_eval, AddMonoidHom.flip_apply, toAddMonoidHom_zero,
-    AddMonoidHom.zero_apply] at this
-  exact hφ this
+  have _i : Module (ZMod p) M := AddCommGroup.zmodModule hM
+  intro m₁ m₂ h
+  refine Module.eval_apply_injective (ZMod p) (LinearMap.ext fun ψ => ?_)
+  have := congrArg (fun χ : InternalHom G (InternalHom G M (ZMod p)) (ZMod p) =>
+    evalPairing G χ (of G ψ.toAddMonoidHom)) h
+  simpa only [evalPairing_apply, toAddMonoidHom_eval, AddMonoidHom.flip_apply,
+    LinearMap.toAddMonoidHom_coe, Module.Dual.eval_apply] using this
 
 /-- **Double duality.** For a finite module `M` killed by a prime `p`, evaluation into the double
 dual with values in `ZMod p` is bijective: `M` is equivariantly its own double dual. -/
