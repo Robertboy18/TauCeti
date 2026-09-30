@@ -27,9 +27,10 @@ Neukirch–Schmidt–Wingberg I §5, not the covariant functoriality of group *h
 `groupCohomology` files call by the same name.
 
 The identity `cor ∘ res = [G : U]` (NSW (1.5.7)) rests on the unit `M → Coind_U^G M`,
-`m ↦ (g ↦ g • m)`, of coinduction (`TauCeti.DiscreteCoind.unit`), through two facts: evaluation at
-`1` retracts the unit, so restriction is the coefficient map of the unit followed by the Shapiro
-map; and the trace of the unit is multiplication by the index. Corestriction is natural in the
+`m ↦ (g ↦ g • m)`, of coinduction (`TauCeti.DiscreteCoind.unit`), through two facts: restriction
+followed by the inverse of Shapiro's isomorphism is the coefficient map of the unit
+(`TauCeti.ContinuousCohomology.res_comp_shapiroIso_inv`), and the trace of the unit is
+multiplication by the index (`TauCeti.DiscreteCoind.trace_unit`). Corestriction is natural in the
 coefficient module, and in degrees `0` and `1` it agrees, under the comparison isomorphisms with
 the explicit inhomogeneous model, with the transversal formulas
 `TauCeti.ContCohomology.explicitCor0` and `TauCeti.ContCohomology.explicitCor1`.
@@ -41,8 +42,6 @@ the explicit inhomogeneous model, with the transversal formulas
 
 ## Main results
 
-* `TauCeti.ContinuousCohomology.coeffMap_unit_comp_shapiroMap`: restriction is the coefficient
-  map of the unit followed by the Shapiro map.
 * `TauCeti.ContinuousCohomology.shapiroMap_comp_corestriction`: the Shapiro map followed by
   corestriction is the coefficient map of the trace.
 * `TauCeti.ContinuousCohomology.res_comp_corestriction`,
@@ -75,70 +74,9 @@ variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   (U : Subgroup G) (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
   [DistribMulAction G M] [ContinuousSMul G M]
 
-/-! ### Restriction through the unit and the Shapiro map -/
-
-/-- **Restriction factors through the unit of coinduction and the Shapiro map**: the coefficient
-map `Hⁿ(G, M) ⟶ Hⁿ(G, Coind_U^G M)` of the unit `m ↦ (g ↦ g • m)`, followed by the Shapiro map
-`Hⁿ(G, Coind_U^G M) ⟶ Hⁿ(U, M)`, is restriction to `U`. Evaluation at `1` retracts the unit, and
-the Shapiro map is restriction followed by evaluation at `1`. This holds for every subgroup `U` of
-every topological group `G`. -/
-@[reassoc]
-theorem coeffMap_unit_comp_shapiroMap (n : ℕ) :
-    coeffMap (ofDiscreteModuleMap (DiscreteCoind.unit G U M).toAddMonoidHom.toIntLinearMap
-        fun g m => _root_.map_smul (DiscreteCoind.unit G U M) g m) n ≫ shapiroMap U M n =
-      res U (ofDiscreteModule ℤ G M) n := by
-  -- The restriction of the unit followed by the counit is the identity of `M` over `U`.
-  have hcomp : (TopRep.resFunctor (U.subtype : U →* G)).map
-      (ofDiscreteModuleMap (DiscreteCoind.unit G U M).toAddMonoidHom.toIntLinearMap
-        fun g m => _root_.map_smul (DiscreteCoind.unit G U M) g m) ≫
-      ofDiscreteModuleMap (DiscreteCoind.eval G U M).toIntLinearMap
-        (fun u f => DiscreteCoind.eval_smul u f) = 𝟙 (ofDiscreteModule ℤ U M) := by
-    refine TopRep.hom_ext (DFunLike.ext _ _ fun (m : M) => ?_)
-    -- Not `rfl`: `DiscreteCoind.eval` and `DiscreteCoind.unit` are not exposed, so the evaluation
-    -- lemmas are needed, with their morphisms spelled out because the source of the second factor
-    -- is `TopRep.res U.subtype (ofDiscreteModule ℤ G _)` on one side and
-    -- `ofDiscreteModule ℤ U _` on the other.
-    exact (TopRep.comp_apply ((TopRep.resFunctor (U.subtype : U →* G)).map
-        (ofDiscreteModuleMap (DiscreteCoind.unit G U M).toAddMonoidHom.toIntLinearMap
-          fun g m => _root_.map_smul (DiscreteCoind.unit G U M) g m))
-        (ofDiscreteModuleMap (DiscreteCoind.eval G U M).toIntLinearMap
-          fun u f => DiscreteCoind.eval_smul u f) m).trans
-      ((ofDiscreteModuleMap_hom_apply (G := U) (DiscreteCoind.eval G U M).toIntLinearMap
-        (fun u f => DiscreteCoind.eval_smul u f) _).trans
-        ((congrArg (DiscreteCoind.eval G U M) (ofDiscreteModuleMap_hom_apply
-          (DiscreteCoind.unit G U M).toAddMonoidHom.toIntLinearMap
-          (fun g m => _root_.map_smul (DiscreteCoind.unit G U M) g m) m)).trans
-          (DiscreteCoind.eval_unit m)))
-  rw [shapiroMap_eq_res_comp_coeffMap]
-  -- Restriction is natural in the coefficients, and the two coefficient maps then compose to the
-  -- coefficient map of `hcomp`, which is the identity. The composites are reassociated by hand,
-  -- since their middle objects agree only up to `res_ofDiscreteModule`.
-  refine (coeffMap_comp_res_assoc U _ n _).trans ?_
-  exact ((congrArg (res U _ n ≫ ·) ((coeffMap_comp _ _ n).symm.trans
-    (congrArg (coeffMap · n) hcomp))).trans
-      ((congrArg (res U _ n ≫ ·) (coeffMap_id _ n)).trans (Category.comp_id _)))
-
 /-! ### Corestriction -/
 
-variable [CompactSpace G] [TotallyDisconnectedSpace G]
-
-section Closed
-
-variable (hU : IsClosed (U : Set G))
-
-/-- Restriction to a closed subgroup `U` of a profinite group, followed by the inverse of Shapiro's
-isomorphism, is the coefficient map of the unit `M → Coind_U^G M`. -/
-theorem res_comp_shapiroIso_inv (n : ℕ) :
-    res U (ofDiscreteModule ℤ G M) n ≫ (shapiroIso U hU M n).inv =
-      coeffMap (ofDiscreteModuleMap (DiscreteCoind.unit G U M).toAddMonoidHom.toIntLinearMap
-        fun g m => _root_.map_smul (DiscreteCoind.unit G U M) g m) n := by
-  refine (Iso.comp_inv_eq _).2 ?_
-  rw [shapiroIso_hom]
-  exact (coeffMap_unit_comp_shapiroMap U M n).symm
-
-end Closed
-
-variable (hU : IsOpen (U : Set G)) [U.FiniteIndex]
+variable [CompactSpace G] [TotallyDisconnectedSpace G] (hU : IsOpen (U : Set G)) [U.FiniteIndex]
 
 /-- **Corestriction in every degree**, `cor : Hⁿ(U, M) ⟶ Hⁿ(G, M)`, for an open finite-index
 subgroup `U` of a profinite group `G` and a discrete `G`-module `M`: the inverse of Shapiro's
@@ -153,6 +91,15 @@ noncomputable def corestriction (n : ℕ) :
     coeffMap (ofDiscreteModuleMap (DiscreteCoind.trace G U M).toAddMonoidHom.toIntLinearMap
       fun g f => _root_.map_smul (DiscreteCoind.trace G U M) g f) n
 
+-- Not `@[simp]`: `corestriction` is the intended normal form, and this lemma unfolds it.
+/-- The defining equation of corestriction: the inverse of Shapiro's isomorphism followed by the
+coefficient map of the trace `Coind_U^G M → M`. -/
+theorem corestriction_def (n : ℕ) :
+    corestriction U M hU n =
+      (shapiroIso U (U.isClosed_of_isOpen hU) M n).inv ≫
+        coeffMap (ofDiscreteModuleMap (DiscreteCoind.trace G U M).toAddMonoidHom.toIntLinearMap
+          fun g f => _root_.map_smul (DiscreteCoind.trace G U M) g f) n := (rfl)
+
 /-- **The Shapiro map followed by corestriction is the coefficient map of the trace.** This is the
 characteristic property of corestriction: it is the unique map `Hⁿ(U, M) ⟶ Hⁿ(G, M)` whose
 composite with the Shapiro isomorphism is the coefficient map of `Coind_U^G M → M`. -/
@@ -161,7 +108,7 @@ theorem shapiroMap_comp_corestriction (n : ℕ) :
     shapiroMap U M n ≫ corestriction U M hU n =
       coeffMap (ofDiscreteModuleMap (DiscreteCoind.trace G U M).toAddMonoidHom.toIntLinearMap
         fun g f => _root_.map_smul (DiscreteCoind.trace G U M) g f) n := by
-  rw [corestriction, ← Category.assoc, shapiroMap_shapiroIso_inv, Category.id_comp]
+  rw [corestriction_def, ← Category.assoc, shapiroMap_shapiroIso_inv, Category.id_comp]
 
 omit [CompactSpace G] [TotallyDisconnectedSpace G] in
 /-- The unit followed by the trace is multiplication by the index on `M`, as an endomorphism of
@@ -199,13 +146,13 @@ theorem res_comp_corestriction (n : ℕ) :
     have h := (continuousCohomologyFunctor ℤ G n).map_nsmul (f := 𝟙 (ofDiscreteModule ℤ G M))
       (n := U.index)
     rwa [continuousCohomologyFunctor_map, continuousCohomologyFunctor_map, coeffMap_id] at h
-  rw [corestriction]
+  rw [corestriction_def]
   -- The composites are reassociated by hand, since the middle object of `res ≫ inv` is
   -- `continuousCohomology n (TopRep.res U.subtype (ofDiscreteModule ℤ G M))` on one side and
   -- `continuousCohomology n (ofDiscreteModule ℤ U M)` on the other, which stops `Category.assoc`
   -- from matching as a rewrite rule.
   exact ((Category.assoc _ _ _).symm.trans
-    (congrArg (· ≫ coeffMap _ n) (res_comp_shapiroIso_inv U M (U.isClosed_of_isOpen hU) n))).trans
+    (congrArg (· ≫ coeffMap _ n) (res_comp_shapiroIso_inv U (U.isClosed_of_isOpen hU) M n))).trans
     ((coeffMap_comp _ _ n).symm.trans ((congrArg (coeffMap · n) (unit_comp_trace U M)).trans hfun))
 
 /-- **`cor (res x) = [G : U] • x`** for every class `x ∈ Hⁿ(G, M)` (NSW (1.5.7)). -/
@@ -220,31 +167,31 @@ theorem corestriction_res (n : ℕ) (x : continuousCohomology n (ofDiscreteModul
 
 /-! ### Naturality in the coefficients -/
 
-/-- **Corestriction is natural in the coefficient module**: for a `G`-equivariant homomorphism
-`f : M → N` of discrete `G`-modules, corestriction followed by the coefficient map of `f` over `G`
-is the coefficient map of `f` over `U` followed by corestriction. -/
-@[reassoc]
-theorem corestriction_naturality {N : Type u} [AddCommGroup N] [TopologicalSpace N]
-    [DiscreteTopology N] [DistribMulAction G N] [ContinuousSMul G N] (f : M →+[G] N) (n : ℕ) :
-    corestriction U M hU n ≫
-        coeffMap (ofDiscreteModuleMap f.toAddMonoidHom.toIntLinearMap
-          fun g m => _root_.map_smul f g m) n =
-      coeffMap (ofDiscreteModuleMap (G := U) f.toAddMonoidHom.toIntLinearMap
-          fun u m => _root_.map_smul f (u : G) m) n ≫ corestriction U N hU n := by
-  -- Cancel the Shapiro isomorphism of `M` on the left; both sides become the coefficient map of
-  -- `Coind f` followed by the coefficient map of the trace of `N`, by naturality of the Shapiro
-  -- map (`shapiroMap_naturality`) and of the trace (`DiscreteCoind.trace_map`).
-  have := isIso_shapiroMap U (U.isClosed_of_isOpen hU) M n
-  rw [← cancel_epi (shapiroMap U M n), ← Category.assoc, shapiroMap_comp_corestriction,
-    ← Category.assoc, ← shapiroMap_naturality U M (B := N) f.toAddMonoidHom
-      (fun u m => _root_.map_smul f (u : G) m), Category.assoc, shapiroMap_comp_corestriction,
-    ← coeffMap_comp, ← coeffMap_comp]
-  refine congrArg (coeffMap · n)
-    (TopRep.hom_ext (DFunLike.ext _ _ fun (φ : DiscreteCoind G U M) => ?_))
+section Naturality
+
+variable {N : Type u} [AddCommGroup N] [TopologicalSpace N] [DiscreteTopology N]
+  [DistribMulAction G N] [ContinuousSMul G N] (f : M →+[G] N)
+
+omit [ContinuousSMul G M] [CompactSpace G] [TotallyDisconnectedSpace G] [ContinuousSMul G N] in
+/-- The trace is natural in the coefficients, as morphisms of the canonical objects: the trace of
+`M` followed by `f` is the coinduction of `f` followed by the trace of `N`
+(`TauCeti.DiscreteCoind.trace_map`). -/
+private theorem trace_comp_ofDiscreteModuleMap :
+    ofDiscreteModuleMap (DiscreteCoind.trace G U M).toAddMonoidHom.toIntLinearMap
+        (fun g φ => _root_.map_smul (DiscreteCoind.trace G U M) g φ) ≫
+      ofDiscreteModuleMap f.toAddMonoidHom.toIntLinearMap (fun g m => _root_.map_smul f g m) =
+    ofDiscreteModuleMap
+        (DiscreteCoind.map f.toAddMonoidHom.toIntLinearMap
+          fun (u : U) (m : M) => _root_.map_smul f (u : G) m).toAddMonoidHom.toIntLinearMap
+        (fun g φ => DiscreteCoind.map_smul f.toAddMonoidHom.toIntLinearMap
+          (fun (u : U) (m : M) => _root_.map_smul f (u : G) m) g φ) ≫
+      ofDiscreteModuleMap (DiscreteCoind.trace G U N).toAddMonoidHom.toIntLinearMap
+        fun g φ => _root_.map_smul (DiscreteCoind.trace G U N) g φ := by
+  refine TopRep.hom_ext (DFunLike.ext _ _ fun (φ : DiscreteCoind G U M) => ?_)
   set τM := ofDiscreteModuleMap (DiscreteCoind.trace G U M).toAddMonoidHom.toIntLinearMap
-    fun g f => _root_.map_smul (DiscreteCoind.trace G U M) g f
+    fun g φ => _root_.map_smul (DiscreteCoind.trace G U M) g φ
   set τN := ofDiscreteModuleMap (DiscreteCoind.trace G U N).toAddMonoidHom.toIntLinearMap
-    fun g f => _root_.map_smul (DiscreteCoind.trace G U N) g f
+    fun g φ => _root_.map_smul (DiscreteCoind.trace G U N) g φ
   set fG := ofDiscreteModuleMap f.toAddMonoidHom.toIntLinearMap fun g m => _root_.map_smul f g m
   set cf := ofDiscreteModuleMap
     (DiscreteCoind.map f.toAddMonoidHom.toIntLinearMap
@@ -252,7 +199,8 @@ theorem corestriction_naturality {N : Type u} [AddCommGroup N] [TopologicalSpace
     fun g φ => DiscreteCoind.map_smul f.toAddMonoidHom.toIntLinearMap
       (fun (u : U) (m : M) => _root_.map_smul f (u : G) m) g φ
   -- Both sides send `φ` to `f (tr φ)`: the left one directly, the right one through
-  -- `tr (Coind f φ) = f (tr φ)` (`DiscreteCoind.trace_map`).
+  -- `tr (Coind f φ) = f (tr φ)`. Not `simp`: `TopRep.comp_apply` is stated through the
+  -- concrete-category coercion, not through `.hom`, so it is applied by hand.
   have hl : (τM ≫ fG).hom φ = f (DiscreteCoind.trace G U M φ) :=
     (TopRep.comp_apply τM fG φ).trans
       ((congrArg (fun x => fG.hom x) (ofDiscreteModuleMap_hom_apply _ _ φ)).trans
@@ -265,6 +213,27 @@ theorem corestriction_naturality {N : Type u} [AddCommGroup N] [TopologicalSpace
           (DiscreteCoind.trace_map f.toAddMonoidHom.toIntLinearMap
             (fun g m => _root_.map_smul f g m) φ)))
   exact hl.trans hr.symm
+
+/-- **Corestriction is natural in the coefficient module**: for a `G`-equivariant homomorphism
+`f : M → N` of discrete `G`-modules, corestriction followed by the coefficient map of `f` over `G`
+is the coefficient map of `f` over `U` followed by corestriction. -/
+@[reassoc]
+theorem corestriction_naturality (n : ℕ) :
+    corestriction U M hU n ≫
+        coeffMap (ofDiscreteModuleMap f.toAddMonoidHom.toIntLinearMap
+          fun g m => _root_.map_smul f g m) n =
+      coeffMap (ofDiscreteModuleMap (G := U) f.toAddMonoidHom.toIntLinearMap
+          fun u m => _root_.map_smul f (u : G) m) n ≫ corestriction U N hU n := by
+  -- Cancel the Shapiro isomorphism of `M` on the left; by naturality of the Shapiro map, both sides
+  -- become the coefficient map of a composite through the trace, and the two composites agree by
+  -- naturality of the trace.
+  have := isIso_shapiroMap U (U.isClosed_of_isOpen hU) M n
+  rw [← cancel_epi (shapiroMap U M n), ← shapiroMap_naturality_assoc U M (B := N)
+    f.toAddMonoidHom (fun u m => _root_.map_smul f (u : G) m)]
+  simp only [shapiroMap_comp_corestriction_assoc, shapiroMap_comp_corestriction, ← coeffMap_comp,
+    trace_comp_ofDiscreteModuleMap]
+
+end Naturality
 
 /-! ### Agreement with the explicit corestrictions -/
 
@@ -294,17 +263,10 @@ theorem explicitH1AddEquivContinuousCohomology_corestriction (x : H1 U M) :
       shapiroMap U M 1 (explicitH1AddEquivContinuousCohomology G (DiscreteCoind G U M) y) := by
     rw [explicitH1AddEquivContinuousCohomology_shapiroMap, hy, ← explicitShapiro1_apply _ _ _
       (U.isClosed_of_isOpen hU), AddEquiv.apply_symm_apply]
-  have hpair : ofDiscreteModulePair (ContinuousMonoidHom.id G : G →* G)
-      (DiscreteCoind.trace G U M).toAddMonoidHom.toIntLinearMap
-        (fun g f => _root_.map_smul (DiscreteCoind.trace G U M) g f) =
-      ofDiscreteModuleMap (DiscreteCoind.trace G U M).toAddMonoidHom.toIntLinearMap
-        fun g f => _root_.map_smul (DiscreteCoind.trace G U M) g f :=
-    ofDiscreteModulePair_eq_of_hom_apply _ _ _ _ fun _ => rfl
-  rw [hx, ← ConcreteCategory.comp_apply, shapiroMap_comp_corestriction, coeffMap_def, ← hpair,
-    explicitCor1_eq_explicitCoeff1_trace hU, AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom,
-    ← hy, explicitCoeff1_eq_explicitMap1]
-  exact explicitH1AddEquivContinuousCohomology_map G (DiscreteCoind G U M) G M
-    (ContinuousMonoidHom.id G) (DiscreteCoind.trace G U M).toAddMonoidHom
-    (fun g f => _root_.map_smul (DiscreteCoind.trace G U M) g f) y
+  -- The class `x` is the Shapiro image of `y`, so inverse Shapiro sends it to `y`, and the
+  -- coefficient map of the trace on `y` is the explicit coefficient map of the trace on `y`.
+  rw [hx, ← ConcreteCategory.comp_apply, shapiroMap_comp_corestriction,
+    explicitH1AddEquivContinuousCohomology_coeffMap, explicitCor1_eq_explicitCoeff1_trace hU,
+    AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom, ← hy]
 
 end TauCeti.ContinuousCohomology
