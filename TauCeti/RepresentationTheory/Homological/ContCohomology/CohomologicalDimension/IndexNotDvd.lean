@@ -22,12 +22,14 @@ neighbourhoods `V ⊇ H` have index prime to `p`: a class restricting to zero on
 restricts to zero on some open `V ⊇ H`, by the colimit description of the cohomology of a closed
 subgroup (`TauCeti.ContinuousCohomology.exists_openSubgroup_le_res_eq_zero`).
 
-Consequently `cd_p G ≤ cd_p H` for such a subgroup `H`, and in particular `cd_p G ≤ cd_p U` for an
-open subgroup `U` of index prime to `p`. The reverse inequality `cd_p H ≤ cd_p G`, which holds for
-every closed subgroup, is Shapiro's lemma and is not proved here. The closed-subgroup statement is
-the one a Sylow pro-`p` subgroup satisfies, since each of its open neighbourhoods has index prime
-to `p`; the comparison of `cd_p G` with the cohomological dimension of a Sylow pro-`p` subgroup is
-where these results are used.
+Consequently `cd_p G ≤ cd_p U` for an open subgroup `U` of index prime to `p` of a compact group,
+and `cd_p G ≤ cd_p H` for such a closed subgroup `H` of a profinite group: both follow from the one
+observation that vanishing transfers from a subgroup on which restriction is injective in every
+positive degree (`TauCeti.CohomologicalDimensionLE.of_forall_res_injective`). The reverse
+inequality `cd_p H ≤ cd_p G`, which holds for every closed subgroup, is Shapiro's lemma and is not
+proved here. The closed-subgroup statement is the one a Sylow pro-`p` subgroup satisfies, since
+each of its open neighbourhoods has index prime to `p`; the comparison of `cd_p G` with the
+cohomological dimension of a Sylow pro-`p` subgroup is where these results are used.
 
 ## Main results
 
@@ -37,10 +39,13 @@ where these results are used.
 * `TauCeti.ContinuousCohomology.res_injective_of_forall_not_dvd_index`: the same for a closed
   subgroup `H` of a profinite group all of whose open neighbourhoods have index prime to `p`, for
   smooth discrete `p`-primary torsion `X`.
+* `TauCeti.cohomologicalDimensionAt_le_of_forall_res_injective`: `cd_p G ≤ cd_p H` for a subgroup
+  `H` on which restriction is injective in every positive degree, for every discrete `p`-primary
+  torsion `G`-module.
+* `TauCeti.cohomologicalDimensionAt_le_of_not_dvd_index`: **`cd_p G ≤ cd_p U`** for an open
+  subgroup `U` of a compact group `G` with `[G : U]` prime to `p`.
 * `TauCeti.cohomologicalDimensionAt_le_of_isClosed_of_forall_not_dvd_index`: **`cd_p G ≤ cd_p H`**
   for such a closed subgroup `H` of a profinite group `G`.
-* `TauCeti.cohomologicalDimensionAt_le_of_not_dvd_index`: **`cd_p G ≤ cd_p U`** for an open
-  subgroup `U` of a profinite group `G` with `[G : U]` prime to `p`.
 
 ## References
 
@@ -94,15 +99,16 @@ theorem res_injective_of_forall_not_dvd_index (hp : p.Prime) (hX : IsSmoothDiscr
 end ContinuousCohomology
 
 variable {p : ℕ} {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
-  [CompactSpace G] [TotallyDisconnectedSpace G]
 
-/-- **`cd_p G ≤ cd_p H` for a closed subgroup `H` whose open neighbourhoods all have index prime to
-`p`**, as the vanishing predicate: for `H` closed in a profinite group `G` with every open `V ⊇ H`
-of index prime to `p`, `CohomologicalDimensionLE p H n` implies `CohomologicalDimensionLE p G n`. -/
-theorem CohomologicalDimensionLE.of_isClosed_of_forall_not_dvd_index (hp : p.Prime)
-    {H : Subgroup G} (hH : IsClosed (H : Set G))
-    (hind : ∀ V : OpenSubgroup G, H ≤ V → ¬ p ∣ V.toSubgroup.index) {n : ℕ}
-    (h : CohomologicalDimensionLE.{v} p H n) : CohomologicalDimensionLE.{v} p G n := by
+/-- **Vanishing transfers along a subgroup on which restriction is injective**, as the vanishing
+predicate: if restriction `Hⁱ⁺¹(G, M) → Hⁱ⁺¹(H, M)` is injective for every discrete `p`-primary
+torsion `G`-module `M` and every `i`, then `CohomologicalDimensionLE p H n` implies
+`CohomologicalDimensionLE p G n`. -/
+theorem CohomologicalDimensionLE.of_forall_res_injective {H : Subgroup G}
+    (hres : ∀ (M : Type (max u v)) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+      [DistribMulAction G M] [ContinuousSMul G M], IsPPrimaryTorsion p M → ∀ i : ℕ,
+      Function.Injective (ContinuousCohomology.res H (ofDiscreteModule ℤ G M) (i + 1)).hom)
+    {n : ℕ} (h : CohomologicalDimensionLE.{v} p H n) : CohomologicalDimensionLE.{v} p G n := by
   rw [cohomologicalDimensionLE_iff] at h ⊢
   intro M _ _ _ _ _ hM i hi
   obtain ⟨i, rfl⟩ : ∃ j, i = j + 1 := ⟨i - 1, by omega⟩
@@ -111,9 +117,55 @@ theorem CohomologicalDimensionLE.of_isClosed_of_forall_not_dvd_index (hp : p.Pri
       (TopRep.res (H.subtype : H →* G) (ofDiscreteModule ℤ G M))) := by
     rw [res_ofDiscreteModule]
     exact h M hM (i + 1) hi
-  exact subsingleton_of_forall_eq 0 fun x ↦ (injective_iff_map_eq_zero _).1
-    (ContinuousCohomology.res_injective_of_forall_not_dvd_index hp
-      (ofDiscreteModule_isSmoothDiscrete ℤ G M) hM hH hind i) x (Subsingleton.elim _ _)
+  exact subsingleton_of_forall_eq 0 fun x ↦ (injective_iff_map_eq_zero _).1 (hres M hM i) x
+    (Subsingleton.elim _ _)
+
+/-- **`cd_p G ≤ cd_p H` for a subgroup `H` on which restriction is injective**: if restriction
+`Hⁱ⁺¹(G, M) → Hⁱ⁺¹(H, M)` is injective for every discrete `p`-primary torsion `G`-module `M` and
+every `i`, then the `p`-cohomological dimension of `G` is at most that of `H`. -/
+theorem cohomologicalDimensionAt_le_of_forall_res_injective {H : Subgroup G}
+    (hres : ∀ (M : Type (max u v)) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+      [DistribMulAction G M] [ContinuousSMul G M], IsPPrimaryTorsion p M → ∀ i : ℕ,
+      Function.Injective (ContinuousCohomology.res H (ofDiscreteModule ℤ G M) (i + 1)).hom) :
+    cohomologicalDimensionAt.{v} p G ≤ cohomologicalDimensionAt.{v} p H := by
+  induction hcd : cohomologicalDimensionAt.{v} p H using ENat.recTopCoe with
+  | top => exact le_top
+  | coe n =>
+    exact (cohomologicalDimensionAt_le_iff p G n).2
+      (((cohomologicalDimensionAt_le_iff p H n).1 hcd.le).of_forall_res_injective hres)
+
+variable [CompactSpace G]
+
+/-- **`cd_p G ≤ cd_p U` for an open subgroup `U` of index prime to `p`**, as the vanishing
+predicate: for `U` open in a compact group `G` with `¬ p ∣ [G : U]`,
+`CohomologicalDimensionLE p U n` implies `CohomologicalDimensionLE p G n`. -/
+theorem CohomologicalDimensionLE.of_not_dvd_index (hp : p.Prime) (U : OpenSubgroup G)
+    (hU : ¬ p ∣ U.toSubgroup.index) {n : ℕ} (h : CohomologicalDimensionLE.{v} p U.toSubgroup n) :
+    CohomologicalDimensionLE.{v} p G n :=
+  h.of_forall_res_injective fun _ _ _ _ _ _ hM i ↦
+    ContinuousCohomology.res_injective_of_not_dvd_index hp hM U hU i
+
+/-- **`cd_p G ≤ cd_p U` for an open subgroup `U` of index prime to `p`** (Serre, *Galois
+Cohomology*, I §3.3, Prop. 14): for `U` open in a compact group `G` with `¬ p ∣ [G : U]`, the
+`p`-cohomological dimension of `G` is at most that of `U`. -/
+theorem cohomologicalDimensionAt_le_of_not_dvd_index (hp : p.Prime) (U : OpenSubgroup G)
+    (hU : ¬ p ∣ U.toSubgroup.index) :
+    cohomologicalDimensionAt.{v} p G ≤ cohomologicalDimensionAt.{v} p U.toSubgroup :=
+  cohomologicalDimensionAt_le_of_forall_res_injective fun _ _ _ _ _ _ hM i ↦
+    ContinuousCohomology.res_injective_of_not_dvd_index hp hM U hU i
+
+variable [TotallyDisconnectedSpace G]
+
+/-- **`cd_p G ≤ cd_p H` for a closed subgroup `H` whose open neighbourhoods all have index prime to
+`p`**, as the vanishing predicate: for `H` closed in a profinite group `G` with every open `V ⊇ H`
+of index prime to `p`, `CohomologicalDimensionLE p H n` implies `CohomologicalDimensionLE p G n`. -/
+theorem CohomologicalDimensionLE.of_isClosed_of_forall_not_dvd_index (hp : p.Prime)
+    {H : Subgroup G} (hH : IsClosed (H : Set G))
+    (hind : ∀ V : OpenSubgroup G, H ≤ V → ¬ p ∣ V.toSubgroup.index) {n : ℕ}
+    (h : CohomologicalDimensionLE.{v} p H n) : CohomologicalDimensionLE.{v} p G n :=
+  h.of_forall_res_injective fun M _ _ _ _ _ hM i ↦
+    ContinuousCohomology.res_injective_of_forall_not_dvd_index hp
+      (ofDiscreteModule_isSmoothDiscrete ℤ G M) hM hH hind i
 
 /-- **`cd_p G ≤ cd_p H` for a closed subgroup `H` whose open neighbourhoods all have index prime to
 `p`** (Serre, *Galois Cohomology*, I §3.3, Cor. to Prop. 14): for `H` closed in a profinite group
@@ -122,34 +174,9 @@ most that of `H`. -/
 theorem cohomologicalDimensionAt_le_of_isClosed_of_forall_not_dvd_index (hp : p.Prime)
     {H : Subgroup G} (hH : IsClosed (H : Set G))
     (hind : ∀ V : OpenSubgroup G, H ≤ V → ¬ p ∣ V.toSubgroup.index) :
-    cohomologicalDimensionAt.{v} p G ≤ cohomologicalDimensionAt.{v} p H := by
-  induction hcd : cohomologicalDimensionAt.{v} p H using ENat.recTopCoe with
-  | top => exact le_top
-  | coe n =>
-    exact (cohomologicalDimensionAt_le_iff p G n).2
-      (((cohomologicalDimensionAt_le_iff p H n).1 hcd.le).of_isClosed_of_forall_not_dvd_index hp
-        hH hind)
-
-/-- **`cd_p G ≤ cd_p U` for an open subgroup `U` of index prime to `p`**, as the vanishing
-predicate: for `U` open in a profinite group `G` with `¬ p ∣ [G : U]`,
-`CohomologicalDimensionLE p U n` implies `CohomologicalDimensionLE p G n`. -/
-theorem CohomologicalDimensionLE.of_not_dvd_index (hp : p.Prime) (U : OpenSubgroup G)
-    (hU : ¬ p ∣ U.toSubgroup.index) {n : ℕ} (h : CohomologicalDimensionLE.{v} p U.toSubgroup n) :
-    CohomologicalDimensionLE.{v} p G n :=
-  -- every open `V ⊇ U` has index dividing `[G : U]`, hence prime to `p`
-  h.of_isClosed_of_forall_not_dvd_index hp U.isClosed fun _ hUV hV ↦
-    hU (hV.trans (Subgroup.index_dvd_of_le hUV))
-
-/-- **`cd_p G ≤ cd_p U` for an open subgroup `U` of index prime to `p`** (Serre, *Galois
-Cohomology*, I §3.3, Prop. 14): for `U` open in a profinite group `G` with `¬ p ∣ [G : U]`, the
-`p`-cohomological dimension of `G` is at most that of `U`. -/
-theorem cohomologicalDimensionAt_le_of_not_dvd_index (hp : p.Prime) (U : OpenSubgroup G)
-    (hU : ¬ p ∣ U.toSubgroup.index) :
-    cohomologicalDimensionAt.{v} p G ≤ cohomologicalDimensionAt.{v} p U.toSubgroup := by
-  induction hcd : cohomologicalDimensionAt.{v} p U.toSubgroup using ENat.recTopCoe with
-  | top => exact le_top
-  | coe n =>
-    exact (cohomologicalDimensionAt_le_iff p G n).2
-      (((cohomologicalDimensionAt_le_iff p U.toSubgroup n).1 hcd.le).of_not_dvd_index hp U hU)
+    cohomologicalDimensionAt.{v} p G ≤ cohomologicalDimensionAt.{v} p H :=
+  cohomologicalDimensionAt_le_of_forall_res_injective fun M _ _ _ _ _ hM i ↦
+    ContinuousCohomology.res_injective_of_forall_not_dvd_index hp
+      (ofDiscreteModule_isSmoothDiscrete ℤ G M) hM hH hind i
 
 end TauCeti
