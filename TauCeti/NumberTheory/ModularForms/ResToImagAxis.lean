@@ -8,10 +8,10 @@ module
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 public import Mathlib.NumberTheory.ModularForms.Identities
-public import Mathlib.NumberTheory.ModularForms.NormTrace
-public import Mathlib.NumberTheory.ModularForms.QExpansion
 public import TauCeti.Analysis.Complex.UpperHalfPlane.ResToImagAxis
 public import TauCeti.NumberTheory.ModularForms.SlashActionRat
+import Mathlib.NumberTheory.ModularForms.NormTrace
+import Mathlib.NumberTheory.ModularForms.QExpansion
 
 /-!
 # The slash action on the imaginary axis

@@ -11,6 +11,7 @@ public import TauCeti.NumberTheory.ModularForms.GeodesicIntegral
 public import TauCeti.RingTheory.MvPolynomial.Homogeneous
 import Mathlib.MeasureTheory.Integral.Asymptotics
 import Mathlib.MeasureTheory.Integral.ExpDecay
+import TauCeti.NumberTheory.ModularForms.Cusps.Basic
 
 /-!
 # The period integral of a cusp form against a binary form
@@ -56,7 +57,7 @@ the exponential decay of a cusp form there, which beats the polynomial growth of
   holomorphic.
 * `TauCeti.ModularSymbols.integrableOn_resToImagAxis_periodIntegrand_slash`: **absolute
   convergence** of the period integral of a cusp form of weight `w + 2` against a binary form of
-  degree `w` along the geodesic between any two cusps.
+  degree `w` along the geodesic between any two distinct cusps.
 * `TauCeti.ModularSymbols.geodesicIntegral_mapGL_mul_periodIntegrand`: the transformation law
   `∫_{γβ}^{γα} f(z) P(z, 1) dz = ∫_β^α (f ∣[k] γ)(z) (P ∣ γ)(z, 1) dz` for `γ ∈ SL(2, ℤ)`, and
   `TauCeti.ModularSymbols.geodesicIntegral_mapGL_mul_periodIntegrand_of_mem`: its form for `γ`
@@ -268,8 +269,8 @@ theorem integrableOn_resToImagAxis_periodIntegrand_slash_Ici [Γ.IsArithmetic] [
 /-- **Absolute convergence of the period integral.** For a cusp form `f` of weight `w + 2` on an
 arithmetic subgroup, a binary form `P` of degree `w`, and a rational matrix `g` of positive
 determinant, the integrand of `∫_{g • 0}^{g • ∞} f(z) P(z, 1) dz` is integrable along the whole
-geodesic: both endpoints are cusps, and each is moved to `i∞`, the finite one by the reflection
-`S`. -/
+geodesic between the two distinct cusps `g • 0` and `g • ∞`: each endpoint is moved to `i∞`, the
+finite one by the reflection `S`. -/
 theorem integrableOn_resToImagAxis_periodIntegrand_slash [Γ.IsArithmetic] [CuspFormClass F Γ k]
     (f : F) (hk : k = w + 2) (P : homogeneousSubmodule (Fin 2) R w) {g : GL (Fin 2) ℚ}
     (hg : 0 < (g : Matrix (Fin 2) (Fin 2) ℚ).det) :

@@ -7,9 +7,9 @@ module
 
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Topology.Compactification.OnePoint.ProjectiveLine
-public import TauCeti.NumberTheory.ModularForms.Cusps.Basic
 public import TauCeti.NumberTheory.ModularForms.ResToImagAxis
 public import TauCeti.NumberTheory.ModularForms.SlashActionRat
+import TauCeti.NumberTheory.ModularForms.Cusps.Basic
 
 /-!
 # Integrals of one-forms along geodesics between cusps

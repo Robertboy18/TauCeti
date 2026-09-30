@@ -47,7 +47,7 @@ namespace TauCeti.UpperHalfPlane
 
 /-- For a polynomial `P` in two variables with coefficients mapping to `ℂ`, the function
 `z ↦ P(z, 1)` is holomorphic on `ℍ`. -/
-lemma _root_.MvPolynomial.mdifferentiable_aeval_coe {R : Type*} [CommRing R] [Algebra R ℂ]
+lemma _root_.MvPolynomial.mdifferentiable_aeval_coe {R : Type*} [CommSemiring R] [Algebra R ℂ]
     (P : MvPolynomial (Fin 2) R) : MDiff fun z : ℍ ↦ MvPolynomial.aeval ![(z : ℂ), 1] P := by
   induction P using MvPolynomial.induction_on with
   | C a => simpa using mdifferentiable_const

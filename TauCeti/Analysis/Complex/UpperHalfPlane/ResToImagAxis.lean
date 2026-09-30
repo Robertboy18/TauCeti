@@ -162,8 +162,8 @@ open Asymptotics in
 /-- Along the imaginary axis, a polynomial `P` in the numerator `a i t + b` and denominator
 `c i t + d` of the Möbius transformation of a real matrix grows at most like `t ^ n` for
 `n ≥ P.totalDegree`. -/
-theorem isBigO_aeval_num_denom {R : Type*} [CommRing R] [Algebra R ℂ] {P : MvPolynomial (Fin 2) R}
-    {n : ℕ} (hP : P.totalDegree ≤ n) (g : GL (Fin 2) ℝ) :
+theorem isBigO_aeval_num_denom {R : Type*} [CommSemiring R] [Algebra R ℂ]
+    {P : MvPolynomial (Fin 2) R} {n : ℕ} (hP : P.totalDegree ≤ n) (g : GL (Fin 2) ℝ) :
     (fun t : ℝ ↦ MvPolynomial.aeval ![num g (Complex.I * t), denom g (Complex.I * t)] P) =O[atTop]
       fun t ↦ t ^ n := by
   have hI : (fun t : ℝ ↦ Complex.I * (t : ℂ)) =O[atTop] fun t : ℝ ↦ t :=
