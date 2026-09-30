@@ -22,11 +22,11 @@ the substitution `z = g • (i t)` turns the integral of the one-form `F(z) dz` 
 
 because the weight-`2` slash `(F ∣[2] g)(τ) = F(g • τ) · det g · (cτ + d)⁻²` is exactly the
 pullback of `F(z) dz` along `τ ↦ g • τ`. This file takes the right-hand side as the definition of
-the **geodesic integral** `TauCeti.geodesicIntegral g F` and proves that it is intrinsic to the
-oriented geodesic: it depends only on the pair of endpoints `(g • 0, g • ∞)`, changes sign when
-the endpoints are swapped, and transforms under a further matrix by slashing the integrand. Both
-endpoints are improper, and the integral is a Bochner integral, so it vanishes when the integrand
-is not integrable; the convergence criterion
+the **geodesic integral** `Matrix.GeneralLinearGroup.geodesicIntegral g F` and proves that it is
+intrinsic to the oriented geodesic: it depends only on the pair of endpoints `(g • 0, g • ∞)`,
+changes sign when the endpoints are swapped, and transforms under a further matrix by slashing the
+integrand. Both endpoints are improper, and the integral is a Bochner integral, so it vanishes when
+the integrand is not integrable; the convergence criterion
 `UpperHalfPlane.integrableOn_resToImagAxis_Ioi_of_slash_S` (in
 `TauCeti.NumberTheory.ModularForms.ResToImagAxis`) reduces integrability near the finite end
 `g • 0` to integrability near `i∞` of the reflected integrand `F ∣[2] (g S)`, so that both ends are
@@ -48,19 +48,22 @@ symbols, whose integrand `f(z) P(z, 1)` and convergence are treated in
 
 ## Main definitions
 
-* `TauCeti.geodesicIntegral g F`: the integral `∫_{g • 0}^{g • ∞} F(z) dz`, as
-  `i ∫₀^∞ (F ∣[2] g)(i t) dt`.
+* `Matrix.GeneralLinearGroup.geodesicIntegral g F`: the integral `∫_{g • 0}^{g • ∞} F(z) dz`, as
+  `i ∫₀^∞ (F ∣[2] g)(i t) dt`. It is an operation on the matrix `g ∈ GL(2, ℚ)` cutting out the
+  geodesic, so it lives in the namespace of `GL` and is available as `g.geodesicIntegral F`.
 
 ## Main results
 
-* `TauCeti.geodesicIntegral_mul`: the substitution `z ↦ g • z`,
+* `Matrix.GeneralLinearGroup.geodesicIntegral_mul`: the substitution `z ↦ g • z`,
   `∫_{gh • 0}^{gh • ∞} F(z) dz = ∫_{h • 0}^{h • ∞} (F ∣[2] g)(z) dz`.
-* `TauCeti.geodesicIntegral_mul_of_diagonal` and `TauCeti.geodesicIntegral_eq_of_smul_eq`: the
-  integral only depends on the endpoints `g • 0` and `g • ∞`, for `g` of positive determinant.
-* `TauCeti.geodesicIntegral_mul_S`: reversing the orientation,
+* `Matrix.GeneralLinearGroup.geodesicIntegral_mul_of_diagonal` and
+  `Matrix.GeneralLinearGroup.geodesicIntegral_eq_of_smul_eq`: the integral only depends on the
+  endpoints `g • 0` and `g • ∞`, for `g` of positive determinant.
+* `Matrix.GeneralLinearGroup.geodesicIntegral_mul_S`: reversing the orientation,
   `∫_{g • ∞}^{g • 0} F(z) dz = -∫_{g • 0}^{g • ∞} F(z) dz`.
-* `TauCeti.geodesicIntegral_add`, `TauCeti.geodesicIntegral_smul`: linearity in the integrand,
-  for integrable integrands.
+* `Matrix.GeneralLinearGroup.geodesicIntegral_add` and
+  `Matrix.GeneralLinearGroup.geodesicIntegral_smul`: linearity in the integrand, for integrable
+  integrands.
 
 ## References
 
@@ -72,8 +75,8 @@ symbols, whose integrand `f(z) P(z, 1)` and convergence are treated in
 
 public section
 
-open Complex MeasureTheory Set Matrix Matrix.SpecialLinearGroup ModularGroup
-open OnePoint
+open Complex MeasureTheory Set Matrix Matrix.GeneralLinearGroup Matrix.SpecialLinearGroup
+open ModularGroup OnePoint
 open UpperHalfPlane hiding I
 open scoped MatrixGroups ModularForm
 
@@ -90,11 +93,12 @@ The definition is total in `g`, like the slash action: for `det g < 0` it is the
 which is then a junk value and not the integral along the geodesic from `g • 0` to `g • ∞` (the
 slash of a negative-determinant matrix involves complex conjugation). Every result reading it as a
 geodesic integral assumes `0 < det g`. -/
-noncomputable def geodesicIntegral (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) : ℂ :=
+noncomputable def _root_.Matrix.GeneralLinearGroup.geodesicIntegral (g : GL (Fin 2) ℚ)
+    (F : ℍ → ℂ) : ℂ :=
   I * ∫ t in Ioi (0 : ℝ), resToImagAxis (F ∣[(2 : ℤ)] g) t
 
 /-- Definition of the geodesic integral. -/
-theorem geodesicIntegral_def (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
+theorem _root_.Matrix.GeneralLinearGroup.geodesicIntegral_def (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
     geodesicIntegral g F = I * ∫ t in Ioi (0 : ℝ), resToImagAxis (F ∣[(2 : ℤ)] g) t := by
   rw [geodesicIntegral]
 
@@ -102,18 +106,19 @@ theorem geodesicIntegral_def (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
 integral of the pulled-back one-form `(F ∣[2] g)(z) dz` from `h • 0` to `h • ∞`. The identity is
 an algebraic consequence of the slash action and holds for every `g` and `h`; its reading as a
 substitution in a geodesic integral requires `g` and `h` to have positive determinant. -/
-theorem geodesicIntegral_mul (g h : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
+theorem _root_.Matrix.GeneralLinearGroup.geodesicIntegral_mul (g h : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
     geodesicIntegral (g * h) F = geodesicIntegral h (F ∣[(2 : ℤ)] g) := by
   rw [geodesicIntegral, geodesicIntegral, SlashAction.slash_mul]
 
 /-- The geodesic integral of the zero one-form vanishes. -/
 @[simp]
-theorem geodesicIntegral_zero (g : GL (Fin 2) ℚ) : geodesicIntegral g 0 = 0 := by
+theorem _root_.Matrix.GeneralLinearGroup.geodesicIntegral_zero (g : GL (Fin 2) ℚ) :
+    geodesicIntegral g 0 = 0 := by
   simp [geodesicIntegral]
 
 /-- The geodesic integral is additive in the integrand, for integrable integrands (for every
 `g`, since the slash action is additive). -/
-theorem geodesicIntegral_add (g : GL (Fin 2) ℚ) {F G : ℍ → ℂ}
+theorem _root_.Matrix.GeneralLinearGroup.geodesicIntegral_add (g : GL (Fin 2) ℚ) {F G : ℍ → ℂ}
     (hF : IntegrableOn (resToImagAxis (F ∣[(2 : ℤ)] g)) (Ioi 0))
     (hG : IntegrableOn (resToImagAxis (G ∣[(2 : ℤ)] g)) (Ioi 0)) :
     geodesicIntegral g (F + G) = geodesicIntegral g F + geodesicIntegral g G := by
@@ -122,8 +127,9 @@ theorem geodesicIntegral_add (g : GL (Fin 2) ℚ) {F G : ℍ → ℂ}
 
 /-- The geodesic integral is `ℂ`-linear in the integrand, for `g` of positive determinant (for
 negative determinant the slash conjugates the scalar). -/
-theorem geodesicIntegral_smul {g : GL (Fin 2) ℚ} (hg : 0 < (g : Matrix (Fin 2) (Fin 2) ℚ).det)
-    (c : ℂ) (F : ℍ → ℂ) : geodesicIntegral g (c • F) = c * geodesicIntegral g F := by
+theorem _root_.Matrix.GeneralLinearGroup.geodesicIntegral_smul {g : GL (Fin 2) ℚ}
+    (hg : 0 < (g : Matrix (Fin 2) (Fin 2) ℚ).det) (c : ℂ) (F : ℍ → ℂ) :
+    geodesicIntegral g (c • F) = c * geodesicIntegral g F := by
   simp only [geodesicIntegral, ModularForm.rat_smul_slash_of_det_pos _ hg, resToImagAxis_smul,
     Pi.smul_apply, smul_eq_mul]
   rw [integral_const_mul]
@@ -134,9 +140,10 @@ theorem geodesicIntegral_smul {g : GL (Fin 2) ℚ} (hg : 0 < (g : Matrix (Fin 2)
 /-- **Reparametrising the geodesic.** A diagonal matrix `d` of positive determinant fixes the
 cusps `0` and `∞` and rescales the imaginary axis, so it does not change the geodesic integral
 from `g • 0` to `g • ∞`. -/
-theorem geodesicIntegral_mul_of_diagonal (g : GL (Fin 2) ℚ) {d : GL (Fin 2) ℚ}
-    (h₁₀ : d 1 0 = 0) (h₀₁ : d 0 1 = 0) (hd : 0 < (d : Matrix (Fin 2) (Fin 2) ℚ).det)
-    (F : ℍ → ℂ) : geodesicIntegral (g * d) F = geodesicIntegral g F := by
+theorem _root_.Matrix.GeneralLinearGroup.geodesicIntegral_mul_of_diagonal (g : GL (Fin 2) ℚ)
+    {d : GL (Fin 2) ℚ} (h₁₀ : d 1 0 = 0) (h₀₁ : d 0 1 = 0)
+    (hd : 0 < (d : Matrix (Fin 2) (Fin 2) ℚ).det) (F : ℍ → ℂ) :
+    geodesicIntegral (g * d) F = geodesicIntegral g F := by
   rw [geodesicIntegral_mul, geodesicIntegral_def, geodesicIntegral_def]
   -- the axis is rescaled by the positive ratio `r = d₀₀ / d₁₁`
   have hr0 : (0 : ℝ) < d 0 0 / d 1 1 := by
@@ -150,7 +157,7 @@ theorem geodesicIntegral_mul_of_diagonal (g : GL (Fin 2) ℚ) {d : GL (Fin 2) �
 
 /-- **The geodesic integral only depends on the endpoints.** Two matrices of positive
 determinant sending `(0, ∞)` to the same pair of cusps give the same integral. -/
-theorem geodesicIntegral_eq_of_smul_eq {g g' : GL (Fin 2) ℚ}
+theorem _root_.Matrix.GeneralLinearGroup.geodesicIntegral_eq_of_smul_eq {g g' : GL (Fin 2) ℚ}
     (hg : 0 < (g : Matrix (Fin 2) (Fin 2) ℚ).det) (hg' : 0 < (g' : Matrix (Fin 2) (Fin 2) ℚ).det)
     (h₀ : g • ((0 : ℚ) : OnePoint ℚ) = g' • ((0 : ℚ) : OnePoint ℚ))
     (hinf : g • (∞ : OnePoint ℚ) = g' • ∞) (F : ℍ → ℂ) :
@@ -186,7 +193,7 @@ theorem geodesicIntegral_eq_of_smul_eq {g g' : GL (Fin 2) ℚ}
 the integral from `g • ∞` to `g • 0` is the negative of the integral from `g • 0` to `g • ∞`. The
 identity is the substitution `t ↦ 1 / t` on the imaginary axis and holds for every `g`; its
 reading as an orientation reversal of a geodesic integral requires `0 < det g`. -/
-theorem geodesicIntegral_mul_S (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
+theorem _root_.Matrix.GeneralLinearGroup.geodesicIntegral_mul_S (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
     geodesicIntegral (g * mapGL ℚ S) F = -geodesicIntegral g F := by
   rw [geodesicIntegral_mul, geodesicIntegral, geodesicIntegral, ModularForm.rat_slash_mapGL,
     ← TauCeti.Matrix.SpecialLinearGroup.coe_GL_eq_mapGL, ← ModularForm.SL_slash]

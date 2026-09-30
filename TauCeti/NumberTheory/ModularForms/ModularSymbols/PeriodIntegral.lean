@@ -290,14 +290,14 @@ theorem integrableOn_resToImagAxis_periodIntegrand_slash [Γ.IsArithmetic] [Cusp
 /-- **The transformation law of the periods under `SL(2, ℤ)`**:
 `∫_{γ g • 0}^{γ g • ∞} f(z) P(z, 1) dz = ∫_{g • 0}^{g • ∞} (f ∣[k] γ)(z) (P ∣ γ)(z, 1) dz`,
 the substitution `z ↦ γ • z` in the period integral. The identity holds for every rational `g`
-(it is `geodesicIntegral_mul` and the transformation law of the integrand); both sides are period
-integrals along geodesics when `0 < det g`. -/
+(it is `Matrix.GeneralLinearGroup.geodesicIntegral_mul` and the transformation law of the
+integrand); both sides are period integrals along geodesics when `0 < det g`. -/
 theorem geodesicIntegral_mapGL_mul_periodIntegrand {k : ℤ} (hk : k = w + 2) (f : ℍ → ℂ)
     (P : homogeneousSubmodule (Fin 2) R w) (γ : SL(2, ℤ)) (g : GL (Fin 2) ℚ) :
-    geodesicIntegral (mapGL ℚ γ * g) (periodIntegrand f P) =
-      geodesicIntegral g
+    (mapGL ℚ γ * g).geodesicIntegral (periodIntegrand f P) =
+      g.geodesicIntegral
         (periodIntegrand (f ∣[k] γ) (binaryFormRep R w (op (γ : Matrix (Fin 2) (Fin 2) ℤ)) P)) := by
-  rw [geodesicIntegral_mul, periodIntegrand_slash_mapGL hk]
+  rw [Matrix.GeneralLinearGroup.geodesicIntegral_mul, periodIntegrand_slash_mapGL hk]
 
 /-- **The periods of a form respect the modular-symbol relation**: for `γ` in the level `Γ` of a
 slash-invariant `f`,
@@ -308,8 +308,8 @@ sides are period integrals along geodesics when `0 < det g`. -/
 theorem geodesicIntegral_mapGL_mul_periodIntegrand_of_mem {Γ : Subgroup SL(2, ℤ)}
     [SlashInvariantFormClass F (Γ.map (mapGL ℝ)) k] (f : F) (hk : k = w + 2)
     (P : homogeneousSubmodule (Fin 2) R w) {γ : SL(2, ℤ)} (hγ : γ ∈ Γ) (g : GL (Fin 2) ℚ) :
-    geodesicIntegral (mapGL ℚ γ * g) (periodIntegrand f P) =
-      geodesicIntegral g
+    (mapGL ℚ γ * g).geodesicIntegral (periodIntegrand f P) =
+      g.geodesicIntegral
         (periodIntegrand f (binaryFormRep R w (op (γ : Matrix (Fin 2) (Fin 2) ℤ)) P)) := by
   rw [geodesicIntegral_mapGL_mul_periodIntegrand hk, ModularForm.SL_slash,
     TauCeti.Matrix.SpecialLinearGroup.coe_GL_eq_mapGL,
