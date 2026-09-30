@@ -32,7 +32,7 @@ namespace TauCeti
 
 /-- **Polynomial growth of a polynomial in `O(u)` variables.** If each coordinate of `x` is `O(u)`
 along `l`, and `1 = O(u)`, then `aeval (x a) P` is `O(u a ^ n)` for every `n ≥ P.totalDegree`. -/
-theorem isBigO_aeval_of_totalDegree_le {α ι R 𝕜 : Type*} [CommRing R] [NormedField 𝕜]
+theorem isBigO_aeval_of_totalDegree_le {α ι R 𝕜 : Type*} [CommRing R] [SeminormedCommRing 𝕜]
     [Algebra R 𝕜] {l : Filter α} {P : MvPolynomial ι R} {n : ℕ} (hP : P.totalDegree ≤ n)
     {x : α → ι → 𝕜} {u : α → ℝ} (hx : ∀ i, (fun a ↦ x a i) =O[l] u)
     (hu : (fun _ ↦ (1 : ℝ)) =O[l] u) :
