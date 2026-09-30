@@ -551,7 +551,7 @@ variable {G : Type*} [Group G] {M M' : Type*} [AddCommGroup M] [AddCommGroup M']
 
 /-- Precomposition with an injection is surjective when the target modules are killed by a prime
 `p`: `Hom(-, N)` is exact on the modules killed by `p`. This is
-`TauCeti.AddMonoidHom.exists_comp_eq_of_injective` on the internal hom. -/
+`AddMonoidHom.exists_comp_eq_of_injective` on the internal hom. -/
 theorem precomp_surjective {p : ℕ} [Fact p.Prime] (hM' : ∀ x : M', p • x = 0)
     (hN : ∀ x : N, p • x = 0) {f : M →+[G] M'} (hf : Function.Injective f) :
     Function.Surjective (precomp G f (N := N)) := fun φ => by

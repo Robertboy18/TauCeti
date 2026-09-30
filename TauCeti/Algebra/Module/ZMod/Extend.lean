@@ -26,7 +26,7 @@ inclusion `2ℤ/4ℤ ⊆ ℤ/4ℤ` to a homomorphism `ℤ/4ℤ → ℤ/2ℤ`, si
 
 ## Main results
 
-* `TauCeti.AddMonoidHom.exists_comp_eq_of_injective`: for `p` prime and `B`, `N` killed by `p`,
+* `AddMonoidHom.exists_comp_eq_of_injective`: for `p` prime and `B`, `N` killed by `p`,
   every additive homomorphism `A →+ N` is the restriction along an injective `f : A →+ B` of an
   additive homomorphism `B →+ N`.
 -/
@@ -40,7 +40,7 @@ variable {p : ℕ} [Fact p.Prime] {A B N : Type*} [AddCommGroup A] [AddCommGroup
 /-- **Extension along an injection of groups killed by a prime.** If `p` is prime and `B` and `N`
 are killed by `p`, every additive homomorphism `φ : A →+ N` extends along an injective additive
 homomorphism `f : A →+ B` to a homomorphism `ψ : B →+ N` with `ψ ∘ f = φ`. -/
-theorem AddMonoidHom.exists_comp_eq_of_injective (hB : ∀ b : B, p • b = 0)
+theorem _root_.AddMonoidHom.exists_comp_eq_of_injective (hB : ∀ b : B, p • b = 0)
     (hN : ∀ x : N, p • x = 0) {f : A →+ B} (hf : Function.Injective f) (φ : A →+ N) :
     ∃ ψ : B →+ N, ψ.comp f = φ := by
   have hA : ∀ a : A, p • a = 0 := fun a => hf (by rw [map_nsmul, hB, map_zero])
@@ -49,9 +49,9 @@ theorem AddMonoidHom.exists_comp_eq_of_injective (hB : ∀ b : B, p • b = 0)
   let := AddCommGroup.zmodModule hN
   obtain ⟨g, hg⟩ := (f.toZModLinearMap p).exists_leftInverse_of_injective
     (LinearMap.ker_eq_bot.mpr hf)
-  refine ⟨((φ.toZModLinearMap p).comp g).toAddMonoidHom, _root_.AddMonoidHom.ext fun a => ?_⟩
+  refine ⟨((φ.toZModLinearMap p).comp g).toAddMonoidHom, AddMonoidHom.ext fun a => ?_⟩
   have h := LinearMap.congr_fun hg a
-  simp only [LinearMap.comp_apply, _root_.AddMonoidHom.coe_toZModLinearMap,
+  simp only [LinearMap.comp_apply, AddMonoidHom.coe_toZModLinearMap,
     LinearMap.id_apply] at h
   simp [h]
 
