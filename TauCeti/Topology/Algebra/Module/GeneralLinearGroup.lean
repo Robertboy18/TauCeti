@@ -24,7 +24,7 @@ Over a field, the endomorphism algebra of a finite-dimensional space is itself f
 so its module topology is Hausdorff when the field is Hausdorff and locally compact when the field
 is locally compact. The unit topology inherits both properties, so the linear automorphisms of a
 finite-dimensional space over a Hausdorff locally compact field form a locally compact group. This
-is the local-compactness input for the orthogonal and Spin point groups over `ℝ` and `ℚ_p`.
+is the local-compactness input for the orthogonal point group over `ℝ` and `ℚ_p`.
 -/
 
 public section

@@ -76,8 +76,7 @@ variable {K V : Type*} [Field K] [TopologicalSpace K] [IsTopologicalRing K] [T2S
 
 /-- The orthogonal group of a finite-dimensional quadratic space over a Hausdorff topological
 field in which `2` is invertible is closed in the linear automorphism group with its canonical
-topology. The statement involves no topology on the space itself; the proof uses its module
-topology, for which the form is continuous. -/
+topology. No topology on the space itself is assumed. -/
 theorem isClosed_orthogonalGroup : IsClosed (orthogonalGroup Q : Set (V ≃ₗ[K] V)) := by
   let _ : TopologicalSpace V := moduleTopology K V
   have h : (orthogonalGroup Q : Set (V ≃ₗ[K] V)) =

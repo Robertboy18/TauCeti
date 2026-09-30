@@ -41,9 +41,9 @@ Scalar units lie in the Lipschitz group as soon as some vector is anisotropic.
   Lipschitz group.
 * `CliffordAlgebra.mem_lipschitzGroup_iff_involute_act_ι_mem_range_ι`: for a nondegenerate form
   representing a unit, the Lipschitz group is exactly the classical Clifford group.
-* `CliffordAlgebra.mem_spinGroup_iff_involute_act_ι_mem_range_ι`: under the same hypotheses,
-  Mathlib's Spin group consists of the even unitary elements whose twisted conjugation preserves
-  the vectors, with no reference to the Lipschitz closure.
+* `CliffordAlgebra.mem_spinGroup_iff_unitary_even_and_involute_act_ι_mem_range_ι`: under the
+  same hypotheses, Mathlib's Spin group consists of the even unitary elements whose twisted
+  conjugation preserves the vectors, with no reference to the Lipschitz closure.
 
 ## References
 
@@ -148,7 +148,7 @@ finite-dimensional space representing a unit, an element of the Clifford algebra
 `v ↦ involute x * ι Q v * star x` preserves the vectors. Unitarity makes `star x` the inverse
 of `x`, so this is the Lipschitz condition of
 `mem_lipschitzGroup_iff_involute_act_ι_mem_range_ι` read on the Clifford algebra itself. -/
-theorem mem_spinGroup_iff_involute_act_ι_mem_range_ι (hQ : Q.Nondegenerate)
+theorem mem_spinGroup_iff_unitary_even_and_involute_act_ι_mem_range_ι (hQ : Q.Nondegenerate)
     (hv : ∃ v, IsUnit (Q v)) {x : CliffordAlgebra Q} :
     x ∈ spinGroup Q ↔
       x ∈ unitary (CliffordAlgebra Q) ∧ x ∈ even Q ∧

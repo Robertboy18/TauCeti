@@ -85,8 +85,7 @@ theorem locallyCompactSpace_moduleTopology [LocallyCompactSpace K] :
   exact ModuleTopology.locallyCompactSpace b
 
 /-- Every subspace of a finite-dimensional space over a Hausdorff division ring equipped with a
-topological semiring structure is closed for the module topology: it is the kernel of the
-continuous projection onto the Hausdorff finite-dimensional quotient. -/
+topological semiring structure is closed for the module topology. -/
 theorem _root_.Submodule.isClosed_of_isModuleTopology [T2Space K] [TopologicalSpace V]
     [IsModuleTopology K V] (W : Submodule K V) : IsClosed (W : Set V) := by
   have : T2Space (V ⧸ W) := ModuleTopology.t2Space (Module.finBasis K (V ⧸ W))

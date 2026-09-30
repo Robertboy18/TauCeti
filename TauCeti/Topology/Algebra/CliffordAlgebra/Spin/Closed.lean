@@ -71,8 +71,8 @@ theorem isClosed_spinGroup (hQ : Q.Nondegenerate) :
             (LinearMap.range (ι Q) : Set (CliffordAlgebra Q)) := by
       ext x
       simp only [SetLike.mem_coe,
-        mem_spinGroup_iff_involute_act_ι_mem_range_ι Q hQ hQ.exists_isUnit, mem_inter_iff,
-        mem_iInter, mem_preimage, and_assoc]
+        mem_spinGroup_iff_unitary_even_and_involute_act_ι_mem_range_ι Q hQ hQ.exists_isUnit,
+        mem_inter_iff, mem_iInter, mem_preimage, and_assoc]
     have heven : (even Q : Set (CliffordAlgebra Q)) = (evenOdd Q 0 : Set (CliffordAlgebra Q)) := by
       rw [← even_toSubmodule, Subalgebra.coe_toSubmodule]
     rw [h, heven]
