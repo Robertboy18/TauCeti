@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.TwoOdd
+public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.TwoOdd.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.SuccessiveApproximation.Tail
 
 /-!
@@ -15,8 +15,9 @@ Let `F = freeProP 2 (Fin n)` be the free pro-`2` group on an odd number `n` of g
 `r ∈ λ_1(F)` be a relator with the class of `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)` in `gr_1(F)`, which is
 the normal form modulo `λ_2(F)` of the relators with `q = 2` of odd rank. The dyadic span statement
 `gr_{m+1}(F) = Im δ_ρ + T_{m+1}(ρ)` of
-`TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.TwoOdd`, whose tails are spanned by
-the `2`-powers of the generators `x₂, …, x_n`, feeds the successive approximation with tails
+`TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.TwoOdd.Basic`, whose tails are
+spanned by the `2`-powers of the generators `x₂, …, x_n`, feeds the successive approximation with
+tails
 (`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_range_sup_basisModificationTail_eq_top`):
 a continuous automorphism of `F` carries `r` exactly to
 

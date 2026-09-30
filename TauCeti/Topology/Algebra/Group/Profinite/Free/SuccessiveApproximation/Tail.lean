@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.BigOperators.Group.List
-public import TauCeti.Topology.Algebra.Group.Profinite.Free.SuccessiveApproximation
+public import TauCeti.Topology.Algebra.Group.Profinite.Free.SuccessiveApproximation.Basic
 import TauCeti.Topology.Algebra.Group.Profinite.ProP.Burnside
 
 /-!
@@ -15,8 +15,8 @@ import TauCeti.Topology.Algebra.Group.Profinite.ProP.Burnside
 Let `F = freeProP p X` be the free pro-`p` group on a finite linearly ordered type `X`, with lower
 `p`-series `λ_k = λ_k(F)`, and let `r, w ∈ λ_1(F)` be relators with the same class `ρ ∈ gr_1(F)`.
 When the basis-modification map `δ_ρ` is not onto `gr_{m+1}(F)`, the successive-approximation
-argument of `TauCeti.Topology.Algebra.Group.Profinite.Free.SuccessiveApproximation` still runs as
-soon as the span statement holds up to the **tail** `T_{m+1}(ρ)` of
+argument of `TauCeti.Topology.Algebra.Group.Profinite.Free.SuccessiveApproximation.Basic` still
+runs as soon as the span statement holds up to the **tail** `T_{m+1}(ρ)` of
 `TauCeti.freeProP.basisModificationTail`, spanned by the iterated `p`-powers `π^{m+1} ξ_i` of the
 generators `x_i` whose coefficient `c_i` in `ρ` vanishes:
 
@@ -40,11 +40,15 @@ subgroups `⟨x_i⟩ ∩ λ_2(F)` are detected on the finite quotients
 conclusion is an exact equation `e r = t_{i₁} ⋯ t_{i_a} * w * t_{j₁} ⋯ t_{j_b}` for a continuous
 automorphism `e` of `F`.
 
-This is the first half of Labute's treatment of the relators with `q = 2`: for the dyadic
-normal-form words the tails are the `2`-powers `x_i^{2^{m+1}}` of the generators other than the
-ones carrying the square, and the argument yields the relator in the form
-`x₁^{α₁} r₀(x) x₃^{α₃} ⋯ x_n^{α_n}` with `2`-adic exponents `α_i` divisible by `4`, before the
-tail relator is normalised in its own right.
+This is the first half of Labute's treatment of the relators with `q = 2`. For the odd-rank
+dyadic normal-form word `x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)` the tails are the `2`-powers
+`x_i^{2^{m+1}}` of the generators `x₂, …, x_n` other than the one carrying the square, and the
+argument yields the relator in the intermediate form `x₁² r₀(x) x₂^{α₂} ⋯ x_n^{α_n}` with `2`-adic
+exponents `α₂, …, α_n` divisible by `4`
+(`TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.TwoOdd.Approximation`), before the
+tail relator `r₀(x) x₂^{α₂} ⋯ x_n^{α_n}` is normalised in its own right. For the even-rank word
+`x₁^{2+α} (x₁, x₂) x₃^{2^f} ⋯` a tail is placed in front of the word, which is why the theorem
+takes two lists of tail positions.
 
 ## Main results
 
@@ -226,7 +230,8 @@ theorem exists_continuousMonoidHom_inv_mul_apply_mem_of_range_sup_basisModificat
           map_list_prod, List.map_map, ← QuotientGroup.mk'_apply, map_list_prod, List.map_map]
         simpa [Function.comp_def] using
           List.prod_map_mul_of_mem_center l (fun i ↦ ((t i : freeProP p X) :
-            freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) (k + 1 + 1 + 1))) _ hcen
+            freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) (k + 1 + 1 + 1))) _
+            fun i _ ↦ hcen i
       have hUcen : ∀ l : List X, (((l.map u).prod : freeProP p X) :
           freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) (k + 1 + 1 + 1)) ∈
             Submonoid.center _ := fun l ↦ by
@@ -364,10 +369,16 @@ theorem exists_continuousMulEquiv_apply_eq_of_range_sup_basisModificationTail_eq
   have htH (i : X) : t i ∈ H i :=
     hP.mem_of_forall_mk_mem_map_pLowerCentralSeries hp (hH i) fun k ↦
       (ht i k).symm ▸ (s k).2.2.1 i
+  -- At each level `k`, the classes of the recovered tail elements are the tail classes carried in
+  -- the comparison data, as functions on the generators; this is the form in which they enter the
+  -- level-`k` equation of the data.
+  have hts (k : ℕ) :
+      (fun i ↦ ((t i : freeProP p X) : freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) k)) =
+        (s k).1.2 :=
+    funext fun i ↦ ht i k
   refine ⟨e, t, fun i ↦ (Subgroup.mem_inf.mp (htH i)).1, fun i ↦ (Subgroup.mem_inf.mp (htH i)).2,
     eq_of_forall_mk_eq_of_iInf_eq_bot (hP.iInf_pLowerCentralSeries_eq_bot hp) fun k ↦ ?_⟩
-  rw [hmkT, show (fun i ↦ ((t i : freeProP p X) :
-    freeProP p X ⧸ pLowerCentralSeries p (freeProP p X) k)) = (s k).1.2 from funext fun i ↦ ht i k]
+  rw [hmkT, hts k]
   exact (he k r).trans (s k).2.2.2
 
 end TauCeti.freeProP
