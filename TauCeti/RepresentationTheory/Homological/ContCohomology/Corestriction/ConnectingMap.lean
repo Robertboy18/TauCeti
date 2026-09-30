@@ -41,7 +41,8 @@ reduces to the naturality of the connecting map in the morphism of short exact s
 ```
 
 formed by the three traces, which commute with the inclusions and the projections because the trace
-is natural in the coefficients (`trace_coind_restrict_incl`, `trace_coind_restrict_proj`).
+is natural in the coefficients: both sides are the finite sum `∑ g • f (g⁻¹)` over a transversal,
+and the maps of `S` are additive and equivariant.
 
 ## Main results
 
@@ -78,28 +79,7 @@ variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Com
   [ContinuousSMul G C]
   (S : DiscreteShortExact G A B C) (U : Subgroup G) (hU : IsOpen (U : Set G)) [U.FiniteIndex]
 
-/-! ### The traces form a morphism of short exact sequences -/
-
 attribute [local instance] Subgroup.fintypeQuotientOfFiniteIndex
-
-omit [ContinuousSMul G A] [ContinuousSMul G C] in
-/-- The trace commutes with the inclusions: the trace of `B` after the coinduced inclusion
-`Coind_U^G A → Coind_U^G B` is the inclusion `A → B` after the trace of `A`. -/
-theorem trace_coind_restrict_incl (hU' : IsClosed (U : Set G)) (a : DiscreteCoind G U A) :
-    DiscreteCoind.trace G U B ((coind U hU' (S.restrict U)).incl a) =
-      S.incl (DiscreteCoind.trace G U A a) := by
-  -- Both sides are `∑_{gU} g • S.incl (a g⁻¹)`, the inclusion being additive and equivariant.
-  simp only [DiscreteCoind.trace_apply, map_sum, coind_incl_apply, restrict_incl,
-    S.incl_equivariant]
-
-omit [ContinuousSMul G A] [ContinuousSMul G C] in
-/-- The trace commutes with the projections: the trace of `C` after the coinduced projection
-`Coind_U^G B → Coind_U^G C` is the projection `B → C` after the trace of `B`. -/
-theorem trace_coind_restrict_proj (hU' : IsClosed (U : Set G)) (b : DiscreteCoind G U B) :
-    DiscreteCoind.trace G U C ((coind U hU' (S.restrict U)).proj b) =
-      S.proj (DiscreteCoind.trace G U B b) := by
-  simp only [DiscreteCoind.trace_apply, map_sum, coind_proj_apply, restrict_proj,
-    S.proj_equivariant]
 
 /-! ### Corestriction commutes with the connecting maps -/
 
@@ -132,9 +112,16 @@ theorem delta_corestriction (n : ℕ) :
   have := isIso_shapiroMap U hU' C n
   rw [← cancel_epi (shapiroMap U C n), ← delta_shapiroMap_assoc, shapiroMap_comp_corestriction,
     shapiroMap_comp_corestriction_assoc]
+  -- The traces commute with the coinduced inclusion and projection: both sides are the finite sum
+  -- `∑ g • S.incl (a g⁻¹)` (resp. with `S.proj`), the maps of `S` being additive and equivariant.
   exact (coind U hU' (S.restrict U)).delta_naturality S (DiscreteCoind.trace G U A)
     (DiscreteCoind.trace G U B) (DiscreteCoind.trace G U C)
-    (S.trace_coind_restrict_incl U hU') (S.trace_coind_restrict_proj U hU') n
+    (fun a => by
+      simp only [DiscreteCoind.trace_apply, map_sum, coind_incl_apply, restrict_incl,
+        S.incl_equivariant])
+    (fun b => by
+      simp only [DiscreteCoind.trace_apply, map_sum, coind_proj_apply, restrict_proj,
+        S.proj_equivariant]) n
 
 /-- **`cor (δ x) = δ (cor x)`** for every class `x ∈ Hⁿ(U, C)` (NSW (1.5.2)): corestriction
 commutes with the connecting maps in every degree. -/
