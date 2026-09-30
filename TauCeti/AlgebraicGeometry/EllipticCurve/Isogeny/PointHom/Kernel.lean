@@ -190,8 +190,8 @@ theorem ker_eq_map_ker_toPointHom :
 
 /-- **The kernel of a separable isogeny has `deg φ` points** over a separably closed field
 (Silverman III.4.10(c)). -/
-@[simp]
-theorem card_ker_eq_degree : Nat.card φ.ker = φ.degree := by
+-- Simplify before `mem_ker_iff` rewrites membership in the kernel subtype.
+@[simp↓] theorem card_ker_eq_degree : Nat.card φ.ker = φ.degree := by
   rw [ker_eq_map_ker_toPointHom, ← φ.card_ker_toPointHom_eq_degree]
   exact (Nat.card_congr (φ.toPointHom.ker.equivMapOfInjective _
     (Point.equivBaseChangeSelf W₁).injective).toEquiv).symm
