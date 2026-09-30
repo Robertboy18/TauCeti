@@ -25,9 +25,9 @@ subgroup (`TauCeti.ContinuousCohomology.exists_openSubgroup_le_res_eq_zero`).
 Consequently `cd_p G ≤ cd_p H` for such a subgroup `H`, and in particular `cd_p G ≤ cd_p U` for an
 open subgroup `U` of index prime to `p`. The reverse inequality `cd_p H ≤ cd_p G`, which holds for
 every closed subgroup, is Shapiro's lemma and is not proved here. The closed-subgroup statement is
-the one a Sylow pro-`p` subgroup satisfies, since its open neighbourhoods are exactly the open
-subgroups of index prime to `p`; the comparison of `cd_p G` with the cohomological dimension of a
-Sylow pro-`p` subgroup is where these results are used.
+the one a Sylow pro-`p` subgroup satisfies, since each of its open neighbourhoods has index prime
+to `p`; the comparison of `cd_p G` with the cohomological dimension of a Sylow pro-`p` subgroup is
+where these results are used.
 
 ## Main results
 

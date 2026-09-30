@@ -165,9 +165,10 @@ theorem isProPSylow_iff_isClosed_and_isProP_and_not_dvd_profiniteIndex (q : Nat.
   rw [isProPSylow_iff, P.not_dvd_profiniteIndex_iff_forall_not_dvd_index q]
 
 /-- An open subgroup containing a Sylow pro-`p` subgroup of a compact group has index prime to
-`p`. Together with `isProPSylow_iff_isClosed_and_isProP_and_not_dvd_profiniteIndex` this is the
-finite-index content of the prime-to-`p` condition: the open subgroups containing `P` are exactly
-the open subgroups of index prime to `p`. -/
+`p`. This is the finite-index content of the prime-to-`p` condition in
+`isProPSylow_iff_isClosed_and_isProP_and_not_dvd_profiniteIndex`: every open subgroup `V ≥ P` has
+`[G : V]` prime to `p`. (The converse fails: an open subgroup of index prime to `p` contains some
+Sylow pro-`p` subgroup, but not necessarily the given `P`.) -/
 theorem IsProPSylow.not_dvd_index_of_le (hP : IsProPSylow p P) (V : OpenSubgroup G)
     (hPV : P ≤ V) : ¬ p ∣ V.toSubgroup.index := by
   -- the normal core of `V` is an open normal subgroup `N ≤ V`, and `[G : V]` is the index of the

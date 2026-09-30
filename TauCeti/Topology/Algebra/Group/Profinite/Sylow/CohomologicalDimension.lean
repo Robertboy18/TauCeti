@@ -12,12 +12,13 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Sylow.Basic
 # The `p`-cohomological dimension of a profinite group is at most that of a Sylow subgroup
 
 Let `G` be a profinite group, `p` a prime and `P` a Sylow pro-`p` subgroup of `G`. Then
-`cd_p G ≤ cd_p P`. The open subgroups of `G` containing `P` are exactly the open subgroups of
-index prime to `p`, so restriction from `G` to `P` is injective on the cohomology of every discrete
-`p`-primary torsion `G`-module in every positive degree, and a vanishing statement for `P` transfers
-to `G`. This is one half of the equality `cd_p G = cd_p P` (Serre, *Galois Cohomology*, I §3.3,
-Cor. 1 to Prop. 14; NSW (3.3.6)). The other half, `cd_p P ≤ cd_p G`, is the monotonicity of `cd_p`
-in a closed subgroup, that is Shapiro's lemma for the closed subgroup `P`, and is not proved here.
+`cd_p G ≤ cd_p P`. Every open subgroup of `G` containing `P` has index prime to `p`
+(`TauCeti.IsProPSylow.not_dvd_index_of_le`), so restriction from `G` to `P` is injective on the
+cohomology of every discrete `p`-primary torsion `G`-module in every positive degree, and a
+vanishing statement for `P` transfers to `G`. This is one half of the equality `cd_p G = cd_p P`
+(Serre, *Galois Cohomology*, I §3.3, Cor. 1 to Prop. 14; NSW (3.3.6)). The other half,
+`cd_p P ≤ cd_p G`, is the monotonicity of `cd_p` in a closed subgroup, that is Shapiro's lemma for
+the closed subgroup `P`, and is not proved here.
 
 ## Main results
 
