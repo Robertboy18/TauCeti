@@ -38,7 +38,10 @@ subgroup.
   `(m, φ) ↦ φ m` is `TauCeti.InternalHom.evalPairing_flip_equivariant`.
 * `TauCeti.InternalHom.zmodEquiv`: for a `ZMod n`-module `A`, evaluation at `1` identifies
   `InternalHom G (ZMod n) A` with `A` additively; `TauCeti.InternalHom.toAddMonoidHom_apply_eq_smul`
-  recovers a homomorphism from its value at `1`.
+  recovers a homomorphism from its value at `1`. For a trivial action of `G` on `ZMod n` the
+  conjugation action on `InternalHom G (ZMod n) (ZMod n)` is trivial
+  (`TauCeti.InternalHom.smul_zmod_eq_self`) and evaluation at `1` is equivariant
+  (`TauCeti.InternalHom.zmodEquiv_smul`).
 
 ## Main results
 
@@ -510,6 +513,24 @@ theorem zmodEquiv_apply (φ : InternalHom G (ZMod n) A) :
 theorem zmodEquiv_symm_apply (a : A) (x : ZMod n) :
     ((zmodEquiv G).symm a).toAddMonoidHom x = x • a :=
   (rfl)
+
+section TrivialAction
+
+variable {G} [Group G] [DistribMulAction G (ZMod n)] (htriv : ∀ (g : G) (m : ZMod n), g • m = m)
+
+include htriv
+
+/-- For a trivial action on `ZMod n`, the conjugation action on `InternalHom G (ZMod n) (ZMod n)` is
+trivial. -/
+theorem smul_zmod_eq_self (g : G) (φ : InternalHom G (ZMod n) (ZMod n)) : g • φ = φ :=
+  smul_eq_self_iff.2 fun m => by rw [htriv, htriv]
+
+/-- For a trivial action on `ZMod n`, evaluation at `1` is `G`-equivariant. -/
+theorem zmodEquiv_smul (g : G) (φ : InternalHom G (ZMod n) (ZMod n)) :
+    zmodEquiv G (g • φ) = g • zmodEquiv G φ := by
+  rw [smul_zmod_eq_self htriv, htriv]
+
+end TrivialAction
 
 end ZMod
 
