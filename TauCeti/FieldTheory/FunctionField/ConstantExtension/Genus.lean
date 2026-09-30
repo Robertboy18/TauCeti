@@ -51,14 +51,17 @@ variable [FiniteDimensional F F'] [Algebra.IsSeparable k k']
 
 /-- **The conorm along a constant field extension preserves degrees** (Stichtenoth,
 Theorem 3.6.3(c)): for a finite separable constant field extension `F · k' / k'` of `F / k` with
-exact constant field `k`, `deg (Con D) = deg D` for every divisor `D` of `F / k`. -/
+exact constant field `k`, `deg (Con D) = deg D` for every divisor `D` of `F / k`.  No
+function-field hypothesis on `F / k` is needed. -/
 @[simp]
-theorem Divisor.degree_conorm_of_constantCompositum_eq_top (hF : IsFunctionField k F)
+theorem Divisor.degree_conorm_of_constantCompositum_eq_top
     (hex : IsIntegrallyClosedIn k F) (h : constantCompositum F k' F' = ⊤) (D : Divisor k F) :
     Divisor.degree (Divisor.conorm k' F' D) = Divisor.degree D := by
   have := finiteDimensional_base_of_constantCompositum_eq_top hex h
-  rw [Divisor.degree_conorm k' F' hF (finrank_constantCompositum_eq_finrank_of_isSeparable F k' F'
-    hex), geometricDegree_eq_one_of_constantCompositum_eq_top F k' F' h, Nat.cast_one, one_mul]
+  have := isSeparable_of_constantCompositum_eq_top (k := k) (k' := k') h
+  rw [Divisor.degree_conorm_of_isSeparable k' F'
+    (finrank_constantCompositum_eq_finrank_of_isSeparable F k' F' hex),
+    geometricDegree_eq_one_of_constantCompositum_eq_top F k' F' h, Nat.cast_one, one_mul]
 
 /-- **The genus is unchanged by a finite separable constant field extension** (Stichtenoth,
 Theorem 3.6.3(b)): if `k` is the exact constant field of `F`, then `g(F · k' / k') = g(F / k)`.
@@ -73,11 +76,11 @@ theorem genus_eq_genus_of_constantCompositum_eq_top (hF : IsFunctionField k F)
     obtain ⟨D, hD⟩ := Divisor.exists_le_conorm (k := k) (F := F) k' F' D'
     have hcomp := Divisor.dim_le_dim_add_degree_sub hF' hD
     have hRiemann := Divisor.degree_add_one_sub_dim_le_genus hF D
-    rw [Divisor.dim_conorm hex h hF', Divisor.degree_conorm_of_constantCompositum_eq_top hF hex h]
+    rw [Divisor.dim_conorm hex h hF', Divisor.degree_conorm_of_constantCompositum_eq_top hex h]
       at hcomp
     linarith
   · have hRiemann := Divisor.degree_add_one_sub_dim_le_genus hF' (Divisor.conorm k' F' D)
-    rwa [Divisor.dim_conorm hex h hF', Divisor.degree_conorm_of_constantCompositum_eq_top hF hex h]
+    rwa [Divisor.dim_conorm hex h hF', Divisor.degree_conorm_of_constantCompositum_eq_top hex h]
       at hRiemann
 
 /-- **The conorm of the canonical class is the canonical class** (Stichtenoth,
@@ -94,7 +97,7 @@ theorem conormClassGroup_canonicalClass_of_constantCompositum_eq_top (hF : IsFun
   obtain ⟨W, hW⟩ := (Place.orderSystem hF).divisorClass_surjective (canonicalClass hF hex)
   have hW' := (divisorClass_eq_canonicalClass_iff hF hex W).1 hW
   rw [← hW, Divisor.conormClassGroup_divisorClass, divisorClass_eq_canonicalClass_iff hF' hex',
-    Divisor.dim_conorm hex h hF', Divisor.degree_conorm_of_constantCompositum_eq_top hF hex h,
+    Divisor.dim_conorm hex h hF', Divisor.degree_conorm_of_constantCompositum_eq_top hex h,
     genus_eq_genus_of_constantCompositum_eq_top hF hex h]
   exact hW'
 
@@ -112,12 +115,12 @@ theorem conormClassGroup_injective_of_constantCompositum_eq_top (hF : IsFunction
   rw [Divisor.conormClassGroup_divisorClass, Divisor.divisorClass_eq_zero_iff hF'] at hc
   obtain ⟨z, hz⟩ := hc
   have hdeg : Divisor.degree D = 0 := by
-    rw [← Divisor.degree_conorm_of_constantCompositum_eq_top hF hex h, ← hz,
+    rw [← Divisor.degree_conorm_of_constantCompositum_eq_top hex h, ← hz,
       Divisor.degree_principal]
   have hdim : 1 ≤ Divisor.dim D := by
     rw [← Divisor.dim_conorm hex h hF']
     exact (Divisor.one_le_dim_iff_exists_principal_eq_of_degree_eq_zero hF' (by
-      rw [Divisor.degree_conorm_of_constantCompositum_eq_top hF hex h, hdeg])).2 ⟨z, hz⟩
+      rw [Divisor.degree_conorm_of_constantCompositum_eq_top hex h, hdeg])).2 ⟨z, hz⟩
   exact (Divisor.divisorClass_eq_zero_iff hF).2
     ((Divisor.one_le_dim_iff_exists_principal_eq_of_degree_eq_zero hF hdeg).1 hdim)
 
