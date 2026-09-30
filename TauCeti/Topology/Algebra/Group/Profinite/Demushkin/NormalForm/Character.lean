@@ -39,11 +39,11 @@ isomorphic, because their canonical characters have the images `{±1} × U^(2)` 
 
 ## Main results
 
-* `TauCeti.demushkinCharacter_symm_apply_of_equiv_demushkinWordNeTwo`,
-  `TauCeti.demushkinCharacter_symm_apply_of_equiv_demushkinWordTwoOdd`,
-  `TauCeti.demushkinCharacter_symm_apply_of_equiv_demushkinWordTwoOddTop`,
-  `TauCeti.demushkinCharacter_symm_apply_of_equiv_demushkinWordTwoEven`,
-  `TauCeti.demushkinCharacter_symm_apply_of_equiv_demushkinWordTwoRankTwo`: **the character
+* `TauCeti.demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordNeTwo`,
+  `TauCeti.demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoOdd`,
+  `TauCeti.demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoOddTop`,
+  `TauCeti.demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoEven`,
+  `TauCeti.demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoRankTwo`: **the character
   table on the canonical character**: along an isomorphism onto a normal form, the canonical
   character takes the tabulated values on the marked generators.
 * `TauCeti.range_demushkinCharacter_eq_unitsPrincipal_of_equiv_demushkinWordNeTwo`,
@@ -92,7 +92,7 @@ include hG
 `e : G ≃ₜ* ⟨x₁, …, xₙ ∣ x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)⟩`, for `p ∣ q` and `n ≥ 2` even, the
 canonical character of `G` satisfies `χ(x₂)(1 - q) = 1` and `χ(x_i) = 1` for every `i ≠ 2`, the
 generators being read back in `G` through `e⁻¹`. -/
-theorem demushkinCharacter_symm_apply_of_equiv_demushkinWordNeTwo (hq : p ∣ q) (hn : Even n)
+theorem demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordNeTwo (hq : p ∣ q) (hn : Even n)
     (hn₁ : 1 < n) (e : G ≃ₜ* presentedProP p (Fin n) {demushkinWordNeTwo q n (freeProPGen p n)}) :
     (demushkinCharacter hG (e.symm (presentedProPGen p n _ 1)) : ℤ_[p]) * (1 - q) = 1 ∧
       ∀ i, i ≠ 1 → demushkinCharacter hG (e.symm (presentedProPGen p n _ i)) = 1 :=
@@ -144,7 +144,7 @@ variable {f : ℕ}
 `e : G ≃ₜ* ⟨x₁, …, xₙ ∣ x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)⟩`, for `f ≥ 1` and `n ≥ 3` odd, the
 canonical character of `G` satisfies `χ(x₁) = -1`, `χ(x₃)(1 - 2^f) = 1` and `χ(x_i) = 1`
 otherwise. -/
-theorem demushkinCharacter_symm_apply_of_equiv_demushkinWordTwoOdd (hf : 0 < f) (hn : Odd n)
+theorem demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoOdd (hf : 0 < f) (hn : Odd n)
     (hn₂ : 2 < n)
     (e : G ≃ₜ* presentedProP 2 (Fin n) {demushkinWordTwoOdd f n (freeProPGen 2 n)}) :
     demushkinCharacter hG (e.symm (presentedProPGen 2 n _ 0)) = -1 ∧
@@ -179,7 +179,7 @@ section TwoOddTop
 /-- **The character table on the canonical character, `q = 2`, `n` odd, level `f = ∞`.** Along an
 isomorphism `e : G ≃ₜ* ⟨x₁, …, xₙ ∣ x₁² (x₂, x₃) ⋯ (x_{n-1}, x_n)⟩`, for `n` odd, the canonical
 character of `G` satisfies `χ(x₁) = -1` and `χ(x_i) = 1` for every `i ≠ 1`. -/
-theorem demushkinCharacter_symm_apply_of_equiv_demushkinWordTwoOddTop (hn : Odd n)
+theorem demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoOddTop (hn : Odd n)
     (e : G ≃ₜ* presentedProP 2 (Fin n) {demushkinWordTwoOddTop n (freeProPGen 2 n)}) :
     demushkinCharacter hG (e.symm (presentedProPGen 2 n _ 0)) = -1 ∧
       ∀ i, i ≠ 0 → demushkinCharacter hG (e.symm (presentedProPGen 2 n _ i)) = 1 :=
@@ -206,7 +206,7 @@ variable {a f : ℕ}
 `e : G ≃ₜ* ⟨x₁, …, xₙ ∣ x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)⟩`, for `a` even,
 `f ≥ 1` and `n ≥ 4` even, the canonical character of `G` satisfies `χ(x₂)(1 + a) = -1`,
 `χ(x₄)(1 - 2^f) = 1` and `χ(x_i) = 1` otherwise. -/
-theorem demushkinCharacter_symm_apply_of_equiv_demushkinWordTwoEven (ha : 2 ∣ a) (hf : 0 < f)
+theorem demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoEven (ha : 2 ∣ a) (hf : 0 < f)
     (hn : Even n) (hn₃ : 3 < n)
     (e : G ≃ₜ* presentedProP 2 (Fin n) {demushkinWordTwoEven a f n (freeProPGen 2 n)}) :
     (demushkinCharacter hG (e.symm (presentedProPGen 2 n _ 1)) : ℤ_[2]) * (1 + a) = -1 ∧
@@ -246,7 +246,7 @@ variable {a : ℕ}
 /-- **The character table on the canonical character, `q = 2` and `n = 2`.** Along an isomorphism
 `e : G ≃ₜ* ⟨x₁, x₂ ∣ x₁^{2+a} (x₁, x₂)⟩`, for `a` even, the canonical character of `G` satisfies
 `χ(x₁) = 1` and `χ(x₂)(1 + a) = -1`. -/
-theorem demushkinCharacter_symm_apply_of_equiv_demushkinWordTwoRankTwo (ha : 2 ∣ a)
+theorem demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoRankTwo (ha : 2 ∣ a)
     (e : G ≃ₜ* presentedProP 2 (Fin 2) {demushkinWordTwoRankTwo a (freeProPGen 2 2)}) :
     demushkinCharacter hG (e.symm (presentedProPGen 2 2 _ 0)) = 1 ∧
       (demushkinCharacter hG (e.symm (presentedProPGen 2 2 _ 1)) : ℤ_[2]) * (1 + a) = -1 :=

@@ -9,7 +9,7 @@ public import Mathlib.Algebra.Group.Subgroup.Ker
 public import TauCeti.Algebra.Group.Subgroup.ModularLaw
 
 /-!
-# Kernels and equality loci of group homomorphisms
+# Kernels, ranges and equality loci of group homomorphisms
 
 This file supplies the characteristic membership equation for the subgroup equality locus, the
 invariance of the range of a group homomorphism under precomposition with a surjection, and
