@@ -190,10 +190,9 @@ theorem isEffective_conorm {D : Divisor k F} (hD : D.IsEffective) :
   WeilDivisor.isEffective_iff_zero_le.mpr <| by
     simpa using conorm_mono k' F' (WeilDivisor.isEffective_iff_zero_le.mp hD)
 
-/-- **Every divisor of `F' / k'` is bounded above by a conorm**: replacing each place in the
-support by the place below it, with the positive part of its coefficient as multiplicity, gives a
-divisor of `F / k` whose conorm dominates.  This is what lets an estimate for the divisors of
-`F / k` be transported to all divisors of `F' / k'`. -/
+/-- **Every divisor of `F' / k'` is bounded above by a conorm**: for every divisor `D'` of
+`F' / k'` there is a divisor `D` of `F / k` with `D' ≤ Con D`.  This transports estimates on the
+divisors of `F / k` to all divisors of `F' / k'`. -/
 theorem exists_le_conorm (D' : Divisor k' F') : ∃ D : Divisor k F, D' ≤ conorm k' F' D := by
   classical
   induction D' using Finsupp.induction_linear with

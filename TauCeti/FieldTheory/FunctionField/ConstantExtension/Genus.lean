@@ -19,13 +19,8 @@ and — since it also preserves the dimensions of Riemann–Roch spaces — the 
 the genus of `F / k`.  Consequently the conorm carries the canonical class to the canonical class
 and is injective on divisor classes.
 
-The two inequalities between the genera both come from Riemann's theorem
-`deg D + 1 - ℓ(D) ≤ g`, read in `F / k` and in `F' / k'`.  For `g ≤ g'` the quantity
-`deg D + 1 - ℓ(D)` is unchanged by the conorm.  For `g' ≤ g` a divisor `D'` of `F' / k'` is
-bounded above by the conorm of a divisor `D` of `F / k`, and the comparison
-`ℓ(Con D) ≤ ℓ(D') + deg (Con D) - deg D'` between the two Riemann–Roch spaces then brings
-`deg D' + 1 - ℓ(D')` below `deg D + 1 - ℓ(D)`.  No exactness of `k'` in `F'` is needed for the
-genus identity; it enters only where the canonical class of `F' / k'` is spoken of.
+Exactness of `k'` in `F'` is not needed for the degree and genus identities; it is assumed only
+where the canonical class of `F' / k'` is spoken of.
 
 ## Main results
 
@@ -55,8 +50,8 @@ variable [IsScalarTower k k' F'] [IsScalarTower k F F']
 variable [FiniteDimensional F F'] [Algebra.IsSeparable k k']
 
 /-- **The conorm along a constant field extension preserves degrees** (Stichtenoth,
-Theorem 3.6.3(c)): `deg (Con D) = deg D`.  Linear disjointness of `F` and `k'` over `k` gives
-`[F' : F] = [k' : k]`, so the geometric degree by which the conorm multiplies degrees is one. -/
+Theorem 3.6.3(c)): for a finite separable constant field extension `F · k' / k'` of `F / k` with
+exact constant field `k`, `deg (Con D) = deg D` for every divisor `D` of `F / k`. -/
 @[simp]
 theorem Divisor.degree_conorm_of_constantCompositum_eq_top (hF : IsFunctionField k F)
     (hex : IsIntegrallyClosedIn k F) (h : constantCompositum F k' F' = ⊤) (D : Divisor k F) :
@@ -67,14 +62,7 @@ theorem Divisor.degree_conorm_of_constantCompositum_eq_top (hF : IsFunctionField
 
 /-- **The genus is unchanged by a finite separable constant field extension** (Stichtenoth,
 Theorem 3.6.3(b)): if `k` is the exact constant field of `F`, then `g(F · k' / k') = g(F / k)`.
-
-Exactness of `k'` in `F · k'` is not assumed: both inequalities come from Riemann's theorem alone,
-through the invariance of degrees and Riemann–Roch dimensions under the conorm.  When `k'` is
-perfect, `TauCeti.isIntegrallyClosedIn_of_constantCompositum_eq_top` supplies that exactness, and
-the identity is Stichtenoth's statement of record.
-
-Not a `simp` lemma: `k` and `F` occur only in the hypotheses, so `simp` could never infer them
-(the `simpNF` linter rejects the attribute). -/
+Exactness of `k'` in `F · k'` is not assumed. -/
 theorem genus_eq_genus_of_constantCompositum_eq_top (hF : IsFunctionField k F)
     (hex : IsIntegrallyClosedIn k F) (h : constantCompositum F k' F' = ⊤) :
     genus k' F' = genus k F := by
@@ -111,9 +99,9 @@ theorem conormClassGroup_canonicalClass_of_constantCompositum_eq_top (hF : IsFun
   exact hW'
 
 /-- **The conorm is injective on divisor classes** (Stichtenoth, Theorem 3.6.3(f)): along a finite
-separable constant field extension of a function field with exact constant field, a divisor whose
-conorm is principal is itself principal.  A principal conorm has degree zero and a nonzero
-Riemann–Roch space, and both properties descend to the original divisor. -/
+separable constant field extension of a function field with exact constant field, two divisors
+with the same conorm class lie in the same class; equivalently, a divisor whose conorm is principal
+is itself principal. -/
 theorem conormClassGroup_injective_of_constantCompositum_eq_top (hF : IsFunctionField k F)
     (hex : IsIntegrallyClosedIn k F) (h : constantCompositum F k' F' = ⊤) :
     Function.Injective (Divisor.conormClassGroup k' F' hF (hF.of_constantCompositum_eq_top h)) := by
