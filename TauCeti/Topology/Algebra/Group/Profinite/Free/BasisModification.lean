@@ -90,10 +90,8 @@ and the level `f` is the free parameter it accounts for. For the even-rank relat
 * `TauCeti.freeProP.basisModification`: the endomorphism `θ_w : F → F`, `x_i ↦ x_i * w_i`.
 * `TauCeti.freeProP.basisModificationDelta`: for `m ≥ 1`, the `𝔽_p`-bilinear map
   `δ : gr_1(F) → gr_m(F)^X → gr_{m+1}(F)`, `(ρ, ω) ↦ δ_ρ(ω)`.
-* `TauCeti.freeProP.gradedPowIterSpan`: the span in `gr_j(F)` of the `π^j ξ_i` over a set `S` of
-  generators.
-* `TauCeti.freeProP.basisModificationTail`: the tail `T_j(ρ) ≤ gr_j(F)`, spanned by the `π^j ξ_i`
-  with `c_i = 0`.
+* `TauCeti.freeProP.basisModificationTail`: the tail `T_j(ρ) ≤ gr_j(F)`, the span
+  `TauCeti.freeProP.gradedPowIterSpan` of the `π^j ξ_i` with `c_i = 0`.
 * `TauCeti.freeProP.degreeOneDeriv`: the partial derivative `∂_i : gr_1(F) →ₗ[𝔽_p] gr_0(F)`.
 
 ## Main results
@@ -103,12 +101,10 @@ and the level `f` is the free parameter it accounts for. For the even-rank relat
 * `TauCeti.freeProP.gradedDeviation_basisModification`,
   `TauCeti.freeProP.gradedMk_inv_mul_basisModification`: the class of `r⁻¹ * θ_w r` in
   `gr_{m+1}(F)` is `δ(ω)`; in particular it depends only on the classes `ω_i`.
-* `TauCeti.freeProP.finrank_gradedPowIterSpan`, `TauCeti.freeProP.finrank_basisModificationTail`:
-  the span over `S` has dimension `#S`, so `dim T_j(ρ)` is the number of indices `i` with
-  `c_i = 0`.
-* `TauCeti.freeProP.gradedPowIterSpan_succ`, `TauCeti.freeProP.basisModificationTail_succ`: `π`
-  carries the span over `S` in degree `j ≥ 1` onto the span in degree `j + 1`; in particular
-  `T_{j+1}(ρ) = π(T_j(ρ))`.
+* `TauCeti.freeProP.finrank_basisModificationTail`: `dim T_j(ρ)` is the number of indices `i`
+  with `c_i = 0`.
+* `TauCeti.freeProP.basisModificationTail_succ`: `π` carries `T_j(ρ)` onto `T_{j+1}(ρ)` for
+  `j ≥ 1`.
 * `TauCeti.freeProP.basisModificationDelta_eq_gradedPow_add_sum`,
   `TauCeti.freeProP.gradedPow_basisModificationDelta`:
   `δ_ρ(ω) = π (Σ_i c_i ω_i) + Σ_i [ω_i, ∂_i ρ]`, and `π (δ_ρ(ω)) = δ_ρ(π ω)`.
@@ -578,89 +574,11 @@ theorem span_range_degreeOneDeriv_eq_top_iff_nondegenerate_degreeOneForm
 
 end DerivForm
 
-/-! ### The spans of `p`-power classes and the tails `T_j` -/
+/-! ### The tails `T_j` -/
 
 section Tail
 
-variable [Fact p.Prime]
-
-variable (p X) in
-/-- **The span of the `p`-power classes of a set of generators**: for `S : Set X`, the subspace
-of `gr_j(F)` spanned by the iterated `p`-powers `π^j ξ_i` of the generator classes `ξ_i ∈ gr_0(F)`
-with `i ∈ S`. The vectors `π^j ξ_i` are linearly independent, so it has dimension `#S`
-(`TauCeti.freeProP.finrank_gradedPowIterSpan`), and above degree zero `π` carries it onto the span
-in the next degree (`TauCeti.freeProP.gradedPowIterSpan_succ`). The tails of the
-successive-approximation arguments of the classification of Demushkin groups are its instances at
-the index sets those arguments leave free. -/
-noncomputable def gradedPowIterSpan (S : Set X) (j : ℕ) :
-    Submodule (ZMod p) (gradedPiece p (freeProP p X) j) :=
-  span (ZMod p)
-    ((fun i ↦ gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of i))) '' S)
-
-/-- An iterated power `π^j ξ_i` with `i ∈ S` belongs to the span of the `p`-power classes over
-`S`. -/
-theorem gradedPowIter_mem_gradedPowIterSpan {S : Set X} {i : X} (hi : i ∈ S) (j : ℕ) :
-    gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of i)) ∈
-      gradedPowIterSpan p X S j :=
-  subset_span ⟨i, hi, rfl⟩
-
-/-- The double power `π² ξ_i` with `i ∈ S` belongs to the span of the `p`-power classes over `S`
-in degree two. -/
-theorem gradedPow_gradedPow_gradedMkZero_mem_gradedPowIterSpan {S : Set X} {i : X} (hi : i ∈ S) :
-    gradedPow p (freeProP p X) 1
-        (gradedPow p (freeProP p X) 0 (gradedMkZero p (freeProP p X) (of i))) ∈
-      gradedPowIterSpan p X S 2 := by
-  have h := gradedPowIter_mem_gradedPowIterSpan (p := p) hi 2
-  rwa [gradedPowIter_succ, gradedPowIter_succ, gradedPowIter_zero] at h
-
-/-- A submodule contains the span of the `p`-power classes over `S` if and only if it contains
-every generator `π^j ξ_i` with `i ∈ S`. -/
-@[simp]
-theorem gradedPowIterSpan_le_iff {S : Set X} {j : ℕ}
-    {W : Submodule (ZMod p) (gradedPiece p (freeProP p X) j)} :
-    gradedPowIterSpan p X S j ≤ W ↔
-      ∀ i ∈ S, gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of i)) ∈ W := by
-  simp only [gradedPowIterSpan, span_le, Set.subset_def, SetLike.mem_coe, Set.forall_mem_image]
-
-/-- The span of the `p`-power classes is monotone in the index set. -/
-@[gcongr]
-theorem gradedPowIterSpan_mono {S T : Set X} (h : S ⊆ T) (j : ℕ) :
-    gradedPowIterSpan p X S j ≤ gradedPowIterSpan p X T j :=
-  span_mono (Set.image_mono h)
-
-/-- **`π` carries the span of the `p`-power classes onto the span in the next degree above degree
-zero**: for `j ≥ 1`, the span over `S` in degree `j + 1` is the image under `π` of the span over
-`S` in degree `j`, since `π` is additive on `gr_j(F)` and `π (π^j ξ_i) = π^{j+1} ξ_i`. -/
-theorem gradedPowIterSpan_succ (S : Set X) {j : ℕ} (hj : 1 ≤ j) :
-    gradedPowIterSpan p X S (j + 1) =
-      (gradedPowIterSpan p X S j).map
-        ((gradedPowAddMonoidHom p (freeProP p X) hj).toZModLinearMap p) := by
-  rw [gradedPowIterSpan, gradedPowIterSpan, map_span, Set.image_image]
-  simp only [AddMonoidHom.coe_toZModLinearMap, gradedPowAddMonoidHom_apply, gradedPowIter_succ]
-
-/-- **The dimension of the span of the `p`-power classes over `S`** is the cardinality of `S`,
-because the `π^j ξ_i` are linearly independent
-(`TauCeti.freeProP.linearIndependent_gradedPowIter_gradedMkZero_of`). -/
-theorem finrank_gradedPowIterSpan [Finite X] (S : Set X) (j : ℕ) :
-    Module.finrank (ZMod p) (gradedPowIterSpan p X S j) = Nat.card S := by
-  classical
-  have := Fintype.ofFinite X
-  rw [gradedPowIterSpan, Set.image_eq_range]
-  exact (finrank_span_eq_card ((linearIndependent_gradedPowIter_gradedMkZero_of p X j).comp
-    (Subtype.val : S → X) Subtype.val_injective)).trans Nat.card_eq_fintype_card.symm
-
-/-- **Membership in the span of the `p`-power classes**: for a finite index set `S`, the elements
-of the span over `S` are the linear combinations of the `π^j ξ_i` over the indices `i ∈ S`. -/
-theorem mem_gradedPowIterSpan_iff {S : Set X} [Fintype S] {j : ℕ}
-    {v : gradedPiece p (freeProP p X) j} :
-    v ∈ gradedPowIterSpan p X S j ↔
-      ∃ c : S → ZMod p,
-        ∑ i, c i • gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of (i : X))) =
-          v := by
-  rw [gradedPowIterSpan, Set.image_eq_range]
-  exact mem_span_range_iff_exists_fun _
-
-variable [Finite X] [LinearOrder X]
+variable [Fact p.Prime] [Finite X] [LinearOrder X]
 
 variable (p X) in
 /-- **The tail `T_j(ρ)`** of a class `ρ ∈ gr_1(F)`: the span `TauCeti.freeProP.gradedPowIterSpan`
@@ -692,18 +610,6 @@ theorem gradedPowIter_mem_basisModificationTail {ρ : gradedPiece p (freeProP p 
   rw [basisModificationTail_def]
   exact gradedPowIter_mem_gradedPowIterSpan
     (S := {i | (degreeOneBasis p X).repr ρ (Sum.inl i) = 0}) hi j
-
-/-- The double power `π² ξ_i` belongs to `T₂(ρ)` when the coefficient `c_i` in `ρ`
-vanishes. -/
-theorem gradedPow_gradedPow_gradedMkZero_mem_basisModificationTail
-    {ρ : gradedPiece p (freeProP p X) 1} {i : X}
-    (hi : (degreeOneBasis p X).repr ρ (Sum.inl i) = 0) :
-    gradedPow p (freeProP p X) 1
-        (gradedPow p (freeProP p X) 0 (gradedMkZero p (freeProP p X) (of i))) ∈
-      basisModificationTail p X ρ 2 := by
-  rw [basisModificationTail_def]
-  exact gradedPow_gradedPow_gradedMkZero_mem_gradedPowIterSpan
-    (S := {i | (degreeOneBasis p X).repr ρ (Sum.inl i) = 0}) hi
 
 /-- A submodule contains `T_j(ρ)` if and only if it contains every generator `π^j ξ_i`
 whose coefficient `c_i` in `ρ` vanishes. -/
@@ -859,7 +765,7 @@ theorem range_basisModificationDelta_sup_basisModificationTail_eq_top (hm : 1 �
     · -- `π (π ξ_i) = π² ξ_i` lies in the tail, since `c_i = 0`.
       rw [degreeOneFamily_inl]
       exact Submodule.mem_sup_right
-        (gradedPow_gradedPow_gradedMkZero_mem_basisModificationTail (hc i))
+        (by simpa using gradedPowIter_mem_basisModificationTail (hc i) 2)
     · -- `π [ξ_j, ξ_k] = [π ξ_j, ξ_k] + (p choose 2) • [[ξ_j, ξ_k], ξ_j]` is a sum of brackets.
       rw [degreeOneFamily_inr, gradedPow_gradedBracket_zero_zero]
       exact Submodule.mem_sup_left
@@ -1215,8 +1121,9 @@ theorem range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two (hm 
               (gradedMkZero 2 (freeProP 2 X) (of a)) y) ∈
             LinearMap.range (basisModificationDelta 2 X le_rfl ρ) ⊔
               gradedPowIterSpan 2 X {i₁}ᶜ (1 + 1) := by
-        have hspan := gradedPow_gradedPow_gradedMkZero_mem_gradedPowIterSpan (p := 2)
-          (Set.mem_compl_singleton_iff.2 ha)
+        have hspan := gradedPowIter_mem_gradedPowIterSpan (p := 2)
+          (Set.mem_compl_singleton_iff.2 ha) 2
+        simp only [gradedPowIter_succ, gradedPowIter_zero] at hspan
         have h₂ := hkey 1 le_rfl (gradedBracket 2 (freeProP 2 X) 0 0
           (gradedMkZero 2 (freeProP 2 X) (of a)) y) (gradedMkZero 2 (freeProP 2 X) (of a))
         rw [hψ, ite_eq_right ha, zero_smul, zero_add] at h₂
@@ -1237,9 +1144,9 @@ theorem range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two (hm 
           rw [hψ, ite_eq_left hi, one_smul, gradedBracket_gradedPow_self, add_zero] at h
           exact Submodule.mem_sup_left h
         · -- `π² ξ_i` lies in the span, since `i ≠ i₁`.
-          exact Submodule.mem_sup_right
-            (gradedPow_gradedPow_gradedMkZero_mem_gradedPowIterSpan (p := 2)
-              (Set.mem_compl_singleton_iff.2 hi))
+          exact Submodule.mem_sup_right (by
+            simpa using gradedPowIter_mem_gradedPowIterSpan (p := 2)
+              (Set.mem_compl_singleton_iff.2 hi) 2)
       · rw [degreeOneFamily_inr]
         dsimp only
         by_cases hj : j = i₁
