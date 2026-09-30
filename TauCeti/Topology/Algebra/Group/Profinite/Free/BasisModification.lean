@@ -129,10 +129,8 @@ and the level `f` is the free parameter it accounts for. For the even-rank relat
 * `TauCeti.freeProP.range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two`: for
   `p = 2` and a class whose derivatives span `gr_0(F)`, whose `2`-power part sits on a single
   generator `x_{i₀}`, and for which `ξ_{i₁}` pairs only with `ξ_{i₀}`, with entry `c_{i₀}`,
-  `gr_{m+1}(F) = Im δ_ρ + ⟨π^{m+1} ξ_i : i ≠ i₁⟩`.
-* `TauCeti.freeProP.range_basisModificationDelta_sup_basisModificationTail_eq_top_two`: the case
-  `i₁ = i₀` of a generator `x_{i₀}` not occurring in the brackets,
-  `gr_{m+1}(F) = Im δ_ρ + T_{m+1}(ρ)`.
+  `gr_{m+1}(F) = Im δ_ρ + ⟨π^{m+1} ξ_i : i ≠ i₁⟩`; at `i₁ = i₀`, for a generator `x_{i₀}` not
+  occurring in the brackets, this is `gr_{m+1}(F) = Im δ_ρ + T_{m+1}(ρ)`.
 
 ## References
 
@@ -651,6 +649,17 @@ theorem finrank_gradedPowIterSpan [Finite X] (S : Set X) (j : ℕ) :
   exact (finrank_span_eq_card ((linearIndependent_gradedPowIter_gradedMkZero_of p X j).comp
     (Subtype.val : S → X) Subtype.val_injective)).trans Nat.card_eq_fintype_card.symm
 
+/-- **Membership in the span of the `p`-power classes**: for a finite index set `S`, the elements
+of the span over `S` are the linear combinations of the `π^j ξ_i` over the indices `i ∈ S`. -/
+theorem mem_gradedPowIterSpan_iff {S : Set X} [Fintype S] {j : ℕ}
+    {v : gradedPiece p (freeProP p X) j} :
+    v ∈ gradedPowIterSpan p X S j ↔
+      ∃ c : S → ZMod p,
+        ∑ i, c i • gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of (i : X))) =
+          v := by
+  rw [gradedPowIterSpan, Set.image_eq_range]
+  exact mem_span_range_iff_exists_fun _
+
 variable [Finite X] [LinearOrder X]
 
 variable (p X) in
@@ -710,15 +719,16 @@ section
 attribute [local instance] Fintype.ofFinite
 
 /-- **Membership in the tail**: the elements of `T_j(ρ)` are the linear combinations of the
-`π^j ξ_i` over the indices `i` with `c_i = 0`. -/
+`π^j ξ_i` over the indices `i` with `c_i = 0`, the instance of
+`TauCeti.freeProP.mem_gradedPowIterSpan_iff` at the index set of the tail. -/
 theorem mem_basisModificationTail_iff {ρ : gradedPiece p (freeProP p X) 1} {j : ℕ}
     {v : gradedPiece p (freeProP p X) j} :
     v ∈ basisModificationTail p X ρ j ↔
       ∃ c : {i : X // (degreeOneBasis p X).repr ρ (Sum.inl i) = 0} → ZMod p,
         ∑ i, c i • gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of (i : X))) =
           v := by
-  rw [basisModificationTail_def, gradedPowIterSpan, Set.image_eq_range]
-  exact mem_span_range_iff_exists_fun _
+  rw [basisModificationTail_def]
+  exact mem_gradedPowIterSpan_iff (p := p) (S := {i | (degreeOneBasis p X).repr ρ (Sum.inl i) = 0})
 
 end
 
@@ -1253,32 +1263,6 @@ theorem range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two (hm 
         (htop ▸ Submodule.mem_top)
   exact eq_top_of_forall_gradedPow_mem_of_forall_gradedBracket_mem (hopen (m + 1 + 1))
     (hpow m hm) fun v y ↦ hbr m hm v (hpow m hm v) y
-
-/-- **The dyadic span statement for the odd-rank normal form** (Labute, Proposition 5, the case
-`q = 2` with `n` odd): let `ρ ∈ gr_1(F)`, for `F` free pro-`2`, have its partial derivatives
-`∂_i ρ` spanning `gr_0(F)`, let `x_{i₀}` be the only generator whose coefficient `c_i` of `π ξ_i`
-in `ρ` may be nonzero, and let the coordinate character `χ_{i₀}` be orthogonal to every other
-coordinate character under the degree-one form of `ρ`, that is, `ξ_{i₀}` occurs in no bracket of
-`ρ`. Then for every `m ≥ 1`
-  `gr_{m+1}(F) = Im δ_ρ + T_{m+1}(ρ)`,
-where the tail `T_{m+1}(ρ)` is spanned by the `2`-powers `π^{m+1} ξ_i` with `c_i = 0`. This is the
-case of the dyadic relators `x₁² x₂^{2^f} (x₂, x₃) ⋯ (x_{n-1}, x_n)` of odd rank `n`, with
-`f ≥ 2`, whose class is `π ξ₁ + [ξ₂, ξ₃] + ⋯ + [ξ_{n-1}, ξ_n]`. It is the instance `i₁ = i₀` of
-`TauCeti.freeProP.range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two`, since
-`B_ρ(χ_{i₀}, χ_{i₀}) = (2 choose 2) c_{i₀} = c_{i₀}`, and every `i ≠ i₀` has `c_i = 0`. -/
-theorem range_basisModificationDelta_sup_basisModificationTail_eq_top_two (hm : 1 ≤ m)
-    {ρ : gradedPiece 2 (freeProP 2 X) 1}
-    (hρ : span (ZMod 2) (Set.range fun i ↦ degreeOneDeriv 2 X i ρ) = ⊤) {i₀ : X}
-    (hc : ∀ i, i ≠ i₀ → (degreeOneBasis 2 X).repr ρ (Sum.inl i) = 0)
-    (hd : ∀ i, i ≠ i₀ → degreeOneForm ρ (dualBasis 2 X i) (dualBasis 2 X i₀) = 0) :
-    LinearMap.range (basisModificationDelta 2 X hm ρ) ⊔ basisModificationTail 2 X ρ (m + 1) =
-      ⊤ := by
-  rw [basisModificationTail_def]
-  have h := range_basisModificationDelta_sup_gradedPowIterSpan_compl_eq_top_two hm hρ hc
-    (by rw [degreeOneForm_dualBasis_self, Nat.choose_self, one_smul]) hd
-  refine top_le_iff.1 (h.ge.trans (sup_le_sup_left (gradedPowIterSpan_mono ?_ _) _))
-  intro i hi
-  exact hc i hi
 
 end DyadicSpan
 
