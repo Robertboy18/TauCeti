@@ -39,6 +39,8 @@ associativity follow from transport.
 
 * `GradedOpposite.op_mul`: the signed reversed-product formula on homogeneous elements.
 * `GradedOpposite.op_mem_piece_iff`: `op` preserves degree.
+* `GradedOpposite.op_mul_op_of_even_right` and `GradedOpposite.op_mul_op_of_even_left`: a
+  homogeneous factor of even degree reverses products without a Koszul sign.
 * `GradedOpposite.map_id` and `GradedOpposite.map_comp`: functoriality of the signed opposite.
 
 The convention follows B. Keller, *Introduction to A-infinity algebras and modules*, Sections 3
@@ -321,6 +323,34 @@ theorem op_mul {p q : ℤ} {a b : A} (ha : a ∈ G.piece p) (hb : b ∈ G.piece 
   rw [hsign, one_mul]
   congr 1
   ac_rfl
+
+/-- Multiplying on the right by the image of a homogeneous element of even degree in the graded
+opposite reverses the factors without a Koszul sign. -/
+theorem op_mul_op_of_even_right {q : ℤ} {b : A} (hb : b ∈ G.piece q) (hq : Even q) (a : A) :
+    op G a * op G b = op G (b * a) := by
+  have key : (LinearMap.mulRight R (op G b)).comp (opLinearEquiv G).toLinearMap =
+      (opLinearEquiv G).toLinearMap.comp (LinearMap.mulLeft R b) := by
+    refine G.linearMap_ext fun p a ha ↦ ?_
+    simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply,
+      LinearMap.mulRight_apply, LinearMap.mulLeft_apply, opLinearEquiv_apply]
+    rw [op_mul G ha hb, Int.negOnePow_even _ (hq.mul_left p), one_smul]
+  simpa only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply,
+    LinearMap.mulRight_apply, LinearMap.mulLeft_apply, opLinearEquiv_apply] using
+    LinearMap.congr_fun key a
+
+/-- Multiplying on the left by the image of a homogeneous element of even degree in the graded
+opposite reverses the factors without a Koszul sign. -/
+theorem op_mul_op_of_even_left {q : ℤ} {b : A} (hb : b ∈ G.piece q) (hq : Even q) (a : A) :
+    op G b * op G a = op G (a * b) := by
+  have key : (LinearMap.mulLeft R (op G b)).comp (opLinearEquiv G).toLinearMap =
+      (opLinearEquiv G).toLinearMap.comp (LinearMap.mulRight R b) := by
+    refine G.linearMap_ext fun p a ha ↦ ?_
+    simp only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply,
+      LinearMap.mulRight_apply, LinearMap.mulLeft_apply, opLinearEquiv_apply]
+    rw [op_mul G hb ha, Int.negOnePow_even _ (hq.mul_right p), one_smul]
+  simpa only [LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply,
+    LinearMap.mulRight_apply, LinearMap.mulLeft_apply, opLinearEquiv_apply] using
+    LinearMap.congr_fun key a
 
 /-- Returning a homogeneous product from the graded opposite reverses its factors and retains the
 Koszul sign. -/
