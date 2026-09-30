@@ -8,6 +8,7 @@ module
 public import Mathlib.Algebra.Ring.NegOnePow
 public import Mathlib.RingTheory.GradedAlgebra.Basic
 public import TauCeti.Algebra.DirectSum.Internal
+import TauCeti.Algebra.Module.GradedModule.Internal
 
 /-!
 # Nonunital and unital differential graded algebras
@@ -40,10 +41,9 @@ its degree alone.
 
 ## Main results
 
-* `TauCeti.map_decompose_of_map_mem`, `TauCeti.map_mul_of_leibniz_of_map_eq_zero`,
-  `TauCeti.map_one_eq_zero_of_leibniz`, and `TauCeti.map_algebraMap_of_leibniz`: consequences of
-  the degree law alone, respectively of the graded Leibniz rule alone, shared with the curved
-  differential graded algebras of `TauCeti.Algebra.Homology.Curved.Algebra.Defs`.
+* `TauCeti.map_mul_of_leibniz_of_map_eq_zero`, `TauCeti.map_one_eq_zero_of_leibniz`, and
+  `TauCeti.map_algebraMap_of_leibniz`: consequences of the graded Leibniz rule alone, shared with
+  the curved differential graded algebras of `TauCeti.Algebra.Homology.Curved.Algebra.Defs`.
 * `TauCeti.IsNonUnitalDGAlgebra.map_decompose` computes the differential on homogeneous
   components.
 * `TauCeti.IsNonUnitalDGAlgebra.leibniz_of_map_eq_zero` and
@@ -71,33 +71,17 @@ open DirectSum
 
 namespace TauCeti
 
-section DegreeAndLeibniz
+section Leibniz
 
 /-!
-### Consequences of the degree and Leibniz laws alone
+### A consequence of the Leibniz law alone
 
-The next two lemmas use only that `d` raises degree by one, respectively only the graded Leibniz
-rule, and not that `d` squares to zero.  They are stated with those laws as hypotheses so that
-differential graded algebras and the curved differential graded algebras of
-`TauCeti.Algebra.Homology.Curved.Algebra.Defs` share one proof.  The degree law involves no
-multiplication, so its consequence is stated for a linear endomorphism of any internally
-`ℤ`-graded module.
+The next lemma uses only the graded Leibniz rule, and not that `d` raises degree by one or squares
+to zero.  It is stated with that rule as a hypothesis so that differential graded algebras and the
+curved differential graded algebras of `TauCeti.Algebra.Homology.Curved.Algebra.Defs` share one
+proof.  The corresponding consequence of the degree law alone, that `d` commutes with homogeneous
+projections up to the degree shift, is `TauCeti.LinearMap.IsHomogeneous.map_decompose`.
 -/
-
-section Degree
-
-variable {R A : Type*} [Semiring R] [AddCommMonoid A] [Module R A]
-  {𝒜 : ℤ → Submodule R A} [DirectSum.Decomposition 𝒜] {d : A →ₗ[R] A}
-
-/-- A linear map raising degree by one commutes with homogeneous projections, up to the degree
-shift by one. -/
-theorem map_decompose_of_map_mem (hd : ∀ {p : ℤ} {a : A}, a ∈ 𝒜 p → d a ∈ 𝒜 (p + 1)) (p : ℤ)
-    (a : A) : d (DirectSum.decompose 𝒜 a p : A) = (DirectSum.decompose 𝒜 (d a) (p + 1) : A) :=
-  DirectSum.map_decompose_shift 𝒜 𝒜 d (· + 1) (add_left_injective 1) (fun _ _ ha ↦ hd ha) p a
-
-end Degree
-
-section Leibniz
 
 variable {R A : Type*} [CommRing R] [NonUnitalRing A] [Module R A]
   {𝒜 : ℤ → Submodule R A} [DirectSum.Decomposition 𝒜] {d : A →ₗ[R] A}
@@ -114,8 +98,6 @@ theorem map_mul_of_leibniz_of_map_eq_zero
   rw [hl (SetLike.coe_mem _) b, hb, mul_zero, smul_zero, add_zero]
 
 end Leibniz
-
-end DegreeAndLeibniz
 
 section NonUnital
 
@@ -147,7 +129,7 @@ namespace IsNonUnitalDGAlgebra
 theorem map_decompose (h : IsNonUnitalDGAlgebra 𝒜 d) (p : ℤ) (a : A) :
     d (DirectSum.decompose 𝒜 a p : A) =
       (DirectSum.decompose 𝒜 (d a) (p + 1) : A) :=
-  map_decompose_of_map_mem h.map_mem p a
+  (LinearMap.isHomogeneous_def.mpr fun _ _ ha ↦ h.map_mem ha).map_decompose p a
 
 /-- The Leibniz rule against a cycle in the right factor.  The vanishing signed term permits an
 arbitrary left factor, without a homogeneity hypothesis. -/

@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Algebra.Lie.OfAssociative
 public import TauCeti.Algebra.Homology.DG.Algebra.Defs
+import TauCeti.Algebra.Module.GradedModule.Internal
 
 /-!
 # Curved differential graded algebras
@@ -94,7 +95,7 @@ namespace IsCurvedDGAlgebra
 @[simp]
 theorem map_decompose (h : IsCurvedDGAlgebra 𝒜 d w) (p : ℤ) (a : A) :
     d (DirectSum.decompose 𝒜 a p : A) = (DirectSum.decompose 𝒜 (d a) (p + 1) : A) :=
-  map_decompose_of_map_mem h.map_mem p a
+  (LinearMap.isHomogeneous_def.mpr fun _ _ ha ↦ h.map_mem ha).map_decompose p a
 
 /-- The Leibniz rule against a cycle in the right factor. The vanishing signed term permits an
 arbitrary left factor, without a homogeneity hypothesis. -/
