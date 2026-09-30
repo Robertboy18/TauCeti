@@ -277,8 +277,8 @@ misses the classes `π^{m+1} ξ_i`, so `δ_ρ` is not onto. It is the constraine
 `TauCeti.freeProP.exists_continuousMulEquiv_apply_eq` with `Z = K` and with `C i = K` at the
 generators carrying a nonzero exponent: such corrections preserve the exponent vector of the
 relator, which keeps the deviations in `K` along the approximation. The hypothesis on the
-corrections is the constrained form of the span statement `Im δ_ρ ⊇ ` (classes of
-`λ_{m+1}(F) ∩ K`); it is assumed here, not established. -/
+corrections is the constrained form of the span statement that `Im δ_ρ` contains the class of
+every element of `λ_{m+1}(F) ∩ K`; it is assumed here, not established. -/
 theorem exists_continuousMulEquiv_apply_eq_of_exponentSum_eq
     (r w : pLowerCentralSeries p (freeProP p X) 1)
     (h : gradedMk p (freeProP p X) 1 r = gradedMk p (freeProP p X) 1 w)
