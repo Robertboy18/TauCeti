@@ -822,7 +822,12 @@ private theorem degreeOneForm_demushkinWordTwoEven_dualBasis {a f : ℕ} (ha : 2
     degreeOneForm_gradedBracket_gradedMkZero, toMul_dualBasis_freeProPGen, Nat.choose_self,
     one_smul, mul_ite, mul_one, mul_zero]
 
-private theorem degreeOneBasis_repr_demushkinWordTwoEven_inl {a f : ℕ} (ha : 2 ∣ a) (hf : 0 < f)
+/-- **The `2`-power coordinates of the class of the `q = 2`, `n` even normal-form word**
+`x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`, for `a` even and `f ≥ 1`: the coefficient
+of `π ξ₁` is `1 + a/2`, that of `π ξ₃` is `2^{f-1}`, and the other `2`-power coordinates
+vanish. -/
+@[simp]
+theorem degreeOneBasis_repr_gradedMk_demushkinWordTwoEven_inl {a f : ℕ} (ha : 2 ∣ a) (hf : 0 < f)
     (k : Fin n) :
     (degreeOneBasis 2 (Fin n)).repr
       (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoEven a f n (freeProPGen 2 n),
@@ -833,6 +838,24 @@ private theorem degreeOneBasis_repr_demushkinWordTwoEven_inl {a f : ℕ} (ha : 2
   simp only [map_add, map_sum, map_nsmul, Finsupp.add_apply, Finsupp.finsetSum_apply,
     Finsupp.smul_apply, degreeOneBasis_repr_gradedBracket_inl, Finset.sum_const_zero, add_zero,
     degreeOneBasis_repr_gradedPow_gradedMkZero_inl, toMul_dualBasis_freeProPGen]
+
+/-- **The vanishing `2`-power coordinates of the even dyadic normal-form word**
+`x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`, for `4 ∣ a` and `f ≥ 2`: all coordinates
+except that of `x₁` vanish. -/
+theorem degreeOneBasis_repr_gradedMk_demushkinWordTwoEven_inl_eq_zero_iff {a f : ℕ} (ha : 4 ∣ a)
+    (hf : 2 ≤ f) (k : Fin n) :
+    (degreeOneBasis 2 (Fin n)).repr
+        (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoEven a f n (freeProPGen 2 n),
+          demushkinWordTwoEven_mem_pLowerCentralSeries_one (dvd_trans (Dvd.intro 2 rfl) ha)
+            (zero_lt_two.trans_le hf) n _⟩)
+        (Sum.inl k) = 0 ↔ (k : ℕ) ≠ 0 := by
+  obtain ⟨g, hg⟩ : ∃ g, f - 1 = g + 1 := ⟨f - 2, by omega⟩
+  rw [degreeOneBasis_repr_gradedMk_demushkinWordTwoEven_inl (dvd_trans (Dvd.intro 2 rfl) ha)
+    (zero_lt_two.trans_le hf), hg]
+  obtain ⟨b, rfl⟩ := ha
+  have hb : 4 * b / 2 = 2 * b := by omega
+  rw [hb]
+  simp [nsmul_eq_mul, CharTwo.two_eq_zero]
 
 /-- **The degree-one form of `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` is not
 alternating**, for `n ≥ 1`, `4 ∣ a` and `f ≥ 2`: its value on the first coordinate character twice
@@ -845,11 +868,27 @@ theorem not_isAlt_degreeOneForm_demushkinWordTwoEven (hn : 0 < n) {a f : ℕ} (h
           (zero_lt_two.trans_le hf) n _⟩)).IsAlt := by
   intro h
   have := h (dualBasis 2 (Fin n) ⟨0, hn⟩)
-  rw [degreeOneForm_dualBasis_self, degreeOneBasis_repr_demushkinWordTwoEven_inl
+  rw [degreeOneForm_dualBasis_self, degreeOneBasis_repr_gradedMk_demushkinWordTwoEven_inl
     (dvd_trans (Dvd.intro 2 rfl) ha) (zero_lt_two.trans_le hf)] at this
   obtain ⟨b, rfl⟩ := ha
   have hb : 4 * b / 2 = 2 * b := by omega
   simp [hb, nsmul_eq_mul, CharTwo.two_eq_zero] at this
+
+/-- **The second coordinate character pairs only with the first under the degree-one form of
+`x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)`**, for `n ≥ 2`, `a` even and `f ≥ 1`:
+pairing any character `χ` with the second coordinate character reads off `χ(x₁)`, because `x₂`
+occurs only in the commutator `(x₁, x₂)`. In particular the second coordinate character is
+orthogonal to every coordinate character other than the first. -/
+theorem degreeOneForm_gradedMk_demushkinWordTwoEven_dualBasis_one (hn : 1 < n) {a f : ℕ}
+    (ha : 2 ∣ a) (hf : 0 < f) (χ : continuousZModDual 2 (freeProP 2 (Fin n))) :
+    degreeOneForm (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨demushkinWordTwoEven a f n (freeProPGen 2 n),
+        demushkinWordTwoEven_mem_pLowerCentralSeries_one ha hf n _⟩) χ
+      (dualBasis 2 (Fin n) ⟨1, hn⟩) = (χ.toMul (freeProPGen 2 n 0)).toAdd := by
+  rw [degreeOneForm_demushkinWordTwoEven_dualBasis ha hf]
+  simp only [one_ne_zero, ite_false, smul_zero, ite_true, sub_zero, zero_add, OfNat.one_ne_ofNat,
+    add_zero]
+  rw [Finset.sum_eq_zero fun i _ ↦ by
+    rw [ite_eq_right (by omega), ite_eq_right (by omega), sub_zero], add_zero]
 
 /-- **The degree-one form of `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` is nondegenerate
 for `n` even, `a` even and `f ≥ 1`**: pairing with the second coordinate character reads off the
