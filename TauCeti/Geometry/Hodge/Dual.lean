@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.LinearAlgebra.Dual.Lemmas
-public import TauCeti.Geometry.Hodge.Morphism
 public import TauCeti.Geometry.Hodge.WeilOperator
 
 /-!
@@ -317,6 +316,42 @@ theorem dualMap_apply (f : Hom source target) (φ : Module.Dual ℂ W₂) (x : W
     f.dualMap φ x = φ (f x) := by
   rw [toLinearMap_def, dualMap_toIntLinearMap, integralMapToComplex_dualMap h₁ h₂,
     LinearMap.dualMap_apply, toLinearMap_def]
+
+/-- Transposition sends the zero morphism to the zero morphism. -/
+@[simp]
+theorem dualMap_zero : (0 : Hom source target).dualMap = 0 := by
+  ext φ v
+  simp
+
+/-- Transposition is additive. -/
+@[simp]
+theorem dualMap_add (f g : Hom source target) : (f + g).dualMap = f.dualMap + g.dualMap := by
+  ext φ v
+  simp
+
+/-- Transposition commutes with negation. -/
+@[simp]
+theorem dualMap_neg (f : Hom source target) : (-f).dualMap = -f.dualMap := by
+  ext φ v
+  simp
+
+/-- Transposition commutes with subtraction. -/
+@[simp]
+theorem dualMap_sub (f g : Hom source target) : (f - g).dualMap = f.dualMap - g.dualMap := by
+  ext φ v
+  simp
+
+/-- Transposition commutes with natural multiples. -/
+@[simp]
+theorem dualMap_nsmul (k : ℕ) (f : Hom source target) : (k • f).dualMap = k • f.dualMap := by
+  ext φ v
+  simp
+
+/-- Transposition commutes with integer multiples. -/
+@[simp]
+theorem dualMap_zsmul (k : ℤ) (f : Hom source target) : (k • f).dualMap = k • f.dualMap := by
+  ext φ v
+  simp
 
 /-- The transpose of the identity is the identity. -/
 @[simp]
