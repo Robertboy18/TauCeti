@@ -171,8 +171,7 @@ theorem exists_mem_proPFrattini_continuousMulEquiv_presentedProP (X : Type u) [F
 
 /-- **A Demushkin group is a one-relator pro-`p` group on `Fin n`**, `n = demushkinRank hG`: it is
 presented by a single relator `r ∈ Φ(F)` of the free pro-`p` group on `Fin (demushkinRank hG)`,
-whatever the universe of `G`. The presentation on `ULift (Fin n)` in the universe of `G` is
-relabelled onto `Fin n` through `TauCeti.freeProP.uliftEquiv`. -/
+whatever the universe of `G`. -/
 theorem exists_mem_proPFrattini_continuousMulEquiv_presentedProP_fin :
     ∃ r ∈ proPFrattini p (freeProP p (Fin (demushkinRank hG))),
       Nonempty (presentedProP p (Fin (demushkinRank hG)) {r} ≃ₜ* G) := by

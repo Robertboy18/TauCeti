@@ -22,14 +22,6 @@ relators of the Demushkin classification are words in `freeProP p (Fin n)`. This
 the two free pro-`p` groups: `TauCeti.freeProP.uliftEquiv` is the topological isomorphism
 `freeProP p (ULift X) ≃ₜ* freeProP p X` matching the generator at `⟨x⟩` with the generator at `x`.
 
-The map is the lift of `x ↦ ⟨of x⟩` into the universe lift `ULift (freeProP p X)`, which is a
-pro-`p` group in the universe of `ULift X`. It is surjective because the generators generate
-topologically, and injective because its kernel lies in every open normal subgroup `U` of
-`freeProP p (ULift X)`: the quotient by `U` is a finite `p`-group, so it is isomorphic to a finite
-`p`-group `Shrink` in the universe of `X`, and the induced map of `freeProP p X` into that copy,
-composed back with the isomorphism to `freeProP p (ULift X)`, agrees with the quotient map on
-the generators, hence everywhere.
-
 ## Main declarations
 
 * `TauCeti.freeProP.uliftEquiv`: the topological isomorphism

@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.OddPrime
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.QInvariant
 
 /-!
 # Uniqueness of Demushkin groups at an odd prime with `q = p`
