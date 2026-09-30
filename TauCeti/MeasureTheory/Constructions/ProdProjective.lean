@@ -18,7 +18,10 @@ its finite-dimensional marginals and hence determined by them; rectangles in tur
 finite measure on a product.
 
 This is the shape in which a coding of an infinite family of random variables, jointly with a fixed
-observation, is assembled from the codings of its finite subfamilies.
+observation, is assembled from the codings of its finite subfamilies. The argument is the one that
+closes `TauCeti.Probability.SeparatelyExchangeable.exists_common_visibleArray_coding` (in
+`TauCeti.Probability.Exchangeability.Arrays.Strip.Cell.CommonCoding`), stated here for an arbitrary
+observation space and path space.
 
 ## Main result
 
