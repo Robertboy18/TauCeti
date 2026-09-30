@@ -18,8 +18,8 @@ import TauCeti.Algebra.Polynomial.OfFn
 Over a field, the principal subresultant coefficients of two polynomials locate the degree of
 their greatest common divisor: taken at the actual degree of the nonzero left polynomial and at
 any bound dominating the degree of the right one, they vanish at every index below the degree
-of the gcd and are nonzero at that degree.  Hence the degree of the gcd is the least index with
-a nonzero principal subresultant coefficient.
+of the gcd and are nonzero at that degree.  Hence, at the actual degrees of any two polynomials,
+the degree of the gcd is the least index with a nonzero principal subresultant coefficient.
 
 Both halves read the principal subresultant matrix as the linear map `(A, B) ↦ A * q + B * p` on
 polynomials of bounded degree, through `Polynomial.subresultantMatrix_mulVec`.  A common factor
@@ -190,20 +190,25 @@ theorem _root_.Polynomial.psc_natDegree_gcd_ne_zero {p q : K[X]} {m n : ℕ}
   | left k => exact congrFun h1 k
   | right k => exact congrFun h2 k
 
-/-- The subresultant gcd criterion: for nonzero `p`, at the actual degrees, the degree of the
-gcd of `p` and `q` is the least index with nonzero principal subresultant coefficient. -/
-theorem _root_.Polynomial.natDegree_gcd_eq_iff_psc {p q : K[X]} (hp : p ≠ 0) (j : ℕ) :
+/-- The subresultant gcd criterion: at the actual degrees, the degree of the gcd of `p` and `q`
+is the least index with nonzero principal subresultant coefficient.  When `p = 0`, the gcd is `q`
+and the criterion reads off the empty terminal determinant at `q.natDegree`. -/
+theorem _root_.Polynomial.natDegree_gcd_eq_iff_psc (p q : K[X]) (j : ℕ) :
     (EuclideanDomain.gcd p q).natDegree = j ↔
       psc p q p.natDegree q.natDegree j ≠ 0 ∧
         ∀ i < j, psc p q p.natDegree q.natDegree i = 0 := by
+  have hne : psc p q p.natDegree q.natDegree (EuclideanDomain.gcd p q).natDegree ≠ 0 := by
+    rcases eq_or_ne p 0 with rfl | hp
+    · rw [EuclideanDomain.gcd_zero_left, natDegree_zero, psc_right_bound, Nat.zero_sub, pow_zero]
+      exact one_ne_zero
+    · exact psc_natDegree_gcd_ne_zero hp rfl le_rfl
   constructor
   · rintro rfl
-    exact ⟨psc_natDegree_gcd_ne_zero hp rfl le_rfl,
-      fun i hi => psc_eq_zero_of_lt_natDegree_gcd le_rfl le_rfl hi⟩
+    exact ⟨hne, fun i hi => psc_eq_zero_of_lt_natDegree_gcd le_rfl le_rfl hi⟩
   · rintro ⟨hj, hlt⟩
-    by_contra hne
-    rcases lt_or_gt_of_ne hne with h | h
-    · exact psc_natDegree_gcd_ne_zero hp rfl le_rfl (hlt _ h)
+    by_contra hne'
+    rcases lt_or_gt_of_ne hne' with h | h
+    · exact hne (hlt _ h)
     · exact hj (psc_eq_zero_of_lt_natDegree_gcd le_rfl le_rfl h)
 
 end Field
