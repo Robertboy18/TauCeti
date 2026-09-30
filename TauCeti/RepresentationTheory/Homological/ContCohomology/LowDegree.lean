@@ -394,6 +394,11 @@ theorem explicitCoeff0_eq_explicitMap0 {N : Type*} [AddCommGroup N] [DistribMulA
       explicitMap0 G M (MonoidHom.id G) f.toAddMonoidHom (fun g m => f.map_smul g m) :=
   (rfl)
 
+/-- The identity coefficient map induces the identity on degree-zero cohomology. -/
+@[simp]
+theorem explicitCoeff0_id : explicitCoeff0 G M (DistribMulActionHom.id G) = AddMonoidHom.id _ :=
+  AddMonoidHom.ext fun m => Subtype.ext (coe_explicitCoeff0 G M _ m)
+
 end CompatiblePairDegreeZero
 
 section RestrictionDegreeZero
