@@ -30,6 +30,16 @@ is not integrable; the convergence criterion `integrableOn_resToImagAxis_Ioi_of_
 integrability near the finite end `g • 0` to integrability near `i∞` of the reflected integrand
 `F ∣[2] (g S)`, so that both ends are handled by decay at `i∞`.
 
+The definition is total in `g`, following the convention of the rational slash action itself
+(`TauCeti.NumberTheory.ModularForms.SlashActionRat`) and of the Hecke modules, which work in
+`GL(2, ℚ)` and assume `0 < det g` where they need it. For `det g < 0` the value is the same
+formula, but Mathlib's slash then involves complex conjugation, so it is *not* the integral of
+`F(z) dz` along the geodesic from `g • 0` to `g • ∞`: every statement below whose content is
+geometric — dependence on the endpoints only, `ℂ`-linearity, convergence — carries the hypothesis
+`0 < det g`, and the identities stated for all `g` (`geodesicIntegral_mul`,
+`geodesicIntegral_mul_S`, additivity) are algebraic consequences of the slash action, whose
+geometric reading likewise requires positive determinant.
+
 These integrals are the raw material of the period pairing between cusp forms and modular
 symbols, whose integrand `f(z) P(z, 1)` and convergence are treated in
 `TauCeti.NumberTheory.ModularForms.ModularSymbols.PeriodIntegral`.
@@ -74,7 +84,12 @@ geodesic from the cusp `g • 0` to the cusp `g • ∞`, for `g ∈ GL(2, ℚ)`
 that geodesic is the `g`-image of the positive imaginary axis, and substituting `z = g • (i t)`
 gives `i ∫₀^∞ (F ∣[2] g)(i t) dt`, the imaginary-axis integral of the weight-`2` slash of `F`.
 Both endpoints are improper, and the Bochner integral is `0` when the integrand is not
-integrable. -/
+integrable.
+
+The definition is total in `g`, like the slash action: for `det g < 0` it is the same formula,
+which is then a junk value and not the integral along the geodesic from `g • 0` to `g • ∞` (the
+slash of a negative-determinant matrix involves complex conjugation). Every result reading it as a
+geodesic integral assumes `0 < det g`. -/
 noncomputable def geodesicIntegral (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) : ℂ :=
   I * ∫ t in Ioi (0 : ℝ), resToImagAxis (F ∣[(2 : ℤ)] g) t
 
@@ -84,7 +99,9 @@ theorem geodesicIntegral_def (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
   rw [geodesicIntegral]
 
 /-- **The substitution `z ↦ g • z`**: the integral of `F(z) dz` from `gh • 0` to `gh • ∞` is the
-integral of the pulled-back one-form `(F ∣[2] g)(z) dz` from `h • 0` to `h • ∞`. -/
+integral of the pulled-back one-form `(F ∣[2] g)(z) dz` from `h • 0` to `h • ∞`. The identity is
+an algebraic consequence of the slash action and holds for every `g` and `h`; its reading as a
+substitution in a geodesic integral requires `g` and `h` to have positive determinant. -/
 theorem geodesicIntegral_mul (g h : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
     geodesicIntegral (g * h) F = geodesicIntegral h (F ∣[(2 : ℤ)] g) := by
   rw [geodesicIntegral, geodesicIntegral, SlashAction.slash_mul]
@@ -94,7 +111,8 @@ theorem geodesicIntegral_mul (g h : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
 theorem geodesicIntegral_zero (g : GL (Fin 2) ℚ) : geodesicIntegral g 0 = 0 := by
   simp [geodesicIntegral]
 
-/-- The geodesic integral is additive in the integrand, for integrable integrands. -/
+/-- The geodesic integral is additive in the integrand, for integrable integrands (for every
+`g`, since the slash action is additive). -/
 theorem geodesicIntegral_add (g : GL (Fin 2) ℚ) {F G : ℍ → ℂ}
     (hF : IntegrableOn (resToImagAxis (F ∣[(2 : ℤ)] g)) (Ioi 0))
     (hG : IntegrableOn (resToImagAxis (G ∣[(2 : ℤ)] g)) (Ioi 0)) :
@@ -205,7 +223,9 @@ theorem geodesicIntegral_eq_of_smul_eq {g g' : GL (Fin 2) ℚ}
 /-! ### Reversing the orientation -/
 
 /-- **Reversing the orientation of the geodesic**: `g S` sends `(0, ∞)` to `(g • ∞, g • 0)`, and
-the integral from `g • ∞` to `g • 0` is the negative of the integral from `g • 0` to `g • ∞`. -/
+the integral from `g • ∞` to `g • 0` is the negative of the integral from `g • 0` to `g • ∞`. The
+identity is the substitution `t ↦ 1 / t` on the imaginary axis and holds for every `g`; its
+reading as an orientation reversal of a geodesic integral requires `0 < det g`. -/
 theorem geodesicIntegral_mul_S (g : GL (Fin 2) ℚ) (F : ℍ → ℂ) :
     geodesicIntegral (g * mapGL ℚ S) F = -geodesicIntegral g F := by
   rw [geodesicIntegral_mul, geodesicIntegral, geodesicIntegral, ModularForm.rat_slash_mapGL,
