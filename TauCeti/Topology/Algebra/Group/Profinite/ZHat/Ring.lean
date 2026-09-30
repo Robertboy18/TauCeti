@@ -22,10 +22,9 @@ compact, totally disconnected topological commutative ring in which the integers
 (`zHat.denseRange_ofInt` and `zHat.ofMul_ofInt`). The defining equations for the product and the
 unit are recorded as `simp` lemmas on both sides of the equivalence between `zHat` and
 `Additive zHat`, and the casts are read in `zHat` by the `simp` lemmas `zHat.toMul_natCast` and
-`zHat.toMul_intCast`; in the other direction `zHat.ofMul_gen_pow` and `zHat.ofMul_gen_zpow` read a
-power of the generator as a cast (`simp` reaches the same normal form through `Additive.ofMul_pow`
-and `zHat.ofMul_gen`, so they are not `simp` lemmas). Thus a statement about the ring can be
-rewritten into the language of `zHat.lift` and back.
+`zHat.toMul_intCast`; in the other direction `simp` reads a power of the generator as a cast
+through Mathlib's `Additive.ofMul_pow` and `Additive.ofMul_zpow` together with `zHat.ofMul_gen`.
+Thus a statement about the ring can be rewritten into the language of `zHat.lift` and back.
 
 This is the ring by which a profinite group is powered: the profinite power of an element `x` of
 a profinite group by `a : ℤ̂` is `zHat.lift x a`, and by naturality of the lift (`zHat.map_lift`)
@@ -39,8 +38,7 @@ powering first by `a` and then by `b` is powering by the product `a * b` defined
 
 * `TauCeti.zHat.toMul_mul`, `TauCeti.zHat.ofMul_lift`: the product is the lift.
 * `TauCeti.zHat.toMul_one`, `TauCeti.zHat.toMul_natCast`, `TauCeti.zHat.toMul_intCast`,
-  `TauCeti.zHat.ofMul_gen_pow`, `TauCeti.zHat.ofMul_gen_zpow`, `TauCeti.zHat.ofMul_ofInt`: the
-  unit and the casts of integers are the powers of the generator.
+  `TauCeti.zHat.ofMul_ofInt`: the unit and the casts of integers are the powers of the generator.
 
 ## Implementation notes
 
@@ -123,18 +121,6 @@ theorem toMul_natCast (n : ℕ) : (n : Additive zHat.{u}).toMul = gen ^ n := by
 /-- The cast of an integer `n`, read in `zHat`, is the `n`-th power of the generator. -/
 @[simp]
 theorem toMul_intCast (n : ℤ) : (n : Additive zHat.{u}).toMul = gen ^ n := by
-  rfl
-
-/-- The `n`-th power of the generator, for a natural number `n`, read in the ring, is the cast of
-`n`. This is not a `simp` lemma: `simp` rewrites the left-hand side to the cast through
-`Additive.ofMul_pow` and `zHat.ofMul_gen`. -/
-theorem ofMul_gen_pow (n : ℕ) : ofMul ((gen : zHat.{u}) ^ n) = (n : Additive zHat.{u}) := by
-  rfl
-
-/-- The `n`-th power of the generator, for an integer `n`, read in the ring, is the cast of `n`.
-This is not a `simp` lemma: `simp` rewrites the left-hand side to the cast through
-`Additive.ofMul_zpow` and `zHat.ofMul_gen`. -/
-theorem ofMul_gen_zpow (n : ℤ) : ofMul ((gen : zHat.{u}) ^ n) = (n : Additive zHat.{u}) := by
   rfl
 
 /-- The canonical homomorphism from `ℤ` to the profinite integers is the integer cast of the
