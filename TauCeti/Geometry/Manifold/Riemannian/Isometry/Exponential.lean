@@ -78,8 +78,8 @@ theorem geodesicInterval_mfderiv (Φ : RiemannianIsometry I J M N) (p : M)
     exact ⟨Φ ∘ γ, a, b, Φ.isGeodesicCurveOnFrom_comp_iff.mpr hγ, ht⟩
 
 /-- A smooth Riemannian isometry intertwines the maximal geodesics with corresponding initial
-data, at every time: on the common maximal interval this is uniqueness of geodesics, and off it
-both sides take the junk value `Φ p`. -/
+data, at every time `t`: the identity holds on the common maximal interval, and off it both sides
+take the junk value `Φ p`. -/
 @[simp]
 theorem maximalGeodesic_mfderiv [I.Boundaryless] [J.Boundaryless]
     [T2Space (TangentBundle I M)] [T2Space (TangentBundle J N)]
@@ -111,8 +111,8 @@ theorem mfderiv_image_expDomain (Φ : RiemannianIsometry I J M N) (p : M) :
   rw [(Φ.mfderiv_injective p).mem_set_image, Φ.mfderiv_mem_expDomain_iff]
 
 /-- A smooth Riemannian isometry intertwines the exponential maps, `Φ ∘ exp_p = exp_{Φ p} ∘ dΦ_p`,
-on every tangent vector: on the natural domain this is naturality of geodesics, and off it both
-sides take the junk value `Φ p`. -/
+on every tangent vector: the identity holds on the natural domain, and off it both sides take the
+junk value `Φ p`. -/
 @[simp]
 theorem riemannianExp_mfderiv [I.Boundaryless] [J.Boundaryless]
     [T2Space (TangentBundle I M)] [T2Space (TangentBundle J N)]
