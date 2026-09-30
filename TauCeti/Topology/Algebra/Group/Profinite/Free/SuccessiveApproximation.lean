@@ -37,8 +37,9 @@ Two successive-approximation theorems follow, according to the span statement av
   This hypothesis is established for the relators `x₁^p (x₁, x₂) (x₃, x₄) ⋯` at odd `p`
   (`TauCeti.freeProP.range_basisModificationDelta_eq_top_of_odd`).
 * When `ρ` has no `p`-power part, `Im δ_ρ` misses the classes `π^{m+1} ξ_i` of the `p`-powers of
-  the generators, and only deviations lying in the closed commutator subgroup `K = closure [F, F]`
-  can be absorbed. The **relative** theorem
+  the generators, so the span statement available for `δ_ρ` only covers the classes of the
+  elements of the closed commutator subgroup `K = closure [F, F]`, and the induction has to keep
+  every deviation inside `K`. The **relative** theorem
   (`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_exponentSum_eq`) therefore assumes that
   `r` and `w` have the same exponent vector `v = exponentSum r`, and that every deviation in
   `λ_{m+1}(F) ∩ K` is `δ_ρ` of a level-`m` correction `ω` with `ω_i ∈ K` at every generator `i`
@@ -231,8 +232,9 @@ same exponent vector `v = exponentSum r`, and suppose that for every `m ≥ 1` e
 automorphism of `F` carries `r` to `w`.
 
 This is the form of the argument for a relator whose `p`-power part lies in `λ_2(F)`: there `Im δ_ρ`
-misses the classes `π^{m+1} ξ_i`, so only deviations in `K` can be absorbed and the exponent vector
-has to be kept fixed along the approximation. The hypothesis on the corrections is the constrained
+misses the classes `π^{m+1} ξ_i`, so the span statement for `δ_ρ` only covers the classes of the
+elements of `K`, and the induction keeps every deviation inside `K` by fixing the exponent vector
+along the approximation. The hypothesis on the corrections is the constrained
 form of the span statement `Im δ_ρ ⊇ ` (classes of `λ_{m+1}(F) ∩ K`); it is assumed here, not
 established. -/
 theorem exists_continuousMulEquiv_apply_eq_of_exponentSum_eq
