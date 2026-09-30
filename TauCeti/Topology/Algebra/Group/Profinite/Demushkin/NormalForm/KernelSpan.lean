@@ -125,16 +125,16 @@ theorem degreeOneDeriv_gradedMk_demushkinWordNeTwo_zero {q : ℕ} (hq : p ∣ q)
           demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _⟩) =
       (q / p) • p.choose 2 • gradedMkZero p (freeProP p (Fin n)) (of ⟨0, by omega⟩) +
         gradedMkZero p (freeProP p (Fin n)) (of ⟨1, hn1⟩) := by
+  have hn0 : 0 < n := by omega
   -- The derivative at `x_0` of the first bracket `[ξ_0, ξ_1]` is `ξ_1`.
-  have key : degreeOneDeriv p (Fin n) ⟨0, by omega⟩ (gradedBracket p (freeProP p (Fin n)) 0 0
+  have key : degreeOneDeriv p (Fin n) ⟨0, hn0⟩ (gradedBracket p (freeProP p (Fin n)) 0 0
       (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * 0)))
       (gradedMkZero p (freeProP p (Fin n)) (freeProPGen p n (2 * 0 + 1)))) =
       gradedMkZero p (freeProP p (Fin n)) (of ⟨1, hn1⟩) := by
-    rw [freeProPGen_of_lt p (show 2 * 0 < n by omega),
-      freeProPGen_of_lt p (show 2 * 0 + 1 < n by omega)]
+    rw [freeProPGen_of_lt p (i := 2 * 0) hn0, freeProPGen_of_lt p (i := 2 * 0 + 1) hn1]
     exact degreeOneDeriv_gradedBracket_gradedMkZero_of_left (Fin.mk_lt_mk.2 (by omega))
   rw [gradedMk_demushkinWordNeTwo hq, map_add, map_nsmul, map_sum,
-    freeProPGen_of_lt p (show 0 < n by omega), degreeOneDeriv_gradedPow_gradedMkZero_of_self,
+    freeProPGen_of_lt p hn0, degreeOneDeriv_gradedPow_gradedMkZero_of_self,
     Finset.sum_eq_single 0 (fun b hb hb0 ↦ degreeOneDeriv_gradedBracket_freeProPGen_of_ne _
       (by rw [Finset.mem_range] at hb; omega) (by rw [Fin.val_mk]; omega)
       (by rw [Fin.val_mk]; omega))

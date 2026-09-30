@@ -1041,9 +1041,10 @@ variable (p G) in
 class in `gr_{m+1}(G)` of `⁅g, h⁆ ^ (p ^ m)`. For `m = 0` it is the bracket of the classes of `g`
 and `h` (`TauCeti.gradedPowIterBracket_zero`), and `π` raises `m` by one
 (`TauCeti.gradedPow_gradedPowIterBracket`). At `p = 2` these classes are not brackets of iterated
-`p`-powers: `π [ξ_g, ξ_h]` differs from `[π ξ_g, ξ_h]` by the degree-zero correction
-`[[ξ_g, ξ_h], ξ_g]` (`TauCeti.gradedPow_gradedBracket_zero_zero`), which is why they occur as
-spanning vectors of their own in the span statements of the dyadic classification. -/
+`p`-powers: `π [ξ_g, ξ_h]` differs from `[π ξ_g, ξ_h]` by the correction `[[ξ_g, ξ_h], ξ_g]`,
+the bracket in `gr_2(G)` of the degree-one class `[ξ_g, ξ_h]` with `ξ_g`
+(`TauCeti.gradedPow_gradedBracket_zero_zero`), which is why they occur as spanning vectors of
+their own in the span statements of the dyadic classification. -/
 noncomputable def gradedPowIterBracket (m : ℕ) (g h : G) : gradedPiece p G (m + 1) :=
   gradedMk p G (m + 1) ⟨⁅g, h⁆ ^ p ^ m, commutatorElement_pow_pow_mem_pLowerCentralSeries p g h m⟩
 
@@ -1053,7 +1054,8 @@ theorem gradedPowIterBracket_def (m : ℕ) (g h : G) :
         ⟨⁅g, h⁆ ^ p ^ m, commutatorElement_pow_pow_mem_pLowerCentralSeries p g h m⟩ :=
   (rfl)
 
-/-- In degree zero, `π^0 [ξ_g, ξ_h]` is the bracket of the classes of `g` and `h`. -/
+/-- For `m = 0`, that is without any `p`-power, `π^0 [ξ_g, ξ_h] ∈ gr_1(G)` is the bracket of the
+classes of `g` and `h`. -/
 @[simp]
 theorem gradedPowIterBracket_zero (g h : G) :
     gradedPowIterBracket p G 0 g h =

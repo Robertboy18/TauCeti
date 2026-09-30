@@ -121,9 +121,10 @@ theorem gradedPieceOf_exponentSumKer_demushkinWordTwoEven_eq_map_basisModificati
       ⟨demushkinWordNeTwo 2 n (freeProPGen 2 n),
         demushkinWordNeTwo_mem_pLowerCentralSeries_one dvd_rfl n _⟩) =
       -gradedMkZero 2 (freeProP 2 (Fin n)) (of ⟨0, by omega⟩) := by
+    have hn0 : 0 < n := by omega
     have h := degreeOneDeriv_gradedMk_demushkinWordNeTwo_odd (p := 2) (n := n) dvd_rfl (a := 0)
       (by omega)
-    simpa only [Nat.mul_zero, Nat.zero_add, freeProPGen_of_lt 2 (show 0 < n by omega)] using h
+    simpa only [Nat.mul_zero, Nat.zero_add, freeProPGen_of_lt 2 hn0] using h
   rw [Nat.div_self two_pos, Nat.choose_self, one_nsmul, one_nsmul] at hd0
   -- The implicit arguments are supplied explicitly: inferring them by unification is slow.
   refine gradedPieceOf_exponentSumKer_eq_map_basisModificationDelta_sup_gradedPowIterBracket_of_ne
@@ -190,7 +191,7 @@ theorem _root_.TauCeti.IsCrossedHom.map_inv_mul_basisModification_demushkinWordT
   rw [hF.map_mul, hθr, mul_zero, zero_add, hF.map_inv, hr, mul_zero]
 
 /-- **The graded functional of a crossed homomorphism for the orientation vanishes on
-`δ_ρ(gr_m(X)^n)`** (Labute, §4.2, Lemma 4 (2)). For `n ≥ 4`, `f ≥ 2`, `χ` with `χ(x₂) = -1`,
+`δ_ρ(gr_m(X)^n)`** (Labute, §4.2, Lemma 4 (2)). For `n ≥ 4`, `f ≥ 1`, `χ` with `χ(x₂) = -1`,
 `χ(x₄) (1 - 2^f) = 1` and `χ(x_i) = 1` for `i ≠ 2, 4`, a continuous crossed homomorphism `F` for
 `χ`, the class `ρ` of `r = x₁² (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯` and a family `v` of classes in
 `gr_m(X)`, where `X` is the kernel of the exponent sum at `x₄`, `Δ_{m+1}(F) (δ_ρ(v)) = 0`:
@@ -198,7 +199,7 @@ theorem _root_.TauCeti.IsCrossedHom.map_inv_mul_basisModification_demushkinWordT
 `X ∩ λ_m(F) ≤ ker χ`, which `F` kills. -/
 @[simp]
 theorem gradedFunctional_basisModificationDelta_demushkinWordTwoEven_eq_zero (hn3 : 3 < n)
-    {f : ℕ} (hf : 2 ≤ f) {m : ℕ} (hm : 1 ≤ m) (h₁ : χ (of ⟨1, by omega⟩) = -1)
+    {f : ℕ} (hf : 0 < f) {m : ℕ} (hm : 1 ≤ m) (h₁ : χ (of ⟨1, by omega⟩) = -1)
     (h₃ : (χ (of ⟨3, hn3⟩) : ℤ_[2]) * (1 - 2 ^ f) = 1)
     (h : ∀ j : Fin n, j ≠ ⟨1, by omega⟩ → j ≠ ⟨3, hn3⟩ → χ (of j) = 1)
     {F : freeProP 2 (Fin n) → ℤ_[2]} (hF : IsCrossedHom χ F) (hFc : Continuous F)
@@ -279,8 +280,8 @@ theorem mem_map_basisModificationDelta_demushkinWordTwoEven_iff_forall_gradedFun
   classical
   constructor
   · rintro ⟨v, hv, rfl⟩ i -
-    exact gradedFunctional_basisModificationDelta_demushkinWordTwoEven_eq_zero hn3 hf hm h₁ h₃ h _
-      _ fun j ↦ Submodule.mem_pi.1 hv j (Set.mem_univ j)
+    exact gradedFunctional_basisModificationDelta_demushkinWordTwoEven_eq_zero hn3 (by omega) hm
+      h₁ h₃ h _ _ fun j ↦ Submodule.mem_pi.1 hv j (Set.mem_univ j)
   · intro hΔ
     -- By the constrained span statement,
     -- `ε = δ_ρ(v) + Σ_{a ≠ 2, 4} c_a π^{m+1} ξ_a + d π^m [ξ₂, ξ₄]`.
@@ -297,8 +298,8 @@ theorem mem_map_basisModificationDelta_demushkinWordTwoEven_iff_forall_gradedFun
         (basisModificationDelta 2 (Fin n) hm (gradedMk 2 (freeProP 2 (Fin n)) 1
           ⟨demushkinWordTwoEven 0 f n (freeProPGen 2 n),
             demushkinWordTwoEven_mem_pLowerCentralSeries_one (dvd_zero 2) (by omega) n _⟩) v) = 0 :=
-      gradedFunctional_basisModificationDelta_demushkinWordTwoEven_eq_zero hn3 hf hm h₁ h₃ h _ _
-        fun j ↦ Submodule.mem_pi.1 hv j (Set.mem_univ j)
+      gradedFunctional_basisModificationDelta_demushkinWordTwoEven_eq_zero hn3 (by omega) hm h₁ h₃
+        h _ _ fun j ↦ Submodule.mem_pi.1 hv j (Set.mem_univ j)
     have hΔT (i : Fin n) : (isCrossedHom_crossedHom χ (Pi.single i 1)).gradedFunctional
         ((isProP_freeProP 2 (Fin n)).mem_unitsPrincipal_one χ) (continuous_crossedHom χ _) (m + 1)
         (∑ a : {a : Fin n // a ≠ ⟨3, hn3⟩ ∧ a ≠ ⟨1, by omega⟩}, c a •

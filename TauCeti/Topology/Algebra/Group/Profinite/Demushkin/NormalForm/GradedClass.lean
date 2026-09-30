@@ -319,10 +319,10 @@ theorem gradedMk_demushkinWordTwoEven_eq_gradedMk_demushkinWordNeTwo {a f : ℕ}
           (gradedMkZero 2 H (x (2 * i + 3))) := by
     rw [hN, Nat.add_sub_cancel, Finset.sum_range_succ']
     exact (add_comm _ _).trans (congrArg₂ (· + ·) rfl (Finset.sum_congr rfl fun i _ ↦ by
-      rw [show 2 * (i + 1) = 2 * i + 2 by ring, show 2 * i + 2 + 1 = 2 * i + 3 by ring]))
+      rw [Nat.mul_add_one, Nat.add_assoc (2 * i) 2 1]))
   rw [gradedMk_demushkinWordTwoEven ha (by omega),
     gradedMk_demushkinWordNeTwo ((Nat.dvd_add_right dvd_rfl).2 ha), hsum, h2,
-    show (2 + a) / 2 = 1 + a / 2 by omega]
+    Nat.add_div_left a two_pos, add_comm (a / 2) 1]
   abel
 
 end TauCeti
