@@ -64,8 +64,8 @@ not additive.
 * `TauCeti.freeProP.linearIndependent_gradedPowIter_gradedMkZero_of`: the classes `π^j x'_i` are
   linearly independent in `gr_j(F)`, for every `j`.
 * `TauCeti.freeProP.finrank_gradedPowIterSpan`, `TauCeti.freeProP.gradedPowIterSpan_succ`: the
-  span of the `π^j x'_i` over `S` has dimension `#S`, and for `j ≥ 1` the operator `π` carries it
-  onto the span in degree `j + 1`.
+  span of the `π^j x'_i` over a finite `S` has dimension `#S`, and for `j ≥ 1` the operator `π`
+  carries it onto the span in degree `j + 1`.
 * `TauCeti.freeProP.finrank_gradedPiece_one`: `dim gr_1(F) = #X + (#X choose 2)`;
   `TauCeti.freeProP.natCard_gradedPiece_one`: so `gr_1(F)` has `p ^ (#X + (#X choose 2))` elements.
 * `TauCeti.gradedBracket_freeProP_two_ne_zero`: the bracket of the two generator classes of
@@ -407,9 +407,9 @@ variable {p : ℕ} [Fact p.Prime] {X : Type u}
 variable (p X) in
 /-- **The span of the `p`-power classes of a set of generators**: for `S : Set X`, the subspace
 of `gr_j(F)` spanned by the iterated `p`-powers `π^j x'_i` of the generator classes `x'_i ∈ gr_0(F)`
-with `i ∈ S`. The vectors `π^j x'_i` are linearly independent, so it has dimension `#S`
-(`TauCeti.freeProP.finrank_gradedPowIterSpan`), and above degree zero `π` carries it onto the span
-in the next degree (`TauCeti.freeProP.gradedPowIterSpan_succ`). The tails of the
+with `i ∈ S`. The vectors `π^j x'_i` are linearly independent, so when `S` is finite it has
+dimension `#S` (`TauCeti.freeProP.finrank_gradedPowIterSpan`), and above degree zero `π` carries it
+onto the span in the next degree (`TauCeti.freeProP.gradedPowIterSpan_succ`). The tails of the
 successive-approximation arguments of the classification of Demushkin groups are its instances at
 the index sets those arguments leave free. -/
 noncomputable def gradedPowIterSpan (S : Set X) (j : ℕ) :
