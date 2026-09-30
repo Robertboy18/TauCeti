@@ -215,8 +215,11 @@ theorem _root_.ContinuousMonoidHom.exponentSumKer_le_ker {H : Type*} [Group H]
 /-! ### Endomorphisms preserving the kernel of an exponent sum -/
 
 /-- **An endomorphism moving each generator inside `X` preserves the `i`-th exponent sum**, for
-`X` the kernel of that exponent sum: `φ(y) = Σ_x v_x(y) • exponentSum (φ x_x)` and the `i`-th
-coordinate of `exponentSum (φ x_x)` is `δ_{xi}`. -/
+`X` the kernel of that exponent sum: the exponent vector is linear,
+`exponentSum (φ y) = ∑ x, (exponentSum y)_x • exponentSum (φ x_x)`
+(`TauCeti.freeProP.toAdd_exponentSum_apply_eq_sum_smul`), and the `i`-th coordinate of each
+column `exponentSum (φ x_x)` is `δ_{xi}`, so the `i`-th coordinate of `exponentSum (φ y)` is
+`(exponentSum y)_i`. -/
 theorem _root_.ContinuousMonoidHom.toAdd_exponentSum_apply_apply_eq_of_forall_inv_mul_apply_mem
     [Finite X]
     (φ : freeProP p X →ₜ* freeProP p X) {i : X}
