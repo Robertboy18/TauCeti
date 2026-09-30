@@ -33,8 +33,7 @@ the last two a real minuend.
 * `EReal.sub_coe_eq_iff_eq_add_coe` — a real subtrahend can be moved across an equation, as in
   `sub_eq_iff_eq_add` for groups;
 * `EReal.add_eq_coe_iff_neg_add_neg_eq` — an equation between a sum and a real number can be
-  negated term by term;
-* `EReal.neg_iSup` and `EReal.neg_iInf` — negation exchanges suprema and infima.
+  negated term by term.
 -/
 
 public section
@@ -119,15 +118,6 @@ Both sides force `x` and `y` to be real, so no finiteness hypothesis is needed, 
 theorem _root_.EReal.add_eq_coe_iff_neg_add_neg_eq {x y : EReal} {r : ℝ} :
     x + y = (r : EReal) ↔ -x + -y = ((-r : ℝ) : EReal) := by
   induction x <;> induction y <;> simp [← EReal.coe_add, ← EReal.coe_neg, ← neg_add, -neg_add_rev]
-
-/-- Negation turns a supremum in `EReal` into the infimum of the negated values. -/
-theorem _root_.EReal.neg_iSup {ι : Sort*} (f : ι → EReal) : -(⨆ i, f i) = ⨅ i, -f i :=
-  EReal.negOrderIso.map_iSup f
-
-/-- Negation turns an infimum in `EReal` into the supremum of the negated values. -/
-theorem _root_.EReal.neg_iInf {ι : Sort*} (f : ι → EReal) : -(⨅ i, f i) = ⨆ i, -f i := by
-  rw [← neg_neg (⨆ i, -f i), EReal.neg_iSup]
-  simp only [neg_neg]
 
 end TauCeti
 

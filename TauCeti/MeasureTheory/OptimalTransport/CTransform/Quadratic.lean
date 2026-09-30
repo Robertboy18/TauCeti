@@ -33,10 +33,10 @@ here. Every bridge in this file accounts for the factor `1 / 2` in the cost.
   `TauCeti.isCyclicallyMonotone_norm_sub_sq_div_two_iff_forall_sum_inner_le` its classical
   sum form;
 * `TauCeti.cTransform_norm_sub_sq_div_two`, `TauCeti.cTransformSymm_norm_sub_sq_div_two`,
-  `TauCeti.isCConcave_norm_sub_sq_div_two_iff` and
-  `TauCeti.cSuperdifferential_norm_sub_sq_div_two` — the two `c`-transforms, `c`-concavity and
-  the `c`-superdifferential for the quadratic cost in terms of the Legendre–Fenchel conjugate
-  and the subdifferential of `‖·‖ ^ 2 / 2 - φ`;
+  `TauCeti.isCConcave_norm_sub_sq_div_two_iff`, `TauCeti.isCConcaveSymm_norm_sub_sq_div_two_iff`
+  and `TauCeti.cSuperdifferential_norm_sub_sq_div_two` — the two `c`-transforms, `c`-concavity
+  on the source and on the target, and the `c`-superdifferential for the quadratic cost in terms
+  of the Legendre–Fenchel conjugate and the subdifferential of `‖·‖ ^ 2 / 2 - φ`;
 * `TauCeti.IsCyclicallyMonotone.exists_fenchelConjugate_innerₗ_subset_subdifferential`
   — **Rockafellar's theorem for the quadratic cost**: a `c`-cyclically monotone set lies in the
   subdifferential graph of a Legendre–Fenchel conjugate for the inner product.
@@ -89,6 +89,7 @@ theorem isCyclicallyMonotone_norm_sub_sq_div_two_iff_forall_sum_inner_le {S : Se
 
 /-- The `c`-transform of a potential `φ` for the quadratic cost is `‖y‖ ^ 2 / 2 - u⋆ y`, where
 `u = ‖·‖ ^ 2 / 2 - φ` and `u⋆` is its Legendre–Fenchel conjugate for the inner product. -/
+@[simp]
 theorem cTransform_norm_sub_sq_div_two (φ : E → EReal) (y : E) :
     cTransform (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) φ y =
       ((‖y‖ ^ 2 / 2 : ℝ) : EReal) -
@@ -102,6 +103,7 @@ theorem cTransform_norm_sub_sq_div_two (φ : E → EReal) (y : E) :
 `‖x‖ ^ 2 / 2 - v⋆ x`, where `v = ‖·‖ ^ 2 / 2 - ψ` and `v⋆` is its Legendre–Fenchel conjugate for
 the inner product; the quadratic cost is symmetric, so the formula is the same as for the
 infimal `c`-transform. -/
+@[simp]
 theorem cTransformSymm_norm_sub_sq_div_two (ψ : E → EReal) (x : E) :
     cTransformSymm (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) ψ x =
       ((‖x‖ ^ 2 / 2 : ℝ) : EReal) -
@@ -122,8 +124,22 @@ theorem isCConcave_norm_sub_sq_div_two_iff (φ : E → EReal) :
     isCConcave_pairingCost_iff, flip_innerₗ]
   simp only [EReal.neg_sub_coe]
 
+/-- A potential `ψ` on the target is `c`-concave for the quadratic cost exactly when
+`‖·‖ ^ 2 / 2 - ψ` is a Legendre–Fenchel conjugate for the inner product; the quadratic cost is
+symmetric, so the criterion is the same as for potentials on the source. -/
+theorem isCConcaveSymm_norm_sub_sq_div_two_iff (ψ : E → EReal) :
+    IsCConcaveSymm (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) ψ ↔
+      ∃ g : E → EReal,
+        (fun y => ((‖y‖ ^ 2 / 2 : ℝ) : EReal) - ψ y) = fenchelConjugate (innerₗ E) g := by
+  rw [norm_sub_sq_div_two_eq_pairingCost_add_add,
+    isCConcaveSymm_add_add_iff (pairingCost (innerₗ E)) (fun x => ‖x‖ ^ 2 / 2)
+      (fun y => ‖y‖ ^ 2 / 2),
+    isCConcaveSymm_pairingCost_iff]
+  simp only [EReal.neg_sub_coe]
+
 /-- The `c`-superdifferential of a potential `φ` for the quadratic cost is the graph of the
 subdifferential of `‖·‖ ^ 2 / 2 - φ` for the inner product. -/
+@[simp]
 theorem cSuperdifferential_norm_sub_sq_div_two (φ : E → EReal) :
     cSuperdifferential (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) φ =
       {p | p.2 ∈ subdifferential (innerₗ E) (fun x => ((‖x‖ ^ 2 / 2 : ℝ) : EReal) - φ x) p.1} := by
@@ -154,8 +170,8 @@ theorem IsCyclicallyMonotone.exists_fenchelConjugate_innerₗ_subset_subdifferen
   exact ⟨g, hg⟩
 
 /-- **`c`-cyclically monotone sets for the quadratic cost are exactly the subsets of
-subdifferential graphs of closed convex functions**, the latter described algebraically as
-Legendre–Fenchel conjugates for the inner product. -/
+subdifferential graphs of Legendre–Fenchel conjugates for the inner product.** Every such
+conjugate is convex and lower semicontinuous for the norm topology. -/
 theorem isCyclicallyMonotone_norm_sub_sq_div_two_iff_exists_fenchelConjugate (S : Set (E × E)) :
     IsCyclicallyMonotone (fun p : E × E => ‖p.1 - p.2‖ ^ 2 / 2) S ↔
       ∃ g : E → EReal,

@@ -19,19 +19,19 @@ and every permutation `σ`,
 
 Rockafellar's theorem says that these are exactly the subsets of the graph of the
 subdifferential `∂f` of a proper lower-semicontinuous convex function `f : E → EReal`. This
-file proves it, in the algebraic form valid on a bare dual pair: the potential is produced as a
-Legendre–Fenchel conjugate `f = g⋆`, which is the algebraic description of a closed convex
-function (every conjugate is convex and, for a topology compatible with the pairing, lower
-semicontinuous; that every closed proper convex function is a conjugate is the Fenchel–Moreau
-theorem, which needs a separation theorem and is not used here).
+file proves the algebraic form of that statement on a bare dual pair: a set is cyclically
+monotone exactly when it lies in the subdifferential graph of a Legendre–Fenchel conjugate
+`f = g⋆`. Such a conjugate is convex, and it is lower semicontinuous for every topology on `E`
+compatible with the pairing. When the set is nonempty, `f` is moreover proper: it is never `⊥`
+(`TauCeti.apply_ne_bot_of_mem_subdifferential`) and it is finite at the first coordinate of every
+point of the set (`TauCeti.mem_subdifferential_iff_add_fenchelConjugate_eq`). The converse
+description of closed proper convex functions as conjugates is the Fenchel–Moreau theorem, which
+needs a separation theorem and is not part of this file.
 
-The proof is a translation. Cyclical monotonicity for the pairing is `c`-cyclical monotonicity
-for the transport cost `c (x, y) = -⟪x, y⟫`, for which the `c`-transform vocabulary of optimal
-transport is the Legendre–Fenchel vocabulary of convex analysis with the signs reversed
-(`TauCeti.MeasureTheory.OptimalTransport.CTransform.Pairing`). The theorem of Rockafellar and
-Rüschendorf for a general cost
-(`TauCeti.IsCyclicallyMonotone.exists_isCConcave_subset_cSuperdifferential`) then specialises
-to Rockafellar's original theorem.
+Cyclical monotonicity for the pairing is `c`-cyclical monotonicity for the transport cost
+`c (x, y) = -⟪x, y⟫` (`TauCeti.MeasureTheory.OptimalTransport.Cost.Pairing`), whose `c`-transform
+dictionary in `TauCeti.MeasureTheory.OptimalTransport.CTransform.Pairing` is the Legendre–Fenchel
+vocabulary with the signs reversed.
 
 ## Main statements
 
@@ -81,8 +81,9 @@ theorem IsCyclicallyMonotone.exists_fenchelConjugate_subset_subdifferential
   refine ⟨g, ?_⟩
   rwa [cSuperdifferential_pairingCost, hg] at hsub
 
-/-- **Cyclically monotone sets are exactly the subsets of subdifferential graphs of closed
-convex functions**, the latter described algebraically as Legendre–Fenchel conjugates. -/
+/-- **Cyclically monotone sets are exactly the subsets of subdifferential graphs of
+Legendre–Fenchel conjugates.** Every such conjugate is convex and lower semicontinuous for every
+topology on `E` compatible with the pairing. -/
 theorem isCyclicallyMonotone_pairingCost_iff_exists_fenchelConjugate
     (B : E →ₗ[ℝ] F →ₗ[ℝ] ℝ) (Γ : Set (E × F)) :
     IsCyclicallyMonotone (pairingCost B) Γ ↔

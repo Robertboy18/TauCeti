@@ -460,6 +460,12 @@ theorem isCConcave_cTransformSymm (c : X × Y → ℝ) (ψ : Y → EReal) :
 theorem isCConcaveSymm_cTransform (c : X × Y → ℝ) (φ : X → EReal) :
     IsCConcaveSymm c (cTransform c φ) := ⟨φ, rfl⟩
 
+/-- A potential on the target is `c`-concave exactly when it is `c`-concave, as a potential on
+the source, for the transposed cost. -/
+theorem isCConcaveSymm_iff_isCConcave :
+    IsCConcaveSymm c ψ ↔ IsCConcave (fun p : Y × X => c (p.2, p.1)) ψ :=
+  Iff.rfl
+
 /-- A potential on the source is `c`-concave exactly when it is fixed by the double
 `c`-transform. -/
 theorem isCConcave_iff : IsCConcave c φ ↔ cTransformSymm c (cTransform c φ) = φ := by
