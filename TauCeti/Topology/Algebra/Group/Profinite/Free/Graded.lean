@@ -417,6 +417,14 @@ noncomputable def gradedPowIterSpan (S : Set X) (j : ℕ) :
   span (ZMod p)
     ((fun i ↦ gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of i))) '' S)
 
+/-- The span of the `p`-power classes over `S` is the span of the image of `S` under
+`i ↦ π^j x'_i`. -/
+theorem gradedPowIterSpan_def (S : Set X) (j : ℕ) :
+    gradedPowIterSpan p X S j =
+      span (ZMod p)
+        ((fun i ↦ gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of i))) '' S) :=
+  (rfl)
+
 /-- An iterated power `π^j x'_i` with `i ∈ S` belongs to the span of the `p`-power classes over
 `S`. -/
 theorem gradedPowIter_mem_gradedPowIterSpan {S : Set X} {i : X} (hi : i ∈ S) (j : ℕ) :
@@ -460,8 +468,23 @@ theorem finrank_gradedPowIterSpan [Finite X] (S : Set X) (j : ℕ) :
   exact (finrank_span_eq_card ((linearIndependent_gradedPowIter_gradedMkZero_of p X j).comp
     (Subtype.val : S → X) Subtype.val_injective)).trans Nat.card_eq_fintype_card.symm
 
-/-- **Membership in the span of the `p`-power classes**: for a finite index set `S`, the elements
-of the span over `S` are the linear combinations of the `π^j x'_i` over the indices `i ∈ S`. -/
+/-- **Membership in the span of the `p`-power classes**: the elements of the span over `S` are
+the finitely supported linear combinations of the `π^j x'_i` over the indices `i ∈ S`. For a
+finite index set, `TauCeti.freeProP.mem_gradedPowIterSpan_iff` states this with a plain
+coefficient function. -/
+theorem mem_gradedPowIterSpan_iff_exists_finsupp {S : Set X} {j : ℕ}
+    {v : gradedPiece p (freeProP p X) j} :
+    v ∈ gradedPowIterSpan p X S j ↔
+      ∃ c : S →₀ ZMod p,
+        (c.sum fun i a ↦
+          a • gradedPowIter p (freeProP p X) j (gradedMkZero p (freeProP p X) (of (i : X)))) =
+          v := by
+  rw [gradedPowIterSpan, Set.image_eq_range]
+  exact Finsupp.mem_span_range_iff_exists_finsupp
+
+/-- **Membership in the span of the `p`-power classes over a finite index set**: the elements of
+the span over a finite `S` are the linear combinations of the `π^j x'_i` over the indices `i ∈ S`.
+This is the finite-sum form of `TauCeti.freeProP.mem_gradedPowIterSpan_iff_exists_finsupp`. -/
 theorem mem_gradedPowIterSpan_iff {S : Set X} [Fintype S] {j : ℕ}
     {v : gradedPiece p (freeProP p X) j} :
     v ∈ gradedPowIterSpan p X S j ↔
