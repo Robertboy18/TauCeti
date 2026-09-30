@@ -11,7 +11,7 @@ public import Mathlib.Topology.Instances.ZMod
 public import TauCeti.Algebra.GroupAction.Trivial
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Product
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.H2ZMod
-public import TauCeti.Topology.Algebra.GroupAction.InternalHom
+public import TauCeti.Topology.Algebra.GroupAction.InternalHom.Basic
 
 /-!
 # Evaluation cups for finite discrete modules
