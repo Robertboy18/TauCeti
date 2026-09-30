@@ -67,13 +67,11 @@ theorem adjoin_range_algebraMap_of_constantCompositum_eq_top [Algebra.IsIntegral
   rwa [constantCompositum_def, IntermediateField.adjoin_toSubalgebra_of_isAlgebraic halg,
     IntermediateField.top_toSubalgebra] at this
 
-variable [Algebra.IsSeparable k k']
-
-/-- The image of a `k`-basis of `k'` spans the compositum `F' = F · k'` over `F`. -/
-theorem span_range_algebraMap_comp_of_constantCompositum_eq_top
+/-- The image of a `k`-basis of `k'` spans the compositum `F' = F · k'` over `F`, for an algebraic
+extension of constants. -/
+theorem span_range_algebraMap_comp_of_constantCompositum_eq_top [Algebra.IsIntegral k k']
     (h : constantCompositum F k' F' = ⊤) {ι : Type*} (b : Basis ι k k') :
     Submodule.span F (Set.range (algebraMap k' F' ∘ b)) = ⊤ := by
-  have : Algebra.IsIntegral k k' := ⟨fun c ↦ (Algebra.IsSeparable.isSeparable k c).isIntegral⟩
   let L : Subalgebra k F' := (IsScalarTower.toAlgHom k k' F').range
   let e : k' ≃ₐ[k] L := AlgEquiv.ofInjective _ (algebraMap k' F').injective
   have hspan := Subalgebra.adjoin_eq_span_basis F L (b.map e.toLinearEquiv)
@@ -85,6 +83,7 @@ theorem span_range_algebraMap_comp_of_constantCompositum_eq_top
     at hspan
   exact hspan.symm
 
+variable [Algebra.IsSeparable k k']
 variable (hex : IsIntegrallyClosedIn k F) (h : constantCompositum F k' F' = ⊤)
 
 /-- **A basis of constants**: the `F`-basis of the compositum `F' = F · k'` given by the image of
@@ -123,7 +122,10 @@ theorem constantBasis_repr_algebraMap {ι : Type*} (b : Basis ι k k') (c : k') 
 
 include hex h in
 /-- **The trace of a constant is a constant**: for a finite separable extension of constants, the
-trace from `F' = F · k'` to `F` of a constant is the image of its trace from `k'` to `k`. -/
+trace from `F' = F · k'` to `F` of a constant is the image of its trace from `k'` to `k`.
+
+This is not a `simp` lemma: the base field `k` does not occur in the left-hand side, so `simp`
+cannot infer it (the `simpNF` linter rejects the lemma); use `rw`. -/
 theorem trace_algebraMap_of_constantCompositum_eq_top [FiniteDimensional k k'] (c : k') :
     Algebra.trace F F' (algebraMap k' F' c) = algebraMap k F (Algebra.trace k k' c) := by
   classical
@@ -137,6 +139,7 @@ theorem trace_algebraMap_of_constantCompositum_eq_top [FiniteDimensional k k'] (
 
 /-- The trace dual of a basis of constants is the basis of constants attached to the trace dual
 over `k`: the trace form of `F' / F` restricts on constants to the trace form of `k' / k`. -/
+@[simp]
 theorem traceDual_constantBasis [FiniteDimensional k k'] [FiniteDimensional F F']
     [Algebra.IsSeparable F F'] {ι : Type*} [Finite ι] [DecidableEq ι] (b : Basis ι k k') :
     (constantBasis hex h b).traceDual = constantBasis hex h b.traceDual := by
