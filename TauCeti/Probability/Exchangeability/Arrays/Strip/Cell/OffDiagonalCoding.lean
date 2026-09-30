@@ -217,6 +217,7 @@ theorem measurable_offDiagonalPairSquareContextOfStrips :
 omit [MeasurableSpace α] in
 /-- Reading the square context off the crossing strips and the diagonal of an array recovers its
 square context: this is how a coding of the strips and the diagonal feeds the pair coding. -/
+@[simp]
 theorem offDiagonalPairSquareContextOfStrips_comp_domRestrict :
     offDiagonalPairSquareContextOfStrips (α := α) e i j ∘
         ((Set.univ ×ˢ Set.range e) ∪ (Set.range e ×ˢ Set.univ) ∪ {p : ℕ × ℕ | p.1 = p.2} :
