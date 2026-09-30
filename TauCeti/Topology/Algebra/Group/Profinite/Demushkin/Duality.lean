@@ -23,17 +23,17 @@ Demushkin group `G` and any trivial action of `G` on `ZMod p`, the three maps `�
 
 Under evaluation at `1` the dual module `Hom(𝔽_p, 𝔽_p)` is `𝔽_p` again, and the three maps read as
 follows. `α₁` is the cup square `H¹(G, 𝔽_p) → Hom(H¹(G, 𝔽_p), H²(G, 𝔽_p))`, bijective because the
-cup square of a Demushkin group is a perfect pairing (`TauCeti.IsDemushkin.bijective_cupFp`). `α₀`
+cup square of a Demushkin group is a perfect pairing (`TauCeti.IsDemushkin.cupFp_bijective`). `α₀`
 sends `c ∈ 𝔽_p = H⁰(G, 𝔽_p)` to multiplication by `c` on `H²(G, 𝔽_p)`, bijective because
 `H²(G, 𝔽_p)` is one-dimensional. `α₂` sends a class `b ∈ H²(G, 𝔽_p)` to `c ↦ c • b`, which is
-bijective for every group acting trivially (`TauCeti.ContCohomology.bijective_dualityMap2_zmod`), so
+bijective for every group acting trivially (`TauCeti.ContCohomology.dualityMap2_zmod_bijective`), so
 no statement about it is specific to Demushkin groups.
 
 ## Main results
 
-* `TauCeti.IsDemushkin.bijective_explicitCup11_mul`: on the explicit models, the cup product of
+* `TauCeti.IsDemushkin.explicitCup11_mul_bijective`: on the explicit models, the cup product of
   multiplication on `H¹(G, 𝔽_p)` is a perfect pairing.
-* `TauCeti.IsDemushkin.bijective_dualityMap1`, `TauCeti.IsDemushkin.bijective_dualityMap0`: Tate's
+* `TauCeti.IsDemushkin.dualityMap1_bijective`, `TauCeti.IsDemushkin.dualityMap0_bijective`: Tate's
   duality maps `α₁` and `α₀` at `M = 𝔽_p` are bijective.
 
 ## References
@@ -65,8 +65,8 @@ include hG htriv
 /-- **The cup product of multiplication on the explicit `H¹(G, 𝔽_p)` is a perfect pairing**: for a
 Demushkin group and any trivial action of `G` on `ZMod p`, `x ↦ (x ⌣ ·)` is a bijection from
 `H1 G (ZMod p)` onto the additive homomorphisms `H1 G (ZMod p) →+ H2 G (ZMod p)`. This is
-`TauCeti.IsDemushkin.bijective_cupFp` transported to the explicit models. -/
-theorem bijective_explicitCup11_mul :
+`TauCeti.IsDemushkin.cupFp_bijective` transported to the explicit models. -/
+theorem explicitCup11_mul_bijective :
     Function.Bijective (explicitCup11 G (ZMod p) (ZMod p) (ZMod p) AddMonoidHom.mul continuous_mul
       (smul_mul_smul_of_smul_eq_self htriv)) := by
   have hcup : ∀ x y : H1 G (ZMod p),
@@ -78,14 +78,14 @@ theorem bijective_explicitCup11_mul :
   constructor
   · intro x x' h
     apply (cohomFpAddEquivH1 p G htriv).symm.injective
-    apply hG.bijective_cupFp.1
+    apply hG.cupFp_bijective.1
     ext y
     have := congrArg
       (fun f : H1 G (ZMod p) →+ H2 G (ZMod p) => f (cohomFpAddEquivH1 p G htriv y)) h
     simp only [hcup, AddEquiv.symm_apply_apply] at this
     exact (cohomFpAddEquivH2 p G htriv).injective this
   · intro f
-    obtain ⟨a, ha⟩ := hG.bijective_cupFp.2
+    obtain ⟨a, ha⟩ := hG.cupFp_bijective.2
       (((cohomFpAddEquivH2 p G htriv).symm.toAddMonoidHom.comp
         (f.comp (cohomFpAddEquivH1 p G htriv).toAddMonoidHom)).toZModLinearMap p)
     refine ⟨cohomFpAddEquivH1 p G htriv a, AddMonoidHom.ext fun y => ?_⟩
@@ -95,8 +95,8 @@ theorem bijective_explicitCup11_mul :
 /-- **Tate's duality map `α₁` of a Demushkin group is bijective at `M = 𝔽_p`**: for any trivial
 action of `G` on `ZMod p`, `H¹(G, 𝔽_p) → Hom(H¹(G, Hom(𝔽_p, 𝔽_p)), H²(G, 𝔽_p))` is a bijection.
 Under evaluation at `1` it is the cup square, a perfect pairing. -/
-theorem bijective_dualityMap1 : Function.Bijective (dualityMap1 G (ZMod p) (ZMod p)) := by
-  have hΨ := hG.bijective_explicitCup11_mul htriv
+theorem dualityMap1_bijective : Function.Bijective (dualityMap1 G (ZMod p) (ZMod p)) := by
+  have hΨ := hG.explicitCup11_mul_bijective htriv
   constructor
   · intro a a' h
     apply hΨ.1
@@ -113,8 +113,8 @@ theorem bijective_dualityMap1 : Function.Bijective (dualityMap1 G (ZMod p) (ZMod
 /-- **Tate's duality map `α₀` of a Demushkin group is bijective at `M = 𝔽_p`**: for any trivial
 action of `G` on `ZMod p`, `H⁰(G, 𝔽_p) → Hom(H²(G, Hom(𝔽_p, 𝔽_p)), H²(G, 𝔽_p))` is a bijection,
 since `H²(G, 𝔽_p)` is one-dimensional. -/
-theorem bijective_dualityMap0 : Function.Bijective (dualityMap0 G (ZMod p) (ZMod p)) :=
-  bijective_dualityMap0_zmod_of_finrank_eq_one htriv
+theorem dualityMap0_bijective : Function.Bijective (dualityMap0 G (ZMod p) (ZMod p)) :=
+  dualityMap0_zmod_bijective_of_finrank_eq_one htriv
     ((cohomFpLinearEquivH2 p G htriv).finrank_eq.symm.trans hG.finrank_cohomFp_two)
 
 end IsDemushkin

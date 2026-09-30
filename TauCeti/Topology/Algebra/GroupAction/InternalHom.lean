@@ -45,10 +45,10 @@ equivariant homomorphism, and `Hom(-, N)` is exact on the modules killed by a pr
   `precomp_id` and `precomp_comp`.
 * `TauCeti.InternalHom.zmodEquiv`: for a `ZMod n`-module `A`, evaluation at `1` identifies
   `InternalHom G (ZMod n) A` with `A` additively; `TauCeti.InternalHom.toAddMonoidHom_apply_eq_smul`
-  recovers a homomorphism from its value at `1`. For a trivial action of `G` on `ZMod n` the
-  conjugation action on `InternalHom G (ZMod n) (ZMod n)` is trivial
-  (`TauCeti.InternalHom.smul_zmod_eq_self`) and evaluation at `1` is equivariant
-  (`TauCeti.InternalHom.zmodEquiv_smul`).
+  recovers a homomorphism from its value at `1`. For a trivial action of `G` on `ZMod n`,
+  evaluation at `1` is equivariant (`TauCeti.InternalHom.zmodEquiv_smul`); for trivial actions on
+  both `M` and `N` the conjugation action on `InternalHom G M N` is trivial
+  (`TauCeti.InternalHom.smul_eq_self_of_smul_eq_self`).
 
 ## Main results
 
@@ -423,6 +423,12 @@ theorem smul_eq_self_iff {g : G} {φ : InternalHom G M N} :
     g • φ = φ ↔ ∀ m : M, φ.toAddMonoidHom (g • m) = g • φ.toAddMonoidHom m := by
   rw [InternalHom.ext_iff, toAddMonoidHom_smul, homAction_eq_self_iff]
 
+/-- For trivial actions on `M` and `N`, the conjugation action on `InternalHom G M N` is
+trivial. -/
+theorem smul_eq_self_of_smul_eq_self (hM : ∀ (g : G) (m : M), g • m = m)
+    (hN : ∀ (g : G) (x : N), g • x = x) (g : G) (φ : InternalHom G M N) : g • φ = φ :=
+  smul_eq_self_iff.2 fun m => by rw [hM, hN]
+
 /-- The fixed points of the internal hom are the `G`-equivariant homomorphisms. This is the
 degree-zero invariants of the conjugation action, phrased through Mathlib's
 `MulAction.fixedPoints`, which is the invariants object the surrounding development uses. It is
@@ -639,19 +645,17 @@ theorem zmodEquiv_symm_apply (a : A) (x : ZMod n) :
 
 section TrivialAction
 
-variable {G} [Group G] [DistribMulAction G (ZMod n)] (htriv : ∀ (g : G) (m : ZMod n), g • m = m)
+variable {G} [Group G] [DistribMulAction G (ZMod n)] [DistribMulAction G A]
+  (htriv : ∀ (g : G) (m : ZMod n), g • m = m)
 
 include htriv
 
-/-- For a trivial action on `ZMod n`, the conjugation action on `InternalHom G (ZMod n) (ZMod n)` is
-trivial. -/
-theorem smul_zmod_eq_self (g : G) (φ : InternalHom G (ZMod n) (ZMod n)) : g • φ = φ :=
-  smul_eq_self_iff.2 fun m => by rw [htriv, htriv]
-
-/-- For a trivial action on `ZMod n`, evaluation at `1` is `G`-equivariant. -/
-theorem zmodEquiv_smul (g : G) (φ : InternalHom G (ZMod n) (ZMod n)) :
+/-- For a trivial action on the source `ZMod n`, evaluation at `1` is `G`-equivariant for the
+conjugation action on `InternalHom G (ZMod n) A` and any action on `A`: `(g • φ) 1 = g • φ 1`,
+since `g⁻¹ • 1 = 1`. -/
+theorem zmodEquiv_smul (g : G) (φ : InternalHom G (ZMod n) A) :
     zmodEquiv G (g • φ) = g • zmodEquiv G φ := by
-  rw [smul_zmod_eq_self htriv, htriv]
+  rw [zmodEquiv_apply, zmodEquiv_apply, toAddMonoidHom_smul, homAction_apply, htriv]
 
 end TrivialAction
 

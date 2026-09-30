@@ -34,7 +34,7 @@ relator, is not treated in this file.
 * `TauCeti.IsDemushkin.nondegenerate_cupForm`,
   `TauCeti.IsDemushkin.nondegenerate_cupForm_of_ne_zero`: the cup form of a Demushkin group is
   nondegenerate, for every injective, equivalently nonzero, functional on `H²(G, 𝔽_p)`.
-* `TauCeti.IsDemushkin.bijective_cupFp`: the cup square is a perfect pairing, `a ↦ (a ⌣ ·)` being a
+* `TauCeti.IsDemushkin.cupFp_bijective`: the cup square is a perfect pairing, `a ↦ (a ⌣ ·)` being a
   bijection from `H¹(G, 𝔽_p)` onto the linear maps `H¹(G, 𝔽_p) →ₗ H²(G, 𝔽_p)`.
 * `TauCeti.IsDemushkin.of_nondegenerate_cupForm`, `TauCeti.isDemushkin_iff_nondegenerate_cupForm`:
   **Labute's definition**: a pro-`p` group with finite-dimensional `H¹(G, 𝔽_p)` is Demushkin exactly
@@ -101,7 +101,7 @@ theorem nondegenerate_cupForm_of_ne_zero {φ : cohomFp p G 2 →ₗ[ZMod p] ZMod
 from `H¹(G, 𝔽_p)` onto the linear maps `H¹(G, 𝔽_p) →ₗ H²(G, 𝔽_p)`. Injectivity is the
 left-separating clause of the definition; surjectivity is nondegeneracy of the cup form for an
 isomorphism `H²(G, 𝔽_p) ≅ 𝔽_p`, through the duality `LinearMap.BilinForm.toDual`. -/
-theorem bijective_cupFp : Function.Bijective (cupFp p G) := by
+theorem cupFp_bijective : Function.Bijective (cupFp p G) := by
   have := hG.finite_cohomFp_one
   obtain ⟨e⟩ := hG.nonempty_linearEquiv_cohomFp_two
   refine ⟨(injective_iff_map_eq_zero _).2 fun a ha => ?_, fun f => ?_⟩

@@ -231,10 +231,11 @@ section TrivialZMod
 /-! ### Trivial `ZMod n` coefficients
 
 For a trivial action of `G` on `ZMod n` the conjugation action on the internal hom
-`InternalHom G (ZMod n) (ZMod n)` is trivial too (`TauCeti.InternalHom.smul_zmod_eq_self`), and
-evaluation at `1` identifies the internal hom with `ZMod n` as `G`-modules
-(`TauCeti.InternalHom.zmodEquiv_smul`). Under that identification `α₀` and `α₂` are scalar
-multiplication on `H²(G, ZMod n)`, and `α₁` is the cup product of multiplication in `ZMod n`. -/
+`InternalHom G (ZMod n) (ZMod n)` is trivial too
+(`TauCeti.InternalHom.smul_eq_self_of_smul_eq_self`), and evaluation at `1` identifies the internal
+hom with `ZMod n` as `G`-modules (`TauCeti.InternalHom.zmodEquiv_smul`). Under that identification
+`α₀` and `α₂` are scalar multiplication on `H²(G, ZMod n)`, and `α₁` is the cup product of
+multiplication in `ZMod n`. -/
 
 -- Preferring the ring path keeps a single additive structure on `ZMod n`, so that the module
 -- structure of `H²(G, ZMod n)` below is the one its consumers see.
@@ -261,23 +262,44 @@ noncomputable def H2InternalHomZModEquiv :
   explicitCoeff2Equiv G (InternalHom G (ZMod n) (ZMod n)) (InternalHom.zmodEquiv G)
     continuous_of_discreteTopology continuous_of_discreteTopology (InternalHom.zmodEquiv_smul htriv)
 
+/-- On cocycle classes, `H1InternalHomZModEquiv` evaluates the cocycle at `1` pointwise: it is the
+cocycle pushforward along `TauCeti.InternalHom.zmodEquiv`, whose values are given by
+`cocyclesMap1_apply`. -/
+theorem H1InternalHomZModEquiv_mk (c : Z1 G (InternalHom G (ZMod n) (ZMod n))) :
+    H1InternalHomZModEquiv htriv (c : H1 G (InternalHom G (ZMod n) (ZMod n))) =
+      (cocyclesMap1 G (InternalHom G (ZMod n) (ZMod n)) G (ZMod n) (ContinuousMonoidHom.id G)
+        (InternalHom.zmodEquiv G (n := n) (A := ZMod n)).toAddMonoidHom
+        continuous_of_discreteTopology (fun g φ => InternalHom.zmodEquiv_smul htriv g φ) c :
+          H1 G (ZMod n)) := by
+  rw [H1InternalHomZModEquiv, explicitCoeff1Equiv_mk]
+  rfl
+
+/-- On cocycle classes, `H2InternalHomZModEquiv` evaluates the cocycle at `1` pointwise: it is the
+cocycle pushforward along `TauCeti.InternalHom.zmodEquiv`, whose values are given by
+`cocyclesMap2_apply`. -/
+theorem H2InternalHomZModEquiv_mk (c : Z2 G (InternalHom G (ZMod n) (ZMod n))) :
+    H2InternalHomZModEquiv htriv (c : H2 G (InternalHom G (ZMod n) (ZMod n))) =
+      (cocyclesMap2 G (InternalHom G (ZMod n) (ZMod n)) G (ZMod n) (ContinuousMonoidHom.id G)
+        (InternalHom.zmodEquiv G (n := n) (A := ZMod n)).toAddMonoidHom
+        continuous_of_discreteTopology (fun g φ => InternalHom.zmodEquiv_smul htriv g φ) c :
+          H2 G (ZMod n)) := by
+  rw [H2InternalHomZModEquiv, explicitCoeff2Equiv_mk]
+  rfl
+
 /-- **`α₀` at trivial `ZMod n` coefficients is scalar multiplication**: `α₀ m b = m • b`, reading
 `b` in `H²(G, ZMod n)` through evaluation at `1`. -/
 theorem dualityMap0_zmod (m : H0 G (ZMod n)) (b : H2 G (InternalHom G (ZMod n) (ZMod n))) :
     dualityMap0 G (ZMod n) (ZMod n) m b = (m : ZMod n) • H2InternalHomZModEquiv htriv b := by
   induction b using QuotientAddGroup.induction_on with
   | _ c =>
-    rw [dualityMap0_mk, H2InternalHomZModEquiv, explicitCoeff2Equiv_mk, zmod_smul_mk]
+    rw [dualityMap0_mk, H2InternalHomZModEquiv_mk, zmod_smul_mk]
     refine congrArg (fun z : Z2 G (ZMod n) => (z : H2 G (ZMod n)))
       (Subtype.ext (funext fun q => ?_))
     obtain ⟨g, h⟩ := q
     dsimp only
     rw [AddMonoidHom.flip_apply, InternalHom.evalPairing_apply,
       InternalHom.toAddMonoidHom_apply_eq_smul]
-    -- the repackaged coefficient map built by `explicitCoeff2Equiv` has `InternalHom.zmodEquiv G`
-    -- as its underlying function
-    simp [cocyclesMap2_coe, cochainsMap2_apply, nsmul_eq_mul, ← DistribMulActionHom.toFun_eq_coe,
-      ZeroHom.toFun_eq_coe, AddMonoidHom.toZeroHom_coe]
+    simp [nsmul_eq_mul]
 
 /-- **`α₂` at trivial `ZMod n` coefficients is scalar multiplication**: `α₂ b φ = φ 1 • b`. -/
 theorem dualityMap2_zmod (b : H2 G (ZMod n)) (φ : H0 G (InternalHom G (ZMod n) (ZMod n))) :
@@ -289,7 +311,7 @@ theorem dualityMap2_zmod (b : H2 G (ZMod n)) (φ : H0 G (InternalHom G (ZMod n) 
     refine congrArg (fun z : Z2 G (ZMod n) => (z : H2 G (ZMod n)))
       (Subtype.ext (funext fun q => ?_))
     dsimp only
-    rw [InternalHom.smul_zmod_eq_self htriv, AddMonoidHom.flip_apply,
+    rw [InternalHom.smul_eq_self_of_smul_eq_self htriv htriv, AddMonoidHom.flip_apply,
       InternalHom.evalPairing_apply, InternalHom.toAddMonoidHom_apply_eq_smul]
     simp [nsmul_eq_mul, mul_comm]
 
@@ -303,7 +325,7 @@ theorem dualityMap1_zmod (a : H1 G (ZMod n)) (b : H1 G (InternalHom G (ZMod n) (
   | _ x =>
     induction b using QuotientAddGroup.induction_on with
     | _ y =>
-      rw [dualityMap1_mk, H1InternalHomZModEquiv, explicitCoeff1Equiv_mk]
+      rw [dualityMap1_mk, H1InternalHomZModEquiv_mk]
       -- `explicitCup11_mk` is applied as a term: the continuity of multiplication is stated at
       -- `fun p => p.1 * p.2`, which `rw` does not identify with the pairing `AddMonoidHom.mul`
       refine Eq.trans ?_ (explicitCup11_mk G (ZMod n) (ZMod n) (ZMod n) AddMonoidHom.mul
@@ -312,21 +334,19 @@ theorem dualityMap1_zmod (a : H1 G (ZMod n)) (b : H1 G (InternalHom G (ZMod n) (
         (Subtype.ext (funext fun q => ?_))
       obtain ⟨g, h⟩ := q
       dsimp only
-      rw [InternalHom.smul_zmod_eq_self htriv, AddMonoidHom.flip_apply,
+      rw [InternalHom.smul_eq_self_of_smul_eq_self htriv htriv, AddMonoidHom.flip_apply,
         InternalHom.evalPairing_apply, InternalHom.toAddMonoidHom_apply_eq_smul]
-      -- the repackaged coefficient map built by `explicitCoeff1Equiv` has `InternalHom.zmodEquiv G`
-      -- as its underlying function
-      simp [cocyclesMap1_coe, cochainsMap1_apply, htriv, ← DistribMulActionHom.toFun_eq_coe,
-        ZeroHom.toFun_eq_coe, AddMonoidHom.toZeroHom_coe]
+      simp [htriv]
 
 /-- **`α₂` at trivial `ZMod n` coefficients is bijective**, for every topological group `G` acting
 trivially on `ZMod n`: under evaluation at `1` it sends `b` to `c ↦ c • b`, and a homomorphism out
 of `ZMod n` into a group killed by `n` is determined by its value at `1`. -/
-theorem bijective_dualityMap2_zmod : Function.Bijective (dualityMap2 G (ZMod n) (ZMod n)) := by
+theorem dualityMap2_zmod_bijective : Function.Bijective (dualityMap2 G (ZMod n) (ZMod n)) := by
   -- the identity of `ZMod n` is an invariant element of the internal hom, with value `1` at `1`
   have hid : InternalHom.of G (AddMonoidHom.id (ZMod n)) ∈
       H0 G (InternalHom G (ZMod n) (ZMod n)) :=
-    (FixedPoints.mem_addSubgroup _ _ _).2 fun g => InternalHom.smul_zmod_eq_self htriv g _
+    (FixedPoints.mem_addSubgroup _ _ _).2 fun g =>
+      InternalHom.smul_eq_self_of_smul_eq_self htriv htriv g _
   constructor
   · intro b b' h
     have := congrArg
@@ -348,7 +368,7 @@ theorem bijective_dualityMap2_zmod : Function.Bijective (dualityMap2 G (ZMod n) 
 /-- **`α₀` at trivial `𝔽_p` coefficients is bijective when `H²(G, 𝔽_p)` is one-dimensional**:
 under evaluation at `1` it sends `c` to multiplication by `c`, and every endomorphism of a
 one-dimensional space is a scalar. -/
-theorem bijective_dualityMap0_zmod_of_finrank_eq_one [Fact n.Prime]
+theorem dualityMap0_zmod_bijective_of_finrank_eq_one [Fact n.Prime]
     (hrank : Module.finrank (ZMod n) (H2 G (ZMod n)) = 1) :
     Function.Bijective (dualityMap0 G (ZMod n) (ZMod n)) := by
   have : Nontrivial (H2 G (ZMod n)) :=
