@@ -5,13 +5,12 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.KernelApproximation
+public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Kernel.Approximation
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.DegreeOneForm
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Character.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Criterion
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Equiv
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.CharacterImage
-public import TauCeti.Topology.Algebra.Group.Profinite.Hopfian
 public import TauCeti.NumberTheory.Padics.GeneratedClosedSubgroups
 
 /-!
@@ -27,7 +26,7 @@ the same `f` are topologically isomorphic. This file proves that theorem.
 Write `G = ⟨x₁, …, x_n ∣ r⟩` with `r ∈ Φ(F)`, `F = freeProP 2 (Fin n)`, and let `χ` be the
 canonical character read on `F`. The proof normalizes the basis in three steps and then runs the
 successive approximation of
-`TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.KernelApproximation`.
+`TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Kernel.Approximation`.
 
 1. The class of `r` in `gr_1(F)` has nondegenerate degree-one form, which is not alternating:
    an alternating form would put the image of `χ` inside `1 + 4ℤ_2`, which does not contain
@@ -100,6 +99,10 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
     obtain ⟨N, hN⟩ := hn
     omega
   have hq : 2 ∣ 2 + 2 ^ f := dvd_add dvd_rfl (dvd_pow_self 2 (by omega))
+  have hq4 : (2 + 2 ^ f) % 4 = 2 := by
+    obtain ⟨g, rfl⟩ : ∃ g, f = g + 2 := ⟨f - 2, by omega⟩
+    rw [pow_add, pow_two]
+    omega
   have hw₀₁ : demushkinWordNeTwo (2 + 2 ^ f) n (freeProPGen 2 n) ∈
       pLowerCentralSeries 2 (freeProP 2 (Fin n)) 1 :=
     demushkinWordNeTwo_mem_pLowerCentralSeries_one hq n _
@@ -112,20 +115,13 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
   -- Step 1: the class of `r` has nondegenerate nonalternating degree-one form, so a change of
   -- basis carries it to the class of the normal-form word.
   have hnd := hG.nondegenerate_degreeOneForm hr (ContinuousMulEquiv.refl _)
-  have hnalt : ¬ (degreeOneForm (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨r, hr₁⟩)).IsAlt := by
-    intro halt
-    have hc : ∀ k, (degreeOneBasis 2 (Fin n)).repr (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨r, hr₁⟩)
-        (Sum.inl k) = 0 := fun k ↦ by
-      have h := degreeOneForm_dualBasis_self (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨r, hr₁⟩) k
-      rw [halt.self_eq_zero, Nat.choose_self, one_nsmul] at h
-      exact h.symm
-    have hle := (HasPrescriptionProperty.range_le_unitsPrincipal_iff_forall_pow_dvd_exponentSum hr
-      hnd (hasPrescriptionProperty_demushkinCharacter hG) 2).2 fun x ↦
-        (degreeOneBasis_repr_gradedMk_inl_eq_zero_iff _ _).1 (hc x)
-    exact hw2 (hle (hA ▸ le_topologicalClosure _ (mem_zpowers w)))
+  have hnalt : ¬ (degreeOneForm (gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨r, hr₁⟩)).IsAlt :=
+    HasPrescriptionProperty.not_isAlt_degreeOneForm_of_not_range_le_unitsPrincipal_two hr hnd
+      (hasPrescriptionProperty_demushkinCharacter hG) fun hle ↦
+        hw2 (hle (hA ▸ le_topologicalClosure _ (mem_zpowers w)))
   obtain ⟨e₁, he₁⟩ := exists_continuousMulEquiv_gradedMap_eq_of_not_isAlt _ _ hnd hnalt
     (nondegenerate_degreeOneForm_demushkinWordNeTwo hn hq)
-    (not_isAlt_degreeOneForm_demushkinWordNeTwo_two_add_two_pow hn0 hf)
+    (not_isAlt_degreeOneForm_demushkinWordNeTwo hn0 hq4)
   have hr₁₁ : e₁ r ∈ pLowerCentralSeries 2 (freeProP 2 (Fin n)) 1 :=
     (e₁ : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).toMonoidHom.map_pLowerCentralSeries_le
       (e₁ : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).continuous 1 ⟨r, hr₁, rfl⟩
@@ -157,22 +153,20 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
   have hu2 : χ₁ (of ⟨1, hn1⟩) ∉ unitsPrincipal 2 2 := by
     intro hu2
     -- Every generator would then map into `1 + 4ℤ_2`, hence all of `F`, but `w` is a value.
-    have hle : (Subgroup.closure (Set.range (of : Fin n → freeProP 2 (Fin n)))).topologicalClosure ≤
-        (unitsPrincipal 2 2).comap χ₁.toMonoidHom := by
-      refine topologicalClosure_minimal _ ((closure_le _).2 ?_) ?_
-      · rintro _ ⟨j, rfl⟩
-        by_cases hj : j = ⟨1, hn1⟩
-        · rw [hj]
-          exact hu2
-        · exact hU2 j hj
-      · rw [coe_comap]
-        exact (isClosed_unitsPrincipal (p := 2) 2).preimage χ₁.continuous
-    rw [topologicalClosure_closure_range_of_eq_top] at hle
+    have hle : χ₁.toMonoidHom.range ≤ unitsPrincipal 2 2 :=
+      (MonoidHom.range_le_iff_of_topologicalClosure_closure_eq_top
+        (topologicalClosure_closure_range_of_eq_top 2 (Fin n)) χ₁.continuous
+        (isClosed_unitsPrincipal (p := 2) 2)).2 (by
+          rintro _ ⟨j, rfl⟩
+          by_cases hj : j = ⟨1, hn1⟩
+          · rw [hj]
+            exact hu2
+          · exact hU2 j hj)
     have hwA : w ∈ (demushkinCharacter hG₁).toMonoidHom.range :=
       hA₁ ▸ le_topologicalClosure _ (mem_zpowers w)
     obtain ⟨y, hy⟩ := hwA
     obtain ⟨g, rfl⟩ := presentedProP.mk_surjective 2 {e₁ r} y
-    exact hw2 (hy ▸ hle (mem_top g))
+    exact hw2 (hle (MonoidHom.mem_range.2 ⟨g, hy⟩))
   -- The target value `v = -(1 + 2^f)⁻¹` of `χ` at `x₂`, a generator of `U^[f]`.
   obtain ⟨v, hv⟩ := exists_val_mul_one_add_eq_neg_one (a := (2 : ℤ_[2]) ^ f)
     (dvd_pow_self 2 (by omega))
@@ -181,18 +175,23 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
     exact le_topologicalClosure _ (mem_zpowers v)
   have hv2 : v ∉ unitsPrincipal 2 2 := notMem_unitsPrincipal_two_of_neg_mem le_rfl
     ((neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv).2 (pow_dvd_pow 2 hf))
+  -- `χ₁(x₂)` topologically generates `U^[f]`: its negative has exact level `f`.
+  obtain ⟨hnu, hnu'⟩ :=
+    neg_mem_unitsPrincipal_and_notMem_succ_of_mem_topologicalClosure_zpowers_two hf hwf hwf'
+      (hχ₁A _) hu2
+  rw [(topologicalClosure_zpowers_two_eq_iff hf hf hwf hwf' hnu hnu').2 rfl] at hχ₁A hvA
   -- Step 3: the `2`-adic exponents `s_j` with `χ₁(x_j) χ₁(x₂)^{2 s_j}` the tabulated values.
   have hs : ∀ j : Fin n, ∃ s : ℤ_[2], χ₁ (of j) *
       isProP_units_padicInt_two.padicPow (χ₁ (of ⟨1, hn1⟩) ^ 2) s =
         if j = ⟨1, hn1⟩ then v else 1 := by
     intro j
     by_cases hj : j = ⟨1, hn1⟩
-    · obtain ⟨s, hs⟩ := exists_padicPow_sq_eq_of_mem_topologicalClosure_zpowers_two hf hwf hwf'
-        (hχ₁A _) hu2 hvA
+    · obtain ⟨s, hs⟩ :=
+        exists_padicPow_sq_eq_of_mem_topologicalClosure_zpowers_two hf hnu hnu' hvA
       rw [hj, ite_eq_left rfl]
       exact ⟨s, by rw [hs, ite_eq_right hv2, mul_inv_cancel_left]⟩
-    · obtain ⟨s, hs⟩ := exists_padicPow_sq_eq_of_mem_topologicalClosure_zpowers_two hf hwf hwf'
-        (hχ₁A _) hu2 (inv_mem (hχ₁A (of j)))
+    · obtain ⟨s, hs⟩ := exists_padicPow_sq_eq_of_mem_topologicalClosure_zpowers_two hf hnu hnu'
+        (inv_mem (hχ₁A (of j)))
       rw [ite_eq_right hj]
       exact ⟨s, by rw [hs, ite_eq_left (inv_mem (hU2 j hj)), mul_inv_cancel]⟩
   choose s hs using hs
@@ -203,29 +202,23 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
       (isProP_freeProP 2 (Fin n)).padicPow_mem (isClosed_pLowerCentralSeries 1) (by
         rw [pLowerCentralSeries_one_eq_proPFrattini Fact.out]
         exact pow_mem_proPFrattini _) _⟩
+  have hω : ∀ j, (ω j : freeProP 2 (Fin n)) =
+      (isProP_freeProP 2 (Fin n)).padicPow (of ⟨1, hn1⟩ ^ 2) (s j) := fun j ↦ rfl
   have hχω : ∀ j, χ₁ (ω j) = isProP_units_padicInt_two.padicPow (χ₁ (of ⟨1, hn1⟩) ^ 2) (s j) :=
     fun j ↦ by
       have e : χ₁ ((isProP_freeProP 2 (Fin n)).padicPow (of ⟨1, hn1⟩ ^ 2) (s j)) =
           isProP_units_padicInt_two.padicPow (χ₁ (of ⟨1, hn1⟩ ^ 2)) (s j) :=
         (isProP_freeProP 2 (Fin n)).map_padicPow isProP_units_padicInt_two
           (χ₁ : freeProP 2 (Fin n) →* ℤ_[2]ˣ) χ₁.continuous _ _
-      rw [show (ω j : freeProP 2 (Fin n)) =
-        (isProP_freeProP 2 (Fin n)).padicPow (of ⟨1, hn1⟩ ^ 2) (s j) from rfl, e, map_pow]
-  have hθ1 : ∀ g, g⁻¹ * basisModification ω g ∈ pLowerCentralSeries 2 (freeProP 2 (Fin n)) 1 :=
-    inv_mul_basisModification_mem_pLowerCentralSeries ω
-  have hθsurj : Function.Surjective (basisModification ω) :=
-    (isProP_freeProP 2 (Fin n)).surjective_of_forall_inv_mul_mem_pLowerCentralSeries_one
-      (φ := (basisModification ω).toMonoidHom) (basisModification ω).continuous hθ1
-  set e₂ := (isTopologicallyFinitelyGenerated_freeProP 2 (Fin n)).continuousMulEquivOfSurjective
-    (f := (basisModification ω).toMonoidHom) (basisModification ω).continuous hθsurj with he₂
-  have he₂apply : ∀ g, e₂ g = basisModification ω g := fun g ↦
-    IsTopologicallyFinitelyGenerated.continuousMulEquivOfSurjective_apply _ _ _ g
+      rw [hω, e, map_pow]
+  set e₂ := basisModificationEquiv le_rfl ω with he₂
   -- The character `χ₂ = χ₁ ∘ e₂` has the tabulated values on the generators.
   set χ₂ : freeProP 2 (Fin n) →ₜ* ℤ_[2]ˣ :=
     χ₁.comp (e₂ : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)) with hχ₂
-  have hχ₂apply : ∀ g, χ₂ g = χ₁ (e₂ g) := fun g ↦ rfl
+  have hχ₂apply : ∀ g, χ₂ g = χ₁ (e₂ g) := fun g ↦ by
+    rw [hχ₂, ContinuousMonoidHom.coe_comp, Function.comp_apply, ContinuousMonoidHom.coe_coe]
   have hχ₂of : ∀ j, χ₂ (of j) = if j = ⟨1, hn1⟩ then v else 1 := fun j ↦ by
-    rw [hχ₂apply, he₂apply, basisModification_of, map_mul, hχω, hs]
+    rw [hχ₂apply, he₂, basisModificationEquiv_apply, basisModification_of, map_mul, hχω, hs]
   have hχ₂₁ : (χ₂ (of ⟨1, hn1⟩) : ℤ_[2]) * (1 - ((2 + 2 ^ f : ℕ) : ℤ_[2])) = 1 := by
     rw [hχ₂of, ite_eq_left rfl]
     push_cast
@@ -234,21 +227,12 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
     rw [hχ₂of, ite_eq_right hj]
   -- The relator `r₂ = e₂⁻¹ (e₁ r)` is still in the class of the normal-form word.
   have hr₂₁ : e₂.symm (e₁ r) ∈ pLowerCentralSeries 2 (freeProP 2 (Fin n)) 1 :=
-    (e₂.symm : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).toMonoidHom.map_pLowerCentralSeries_le
-      (e₂.symm : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).continuous 1 ⟨_, hr₁₁, rfl⟩
+    basisModificationEquiv_symm_mem_pLowerCentralSeries le_rfl ω hr₁₁
   have hclass₂ : gradedMk 2 (freeProP 2 (Fin n)) 1 ⟨e₂.symm (e₁ r), hr₂₁⟩ =
       gradedMk 2 (freeProP 2 (Fin n)) 1
         ⟨demushkinWordNeTwo (2 + 2 ^ f) n (freeProPGen 2 n), hw₀₁⟩ := by
-    rw [← hclass, gradedMk_eq_gradedMk_iff]
-    refine QuotientGroup.eq.2 ?_
-    have h := inv_mul_apply_mem_pLowerCentralSeries (basisModification ω).toMonoidHom
-      (basisModification ω).continuous hθ1 hr₁₁
-    have h' : (e₂.symm (e₁ r))⁻¹ * e₁ r = e₂.symm ((e₁ r)⁻¹ * basisModification ω (e₁ r)) := by
-      rw [map_mul, map_inv, ← he₂apply, e₂.symm_apply_apply]
-    rw [h']
-    exact MonoidHom.map_pLowerCentralSeries_le
-      (e₂.symm : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).toMonoidHom
-      (e₂.symm : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).continuous 2 ⟨_, h, rfl⟩
+    rw [← hclass]
+    exact gradedMk_basisModificationEquiv_symm le_rfl ω ⟨e₁ r, hr₁₁⟩
   -- It lies in `X = ker χ₂`, and every crossed homomorphism for `χ₂` kills it.
   have hχ₂r₂ : χ₂ (e₂.symm (e₁ r)) = 1 := by
     rw [hχ₂apply, e₂.apply_symm_apply, hχ₁, ContinuousMonoidHom.coe_comp, Function.comp_apply,
@@ -265,8 +249,8 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordNeTwo_of_range_eq
   have hkill₂ : ∀ D : freeProP 2 (Fin n) → ℤ_[2], Continuous D → IsCrossedHom χ₂ D →
       D (e₂.symm (e₁ r)) = 0 := fun D hDc hD ↦
     hkill _ (hDc.comp (e₂.symm : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).continuous)
-      (hD.comp (e₂.symm : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)) fun x ↦
-        congrArg χ₁ (e₂.apply_symm_apply x).symm)
+      (hD.comp (e₂.symm : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)) fun x ↦ by
+        rw [hχ₂apply, ContinuousMonoidHom.coe_coe, e₂.apply_symm_apply])
   -- The successive approximation inside `X`.
   obtain ⟨e₃, -, he₃⟩ :=
     exists_continuousMulEquiv_apply_demushkinWordNeTwo_eq_of_isCrossedHom_eq_zero hn hn1 hq

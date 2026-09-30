@@ -24,7 +24,7 @@ modifications `x_i ↦ x_i w_i` with `w_i ∈ X`, which do not change the values
 generators. The deviation `(φ w)⁻¹ * r` after any such modification `φ` lies in `X` and is killed
 by every continuous crossed homomorphism `D : F → ℤ_p` for `χ`, provided `r` is: `D (φ w) = 0`
 because the word is killed at the tabulated character values
-(`TauCeti.IsCrossedHom.map_demushkinWordNeTwo_eq_zero`). Labute's Lemma 4
+(`TauCeti.IsCrossedHom.map_apply_demushkinWordNeTwo_eq_zero`). Labute's Lemma 4
 (`TauCeti.freeProP.mem_map_basisModificationDelta_iff_forall_gradedFunctional_crossedHom_eq_zero`)
 then writes the class of such a deviation in `gr_{m+1}(X)` as `δ_ρ(ω)` with `ω ∈ gr_m(X)^n`, so
 the constrained successive-approximation theorem
@@ -44,8 +44,6 @@ the coset of the normal form, before the exact values are arranged by a basis mo
 
 ## Main results
 
-* `TauCeti.IsCrossedHom.map_apply_demushkinWordNeTwo_eq_zero`: a crossed homomorphism for `χ`
-  kills the image of the normal-form word under an endomorphism preserving `χ`.
 * `TauCeti.freeProP.apply_of_mem_unitsPrincipal_two_of_isCrossedHom_eq_zero`: a
   character all of whose crossed homomorphisms kill a relator in the class of the normal form
   takes the generators `x_i`, `i ≠ 2`, into `1 + p²ℤ_p`.
@@ -69,35 +67,6 @@ open Subgroup
 namespace freeProP
 
 variable {p : ℕ} [Fact p.Prime] {n q : ℕ} {χ : freeProP p (Fin n) →ₜ* ℤ_[p]ˣ}
-
-/-! ### The Kronecker crossed homomorphisms on the normal-form word -/
-
-/-- **A crossed homomorphism for the orientation kills the image of the normal-form word under an
-endomorphism preserving the character**: the word on the tuple `(φ x_i)` is killed at the same
-character values. -/
-theorem _root_.TauCeti.IsCrossedHom.map_apply_demushkinWordNeTwo_eq_zero (hn1 : 1 < n)
-    (h₁ : (χ (of ⟨1, hn1⟩) : ℤ_[p]) * (1 - q) = 1) (h : ∀ j, j ≠ ⟨1, hn1⟩ → χ (of j) = 1)
-    {f : freeProP p (Fin n) → ℤ_[p]} (hf : IsCrossedHom χ f)
-    (φ : freeProP p (Fin n) →ₜ* freeProP p (Fin n)) (hφ : ∀ g, χ (φ g) = χ g) :
-    f (φ (demushkinWordNeTwo q n (freeProPGen p n))) = 0 := by
-  rw [TauCeti.map_demushkinWordNeTwo]
-  refine hf.map_demushkinWordNeTwo_eq_zero hn1 ?_ fun i hi ↦ ?_
-  · rw [Function.comp_apply, hφ, freeProPGen_of_lt p hn1]
-    exact h₁
-  · rw [Function.comp_apply, hφ]
-    by_cases hi' : i < n
-    · rw [freeProPGen_of_lt p hi']
-      exact h _ fun e ↦ hi (congrArg Fin.val e)
-    · rw [freeProPGen_eq_one_of_le p (not_lt.1 hi'), _root_.map_one]
-
-/-- The normal-form word lies in the kernel of the exponent sum at `x₂`. -/
-theorem demushkinWordNeTwo_freeProPGen_mem_exponentSumKer (hn1 : 1 < n) (q : ℕ) :
-    demushkinWordNeTwo q n (freeProPGen p n) ∈ exponentSumKer p (Fin n) ⟨1, hn1⟩ := by
-  refine demushkinWordNeTwo_mem q n (pow_mem ?_ q) fun i hi ↦ ?_
-  · rw [freeProPGen_of_lt p (by omega)]
-    exact of_mem_exponentSumKer fun e ↦ absurd (congrArg Fin.val e) (by simp)
-  · rw [freeProPGen_of_lt p (by omega)]
-    exact of_mem_exponentSumKer fun e ↦ absurd (congrArg Fin.val e) (by simp)
 
 /-! ### The character values modulo `p²` -/
 
@@ -138,6 +107,36 @@ private theorem pow_two_dvd_sum_crossedHom_labuteComm (hq : p ∣ q)
     mul_zero, add_zero, ← Units.val_pow_eq_pow_val, Units.dvd_mul_left] at hDw
   exact hDw
 
+/-- For the commutator factor `(x_{2a}, x_{2a+1})` of `w` and the Kronecker crossed homomorphism
+`D_k` at one of its two generators `x_k`, if `p²` divides `D_k (x_{2a}, x_{2a+1})` then
+`χ(x_{k'}) ∈ 1 + p²ℤ_p` at the other generator `x_{k'}`:
+`χ(x_{2a}) χ(x_{2a+1}) D_k (x_{2a}, x_{2a+1}) = ±(χ(x_{k'}) - 1)`. -/
+private theorem apply_freeProPGen_mem_unitsPrincipal_two_of_pow_two_dvd_crossedHom_labuteComm
+    {a : ℕ} {k : Fin n} {k' : ℕ}
+    (hk : (k : ℕ) = 2 * a ∧ k' = 2 * a + 1 ∨ (k : ℕ) = 2 * a + 1 ∧ k' = 2 * a)
+    (h : (p : ℤ_[p]) ^ 2 ∣ crossedHom χ (Pi.single k 1)
+      (labuteComm (freeProPGen p n (2 * a)) (freeProPGen p n (2 * a + 1)))) :
+    χ (freeProPGen p n k') ∈ unitsPrincipal p 2 := by
+  have hid := IsCrossedHom.mul_mul_map_labuteComm (isCrossedHom_crossedHom χ (Pi.single k 1))
+    (freeProPGen p n (2 * a)) (freeProPGen p n (2 * a + 1))
+  rw [crossedHom_single_freeProPGen, crossedHom_single_freeProPGen] at hid
+  rw [mem_unitsPrincipal_iff]
+  rcases hk with ⟨hk, rfl⟩ | ⟨hk, rfl⟩
+  · rw [ite_eq_left hk.symm, ite_eq_right (by omega), mul_one, mul_zero, add_zero] at hid
+    rw [show (χ (freeProPGen p n (2 * a + 1)) : ℤ_[p]) - 1 =
+      -((χ (freeProPGen p n (2 * a)) : ℤ_[p]) * χ (freeProPGen p n (2 * a + 1)) *
+        crossedHom χ (Pi.single k 1)
+          (labuteComm (freeProPGen p n (2 * a)) (freeProPGen p n (2 * a + 1)))) by
+      linear_combination hid]
+    exact (h.mul_left _).neg_right
+  · rw [ite_eq_right (by omega), ite_eq_left hk.symm, mul_one, mul_zero, zero_add] at hid
+    rw [show (χ (freeProPGen p n (2 * a)) : ℤ_[p]) - 1 =
+      (χ (freeProPGen p n (2 * a)) : ℤ_[p]) * χ (freeProPGen p n (2 * a + 1)) *
+        crossedHom χ (Pi.single k 1)
+          (labuteComm (freeProPGen p n (2 * a)) (freeProPGen p n (2 * a + 1))) by
+      linear_combination -hid]
+    exact h.mul_left _
+
 /-- **The character values forced by the relator, modulo `p²`** (Labute, proof of Theorem 5).
 Let `n` be even, `p ∣ q`, and let `r ∈ λ_1(F)` be a relator in the class of
 `w = x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` modulo `λ_2(F)`. If every continuous crossed homomorphism
@@ -166,45 +165,26 @@ theorem apply_of_mem_unitsPrincipal_two_of_isCrossedHom_eq_zero (hn : Even n)
         (by rw [crossedHom_single_freeProPGen, ite_eq_right]; omega)
         (by rw [crossedHom_single_freeProPGen, ite_eq_right]; omega))
       fun ha' ↦ absurd (Finset.mem_range.2 (by omega)) ha'] at h
-  rw [mem_unitsPrincipal_iff]
   obtain ⟨a, ha | ha⟩ := Nat.even_or_odd' (j : ℕ)
   · -- `x_j = x_{2a}`, with partner `x_{2a+1}`.
     have hlt : 2 * a + 1 < n := by omega
-    have h := key ⟨2 * a + 1, hlt⟩ a (by simp) hlt (Or.inr rfl)
-    have hid := IsCrossedHom.mul_mul_map_labuteComm
-      (isCrossedHom_crossedHom χ (Pi.single (⟨2 * a + 1, hlt⟩ : Fin n) 1))
-      (freeProPGen p n (2 * a)) (freeProPGen p n (2 * a + 1))
-    rw [crossedHom_single_freeProPGen, crossedHom_single_freeProPGen, ite_eq_right (by simp),
-      ite_eq_left rfl] at hid
     have hj' : of j = freeProPGen p n (2 * a) := by
       rw [freeProPGen_of_lt p (by omega)]
       exact congrArg of (Fin.ext ha)
-    rw [hj', show (χ (freeProPGen p n (2 * a)) : ℤ_[p]) - 1 =
-      (χ (freeProPGen p n (2 * a)) : ℤ_[p]) * χ (freeProPGen p n (2 * a + 1)) *
-        crossedHom χ (Pi.single (⟨2 * a + 1, hlt⟩ : Fin n) 1)
-          (labuteComm (freeProPGen p n (2 * a)) (freeProPGen p n (2 * a + 1))) by
-      linear_combination -hid]
-    exact h.mul_left _
+    rw [hj']
+    exact apply_freeProPGen_mem_unitsPrincipal_two_of_pow_two_dvd_crossedHom_labuteComm
+      (Or.inr ⟨rfl, rfl⟩) (key ⟨2 * a + 1, hlt⟩ a (by simp) hlt (Or.inr rfl))
   · -- `x_j = x_{2a+1}` with `a ≥ 1`, with partner `x_{2a}`.
     have ha0 : a ≠ 0 := by
       rintro rfl
       exact hj (Fin.ext (by simpa using ha))
     have hlt : 2 * a + 1 < n := by omega
-    have h := key ⟨2 * a, by omega⟩ a (by simpa using ha0) hlt (Or.inl rfl)
-    have hid := IsCrossedHom.mul_mul_map_labuteComm
-      (isCrossedHom_crossedHom χ (Pi.single (⟨2 * a, by omega⟩ : Fin n) 1))
-      (freeProPGen p n (2 * a)) (freeProPGen p n (2 * a + 1))
-    rw [crossedHom_single_freeProPGen, crossedHom_single_freeProPGen, ite_eq_left rfl,
-      ite_eq_right (by simp)] at hid
     have hj' : of j = freeProPGen p n (2 * a + 1) := by
       rw [freeProPGen_of_lt p hlt]
       exact congrArg of (Fin.ext ha)
-    rw [hj', show (χ (freeProPGen p n (2 * a + 1)) : ℤ_[p]) - 1 =
-      -((χ (freeProPGen p n (2 * a)) : ℤ_[p]) * χ (freeProPGen p n (2 * a + 1)) *
-        crossedHom χ (Pi.single (⟨2 * a, by omega⟩ : Fin n) 1)
-          (labuteComm (freeProPGen p n (2 * a)) (freeProPGen p n (2 * a + 1)))) by
-      linear_combination hid]
-    exact (h.mul_left _).neg_right
+    rw [hj']
+    exact apply_freeProPGen_mem_unitsPrincipal_two_of_pow_two_dvd_crossedHom_labuteComm
+      (Or.inl ⟨rfl, rfl⟩) (key ⟨2 * a, by omega⟩ a (by simpa using ha0) hlt (Or.inl rfl))
 
 /-! ### The successive approximation inside `X` -/
 
@@ -251,7 +231,7 @@ theorem exists_continuousMulEquiv_apply_demushkinWordNeTwo_eq_of_isCrossedHom_eq
       (demushkinWordNeTwo_freeProPGen_mem_exponentSumKer hn1 q))) hrX, fun i _ ↦ ?_⟩
     have hDi : IsCrossedHom χ (crossedHom χ (Pi.single i 1)) := isCrossedHom_crossedHom χ _
     rw [hDi.map_mul, hD _ (continuous_crossedHom χ _) hDi, mul_zero, zero_add, hDi.map_inv,
-      hDi.map_apply_demushkinWordNeTwo_eq_zero hn1 h₁ h φ hχφ, mul_zero]
+      hDi.map_apply_demushkinWordNeTwo_eq_zero hn1 h₁ h φ fun i ↦ hχφ _, mul_zero]
   · -- The constrained span statement: Labute's Lemma 4.
     intro m hm z hz
     obtain ⟨hzX, hzD⟩ := hz

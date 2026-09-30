@@ -851,25 +851,20 @@ theorem not_isAlt_degreeOneForm_demushkinWordTwoEven (hn : 0 < n) {a f : ℕ} (h
   have hb : 4 * b / 2 = 2 * b := by omega
   simp [hb, nsmul_eq_mul, CharTwo.two_eq_zero] at this
 
-/-- **The degree-one form of `x₁^{2 + 2^f} (x₁, x₂) ⋯ (x_{n-1}, x_n)` is not alternating** at
-`p = 2`, for `n ≥ 1` and `f ≥ 2`: its value on the first coordinate character twice is
-`(2 + 2^f) / 2 = 1 + 2^{f-1} ≡ 1`. -/
-theorem not_isAlt_degreeOneForm_demushkinWordNeTwo_two_add_two_pow (hn : 0 < n) {f : ℕ}
-    (hf : 2 ≤ f) :
+/-- **The degree-one form of `x₁^q (x₁, x₂) ⋯ (x_{n-1}, x_n)` is not alternating** at `p = 2`,
+for `n ≥ 1` and `q ≡ 2 mod 4`: its value on the first coordinate character twice is `q / 2 ≡ 1`.
+This covers the relators `x₁^{2 + 2^f} (x₁, x₂) ⋯` with `f ≥ 2` and `x₁² (x₁, x₂) ⋯`. -/
+theorem not_isAlt_degreeOneForm_demushkinWordNeTwo (hn : 0 < n) {q : ℕ} (hq : q % 4 = 2) :
     ¬ (degreeOneForm (gradedMk 2 (freeProP 2 (Fin n)) 1
-      ⟨demushkinWordNeTwo (2 + 2 ^ f) n (freeProPGen 2 n),
+      ⟨demushkinWordNeTwo q n (freeProPGen 2 n),
         demushkinWordNeTwo_mem_pLowerCentralSeries_one
-          (dvd_add dvd_rfl (dvd_pow_self 2 (by omega))) n _⟩)).IsAlt := by
+          (Nat.dvd_of_mod_eq_zero (by omega)) n _⟩)).IsAlt := by
   intro h
   have := h (dualBasis 2 (Fin n) ⟨0, hn⟩)
-  rw [degreeOneForm_dualBasis_self,
-    degreeOneBasis_repr_gradedMk_demushkinWordNeTwo_inl
-      (dvd_add dvd_rfl (dvd_pow_self 2 (by omega)))] at this
-  obtain ⟨g, rfl⟩ : ∃ g, f = g + 1 := ⟨f - 1, by omega⟩
-  have h2 : (2 + 2 ^ (g + 1)) / 2 = 1 + 2 ^ g := by
-    rw [pow_succ]
-    omega
-  simp [h2, CharTwo.two_eq_zero, zero_pow (show g ≠ 0 by omega)] at this
+  rw [degreeOneForm_dualBasis_self, degreeOneBasis_repr_gradedMk_demushkinWordNeTwo_inl
+    (Nat.dvd_of_mod_eq_zero (by omega))] at this
+  have h2 : q / 2 = 2 * (q / 4) + 1 := by omega
+  simp [h2, CharTwo.two_eq_zero] at this
 
 /-- **The degree-one form of `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` is nondegenerate
 for `n` even, `a` even and `f ≥ 1`**: pairing with the second coordinate character reads off the

@@ -118,6 +118,7 @@ end Finite
 
 /-- The Kronecker crossed homomorphism `D_k`, with `D_k(x_j) = δ_{kj}`, on the `ℕ`-indexed
 generators. -/
+@[simp]
 theorem crossedHom_single_freeProPGen {n : ℕ} (χ : freeProP p (Fin n) →ₜ* ℤ_[p]ˣ) (k : Fin n)
     (m : ℕ) :
     crossedHom χ (Pi.single k 1) (freeProPGen p n m) = if m = k then 1 else 0 := by
