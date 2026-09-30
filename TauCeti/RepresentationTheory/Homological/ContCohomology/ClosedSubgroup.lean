@@ -266,15 +266,14 @@ theorem exists_openSubgroup_le_res_eq_zero (hX : IsSmoothDiscrete k X) {H : Subg
     _ = φV.f n (K.iCycles n z) := by rw [hFdef, sub_add_cancel]
 
 /-- **Every class of positive degree dies on some open subgroup.** For a profinite group `G` and a
-discrete `G`-module `M`, every class of `Hⁿ⁺¹(G, M)` restricts to zero on some open subgroup of
-`G`: it restricts to zero on the closed trivial subgroup, which has no cohomology in positive
-degrees, hence on an open subgroup containing it. -/
-theorem exists_openSubgroup_res_eq_zero (M : Type v) [AddCommGroup M] [TopologicalSpace M]
-    [DiscreteTopology M] [DistribMulAction G M] [ContinuousSMul G M]
-    (x : continuousCohomology (n + 1) (ofDiscreteModule ℤ G M)) :
-    ∃ V : OpenSubgroup G, (res (V : Subgroup G) (ofDiscreteModule ℤ G M) (n + 1)).hom x = 0 := by
+smooth discrete representation `X`, every class of `Hⁿ⁺¹(G, X)` restricts to zero on some open
+subgroup of `G`: it restricts to zero on the closed trivial subgroup, which has no cohomology in
+positive degrees, hence on an open subgroup containing it. -/
+theorem exists_openSubgroup_res_eq_zero (hX : IsSmoothDiscrete k X)
+    (x : continuousCohomology (n + 1) X) :
+    ∃ V : OpenSubgroup G, (res (V : Subgroup G) X (n + 1)).hom x = 0 := by
   -- the trivial subgroup is a subsingleton, so its positive-degree cohomology vanishes
-  obtain ⟨V, -, hV⟩ := exists_openSubgroup_le_res_eq_zero (ofDiscreteModule_isSmoothDiscrete ℤ G M)
+  obtain ⟨V, -, hV⟩ := exists_openSubgroup_le_res_eq_zero hX
     (H := ⊥) (Subgroup.coe_bot (G := G) ▸ isClosed_singleton) (x := x) (Subsingleton.elim _ _)
   exact ⟨V, hV⟩
 

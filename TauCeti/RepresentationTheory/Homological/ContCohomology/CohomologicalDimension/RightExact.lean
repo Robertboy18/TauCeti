@@ -80,7 +80,7 @@ theorem subsingleton_continuousCohomology_succ_of_forall_coeffMap_proj_surjectiv
     Subsingleton (continuousCohomology (n + 1) (ofDiscreteModule ℤ G M)) := by
   refine subsingleton_of_forall_eq 0 fun x => ?_
   -- `x` restricts to zero on some open subgroup `V`
-  obtain ⟨V, hV⟩ := exists_openSubgroup_res_eq_zero M x
+  obtain ⟨V, hV⟩ := exists_openSubgroup_res_eq_zero (ofDiscreteModule_isSmoothDiscrete ℤ G M) x
   -- the unit `ι : M → Coind_V^G M`, its image `N ≅ M`, and the short exact sequence
   -- `0 → N → Coind_V^G M → Coind_V^G M ⧸ N → 0`
   let ι : M →+ DiscreteCoind G V.toSubgroup M := DiscreteCoind.unit G V.toSubgroup M
