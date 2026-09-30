@@ -8,7 +8,6 @@ module
 public import TauCeti.NumberTheory.LocalField.RamificationGroup
 public import TauCeti.NumberTheory.LocalField.TamelyRamified
 public import TauCeti.NumberTheory.NumberField.LocalGlobal.DecompositionGroup
-public import TauCeti.NumberTheory.NumberField.LocalGlobal.Different.Tame
 public import TauCeti.RingTheory.Ideal.RamificationGroup
 
 /-!
@@ -32,8 +31,8 @@ valuation, so a congruence that holds on `𝓞 L` holds on all of `𝒪[L_w]`.
 For `L/K` Galois, `decompositionHom v w` is an isomorphism onto `Aut(L_w/K_v)`, and the global
 and local ramification groups have the same orders. In particular the global wild inertia group
 `G_1` of `w` is trivial exactly when `L_w/K_v` is tamely ramified, that is, when the residue
-characteristic does not divide `e(w/v)`, or equivalently when the different exponent at `w` is
-`e(w/v) - 1`.
+characteristic does not divide `e(w/v)`. The reading on the different exponent is in
+`TauCeti.NumberTheory.NumberField.LocalGlobal.Different.Tame`.
 
 ## Main results
 
@@ -46,11 +45,10 @@ characteristic does not divide `e(w/v)`, or equivalently when the different expo
   Galois, `decompositionHom v w` carries the global ramification groups onto the local ones.
 * `IsDedekindDomain.HeightOneSpectrum.card_ramificationGroup_eq_card_lowerRamificationGroup`: for
   `L/K` Galois, the global and local ramification groups have the same orders.
-* `IsDedekindDomain.HeightOneSpectrum.ramificationGroup_one_eq_bot_iff_isTamelyRamified`,
-  `ramificationGroup_one_eq_bot_iff_natCast_ramificationIdx_ne_zero` and
-  `ramificationGroup_one_eq_bot_iff_multiplicity_differentIdeal_eq`: for `L/K` Galois, `G_1` is
-  trivial exactly when `w` is tamely ramified, read on the completion, on the ramification index
-  in the residue field of `v`, and on the different exponent.
+* `IsDedekindDomain.HeightOneSpectrum.ramificationGroup_one_eq_bot_iff_isTamelyRamified` and
+  `ramificationGroup_one_eq_bot_iff_natCast_ramificationIdx_ne_zero`: for `L/K` Galois, `G_1` is
+  trivial exactly when `w` is tamely ramified, read on the completion and on the ramification
+  index in the residue field of `v`.
 
 ## References
 
@@ -167,16 +165,5 @@ theorem ramificationGroup_one_eq_bot_iff_natCast_ramificationIdx_ne_zero :
       ((w.asIdeal.ramificationIdx (𝓞 K) : ℕ) : 𝓞 K ⧸ v.asIdeal) ≠ 0 :=
   (ramificationGroup_one_eq_bot_iff_isTamelyRamified v w).trans
     (isTamelyRamified_adicCompletion_iff v w)
-
-variable (w) in
-include v in
-/-- For `L/K` Galois, the first ramification group `G_1` of `w` is trivial if and only if the
-different exponent at `w` is `e(w/v) - 1`, the tame value of Dedekind's different theorem. -/
-theorem ramificationGroup_one_eq_bot_iff_multiplicity_differentIdeal_eq :
-    w.asIdeal.ramificationGroup (L ≃ₐ[K] L) 1 = ⊥ ↔
-      multiplicity w.asIdeal (differentIdeal (𝓞 K) (𝓞 L)) =
-        w.asIdeal.ramificationIdx (𝓞 K) - 1 :=
-  (ramificationGroup_one_eq_bot_iff_isTamelyRamified v w).trans
-    (multiplicity_differentIdeal_eq_ramificationIdx_sub_one_iff_isTamelyRamified v w).symm
 
 end IsDedekindDomain.HeightOneSpectrum
