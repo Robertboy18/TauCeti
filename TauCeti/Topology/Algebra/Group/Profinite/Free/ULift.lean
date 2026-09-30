@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Topology.Algebra.ContinuousMulEquiv
 public import TauCeti.Topology.Algebra.Group.Profinite.Free.ProP
+import TauCeti.Topology.Connected.TotallyDisconnected
 import Mathlib.Algebra.Group.Shrink
 import Mathlib.Basic.Countable.Small
 

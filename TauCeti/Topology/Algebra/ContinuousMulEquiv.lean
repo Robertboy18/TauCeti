@@ -7,8 +7,6 @@ module
 
 public import Mathlib.Topology.Algebra.ContinuousMonoidHom
 public import Mathlib.Topology.Constructions
-public import Mathlib.Topology.Connected.TotallyDisconnected
-public import Mathlib.Topology.Homeomorph.Lemmas
 public import Mathlib.Algebra.Group.Equiv.TypeTags
 public import Mathlib.Algebra.Group.ULift
 
@@ -43,8 +41,6 @@ live in a fixed universe be applied to a group in a smaller one.
   lemmas `toMultiplicative_apply` and `toMultiplicative_symm_apply`.
 * `TauCeti.ContinuousMulEquiv.ulift`: the topological isomorphism `ULift M ≃ₜ* M`, with its
   evaluation lemmas `ulift_apply` and `ulift_symm_apply`.
-* `ULift.totallyDisconnectedSpace`: the universe lift of a totally disconnected space is totally
-  disconnected, so that `ULift P` is a profinite group whenever `P` is one.
 -/
 
 public section
@@ -183,15 +179,6 @@ theorem ContinuousMulEquiv.ulift_apply (x : ULift.{v} M) : ContinuousMulEquiv.ul
 theorem ContinuousMulEquiv.ulift_symm_apply (x : M) :
     (ContinuousMulEquiv.ulift : ULift.{v} M ≃ₜ* M).symm x = ULift.up.{v} x :=
   (rfl)
-
-/-- The universe lift of a totally disconnected space is totally disconnected: together with
-Mathlib's `ULift.compactSpace` and `IsTopologicalGroup (ULift G)`, this makes `ULift P` a profinite
-group for every profinite group `P`, so that `P` lifted to a higher universe is a legitimate target
-of a universal property. -/
-instance _root_.ULift.totallyDisconnectedSpace {X : Type u} [TopologicalSpace X]
-    [TotallyDisconnectedSpace X] : TotallyDisconnectedSpace (ULift.{v} X) :=
-  (Homeomorph.ulift : ULift.{v} X ≃ₜ X).isEmbedding.isTotallyDisconnected_range.1
-    (isTotallyDisconnected_of_totallyDisconnectedSpace _)
 
 end ULift
 
