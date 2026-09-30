@@ -27,9 +27,9 @@ complex dual of the complexification is a complexification of the dual lattice, 
 conjugation is the twisted transpose (`TauCeti.Hodge.latticeConjugation_dual`). Dualizing is
 contravariantly functorial in morphisms, at both the complex and the integral level.
 
-This is the dual companion to tensor products and internal homs of pure Hodge structures,
-following Peters–Steenbrink, *Mixed Hodge Structures*, §2; it is the base on which the internal
-hom of Hodge structures is built.
+This is the dual companion to tensor products of pure Hodge structures, following Deligne,
+*Théorie de Hodge II*, §2.1, and Peters–Steenbrink, *Mixed Hodge Structures*, §2.1; the internal
+Hom of two pure Hodge structures is the tensor product of the dual of the source with the target.
 
 ## Main declarations
 
@@ -192,6 +192,15 @@ theorem apply_eq_zero_of_mem_piece_of_ne {a p : ℤ}
 
 section WeilOperator
 
+/-- The scalar by which the inverse Weil operator acts on the component of index `-p` and weight
+`n` is the scalar by which the Weil operator of the dual acts on the component of index `p` and
+weight `-n`: `(-1)^n i^{-2p-n} = i^{2p+n}` since `i^4 = 1`. -/
+private theorem neg_one_zpow_mul_I_zpow (n p : ℤ) :
+    (-1 : ℂ) ^ n * Complex.I ^ (2 * -p - n) = Complex.I ^ (2 * p + n) := by
+  rw [show (2 : ℤ) * p + n = 2 * n + (2 * -p - n) + 4 * p by ring, zpow_add₀ Complex.I_ne_zero,
+    zpow_add₀ Complex.I_ne_zero, zpow_mul, zpow_mul]
+  simp
+
 /-- **The Weil operator of the dual is the transpose of the inverse Weil operator.** On the
 `p`-th component of the dual, of weight `-n`, it acts by `i^{2p+n}`, and that is the inverse of
 the scalar `i^{-2p-n}` by which the Weil operator acts on the complementary component of index
@@ -201,18 +210,12 @@ theorem weilOperator_dual :
     hs.dual.weilOperator = hs.weilOperatorEquiv.symm.toLinearMap.dualMap := by
   refine (hs.dual.weilOperator_unique _ fun p φ hφ ↦ ?_).symm
   refine hs.linearMap_ext_of_piece fun a x hx ↦ ?_
-  rw [LinearMap.dualMap_apply, LinearEquiv.coe_coe, weilOperatorEquiv_symm_apply,
-    hs.weilOperator_apply_of_mem hx, LinearMap.smul_apply, map_smul, map_smul, smul_eq_mul,
-    smul_eq_mul]
+  simp only [LinearMap.dualMap_apply, LinearEquiv.coe_coe, weilOperatorEquiv_symm_apply,
+    hs.weilOperator_apply_of_mem hx, LinearMap.smul_apply, map_smul, smul_eq_mul, sub_neg_eq_add]
   by_cases ha : a = -p
   · subst ha
-    -- The scalars agree: `(-1)^n i^{-2p-n} = i^{2p+n}` because `i^4 = 1`.
-    have h2 : (-1 : ℂ) = Complex.I ^ (2 : ℤ) := by simp
-    rw [h2, ← zpow_mul, ← mul_assoc, ← zpow_add₀ Complex.I_ne_zero,
-      show 2 * n + (2 * -p - n) = (2 * p - -n) + 4 * (-p) by ring, zpow_add₀ Complex.I_ne_zero,
-      zpow_mul]
-    simp
-  · rw [hs.apply_eq_zero_of_mem_piece_of_ne hx hφ ha, mul_zero, mul_zero, smul_zero]
+    rw [← mul_assoc, neg_one_zpow_mul_I_zpow]
+  · simp [hs.apply_eq_zero_of_mem_piece_of_ne hx hφ ha]
 
 /-- **The dual pairing is Weil-invariant:** `⟨C φ, C x⟩ = ⟨φ, x⟩`. -/
 theorem weilOperator_dual_apply_weilOperator (φ : Module.Dual ℂ W) (x : W) :
@@ -319,6 +322,7 @@ theorem dualMap_id : (id source).dualMap = id source.dual := by
   simp
 
 /-- Transposition reverses composition of Hodge morphisms. -/
+@[simp]
 theorem dualMap_comp {V₃ W₃ : Type*} [AddCommGroup V₃] [AddCommGroup W₃] [Module ℂ W₃]
     {ι₃ : V₃ →ₗ[ℤ] W₃} {h₃ : IsBaseChange ℂ ι₃} [Module.Free ℤ V₃] [Module.Finite ℤ V₃]
     {third : HodgeStructure h₃ n} (g : Hom target third) (f : Hom source target) :

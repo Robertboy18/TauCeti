@@ -877,17 +877,8 @@ theorem dualLatticeMap_apply_ι (hℂ : IsBaseChange ℂ ιℂ) (f : Module.Dual
 functional. -/
 theorem dual_latticeConjugation_toEquiv_dualLatticeMap (hℂ : IsBaseChange ℂ ιℂ)
     (f : Module.Dual ℤ V) :
-    (latticeConjugation hℂ).dual.toEquiv (dualLatticeMap hℂ f) = dualLatticeMap hℂ f := by
-  ext x
-  induction x using hℂ.inductionOn with
-  | tmul v => simp [star_intCast]
-  | smul z x hx =>
-    simp only [Conjugation.dual_toEquiv_apply] at hx ⊢
-    rw [LinearEquiv.map_smulₛₗ, map_smul, map_smul, smul_eq_mul, smul_eq_mul, star_mul', hx,
-      Complex.star_def, Complex.conj_conj]
-  | add x y hx hy =>
-    simp only [Conjugation.dual_toEquiv_apply, map_add] at hx hy ⊢
-    rw [hx, hy]
+    (latticeConjugation hℂ).dual.toEquiv (dualLatticeMap hℂ f) = dualLatticeMap hℂ f :=
+  hℂ.algHom_ext _ _ fun v ↦ by simp [star_intCast]
 
 variable [Module.Free ℤ V] [Module.Finite ℤ V]
 
@@ -920,6 +911,7 @@ variable [AddCommGroup V'ℂ] [Module ℂ V'ℂ] {ι'ℂ : V' →ₗ[ℤ] V'ℂ}
 
 /-- Complexifying the transpose of an integral linear map gives the transpose of its
 complexification. -/
+@[simp]
 theorem integralMapToComplex_dualMap (h'ℂ : IsBaseChange ℂ ι'ℂ) (hℂ : IsBaseChange ℂ ιℂ)
     (f : V' →ₗ[ℤ] V) :
     integralMapToComplex (isBaseChange_dualLatticeMap hℂ) (dualLatticeMap h'ℂ) f.dualMap =
