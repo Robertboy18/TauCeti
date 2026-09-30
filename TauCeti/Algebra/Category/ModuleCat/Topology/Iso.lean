@@ -44,13 +44,20 @@ theorem ofIso_hom {X Y : TopModuleCat R} (e : X ≃L[R] Y) :
 inverse is continuous because its source is discrete. -/
 theorem isIso_of_bijective {X Y : TopModuleCat R} [DiscreteTopology Y] (f : X ⟶ Y)
     (hf : Function.Bijective f) : IsIso f := by
-  let e : X ≃L[R] Y :=
-    { LinearEquiv.ofBijective (f.hom : X →ₗ[R] Y) hf with
-      continuous_toFun := f.hom.continuous
-      continuous_invFun := continuous_of_discreteTopology }
-  have hf : f = (ofIso e).hom := by
+  let g : Y →L[R] X :=
+    ⟨(LinearEquiv.ofBijective (f.hom : X →ₗ[R] Y) hf).symm.toLinearMap,
+      continuous_of_discreteTopology⟩
+  have hg : ∀ y, g y = (LinearEquiv.ofBijective (f.hom : X →ₗ[R] Y) hf).symm y := fun y => by
+    simp only [g, ContinuousLinearMap.coe_mk', LinearEquiv.coe_coe]
+  have h₁ : Function.LeftInverse g f.hom := fun x => by
+    rw [hg, ← ContinuousLinearMap.coe_coe f.hom, LinearEquiv.ofBijective_symm_apply_apply]
+  have h₂ : Function.RightInverse g f.hom := fun y => by
+    rw [hg, ← ContinuousLinearMap.coe_coe f.hom, ← LinearEquiv.ofBijective_apply _ (hf := hf),
+      LinearEquiv.apply_symm_apply]
+  have hf : f = (ofIso (ContinuousLinearEquiv.equivOfInverse f.hom g h₁ h₂)).hom := by
     ext x
-    rfl
+    simp only [ofIso_hom, hom_ofHom, ContinuousLinearEquiv.coe_coe,
+      ContinuousLinearEquiv.equivOfInverse_apply]
   rw [hf]
   infer_instance
 
