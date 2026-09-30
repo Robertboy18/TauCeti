@@ -77,6 +77,7 @@ restricted to `U` is an affinoid pre-adic space. -/
   {U | isAffinoid (X.restrict U.isOpenEmbedding)}
 
 /-- The whole space is an open affinoid subspace exactly when `X` is affinoid. -/
+@[simp]
 theorem top_mem_affinoidOpens_iff : ⊤ ∈ X.affinoidOpens ↔ isAffinoid X :=
   ObjectProperty.prop_iff_of_iso isAffinoid X.restrictTopIso
 

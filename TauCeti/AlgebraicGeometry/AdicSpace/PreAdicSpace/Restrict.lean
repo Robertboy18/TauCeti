@@ -229,8 +229,6 @@ private theorem range_ofRestrict_comp_base :
 private noncomputable def restrictIsoPresheafedSpace :
     X.toPresheafedSpace.restrict U.isOpenEmbedding ≅
       Y.toPresheafedSpace.restrict ((Opens.map e.inv.base).obj U).isOpenEmbedding :=
-  haveI : IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) e.hom.toHom :=
-    (forgetToPresheafedSpace.mapIso e).isIso_hom
   PresheafedSpace.IsOpenImmersion.isoOfRangeEq
     (X.toPresheafedSpace.ofRestrict U.isOpenEmbedding ≫ e.hom.toHom)
     (Y.toPresheafedSpace.ofRestrict ((Opens.map e.inv.base).obj U).isOpenEmbedding)
@@ -240,8 +238,6 @@ private theorem restrictIsoPresheafedSpace_hom_ofRestrict :
     (restrictIsoPresheafedSpace e U).hom ≫
         Y.toPresheafedSpace.ofRestrict ((Opens.map e.inv.base).obj U).isOpenEmbedding =
       X.toPresheafedSpace.ofRestrict U.isOpenEmbedding ≫ e.hom.toHom :=
-  haveI : IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) e.hom.toHom :=
-    (forgetToPresheafedSpace.mapIso e).isIso_hom
   PresheafedSpace.IsOpenImmersion.lift_fac _ _ (le_of_eq (range_ofRestrict_comp_base e U))
 
 -- The isomorphism of presheafed spaces factors `X.ofRestrict ≫ e.hom` through `Y.ofRestrict`,

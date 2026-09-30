@@ -252,6 +252,15 @@ theorem Hom.valuation_eq_comap (x : X) :
     Hom.residueFieldMap_comp_residue, ValuationSpectrum.comap_comp, Function.comp_apply,
     ← X.stalkValuation_def x, f.stalkValuation_eq_comap x]
 
+/-- The stalk maps of a morphism of pre-adic spaces whose underlying morphism of presheafed
+spaces is an isomorphism are isomorphisms. -/
+instance isIso_stalkMap [IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) f.toHom]
+    (x : X) : IsIso (f.stalkMap x) :=
+  -- instance search does not unfold the abbreviation `toRingPresheafedSpaceHom` to a functor
+  -- application, so the underlying instance is supplied by hand
+  have : IsIso (toRingPresheafedSpaceHom f.toHom) := Functor.map_isIso _ _
+  Hom.stalkMap_def f x ▸ PresheafedSpace.stalkMap.isIso (toRingPresheafedSpaceHom f.toHom) x
+
 end Stalks
 
 section OfFac
@@ -298,6 +307,13 @@ end OfFac
 
 section ReflectsIsomorphisms
 
+/-- The underlying morphism of presheafed spaces of an isomorphism of pre-adic spaces is an
+isomorphism. Instance search does not see `forgetToPresheafedSpace.map f` as `f.toHom`, so
+Mathlib's `Functor.map_isIso` does not supply this. -/
+instance isIso_toHom (f : X ⟶ Y) [IsIso f] :
+    IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) f.toHom :=
+  (forgetToPresheafedSpace.mapIso (asIso f)).isIso_hom
+
 /-- The forgetful functor to presheafed spaces reflects isomorphisms: the inverse of the
 underlying isomorphism of presheafed spaces factors the identity through `f`, whose stalk maps
 are isomorphisms, so it is a morphism of pre-adic spaces by `Hom.ofFac`. -/
@@ -305,12 +321,9 @@ instance : forgetToPresheafedSpace.{u}.ReflectsIsomorphisms where
   reflects {X Y} f hf := by
     obtain ⟨g, hg₁, hg₂⟩ := hf.out
     -- Instance search does not see the objects `forgetToPresheafedSpace.obj X` in the type of
-    -- `hf` as the objects `X.toPresheafedSpace` of the morphisms below, nor does it unfold the
-    -- abbreviation `toRingPresheafedSpaceHom`; both instances are therefore restated.
+    -- `hf` as the objects `X.toPresheafedSpace` of the morphisms below, so the instance is
+    -- restated.
     have : IsIso (X := X.toPresheafedSpace) (Y := Y.toPresheafedSpace) f.toHom := hf
-    have : IsIso (toRingPresheafedSpaceHom f.toHom) := Functor.map_isIso _ _
-    have : ∀ y : Y, IsIso (f.stalkMap (g.base y)) := fun y ↦
-      Hom.stalkMap_def f _ ▸ PresheafedSpace.stalkMap.isIso (toRingPresheafedSpaceHom f.toHom) _
     exact ⟨⟨Hom.ofFac (𝟙 Y) f g hg₂, Hom.ext' hg₁, Hom.ext' hg₂⟩⟩
 
 end ReflectsIsomorphisms
