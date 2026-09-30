@@ -37,15 +37,15 @@ Two successive-approximation theorems follow, according to the span statement av
   This hypothesis is established for the relators `x₁^p (x₁, x₂) (x₃, x₄) ⋯` at odd `p`
   (`TauCeti.freeProP.range_basisModificationDelta_eq_top_of_odd`).
 * When `ρ` has no `p`-power part, `Im δ_ρ` misses the classes `π^{m+1} ξ_i` of the `p`-powers of
-  the generators, so the span statement available for `δ_ρ` only covers the classes of the
-  elements of the closed commutator subgroup `K = closure [F, F]`, and the induction has to keep
-  every deviation inside `K`. The **relative** theorem
-  (`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_exponentSum_eq`) therefore assumes that
-  `r` and `w` have the same exponent vector `v = exponentSum r`, and that every deviation in
-  `λ_{m+1}(F) ∩ K` is `δ_ρ` of a level-`m` correction `ω` with `ω_i ∈ K` at every generator `i`
-  with `v_i ≠ 0`. Such a correction preserves the exponent vector of the relator
-  (`TauCeti.freeProP.exponentSum_basisModification`), so the deviation stays in `K` at every
-  level and the induction closes. The intended application is to the relators
+  the generators, so `δ_ρ` is not onto `gr_{m+1}(F)`. The **relative** theorem
+  (`TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_exponentSum_eq`) works with a span
+  statement for the classes of the elements of the closed commutator subgroup
+  `K = closure [F, F]`: it assumes that `r` and `w` have the same exponent vector
+  `v = exponentSum r`, and that every deviation in `λ_{m+1}(F) ∩ K` is `δ_ρ` of a level-`m`
+  correction `ω` with `ω_i ∈ K` at every generator `i` with `v_i ≠ 0`. This guarantees absorption
+  for the deviations lying in `K`, and such a correction preserves the exponent vector of the
+  relator (`TauCeti.freeProP.exponentSum_basisModification`), which keeps the deviation in `K` at
+  every level. The intended application is to the relators
   `x₁^q (x₁, x₂) (x₃, x₄) ⋯` with `q = 0` or `q = p^f`, `f ≥ 2`, whose `p`-power part `x₁^q` lies
   in `λ_2(F)`; this file does not establish the hypothesis on the corrections for them, and the
   theorem is conditional on it.
@@ -91,12 +91,12 @@ variable {p : ℕ} [Fact p.Prime] {X : Type u} [Finite X] [LinearOrder X]
 
 /-! ### One step of the approximation -/
 
-/-- **One step of the successive approximation.** Let `s, w ∈ λ_1(F)` with
+/-- **One step of the successive approximation.** Let `s ∈ λ_1(F)` and `w ∈ F` with
 `s⁻¹ * w ∈ λ_{m+1}(F)`, `m ≥ 1`, and let `ω : X → λ_m(F)` be a family whose classes satisfy
 `δ_σ(⟦ω⟧) = ` the class of `s⁻¹ * w` in `gr_{m+1}(F)`, where `σ ∈ gr_1(F)` is the class of `s`. Then
 the basis modification `θ_ω` improves the congruence by one level: `(θ_ω s)⁻¹ * w ∈ λ_{m+2}(F)`. -/
 theorem inv_basisModification_mul_mem_pLowerCentralSeries {m : ℕ} (hm : 1 ≤ m)
-    (s w : pLowerCentralSeries p (freeProP p X) 1)
+    (s : pLowerCentralSeries p (freeProP p X) 1) (w : freeProP p X)
     (hs : (s : freeProP p X)⁻¹ * w ∈ pLowerCentralSeries p (freeProP p X) (m + 1))
     (ω : X → pLowerCentralSeries p (freeProP p X) m)
     (hω : basisModificationDelta p X hm (gradedMk p (freeProP p X) 1 s)
@@ -232,11 +232,10 @@ same exponent vector `v = exponentSum r`, and suppose that for every `m ≥ 1` e
 automorphism of `F` carries `r` to `w`.
 
 This is the form of the argument for a relator whose `p`-power part lies in `λ_2(F)`: there `Im δ_ρ`
-misses the classes `π^{m+1} ξ_i`, so the span statement for `δ_ρ` only covers the classes of the
-elements of `K`, and the induction keeps every deviation inside `K` by fixing the exponent vector
-along the approximation. The hypothesis on the corrections is the constrained
-form of the span statement `Im δ_ρ ⊇ ` (classes of `λ_{m+1}(F) ∩ K`); it is assumed here, not
-established. -/
+misses the classes `π^{m+1} ξ_i`, so `δ_ρ` is not onto. The hypothesis on the corrections is the
+constrained form of the span statement `Im δ_ρ ⊇ ` (classes of `λ_{m+1}(F) ∩ K`); it guarantees
+absorption for the deviations lying in `K`, and the exponent-vector hypotheses keep the deviations
+there along the approximation. It is assumed here, not established. -/
 theorem exists_continuousMulEquiv_apply_eq_of_exponentSum_eq
     (r w : pLowerCentralSeries p (freeProP p X) 1)
     (h : gradedMk p (freeProP p X) 1 r = gradedMk p (freeProP p X) 1 w)
