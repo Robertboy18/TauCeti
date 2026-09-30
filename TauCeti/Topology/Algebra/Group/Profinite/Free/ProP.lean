@@ -38,9 +38,8 @@ group is a continuous image of the free pro-`p` group on any finite type with at
 ## Main results
 
 * `TauCeti.isProP_freeProP`: a free pro-`p` group is pro-`p`.
-* `TauCeti.freeProP.topologicalClosure_closure_range_of_eq_top`,
-  `TauCeti.topologicalClosure_closure_eq_top_of_forall_freeProPGen_mem`: the generators
-  generate the free pro-`p` group topologically.
+* `TauCeti.freeProP.topologicalClosure_closure_range_of_eq_top`: the generators generate the
+  free pro-`p` group topologically.
 * `TauCeti.isTopologicallyFinitelyGenerated_freeProP`: for finite `X`, the free pro-`p` group on
   `X` is topologically finitely generated.
 * `TauCeti.freeProP.hom_ext`: homomorphisms agreeing on the generators are equal.
@@ -549,20 +548,14 @@ theorem finite_range_freeProPGen : (Set.range (freeProPGen p n)).Finite := by
   · exact Or.inr ⟨⟨i, h⟩, (freeProPGen_of_lt p h).symm⟩
   · exact Or.inl (freeProPGen_eq_one_of_le p (not_lt.mp h))
 
-/-- A set containing the `ℕ`-indexed generators `freeProPGen p n i`, `i < n`, topologically
-generates the free pro-`p` group on `n` generators. -/
-theorem topologicalClosure_closure_eq_top_of_forall_freeProPGen_mem {S : Set (freeProP p (Fin n))}
-    (h : ∀ i < n, freeProPGen p n i ∈ S) : (Subgroup.closure S).topologicalClosure = ⊤ := by
-  refine top_le_iff.1 ((freeProP.topologicalClosure_closure_range_of_eq_top p (Fin n)).ge.trans
-    (Subgroup.topologicalClosure_mono (Subgroup.closure_mono ?_)))
-  rintro _ ⟨i, rfl⟩
-  rw [← freeProPGen_val p i]
-  exact h i i.isLt
-
 /-- A set containing every `ℕ`-indexed generator generates the free pro-`p` group topologically. -/
 theorem topologicalClosure_closure_eq_top_of_range_freeProPGen_subset {s : Set (freeProP p (Fin n))}
-    (hs : Set.range (freeProPGen p n) ⊆ s) : (Subgroup.closure s).topologicalClosure = ⊤ :=
-  topologicalClosure_closure_eq_top_of_forall_freeProPGen_mem p fun i _ ↦ hs ⟨i, rfl⟩
+    (hs : Set.range (freeProPGen p n) ⊆ s) : (Subgroup.closure s).topologicalClosure = ⊤ := by
+  refine top_le_iff.1 ?_
+  rw [← freeProP.topologicalClosure_closure_range_of_eq_top p (Fin n)]
+  refine Subgroup.topologicalClosure_mono (Subgroup.closure_mono ?_)
+  rintro _ ⟨i, rfl⟩
+  exact hs ⟨i, freeProPGen_val p i⟩
 
 /-- The value of a homomorphism on the `ℕ`-indexed generators. -/
 theorem map_freeProPGen {K F : Type*} [Group K] [FunLike F (freeProP p (Fin n)) K]

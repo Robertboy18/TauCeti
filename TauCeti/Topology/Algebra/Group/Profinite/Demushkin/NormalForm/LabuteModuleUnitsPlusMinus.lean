@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Orientation
+public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.LabuteModule
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.CharacterKernelTwoGenerators
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.RelationModule
 
@@ -26,9 +26,9 @@ This file describes `X` by normal generators and hence `E` by module generators.
 `v ^ 2 = (-v) ^ 2 ∈ U^(f)` (`TauCeti.exists_padicPow_eq_sq_of_neg_mem_unitsPrincipal`). Then the
 kernel `X` is the closed normal closure of the unmarked generators `x_i`, `i ≠ 2, 4`, together
 with `x₂² x₄^{-m}` and the commutator `(x₂, x₄)`
-(`TauCeti.ker_orientationTwoEven_comp_mk_of_dvd`). In particular `E` is spanned over `Λ` by the
+(`TauCeti.ker_orientationTwoEven_comp_mk_of_four_dvd`). In particular `E` is spanned over `Λ` by the
 classes of these `n` elements
-(`TauCeti.span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_dvd`). For
+(`TauCeti.span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_four_dvd`). For
 Labute's relator `x₁² (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯`, that is `α = 0`, the marked value is
 `χ(x₂) = -1`, `m = 0`, and the extra generators are `x₂²` and `(x₂, x₄)`
 (`TauCeti.ker_orientationTwoEven_comp_mk_of_eq_zero`).
@@ -39,12 +39,12 @@ Labute's argument on `E` in the branch `Im χ = {±1} × U^(f)`, where `Λ ≅ �
 
 ## Main results
 
-* `TauCeti.ker_orientationTwoEven_comp_mk_of_dvd`: for `3 < n`, `2 ≤ f`, `4 ∣ α` and
+* `TauCeti.ker_orientationTwoEven_comp_mk_of_four_dvd`: for `3 < n`, `2 ≤ f`, `4 ∣ α` and
   `u ^ m = v ^ 2`, the kernel of the standard orientation on `F` is the closed normal closure of
   the `x_i` with `i ≠ 2, 4`, of `x₂² x₄^{-m}` and of `(x₂, x₄)`.
 * `TauCeti.ker_orientationTwoEven_comp_mk_of_eq_zero`: the case `α = 0`, with `x₂²` in place of
   `x₂² x₄^{-m}`.
-* `TauCeti.span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_dvd`: the
+* `TauCeti.span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_four_dvd`: the
   classes of these elements span Labute's module `E = X ⧸ (X, X)` over `ℤ_2[[F ⧸ X]]`.
 
 ## References
@@ -69,7 +69,7 @@ variable (a f n : ℕ) (v u : ℤ_[2]ˣ)
 with `i ≠ 2, 4`, of `x₂² x₄^{-m}` and of the commutator `(x₂, x₄)`. In the branch `2^f ∣ α`, where
 the image of `χ` is `{±1} × U^(f)`, such an `m` exists by
 `TauCeti.exists_padicPow_eq_sq_of_neg_mem_unitsPrincipal`. -/
-theorem ker_orientationTwoEven_comp_mk_of_dvd (hn : 3 < n) (hf : 2 ≤ f)
+theorem ker_orientationTwoEven_comp_mk_of_four_dvd (hn : 3 < n) (hf : 2 ≤ f)
     (hv : (v : ℤ_[2]) * (1 + (a : ℤ_[2])) = -1) (hu : (u : ℤ_[2]) * (1 - (2 : ℤ_[2]) ^ f) = 1)
     (ha : 4 ∣ (a : ℤ_[2])) {m : ℤ_[2]}
     (hm : isProP_units_padicInt_two.padicPow u m = v ^ 2) :
@@ -77,29 +77,19 @@ theorem ker_orientationTwoEven_comp_mk_of_dvd (hn : 3 < n) (hf : 2 ≤ f)
       (Subgroup.normalClosure (insert (freeProPGen 2 n 1 ^ 2 *
           ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 3) m)⁻¹)
         (insert ⁅freeProPGen 2 n 1, freeProPGen 2 n 3⁆
-          (freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3})))).topologicalClosure := by
-  have hχ1 : ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)) (freeProPGen 2 n 1) =
-      v :=
-    (presentedProP.comp_mk_freeProPGen _ _ _ _ 1).trans
-      (orientationTwoEven_presentedProPGen_one a f n v u (by omega))
-  have hχ3 : ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)) (freeProPGen 2 n 3) =
-      u :=
-    (presentedProP.comp_mk_freeProPGen _ _ _ _ 3).trans
-      (orientationTwoEven_presentedProPGen_three a f n v u hn)
-  have hχS : ∀ x ∈ freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3},
-      ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)) x = 1 := by
-    rintro _ ⟨i, ⟨-, hi1, hi3⟩, rfl⟩
-    exact (presentedProP.comp_mk_freeProPGen _ _ _ _ i).trans
-      (orientationTwoEven_presentedProPGen_of_ne a f n v u hi1 hi3)
+          (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3})))).topologicalClosure := by
+  have hχ1 := orientationTwoEven_comp_mk_freeProPGen_one a f n v u (by omega)
+  have hχ3 := orientationTwoEven_comp_mk_freeProPGen_three a f n v u hn
   -- The generators `x₂`, `x₄` and the unmarked `x_i` topologically generate `F`.
   have hgen : (Subgroup.closure (insert (freeProPGen 2 n 1) (insert (freeProPGen 2 n 3)
-      (freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3})))).topologicalClosure = ⊤ := by
-    refine topologicalClosure_closure_eq_top_of_forall_freeProPGen_mem 2 fun i hi ↦ ?_
+      (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3})))).topologicalClosure = ⊤ := by
+    refine topologicalClosure_closure_eq_top_of_range_freeProPGen_subset 2 ?_
+    rintro _ ⟨i, rfl⟩
     by_cases h1 : i = 1
     · exact h1 ▸ Set.mem_insert _ _
     by_cases h3 : i = 3
     · exact Set.mem_insert_of_mem _ (h3 ▸ Set.mem_insert _ _)
-    exact Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ ⟨i, ⟨hi, h1, h3⟩, rfl⟩)
+    exact Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ ⟨i, ⟨h1, h3⟩, rfl⟩)
   have hu' : (u : ℤ_[2]) * (1 - ((2 : ℕ) : ℤ_[2]) ^ f) = 1 := by exact_mod_cast hu
   have hu1 : u ≠ 1 := by
     intro h
@@ -107,7 +97,9 @@ theorem ker_orientationTwoEven_comp_mk_of_dvd (hn : 3 < n) (hf : 2 ≤ f)
       (h ▸ one_mem _)
     omega
   refine IsProP.ker_eq_topologicalClosure_normalClosure_of_neg_mem_unitsPrincipal
-    (isProP_freeProP 2 (Fin n)) _ hgen hχS ?_ ?_ ?_ ?_
+    (isProP_freeProP 2 (Fin n)) _ hgen
+    (fun _ ⟨i, hi, hs⟩ ↦ hs ▸ orientationTwoEven_comp_mk_freeProPGen_of_ne a f n v u hi.1 hi.2)
+    ?_ ?_ ?_ ?_
   · rw [hχ1, neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one hv]
     norm_num
     exact ha
@@ -128,14 +120,14 @@ theorem ker_orientationTwoEven_comp_mk_of_eq_zero (hn : 3 < n) (hf : 2 ≤ f) (h
     ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)).toMonoidHom.ker =
       (Subgroup.normalClosure (insert (freeProPGen 2 n 1 ^ 2)
         (insert ⁅freeProPGen 2 n 1, freeProPGen 2 n 3⁆
-          (freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3})))).topologicalClosure := by
+          (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3})))).topologicalClosure := by
   have hv1 : v = -1 := by
     ext
     rw [Units.val_neg, Units.val_one, ← hv, ha]
     simp
   have hm : isProP_units_padicInt_two.padicPow u 0 = v ^ 2 := by
     rw [IsProP.padicPow_zero, hv1, neg_one_sq]
-  rw [ker_orientationTwoEven_comp_mk_of_dvd a f n v u hn hf hv hu (by rw [ha]; simp) hm,
+  rw [ker_orientationTwoEven_comp_mk_of_four_dvd a f n v u hn hf hv hu (by rw [ha]; simp) hm,
     IsProP.padicPow_zero, inv_one, mul_one]
 
 /-- **Labute's module of the even-rank dyadic normal form with `4 ∣ α` is generated by the classes
@@ -146,8 +138,8 @@ group `F`, the classes of the `x_i` with `i ≠ 2, 4`, of `x₂² x₄^{-m}` and
 `TauCeti.IsProP.completedGroupAlgebraModule` through conjugation. In the branch `2^f ∣ α`, where
 the image of `χ` is `{±1} × U^(f)`, the exponent `m` exists by
 `TauCeti.exists_padicPow_eq_sq_of_neg_mem_unitsPrincipal`. -/
-theorem span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_dvd (hn : 3 < n)
-    (hf : 2 ≤ f) (hv : (v : ℤ_[2]) * (1 + (a : ℤ_[2])) = -1)
+theorem span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_four_dvd
+    (hn : 3 < n) (hf : 2 ≤ f) (hv : (v : ℤ_[2]) * (1 + (a : ℤ_[2])) = -1)
     (hu : (u : ℤ_[2]) * (1 - (2 : ℤ_[2]) ^ f) = 1) (ha : 4 ∣ (a : ℤ_[2]))
     {m : ℤ_[2]} (hm : isProP_units_padicInt_two.padicPow u m = v ^ 2) :
     haveI := ((orientationTwoEven a f n v u).comp (presentedProP.mk 2 _)).isClosed_ker
@@ -164,13 +156,9 @@ theorem span_topologicalAbelianization_ker_orientationTwoEven_comp_mk_eq_top_of_
         (Subtype.val ⁻¹' (insert (freeProPGen 2 n 1 ^ 2 *
             ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 3) m)⁻¹)
           (insert ⁅freeProPGen 2 n 1, freeProPGen 2 n 3⁆
-            (freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3})))))) = ⊤ :=
-  have hfin : (insert (freeProPGen 2 n 1 ^ 2 *
-      ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 3) m)⁻¹)
-        (insert ⁅freeProPGen 2 n 1, freeProPGen 2 n 3⁆
-          (freeProPGen 2 n '' {i | i < n ∧ i ≠ 1 ∧ i ≠ 3}))).Finite :=
-    ((((Set.finite_Iio n).subset fun _ hi ↦ hi.1).image _).insert _).insert _
+            (freeProPGen 2 n '' {i | i ≠ 1 ∧ i ≠ 3})))))) = ⊤ :=
   (isProP_freeProP 2 (Fin n)).span_completedGroupAlgebraModule_topologicalAbelianization_eq_top _
-    hfin (ker_orientationTwoEven_comp_mk_of_dvd a f n v u hn hf hv hu ha hm).symm
+    ((((finite_range_freeProPGen 2 n).subset (Set.image_subset_range _ _)).insert _).insert _)
+    (ker_orientationTwoEven_comp_mk_of_four_dvd a f n v u hn hf hv hu ha hm).symm
 
 end TauCeti
