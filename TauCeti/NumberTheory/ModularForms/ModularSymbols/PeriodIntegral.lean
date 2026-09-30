@@ -17,7 +17,8 @@ import TauCeti.NumberTheory.ModularForms.Cusps.Basic
 # The period integral of a cusp form against a binary form
 
 Let `f` be a cusp form of weight `k = w + 2` on an arithmetic subgroup and `P` a binary form of
-degree `w` with coefficients in a ring `R` mapping to `ℂ`. The **period integrand** is the
+degree `w` with coefficients in a commutative semiring `R` mapping to `ℂ`. The **period integrand**
+is the
 one-form `f(z) P(z, 1) dz`, and its integrals
 
 `∫_β^α f(z) P(z, 1) dz`
@@ -34,7 +35,9 @@ of `f ∣[k] γ` against `P ∣ γ`, the right action of `TauCeti.binaryFormRep`
 the periods compatible with the relation `{γα, γβ} ⊗ P = {α, β} ⊗ (P ∣ γ)` defining modular
 symbols. Second, **absolute convergence**: both endpoints of the geodesic are cusps, and the
 integrand is integrable along the whole geodesic. Moving each endpoint to `i∞` reduces this to
-the exponential decay of a cusp form there, which beats the polynomial growth of `P`.
+the exponential decay of a cusp form there, which beats the polynomial growth of `P`. Only the
+`SL(2, ℤ)` form of the transformation law, stated through `TauCeti.binaryFormRep`, needs `R` to be
+a ring.
 
 ## Main definitions
 
@@ -51,13 +54,13 @@ the exponential decay of a cusp form there, which beats the polynomial growth of
 * `TauCeti.ModularSymbols.periodIntegrand_slash_apply`: the weight-`2` slash of the integrand by a
   rational matrix `g` of positive determinant is
   `(det g)⁻ʷ · (f ∣[k] g)(τ) · P(aτ + b, cτ + d)`.
-* `TauCeti.ModularSymbols.periodIntegrand_slash_mapGL`: for `γ ∈ SL(2, ℤ)`, slashing the
-  integrand of `f` against `P` by `γ` gives the integrand of `f ∣[k] γ` against `P ∣ γ`.
 * `TauCeti.ModularSymbols.mdifferentiable_periodIntegrand`: the integrand of a holomorphic `f` is
   holomorphic.
 * `TauCeti.ModularSymbols.integrableOn_resToImagAxis_periodIntegrand_slash`: **absolute
   convergence** of the period integral of a cusp form of weight `w + 2` against a binary form of
   degree `w` along the geodesic between any two distinct cusps.
+* `TauCeti.ModularSymbols.periodIntegrand_slash_mapGL`: for `γ ∈ SL(2, ℤ)`, slashing the
+  integrand of `f` against `P` by `γ` gives the integrand of `f ∣[k] γ` against `P ∣ γ`.
 * `TauCeti.ModularSymbols.geodesicIntegral_mapGL_mul_periodIntegrand`: the transformation law
   `∫_{γβ}^{γα} f(z) P(z, 1) dz = ∫_β^α (f ∣[k] γ)(z) (P ∣ γ)(z, 1) dz` for `γ ∈ SL(2, ℤ)`, and
   `TauCeti.ModularSymbols.geodesicIntegral_mapGL_mul_periodIntegrand_of_mem`: its form for `γ`
@@ -80,7 +83,11 @@ open scoped Manifold MatrixGroups ModularForm Pointwise
 
 namespace TauCeti.ModularSymbols
 
-variable {R : Type*} [CommRing R] [Algebra R ℂ] {w : ℕ}
+variable {R : Type*} {w : ℕ}
+
+section CommSemiring
+
+variable [CommSemiring R] [Algebra R ℂ]
 
 /-- The **period integrand** `z ↦ f(z) · P(z, 1)` of a function `f : ℍ → ℂ` against a binary form
 `P` of degree `w`: the one-form `f(z) P(z, 1) dz` whose integrals along geodesics between cusps
@@ -199,25 +206,6 @@ theorem periodIntegrand_slash_apply {k : ℤ} (hk : k = w + 2) (f : ℍ → ℂ)
         ring
     _ = _ := by ring
 
-/-- **The transformation law under `SL(2, ℤ)`**: slashing the integrand of `f` against `P` by
-`γ ∈ SL(2, ℤ)` gives the integrand of `f ∣[k] γ` against `P ∣ γ`, the right action of `γ` on
-binary forms (`TauCeti.binaryFormRep`). -/
-theorem periodIntegrand_slash_mapGL {k : ℤ} (hk : k = w + 2) (f : ℍ → ℂ)
-    (P : homogeneousSubmodule (Fin 2) R w) (γ : SL(2, ℤ)) :
-    periodIntegrand f P ∣[(2 : ℤ)] (mapGL ℚ γ) =
-      periodIntegrand (f ∣[k] γ) (binaryFormRep R w (op (γ : Matrix (Fin 2) (Fin 2) ℤ)) P) := by
-  have hdet : ((mapGL ℚ γ : GL (Fin 2) ℚ) : Matrix (Fin 2) (Fin 2) ℚ).det = 1 := by
-    rw [← Matrix.GeneralLinearGroup.val_det_apply, det_mapGL, Units.val_one]
-  funext τ
-  rw [periodIntegrand_slash_apply hk f P (by rw [hdet]; exact one_pos) τ, periodIntegrand_apply,
-    hdet, ModularForm.rat_slash_mapGL, ← TauCeti.Matrix.SpecialLinearGroup.coe_GL_eq_mapGL,
-    ← ModularForm.SL_slash, map_mapGL, coe_binaryFormRep_apply, aeval_linearSubst]
-  push_cast
-  rw [one_zpow, one_mul]
-  congr 2
-  ext i
-  fin_cases i <;> simp [num, denom, mapGL_coe_matrix, Matrix.map_apply]
-
 /-! ### Absolute convergence -/
 
 variable {Γ : Subgroup (GL (Fin 2) ℝ)} {F : Type*} [FunLike F ℍ ℂ] {k : ℤ}
@@ -286,7 +274,30 @@ theorem integrableOn_resToImagAxis_periodIntegrand_slash [Γ.IsArithmetic] [Cusp
   rwa [SlashAction.slash_mul, ModularForm.rat_slash_mapGL,
     ← TauCeti.Matrix.SpecialLinearGroup.coe_GL_eq_mapGL, ← ModularForm.SL_slash] at this
 
-/-! ### The transformation law for the geodesic integral -/
+end CommSemiring
+
+/-! ### The transformation law under `SL(2, ℤ)` -/
+
+variable [CommRing R] [Algebra R ℂ] {F : Type*} [FunLike F ℍ ℂ] {k : ℤ}
+
+/-- **The transformation law under `SL(2, ℤ)`**: slashing the integrand of `f` against `P` by
+`γ ∈ SL(2, ℤ)` gives the integrand of `f ∣[k] γ` against `P ∣ γ`, the right action of `γ` on
+binary forms (`TauCeti.binaryFormRep`). -/
+theorem periodIntegrand_slash_mapGL {k : ℤ} (hk : k = w + 2) (f : ℍ → ℂ)
+    (P : homogeneousSubmodule (Fin 2) R w) (γ : SL(2, ℤ)) :
+    periodIntegrand f P ∣[(2 : ℤ)] (mapGL ℚ γ) =
+      periodIntegrand (f ∣[k] γ) (binaryFormRep R w (op (γ : Matrix (Fin 2) (Fin 2) ℤ)) P) := by
+  have hdet : ((mapGL ℚ γ : GL (Fin 2) ℚ) : Matrix (Fin 2) (Fin 2) ℚ).det = 1 := by
+    rw [← Matrix.GeneralLinearGroup.val_det_apply, det_mapGL, Units.val_one]
+  funext τ
+  rw [periodIntegrand_slash_apply hk f P (by rw [hdet]; exact one_pos) τ, periodIntegrand_apply,
+    hdet, ModularForm.rat_slash_mapGL, ← TauCeti.Matrix.SpecialLinearGroup.coe_GL_eq_mapGL,
+    ← ModularForm.SL_slash, map_mapGL, coe_binaryFormRep_apply, aeval_linearSubst]
+  push_cast
+  rw [one_zpow, one_mul]
+  congr 2
+  ext i
+  fin_cases i <;> simp [num, denom, mapGL_coe_matrix, Matrix.map_apply]
 
 /-- **The transformation law of the periods under `SL(2, ℤ)`**:
 `∫_{γ g • 0}^{γ g • ∞} f(z) P(z, 1) dz = ∫_{g • 0}^{g • ∞} (f ∣[k] γ)(z) (P ∣ γ)(z, 1) dz`,
