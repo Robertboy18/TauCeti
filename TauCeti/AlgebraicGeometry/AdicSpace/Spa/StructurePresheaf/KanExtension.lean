@@ -183,6 +183,18 @@ noncomputable def presentationLimitPresheafIsPointwiseRightKanExtension : (Funct
       presentationLimit_hom_ext_toPresentation fun i ↦ by
         simp [← hm, presentationLimitMap_le_open_comp_πToPresentation])
 
+/-- **The legs of the Kan-extension cone are the restriction maps**: at an open `V`, the leg of
+the cone of `presentationLimitPresheafIsPointwiseRightKanExtension` indexed by a rational open
+`W ⊆ V` (an object `g` of the category of rational opens over `V`) is the restriction map from `V`
+to `W`. -/
+theorem presentationLimitPresheaf_coneAt_π_app (V : Opens ↥(spa Aplus))
+    (g : StructuredArrow (op V) (rationalOpensFunctor Aplus).op) :
+    ((Functor.RightExtension.mk (presentationLimitPresheaf P Aplus)
+      (𝟙 ((rationalOpensFunctor Aplus).op ⋙ presentationLimitPresheaf P Aplus))).coneAt
+        (op V)).π.app g =
+      (presentationLimitPresheaf P Aplus).map (homOfLE (leOfHom g.hom.unop)).op := by
+  simp
+
 /-- **`presentationLimitPresheaf` is adapted to the rational opens**: at every open `V`, it is the
 limit of its values on the rational opens `W ⊆ V`. This is Wedhorn §8.1's description of `𝒪_X(V)`
 in the sense of Wedhorn's Remark and Definition 8.9. -/
