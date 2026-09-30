@@ -416,7 +416,6 @@ def unit : M →+[G] DiscreteCoind G U M where
 theorem unit_apply (m : M) (g : G) : unit G U M m g = g • m := (rfl)
 
 /-- Evaluation at `1` retracts the unit. -/
-@[simp]
 theorem eval_unit (m : M) : eval G U M (unit G U M m) = m := by
   rw [eval_apply, unit_apply, one_smul]
 
@@ -431,7 +430,6 @@ variable [U.FiniteIndex]
 attribute [local instance] Subgroup.fintypeQuotientOfFiniteIndex
 
 /-- **The trace of the unit is multiplication by the index**: `∑_{gU} g • g⁻¹ • m = [G : U] • m`. -/
-@[simp]
 theorem trace_unit (m : M) : trace G U M (unit G U M m) = U.index • m := by
   simp only [trace_apply, unit_apply, smul_inv_smul, Finset.sum_const, Finset.card_univ,
     U.index_eq_card, Nat.card_eq_fintype_card]
