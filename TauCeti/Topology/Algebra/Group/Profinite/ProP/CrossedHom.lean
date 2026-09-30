@@ -6,9 +6,9 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Topology.Algebra.Group.CrossedHom
-public import TauCeti.Topology.Algebra.Group.LowerCentralSeries
 public import TauCeti.Topology.Algebra.Group.LowerCentralSeries.Graded.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicUnits
+import Mathlib.NumberTheory.Multiplicity
 import TauCeti.NumberTheory.Padics.RingHoms
 
 /-!
@@ -20,9 +20,9 @@ principal units `1 + pℤ_p` (as every continuous character of a pro-`p` group h
 `χ`, that is `f (g * h) = χ g * f h + f g`. Along the lower `p`-series `λ_k = λ_k(G)` both the
 character and the crossed homomorphism gain one power of `p` per step:
 
-* `χ g ≡ 1 mod p ^ (k + 1)` for `g ∈ λ_k` (`TauCeti.mem_unitsPrincipal_of_mem_pLowerCentralSeries`),
-  since a `p`-th power of `1 + p ^ (k + 1) ℤ_p` lies in `1 + p ^ (k + 2) ℤ_p` and `ℤ_pˣ` is
-  commutative;
+* `χ g ≡ 1 mod p ^ (k + 1)` for `g ∈ λ_k` (`TauCeti.mem_unitsPrincipal_of_mem_pLowerCentralSeries`
+  in `Profinite/ProP/PadicUnits.lean`), since a `p`-th power of `1 + p ^ (k + 1) ℤ_p` lies in
+  `1 + p ^ (k + 2) ℤ_p` and `ℤ_pˣ` is commutative;
 * `p ^ k ∣ f g` for `g ∈ λ_k` (`TauCeti.IsCrossedHom.pow_dvd_apply_of_mem_pLowerCentralSeries`),
   since `f (x ^ p) = (1 + χ x + ⋯ + χ x ^ (p - 1)) f x` with the geometric sum divisible by `p`,
   and `f ⁅x, y⁆ = (χ x - 1) f y - (χ y - 1) f x` with `χ x - 1 ∈ p ^ (k + 1) ℤ_p` for `x ∈ λ_k`.
@@ -52,8 +52,6 @@ in the classification of the dyadic Demushkin groups of even rank.
 
 ## Main results
 
-* `TauCeti.mem_unitsPrincipal_of_mem_pLowerCentralSeries`: a continuous character with values in
-  `1 + pℤ_p` takes `λ_k(G)` into `1 + p ^ (k + 1) ℤ_p`.
 * `TauCeti.IsCrossedHom.pow_dvd_apply_of_mem_pLowerCentralSeries`: a continuous crossed
   homomorphism for such a character is divisible by `p ^ k` on `λ_k(G)`;
   `TauCeti.IsCrossedHom.dvd_apply_of_mem_pLowerCentralSeries_one` is the case `k = 1` for a pro-`p`
@@ -76,7 +74,6 @@ public section
 
 namespace TauCeti
 
-open Finset
 open scoped commutatorElement
 
 -- Preferring the ring path keeps a single additive structure on `ZMod p`, so that the graded
@@ -86,42 +83,7 @@ attribute [local instance 2000] Ring.toAddCommGroup
 variable {p : ℕ} [Fact p.Prime] {G : Type*} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   {χ : G →ₜ* ℤ_[p]ˣ}
 
-/-! ### The character along the lower `p`-series -/
-
-/-- **A character with values in `1 + pℤ_p` takes `λ_k(G)` into `1 + p ^ (k + 1) ℤ_p`.** The
-`p`-th power of an element of `1 + p ^ (k + 1) ℤ_p` lies in `1 + p ^ (k + 2) ℤ_p`, commutators are
-killed because `ℤ_pˣ` is commutative, and `1 + p ^ (k + 2) ℤ_p` is closed. -/
-theorem mem_unitsPrincipal_of_mem_pLowerCentralSeries (hχ : ∀ g, χ g ∈ unitsPrincipal p 1) {k : ℕ}
-    {g : G} (hg : g ∈ pLowerCentralSeries p G k) : χ g ∈ unitsPrincipal p (k + 1) := by
-  suffices h : ∀ k, pLowerCentralSeries p G k ≤ (unitsPrincipal p (k + 1)).comap (χ : G →* ℤ_[p]ˣ)
-    from h k hg
-  intro k
-  induction k with
-  | zero => exact fun g _ ↦ hχ g
-  | succ k ih =>
-    rw [pLowerCentralSeries_succ]
-    have hK : IsClosed
-        (((unitsPrincipal p (k + 1 + 1)).comap (χ : G →* ℤ_[p]ˣ) : Subgroup G) : Set G) := by
-      rw [Subgroup.coe_comap]
-      exact (isClosed_unitsPrincipal (p := p) _).preimage (by exact χ.continuous)
-    refine (pLowerCentralStep_le_iff hK).2
-      ⟨fun x hx ↦ ?_, Subgroup.commutator_le.2 fun x _ y _ ↦ ?_⟩
-    · rw [Subgroup.mem_comap, map_pow]
-      simpa using pow_pow_mem_unitsPrincipal k.succ_pos (ih hx) 1
-    · rw [Subgroup.mem_comap, map_commutatorElement,
-        commutatorElement_eq_one_iff_mul_comm.2 (mul_comm _ _)]
-      exact one_mem _
-
 /-! ### Divisibility of a crossed homomorphism along the lower `p`-series -/
-
-/-- For `u ≡ 1 mod p`, the geometric sum `1 + u + ⋯ + u ^ (p - 1)` is divisible by `p`. -/
-private theorem dvd_sum_range_pow_of_dvd_sub_one {u : ℤ_[p]} (hu : (p : ℤ_[p]) ∣ u - 1) :
-    (p : ℤ_[p]) ∣ ∑ j ∈ range p, u ^ j := by
-  have h : ∑ j ∈ range p, u ^ j = ∑ j ∈ range p, (u ^ j - 1) + p := by
-    rw [sum_sub_distrib, sum_const, card_range, nsmul_eq_mul, mul_one, sub_add_cancel]
-  rw [h]
-  refine dvd_add (dvd_sum fun j _ ↦ hu.trans ?_) dvd_rfl
-  simpa using sub_dvd_pow_sub_pow u 1 j
 
 namespace IsCrossedHom
 
@@ -148,12 +110,14 @@ theorem pow_dvd_apply_of_mem_pLowerCentralSeries {k : ℕ} {g : G}
         simp only [Set.mem_ofPred_eq] at ha ⊢
         rw [hf.map_inv]
         exact ha.mul_left _ }
+  have hmem : ∀ k g, g ∈ S k ↔ (p : ℤ_[p]) ^ k ∣ f g := fun k g ↦ by
+    simp only [S, Subgroup.mem_mk, Submonoid.mem_mk, Subsemigroup.mem_mk, Set.mem_ofPred_eq]
   have hS : ∀ k, IsClosed (S k : Set G) := fun k ↦ by
     have : (S k : Set G) = f ⁻¹' (PadicInt.toZModPow k ⁻¹' {0}) := by
       ext g
       rw [Set.mem_preimage, Set.mem_preimage, Set.mem_singleton_iff,
-        PadicInt.toZModPow_eq_zero_iff_dvd]
-      rfl
+        PadicInt.toZModPow_eq_zero_iff_dvd, SetLike.mem_coe]
+      exact hmem k g
     rw [this]
     exact (isClosed_singleton.preimage (PadicInt.continuous_toZModPow k)).preimage hfc
   have hp1 : ∀ x, (p : ℤ_[p]) ∣ (χ x : ℤ_[p]) - 1 := fun x ↦ by
@@ -161,35 +125,31 @@ theorem pow_dvd_apply_of_mem_pLowerCentralSeries {k : ℕ} {g : G}
   suffices h : ∀ k, pLowerCentralSeries p G k ≤ S k from h k hg
   intro k
   induction k with
-  | zero => exact fun g _ ↦ by simp [S]
+  | zero => exact fun g _ ↦ (hmem 0 g).2 (by rw [pow_zero]; exact one_dvd _)
   | succ k ih =>
     rw [pLowerCentralSeries_succ]
     refine (pLowerCentralStep_le_iff (hS (k + 1))).2
       ⟨fun x hx ↦ ?_, Subgroup.commutator_le.2 fun x hx y _ ↦ ?_⟩
     · -- `f (x ^ p) = (1 + χ x + ⋯ + χ x ^ (p - 1)) * f x`, with `p ∣ Σ` and `p ^ k ∣ f x`.
-      change (p : ℤ_[p]) ^ (k + 1) ∣ f (x ^ p)
-      rw [hf.map_pow, pow_succ']
-      exact mul_dvd_mul (dvd_sum_range_pow_of_dvd_sub_one (hp1 x)) (ih hx)
+      rw [hmem, hf.map_pow, pow_succ']
+      exact mul_dvd_mul (by simpa using dvd_geom_sum₂_self (hp1 x)) ((hmem k x).1 (ih hx))
     · -- `f ⁅x, y⁆ = (χ x - 1) * f y - (χ y - 1) * f x`, with `p ^ (k + 1) ∣ χ x - 1` and
       -- `p ∣ χ y - 1`, `p ^ k ∣ f x`.
-      change (p : ℤ_[p]) ^ (k + 1) ∣ f ⁅x, y⁆
-      rw [hf.map_commutatorElement]
+      rw [hmem, hf.map_commutatorElement]
       refine dvd_sub ((mem_unitsPrincipal_iff.1
         (mem_unitsPrincipal_of_mem_pLowerCentralSeries hχ hx)).mul_right _) ?_
       rw [pow_succ']
-      exact mul_dvd_mul (hp1 y) (ih hx)
+      exact mul_dvd_mul (hp1 y) ((hmem k x).1 (ih hx))
 
 /-! ### The graded functional -/
 
 /-- The quotient `f g / p ^ k` for `g ∈ λ_k(G)`. -/
 private noncomputable def gradedQuot (k : ℕ) (g : pLowerCentralSeries p G k) : ℤ_[p] :=
-  (show ∃ c, f g = (p : ℤ_[p]) ^ k * c from
-    hf.pow_dvd_apply_of_mem_pLowerCentralSeries hχ hfc g.2).choose
+  (dvd_def.1 (hf.pow_dvd_apply_of_mem_pLowerCentralSeries hχ hfc g.2)).choose
 
 private theorem apply_eq_pow_mul_gradedQuot (k : ℕ) (g : pLowerCentralSeries p G k) :
     f g = (p : ℤ_[p]) ^ k * gradedQuot hf hχ hfc k g :=
-  (show ∃ c, f g = (p : ℤ_[p]) ^ k * c from
-    hf.pow_dvd_apply_of_mem_pLowerCentralSeries hχ hfc g.2).choose_spec
+  (dvd_def.1 (hf.pow_dvd_apply_of_mem_pLowerCentralSeries hχ hfc g.2)).choose_spec
 
 private theorem gradedQuot_eq (k : ℕ) (g : pLowerCentralSeries p G k) {c : ℤ_[p]}
     (hc : f g = (p : ℤ_[p]) ^ k * c) : gradedQuot hf hχ hfc k g = c :=
@@ -214,15 +174,19 @@ private noncomputable def gradedFunctionalAux (k : ℕ) :
     rw [gradedQuot_eq hf hχ hfc k _ hgh, map_add, _root_.map_mul,
       mem_unitsPrincipal_one_iff_toZMod.1 (hχ g), one_mul, ofAdd_add, mul_comm]
 
+private theorem gradedFunctionalAux_apply (k : ℕ) (g : pLowerCentralSeries p G k) :
+    gradedFunctionalAux hf hχ hfc k g =
+      Multiplicative.ofAdd (PadicInt.toZMod (gradedQuot hf hχ hfc k g)) :=
+  rfl
+
 private theorem subgroupOf_le_ker_gradedFunctionalAux (k : ℕ) :
     (pLowerCentralSeries p G (k + 1)).subgroupOf (pLowerCentralSeries p G k) ≤
       (gradedFunctionalAux hf hχ hfc k).ker := by
   intro g hg
   rw [Subgroup.mem_subgroupOf] at hg
   obtain ⟨c, hc⟩ := hf.pow_dvd_apply_of_mem_pLowerCentralSeries hχ hfc hg
-  rw [MonoidHom.mem_ker]
-  change Multiplicative.ofAdd (PadicInt.toZMod (gradedQuot hf hχ hfc k g)) = 1
-  rw [gradedQuot_eq hf hχ hfc k g (c := p * c) (by rw [hc, pow_succ]; ring), _root_.map_mul,
+  rw [MonoidHom.mem_ker, gradedFunctionalAux_apply,
+    gradedQuot_eq hf hχ hfc k g (c := p * c) (by rw [hc, pow_succ]; ring), _root_.map_mul,
     map_natCast, ZMod.natCast_self, zero_mul, ofAdd_zero]
 
 variable (k : ℕ)
@@ -244,12 +208,12 @@ theorem gradedFunctional_gradedMk (g : pLowerCentralSeries p G k) {c : ℤ_[p]}
     (hc : f g = (p : ℤ_[p]) ^ k * c) :
     hf.gradedFunctional hχ hfc k (gradedMk p G k g) = PadicInt.toZMod c := by
   rw [gradedFunctional, AddMonoidHom.coe_toZModLinearMap, gradedMk_def,
-    MonoidHom.toAdditiveLeft_apply_apply, toMul_ofMul, QuotientGroup.lift_mk]
-  change (PadicInt.toZMod (gradedQuot hf hχ hfc k g)) = _
-  rw [gradedQuot_eq hf hχ hfc k g hc]
+    MonoidHom.toAdditiveLeft_apply_apply, toMul_ofMul, QuotientGroup.lift_mk,
+    gradedFunctionalAux_apply, toAdd_ofAdd, gradedQuot_eq hf hχ hfc k g hc]
 
 /-- **The kernel of the graded functional on classes**: `Δ_k(f)` kills the class of `g ∈ λ_k(G)`
 exactly when `p ^ (k + 1) ∣ f g`. -/
+@[simp]
 theorem gradedFunctional_gradedMk_eq_zero_iff (g : pLowerCentralSeries p G k) :
     hf.gradedFunctional hχ hfc k (gradedMk p G k g) = 0 ↔ (p : ℤ_[p]) ^ (k + 1) ∣ f g := by
   rw [hf.gradedFunctional_gradedMk hχ hfc k g (apply_eq_pow_mul_gradedQuot hf hχ hfc k g),

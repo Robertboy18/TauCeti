@@ -17,9 +17,12 @@ Let `F = freeProP p (Fin n)` with `n` even, let `r = x₁^q (x₁, x₂)(x₃, x
 the normal-form word `TauCeti.demushkinWordNeTwo q n` on the generators of `F` with `p ∣ q`, and
 let `ρ ∈ gr_1(F)` be its class. Let `χ : F → ℤ_pˣ` be a continuous character with the values of
 the orientation of this normal form, `χ(x₂) (1 - q) = 1` and `χ(x_i) = 1` for `i ≠ 2`, and let
-`X = ker χ` be the kernel of the exponent sum at `x₂`, with graded pieces `gr_m(X) ≤ gr_m(F)`.
-Throughout, indices in the Lean statements are the `0`-based indices of `Fin n`, so `x₂` is
-`of ⟨1, _⟩` and `X` is `TauCeti.freeProP.exponentSumKer p (Fin n) ⟨1, _⟩`.
+`X` be the kernel of the exponent sum at `x₂`, with graded pieces `gr_m(X) ≤ gr_m(F)`. Since `χ`
+is trivial on the generators `x_i`, `i ≠ 2`, which topologically generate `X` as a normal subgroup,
+`X ≤ ker χ` (`ContinuousMonoidHom.exponentSumKer_le_ker`); for the orientation itself, where
+`χ(x₂)` has infinite order, `X` is the kernel of `χ`, Labute's `X = ker χ`. Throughout, indices
+in the Lean statements are the `0`-based indices of `Fin n`, so `x₂` is `of ⟨1, _⟩` and `X` is
+`TauCeti.freeProP.exponentSumKer p (Fin n) ⟨1, _⟩`.
 
 The constrained span statement of `Demushkin/NormalForm/KernelSpan.lean` (Labute's Lemma 3) writes
 every class of `gr_{m+1}(X)` as `δ_ρ(ω) + Σ_{i ≠ 2} c_i π^{m+1} ξ_i` with `ω ∈ gr_m(X)^n`. This
@@ -85,7 +88,7 @@ theorem IsCrossedHom.map_inv_mul_basisModification_demushkinWordNeTwo_eq_zero (h
     f ((demushkinWordNeTwo q n (freeProPGen p n))⁻¹ *
       freeProP.basisModification w (demushkinWordNeTwo q n (freeProPGen p n))) = 0 := by
   have hker : ∀ i, χ (w i) = 1 := fun i ↦
-    MonoidHom.mem_ker.1 (freeProP.exponentSumKer_le_ker χ h (hw i))
+    MonoidHom.mem_ker.1 (χ.exponentSumKer_le_ker h (hw i))
   -- The values of `χ` on the generator tuple and on the modified tuple.
   have hgen : ∀ i, i ≠ 1 → χ (freeProPGen p n i) = 1 := fun i hi ↦ by
     by_cases hi' : i < n

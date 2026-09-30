@@ -60,7 +60,7 @@ The graded pieces `gr_m(X_i) ≤ gr_m(F)` of `X_i` along the lower `p`-series
 
 * `TauCeti.freeProP.exponentSumKer_eq_topologicalClosure_normalClosure`: `X_i` is the closed
   normal closure of the generators `x_j`, `j ≠ i`; hence a continuous homomorphism trivial on
-  those generators is trivial on `X_i` (`TauCeti.freeProP.exponentSumKer_le_ker`).
+  those generators is trivial on `X_i` (`ContinuousMonoidHom.exponentSumKer_le_ker`).
 * `TauCeti.freeProP.gradedMk_mem_gradedPieceOf_exponentSumKer_iff`: the class of `y ∈ λ_m(F)`
   lies in `gr_m(X_i)` exactly when `p ^ (m + 1)` divides its `i`-th exponent sum.
 * `TauCeti.freeProP.isCompl_gradedPieceOf_exponentSumKer_span_gradedPowIter`:
@@ -176,14 +176,11 @@ theorem exponentSumKer_eq_topologicalClosure_normalClosure (i : X) :
 /-- **A continuous homomorphism trivial on the generators `x_j`, `j ≠ i`, is trivial on the kernel
 of the `i`-th exponent sum**, for a `T1` target: its kernel is a closed normal subgroup containing
 those generators, and `X` is their closed normal closure. -/
-theorem exponentSumKer_le_ker {H : Type*} [Group H] [TopologicalSpace H] [T1Space H]
-    (φ : freeProP p X →ₜ* H) {i : X} (h : ∀ j, j ≠ i → φ (of j) = 1) :
-    exponentSumKer p X i ≤ φ.ker := by
+theorem _root_.ContinuousMonoidHom.exponentSumKer_le_ker {H : Type*} [Group H]
+    [TopologicalSpace H] [T1Space H] (φ : freeProP p X →ₜ* H) {i : X}
+    (h : ∀ j, j ≠ i → φ (of j) = 1) : exponentSumKer p X i ≤ φ.ker := by
   rw [exponentSumKer_eq_topologicalClosure_normalClosure]
-  refine Subgroup.topologicalClosure_minimal _ (Subgroup.normalClosure_le_normal ?_)
-    φ.isClosed_ker
-  rintro _ ⟨j, hj, rfl⟩
-  exact MonoidHom.mem_ker.2 (h j hj)
+  exact topologicalClosure_normalClosure_le_ker (by rintro _ ⟨j, hj, rfl⟩; exact h j hj)
 
 /-! ### The graded pieces of the kernel of an exponent sum -/
 
