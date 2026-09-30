@@ -97,8 +97,6 @@ zero. -/
 noncomputable def toBoundedDerivedK0 : AbelianK0 A →+ TriangulatedK0 (DerivedCategory.Bounded A) :=
   lift
     { obj := fun X ↦ TriangulatedK0.of ((DerivedCategory.Bounded.singleFunctor A 0).obj X)
-      map_iso := fun _ _ e ↦ TriangulatedK0.of_congr
-        ((DerivedCategory.Bounded.singleFunctor A 0).mapIso e)
       map_shortExact := fun _ hS ↦ TriangulatedK0.of_singleFunctor_shortExact hS }
 
 /-- The canonical map to derived `K₀` sends an object class to the class of its degree-zero
@@ -325,9 +323,7 @@ private lemma toBoundedDerivedK0_surjective :
         SplitK0.boundedHomotopyEquiv_of, TriangulatedK0.map_of, fromSplit_of,
         toBoundedDerivedK0_of]
       exact TriangulatedK0.of_congr (boundedQhSingleIso X)
-  rw [← AddMonoidHom.range_eq_top, eq_top_iff, ← TriangulatedK0.closure_range_of,
-    AddSubgroup.closure_le]
-  rintro _ ⟨Y, rfl⟩
+  refine TriangulatedK0.surjective_of_forall_of_mem_range fun Y => ?_
   obtain ⟨K, ⟨e⟩⟩ := exists_iso_boundedQh_obj Y
   refine ⟨fromSplit A ((SplitK0.boundedHomotopyEquiv A).symm (TriangulatedK0.of K)), ?_⟩
   rw [← AddMonoidHom.comp_apply, ← hcomp, AddMonoidHom.comp_apply,
