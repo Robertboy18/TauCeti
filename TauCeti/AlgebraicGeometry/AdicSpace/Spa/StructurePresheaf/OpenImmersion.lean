@@ -21,20 +21,20 @@ is the image functor on opens, when `A⁺` consists of power-bounded elements an
 definition. It is the presheaf half of Wedhorn's Remark 8.8, that `j` is an open immersion of
 pre-adic spaces with image `U`; the compatibility of the stalk valuations is not treated here.
 
-## The argument
+## The isomorphism on arbitrary opens
 
-On rational opens the identification is `presentationLimitLocIso` of
-`TauCeti.AlgebraicGeometry.AdicSpace.Spa.StructurePresheaf.Localization`, reindexed here by the
-rational opens `W` of `Spa(B, A_U⁺)` through `j(W)`
-(`presentationLimitLocImageIso`). Both presheaves are pointwise right Kan extensions of their
-restrictions to the rational opens (`presentationLimitPresheafIsPointwiseRightKanExtension`), so a
-morphism into `𝒪_U(W)` is a compatible family of morphisms into the `𝒪_U(W')` for the rational
-`W' ⊆ W`, and a morphism into `𝒪_X(j(W))` is a compatible family into the `𝒪_X(V)` for the rational
-`V ⊆ j(W)`. The two comparison maps are the morphisms induced by the rational-level identification
-in the two directions, using that `j` and `j⁻¹` are inverse bijections between the rational opens
-of `Spa(B, A_U⁺)` and the rational opens of `X` inside `U`
-(`spaComapLoc_functor_obj_mem_spaRationalOpens`, `locOpensComap_mem_spaRationalOpens`). That they
-are inverse to each other, and natural in `W`, is checked on these families.
+For an open `W` of `Spa(B, A_U⁺)`, the component of `presentationLimitPresheafLocIso` at `W` is an
+isomorphism `𝒪_X(j(W)) ≅ 𝒪_U(W)` of complete separated topological rings, natural in `W`. On a
+rational open `W` it is the identification `presentationLimitLocIso` of
+`TauCeti.AlgebraicGeometry.AdicSpace.Spa.StructurePresheaf.Localization`, indexed by `W` through
+`j(W)` (`presentationLimitLocImageIso`, `presentationLimitPresheafLocIso_hom_app`); on a general
+`W` it is determined by its restrictions to the rational opens `W' ⊆ W`
+(`presentationLimitPresheafLocIso_hom_app_comp_map`), since both presheaves are the limits of their
+values on rational opens (`presentationLimitPresheafIsPointwiseRightKanExtension`). The
+restricted presheaf `j''ᵒᵖ ⋙ 𝒪_X` is the structure presheaf of the presheafed space `X` restricted
+along `j` (Mathlib's `PresheafedSpace.restrict`), so `presentationLimitPresheafLocIso` is the
+isomorphism of presheafed spaces underlying the open immersion; together with the compatibility of
+the stalk valuations, it makes the rational subset `U` an open affinoid subspace of `X`.
 
 ## Main definitions
 
@@ -229,6 +229,47 @@ private noncomputable def ofLocCone :
             eqToHom_refl]
           rw [reassoc_of% key, reassoc_of% presentationLimitMap_comp] } }
 
+/-- The leg of `toLocCone W` at a rational `W' ⊆ W`. -/
+private theorem toLocCone_π_app :
+    letI := locUniformSpace P T s S hden
+    letI := isUniformAddGroup_locUniformSpace P T s S hden
+    letI := isTopologicalRing_locUniformSpace P T s S hden
+    ∀ (W : Opens ↥(spa (completedPlusSubring P Aplus T s S hden)))
+      (g : StructuredArrow (op W)
+        (rationalOpensFunctor (completedPlusSubring P Aplus T s S hden)).op),
+      (toLocCone P Aplus T s S hden hAplus hP hT W).π.app g =
+        eqToHom (presentationLimitPresheaf_obj P Aplus _) ≫
+          presentationLimitMap (P := P)
+            (spaComapLoc_functor_obj_mono P Aplus hP T s S hden (leOfHom g.hom.unop)) ≫
+          (presentationLimitLocImageIso P Aplus T s S hden hAplus hP hT
+            ((rationalOpensFunctor _).obj g.right.unop) g.right.unop.2).hom ≫
+          eqToHom (presentationLimitPresheaf_obj (completionLocalization P T s S hden)
+            (completedPlusSubring P Aplus T s S hden)
+            (op ((rationalOpensFunctor _).obj g.right.unop))).symm :=
+  fun _ _ ↦ rfl
+
+/-- The leg of `ofLocCone W` at a rational `V ⊆ j(W)`. -/
+private theorem ofLocCone_π_app :
+    letI := locUniformSpace P T s S hden
+    letI := isUniformAddGroup_locUniformSpace P T s S hden
+    letI := isTopologicalRing_locUniformSpace P T s S hden
+    ∀ (W : Opens ↥(spa (completedPlusSubring P Aplus T s S hden)))
+      (g : StructuredArrow
+        (op ((isOpenEmbedding_spaComapLocHom P Aplus hP T s S hden).functor.obj W))
+        (rationalOpensFunctor Aplus).op),
+      (ofLocCone P Aplus T s S hden hAplus hP hT W).π.app g =
+        eqToHom (presentationLimitPresheaf_obj _ _ _) ≫
+          presentationLimitMap (P := completionLocalization P T s S hden)
+            ((locOpensComap_mono P Aplus T s S hden (leOfHom g.hom.unop)).trans
+              (locOpensComap_spaComapLoc_functor_obj P Aplus hP T s S hden W).le) ≫
+          (presentationLimitLocIso P Aplus T s S hden hAplus hT
+            ((rationalOpensFunctor Aplus).obj g.right.unop) g.right.unop.2
+            ((leOfHom g.hom.unop).trans
+              (spaComapLoc_functor_obj_le_spaBasicOpen P Aplus hP T s S hden W))).inv ≫
+          eqToHom (presentationLimitPresheaf_obj P Aplus
+            (op ((rationalOpensFunctor Aplus).obj g.right.unop))).symm :=
+  fun _ _ ↦ rfl
+
 /-- The morphism `𝒪_X(j(W)) ⟶ 𝒪_U(W)` induced by `toLocCone`. -/
 private noncomputable def toLoc :
     letI := locUniformSpace P T s S hden
@@ -281,26 +322,20 @@ private theorem toLoc_comp_map :
   have _ := isUniformAddGroup_locUniformSpace P T s S hden
   have _ := isTopologicalRing_locUniformSpace P T s S hden
   intro W W' hW' h
-  have := (presentationLimitPresheafIsPointwiseRightKanExtension (op W)).fac
+  -- the factorization of `toLoc W` through the leg at `W'` of the Kan-extension cone
+  have key := (presentationLimitPresheafIsPointwiseRightKanExtension (op W)).fac
     (toLocCone P Aplus T s S hden hAplus hP hT W)
     (StructuredArrow.mk (C := (InducedCategory _ (Subtype.val :
       spaRationalOpens (completedPlusSubring P Aplus T s S hden) → _))ᵒᵖ) (Y := op ⟨W', hW'⟩)
       (homOfLE h).op)
-  -- the leg of the Kan-extension cone is restriction to `W'`
-  have key : toLoc P Aplus T s S hden hAplus hP hT W ≫
-      (presentationLimitPresheaf (completionLocalization P T s S hden)
-        (completedPlusSubring P Aplus T s S hden)).map (homOfLE h).op =
-      eqToHom (presentationLimitPresheaf_obj P Aplus _) ≫
-        presentationLimitMap (P := P) (spaComapLoc_functor_obj_mono P Aplus hP T s S hden h) ≫
-        (presentationLimitLocImageIso P Aplus T s S hden hAplus hP hT W' hW').hom ≫
-        eqToHom (presentationLimitPresheaf_obj (completionLocalization P T s S hden)
-          (completedPlusSubring P Aplus T s S hden) (op W')).symm := by
-    simpa [toLoc, toLocCone] using this
-  rw [presentationLimitPresheaf_map] at key
+  rw [presentationLimitPresheaf_coneAt_π_app, toLocCone_π_app, presentationLimitPresheaf_map]
+    at key
+  simp only [StructuredArrow.mk_right, unop_op, inducedFunctor_obj] at key
   -- cancel the final transport, which both sides end with
   rw [← cancel_mono (eqToHom (presentationLimitPresheaf_obj (completionLocalization P T s S hden)
     (completedPlusSubring P Aplus T s S hden) (op W')).symm)]
-  simpa only [Category.assoc] using key
+  simp only [toLoc, Category.assoc]
+  exact key
 
 /-- **`ofLoc` restricts to the inverse identification on rational opens**: for a rational
 `V ⊆ j(W)`, `ofLoc W` followed by restriction to `V` is restriction from `W` to `j⁻¹(V)` followed by
@@ -325,26 +360,18 @@ private theorem ofLoc_comp_map :
   have _ := isUniformAddGroup_locUniformSpace P T s S hden
   have _ := isTopologicalRing_locUniformSpace P T s S hden
   intro W V hV h
-  have := (presentationLimitPresheafIsPointwiseRightKanExtension (op _)).fac
+  -- the factorization of `ofLoc W` through the leg at `V` of the Kan-extension cone
+  have key := (presentationLimitPresheafIsPointwiseRightKanExtension (op _)).fac
     (ofLocCone P Aplus T s S hden hAplus hP hT W)
     (StructuredArrow.mk (C := (InducedCategory _ (Subtype.val : spaRationalOpens Aplus → _))ᵒᵖ)
       (Y := op ⟨V, hV⟩) (homOfLE h).op)
-  -- the leg of the Kan-extension cone is restriction to `V`
-  have key : ofLoc P Aplus T s S hden hAplus hP hT W ≫
-      (presentationLimitPresheaf P Aplus).map (homOfLE h).op =
-      eqToHom (presentationLimitPresheaf_obj (completionLocalization P T s S hden)
-          (completedPlusSubring P Aplus T s S hden) (op W)) ≫
-        presentationLimitMap (P := completionLocalization P T s S hden)
-          ((locOpensComap_mono P Aplus T s S hden h).trans
-            (locOpensComap_spaComapLoc_functor_obj P Aplus hP T s S hden W).le) ≫
-        (presentationLimitLocIso P Aplus T s S hden hAplus hT V hV
-          (h.trans (spaComapLoc_functor_obj_le_spaBasicOpen P Aplus hP T s S hden W))).inv ≫
-        eqToHom (presentationLimitPresheaf_obj P Aplus (op V)).symm := by
-    simpa [ofLoc, ofLocCone] using this
-  rw [presentationLimitPresheaf_map] at key
+  rw [presentationLimitPresheaf_coneAt_π_app, ofLocCone_π_app, presentationLimitPresheaf_map]
+    at key
+  simp only [StructuredArrow.mk_right, unop_op, inducedFunctor_obj] at key
   -- cancel the final transport, which both sides end with
   rw [← cancel_mono (eqToHom (presentationLimitPresheaf_obj P Aplus (op V)).symm)]
-  simpa only [Category.assoc] using key
+  simp only [ofLoc, Category.assoc]
+  exact key
 
 /-- `toLoc` followed by `ofLoc` is the identity. -/
 private theorem toLoc_comp_ofLoc :
@@ -359,18 +386,13 @@ private theorem toLoc_comp_ofLoc :
   intro W
   refine (presentationLimitPresheafIsPointwiseRightKanExtension (op _)).hom_ext fun g ↦ ?_
   -- the leg of the Kan-extension cone at `g` is restriction to the rational open `V = R(g)`
-  have hleg : ((Functor.RightExtension.mk (presentationLimitPresheaf P Aplus)
-      (𝟙 ((rationalOpensFunctor Aplus).op ⋙ presentationLimitPresheaf P Aplus))).coneAt
-        (op ((isOpenEmbedding_spaComapLocHom P Aplus hP T s S hden).functor.obj W))).π.app g =
-      (presentationLimitPresheaf P Aplus).map (homOfLE (leOfHom g.hom.unop)).op := by
-    simp
   have hV : (rationalOpensFunctor Aplus).obj g.right.unop ∈ spaRationalOpens Aplus :=
     g.right.unop.2
   have hVW : (rationalOpensFunctor Aplus).obj g.right.unop ≤
       (isOpenEmbedding_spaComapLocHom P Aplus hP T s S hden).functor.obj W :=
     leOfHom g.hom.unop
   have hVT := hVW.trans (spaComapLoc_functor_obj_le_spaBasicOpen P Aplus hP T s S hden W)
-  rw [hleg, presentationLimitPresheaf_map]
+  rw [presentationLimitPresheaf_coneAt_π_app, presentationLimitPresheaf_map]
   simp only [Category.assoc, Category.id_comp]
   -- `ofLoc W` followed by restriction to `V`, then `toLoc W` followed by restriction to `j⁻¹(V)`
   rw [reassoc_of% ofLoc_comp_map P Aplus T s S hden hAplus hP hT W _ hV hVW,
@@ -399,19 +421,11 @@ private theorem ofLoc_comp_toLoc :
   intro W
   refine (presentationLimitPresheafIsPointwiseRightKanExtension (op W)).hom_ext fun g ↦ ?_
   -- the leg of the Kan-extension cone at `g` is restriction to the rational open `W' = R(g)`
-  have hleg : ((Functor.RightExtension.mk (presentationLimitPresheaf
-      (completionLocalization P T s S hden) (completedPlusSubring P Aplus T s S hden))
-      (𝟙 ((rationalOpensFunctor (completedPlusSubring P Aplus T s S hden)).op ⋙
-        presentationLimitPresheaf (completionLocalization P T s S hden)
-          (completedPlusSubring P Aplus T s S hden)))).coneAt (op W)).π.app g =
-      (presentationLimitPresheaf (completionLocalization P T s S hden)
-        (completedPlusSubring P Aplus T s S hden)).map (homOfLE (leOfHom g.hom.unop)).op := by
-    simp
   have hW' : (rationalOpensFunctor _).obj g.right.unop ∈
       spaRationalOpens (completedPlusSubring P Aplus T s S hden) :=
     g.right.unop.2
   have h : (rationalOpensFunctor _).obj g.right.unop ≤ W := leOfHom g.hom.unop
-  rw [hleg, presentationLimitPresheaf_map]
+  rw [presentationLimitPresheaf_coneAt_π_app, presentationLimitPresheaf_map]
   simp only [Category.assoc, Category.id_comp]
   -- `toLoc W` followed by restriction to `W'`, then `ofLoc W` followed by restriction to `j(W')`
   rw [reassoc_of% toLoc_comp_map P Aplus T s S hden hAplus hP hT W _ hW' h,
@@ -440,20 +454,13 @@ private theorem map_comp_toLoc :
   have _ := isTopologicalRing_locUniformSpace P T s S hden
   intro X Y f
   refine (presentationLimitPresheafIsPointwiseRightKanExtension (op Y.unop)).hom_ext fun g ↦ ?_
-  have hleg : ((Functor.RightExtension.mk (presentationLimitPresheaf
-      (completionLocalization P T s S hden) (completedPlusSubring P Aplus T s S hden))
-      (𝟙 ((rationalOpensFunctor (completedPlusSubring P Aplus T s S hden)).op ⋙
-        presentationLimitPresheaf (completionLocalization P T s S hden)
-          (completedPlusSubring P Aplus T s S hden)))).coneAt (op Y.unop)).π.app g =
-      (presentationLimitPresheaf (completionLocalization P T s S hden)
-        (completedPlusSubring P Aplus T s S hden)).map (homOfLE (leOfHom g.hom.unop)).op := by
-    simp
   have hW' : (rationalOpensFunctor _).obj g.right.unop ∈
       spaRationalOpens (completedPlusSubring P Aplus T s S hden) :=
     g.right.unop.2
   have h₂ : (rationalOpensFunctor _).obj g.right.unop ≤ Y.unop := leOfHom g.hom.unop
+  -- the leg of the Kan-extension cone at `g` is restriction to the rational open `W' = R(g)`;
   -- on the right, the two restrictions compose to the restriction from `X` to `W'`
-  rw [hleg]
+  rw [presentationLimitPresheaf_coneAt_π_app]
   simp only [Category.assoc]
   rw [← Functor.map_comp, presentationLimitPresheaf_map, presentationLimitPresheaf_map,
     reassoc_of% toLoc_comp_map P Aplus T s S hden hAplus hP hT Y.unop _ hW' h₂,

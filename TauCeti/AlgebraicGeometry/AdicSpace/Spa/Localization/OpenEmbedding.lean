@@ -162,6 +162,7 @@ theorem locOpensComap_spaComapLoc_functor_obj :
 
 /-- **The image of the pullback of an open contained in `R(T/s)` is the open itself**:
 `j(j⁻¹(V)) = V` for `V ⊆ R(T/s)`, since `R(T/s)` is the range of `j`. -/
+@[simp]
 theorem spaComapLoc_functor_obj_locOpensComap {V : Opens ↥(spa Aplus)}
     (hV : V ≤ spaBasicOpen Aplus T s) :
     letI := locUniformSpace P T s S hden
