@@ -224,7 +224,7 @@ variable {Γ : Subgroup (GL (Fin 2) ℝ)} {F : Type*} [FunLike F ℍ ℂ] {k : �
 /-- The period integrand of a holomorphic function is holomorphic. -/
 theorem mdifferentiable_periodIntegrand {f : ℍ → ℂ} (hf : MDiff f)
     (P : homogeneousSubmodule (Fin 2) R w) : MDiff (periodIntegrand f P) :=
-  hf.mul (TauCeti.UpperHalfPlane.mdifferentiable_aeval_coe _)
+  hf.mul (MvPolynomial.mdifferentiable_aeval_coe _)
 
 /-- **Convergence at `i∞`**: for a cusp form `f` of weight `w + 2` and a binary form `P` of degree
 `w`, the slashed integrand `(f(z) P(z, 1)) ∣[2] g` is integrable along the imaginary axis away

@@ -23,8 +23,8 @@ under the Möbius action of a positive-determinant real matrix, the biholomorphi
 ## Main declarations
 
 * `TauCeti.UpperHalfPlane.analyticAt_comp_ofComplex`.
-* `TauCeti.UpperHalfPlane.mdifferentiable_aeval_coe` — `z ↦ P(z, 1)` is holomorphic for a
-  polynomial `P` in two variables.
+* `MvPolynomial.mdifferentiable_aeval_coe` — `z ↦ P(z, 1)` is holomorphic for a polynomial `P`
+  in two variables.
 * `TauCeti.UpperHalfPlane.mdifferentiable_comp_smul_iff` — `τ ↦ f (g • τ)` is holomorphic
   exactly when `f` is, for `g : GL (Fin 2) ℝ` of positive determinant.
 * `TauCeti.UpperHalfPlane.not_accPt_zeros_comp_ofComplex` and
@@ -47,7 +47,7 @@ namespace TauCeti.UpperHalfPlane
 
 /-- For a polynomial `P` in two variables with coefficients mapping to `ℂ`, the function
 `z ↦ P(z, 1)` is holomorphic on `ℍ`. -/
-lemma mdifferentiable_aeval_coe {R : Type*} [CommRing R] [Algebra R ℂ]
+lemma _root_.MvPolynomial.mdifferentiable_aeval_coe {R : Type*} [CommRing R] [Algebra R ℂ]
     (P : MvPolynomial (Fin 2) R) : MDiff fun z : ℍ ↦ MvPolynomial.aeval ![(z : ℂ), 1] P := by
   induction P using MvPolynomial.induction_on with
   | C a => simpa using mdifferentiable_const

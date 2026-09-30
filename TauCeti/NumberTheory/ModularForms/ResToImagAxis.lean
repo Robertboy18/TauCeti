@@ -190,9 +190,10 @@ theorem exists_isBigO_resToImagAxis_rat_slash_exp {Γ : Subgroup (GL (Fin 2) ℝ
     {F : Type*} [FunLike F ℍ ℂ] {k : ℤ} [CuspFormClass F Γ k] (f : F) (g : GL (Fin 2) ℚ) :
     ∃ c > 0, resToImagAxis (f ∣[k] g) =O[atTop] fun t ↦ Real.exp (-c * t) := by
   set g' : GL (Fin 2) ℝ := Matrix.GeneralLinearGroup.map (algebraMap ℚ ℝ) g with hg'
-  -- the conjugate level is arithmetic; `Rat.castHom ℝ` and `algebraMap ℚ ℝ` are the same map
+  -- the conjugate level is arithmetic; `Rat.castHom ℝ` and `algebraMap ℚ ℝ` agree because ring
+  -- homomorphisms out of `ℚ` are unique (`Rat.subsingleton_ringHom`)
   have : (ConjAct.toConjAct g'⁻¹ • Γ).IsArithmetic := by
-    simpa [hg', show Rat.castHom ℝ = algebraMap ℚ ℝ from rfl, map_inv]
+    simpa [hg', Subsingleton.elim (Rat.castHom ℝ) (algebraMap ℚ ℝ), map_inv]
       using Subgroup.IsArithmetic.conj Γ g⁻¹
   obtain ⟨c, hc, hO⟩ := CuspFormClass.exp_decay_atImInfty' (CuspForm.translate f g')
   refine ⟨c, hc, ?_⟩
