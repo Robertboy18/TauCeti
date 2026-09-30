@@ -31,8 +31,9 @@ property (`TauCeti.demushkinCharacter`), is its standard orientation
 `TauCeti.standardD0Orientation`, with values `-1`, `1`, `(-3)⁻¹` on `A`, `S`, `Y`: these are the
 tabulated character values `χ(x₁) = -1`, `χ(x₂) = 1`, `χ(x₃) = (1 - 2²)⁻¹` of the normal form
 `x₁² x₂^{2^f} (x₂, x₃)` at `f = 2`, and the tabulated values are the prescription property. The
-image of the canonical character is all of `ℤ₂ˣ = {±1} × U^(2)`, the second invariant of `D₀` in
-the classification of Demushkin groups.
+image of the canonical character is therefore all of `ℤ₂ˣ = {±1} × U^(2)`
+(`TauCeti.range_standardD0Orientation`), the second invariant of `D₀` in the classification of
+Demushkin groups: the invariants of `D₀` are `(n, Im χ) = (3, ℤ₂ˣ)`.
 
 ## Main results
 
@@ -42,9 +43,8 @@ the classification of Demushkin groups.
 * `D₀` is infinite (an `Infinite demushkinD0` instance).
 * `TauCeti.hasPrescriptionProperty_standardD0Orientation`,
   `TauCeti.demushkinCharacter_demushkinD0`: **the standard orientation of `D₀` is its canonical
-  character**.
-* `TauCeti.range_demushkinCharacter_demushkinD0`: the image of the canonical character of `D₀` is
-  `ℤ₂ˣ`.
+  character**; with `TauCeti.range_standardD0Orientation`, `simp` then shows that the image of
+  the canonical character of `D₀` is `ℤ₂ˣ`.
 
 ## References
 
@@ -113,11 +113,5 @@ does. -/
 theorem demushkinCharacter_demushkinD0 (hG : IsDemushkin 2 demushkinD0) :
     demushkinCharacter hG = standardD0Orientation :=
   (hasPrescriptionProperty_standardD0Orientation.eq_demushkinCharacter hG).symm
-
-/-- **The image of the canonical character of `D₀` is `ℤ₂ˣ`**, which is `{±1} × U^(2)`
-(`TauCeti.unitsPlusMinus_two`): the invariants of `D₀` are `(n, Im χ) = (3, ℤ₂ˣ)`. -/
-theorem range_demushkinCharacter_demushkinD0 (hG : IsDemushkin 2 demushkinD0) :
-    (demushkinCharacter hG).toMonoidHom.range = ⊤ := by
-  simp
 
 end TauCeti
