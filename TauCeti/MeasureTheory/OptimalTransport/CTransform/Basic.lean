@@ -419,6 +419,7 @@ theorem cTransformSymm_add_const (c : X × Y → ℝ) (ψ : Y → EReal) (a : �
 
 /-- Adding a split cost `a x + b y` to the cost shifts the `c`-transform: the source term is
 absorbed into the potential and the target term is added to the result. -/
+@[simp]
 theorem cTransform_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (φ : X → EReal) (y : Y) :
     cTransform (fun p => c p + a p.1 + b p.2) φ y =
       (b y : EReal) + cTransform c (fun x => φ x - (a x : EReal)) y := by
@@ -433,6 +434,7 @@ theorem cTransform_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) 
 
 /-- Adding a split cost `a x + b y` to the cost shifts the symmetric `c`-transform: the target
 term is absorbed into the potential and the source term is added to the result. -/
+@[simp]
 theorem cTransformSymm_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (ψ : Y → EReal)
     (x : X) :
     cTransformSymm (fun p => c p + a p.1 + b p.2) ψ x =
@@ -649,6 +651,7 @@ theorem cTransformSymm_cTransform_eq_of_mem_cSuperdifferential
 
 /-- A potential is `c`-concave for the cost shifted by a split cost `a x + b y` exactly when the
 potential with the source term absorbed is `c`-concave for the original cost. -/
+@[simp]
 theorem isCConcave_add_add_iff (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (φ : X → EReal) :
     IsCConcave (fun p => c p + a p.1 + b p.2) φ ↔
       IsCConcave c (fun x => φ x - (a x : EReal)) := by
@@ -665,6 +668,7 @@ theorem isCConcave_add_add_iff (c : X × Y → ℝ) (a : X → ℝ) (b : Y → �
 
 /-- A potential on the target is `c`-concave for the cost shifted by a split cost `a x + b y`
 exactly when the potential with the target term absorbed is `c`-concave for the original cost. -/
+@[simp]
 theorem isCConcaveSymm_add_add_iff (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (ψ : Y → EReal) :
     IsCConcaveSymm (fun p => c p + a p.1 + b p.2) ψ ↔
       IsCConcaveSymm c (fun y => ψ y - (b y : EReal)) := by
@@ -676,6 +680,7 @@ theorem isCConcaveSymm_add_add_iff (c : X × Y → ℝ) (a : X → ℝ) (b : Y �
 
 /-- Adding a split cost `a x + b y` to the cost does not change the `c`-superdifferential, once
 the source term is absorbed into the potential. -/
+@[simp]
 theorem cSuperdifferential_add_add (c : X × Y → ℝ) (a : X → ℝ) (b : Y → ℝ) (φ : X → EReal) :
     cSuperdifferential (fun p => c p + a p.1 + b p.2) φ =
       cSuperdifferential c (fun x => φ x - (a x : EReal)) := by

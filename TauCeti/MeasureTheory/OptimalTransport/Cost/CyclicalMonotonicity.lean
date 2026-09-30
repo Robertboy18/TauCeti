@@ -132,6 +132,7 @@ variable [LE M] [AddRightMono M] [AddRightReflectLE M]
 alone and a function of the target alone to the cost does not change which sets are cyclically
 monotone: both extra terms contribute the same total to the diagonal and to any rearrangement of
 the targets. -/
+@[simp]
 theorem isCyclicallyMonotone_add_add_iff (c : X × Y → M) (a : X → M) (b : Y → M)
     {S : Set (X × Y)} :
     IsCyclicallyMonotone (fun p => c p + a p.1 + b p.2) S ↔ IsCyclicallyMonotone c S := by
