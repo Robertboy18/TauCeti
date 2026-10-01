@@ -7,6 +7,7 @@ module
 
 public import TauCeti.NumberTheory.NumberField.Global.Orders.Basic
 public import Mathlib.RingTheory.FractionalIdeal.Inverse
+import TauCeti.RingTheory.FractionalIdeal.Operations
 
 /-!
 # Proper fractional ideals of a number-field order
@@ -87,9 +88,8 @@ theorem multiplierRing_mul_isUnit
 theorem multiplierRing_mul_spanSingleton
     (I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K) {x : K} (hx : x ≠ 0) :
     O.multiplierRing (I * FractionalIdeal.spanSingleton _ x) = O.multiplierRing I := by
-  apply O.multiplierRing_mul_isUnit I
-  exact (FractionalIdeal.mul_inv_cancel_iff_isUnit K).mp
-    (FractionalIdeal.spanSingleton_mul_inv K hx)
+  exact O.multiplierRing_mul_isUnit I _
+    (FractionalIdeal.isUnit_spanSingleton (isUnit_iff_ne_zero.mpr hx))
 
 /-- A fractional ideal is proper when its multiplier ring equals the order. -/
 def IsProperFractionalIdeal (I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K) : Prop :=
