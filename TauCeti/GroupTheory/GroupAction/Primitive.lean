@@ -19,13 +19,14 @@ primitivity of the product action of a permutation wreath product: a stabilizer 
 change one coordinate of a tuple while leaving a constant tuple fixed.
 
 The second is monotonicity in the acting subgroup.  A block for a subgroup is a block for every
-smaller subgroup, so transitivity and primitivity pass from a subgroup to every larger one.  This
-is how primitivity of a transitive permutation group is inherited by the groups containing it.
+smaller subgroup, so primitivity passes from a subgroup to every larger one.  This is how
+primitivity of a transitive permutation group is inherited by the groups containing it.  (The
+corresponding statement for transitivity is Mathlib's `MulAction.IsPretransitive.of_compHom`.)
 
 ## Main results
 
-* `MulAction.IsBlock.of_le`, `MulAction.IsPretransitive.of_le`, `MulAction.IsPreprimitive.of_le`:
-  blocks pass to smaller subgroups, transitivity and primitivity to larger ones.
+* `MulAction.IsBlock.of_le`, `MulAction.IsPreprimitive.of_le`: blocks pass to smaller subgroups
+  and primitivity to larger ones.
 * `TauCeti.MulAction.fixedPoints_stabilizer_eq_singleton`: a nontrivial point stabilizer in a
   faithful primitive action fixes exactly its base point.
 * `TauCeti.MulAction.exists_mem_stabilizer_smul_ne`: such a stabilizer moves every other point.
@@ -53,12 +54,6 @@ private def inclusionMulActionHom (h : H ≤ K) : X →ₑ[Subgroup.inclusion h]
 theorem _root_.MulAction.IsBlock.of_le (h : H ≤ K) {B : Set X} (hB : IsBlock K B) :
     IsBlock H B :=
   hB.preimage (inclusionMulActionHom h)
-
-/-- A subgroup acting transitively makes every larger subgroup act transitively. -/
-theorem _root_.MulAction.IsPretransitive.of_le (h : H ≤ K) [IsPretransitive H X] :
-    IsPretransitive K X :=
-  IsPretransitive.of_surjective_map (f := inclusionMulActionHom h) Function.surjective_id
-    inferInstance
 
 /-- A subgroup acting primitively makes every larger subgroup act primitively. -/
 theorem _root_.MulAction.IsPreprimitive.of_le (h : H ≤ K) [IsPreprimitive H X] :
