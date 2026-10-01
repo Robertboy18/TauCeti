@@ -111,25 +111,19 @@ theorem subsingleton_continuousCohomology_succ_of_forall_coeffMap_proj_surjectiv
   have hinj : Function.Injective ι :=
     DiscreteCoind.unit_injective (G := G) (U := V.toSubgroup) (M := M)
   let e : M ≃ₗ[ℤ] N := (AddMonoidHom.ofInjective hinj).toIntLinearEquiv
+  -- `e` followed by the inclusion of `N` is `ι`; equivariance and the factorization below both
+  -- reduce to this pointwise identity
+  have he_coe : ∀ m : M, S.incl (e m) = ι m := fun m => by
+    simp only [S, DiscreteShortExact.ofAddSubgroup_incl]
+    exact AddMonoidHom.ofInjective_apply hinj
   have he : ∀ (g : G) (m : M), e (g • m) = g • e m := fun g m =>
-    Subtype.ext ((AddMonoidHom.ofInjective_apply hinj (x := g • m)).trans ((hι g m).trans
-      ((congrArg (g • ·) (AddMonoidHom.ofInjective_apply hinj (x := m)).symm).trans
-        (N.restrictDistribMulAction_coe_smul hN g (e m)).symm)))
+    S.incl_injective <| by rw [S.incl_equivariant, he_coe, he_coe, hι]
   -- the coefficient map of `ι` is the isomorphism `M ≅ N` followed by the inclusion `N → B`
   have hfac : (ofDiscreteModuleIso e he).hom ≫
       ofDiscreteModuleMap S.incl.toIntLinearMap S.incl_equivariant =
         ofDiscreteModuleMap ι.toIntLinearMap hι := by
     rw [ofDiscreteModuleIso_hom]
-    refine TopRep.hom_ext (DFunLike.ext _ _ fun (m : M) => ?_)
-    -- both sides send `m` to `ι m`: the left through `e m` and the inclusion of `N`
-    exact (TopRep.comp_apply (ofDiscreteModuleMap e.toLinearMap he)
-      (ofDiscreteModuleMap S.incl.toIntLinearMap S.incl_equivariant) m).trans
-      (((ofDiscreteModuleMap_hom_apply S.incl.toIntLinearMap S.incl_equivariant _).trans
-        ((congrArg S.incl (ofDiscreteModuleMap_hom_apply e.toLinearMap he m)).trans
-          ((congrArg (fun f : N →+ DiscreteCoind G V.toSubgroup M => f (e m))
-            (DiscreteShortExact.ofAddSubgroup_incl N hN)).trans
-            (AddMonoidHom.ofInjective_apply hinj (x := m))))).trans
-        (ofDiscreteModuleMap_hom_apply ι.toIntLinearMap hι m).symm)
+    exact TopRep.hom_ext (DFunLike.ext _ _ he_coe)
   -- the image of `x` in `Hⁿ⁺¹(G, Coind_V^G M)` is zero, being its restriction to `V` under
   -- Shapiro's lemma
   have hιx : coeffMap (ofDiscreteModuleMap ι.toIntLinearMap hι) (n + 1) x = 0 := by
