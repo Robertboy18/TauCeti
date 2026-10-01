@@ -124,6 +124,7 @@ theorem demushkinWordTwoEvenPadic_def :
 
 /-- At a natural exponent `α = a` and `q = 2^f`, the word is the even dyadic normal-form word
 `x₁^{2+a} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` with natural exponent. -/
+@[simp]
 theorem demushkinWordTwoEvenPadic_natCast (a f : ℕ) :
     demushkinWordTwoEvenPadic hH (a : ℤ_[2]) (2 ^ f) n x = demushkinWordTwoEven a f n x := by
   rw [demushkinWordTwoEvenPadic_def, demushkinWordTwoEven_def,
@@ -273,16 +274,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_of_apply
     rw [presentedProP.comp_mk_freeProPGen]
     exact h 2 (by omega) (by omega)
   -- The character is trivial on `x₁^{2+α}`, and `F (x₁^{2+α}) = (2 + α) F (x₁)`.
-  have hχpp : (χ.comp (presentedProP.mk 2 _))
-      ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 0) (2 + α)) = 1 := by
-    have e : (χ.comp (presentedProP.mk 2 _))
-        ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 0) (2 + α)) =
-        isProP_units_padicInt_two.padicPow ((χ.comp (presentedProP.mk 2 _)) (freeProPGen 2 n 0))
-          (2 + α) :=
-      (isProP_freeProP 2 (Fin n)).map_padicPow isProP_units_padicInt_two
-        (χ.comp (presentedProP.mk 2 _) : freeProP 2 (Fin n) →* ℤ_[2]ˣ)
-        (χ.comp (presentedProP.mk 2 _)).continuous _ _
-    rw [e, h0, isProP_units_padicInt_two.one_padicPow]
+  have hχpp := (isProP_freeProP 2 (Fin n)).map_padicPow_eq_one_of_eq_one
+    (χ.comp (presentedProP.mk 2 _)) h0 (2 + α)
   have hpp := hF.map_padicPow_of_eq_one hFc (isProP_freeProP 2 (Fin n)) h0 (2 + α)
   -- `χ(x₂) F (x₁, x₂) = (1 - χ(x₂)) F x₁`.
   have hc01 := hF.mul_mul_map_labuteComm (freeProPGen 2 n 0) (freeProPGen 2 n 1)
@@ -384,16 +377,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα
     obtain ⟨F, hFc, hF, hFv, hFr⟩ :=
       hχ.exists_continuous_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels (by omega : 0 < n)
     have hr := hFr _ rfl
-    have hχpp : (χ.comp (presentedProP.mk 2 _))
-        ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 0) (2 + α)) = 1 := by
-      have e : (χ.comp (presentedProP.mk 2 _))
-          ((isProP_freeProP 2 (Fin n)).padicPow (freeProPGen 2 n 0) (2 + α)) =
-          isProP_units_padicInt_two.padicPow
-            ((χ.comp (presentedProP.mk 2 _)) (freeProPGen 2 n 0)) (2 + α) :=
-        (isProP_freeProP 2 (Fin n)).map_padicPow isProP_units_padicInt_two
-          (χ.comp (presentedProP.mk 2 _) : freeProP 2 (Fin n) →* ℤ_[2]ˣ)
-          (χ.comp (presentedProP.mk 2 _)).continuous _ _
-      rw [e, hx0', isProP_units_padicInt_two.one_padicPow]
+    have hχpp := (isProP_freeProP 2 (Fin n)).map_padicPow_eq_one_of_eq_one
+      (χ.comp (presentedProP.mk 2 _)) hx0' (2 + α)
     rw [hF.map_demushkinWordTwoEvenPadic,
       hF.sum_map_labuteComm_eq_zero_of_forall_eq_ite n two_pos hFv, hχpp,
       hF.map_padicPow_of_eq_one hFc _ hx0', Units.val_one] at hr
