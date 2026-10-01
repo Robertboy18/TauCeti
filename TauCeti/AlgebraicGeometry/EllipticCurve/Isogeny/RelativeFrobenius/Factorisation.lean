@@ -29,8 +29,6 @@ and so does the pulled-back copy of `F(W₁⁽ᵖʳ⁾)`, which is generated ove
 
 ## Main results
 
-* `TauCeti.Isogeny.exists_inseparableDegree_eq_pow`: the inseparable degree of an isogeny is a
-  power of `p`.
 * `TauCeti.Isogeny.existsUnique_comp_iterateRelativeFrobeniusIsogeny_eq_iff`: `φ` factors
   through `F^n`, by a unique isogeny, exactly when `p ^ n` divides its inseparable degree; with
   `TauCeti.Isogeny.fieldRange_le_fieldRange_iterateRelativeFrobeniusIsogeny_iff` as its
@@ -60,11 +58,6 @@ open WeierstrassCurve.Affine
 
 variable {F : Type*} [Field F] (p : ℕ) [ExpChar F p] {W₁ W₂ : WeierstrassCurve.Affine F}
   (φ : Isogeny W₁ W₂)
-
-/-- **The inseparable degree of an isogeny is a power of the characteristic exponent.** -/
-theorem exists_inseparableDegree_eq_pow : ∃ r : ℕ, φ.inseparableDegree = p ^ r := by
-  rw [inseparableDegree_def]
-  exact finInsepDegree_eq_pow _ _ p
 
 -- The exact case `p ^ r = deg_i φ` of the subfield criterion below, where the separable closure
 -- enters: `F(W₁)/S` is purely inseparable of degree `p ^ r`, so `S` contains every `p ^ r`-th
@@ -113,7 +106,8 @@ theorem fieldRange_le_fieldRange_iterateRelativeFrobeniusIsogeny_iff {n : ℕ} :
         inseparableDegree_eq_degree_of_isPurelyInseparable (iterateRelativeFrobeniusIsogeny p W₁ n),
         degree_iterateRelativeFrobeniusIsogeny, mul_comm]⟩
   · intro h
-    obtain ⟨r, hr⟩ := exists_inseparableDegree_eq_pow p φ
+    obtain ⟨r, hr⟩ : ∃ r : ℕ, φ.inseparableDegree = p ^ r :=
+      φ.inseparableDegree_def ▸ finInsepDegree_eq_pow _ _ p
     rcases ‹ExpChar F p› with _ | ⟨hp⟩
     · -- in characteristic zero the inseparable degree is `1 = 1 ^ n`
       exact fieldRange_le_of_inseparableDegree_eq_pow 1 φ (by rw [hr, one_pow, one_pow])
@@ -198,7 +192,8 @@ theorem exists_isSeparable_comp_iterateRelativeFrobeniusIsogeny_eq :
       Algebra.IsSeparable χ.fieldPullback.fieldRange
           (W₁.map (iterateFrobenius F p r)).FunctionField ∧
         χ.comp (iterateRelativeFrobeniusIsogeny p W₁ r) = φ := by
-  obtain ⟨r, hr⟩ := exists_inseparableDegree_eq_pow p φ
+  obtain ⟨r, hr⟩ : ∃ r : ℕ, φ.inseparableDegree = p ^ r :=
+    φ.inseparableDegree_def ▸ finInsepDegree_eq_pow _ _ p
   obtain ⟨χ, hχ, -⟩ := existsUnique_comp_iterateRelativeFrobeniusIsogeny_eq p φ hr
   exact ⟨r, χ, isSeparable_of_comp_iterateRelativeFrobeniusIsogeny_eq hr hχ, hχ⟩
 
