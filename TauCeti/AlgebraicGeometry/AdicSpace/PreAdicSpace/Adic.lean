@@ -203,7 +203,7 @@ theorem isPreAdic.isSheafy_iff (hX : isPreAdic X) :
 to an open is sheafy (`isSheafy_restrict`), an open cover by affinoid adic spaces is the same as an
 open cover by open affinoid subspaces: an adic space is a sheafy locally affinoid object of
 `𝒱^pre`. Their full subcategory of `𝒱^pre` is Wedhorn's category `(Adic)`, `TauCeti.AdicSpace`. -/
-@[expose] def isAdic : ObjectProperty PreAdicSpace.{u} :=
+def isAdic : ObjectProperty PreAdicSpace.{u} :=
   fun X ↦ isSheafy X ∧ isLocallyAffinoid X
 
 theorem isAdic_iff : isAdic X ↔ isSheafy X ∧ isLocallyAffinoid X := Iff.rfl
