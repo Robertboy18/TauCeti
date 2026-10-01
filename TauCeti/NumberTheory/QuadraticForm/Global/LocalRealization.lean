@@ -25,18 +25,20 @@ local realization theorem `TauCeti.RegularFormClass.exists_of_realization`: the 
 it carries, rank one with `s_v = -1` and rank two with `d_v = [-1]` and `s_v = -1`, are exactly the
 small-rank conditions of admissibility. At a real place the form is a sum of `p_w` squares minus
 `n - p_w` squares, and its discriminant `(-1)^(n - p_w)` is the image of `d` by the real
-discriminant condition of admissibility. A complex place carries only the rank: every regular form
-of rank `n` over `ℂ` is isometric to the sum of `n` squares
-(`QuadraticForm.equivalent_weightedSumSquares_one_iff_finrank_eq`), so no local form is chosen
-there.
+discriminant condition of admissibility. As for the local predicates of
+`TauCeti.NumberTheory.QuadraticForm.Global.Predicates`, no complex clause is included: a complex
+place carries only the rank, and every regular form on `Fin n → ℂ` is isometric to the sum of `n`
+squares (`QuadraticForm.equivalent_weightedSumSquares_one_iff_finrank_eq`), so a complex-place
+form would carry no information beyond `n`.
 
-A locally realizing family inherits the global constraints of the system: all its local
-discriminants are images of the one global class `d`, its finite Hasse invariants are trivial at
-almost every place, and the product of its finite Hasse invariants with the real Hasse signs
-`(-1)^(q(q-1)/2)`, `q` the negative index, is one. These are exactly the hypotheses of O'Meara's
-existence theorem 72:1 for a global form with prescribed localizations: applied to a locally
-realizing family, that theorem produces a global form isometric to `U_v` at every finite place and
-to `R_w` at every real place, hence a global form with invariants `I`.
+The predicate `IsLocalRealization` only records the local invariants; the global constraints are
+inherited from the system when that system is admissible. A family realizing an admissible system
+has all its local discriminants images of the one global class `d`, its finite Hasse invariants
+trivial at almost every place, and the product of its finite Hasse invariants with the real Hasse
+signs `(-1)^(q(q-1)/2)`, `q` the negative index, equal to one. These are exactly the hypotheses of
+O'Meara's existence theorem 72:1 for a global form with prescribed localizations: applied to a
+family realizing an admissible system, that theorem produces a global form isometric to `U_v` at
+every finite place and to `R_w` at every real place, hence a global form with invariants `I`.
 
 The construction is not canonical: the local realization theorem is an existence statement, and
 so is the theorem here.
@@ -57,9 +59,9 @@ so is the theorem here.
   locally.
 * `GlobalFormInvariants.IsLocalRealization.discr_real`,
   `GlobalFormInvariants.IsLocalRealization.hasFiniteMulSupport_localHasse`,
-  `GlobalFormInvariants.IsLocalRealization.finprod_localHasse_mul_prod_eq_one`: the real
-  discriminants of a locally realizing family are images of the global discriminant, its finite
-  Hasse invariants have finite support, and its Hasse product is one.
+  `GlobalFormInvariants.IsLocalRealization.finprod_localHasse_mul_prod_eq_one`: for a family
+  realizing an admissible system, the real discriminants are images of the global discriminant,
+  the finite Hasse invariants have finite support, and the Hasse product is one.
 
 ## References
 
