@@ -598,8 +598,8 @@ theorem exists_continuousMulEquiv_apply_eq_demushkinWordTwoEven_of_range_eq
     -- Apply the graded map of the transvection pair, which is injective and fixes the class of
     -- the normal-form word.
     have hinj : Function.Injective (gradedMap 2
-        (symplecticTransvection hn3 d : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).toMonoidHom
-        (symplecticTransvection hn3 d : freeProP 2 (Fin n) →ₜ* freeProP 2 (Fin n)).continuous 1) :=
+        (symplecticTransvection hn3 d : freeProP 2 (Fin n) →* freeProP 2 (Fin n))
+        (map_continuous (symplecticTransvection hn3 d)) 1) :=
       fun a b hab ↦ by
         rw [← gradedMap_symm_gradedMap (symplecticTransvection hn3 d) 1 a,
           ← gradedMap_symm_gradedMap (symplecticTransvection hn3 d) 1 b, hab]

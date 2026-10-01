@@ -908,8 +908,8 @@ theorem gradedMap_comp (g : H →* K) (hg : Continuous g) (f : G →* H) (hf : C
 isomorphism, in every degree. -/
 @[simp]
 theorem gradedMap_symm_gradedMap (e : G ≃ₜ* H) (k : ℕ) (x : gradedPiece p G k) :
-    gradedMap p (e.symm : H →ₜ* G).toMonoidHom (e.symm : H →ₜ* G).continuous k
-      (gradedMap p (e : G →ₜ* H).toMonoidHom (e : G →ₜ* H).continuous k x) = x := by
+    gradedMap p (e.symm : H →* G) (map_continuous e.symm) k
+      (gradedMap p (e : G →* H) (map_continuous e) k x) = x := by
   obtain ⟨x, rfl⟩ := gradedMk_surjective k x
   rw [gradedMap_gradedMk, gradedMap_gradedMk]
   congr 1
