@@ -83,7 +83,7 @@ proof.  The corresponding consequence of the degree law alone, that `d` commutes
 projections up to the degree shift, is `TauCeti.LinearMap.IsHomogeneous.map_decompose`.
 -/
 
-variable {R A : Type*} [CommRing R] [NonUnitalRing A] [Module R A]
+variable {R A : Type*} [Semiring R] [NonUnitalNonAssocRing A] [Module R A]
   {𝒜 : ℤ → Submodule R A} [DirectSum.Decomposition 𝒜] {d : A →ₗ[R] A}
 
 /-- The graded Leibniz rule against a cycle in the right factor.  The vanishing signed term permits
