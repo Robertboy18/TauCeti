@@ -7,6 +7,7 @@ module
 
 public import TauCeti.NumberTheory.LocalField.NatCastValuation
 public import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.FieldTheory.KummerPolynomial
 import Mathlib.NumberTheory.LegendreSymbol.Basic
 import TauCeti.Algebra.Group.Units.Basic
 import TauCeti.NumberTheory.LocalField.PowerSubgroup.Basic
@@ -31,6 +32,12 @@ concrete p-adic norm and valuation APIs.
 * `Padic.not_isSquare_neg_one_of_mod_four_eq_three`: `-1` is nonsquare in `ℚ_[p]` when
   `p ≡ 3 (mod 4)`.
 * `Padic.not_isSquare_five`: `5` is nonsquare in `ℚ_[2]`.
+* `Padic.pow_ne_p` and `Padic.X_pow_sub_C_p_irreducible_of_prime`: `p` is not a proper power
+  in `ℚ_[p]`, so the Eisenstein polynomial `X ^ q - p` is irreducible over `ℚ_[p]` for every
+  prime `q`.
+* `Padic.not_isSquare_intCast_of_not_isSquare_zmod`: an integer that is not a square modulo a
+  power of `p` is not a square in `ℚ_[p]`; `Padic.not_isSquare_neg_three` is the instance `-3`
+  in `ℚ_[5]`.
 
 The Padic and residue-field constructions used here are part of Mathlib's upstream
 `NumberTheory/Padics` development.
@@ -170,5 +177,39 @@ theorem not_isSquare_five : ¬IsSquare (5 : ℚ_[2]) := by
   rw [map_mul, map_ofNat] at h8
   have hsq : ∀ x : ZMod (2 ^ 3), x * x ≠ 5 := by decide
   exact hsq _ h8
+
+/-- `p` is not an `n`-th power in `ℚ_[p]` for `n ≥ 2`, since its valuation is `1`. -/
+theorem pow_ne_p (b : ℚ_[p]) {n : ℕ} (hn : 2 ≤ n) : b ^ n ≠ p := fun hb ↦ by
+  have h := congrArg Padic.valuation hb
+  rw [Padic.valuation_pow, Padic.valuation_p] at h
+  have := Int.eq_one_of_mul_eq_one_right (by positivity) h
+  omega
+
+/-- The Eisenstein polynomial `X ^ q - p` is irreducible over `ℚ_[p]` for every prime `q`. -/
+theorem X_pow_sub_C_p_irreducible_of_prime {q : ℕ} (hq : q.Prime) :
+    Irreducible (Polynomial.X ^ q - Polynomial.C (p : ℚ_[p])) :=
+  X_pow_sub_C_irreducible_of_prime hq fun b ↦ pow_ne_p p b hq.two_le
+
+variable {p} in
+/-- A square root in `ℚ_[p]` of an integer is a `p`-adic integer, so an integer that is not a
+square modulo some power of `p` is not a square in `ℚ_[p]`. -/
+theorem not_isSquare_intCast_of_not_isSquare_zmod {a : ℤ} {k : ℕ}
+    (h : ¬ IsSquare (a : ZMod (p ^ k))) : ¬ IsSquare (a : ℚ_[p]) := by
+  rintro ⟨b, hb⟩
+  have hb1 : ‖b‖ ≤ 1 := by
+    have : ‖b‖ * ‖b‖ ≤ 1 := by rw [← norm_mul, ← hb]; exact norm_int_le_one a
+    nlinarith [norm_nonneg b]
+  obtain ⟨c, rfl⟩ : ∃ c : ℤ_[p], (c : ℚ_[p]) = b := ⟨⟨b, hb1⟩, rfl⟩
+  have hc : c * c = a := PadicInt.ext (by push_cast; exact hb.symm)
+  exact h ⟨PadicInt.toZModPow k c, by rw [← map_mul, hc, map_intCast]⟩
+
+/-- The prime `5`, as a `Fact`, so that `ℚ_[5]` can be written. -/
+local instance factPrimeFive : Fact (Nat.Prime 5) := ⟨Nat.prime_five⟩
+
+/-- `-3` is not a square in `ℚ_[5]`, since its residue `2` is not a square modulo `5`. -/
+theorem not_isSquare_neg_three : ¬ IsSquare (-3 : ℚ_[5]) := by
+  have h := not_isSquare_intCast_of_not_isSquare_zmod (p := 5) (a := -3) (k := 1)
+    (by rintro ⟨x, hx⟩; revert x hx; decide)
+  simpa using h
 
 end Padic
