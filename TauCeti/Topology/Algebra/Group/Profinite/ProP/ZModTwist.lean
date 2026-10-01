@@ -424,6 +424,7 @@ theorem smul_eq_nsmul_val_charScalar (h : i ≤ n) (g : G) (x : ZModTwist χ i) 
 /-- **The conjugation action on the homomorphisms between two twists is trivial**: `g` acts on
 `I(χ)/pⁱ` and on `I(χ)/pⁿ` by one and the same natural number, with which every additive
 homomorphism commutes. -/
+@[simp]
 theorem smul_internalHom_eq_self (g : G) (φ : InternalHom G (ZModTwist χ i) (ZModTwist χ n)) :
     g • φ = φ :=
   InternalHom.smul_eq_self_iff.2 fun x ↦ by
@@ -431,6 +432,7 @@ theorem smul_internalHom_eq_self (g : G) (φ : InternalHom G (ZModTwist χ i) (Z
       smul_eq_nsmul_val_charScalar χ (le_max_right i n) g]
 
 /-- Every homomorphism between two twists is invariant. -/
+@[simp]
 theorem H0_internalHom_eq_top : H0 G (InternalHom G (ZModTwist χ i) (ZModTwist χ n)) = ⊤ :=
   H0_eq_top_of_smul_eq_self (smul_internalHom_eq_self χ)
 

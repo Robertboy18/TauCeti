@@ -31,11 +31,12 @@ with the change of group to `U` in three ways.
   formula for the evaluation pairings. A class of `U` paired against a restricted class of `G` is
   detected, after corestriction, by the pairing of `G`; this is the identity through which the
   duality of an open subgroup is compared with that of the ambient group.
-* **Shapiro's lemma transports them**: for a finite discrete `U`-module `A` and `G` profinite, the
-  dual of the coinduced module `Coind_U^G A` is again coinduced,
-  `Hom(Coind_U^G A, N) ≅ Coind_U^G Hom(A, N)` through `TauCeti.DiscreteCoind.toInternalHom`, and
-  Shapiro's lemma identifies the cohomology of both coinduced modules with that of `U`. Under
-  these identifications the `(1,1)` evaluation pairing of `G` is the corestriction of the
+* **Shapiro's lemma transports them**: for a discrete `U`-module `A` and `G` profinite, the dual of
+  the coinduced module `Coind_U^G A` is again coinduced,
+  `Hom(Coind_U^G A, N) ≅ Coind_U^G Hom(A, N)` through `TauCeti.DiscreteCoind.toInternalHom` (a
+  bijection when the conjugation action of `U` on `Hom(A, N)` is continuous, as it is for a finite
+  `A`), and Shapiro's lemma identifies the cohomology of both coinduced modules with that of `U`.
+  Under these identifications the `(1,1)` evaluation pairing of `G` is the corestriction of the
   evaluation pairing of `U`:
 
   ```text
@@ -47,7 +48,8 @@ with the change of group to `U` in three ways.
   inverse Shapiro image is detected by the pairing of `G`. The same identity holds in the `(0,2)`
   shape, and there it says that injectivity of Tate's duality map `α₂` descends from `G` to `U`:
   if `α₂` of `G` is injective on the coinduced module `Coind_U^G A`, then `α₂` of `U` is injective
-  on `A`.
+  on `A`, for every discrete `U`-module `A` whose internal hom `Hom(A, N)` carries a continuous
+  conjugation action.
 
 The first two are the specializations to the evaluation pairing of the general statements for the
 explicit cup products, compatibility with restriction from
@@ -60,7 +62,8 @@ pairing of `G` on the coinduced modules is the trace of the pointwise evaluation
 (`TauCeti.DiscreteCoind.toAddMonoidHom_toInternalHom_apply`), the cup product is natural in the
 pairing, and the corestriction of a cup product of `U` is the trace of the cup product of `G`
 along the pointwise pairing of the inverse Shapiro images
-(`TauCeti.ContCohomology.explicitCor2_explicitCup11`).
+(`TauCeti.ContCohomology.explicitCor2_explicitCup02` in the `(0,2)` shape and
+`explicitCor2_explicitCup11` in the `(1,1)` shape).
 
 ## Main statements
 
@@ -281,34 +284,34 @@ variable (G : Type uG) [Group G] [TopologicalSpace G] [ContinuousMul G] (U : Sub
   (N : Type uN) [AddCommGroup N] [DistribMulAction G N]
 
 /-- The pairing `(F, f) ↦ tr (g ↦ F g (f g))` of the coinduced modules `Coind_U^G Hom(A, N)` and
-`Coind_U^G A`, with values in `N`: the trace of the pointwise evaluation pairing. It is the
-evaluation pairing of `G` read through `toInternalHom`
-(`tracePairing_eq_evalPairing_toInternalHom`), which is what lets the naturality of the cup product
-in the pairing compare the two sides of the Shapiro identities below. -/
+`Coind_U^G A`, with values in `N`: the evaluation pairing of `G` read through
+`TauCeti.DiscreteCoind.toInternalHom`. It is the trace of the pointwise evaluation pairing
+(`tracePairing_apply`), which is what lets the naturality of the cup product in the pairing compare
+the two sides of the Shapiro identities below. -/
 private noncomputable def tracePairing :
     DiscreteCoind G U (InternalHom U A N) →+ DiscreteCoind G U A →+ N :=
-  (DiscreteCoind.pointwisePairing U (InternalHom.evalPairing U)
-    (InternalHom.evalPairing_equivariant (G := U))).compr₂
-    (DiscreteCoind.trace G U N : DiscreteCoind G U N →+ N)
+  (InternalHom.evalPairing G).comp (DiscreteCoind.toInternalHom U A N).toAddMonoidHom
+
+private theorem tracePairing_eq_evalPairing_toInternalHom
+    (F : DiscreteCoind G U (InternalHom U A N)) (f : DiscreteCoind G U A) :
+    tracePairing G U A N F f =
+      InternalHom.evalPairing G (DiscreteCoind.toInternalHom U A N F) f :=
+  rfl
 
 private theorem tracePairing_apply (F : DiscreteCoind G U (InternalHom U A N))
     (f : DiscreteCoind G U A) :
     tracePairing G U A N F f = DiscreteCoind.trace G U N
       (DiscreteCoind.pointwisePairing U (InternalHom.evalPairing U)
-        (InternalHom.evalPairing_equivariant (G := U)) F f) :=
-  rfl
+        (InternalHom.evalPairing_equivariant (G := U)) F f) := by
+  rw [tracePairing_eq_evalPairing_toInternalHom, InternalHom.evalPairing_apply,
+    DiscreteCoind.toAddMonoidHom_toInternalHom_apply]
 
 private theorem tracePairing_smul (g : G) (F : DiscreteCoind G U (InternalHom U A N))
     (f : DiscreteCoind G U A) :
     tracePairing G U A N (g • F) (g • f) = g • tracePairing G U A N F f := by
-  simp only [tracePairing_apply, DiscreteCoind.pointwisePairing_smul, map_smul]
-
-private theorem tracePairing_eq_evalPairing_toInternalHom
-    (F : DiscreteCoind G U (InternalHom U A N)) (f : DiscreteCoind G U A) :
-    tracePairing G U A N F f =
-      InternalHom.evalPairing G (DiscreteCoind.toInternalHom U A N F) f := by
-  rw [InternalHom.evalPairing_apply, DiscreteCoind.toAddMonoidHom_toInternalHom_apply,
-    tracePairing_apply]
+  rw [tracePairing_eq_evalPairing_toInternalHom,
+    _root_.map_smul (DiscreteCoind.toInternalHom U A N) g F, InternalHom.evalPairing_equivariant,
+    tracePairing_eq_evalPairing_toInternalHom]
 
 end TracePairing
 
@@ -402,12 +405,19 @@ theorem explicitDualityPairing02_explicitCoeff0_toInternalHom
   simp only [explicitCoeff2_id, explicitCoeff0_id, AddMonoidHom.id_apply] at h₁ h₂
   exact h₁.symm.trans h₂.symm
 
-include hU in
+section Descent
+
+omit [Finite A]
+variable [ContinuousSMul U (InternalHom U A N)]
+include hU
+
 /-- **Injectivity of Tate's duality map `α₂` descends to an open subgroup.** If
 `α₂ : H²(G, Coind_U^G A) → Hom(H⁰(G, Hom(Coind_U^G A, N)), H²(G, N))` is injective, then so is
 `α₂ : H²(U, A) → Hom(H⁰(U, Hom(A, N)), H²(U, N))`: a class of `H²(U, A)` killed by every invariant
 of `Hom(A, N)` has, by `explicitDualityPairing02_explicitCoeff0_toInternalHom`, an inverse Shapiro
-image killed by every invariant of `Hom(Coind_U^G A, N)`, all of which are coinduced. -/
+image killed by every invariant of `Hom(Coind_U^G A, N)`, all of which are coinduced. The
+continuity of the conjugation action of `U` on `Hom(A, N)`, automatic for a finite `A`, is what
+makes `toInternalHom` surjective. -/
 theorem dualityMap2_injective_of_injective_discreteCoind
     (h : Function.Injective (dualityMap2 G (DiscreteCoind G U A) N)) :
     Function.Injective (dualityMap2 U A N) := by
@@ -421,6 +431,8 @@ theorem dualityMap2_injective_of_injective_discreteCoind
     explicitDualityPairing02_explicitCoeff0_toInternalHom G U hU, AddEquiv.apply_symm_apply,
     ← dualityMap2_eq_explicitDualityPairing02, hx, AddMonoidHom.zero_apply, map_zero,
     AddMonoidHom.zero_apply]
+
+end Descent
 
 end Shapiro
 
