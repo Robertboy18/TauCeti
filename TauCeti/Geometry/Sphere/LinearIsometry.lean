@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Analysis.Normed.Operator.LinearIsometry
+public import Mathlib.Analysis.Normed.Group.BallSphere
 public import Mathlib.Analysis.Normed.Module.Basic
 public import Mathlib.Topology.MetricSpace.Isometry
 
@@ -17,6 +18,8 @@ This file develops that restriction independently of the manifold structure on s
 
 ## Main definitions
 
+* `LinearIsometry.unitSphereMap`: the map of unit spheres obtained by restricting a linear
+  isometry.
 * `LinearIsometryEquiv.unitSphereEquiv`: the equivalence of unit spheres obtained by
   restricting a linear isometry equivalence.
 * `LinearIsometryEquiv.unitSphereIsometryEquiv`: the isometry equivalence of unit spheres
@@ -24,20 +27,63 @@ This file develops that restriction independently of the manifold structure on s
 
 ## Main results
 
+* `LinearIsometry.isometry_unitSphereMap`, `LinearIsometry.isEmbedding_unitSphereMap`: the
+  restriction of a linear isometry is an isometry, hence a topological embedding.
 * `LinearIsometryEquiv.isometry_unitSphereEquiv`: the restriction is an isometry.
 * `TauCeti.LinearMap.eq_of_eqOn_unitSphere`: a real linear map is determined by its
   values on the unit sphere.
 
 ## Implementation notes
 
-The declarations extending `LinearIsometryEquiv` live in the root-level `LinearIsometryEquiv`
-namespace, so receiver notation elaborates. The separate linear-map lemma remains in
-`TauCeti.LinearMap`; it has no explicit `LinearMap` receiver for dot notation.
+The declarations extending `LinearIsometry` and `LinearIsometryEquiv` live in the root-level
+`LinearIsometry` and `LinearIsometryEquiv` namespaces, so receiver notation elaborates. The
+separate linear-map lemma remains in `TauCeti.LinearMap`; it has no explicit `LinearMap` receiver
+for dot notation.
 -/
 
 public section
 
 open Metric Module
+
+namespace LinearIsometry
+
+variable {R E F : Type*} [Semiring R]
+variable [NormedAddCommGroup E] [NormedAddCommGroup F]
+variable [Module R E] [Module R F]
+
+/-- A linear isometry maps unit vectors to unit vectors. -/
+theorem map_mem_unitSphere (f : E →ₗᵢ[R] F) {x : E} (hx : x ∈ sphere (0 : E) 1) :
+    f x ∈ sphere (0 : F) 1 := by
+  simpa using hx
+
+/-- A linear isometry restricts to a map of the corresponding unit spheres. -/
+def unitSphereMap (f : E →ₗᵢ[R] F) (x : sphere (0 : E) 1) : sphere (0 : F) 1 :=
+  ⟨f x, f.map_mem_unitSphere x.2⟩
+
+@[simp]
+theorem coe_unitSphereMap_apply (f : E →ₗᵢ[R] F) (x : sphere (0 : E) 1) :
+    (f.unitSphereMap x : F) = f x :=
+  (rfl)
+
+/-- The restriction of a linear isometry to the unit spheres is an isometry. -/
+theorem isometry_unitSphereMap (f : E →ₗᵢ[R] F) : Isometry f.unitSphereMap :=
+  Isometry.of_dist_eq fun x y => by simp [Subtype.dist_eq]
+
+/-- The restriction of a linear isometry to the unit spheres is a topological embedding. -/
+theorem isEmbedding_unitSphereMap (f : E →ₗᵢ[R] F) : Topology.IsEmbedding f.unitSphereMap := by
+  exact f.isometry_unitSphereMap.isEmbedding
+
+/-- The restriction of a linear isometry to the unit spheres is continuous. -/
+theorem continuous_unitSphereMap (f : E →ₗᵢ[R] F) : Continuous f.unitSphereMap :=
+  f.isEmbedding_unitSphereMap.continuous
+
+/-- The restriction of a linear isometry to the unit spheres commutes with the antipodal map. -/
+@[simp]
+theorem unitSphereMap_neg (f : E →ₗᵢ[R] F) (x : sphere (0 : E) 1) :
+    f.unitSphereMap (-x) = -f.unitSphereMap x :=
+  Subtype.ext <| by simp
+
+end LinearIsometry
 
 namespace LinearIsometryEquiv
 
