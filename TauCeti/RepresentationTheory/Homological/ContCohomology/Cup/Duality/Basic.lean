@@ -219,6 +219,10 @@ private theorem evalPairingComp_apply (φ : InternalHom G M' N) (m : M) :
     evalPairingComp f φ m = InternalHom.evalPairing G φ (f m) :=
   InternalHom.evalPairing_precomp f φ m
 
+private theorem evalPairingComp_eq_evalPairing_precomp (φ : InternalHom G M' N) (m : M) :
+    evalPairingComp f φ m = InternalHom.evalPairing G (InternalHom.precomp G f φ) m :=
+  (evalPairingComp_apply f φ m).trans (InternalHom.evalPairing_precomp f φ m).symm
+
 private theorem evalPairingComp_equivariant (g : G) (φ : InternalHom G M' N) (m : M) :
     evalPairingComp f (g • φ) (g • m) = g • evalPairingComp f φ m := by
   rw [evalPairingComp_apply, evalPairingComp_apply, map_smul f,
@@ -246,7 +250,7 @@ theorem explicitDualityPairing02_explicitCoeff2 (φ : H0 G (InternalHom G M' N))
     (InternalHom.evalPairing G) continuous_of_discreteTopology
     (InternalHom.evalPairing_equivariant (G := G)) (InternalHom.precomp G f)
     (DistribMulActionHom.id G) (DistribMulActionHom.id G) continuous_id continuous_id
-    (fun _ _ => rfl) φ b
+    (evalPairingComp_eq_evalPairing_precomp f) φ b
   simp only [explicitCoeff2_id, explicitCoeff0_id, AddMonoidHom.id_apply] at h₁ h₂
   unfold explicitDualityPairing02
   exact h₁.symm.trans h₂
@@ -283,7 +287,7 @@ theorem explicitDualityPairing11_explicitCoeff1 (φ : H1 G (InternalHom G M' N))
     (InternalHom.evalPairing G) continuous_of_discreteTopology
     (InternalHom.evalPairing_equivariant (G := G)) (InternalHom.precomp G f)
     (DistribMulActionHom.id G) (DistribMulActionHom.id G) continuous_of_discreteTopology
-    continuous_id continuous_id (fun _ _ => rfl) φ b
+    continuous_id continuous_id (evalPairingComp_eq_evalPairing_precomp f) φ b
   simp only [explicitCoeff2_id, explicitCoeff1_id, AddMonoidHom.id_apply] at h₁ h₂
   unfold explicitDualityPairing11
   exact h₁.symm.trans h₂
@@ -306,7 +310,7 @@ theorem explicitDualityPairing20_explicitCoeff0 (φ : H2 G (InternalHom G M' N))
     (InternalHom.evalPairing G) continuous_of_discreteTopology
     (InternalHom.evalPairing_equivariant (G := G)) (InternalHom.precomp G f)
     (DistribMulActionHom.id G) (DistribMulActionHom.id G) continuous_of_discreteTopology
-    continuous_id (fun _ _ => rfl) φ b
+    continuous_id (evalPairingComp_eq_evalPairing_precomp f) φ b
   simp only [explicitCoeff2_id, explicitCoeff0_id, AddMonoidHom.id_apply] at h₁ h₂
   unfold explicitDualityPairing20
   exact h₁.symm.trans h₂
