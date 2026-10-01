@@ -578,7 +578,8 @@ theorem eq_orientationTwoEvenPadic_of_hasPrescriptionProperty (hα : 2 ∣ α) (
 /-- **The presented group has exactly one character with the prescription property** (Labute,
 Theorem 4, for the normal form `x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)` with `α` even,
 `n ≥ 2` even and `q` even whenever the factor `x₃^q` is present (`2 < n`)): the orientation with
-`χ(x₂) = -(1 + α)⁻¹` and `χ(x₄) = (1 - q)⁻¹`. -/
+`χ(x₂) = -(1 + α)⁻¹` and, when the factor `x₃^q` is present (`2 < n`), `χ(x₄) = (1 - q)⁻¹`. At
+`n = 2` the generator `x₄` does not exist and only the value `χ(x₂)` is prescribed. -/
 theorem existsUnique_hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic (hα : 2 ∣ α)
     (hq : 2 < n → 2 ∣ q) (hn : Even n) (hn₁ : 1 < n) :
     ∃! χ : presentedProP 2 (Fin n)
