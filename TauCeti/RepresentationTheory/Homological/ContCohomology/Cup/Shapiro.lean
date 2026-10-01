@@ -29,9 +29,10 @@ and evaluation at `1` intertwines the two pairings, so each of the six low-degre
 instance of the naturality of the cup product in compatible pairs
 (`TauCeti/RepresentationTheory/Homological/ContCohomology/Cup/Naturality.lean`).
 
-When `U` is open in a profinite group `G` and the modules are `G`-modules restricted to `U`,
-corestriction is inverse Shapiro followed by the coefficient map of the trace, and the
-multiplicativity turns into the **corestriction of a cup product of `U`**:
+When `U` is open in a profinite group `G`, `A` and `B` are discrete `U`-modules and the target `C`
+is a discrete `G`-module restricted to `U`, corestriction is inverse Shapiro followed by the
+coefficient map of the trace, and the multiplicativity turns into the **corestriction of a cup
+product of `U`**:
 
 ```text
 cor (a ⌣_U b) = tr_* (sh⁻¹ a ⌣_G sh⁻¹ b).
@@ -229,18 +230,20 @@ section Corestriction
 
 /-! ### The corestriction of a cup product of an open subgroup
 
-Here the coefficients are discrete `G`-modules `M`, `N`, `P` with a `U`-equivariant pairing
-`μ`, restricted to the open subgroup `U`. Corestriction is inverse Shapiro followed by the trace
+Here `M` and `N` are discrete `U`-modules, `P` is a discrete `G`-module restricted to the open
+subgroup `U`, and `μ` is a `U`-equivariant pairing `M × N → P`; only the target `P` needs the
+ambient `G`-action, for the corestriction and the trace. Corestriction is inverse Shapiro followed
+by the trace
 (`TauCeti.ContCohomology.explicitCor2_eq_explicitCoeff2_trace` and its lower-degree companions),
 so the multiplicativity above computes the corestriction of a cup product of `U`. -/
 
 section DegreeZero
 
-variable (G : Type uG) [Group G] [TopologicalSpace G] [ContinuousMul G]
-  (M : Type uA) [AddCommGroup M] [DistribMulAction G M]
-  (N : Type uB) [AddCommGroup N] [DistribMulAction G N]
+variable (G : Type uG) [Group G] [TopologicalSpace G] [ContinuousMul G] (U : Subgroup G)
+  [U.FiniteIndex]
+  (M : Type uA) [AddCommGroup M] [DistribMulAction U M]
+  (N : Type uB) [AddCommGroup N] [DistribMulAction U N]
   (P : Type uC) [AddCommGroup P] [DistribMulAction G P]
-  (U : Subgroup G) [U.FiniteIndex]
   (μ : M →+ N →+ P) (hμ : ∀ (u : U) (m : M) (n : N), μ (u • m) (u • n) = u • μ m n)
 
 /-- **The corestriction of a `(0,0)` cup product of `U`** is the trace of the `(0,0)` cup product
@@ -263,21 +266,20 @@ end DegreeZero
 section PositiveDegree
 
 variable (G : Type uG) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [CompactSpace G]
-  [TotallyDisconnectedSpace G]
+  [TotallyDisconnectedSpace G] (U : Subgroup G) [U.FiniteIndex] (hU : IsOpen (U : Set G))
   (M : Type uA) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
-    [DistribMulAction G M] [ContinuousSMul G M]
+    [DistribMulAction U M] [ContinuousSMul U M]
   (N : Type uB) [AddCommGroup N] [TopologicalSpace N] [DiscreteTopology N]
-    [DistribMulAction G N] [ContinuousSMul G N]
+    [DistribMulAction U N] [ContinuousSMul U N]
   (P : Type uC) [AddCommGroup P] [TopologicalSpace P] [DiscreteTopology P]
     [DistribMulAction G P] [ContinuousSMul G P]
-  (U : Subgroup G) [U.FiniteIndex] (hU : IsOpen (U : Set G))
   (μ : M →+ N →+ P) (hμ : ∀ (u : U) (m : M) (n : N), μ (u • m) (u • n) = u • μ m n)
 
 /-- Multiplication on the subgroup `U` is continuous for the subspace topology. -/
 local instance instContinuousMulSubgroupCorestriction : ContinuousMul U :=
   U.toSubmonoid.continuousMul
 
-omit [ContinuousSMul G M] in
+omit [ContinuousSMul U M] in
 /-- **The corestriction of a `(0,1)` cup product of `U`** is the trace of the `(0,1)` cup product
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor1_explicitCup01 (a : H0 U M) (b : H1 U N) :
@@ -298,7 +300,7 @@ theorem explicitCor1_explicitCup01 (a : H0 U M) (b : H1 U N) :
     AddEquiv.apply_symm_apply, ← explicitShapiro1_apply G U N (U.isClosed_of_isOpen hU),
     AddEquiv.apply_symm_apply]
 
-omit [ContinuousSMul G N] in
+omit [ContinuousSMul U N] in
 /-- **The corestriction of a `(1,0)` cup product of `U`** is the trace of the `(1,0)` cup product
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor1_explicitCup10 (a : H1 U M) (b : H0 U N) :
@@ -319,7 +321,7 @@ theorem explicitCor1_explicitCup10 (a : H1 U M) (b : H0 U N) :
     AddEquiv.apply_symm_apply, ← explicitShapiro1_apply G U M (U.isClosed_of_isOpen hU),
     AddEquiv.apply_symm_apply]
 
-omit [ContinuousSMul G M] in
+omit [ContinuousSMul U M] in
 /-- **The corestriction of a `(0,2)` cup product of `U`** is the trace of the `(0,2)` cup product
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor2_explicitCup02 (a : H0 U M) (b : H2 U N) :
@@ -362,7 +364,7 @@ theorem explicitCor2_explicitCup11 (a : H1 U M) (b : H1 U N) :
     ← explicitShapiro1_apply G U N (U.isClosed_of_isOpen hU), AddEquiv.apply_symm_apply,
     AddEquiv.apply_symm_apply]
 
-omit [ContinuousSMul G N] in
+omit [ContinuousSMul U N] in
 /-- **The corestriction of a `(2,0)` cup product of `U`** is the trace of the `(2,0)` cup product
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor2_explicitCup20 (a : H2 U M) (b : H0 U N) :
