@@ -5,10 +5,13 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.GroupTheory.FiniteAbelian.Duality
-public import TauCeti.Algebra.Module.ZMod.Extend
-public import TauCeti.Algebra.Module.ZMod.Injective
-public import TauCeti.RingTheory.RootsOfUnity.ZMod
+public import Mathlib.Algebra.Module.ZMod
+
+import Mathlib.GroupTheory.FiniteAbelian.Duality
+import TauCeti.Algebra.Group.TypeTags.Hom
+import TauCeti.Algebra.Module.ZMod.Extend
+import TauCeti.Algebra.Module.ZMod.Injective
+import TauCeti.RingTheory.RootsOfUnity.ZMod
 
 /-!
 # The `ℤ/n`-dual of an additive group killed by `n`
@@ -46,8 +49,7 @@ unity `Multiplicative (ZMod n)`, and a finite abelian group has as many characte
 theorem natCard_addMonoidHom_zmod [Finite M] (hM : ∀ x : M, n • x = 0) :
     Nat.card (M →+ ZMod n) = Nat.card M := by
   have := hasEnoughRootsOfUnity_multiplicative_zmod_exponent hM
-  rw [Nat.card_congr (AddMonoidHom.toMultiplicative.trans
-    (MulEquiv.monoidHomCongrRight toUnits).toEquiv),
+  rw [Nat.card_congr AddMonoidHom.toMultiplicativeUnits,
     CommGroup.card_monoidHom_of_hasEnoughRootsOfUnity, Nat.card_congr Multiplicative.toAdd]
 
 /-- **Homomorphisms to `ℤ/n` separate the points of a group killed by `n`.** If `n ≠ 0`, `M` is
@@ -65,11 +67,11 @@ theorem exists_addMonoidHom_zmod_apply_ne_zero (hM : ∀ x : M, n • x = 0) {a 
     (Multiplicative (ZMod n)) (a := Multiplicative.ofAdd ⟨a, AddSubgroup.mem_zmultiples a⟩)
     (by simpa [← Subtype.coe_ne_coe] using ha)
   obtain ⟨f, hf⟩ := AddMonoidHom.exists_comp_eq_of_injective_of_baer (Module.Baer.zmod_self n) hM
-    S.subtype_injective
-    (AddMonoidHom.toMultiplicative.symm ((MulEquiv.monoidHomCongrRight toUnits).symm φ))
+    S.subtype_injective (AddMonoidHom.toMultiplicativeUnits.symm φ)
   refine ⟨f, fun h => hφ ?_⟩
   have := DFunLike.congr_fun hf ⟨a, AddSubgroup.mem_zmultiples a⟩
-  simp only [AddMonoidHom.comp_apply, AddSubgroup.coe_subtype, h] at this
-  simpa using this.symm
+  simp only [AddMonoidHom.comp_apply, AddSubgroup.coe_subtype, h,
+    AddMonoidHom.toMultiplicativeUnits_symm_apply_apply] at this
+  exact Units.val_eq_one.1 (toAdd_eq_zero.1 this.symm)
 
 end TauCeti

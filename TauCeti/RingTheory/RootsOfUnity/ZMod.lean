@@ -9,7 +9,7 @@ public import Mathlib.Algebra.Module.ZMod
 public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
 
 /-!
-# The `k`-th roots of unity of a domain, as `ℤ/k`
+# `ℤ/k` and the `k`-th roots of unity
 
 A primitive `k`-th root of unity generates the group of all `k`-th roots of unity, so Mathlib's
 `IsPrimitiveRoot.zmodEquivZPowers`, which identifies `ℤ/k` with the powers of a chosen primitive
@@ -32,10 +32,12 @@ their additive homomorphisms to `ZMod n`.
 
 * `TauCeti.nsmul_additive_rootsOfUnity_eq_zero`: `k` kills `μ_k`, written additively, so that it
   is a `ZMod k`-module.
-* `TauCeti.isPrimitiveRoot_ofAdd_one` and `TauCeti.instHasEnoughRootsOfUnityMultiplicativeZMod`:
-  `ofAdd 1` is a primitive `n`-th root of unity in `Multiplicative (ZMod n)`, which has enough
-  `n`-th roots of unity, and `TauCeti.hasEnoughRootsOfUnity_multiplicative_zmod_exponent` has
-  enough `e`-th roots for the exponent `e` of any additive group killed by `n`.
+* `TauCeti.ZMod.isPrimitiveRoot_ofAdd_one`: `ofAdd 1` is a primitive `n`-th root of unity in
+  `Multiplicative (ZMod n)`.
+* `TauCeti.instHasEnoughRootsOfUnityMultiplicativeZMod`: `Multiplicative (ZMod n)` has enough
+  `n`-th roots of unity.
+* `TauCeti.hasEnoughRootsOfUnity_multiplicative_zmod_exponent`: `Multiplicative (ZMod n)` has
+  enough `e`-th roots of unity for the exponent `e` of any additive monoid killed by `n`.
 * `IsPrimitiveRoot.zmodEquivRootsOfUnity`: `ℤ/k ≃+ Additive (μ_k)`, given a primitive `k`-th root.
 * `IsPrimitiveRoot.coe_zmodEquivRootsOfUnity_apply_intCast` and
   `IsPrimitiveRoot.coe_zmodEquivRootsOfUnity_apply_natCast`: it sends `i` to `ζ ^ i`.
@@ -44,14 +46,16 @@ their additive homomorphisms to `ZMod n`.
 
 ## Provenance
 
-Ported from AINTLIB (`github.com/CBirkbeck/AINTLIB`, Apache-2.0) @
-`a302aeacd86053f9d5f991fbbf664e1cc1051d08`, source file
+`IsPrimitiveRoot.zmodEquivRootsOfUnity` is ported from AINTLIB (`github.com/CBirkbeck/AINTLIB`,
+Apache-2.0) @ `a302aeacd86053f9d5f991fbbf664e1cc1051d08`, source file
 `projects/HasseWeil/HasseWeil/HasseBound/WeilPairing/RootsOfUnity.lean`, declaration
 `rootsOfUnity_addEquiv_zmod`. Three changes: the direction is reversed to start from `ZMod k`, so
 that it reads like `IsPrimitiveRoot.zmodEquivZPowers` which it extends; the base is a domain rather
 than a field, which is all `zpowers_eq` asks for; and the four characterising lemmas below — the
 equivalence and its inverse, each at an integer and at a natural exponent — are added, none of
-which the source has.
+which the source has. The remaining declarations of this file — the `ZMod k`-module structure on
+`μ_k` written additively and the roots of unity of `Multiplicative (ZMod n)` — have no counterpart
+in that source.
 -/
 
 public section
@@ -70,6 +74,8 @@ theorem nsmul_additive_rootsOfUnity_eq_zero (x : Additive (rootsOfUnity k M)) : 
 instance instModuleZModAdditiveRootsOfUnity : Module (ZMod k) (Additive (rootsOfUnity k M)) :=
   AddCommGroup.zmodModule (nsmul_additive_rootsOfUnity_eq_zero k)
 
+namespace ZMod
+
 /-- **`ofAdd 1` is a primitive `n`-th root of unity in `ℤ/n` written multiplicatively**: its order
 is the additive order of `1 : ZMod n`, which is `n`. -/
 theorem isPrimitiveRoot_ofAdd_one (n : ℕ) :
@@ -77,19 +83,21 @@ theorem isPrimitiveRoot_ofAdd_one (n : ℕ) :
   have := IsPrimitiveRoot.orderOf (Multiplicative.ofAdd (1 : ZMod n))
   rwa [orderOf_ofAdd_eq_addOrderOf, ZMod.addOrderOf_one] at this
 
+end ZMod
+
 /-- **`ℤ/n` written multiplicatively has enough `n`-th roots of unity**: `ofAdd 1` is a primitive
 one, and its roots of unity form a cyclic group, being a subgroup of the cyclic group of units of
 `Multiplicative (ZMod n)`. -/
 instance instHasEnoughRootsOfUnityMultiplicativeZMod (n : ℕ) :
     HasEnoughRootsOfUnity (Multiplicative (ZMod n)) n where
-  prim := ⟨_, isPrimitiveRoot_ofAdd_one n⟩
+  prim := ⟨_, ZMod.isPrimitiveRoot_ofAdd_one n⟩
   cyc := by
     have : IsCyclic (Multiplicative (ZMod n))ˣ :=
       isCyclic_of_surjective toUnits toUnits.surjective
     infer_instance
 
-/-- **`ℤ/n` written multiplicatively has enough roots of unity for every group killed by `n`**:
-the exponent of such a group divides `n`. This is the hypothesis of Mathlib's duality theory for
+/-- **`ℤ/n` written multiplicatively has enough roots of unity for every monoid killed by `n`**:
+the exponent of such a monoid divides `n`. This is the hypothesis of Mathlib's duality theory for
 finite abelian groups, `CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity` and
 `CommGroup.card_monoidHom_of_hasEnoughRootsOfUnity`, with the target `Multiplicative (ZMod n)`. -/
 theorem hasEnoughRootsOfUnity_multiplicative_zmod_exponent {n : ℕ} [NeZero n] {M : Type*}
