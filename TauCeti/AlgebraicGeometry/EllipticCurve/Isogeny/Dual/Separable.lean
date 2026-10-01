@@ -158,6 +158,10 @@ theorem dual_dual [Algebra.IsSeparable φ.dual.fieldPullback.fieldRange W₂.Fun
 variable {W₃ : WeierstrassCurve.Affine F} [W₃.IsElliptic] (ψ : Isogeny W₂ W₃)
   [Algebra.IsSeparable ψ.fieldPullback.fieldRange W₂.FunctionField]
 
+-- `(ψ.comp φ).dual` needs the composite to be separable; `isSeparable_comp` is not a global
+-- instance (see its docstring), so it is activated locally for the statement below.
+attribute [local instance] isSeparable_comp
+
 /-- **The dual of a composite is the composite of the duals in the opposite order**:
 `(ψ ∘ φ)^ = φ̂ ∘ ψ̂` (Silverman III.6.2(c)). -/
 theorem dual_comp_dual : φ.dual.comp ψ.dual = (ψ.comp φ).dual :=
