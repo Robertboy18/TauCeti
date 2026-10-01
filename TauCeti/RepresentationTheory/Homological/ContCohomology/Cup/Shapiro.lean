@@ -229,7 +229,7 @@ section Corestriction
 
 /-! ### The corestriction of a cup product of an open subgroup
 
-Here the coefficients are discrete `G`-modules `M`, `N`, `P` with a `G`-equivariant pairing
+Here the coefficients are discrete `G`-modules `M`, `N`, `P` with a `U`-equivariant pairing
 `μ`, restricted to the open subgroup `U`. Corestriction is inverse Shapiro followed by the trace
 (`TauCeti.ContCohomology.explicitCor2_eq_explicitCoeff2_trace` and its lower-degree companions),
 so the multiplicativity above computes the corestriction of a cup product of `U`. -/
@@ -240,17 +240,17 @@ variable (G : Type uG) [Group G] [TopologicalSpace G] [ContinuousMul G]
   (M : Type uA) [AddCommGroup M] [DistribMulAction G M]
   (N : Type uB) [AddCommGroup N] [DistribMulAction G N]
   (P : Type uC) [AddCommGroup P] [DistribMulAction G P]
-  (μ : M →+ N →+ P) (hequiv : ∀ (g : G) (m : M) (n : N), μ (g • m) (g • n) = g • μ m n)
   (U : Subgroup G) [U.FiniteIndex]
+  (μ : M →+ N →+ P) (hμ : ∀ (u : U) (m : M) (n : N), μ (u • m) (u • n) = u • μ m n)
 
 /-- **The corestriction of a `(0,0)` cup product of `U`** is the trace of the `(0,0)` cup product
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor0_explicitCup00 (a : H0 U M) (b : H0 U N) :
-    explicitCor0 G P U (explicitCup00 U M N P μ (fun u m n => hequiv (u : G) m n) a b) =
+    explicitCor0 G P U (explicitCup00 U M N P μ hμ a b) =
       explicitCoeff0 G (DiscreteCoind G U P) (DiscreteCoind.trace G U P)
         (explicitCup00 G (DiscreteCoind G U M) (DiscreteCoind G U N) (DiscreteCoind G U P)
-          (DiscreteCoind.pointwisePairing U μ fun u m n => hequiv (u : G) m n)
-          (DiscreteCoind.pointwisePairing_smul U μ fun u m n => hequiv (u : G) m n)
+          (DiscreteCoind.pointwisePairing U μ hμ)
+          (DiscreteCoind.pointwisePairing_smul U μ hμ)
           ((explicitShapiro0 G U M).symm a) ((explicitShapiro0 G U N).symm b)) := by
   rw [explicitCor0_eq_explicitCoeff0_trace, AddMonoidHom.comp_apply, AddEquiv.coe_toAddMonoidHom]
   congr 1
@@ -270,8 +270,8 @@ variable (G : Type uG) [Group G] [TopologicalSpace G] [IsTopologicalGroup G] [Co
     [DistribMulAction G N] [ContinuousSMul G N]
   (P : Type uC) [AddCommGroup P] [TopologicalSpace P] [DiscreteTopology P]
     [DistribMulAction G P] [ContinuousSMul G P]
-  (μ : M →+ N →+ P) (hequiv : ∀ (g : G) (m : M) (n : N), μ (g • m) (g • n) = g • μ m n)
   (U : Subgroup G) [U.FiniteIndex] (hU : IsOpen (U : Set G))
+  (μ : M →+ N →+ P) (hμ : ∀ (u : U) (m : M) (n : N), μ (u • m) (u • n) = u • μ m n)
 
 /-- Multiplication on the subgroup `U` is continuous for the subspace topology. -/
 local instance instContinuousMulSubgroupCorestriction : ContinuousMul U :=
@@ -282,14 +282,12 @@ omit [ContinuousSMul G M] in
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor1_explicitCup01 (a : H0 U M) (b : H1 U N) :
     explicitCor1 G P U hU
-        (explicitCup01 U M N P μ continuous_of_discreteTopology
-          (fun u m n => hequiv (u : G) m n) a b) =
+        (explicitCup01 U M N P μ continuous_of_discreteTopology hμ a b) =
       explicitCoeff1 G (DiscreteCoind G U P) (DiscreteCoind.trace G U P)
         DiscreteCoind.continuous_trace
         (explicitCup01 G (DiscreteCoind G U M) (DiscreteCoind G U N) (DiscreteCoind G U P)
-          (DiscreteCoind.pointwisePairing U μ fun u m n => hequiv (u : G) m n)
-          continuous_of_discreteTopology
-          (DiscreteCoind.pointwisePairing_smul U μ fun u m n => hequiv (u : G) m n)
+          (DiscreteCoind.pointwisePairing U μ hμ) continuous_of_discreteTopology
+          (DiscreteCoind.pointwisePairing_smul U μ hμ)
           ((explicitShapiro0 G U M).symm a)
           ((explicitShapiro1 G U N (U.isClosed_of_isOpen hU)).symm b)) := by
   rw [explicitCor1_eq_explicitCoeff1_trace hU, AddMonoidHom.comp_apply,
@@ -305,14 +303,12 @@ omit [ContinuousSMul G N] in
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor1_explicitCup10 (a : H1 U M) (b : H0 U N) :
     explicitCor1 G P U hU
-        (explicitCup10 U M N P μ continuous_of_discreteTopology
-          (fun u m n => hequiv (u : G) m n) a b) =
+        (explicitCup10 U M N P μ continuous_of_discreteTopology hμ a b) =
       explicitCoeff1 G (DiscreteCoind G U P) (DiscreteCoind.trace G U P)
         DiscreteCoind.continuous_trace
         (explicitCup10 G (DiscreteCoind G U M) (DiscreteCoind G U N) (DiscreteCoind G U P)
-          (DiscreteCoind.pointwisePairing U μ fun u m n => hequiv (u : G) m n)
-          continuous_of_discreteTopology
-          (DiscreteCoind.pointwisePairing_smul U μ fun u m n => hequiv (u : G) m n)
+          (DiscreteCoind.pointwisePairing U μ hμ) continuous_of_discreteTopology
+          (DiscreteCoind.pointwisePairing_smul U μ hμ)
           ((explicitShapiro1 G U M (U.isClosed_of_isOpen hU)).symm a)
           ((explicitShapiro0 G U N).symm b)) := by
   rw [explicitCor1_eq_explicitCoeff1_trace hU, AddMonoidHom.comp_apply,
@@ -328,14 +324,12 @@ omit [ContinuousSMul G M] in
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor2_explicitCup02 (a : H0 U M) (b : H2 U N) :
     explicitCor2 G P U hU
-        (explicitCup02 U M N P μ continuous_of_discreteTopology
-          (fun u m n => hequiv (u : G) m n) a b) =
+        (explicitCup02 U M N P μ continuous_of_discreteTopology hμ a b) =
       explicitCoeff2 G (DiscreteCoind G U P) (DiscreteCoind.trace G U P)
         DiscreteCoind.continuous_trace
         (explicitCup02 G (DiscreteCoind G U M) (DiscreteCoind G U N) (DiscreteCoind G U P)
-          (DiscreteCoind.pointwisePairing U μ fun u m n => hequiv (u : G) m n)
-          continuous_of_discreteTopology
-          (DiscreteCoind.pointwisePairing_smul U μ fun u m n => hequiv (u : G) m n)
+          (DiscreteCoind.pointwisePairing U μ hμ) continuous_of_discreteTopology
+          (DiscreteCoind.pointwisePairing_smul U μ hμ)
           ((explicitShapiro0 G U M).symm a)
           ((explicitShapiro2 G U N (U.isClosed_of_isOpen hU)).symm b)) := by
   rw [explicitCor2_eq_explicitCoeff2_trace hU, AddMonoidHom.comp_apply,
@@ -351,14 +345,12 @@ over `G` of the inverse Shapiro images, along the pointwise pairing of the coind
 `cor (a ⌣_U b) = tr_* (sh⁻¹ a ⌣_G sh⁻¹ b)`. -/
 theorem explicitCor2_explicitCup11 (a : H1 U M) (b : H1 U N) :
     explicitCor2 G P U hU
-        (explicitCup11 U M N P μ continuous_of_discreteTopology
-          (fun u m n => hequiv (u : G) m n) a b) =
+        (explicitCup11 U M N P μ continuous_of_discreteTopology hμ a b) =
       explicitCoeff2 G (DiscreteCoind G U P) (DiscreteCoind.trace G U P)
         DiscreteCoind.continuous_trace
         (explicitCup11 G (DiscreteCoind G U M) (DiscreteCoind G U N) (DiscreteCoind G U P)
-          (DiscreteCoind.pointwisePairing U μ fun u m n => hequiv (u : G) m n)
-          continuous_of_discreteTopology
-          (DiscreteCoind.pointwisePairing_smul U μ fun u m n => hequiv (u : G) m n)
+          (DiscreteCoind.pointwisePairing U μ hμ) continuous_of_discreteTopology
+          (DiscreteCoind.pointwisePairing_smul U μ hμ)
           ((explicitShapiro1 G U M (U.isClosed_of_isOpen hU)).symm a)
           ((explicitShapiro1 G U N (U.isClosed_of_isOpen hU)).symm b)) := by
   rw [explicitCor2_eq_explicitCoeff2_trace hU, AddMonoidHom.comp_apply,
@@ -375,14 +367,12 @@ omit [ContinuousSMul G N] in
 over `G` of the inverse Shapiro images, along the pointwise pairing of the coinduced modules. -/
 theorem explicitCor2_explicitCup20 (a : H2 U M) (b : H0 U N) :
     explicitCor2 G P U hU
-        (explicitCup20 U M N P μ continuous_of_discreteTopology
-          (fun u m n => hequiv (u : G) m n) a b) =
+        (explicitCup20 U M N P μ continuous_of_discreteTopology hμ a b) =
       explicitCoeff2 G (DiscreteCoind G U P) (DiscreteCoind.trace G U P)
         DiscreteCoind.continuous_trace
         (explicitCup20 G (DiscreteCoind G U M) (DiscreteCoind G U N) (DiscreteCoind G U P)
-          (DiscreteCoind.pointwisePairing U μ fun u m n => hequiv (u : G) m n)
-          continuous_of_discreteTopology
-          (DiscreteCoind.pointwisePairing_smul U μ fun u m n => hequiv (u : G) m n)
+          (DiscreteCoind.pointwisePairing U μ hμ) continuous_of_discreteTopology
+          (DiscreteCoind.pointwisePairing_smul U μ hμ)
           ((explicitShapiro2 G U M (U.isClosed_of_isOpen hU)).symm a)
           ((explicitShapiro0 G U N).symm b)) := by
   rw [explicitCor2_eq_explicitCoeff2_trace hU, AddMonoidHom.comp_apply,
