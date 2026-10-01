@@ -8,13 +8,25 @@ module
 public import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
 public import Mathlib.AlgebraicGeometry.Modules.Sheaf
 public import TauCeti.Algebra.Category.ModuleCat.Sheaf.Quasicoherent.Refinement
+public import TauCeti.Algebra.Category.ModuleCat.Sheaf.TensorProduct.Pushforward
+public import TauCeti.AlgebraicGeometry.Modules.TensorProduct
+public import TauCeti.CategoryTheory.Adjunction.Mates
 
 /-!
 # Pullback and restriction of modules on schemes
 
+Mathlib packages pullback of modules along scheme morphisms as a pseudofunctor
+(`AlgebraicGeometry.Scheme.Modules.pseudofunctor`), whose coherence conditions are equations of
+natural transformations. This file records them on components, in the forms used to compare
+iterated pullbacks of a single module, and shows that pullback preserves the structure sheaf
+`𝒪` compatibly with identities and composition.
+
 For a scheme morphism `f : X ⟶ Y` and an open `V ⊆ Y`, restricting the pullback `f^* M` to
 `f⁻¹ V` agrees with pulling back the restriction `M|_V` along `f ∣_ V`. This compatibility lets
 local properties of modules, expressed on open covers, be transported along scheme morphisms.
+
+Pushforward of modules along a scheme morphism is lax monoidal, so pullback, its left adjoint, is
+oplax monoidal, with unit map the identification `f^* 𝒪_Y ≅ 𝒪_X`.
 
 Pullback along any scheme morphism preserves quasi-coherence, finite type, finite presentation
 and local freeness of modules. Local generators and presentations on an open cover pull back to
@@ -22,6 +34,19 @@ local data on the preimage cover.
 
 ## Main declarations
 
+* `AlgebraicGeometry.Scheme.Modules.pseudofunctor_associativity_app`,
+  `AlgebraicGeometry.Scheme.Modules.pseudofunctor_left_unitality_app` and
+  `AlgebraicGeometry.Scheme.Modules.pseudofunctor_right_unitality_app`: the coherence conditions
+  of the pullback pseudofunctor, on components;
+* `AlgebraicGeometry.Scheme.Modules.pullbackObjUnitIso`: the isomorphism `f^* 𝒪_Y ≅ 𝒪_X`, with
+  `pullbackObjUnitIso_id`, `pullbackObjUnitIso_comp`, and `pullbackObjUnitIso_congr` comparing it
+  with identity, composition, and equality of scheme morphisms;
+* `AlgebraicGeometry.Scheme.Modules.pushforwardLaxMonoidal` and
+  `AlgebraicGeometry.Scheme.Modules.pullbackOplaxMonoidal`: the lax monoidal structure of
+  pushforward and the oplax monoidal structure of pullback, with unit maps computed by
+  `AlgebraicGeometry.Scheme.Modules.pushforward_ε` and
+  `AlgebraicGeometry.Scheme.Modules.pullback_η`, and the tensor map of pullback by
+  `AlgebraicGeometry.Scheme.Modules.pullback_δ`;
 * `AlgebraicGeometry.Scheme.Modules.restrictPullbackObjIso` identifies these two restricted
   pullbacks;
 * `AlgebraicGeometry.Scheme.Modules.pullbackOver`: pullback read on the slice sites over `V` and
@@ -43,7 +68,7 @@ local data on the preimage cover.
 
 public section
 
-open CategoryTheory Limits TopologicalSpace
+open CategoryTheory Limits MonoidalCategory TopologicalSpace
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -52,6 +77,233 @@ universe w u
 noncomputable section
 
 variable {X Y : Scheme.{u}}
+
+section Coherence
+
+variable {Z W : Scheme.{u}}
+
+/-- The associativity condition of the pullback pseudofunctor, on the component at a module. -/
+@[reassoc]
+lemma pseudofunctor_associativity_app (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ W) (M : W.Modules) :
+    (pullbackComp f (g ≫ h)).inv.app M ≫ (pullback f).map ((pullbackComp g h).inv.app M) ≫
+      (pullbackComp f g).hom.app ((pullback h).obj M) ≫ (pullbackComp (f ≫ g) h).hom.app M =
+      eqToHom (by simp) := by
+  simpa using NatTrans.congr_app (pseudofunctor_associativity f g h) M
+
+/-- The left unitality condition of the pullback pseudofunctor, on the component at a module. -/
+@[reassoc]
+lemma pseudofunctor_left_unitality_app (f : X ⟶ Y) (M : Y.Modules) :
+    (pullbackComp f (𝟙 Y)).inv.app M ≫ (pullback f).map ((pullbackId Y).hom.app M) =
+      eqToHom (by simp) := by
+  simpa using NatTrans.congr_app (pseudofunctor_left_unitality f) M
+
+/-- The right unitality condition of the pullback pseudofunctor, on the component at a module. -/
+@[reassoc]
+lemma pseudofunctor_right_unitality_app (f : X ⟶ Y) (M : Y.Modules) :
+    (pullbackComp (𝟙 X) f).inv.app M ≫ (pullbackId X).hom.app ((pullback f).obj M) =
+      eqToHom (by simp) := by
+  simpa using NatTrans.congr_app (pseudofunctor_right_unitality f) M
+
+/-- The two ways of identifying `f^* g^* h^* M` with `(f ≫ g ≫ h)^* M` agree. -/
+@[reassoc]
+lemma pullback_map_pullbackComp_hom_app_comp_pullbackComp_hom_app (f : X ⟶ Y) (g : Y ⟶ Z)
+    (h : Z ⟶ W) (M : W.Modules) :
+    (pullback f).map ((pullbackComp g h).hom.app M) ≫ (pullbackComp f (g ≫ h)).hom.app M =
+      (pullbackComp f g).hom.app ((pullback h).obj M) ≫ (pullbackComp (f ≫ g) h).hom.app M ≫
+        eqToHom (by simp) := by
+  rw [← cancel_epi ((pullbackComp f (g ≫ h)).inv.app M ≫
+    (pullback f).map ((pullbackComp g h).inv.app M))]
+  simp only [Category.assoc, pseudofunctor_associativity_app_assoc, eqToHom_trans, eqToHom_refl]
+  rw [← Functor.map_comp_assoc, Iso.inv_hom_id_app, CategoryTheory.Functor.map_id,
+    Category.id_comp, Iso.inv_hom_id_app]
+
+/-- Associativity of pullback, rearranged to pass from `(f ≫ g)^* h^* M` to `f^* (g ≫ h)^* M`. -/
+@[reassoc]
+lemma pullbackComp_inv_app_comp_pullback_map_pullbackComp_hom_app (f : X ⟶ Y) (g : Y ⟶ Z)
+    (h : Z ⟶ W) (M : W.Modules) :
+    (pullbackComp f g).inv.app ((pullback h).obj M) ≫
+        (pullback f).map ((pullbackComp g h).hom.app M) =
+      (pullbackComp (f ≫ g) h).hom.app M ≫ eqToHom (by simp) ≫
+        (pullbackComp f (g ≫ h)).inv.app M := by
+  rw [← cancel_epi ((pullbackComp f g).hom.app ((pullback h).obj M)),
+    ← cancel_mono ((pullbackComp f (g ≫ h)).hom.app M)]
+  simp [pullback_map_pullbackComp_hom_app_comp_pullbackComp_hom_app]
+
+/-- Associativity of pullback, rearranged to pass from `(f ≫ g ≫ h)^* M` to `f^* g^* h^* M`
+through `(f ≫ g)^* h^* M`. -/
+@[reassoc]
+lemma pullbackComp_inv_app_comp_pullback_map_pullbackComp_inv_app (f : X ⟶ Y) (g : Y ⟶ Z)
+    (h : Z ⟶ W) (M : W.Modules) :
+    (pullbackComp f (g ≫ h)).inv.app M ≫ (pullback f).map ((pullbackComp g h).inv.app M) =
+      eqToHom (by simp) ≫ (pullbackComp (f ≫ g) h).inv.app M ≫
+        (pullbackComp f g).inv.app ((pullback h).obj M) := by
+  rw [← cancel_mono ((pullbackComp f g).hom.app ((pullback h).obj M) ≫
+    (pullbackComp (f ≫ g) h).hom.app M)]
+  simp [pseudofunctor_associativity_app]
+
+/-- The composition isomorphism of pullback is compatible with replacing the first morphism by an
+equal one. -/
+@[reassoc]
+lemma pullbackCongr_hom_app_comp_pullbackComp_hom_app {a b : X ⟶ Y} (p : a = b) (f : Y ⟶ Z)
+    (M : Z.Modules) :
+    (pullbackCongr p).hom.app ((pullback f).obj M) ≫ (pullbackComp b f).hom.app M =
+      (pullbackComp a f).hom.app M ≫ eqToHom (by rw [p]) := by
+  subst p
+  simp [pullbackCongr]
+
+/-- The composition isomorphism of pullback is compatible with replacing the second morphism by
+an equal one. -/
+@[reassoc]
+lemma pullbackComp_inv_app_comp_pullback_map_pullbackCongr_hom_app (f : X ⟶ Y) {a b : Y ⟶ Z}
+    (p : a = b) (M : Z.Modules) :
+    (pullbackComp f a).inv.app M ≫ (pullback f).map ((pullbackCongr p).hom.app M) =
+      eqToHom (by rw [p]) ≫ (pullbackComp f b).inv.app M := by
+  subst p
+  simp [pullbackCongr]
+
+end Coherence
+
+section Unit
+
+variable {Z : Scheme.{u}}
+
+/-- Pullback along a morphism of schemes preserves the structure sheaf: `f^* 𝒪_Y ≅ 𝒪_X`, the
+isomorphism being Mathlib's comparison `SheafOfModules.pullbackObjUnitToUnit`. -/
+def pullbackObjUnitIso (f : X ⟶ Y) : (pullback f).obj (𝟙_ Y.Modules) ≅ 𝟙_ X.Modules :=
+  -- Mathlib's invertibility of `pullbackObjUnitToUnit` is stated for pushforwards known to be
+  -- right adjoints; the adjunction is recorded for `Scheme.Modules.pushforward`. Instance search
+  -- does not find the resulting `IsIso` instance, so it is passed explicitly.
+  let : (SheafOfModules.pushforward.{u} f.toRingCatSheafHom).IsRightAdjoint :=
+    inferInstanceAs (pushforward f).IsRightAdjoint
+  have : IsIso (SheafOfModules.pullbackObjUnitToUnit f.toRingCatSheafHom) :=
+    SheafOfModules.instIsIsoPullbackObjUnitToUnitOfFinal _
+  @asIso _ _ _ _ (SheafOfModules.pullbackObjUnitToUnit f.toRingCatSheafHom) this
+
+/-- The hom of `pullbackObjUnitIso` is Mathlib's structure sheaf comparison map. -/
+@[simp]
+lemma pullbackObjUnitIso_hom (f : X ⟶ Y) :
+    (pullbackObjUnitIso f).hom =
+      (letI : (SheafOfModules.pushforward.{u} f.toRingCatSheafHom).IsRightAdjoint :=
+        inferInstanceAs (pushforward f).IsRightAdjoint
+       SheafOfModules.pullbackObjUnitToUnit f.toRingCatSheafHom) := by
+  rfl
+
+/-- The transpose of `f^* 𝒪_Y ≅ 𝒪_X` is the map `𝒪_Y ⟶ f_* 𝒪_X` given by `f` on sections. -/
+lemma pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitIso_hom (f : X ⟶ Y) :
+    (pullbackPushforwardAdjunction f).homEquiv _ _ (pullbackObjUnitIso f).hom =
+      SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom :=
+  Equiv.apply_symm_apply _ _
+
+/-- The map `𝒪_Z ⟶ (f ≫ g)_* 𝒪_X` given by `f ≫ g` on sections is the composite of the maps given
+by `g` and by `f`. -/
+lemma unitToPushforwardObjUnit_comp (f : X ⟶ Y) (g : Y ⟶ Z) :
+    SheafOfModules.unitToPushforwardObjUnit g.toRingCatSheafHom ≫
+        (pushforward g).map (SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom) ≫
+          (pushforwardComp f g).hom.app _ =
+      SheafOfModules.unitToPushforwardObjUnit (f ≫ g).toRingCatSheafHom := by
+  -- On each open, `pushforwardComp` is the identity map and the map associated to
+  -- `(f ≫ g).toRingCatSheafHom` is the composite of the two maps on sections.
+  ext U
+  rfl
+
+/-- Along the identity, `𝟙^* 𝒪_X ≅ 𝒪_X` is the identity isomorphism of pullback. -/
+lemma pullbackObjUnitIso_id (X : Scheme.{u}) :
+    (pullbackObjUnitIso (𝟙 X)).hom = (pullbackId X).hom.app _ := by
+  apply ((pullbackPushforwardAdjunction (𝟙 X)).homEquiv _ _).injective
+  rw [pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitIso_hom, Adjunction.homEquiv_unit,
+    ← unit_conjugateEquiv Adjunction.id, conjugateEquiv_pullbackId_hom]
+  -- On each open, `pushforwardId` and `(𝟙 X).toRingCatSheafHom` act as identities.
+  ext U
+  rfl
+
+/-- The isomorphism `(f ≫ g)^* 𝒪_Z ≅ 𝒪_X` is the composite of `f^* (g^* 𝒪_Z ≅ 𝒪_Y)` and
+`f^* 𝒪_Y ≅ 𝒪_X`, through the composition isomorphism of pullback. -/
+@[reassoc]
+lemma pullbackObjUnitIso_comp (f : X ⟶ Y) (g : Y ⟶ Z) :
+    (pullbackComp f g).inv.app _ ≫ (pullback f).map (pullbackObjUnitIso g).hom ≫
+      (pullbackObjUnitIso f).hom = (pullbackObjUnitIso (f ≫ g)).hom := by
+  apply ((pullbackPushforwardAdjunction (f ≫ g)).homEquiv _ _).injective
+  rw [← Adjunction.homEquiv_conjugateEquiv ((pullbackPushforwardAdjunction g).comp
+      (pullbackPushforwardAdjunction f)), conjugateEquiv_pullbackComp_inv,
+    Adjunction.comp_homEquiv, Equiv.trans_apply, Adjunction.homEquiv_naturality_left,
+    pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitIso_hom]
+  -- `rw` cannot rewrite `homEquiv_naturality_right` here: its instance of
+  -- `SheafOfModules.unitToPushforwardObjUnit` mentions `X.ringCatSheaf` at a type that is not
+  -- unfolded at instance transparency, so the step is applied as a term.
+  refine (congrArg (· ≫ (pushforwardComp f g).hom.app _)
+    ((pullbackPushforwardAdjunction g).homEquiv_naturality_right _ _)).trans ?_
+  rw [pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitIso_hom,
+    pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitIso_hom]
+  exact (Category.assoc _ _ _).trans (unitToPushforwardObjUnit_comp f g)
+
+/-- The canonical identification of a pulled-back structure sheaf is unchanged when the
+scheme morphism is replaced by an equal morphism. -/
+lemma pullbackObjUnitIso_congr {f g : X ⟶ Y} (hf : f = g) :
+    (pullbackCongr hf).hom.app (𝟙_ Y.Modules) ≫ (pullbackObjUnitIso g).hom =
+      (pullbackObjUnitIso f).hom := by
+  subst g
+  simp only [pullbackCongr, eqToIso_refl, Iso.refl_hom, NatTrans.id_app,
+    Category.id_comp]
+
+end Unit
+
+section Monoidal
+
+variable (f : X ⟶ Y)
+
+/-- Pushforward of modules along a morphism of schemes is lax monoidal
+(`TauCeti.SheafOfModules.pushforwardLaxMonoidal`): its tensor map `f_* M ⊗ f_* N ⟶ f_* (M ⊗ N)`
+is induced by `m ⊗ n ↦ m ⊗ n` on sections, and its unit map `𝒪_Y ⟶ f_* 𝒪_X` is given by `f` on
+sections (`pushforward_ε`). -/
+instance pushforwardLaxMonoidal : (pushforward f).LaxMonoidal :=
+  TauCeti.SheafOfModules.pushforwardLaxMonoidal f.toRingCatSheafHom
+
+/-- The unit map `𝒪_Y ⟶ f_* 𝒪_X` of the pushforward of modules is given by `f` on sections. -/
+@[simp]
+lemma pushforward_ε :
+    Functor.LaxMonoidal.ε (pushforward f) =
+      SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom :=
+  TauCeti.SheafOfModules.pushforward_ε f.toRingCatSheafHom
+
+/-- Pullback of modules along a morphism of schemes is oplax monoidal, as the left adjoint of the
+lax monoidal pushforward: it carries comparison maps `f^* (M ⊗ N) ⟶ f^* M ⊗ f^* N`, and its unit
+map is `pullbackObjUnitIso f` (`pullback_η`). The comparison maps are the mates of the tensor
+map of pushforward (`pullback_δ`). -/
+instance pullbackOplaxMonoidal : (pullback f).OplaxMonoidal :=
+  (pullbackPushforwardAdjunction f).leftAdjointOplaxMonoidal
+
+/-- The pullback--pushforward adjunction of modules along a morphism of schemes is compatible with
+the oplax monoidal structure of pullback and the lax monoidal structure of pushforward. -/
+instance isMonoidal_pullbackPushforwardAdjunction :
+    (pullbackPushforwardAdjunction f).IsMonoidal :=
+  inferInstanceAs (letI := (pullbackPushforwardAdjunction f).leftAdjointOplaxMonoidal
+    (pullbackPushforwardAdjunction f).IsMonoidal)
+
+/-- The unit map `f^* 𝒪_Y ⟶ 𝒪_X` of the pullback of modules is the isomorphism
+`pullbackObjUnitIso f`. -/
+@[simp]
+lemma pullback_η : Functor.OplaxMonoidal.η (pullback f) = (pullbackObjUnitIso f).hom := by
+  rw [pullbackOplaxMonoidal, Adjunction.leftAdjointOplaxMonoidal_η, pushforward_ε]
+  exact (Equiv.symm_apply_eq _).mpr
+    (pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitIso_hom f).symm
+
+/-- The tensor map `f^* (M ⊗ N) ⟶ f^* M ⊗ f^* N` of the pullback of modules is the mate, under the
+pullback--pushforward adjunction, of the composite of the units `M ⟶ f_* f^* M` and
+`N ⟶ f_* f^* N` with the tensor map `f_* f^* M ⊗ f_* f^* N ⟶ f_* (f^* M ⊗ f^* N)` of
+pushforward. -/
+lemma pullback_δ (M N : Y.Modules) :
+    Functor.OplaxMonoidal.δ (pullback f) M N =
+      ((pullbackPushforwardAdjunction f).homEquiv _ _).symm
+        (((pullbackPushforwardAdjunction f).unit.app M ⊗ₘ
+            (pullbackPushforwardAdjunction f).unit.app N) ≫
+          Functor.LaxMonoidal.μ (pushforward f) _ _) :=
+  Adjunction.leftAdjointOplaxMonoidal_δ _ _ _
+
+instance : IsIso (Functor.OplaxMonoidal.η (pullback f)) := by
+  rw [pullback_η]
+  infer_instance
+
+end Monoidal
 
 section Over
 
@@ -84,15 +336,8 @@ instance : (pullbackOver f V).IsLeftAdjoint := by
 /-- Pullback read on slice sites preserves the structure sheaf. -/
 def pullbackOverUnitIso :
     SheafOfModules.unit _ ≅ (pullbackOver f V).obj (SheafOfModules.unit _) :=
-  -- Mathlib's invertibility of `pullbackObjUnitToUnit` is stated for pushforwards known to be
-  -- right adjoints; the adjunction is recorded for `Scheme.Modules.pushforward`.
-  let : (SheafOfModules.pushforward.{u} (f ∣_ V).toRingCatSheafHom).IsRightAdjoint :=
-    inferInstanceAs (pushforward (f ∣_ V)).IsRightAdjoint
-  have : IsIso (SheafOfModules.pullbackObjUnitToUnit (f ∣_ V).toRingCatSheafHom) :=
-    SheafOfModules.instIsIsoPullbackObjUnitToUnitOfFinal _
   (overEquiv (f ⁻¹ᵁ V)).unitIso.app _ ≪≫
-    (overEquiv (f ⁻¹ᵁ V)).inverse.mapIso
-      (asIso (SheafOfModules.pullbackObjUnitToUnit (f ∣_ V).toRingCatSheafHom)).symm
+    (overEquiv (f ⁻¹ᵁ V)).inverse.mapIso (pullbackObjUnitIso (f ∣_ V)).symm
 
 /-- Pullback read on slice sites computes the restriction of the pullback: it sends `M.over V`
 to `(f^* M).over (f⁻¹ V)`. -/

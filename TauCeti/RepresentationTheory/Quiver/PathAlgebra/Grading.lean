@@ -200,7 +200,11 @@ variable (k wt)
 noncomputable def gradeByBasis (m : M) :
     Module.Basis {x : Quiver.TotalPath Q // x.2.2.addWeight wt = m} k (gradeBy k wt m) :=
   (Module.Basis.span
-      (linearIndependent_ofPath k Q fun x : Quiver.TotalPath Q => x.2.2.addWeight wt = m)).map
+      (by
+        simpa only [Function.comp_def] using
+          (linearIndependent_ofPath k Q).comp
+            (Subtype.val : {x : Quiver.TotalPath Q // x.2.2.addWeight wt = m} → _)
+            Subtype.val_injective)).map
     (LinearEquiv.ofEq _ _ (gradeBy_eq_span_range k wt m).symm)
 
 variable {k wt}
@@ -397,6 +401,31 @@ theorem decompose_ofPath_gradeBy (x : Quiver.TotalPath Q) :
         ⟨ofPath x, ofPath_mem_gradeBy wt x⟩ :=
   DirectSum.decompose_of_mem _ (ofPath_mem_gradeBy wt x)
 
+/-- **Two arrow weights are compatible**: the `wt`-homogeneous components of an element which is
+homogeneous of degree `m` for a second weight `wt'` are again homogeneous of degree `m` for
+`wt'`, because every basis path is homogeneous for both weights at once. -/
+theorem isHomogeneous_gradeBy_gradeBy {M' : Type*} [AddMonoid M']
+    (wt' : ∀ {a b : Q}, (a ⟶ b) → M') (m : M') :
+    SetLike.IsHomogeneous (gradeBy k wt) (gradeBy k wt' m) := by
+  intro n x hx
+  rw [gradeBy] at hx
+  induction hx using Submodule.span_induction with
+  | mem y hy =>
+    obtain ⟨y, hy, rfl⟩ := hy
+    rw [decompose_ofPath_gradeBy, DirectSum.coe_of_apply]
+    split_ifs
+    · exact ofPath_mem_gradeBy_of_addWeight hy
+    · exact zero_mem _
+  | zero =>
+    rw [decompose_zero, DirectSum.zero_apply, Submodule.coe_zero]
+    exact zero_mem _
+  | add y z _ _ hy hz =>
+    rw [decompose_add, DirectSum.add_apply, Submodule.coe_add]
+    exact add_mem hy hz
+  | smul r y _ hy =>
+    rw [decompose_smul, DirectSum.smul_apply, Submodule.coe_smul]
+    exact Submodule.smul_mem _ r hy
+
 end GradedAlgebra
 
 /-! ### The path-length grading -/
@@ -482,7 +511,11 @@ variable (k Q)
 noncomputable def gradeBasis (n : ℕ) :
     Module.Basis {x : Quiver.TotalPath Q // x.2.2.length = n} k (grade k Q n) :=
   (Module.Basis.span
-      (linearIndependent_ofPath k Q fun x : Quiver.TotalPath Q => x.2.2.length = n)).map
+      (by
+        simpa only [Function.comp_def] using
+          (linearIndependent_ofPath k Q).comp
+            (Subtype.val : {x : Quiver.TotalPath Q // x.2.2.length = n} → _)
+            Subtype.val_injective)).map
     (LinearEquiv.ofEq _ _ (grade_eq_span_range k Q n).symm)
 
 variable {k Q}

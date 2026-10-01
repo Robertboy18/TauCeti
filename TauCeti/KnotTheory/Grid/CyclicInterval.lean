@@ -48,7 +48,9 @@ directions before taking products.
 * `TauCeti.Grid.cIoo_image_rev`: reversing a clockwise open arc by `Fin.rev` gives the clockwise
   open arc with reversed, exchanged endpoints.
 * `TauCeti.Grid.mem_cIoo_finRotate_finRotate`, `TauCeti.Grid.mem_cIco_finRotate_finRotate`: the
-  cyclic permutation `finRotate n` preserves the open and half-open arcs.
+  cyclic permutation `finRotate n` preserves the open and half-open arcs, as do its powers
+  (`TauCeti.Grid.mem_cIoo_finRotate_pow_finRotate_pow`,
+  `TauCeti.Grid.mem_cIco_finRotate_pow_finRotate_pow`).
 * `TauCeti.Grid.finRotate_ne_self`: on a cycle of length at least two, the cyclic successor has
   no fixed point.
 * `TauCeti.Grid.cIoo_finRotate_eq_empty`, `TauCeti.Grid.cIco_eq_singleton_iff`: the arcs from a
@@ -75,6 +77,15 @@ directions before taking products.
 * `TauCeti.Grid.mem_cIco_succ_succAbove_succ_succAbove_iff`: after inserting a point immediately
   after `i`, a half-open arc between old points is the preimage of the old arc under the collapse
   `Fin.predAbove i`.
+* `TauCeti.Grid.cIco_subset_of_mem_cIoo`: a half-open arc starting strictly inside another is
+  contained in it.
+* `TauCeti.Grid.mem_cIco_of_mem_cIco_of_mem_cIoo`: the membership form of that nesting.
+* `TauCeti.Grid.notMem_cIco_finRotate_left`: a point is never in the half-open arc starting at
+  its own cyclic successor.
+* `TauCeti.Grid.self_mem_cIco_finRotate`: a point always lies in a nondegenerate half-open arc
+  ending at its own cyclic successor.
+* `TauCeti.Grid.notMem_cIco_of_cIco_union`: a point missing both halves of a half-open arc
+  cut at an interior point misses the whole arc.
 
 ## References
 
@@ -631,6 +642,26 @@ theorem mem_cIco_finRotate_finRotate (a b x : Fin n) :
       Finset.mem_insert, Finset.mem_insert, (finRotate n).injective.eq_iff,
       mem_cIoo_finRotate_finRotate]
 
+/-- Powers of the cyclic permutation `finRotate n` preserve and reflect membership in open cyclic
+intervals. -/
+theorem mem_cIoo_finRotate_pow_finRotate_pow (k : ℕ) (a b x : Fin n) :
+    (finRotate n ^ k) x ∈ cIoo ((finRotate n ^ k) a) ((finRotate n ^ k) b) ↔ x ∈ cIoo a b := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [pow_succ', Equiv.Perm.mul_apply, Equiv.Perm.mul_apply, Equiv.Perm.mul_apply,
+      mem_cIoo_finRotate_finRotate, ih]
+
+/-- Powers of the cyclic permutation `finRotate n` preserve and reflect membership in half-open
+cyclic intervals. -/
+theorem mem_cIco_finRotate_pow_finRotate_pow (k : ℕ) (a b x : Fin n) :
+    (finRotate n ^ k) x ∈ cIco ((finRotate n ^ k) a) ((finRotate n ^ k) b) ↔ x ∈ cIco a b := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [pow_succ', Equiv.Perm.mul_apply, Equiv.Perm.mul_apply, Equiv.Perm.mul_apply,
+      mem_cIco_finRotate_finRotate, ih]
+
 /-- Replacing a point by its cyclic successor preserves membership in a half-open cyclic interval
 when the successor is not an endpoint. -/
 theorem mem_cIco_finRotate_iff_of_ne {a b c : Fin n}
@@ -757,6 +788,100 @@ theorem castSucc_mem_cIco_succ {a : Fin (n + 1)} {i : Fin n} (h : a ≠ i.succ) 
   rw [ne_eq, ← Fin.val_inj, Fin.val_succ] at h
   simp only [mem_cIco, ne_eq, ← Fin.val_inj, Fin.val_castSucc, Fin.val_succ]
   split_ifs <;> omega
+
+/-- A half-open cyclic interval starting strictly inside another is contained in it. -/
+theorem cIco_subset_of_mem_cIoo {a b r : Fin n}
+    (h : b ∈ cIoo a r) : cIco b r ⊆ cIco a r := by
+  have hunion := cIco_union_cIco_eq_cIco_of_mem_cIoo h
+  intro x hx
+  rw [← hunion]
+  exact Finset.mem_union.mpr (Or.inr hx)
+
+/-- Moving the initial endpoint of a half-open cyclic interval covers it by the interval from the
+new initial endpoint and the interval between the two initial endpoints: every point of
+`cIco t u` lies in `cIco w u ∪ cIco t w`. With no hypothesis on `w` the two intervals may overlap,
+so this is a covering by a union, not a partition; the strict cut is
+`cIco_union_cIco_eq_cIco_of_mem_cIoo`. -/
+theorem cIco_subset_cIco_union_cIco {t w u : Fin n} :
+    cIco t u ⊆ cIco w u ∪ cIco t w := by
+  intro x h
+  by_cases htu : t = u
+  · rw [htu] at h
+    simp at h
+  by_cases hwu : w = u
+  · exact Finset.mem_union.mpr (Or.inr (by rw [hwu]; exact h))
+  by_cases htw : t = w
+  · exact Finset.mem_union.mpr (Or.inl (by rw [← htw]; exact h))
+  simp only [Finset.mem_union, mem_cIco] at ⊢
+  simp only [mem_cIco] at h
+  split_ifs at h ⊢ <;> omega
+
+/-- Interval nesting: a point in `cIco A B` with `B` strictly inside `cIco A C` lies in
+`cIco A C`. This is the `cIco`-membership version of `cIco_subset_of_mem_cIoo`. -/
+theorem mem_cIco_of_mem_cIco_of_mem_cIoo {A B C s : Fin n}
+    (hmem : s ∈ cIco A B) (hB : B ∈ cIoo A C) :
+    s ∈ cIco A C := by
+  have hunion := cIco_union_cIco_eq_cIco_of_mem_cIoo hB
+  rw [← hunion]
+  exact Finset.mem_union.mpr (Or.inl hmem)
+
+/-- A point is never in the half-open cyclic interval starting at its own successor.
+Going clockwise from `c + 1`, the point `c` is the last point reached — only after a full
+cycle. The half-open arc `cIco (c + 1) r` stops before `r`, hence before completing the
+cycle, so it never reaches `c`.
+Stated with `c + 1` rather than `finRotate n c` so the left-hand side is already
+in simp normal form (`finRotate_apply` would otherwise rewrite it). The `NeZero n`
+instance needed for `c + 1` is supplied locally from `c` itself (as in `finRotate_apply`),
+so no typeclass hypothesis is required. -/
+@[simp high]
+theorem notMem_cIco_finRotate_left (c r : Fin n) :
+    haveI := c.neZero; c ∉ cIco (c + 1) r := by
+  match n with
+  | 0 => exact c.elim0
+  | n + 1 =>
+    have h : c + 1 = finRotate (n + 1) c := (finRotate_apply c).symm
+    rw [h, mem_cIco]
+    rintro ⟨hne, hmem⟩
+    have hc := c.isLt
+    have hr := r.isLt
+    have hne' : (finRotate (n + 1) c).val ≠ r.val := fun h => hne (Fin.ext h)
+    by_cases hlast : c = Fin.last n
+    · -- `c` is last: `finRotate` wraps to 0
+      have hrot : (finRotate (n + 1) c).val = 0 := by
+        rw [coe_finRotate]
+        simp [hlast]
+      have hcval : c.val = n := by simp [hlast]
+      rw [hrot] at hmem hne'
+      split_ifs at hmem with h <;> omega
+    · -- `c` is not last: `finRotate` increments by 1
+      have hrot : (finRotate (n + 1) c).val = c.val + 1 :=
+        coe_finRotate_of_ne_last hlast
+      rw [hrot] at hmem hne'
+      split_ifs at hmem with h <;> omega
+
+/-- A point lies in every nondegenerate half-open cyclic interval ending at its own cyclic
+successor: going clockwise, `a` is the last point reached before `finRotate n a`, so any arc
+that stops there and does not start there has already passed through `a`. -/
+theorem self_mem_cIco_finRotate {a c : Fin n} (h : c ≠ finRotate n a) :
+    a ∈ cIco c (finRotate n a) := by
+  have hmem : a ∈ cIco c (finRotate n a) ∪ cIco (finRotate n a) c := by
+    rw [cIco_union_swap h]
+    exact Finset.mem_univ a
+  -- The complementary arc starts at the cyclic successor of `a`, so it misses `a`: that is
+  -- `notMem_cIco_finRotate_left`, which `simp` applies once `finRotate n a` is normalized.
+  exact (Finset.mem_union.mp hmem).resolve_right (by simp)
+
+/-- A point missing both halves of a half-open cyclic interval cut at an interior point
+misses the whole interval. -/
+theorem notMem_cIco_of_cIco_union {p r₀ r₁ s : Fin n}
+    (h₁ : p ∉ cIco r₀ r₁) (h₂ : p ∉ cIco r₁ s) (hcyc : r₁ ∈ cIoo r₀ s) :
+    p ∉ cIco r₀ s := by
+  -- Rewrite the goal interval as the union of the two halves, then case on the union.
+  intro hmem
+  rw [← cIco_union_cIco_eq_cIco_of_mem_cIoo hcyc] at hmem
+  rcases Finset.mem_union.mp hmem with h | h
+  · exact h₁ h
+  · exact h₂ h
 
 end Grid
 

@@ -14,6 +14,7 @@ import TauCeti.Algebra.Group.Units.Basic
 import TauCeti.Algebra.Group.Subgroup.Ker
 import TauCeti.LinearAlgebra.CliffordAlgebra.CartanDieudonne
 import TauCeti.LinearAlgebra.CliffordAlgebra.Basic
+import TauCeti.LinearAlgebra.QuadraticForm.CartanDieudonne.SpecialOrthogonal
 
 /-!
 # The spinor norm
@@ -54,17 +55,6 @@ universe u v w
 variable {K : Type u} {V : Type v} [Field K] [AddCommGroup V] [Module K V]
   [FiniteDimensional K V] [Invertible (2 : K)]
 
-private theorem lipschitzToOrthogonal_surjective_of_invertible
-    (Q : QuadraticForm K V) (hQ : Q.Nondegenerate) :
-    Function.Surjective (lipschitzToOrthogonal Q) := by
-  have hf : @lipschitzToOrthogonal K V _ _ _ Q (inferInstance : Invertible (2 : K)) =
-      @lipschitzToOrthogonal K V _ _ _ Q
-        (invertibleOfNonzero (NeZero.ne (2 : K))) := by
-    congr 1
-    exact Subsingleton.elim _ _
-  rw [hf]
-  exact lipschitzToOrthogonal_surjective Q hQ
-
 /-- The Clifford norm of an element acting trivially on the quadratic space is a square. -/
 theorem isSquare_cliffordNorm_of_mem_ker (Q : QuadraticForm K V) (hQ : Q.Nondegenerate)
     (x : lipschitzGroup Q) (hx : x ∈ MonoidHom.ker (lipschitzToOrthogonal Q)) :
@@ -98,7 +88,7 @@ noncomputable def orthogonalSpinorNorm (Q : QuadraticForm K V) (hQ : Q.Nondegene
     QuadraticMap.orthogonalGroup Q →* Multiplicative (SquareClassGroup K) := by
   exact MonoidHom.liftOfSurjective
     (G₃ := Multiplicative (SquareClassGroup K))
-    (lipschitzToOrthogonal Q) (lipschitzToOrthogonal_surjective_of_invertible Q hQ)
+    (lipschitzToOrthogonal Q) (lipschitzToOrthogonal_surjective Q hQ)
     (spinorNormDescentData Q hQ)
 
 /-- The descended spinor norm evaluates on a Lipschitz action through its Clifford norm. -/
@@ -112,8 +102,8 @@ theorem orthogonalSpinorNorm_lipschitzToOrthogonal (Q : QuadraticForm K V)
     MonoidHom.liftOfRightInverse_comp_apply
       (G₃ := Multiplicative (SquareClassGroup K))
       (lipschitzToOrthogonal Q)
-      (Function.surjInv (lipschitzToOrthogonal_surjective_of_invertible Q hQ))
-      (Function.rightInverse_surjInv (lipschitzToOrthogonal_surjective_of_invertible Q hQ))
+      (Function.surjInv (lipschitzToOrthogonal_surjective Q hQ))
+      (Function.rightInverse_surjInv (lipschitzToOrthogonal_surjective Q hQ))
       (spinorNormDescentData Q hQ) x
 
 /-- The spinor norm of an orthogonal reflection is the square class of the norm of its
@@ -133,20 +123,12 @@ theorem orthogonalSpinorNorm_eq_one_of_isSquare_apply
     (Q : QuadraticForm K V) (hQ : Q.Nondegenerate)
     (hsq : ∀ v [Invertible (Q v)], IsSquare (Q v)) :
     orthogonalSpinorNorm Q hQ = 1 := by
-  have hker : MonoidHom.ker (orthogonalSpinorNorm Q hQ) = ⊤ :=
-    QuadraticMap.subgroup_eq_top_of_reflection_mem Q hQ
-      (MonoidHom.ker (orthogonalSpinorNorm Q hQ)) fun v _ => by
-        rw [MonoidHom.mem_ker, orthogonalSpinorNorm_reflectionOrthogonal]
-        have hsquareUnit : IsSquare (unitOfInvertible (Q v)) := by
-          apply isSquare_units_val_iff.mp
-          simpa only [val_unitOfInvertible] using hsq v
-        simpa using hsquareUnit
-  apply MonoidHom.ext
-  intro g
-  rw [MonoidHom.one_apply]
-  apply MonoidHom.mem_ker.mp
-  rw [hker]
-  exact Subgroup.mem_top g
+  refine QuadraticMap.orthogonalGroup_hom_ext Q hQ fun v _ ↦ ?_
+  rw [orthogonalSpinorNorm_reflectionOrthogonal, MonoidHom.one_apply]
+  have hsquareUnit : IsSquare (unitOfInvertible (Q v)) := by
+    apply isSquare_units_val_iff.mp
+    simpa only [val_unitOfInvertible] using hsq v
+  simpa using hsquareUnit
 
 /-- The spinor norm on `SO(Q)`, obtained by restricting the orthogonal spinor norm. -/
 noncomputable def spinorNorm (Q : QuadraticForm K V) (hQ : Q.Nondegenerate) :
@@ -175,30 +157,26 @@ private theorem exists_spinToSpecialOrthogonal_eq_of_spinorNorm_eq_one [Nontrivi
     (Q : QuadraticForm K V) (hQ : Q.Nondegenerate)
     (g : QuadraticMap.specialOrthogonalGroup Q) (hg : spinorNorm Q hQ g = 1) :
     ∃ s : spinGroup Q, spinToSpecialOrthogonal Q s = g := by
-  obtain ⟨x, hx⟩ := lipschitzToOrthogonal_surjective_of_invertible Q hQ
+  obtain ⟨x, hx⟩ := lipschitzToOrthogonal_surjective Q hQ
     (_root_.QuadraticMap.specialOrthogonalToOrthogonal Q g)
   have hsquare : IsSquare (cliffordNorm Q x) := by
     have hsquareClass : squareClassHom (cliffordNorm Q x) = 1 := by
       rw [← orthogonalSpinorNorm_lipschitzToOrthogonal Q hQ, hx,
         ← spinorNorm_apply, hg]
     simpa using hsquareClass
-  obtain ⟨a, ha⟩ := hsquare
+  have hxeven : ((x : (CliffordAlgebra Q)ˣ) : CliffordAlgebra Q) ∈ evenOdd Q 0 := by
+    rw [← even_toSubmodule, Subalgebra.mem_toSubmodule]
+    exact mem_even_of_det_lipschitzToOrthogonal_eq_one Q x (by
+      rw [hx]
+      exact _root_.QuadraticMap.orthogonalDet_specialOrthogonalToOrthogonal g)
   have hv : ∃ v, IsUnit (Q v) := hQ.exists_isUnit
-  let y : lipschitzGroup Q := scalarUnits Q hv a⁻¹ * x
-  have hynorm : cliffordNorm Q y = 1 := by
-    dsimp only [y]
-    rw [map_mul, cliffordNorm_scalarUnits, ha]
-    simp
+  obtain ⟨a, hyspin⟩ :=
+    (exists_scalarUnits_mul_mem_spinGroup_iff hv x).2 ⟨hxeven, hsquare⟩
+  let y : lipschitzGroup Q := scalarUnits Q hv a * x
   have hyact : lipschitzToOrthogonal Q y =
       _root_.QuadraticMap.specialOrthogonalToOrthogonal Q g := by
     dsimp only [y]
     rw [map_mul, lipschitzToOrthogonal_scalarUnits, hx, one_mul]
-  have hyeven : ((y : (CliffordAlgebra Q)ˣ) : CliffordAlgebra Q) ∈ even Q :=
-    mem_even_of_det_lipschitzToOrthogonal_eq_one Q y (by
-      rw [hyact]
-      exact _root_.QuadraticMap.orthogonalDet_specialOrthogonalToOrthogonal g)
-  have hyspin : ((y : (CliffordAlgebra Q)ˣ) : CliffordAlgebra Q) ∈ spinGroup Q :=
-    (mem_spinGroup_iff_mem_even_and_cliffordNorm_eq_one y).2 ⟨hyeven, hynorm⟩
   let s : spinGroup Q := ⟨((y : (CliffordAlgebra Q)ˣ) : CliffordAlgebra Q), hyspin⟩
   refine ⟨s, ?_⟩
   have hsl : pinToLipschitz Q (spinToPin Q s) = y := by

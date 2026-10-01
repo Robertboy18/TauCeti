@@ -54,7 +54,8 @@ conjugation action.
   cardinality of a `Finset`, which makes it computable.
 * `ConjClasses.card_carrier_dvd_card`: the size of a conjugacy class divides the order of
   the group, with `ConjClasses.card_carrier_cast_ne_zero` the consequence that the size of
-  a class is nonzero in any semiring where the group order is.
+  a class is nonzero in any semiring where the group order is, and
+  `ConjClasses.card_carrier_div_card_ne_zero` the nonvanishing of `#C / #G` for a finite group.
 * `ConjClasses.pow`: the power operation itself, with `C ^ j` its notation.
 * `ConjClasses.mem_pow_iff`: an element lies in `C ^ j` exactly when it is a
   `j`-th power of a member of `C`, with `ConjClasses.mk_pow` the computation rule.
@@ -62,8 +63,17 @@ conjugation action.
   `ConjClasses.pow_mul`: the identity and composition laws for that power.
 * `ConjClasses.map_mk`: the computation rule for `ConjClasses.map` on representatives,
   with `ConjClasses.map_pow` the consequence that the power is natural in the monoid.
+* `MulAut.smul_conjClasses_mk`: an automorphism acts on a conjugacy class by
+  mapping its representative; inner automorphisms fix every class.
 * `ConjClasses.mk_ne_mk_of_orderOf_ne`: elements of different orders lie in different conjugacy
   classes.
+
+The automorphism action lemmas are in the `MulAut` namespace, so dot notation applies:
+`φ.smul_conjClasses_mk x` computes on a representative,
+`φ.smul_conjClasses_pow C n` handles powers, and
+`φ.smul_conjClasses_inv C` handles inversion.
+The representative and power formulas apply to monoids; the inversion formula and
+triviality of the inner action require a group.
 
 ## Implementation notes
 
@@ -217,6 +227,13 @@ nonzero: it divides that order. -/
 theorem card_carrier_cast_ne_zero {R : Type*} [Semiring R] (C : ConjClasses G)
     (h : (Nat.card G : R) ≠ 0) : (Nat.card C.carrier : R) ≠ 0 :=
   ne_zero_of_dvd_ne_zero h (Nat.cast_dvd_cast (card_carrier_dvd_card C))
+
+/-- The proportion `#C / #G` of a conjugacy class is nonzero in a division semiring whenever
+the order of the group is nonzero there. -/
+theorem card_carrier_div_card_ne_zero {R : Type*} [DivisionSemiring R]
+    (C : ConjClasses G) (hG : (Nat.card G : R) ≠ 0) :
+    (Nat.card C.carrier : R) / Nat.card G ≠ 0 :=
+  div_ne_zero (C.card_carrier_cast_ne_zero hG) hG
 
 end ConjClasses
 
@@ -440,3 +457,82 @@ private theorem pow_two_cyclicFour :
     mk_ne_mk_of_orderOf_ne (by rw [horder, horderSquare]; decide)⟩
 
 end ConjClasses
+
+namespace TauCeti
+
+variable {G : Type*}
+
+section Monoid
+
+variable [Monoid G]
+
+/-- An automorphism acts on conjugacy classes by mapping representatives. -/
+instance instMulActionMulAutConjClasses : MulAction (MulAut G) (ConjClasses G) where
+  smul φ c := ConjClasses.map φ.toMonoidHom c
+  one_smul c := by
+    obtain ⟨x, rfl⟩ := ConjClasses.exists_rep c
+    -- Expose the action being constructed, so the representative formula applies.
+    change ConjClasses.map (1 : MulAut G).toMonoidHom (ConjClasses.mk x) =
+      ConjClasses.mk x
+    rw [ConjClasses.map_mk]
+    simp
+  mul_smul φ ψ c := by
+    obtain ⟨x, rfl⟩ := ConjClasses.exists_rep c
+    -- Expose the action being constructed and multiplication in `MulAut`.
+    change ConjClasses.map (φ * ψ).toMonoidHom (ConjClasses.mk x) =
+      ConjClasses.map φ.toMonoidHom
+        (ConjClasses.map ψ.toMonoidHom (ConjClasses.mk x))
+    simp only [ConjClasses.map_mk]
+    exact congrArg ConjClasses.mk (MulAut.mul_apply G φ ψ x)
+
+end Monoid
+
+end TauCeti
+
+namespace MulAut
+
+variable {G : Type*}
+
+section Monoid
+
+variable [Monoid G]
+
+/-- The automorphism action is computed on representatives. -/
+@[simp]
+theorem smul_conjClasses_mk (φ : MulAut G) (x : G) :
+    φ • ConjClasses.mk x = ConjClasses.mk (φ x) :=
+  ConjClasses.map_mk _ x
+
+/-- Automorphisms commute with powering conjugacy classes. -/
+@[simp]
+theorem smul_conjClasses_pow (φ : MulAut G) (c : ConjClasses G) (n : ℕ) :
+    φ • (c ^ n) = (φ • c) ^ n :=
+  ConjClasses.map_pow φ.toMonoidHom c n
+
+end Monoid
+
+variable [Group G]
+
+/-- Automorphisms commute with inversion of conjugacy classes. -/
+@[simp]
+theorem smul_conjClasses_inv (φ : MulAut G) (c : ConjClasses G) :
+    φ • c⁻¹ = (φ • c)⁻¹ := by
+  obtain ⟨x, rfl⟩ := ConjClasses.exists_rep c
+  simp only [ConjClasses.inv_mk, smul_conjClasses_mk, map_inv]
+
+end MulAut
+
+namespace TauCeti
+
+variable {G : Type*} [Group G]
+
+/-- Inner automorphisms fix every conjugacy class. -/
+@[simp]
+theorem mulAut_conj_smul_conjClasses (g : G) (c : ConjClasses G) :
+    MulAut.conj g • c = c := by
+  obtain ⟨x, rfl⟩ := ConjClasses.exists_rep c
+  rw [MulAut.smul_conjClasses_mk]
+  exact (ConjClasses.mk_eq_mk_iff_isConj.mpr
+    (isConj_iff.mpr ⟨g, (MulAut.conj_apply g x).symm⟩)).symm
+
+end TauCeti

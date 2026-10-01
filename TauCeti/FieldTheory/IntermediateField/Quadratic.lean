@@ -133,6 +133,25 @@ theorem _root_.IntermediateField.finrank_sup_adjoin_simple_eq_mul_two
         rw [Module.finrank_mul_finrank]
     _ = Module.finrank K F * 2 := by rw [hfinL]
 
+/-- **A square root of a nonsquare radicand generates a quadratic extension.** If `x ^ 2 = a` for
+some `a ∈ K` that is not a square in `K`, then `[K(x) : K] = 2`: the square already lies in the
+base field, and nonsquareness of `a` is exactly what keeps `x` out of it.
+
+No assumption on the characteristic of `K` is needed: when `2 = 0` the extension is purely
+inseparable, `X ^ 2 - a` being `(X - x) ^ 2`, but it is still quadratic. -/
+theorem finrank_adjoin_simple_eq_two_of_not_isSquare {a : K} {x : L}
+    (hx : x ^ 2 = algebraMap K L a) (ha : ¬ IsSquare a) :
+    Module.finrank K (IntermediateField.adjoin K {x}) = 2 := by
+  have hx2 : x ^ 2 ∈ (⊥ : IntermediateField K L) := by
+    rw [hx]; exact IntermediateField.algebraMap_mem _ _
+  have hxb : x ∉ (⊥ : IntermediateField K L) := by
+    rw [IntermediateField.mem_bot]
+    rintro ⟨t, ht⟩
+    refine ha ⟨t, FaithfulSMul.algebraMap_injective K L ?_⟩
+    rw [map_mul, ht, ← sq, hx]
+  have h := (⊥ : IntermediateField K L).finrank_sup_adjoin_simple_eq_mul_two hx2 hxb
+  rwa [bot_sup_eq, IntermediateField.finrank_bot, one_mul] at h
+
 /-- **Same square class from a shared simple quadratic field.** Let `x` and `y` be square roots of
 `a` and `c` in a field extension `L / K` with `2 ≠ 0`. If `x ∉ K` and the simple extensions `K(x)`
 and `K(y)` coincide, then `a · c` is a square in `K`: two square roots generate the same quadratic
@@ -219,7 +238,7 @@ theorem exists_sq_mem_range_adjoin_simple_eq_of_finrank_eq_two [NeZero (2 : K)]
     refine bot_le.lt_of_ne fun h => ?_
     rw [← h, IntermediateField.finrank_bot] at hE
     omega
-  obtain ⟨y, hyE, hyb⟩ := SetLike.exists_of_lt hEbot
+  obtain ⟨y, hyE, hyb⟩ := IsConcreteLE.exists_of_lt hEbot
   obtain ⟨hEeq, hdeg⟩ := adjoin_simple_eq_of_finrank_eq_two hE hyE hyb
   have hEfin : FiniteDimensional K E := .of_finrank_pos (by omega)
   have hyint : IsIntegral K y := (IsIntegral.of_finite K (⟨y, hyE⟩ : E)).map E.val

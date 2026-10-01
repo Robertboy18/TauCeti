@@ -9,6 +9,7 @@ public import Mathlib.Algebra.Group.Prod
 public import Mathlib.Analysis.Normed.Module.Ball.Homeomorph
 public import Mathlib.Geometry.Manifold.ChartedSpace
 public import Mathlib.Topology.LocallyClosed
+public import TauCeti.Topology.OpenPartialHomeomorph.Constructions
 
 import TauCeti.Topology.Homeomorph.SetCongr
 
@@ -54,6 +55,8 @@ discs (topological sliceness) and for stating the annulus conjecture.
 ## Main definitions
 
 * `TauCeti.IsSliceChart`: an ambient chart flattening a set onto a model slice.
+* `TauCeti.IsSliceChart.subtypeChart`: the chart on a flattened set induced by a zero-slice chart,
+  with values in the tangential model.
 * `TauCeti.IsSliceEmbedding`: an embedding flattened onto a given model slice by ambient charts.
 * `TauCeti.IsLocallyFlat`: a locally flat embedding, the case of the standard coordinate slice.
 
@@ -79,6 +82,8 @@ discs (topological sliceness) and for stating the annulus conjecture.
   `TauCeti.IsLocallyFlat.of_compatible_isSliceChart`, the form of it that assumes only the
   compatible pair of charts.
 * `TauCeti.IsLocallyFlat.prodMap`: a product of locally flat embeddings is locally flat.
+* `TauCeti.IsLocallyFlat.prodMap_of_isOpenEmbedding`: the product of a locally flat embedding with
+  an open embedding is locally flat, with the same complementary model.
 * `TauCeti.isLocallyFlat_iff_isOpenEmbedding`: in codimension zero, locally flat means open.
 * `TauCeti.IsLocallyFlat.isLocallyClosed_range`: a locally flat image is locally closed, as soon as
   the origin of the complementary model is closed.
@@ -191,6 +196,82 @@ coordinates in the model slice. This is the pointwise form of `TauCeti.isSliceCh
 shape proofs use it, as an elimination rule at a single point. -/
 theorem mem_iff (h : IsSliceChart φ S A) {y : M} (hy : y ∈ φ.source) : y ∈ A ↔ φ y ∈ S :=
   isSliceChart_iff.1 h y hy
+
+section ZeroSlice
+
+variable {X Y Y' : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+  [TopologicalSpace Y'] [Zero Y'] {e : OpenPartialHomeomorph X (Y × Y')} {s : Set X}
+
+/-- The ambient inverse of a point on the zero slice belongs to the set flattened by a zero-slice
+chart. -/
+theorem symm_mk_zero_mem
+    (h : IsSliceChart e ((univ : Set Y) ×ˢ ({0} : Set Y')) s)
+    {y : Y} (hy : (y, (0 : Y')) ∈ e.target) : e.symm (y, 0) ∈ s :=
+  (h.mem_iff (e.map_target hy)).2 (by rw [e.right_inv hy]; simp)
+
+/-- On the flattened set, a zero-slice chart is recovered by reinserting the zero transverse
+coordinate after taking the first projection. -/
+theorem mk_fst_zero_eq
+    (h : IsSliceChart e ((univ : Set Y) ×ˢ ({0} : Set Y')) s)
+    {x : X} (hx : x ∈ e.source) (hxs : x ∈ s) : ((e x).1, (0 : Y')) = e x := by
+  have hz := (h.mem_iff hx).1 hxs
+  rw [Set.mem_prod, Set.mem_singleton_iff] at hz
+  exact Prod.ext rfl hz.2.symm
+
+/-- Restrict an ambient zero-slice chart to the flattened set and retain its tangential
+coordinate. -/
+noncomputable def subtypeChart
+    (h : IsSliceChart e ((univ : Set Y) ×ˢ ({0} : Set Y')) s) [Nonempty s] :
+    OpenPartialHomeomorph s Y :=
+  e.subtypeCoord s inferInstance (fun y : Y => (y, (0 : Y'))) Prod.fst h.symm_mk_zero_mem
+    h.mk_fst_zero_eq (fun _ _ => rfl) (continuous_id.prodMk continuous_const)
+    continuous_fst.continuousOn
+
+/-- The source of a zero-slice subtype chart is the part of the subtype in the ambient source. -/
+@[simp]
+theorem subtypeChart_source
+    (h : IsSliceChart e ((univ : Set Y) ×ˢ ({0} : Set Y')) s) [Nonempty s] :
+    h.subtypeChart.source = Subtype.val ⁻¹' e.source := by
+  unfold subtypeChart
+  apply OpenPartialHomeomorph.subtypeCoord_source
+
+/-- The target of a zero-slice subtype chart consists of the tangential coordinates whose
+zero-slice points lie in the ambient target. -/
+@[simp]
+theorem subtypeChart_target
+    (h : IsSliceChart e ((univ : Set Y) ×ˢ ({0} : Set Y')) s) [Nonempty s] :
+    h.subtypeChart.target = (fun y : Y => (y, (0 : Y'))) ⁻¹' e.target := by
+  unfold subtypeChart
+  apply OpenPartialHomeomorph.subtypeCoord_target
+
+/-- A zero-slice subtype chart reads the first coordinate of the ambient chart. -/
+@[simp]
+theorem subtypeChart_apply
+    (h : IsSliceChart e ((univ : Set Y) ×ˢ ({0} : Set Y')) s) [Nonempty s] (x : s) :
+    h.subtypeChart x = (e x.1).1 := by
+  unfold subtypeChart
+  apply OpenPartialHomeomorph.subtypeCoord_apply
+
+/-- On its source, a subtype chart recovers the ambient coordinates by reinserting the zero
+transverse coordinate. -/
+theorem subtypeChart_mk_zero_eq
+    (h : IsSliceChart e ((univ : Set Y) ×ˢ ({0} : Set Y')) s) [Nonempty s]
+    {x : s} (hx : x ∈ h.subtypeChart.source) :
+    (h.subtypeChart x, (0 : Y')) = e x := by
+  exact OpenPartialHomeomorph.subtypeCoord_parametrization_apply _ _ _ _ _ _ _ _ _ _ hx
+
+/-- On its target, the inverse of a zero-slice subtype chart is the ambient inverse evaluated on
+the zero slice. -/
+@[simp]
+theorem coe_subtypeChart_symm_apply
+    (h : IsSliceChart e ((univ : Set Y) ×ˢ ({0} : Set Y')) s) [Nonempty s]
+    {y : Y} (hy : (y, (0 : Y')) ∈ e.target) :
+    (h.subtypeChart.symm y : X) = e.symm (y, 0) := by
+  unfold subtypeChart
+  apply OpenPartialHomeomorph.coe_subtypeCoord_symm_apply
+  exact hy
+
+end ZeroSlice
 
 /-- On the source of a slice chart, the flattened set is cut out by the slice. -/
 theorem source_inter_eq (h : IsSliceChart φ S A) : φ.source ∩ A = φ.source ∩ φ ⁻¹' S :=
@@ -618,6 +699,26 @@ theorem prodMap {G G' : Type*} [TopologicalSpace G] [TopologicalSpace G'] [Zero 
     simp [Homeomorph.prodProdProdComm, Prod.ext_iff]
   have hprod := (IsSliceEmbedding.prodMap h h').transHomeomorph
     (Homeomorph.prodProdProdComm F F' G G')
+  rw [himage] at hprod
+  exact hprod
+
+/-- The product of a locally flat embedding with an open embedding into a space charted on `G` is
+locally flat, with the same complementary model: the product of a flattening chart with a chart of
+the open image is a flattening chart, once the new factor is moved into the tangential model. -/
+theorem prodMap_of_isOpenEmbedding {G P : Type*} [TopologicalSpace G] [TopologicalSpace P]
+    [ChartedSpace G P] {g : N' → P} (h : IsLocallyFlat F F' f) (hg : IsOpenEmbedding g) :
+    IsLocallyFlat (F × G) F' (Prod.map f g) := by
+  let e : (F × F') × G ≃ₜ (F × G) × F' :=
+    (Homeomorph.prodAssoc F F' G).trans
+      (((Homeomorph.refl F).prodCongr (Homeomorph.prodComm F' G)).trans
+        (Homeomorph.prodAssoc F G F').symm)
+  have himage : e '' (((univ : Set F) ×ˢ ({0} : Set F')) ×ˢ (univ : Set G)) =
+      (univ : Set (F × G)) ×ˢ ({0} : Set F') := by
+    rw [Homeomorph.image_eq_preimage_symm]
+    ext ⟨⟨a, c⟩, b⟩
+    simp [e, Homeomorph.prodAssoc, Homeomorph.prodComm, Homeomorph.prodCongr]
+  have hprod := (IsSliceEmbedding.prodMap h
+    (isSliceEmbedding_univ_of_isOpenEmbedding hg)).transHomeomorph e
   rw [himage] at hprod
   exact hprod
 

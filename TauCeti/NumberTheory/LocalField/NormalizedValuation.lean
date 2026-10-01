@@ -37,6 +37,8 @@ Its value at a nonzero `x` is `q ^ (-v_K(x))`, where `q` is the cardinality of t
 * `TauCeti.normalizedValuation`: the normalized valuation `v_K^×` of a nonarchimedean local
   field, as a homomorphism from the unit group to `Multiplicative ℤ`.
 * `TauCeti.normalizedValuationWithZero`: its zero-preserving extension to all of the field.
+* `TauCeti.normalizedValuationMod`: the normalized valuation reduced modulo `n`, as an additive
+  homomorphism `Additive Kˣ →+ ZMod n`.
 * `TauCeti.normalizedAbsoluteValue`: the normalized `ℚ≥0`-valued absolute value associated to
   `normalizedValuation`.
 
@@ -45,6 +47,8 @@ Its value at a nonzero `x` is `q ^ (-v_K(x))`, where `q` is the cardinality of t
 * `TauCeti.toAdd_normalizedValuation_eq_neg_log`: the translation between the multiplicative
   convention of `ValuativeRel.valuation` and the additive normalization.
 * `TauCeti.normalizedValuation_surjective`: the normalized value group is all of `ℤ`.
+* `TauCeti.normalizedValuationMod_surjective`: every residue modulo `n` is the normalized
+  valuation of a unit.
 * `TauCeti.normalizedValuation_irreducible`: an irreducible element of `𝒪[K]` has normalized
   valuation `1`; that is, uniformizers are exactly where the normalization is pinned.
 * `TauCeti.toAdd_normalizedValuation_eq_iff_valuation_eq_zpow` and its two one-sided forms: the
@@ -122,8 +126,7 @@ def normalizedValuationWithZero : K →*₀ ℤᵐ⁰ :=
       (valuation K).toMonoidWithZeroHom)
 
 private noncomputable def intValuation : Valuation K ℤᵐ⁰ :=
-  (valuation K).map (valueGroupWithZeroIsoInt K).toMonoidWithZeroHom
-    (valueGroupWithZeroIsoInt K).toOrderIso.monotone
+  (valuation K).map (valueGroupWithZeroIsoInt K : ValueGroupWithZero K →*₀o ℤᵐ⁰)
 
 private theorem intValuation_surjective : Function.Surjective (intValuation (K := K)) := by
   intro z
@@ -190,7 +193,8 @@ theorem _root_.Valuation.normalizedValuationWithZero_eq_inv_of_surjective
     normalizedValuationWithZero K x = (v x)⁻¹ := by
   have h : intValuation (K := K) x = v x :=
     DFunLike.congr_fun (Valuation.eq_of_isEquiv_of_surjective intValuation_surjective hv
-      ((Valuation.isEquiv_map_self_of_strictMono _ (valueGroupWithZeroIsoInt K).strictMono).trans
+      ((Valuation.isEquiv_map_self_of_strictMono _
+          (EquivLike.injective (valueGroupWithZeroIsoInt K))).trans
         (ValuativeRel.isEquiv _ _))) x
   rw [← h]
   simp [normalizedValuationWithZero, intValuation, invMonoidWithZeroHom]
@@ -331,6 +335,27 @@ theorem normalizedValuation_surjective : Function.Surjective (normalizedValuatio
     apply Multiplicative.toAdd.injective
     simpa [toAdd_normalizedValuation_eq_ord] using hx
 
+variable (K) in
+/-- The normalized valuation of `K` reduced modulo `n`, as an additive homomorphism
+`Additive Kˣ →+ ZMod n`. -/
+def normalizedValuationMod (n : ℕ) : Additive Kˣ →+ ZMod n :=
+  (Int.castAddHom (ZMod n)).comp (normalizedValuation K).toAdditiveLeft
+
+/-- The normalized valuation modulo `n` of `a ∈ Kˣ` is the residue of `v_K(a)`. -/
+@[simp]
+theorem normalizedValuationMod_ofMul (n : ℕ) (a : Kˣ) :
+    normalizedValuationMod K n (Additive.ofMul a) =
+      ((normalizedValuation K a).toAdd : ZMod n) := by
+  simp [normalizedValuationMod]
+
+/-- The normalized valuation modulo `n` is surjective. -/
+theorem normalizedValuationMod_surjective (n : ℕ) :
+    Function.Surjective (normalizedValuationMod K n) := by
+  intro m
+  obtain ⟨k, rfl⟩ := ZMod.intCast_surjective m
+  obtain ⟨a, ha⟩ := normalizedValuation_surjective (K := K) (Multiplicative.ofAdd k)
+  exact ⟨Additive.ofMul a, by rw [normalizedValuationMod_ofMul, ha, toAdd_ofAdd]⟩
+
 /-- An element of the ring of integers is a unit there exactly when its zero-preserving
 normalized valuation is one. -/
 theorem isUnit_iff_normalizedValuationWithZero_eq_one {u : 𝒪[K]} :
@@ -399,7 +424,7 @@ theorem exists_eq_valuation_zpow_of_irreducible {π : 𝒪[K]} (hπ : Irreducibl
     ∃ n : ℤ, (γ : ValueGroupWithZero K) = valuation K (π : K) ^ n := by
   have huni : (valuation K).IsUniformizer (π : K) :=
     Valuation.isUniformizer_of_maximalIdeal_eq_span (valuation K) hπ.maximalIdeal_eq
-  have hγ : γ ∈ MonoidWithZeroHom.valueGroup (.ofClass (valuation K)) := by
+  have hγ : γ ∈ (valuation K).valueGroup := by
     apply MonoidWithZeroHom.mem_valueGroup
     exact ValuativeRel.valuation_surjective (γ : ValueGroupWithZero K)
   rw [huni.zpowers_eq_valueGroup] at hγ

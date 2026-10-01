@@ -461,6 +461,15 @@ def HNegTwoAddEquivAbelianization :
   (HNegTwoAddEquivTensorOfIsTrivial (Rep.trivial ℤ G ℤ)).trans
     (TensorProduct.rid ℤ (Additive (Abelianization G))).toAddEquiv
 
+/-- The integral degree-`-2` identification is the tensor description followed by the right
+unitor. -/
+theorem HNegTwoAddEquivAbelianization_apply
+    (x : tateCohomology (Rep.trivial ℤ G ℤ) (-2)) :
+    HNegTwoAddEquivAbelianization x =
+      (TensorProduct.rid ℤ (Additive (Abelianization G)))
+        (HNegTwoAddEquivTensorOfIsTrivial (Rep.trivial ℤ G ℤ) x) :=
+  (rfl)
+
 -- `dsimp% only` on the left-hand side: see the comment on `H0π_eq_zero_iff`.
 /-- The degree-`-2` identification sends the homology class represented by `(g, 1)` to the class
 of `g` in the additive abelianization. -/
@@ -534,6 +543,18 @@ theorem H0LinearEquivTrivialIntZModCard_H0π (x : (Rep.trivial ℤ H ℤ).ρ.inv
   rw [Iso.toLinearEquiv_apply, H0π_comp_H0IsoNormQuotient_hom_apply,
     Submodule.Quotient.equiv_apply, Submodule.mapQ_apply]
   rfl
+
+/-- The class of `1 ∈ ℤ` in degree-zero Tate cohomology with trivial integral coefficients. -/
+def trivialTateHZeroOne : tateCohomology (Rep.trivial ℤ H ℤ) 0 :=
+  H0π (Rep.trivial ℤ H ℤ) ⟨1, by simp [Representation.invariants]⟩
+
+/-- The canonical degree-zero class corresponds to `1` modulo the order of the group. -/
+@[simp]
+theorem H0LinearEquivTrivialIntZModCard_trivialTateHZeroOne :
+    H0LinearEquivTrivialIntZModCard H (trivialTateHZeroOne H) = 1 := by
+  simpa only [trivialTateHZeroOne, Subtype.coe_mk, Int.cast_one] using
+    (H0LinearEquivTrivialIntZModCard_H0π H
+      ⟨1, by simp [Representation.invariants]⟩)
 
 /-- The order of degree-zero Tate cohomology with trivial integral coefficients is the order of
 the group. -/

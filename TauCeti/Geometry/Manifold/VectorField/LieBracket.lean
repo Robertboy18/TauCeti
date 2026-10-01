@@ -22,6 +22,8 @@ prerequisite for Deliverable A, Layer 1 of the Lie-groups roadmap.
 
 ## Main result
 
+* `TauCeti.mlieBracket_eq_lieBracket`: on a normed space, the manifold Lie bracket is the Lie
+  bracket of vector fields on that space.
 * `TauCeti.mlieBracket_const_model_space`: constant model-space vector fields have zero
   manifold Lie bracket.
 * `mvfderiv_mlieBracket`: a differential sends the manifold bracket to the commutator of
@@ -77,6 +79,13 @@ theorem mlieBracket_const_model_space (a b x : F) :
   change (0 : F) - 0 = 0
   simp
 
+/-- On a normed space, the manifold Lie bracket of two vector fields is their Lie bracket as maps
+of the space. -/
+theorem mlieBracket_eq_lieBracket {V W : ∀ y : F, TangentSpace 𝓘(𝕜, F) y} :
+    VectorField.mlieBracket 𝓘(𝕜, F) V W = VectorField.lieBracket 𝕜 V W := by
+  rw [← VectorField.mlieBracketWithin_univ, VectorField.mlieBracketWithin_eq_lieBracketWithin]
+  exact VectorField.lieBracketWithin_univ
+
 end TauCeti
 
 omit [CompleteSpace E] in
@@ -87,13 +96,14 @@ private theorem fderivWithin_chart_apply_mpullbackWithin
     (fderivWithin 𝕜 (p ∘ (extChartAt I x).symm) (Set.range I) z)
         (mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x).symm U (Set.range I) z) =
       mvfderiv I p ((extChartAt I x).symm z) (U ((extChartAt I x).symm z)) := by
-  rw [← mfderivWithin_eq_fderivWithin]
   -- `TangentSpace I _` is definitionally the model space `E`; no public rewrite lemma exposes the
   -- coordinate composition in the form needed by the chain rule.
-  change (mfderiv[Set.range I] (p ∘ (extChartAt I x).symm) z)
-    ((mfderiv[Set.range I] (extChartAt I x).symm z).inverse
-      (U ((extChartAt I x).symm z))) =
-    (mfderiv% p ((extChartAt I x).symm z)) (U ((extChartAt I x).symm z))
+  suffices h : (mfderiv[Set.range I] (p ∘ (extChartAt I x).symm) z)
+      ((mfderiv[Set.range I] (extChartAt I x).symm z).inverse
+        (U ((extChartAt I x).symm z))) =
+      (mfderiv% p ((extChartAt I x).symm z)) (U ((extChartAt I x).symm z)) by
+    rw [mfderivWithin_eq_fderivWithin] at h
+    exact h
   have hunique : UniqueMDiffAt[Set.range I] z := by
     rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
     exact I.uniqueDiffOn.uniqueDiffWithinAt (extChartAt_target_subset_range x hz)
@@ -250,7 +260,12 @@ theorem mvfderiv_mlieBracket {f : M → F} {V W : ∀ x : M, TangentSpace I x} {
   change (mfderiv% f x) ((mfderiv[Set.range I]
     (extChartAt I x).symm (extChartAt I x x)) Z) = _
   rw [← hchain_apply]
-  simp only [mfderivWithin_eq_fderivWithin]
+  rw [mfderivWithin_eq_fderivWithin]
+  -- The rewrite leaves `(fromTangentSpace _).symm ∘L fderivWithin … ∘L fromTangentSpace _`,
+  -- typed at the `TangentSpace` instances. Mathlib has no evaluation lemma for
+  -- `NormedSpace.fromTangentSpace` (it is `tangentSpaceCastModel`, the identity up to those
+  -- instances), so no rewrite strips it; the plain `fderivWithin` on `E` is reached by unfolding.
+  change (fderivWithin 𝕜 (f ∘ (extChartAt I x).symm) (Set.range I) (extChartAt I x x)) Z = _
   -- Pull the vector fields back and invoke the normed-space bracket identity.
   have hfcoord := contMDiffWithinAt_iff_contDiffWithinAt.mp
     (contMDiffAt_iff_source.mp (hf.of_le hn))

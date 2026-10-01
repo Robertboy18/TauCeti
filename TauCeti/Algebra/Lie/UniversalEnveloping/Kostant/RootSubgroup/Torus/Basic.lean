@@ -252,15 +252,9 @@ theorem repr_eq_zero_of_isCartanWeightVector
     (hwt : ∀ x, IsCartanWeightVector h ρ (wt x) ((b x : M) : V))
     {μ : κ → ℤ} {m : M} (hm : IsCartanWeightVector h ρ μ (m : V)) {y : η} (hy : wt y ≠ μ) :
     b.repr m y = 0 := by
-  obtain ⟨j, hj⟩ : ∃ j, wt y j ≠ μ j := Function.ne_iff.1 hy
-  have h1 : b.repr (kostantCartanOperator e h ρ M hM j m) y = wt y j * b.repr m y :=
-    repr_kostantCartanOperator e h ρ M hM b wt hwt j m y
-  have h2 : b.repr (kostantCartanOperator e h ρ M hM j m) y = μ j * b.repr m y := by
-    rw [kostantCartanOperator_apply_of_isCartanWeightVector e h ρ M hM hm j]
-    simp
-  have := sub_eq_zero.2 (h1.symm.trans h2)
-  rw [← sub_mul] at this
-  exact (mul_eq_zero.1 this).resolve_left (sub_ne_zero.2 hj)
+  exact b.repr_eq_zero_of_weight_ne
+    (fun x j => kostantCartanOperator_apply_of_isCartanWeightVector e h ρ M hM (hwt x) j)
+    (fun j => kostantCartanOperator_apply_of_isCartanWeightVector e h ρ M hM hm j) hy
 
 /-! ## Root operators on a stable subgroup -/
 
@@ -497,7 +491,7 @@ theorem mapScalarExtensionAutomorphisms_kostantTorusPoints (φ : A ⟶ B) (s : �
       kostantTorusPoints M b wt B fun j => Units.map φ.hom.toRingHom.toMonoidHom (s j) := by
   refine Units.ext (Module.Basis.ext (b.baseChange B) fun x => ?_)
   have hchar := congrArg Units.val (map_torusCharacter φ.hom.toRingHom s (wt x))
-  simp only [Units.coe_map, MonoidHom.coe_coe] at hchar
+  simp only [Units.coe_map, MonoidHom.coe_ofClass] at hchar
   rw [Module.Basis.baseChange_apply, GeneralLinear.mapScalarExtensionAutomorphisms_tmul,
     kostantTorusPoints_tmul_basis, kostantTorusPoints_tmul_basis, one_smul,
     GeneralLinear.scalarExtensionMap_tmul, map_mul]
@@ -563,7 +557,7 @@ theorem map_kostantTorusMatrix {B : Type*} [CommRing B] [Algebra ℤ B] (φ : A 
   refine Matrix.GeneralLinearGroup.ext fun r c => ?_
   simp only [Matrix.GeneralLinearGroup.map_apply, kostantTorusMatrix_apply, diagGL_apply]
   split_ifs
-  · rw [← map_torusCharacter φ s (wt r), Units.coe_map, MonoidHom.coe_coe]
+  · rw [← map_torusCharacter φ s (wt r), Units.coe_map, MonoidHom.coe_ofClass]
   · exact map_zero φ
 
 end Matrix

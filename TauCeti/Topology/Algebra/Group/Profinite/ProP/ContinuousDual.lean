@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Topology.Algebra.ContinuousMonoidHom
 public import TauCeti.Topology.Algebra.ContinuousZModDual
+public import TauCeti.Topology.Algebra.Group.Profinite.MaximalProP
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Frattini.Basic
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
 
@@ -33,8 +34,16 @@ Frattini quotient is an isomorphism of `𝔽_p`-vector spaces from the continuou
   of a continuous `𝔽_p`-valued character.
 * `TauCeti.proPFrattini_eq_iInf_ker`: the pro-`p` Frattini subgroup is the intersection of the
   kernels of the continuous `𝔽_p`-valued characters.
+* `ContinuousMonoidHom.ker_le_proPFrattini_of_forall_exists_comp_eq`: a continuous homomorphism
+  through which every continuous `𝔽_p`-valued character factors has kernel inside the pro-`p`
+  Frattini subgroup.
 * `TauCeti.frattiniQuotientDualEquiv`: the continuous `𝔽_p`-dual of the Frattini quotient is the
   continuous `𝔽_p`-dual of `G`.
+* `TauCeti.continuousZModDualMap_quotientMk_bijective`: for a normal subgroup `N ≤ Φ(G)`, the
+  continuous `𝔽_p`-dual of `G ⧸ N` is the continuous `𝔽_p`-dual of `G`, by precomposition with the
+  quotient map.
+* `TauCeti.maximalProPQuotient.continuousZModDualMap_bijective`: pullback identifies the
+  continuous `ZMod p`-valued characters of `G(p)` and `G`.
 
 ## References
 
@@ -97,6 +106,20 @@ theorem proPFrattini_eq_iInf_ker [ContinuousMul G] :
   obtain ⟨φ, hφ⟩ := exists_continuousMonoidHom_ker_eq hU
   exact hφ ▸ Subgroup.mem_iInf.mp hx φ
 
+/-- **The Frattini criterion for a kernel.** If every continuous `𝔽_p`-valued character of `G`
+factors through a continuous homomorphism `φ : G → H`, then the kernel of `φ` lies in the pro-`p`
+Frattini subgroup of `G`. -/
+theorem _root_.ContinuousMonoidHom.ker_le_proPFrattini_of_forall_exists_comp_eq [ContinuousMul G]
+    {H : Type*} [Group H] [TopologicalSpace H] (φ : G →ₜ* H)
+    (h : ∀ ψ : G →ₜ* Multiplicative (ZMod p),
+      ∃ χ : H →ₜ* Multiplicative (ZMod p), χ.comp φ = ψ) :
+    φ.ker ≤ proPFrattini p G := by
+  rw [proPFrattini_eq_iInf_ker]
+  refine le_iInf fun ψ x hx ↦ ?_
+  obtain ⟨χ, rfl⟩ := h ψ
+  rw [MonoidHom.mem_ker, ContinuousMonoidHom.coe_toMonoidHom, MonoidHom.coe_ofClass] at hx ⊢
+  rw [ContinuousMonoidHom.coe_comp, Function.comp_apply, hx, map_one]
+
 /-- Precomposition with the Frattini quotient projection identifies continuous homomorphisms
 from the quotient with continuous homomorphisms from `G` for a discrete target of cardinality
 `p`. -/
@@ -155,5 +178,62 @@ def frattiniQuotientDualEquiv :
 theorem frattiniQuotientDualEquiv_apply (x : continuousZModDual p (G ⧸ proPFrattini p G)) (g : G) :
     Additive.toMul (frattiniQuotientDualEquiv x) g = Additive.toMul x g := by
   simp [frattiniQuotientDualEquiv, frattiniQuotientHomEquiv_apply]
+
+/-- A continuous `𝔽_p`-valued character of `G`, viewed on the Frattini quotient through the inverse
+of the identification, evaluates on the class of an element as the character itself. -/
+@[simp]
+theorem frattiniQuotientDualEquiv_symm_apply_mk (x : continuousZModDual p G) (g : G) :
+    Additive.toMul ((frattiniQuotientDualEquiv (p := p) (G := G)).symm x)
+      (g : G ⧸ proPFrattini p G) = Additive.toMul x g := by
+  rw [← frattiniQuotientDualEquiv_apply, LinearEquiv.apply_symm_apply]
+
+/-- **The characters of a quotient by a subgroup of the Frattini subgroup.** For a normal subgroup
+`N ≤ proPFrattini p G`, precomposition with the quotient map `G → G ⧸ N` is a bijection from the
+continuous `𝔽_p`-dual of `G ⧸ N` onto that of `G`: every continuous `𝔽_p`-valued character of `G`
+kills the pro-`p` Frattini subgroup, hence `N`, and so descends to the quotient. -/
+theorem continuousZModDualMap_quotientMk_bijective {N : Subgroup G} [N.Normal]
+    (hN : N ≤ proPFrattini p G) :
+    Function.Bijective ((ContinuousMonoidHom.quotientMk N).continuousZModDualMap (n := p)) := by
+  refine ⟨fun χ ψ h ↦ Additive.toMul.injective (ContinuousMonoidHom.ext fun q ↦ ?_), fun χ ↦ ?_⟩
+  · obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective q
+    have := congrArg (fun x : continuousZModDual p G ↦ Additive.toMul x g) h
+    simpa only [ContinuousMonoidHom.toMul_continuousZModDualMap_apply,
+      ContinuousMonoidHom.quotientMk_apply] using this
+  · refine ⟨Additive.ofMul (ContinuousMonoidHom.quotientLift N (Additive.toMul χ)
+      (hN.trans (proPFrattini_le_ker (by simp) (Additive.toMul χ)))), ?_⟩
+    apply Additive.toMul.injective
+    rw [ContinuousMonoidHom.toMul_continuousZModDualMap, toMul_ofMul,
+      ContinuousMonoidHom.quotientLift_comp_quotientMk]
+
+/-- Pullback along the maximal pro-`p` quotient identifies the continuous `ZMod p`-valued
+characters of the quotient with those of the original topological group. -/
+theorem maximalProPQuotient.continuousZModDualMap_bijective :
+    Function.Bijective
+      ((⟨maximalProPQuotient.mk p G, maximalProPQuotient.continuous_mk p G⟩ :
+          G →ₜ* maximalProPQuotient p G).continuousZModDualMap (n := p)) := by
+  constructor
+  · intro χ ψ h
+    apply Additive.toMul.injective
+    apply ContinuousMonoidHom.ext
+    intro x
+    obtain ⟨g, rfl⟩ := maximalProPQuotient.mk_surjective p G x
+    have h' := congrArg Additive.toMul h
+    have hg := DFunLike.congr_fun h' g
+    rwa [ContinuousMonoidHom.toMul_continuousZModDualMap_apply,
+      ContinuousMonoidHom.toMul_continuousZModDualMap_apply] at hg
+  · intro χ
+    let f : G →* Multiplicative (ZMod p) := χ.toMul.toMonoidHom
+    let hP : IsProP p (Multiplicative (ZMod p)) :=
+      IsPGroup.isProP (ZModModule.isPGroup_multiplicative (n := p) (G := ZMod p))
+    let lift := maximalProPQuotient.lift hP f χ.toMul.continuous
+    have hlift : Continuous lift :=
+      maximalProPQuotient.continuous_lift hP f χ.toMul.continuous
+    refine ⟨Additive.ofMul (⟨lift, hlift⟩ :
+      maximalProPQuotient p G →ₜ* Multiplicative (ZMod p)), ?_⟩
+    apply Additive.toMul.injective
+    apply ContinuousMonoidHom.ext
+    intro g
+    rw [ContinuousMonoidHom.toMul_continuousZModDualMap_apply]
+    exact maximalProPQuotient.lift_mk hP f χ.toMul.continuous g
 
 end TauCeti

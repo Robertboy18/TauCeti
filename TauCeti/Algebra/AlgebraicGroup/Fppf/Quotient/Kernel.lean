@@ -179,23 +179,23 @@ theorem isIso_kernelFppfQuotientHom (f : H ⟶ K)
     exact (GrpCat.mono_iff_injective _).1 this
   have hinj : Presheaf.IsLocallyInjective J β :=
     Presheaf.isLocallyInjective_of_injective J β fun A x y hxy ↦
-      ULift.ext _ _ (hinjB _ (congrArg ULift.down hxy))
+      ULift.ext (hinjB _ (congrArg ULift.down hxy))
   have hsurj : Presheaf.IsLocallySurjective J β := by
     constructor
-    intro U s
-    obtain ⟨B, φ, z, hφflat, hφfp, hz⟩ := exists_faithfullyFlat_lift f hflat hfp s.down.ofConv
+    intro U ⟨s⟩
+    obtain ⟨B, φ, z, hφflat, hφfp, hz⟩ := exists_faithfullyFlat_lift f hflat hfp s.ofConv
     refine J.superset_covering ?_
       (CommAlgCat.generate_singleton_op_mem_fppfTopology φ hφflat hφfp)
     rw [Sieve.generate_le_iff]
     rintro _ _ ⟨⟩
     let zB : (HopfAlgebra.pointsFunctor (R := R) (H := K)).obj B := toConv z
     refine ⟨ULift.up ((pointwiseQuotientProjection K (kernelHopfIdeal f)
-      (isNormal_kernelHopfIdeal f)).app B zB), ULift.ext _ _ ?_⟩
+      (isNormal_kernelHopfIdeal f)).app B zB), ULift.ext ?_⟩
     have key := congrArg (fun α ↦ α.app B zB)
       (pointwiseQuotientProjection_comp_kernelPointwiseQuotientNatTrans f)
     refine key.trans ?_
     rw [mapPointsFunctor_app_apply, ofConv_toConv, hz]
-    rfl
+    exact (HopfAlgebra.mapPoints_apply (H := H) φ s).symm
   have hβ : IsIso (F.map β) :=
     (J.W_iff β).1 (J.W_of_isLocallyBijective β)
   have hG : IsIso (F.mapGrp.map (groupFunctorGrpMap (kernelPointwiseQuotientPresheafNatTrans f))) :=

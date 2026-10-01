@@ -18,7 +18,8 @@ geodesics. This is the geodesic case of rigidity in the local radial length comp
 
 The competitor is assumed to be a geodesic on an open interval containing `[0, 1]`, so its
 initial velocity and endpoint are supplied by the maximal-geodesic API. The equality case for
-arbitrary length-minimizing curves requires a separate argument that such curves are geodesics.
+arbitrary `C¹` length-minimizing curves, which are radial geodesics up to a nondecreasing
+reparametrization, is `TauCeti.Geometry.Manifold.Riemannian.Geodesic.Gauss.Rigidity`.
 
 ## References
 
@@ -43,7 +44,6 @@ variable
 variable [FiniteDimensional ℝ E] [I.Boundaryless]
   [RiemannianBundle (fun x : M ↦ TangentSpace I x)] [IsManifold I ∞ M]
   [IsContMDiffRiemannianBundle I ∞ E (fun x : M ↦ TangentSpace I x)]
-  [T2Space (TangentBundle I M)]
 
 /-- A geodesic from the centre of a normal ball that reaches `exp_p v` with the same length
 as the radial segment to `v` agrees with that radial segment on `[0, 1]`. The initial velocity
