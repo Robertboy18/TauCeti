@@ -127,7 +127,7 @@ theorem isPreprimitive_referenceSubgroup_iff :
       (Or.inl (by decide))
   | n + 6, j => by
     have hj := j.isLt
-    have h0 := numTransitiveGroups_eq_zero_of_five_lt (show 5 < n + 6 by omega)
+    have h0 : numTransitiveGroups (n + 6) = 0 := numTransitiveGroups_eq_zero_of_five_lt (by omega)
     omega
 
 /-- A permutation group with a transitive-group label acts primitively exactly when its label is
