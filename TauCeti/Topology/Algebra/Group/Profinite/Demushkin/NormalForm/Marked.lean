@@ -204,23 +204,19 @@ theorem isDemushkin_marked_of_q_two_even_unitsPlusMinus (hG : IsDemushkin 2 G)
           demushkinCharacter hG (e.symm (presentedProPGen 2 (demushkinRank hG) _ i)) = 1 := by
   have ha₂ : 2 ∣ a := (dvd_pow_self 2 (by omega : f ≠ 0)).trans ha
   have ha' : (2 : ℤ_[2]) ^ f ∣ (a : ℤ_[2]) := by exact_mod_cast Nat.cast_dvd_cast (α := ℤ_[2]) ha
-  -- `G` is isomorphic to the normal form with exponent `0`, by Labute's Theorem 6.
-  obtain ⟨e₁⟩ :=
-    hG.exists_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_range_eq heven (by omega) hf
-      hrange
-  -- So is the normal form with exponent `α`: it is Demushkin with the same rank and the same image.
+  -- The normal form with exponent `α` is Demushkin of the same rank as `G` with the same image,
+  -- so Labute's Theorem 6 identifies the two groups.
   have hH := isDemushkin_presentedProP_demushkinWordTwoEven (n := demushkinRank hG) (f := f) heven
     (by omega) ha₂ (by omega)
   have hrank := demushkinRank_presentedProP_demushkinWordTwoEven ha₂ (by omega) hH
-  obtain ⟨e₂⟩ := hH.exists_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_range_eq
-    (by rw [hrank]; exact heven) (by rw [hrank]; omega) hf
+  obtain ⟨e⟩ := hG.nonempty_continuousMulEquiv_of_even_demushkinRank_of_range_eq_unitsPlusMinus hH
+    hrank.symm heven (by omega) hf hrange
     (range_demushkinCharacter_eq_unitsPlusMinus_of_equiv_demushkinWordTwoEven hH hf heven
       (by omega) ha' (ContinuousMulEquiv.refl _))
-  rw [hrank] at e₂
   obtain ⟨hsecond, hfourth, htrivial⟩ :=
     demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoEven hG ha₂ (by omega) heven
-      (by omega) (e₁.trans e₂.symm)
-  exact ⟨e₁.trans e₂.symm, hsecond, hfourth, fun i hi hi' _ ↦ htrivial i hi hi'⟩
+      (by omega) e
+  exact ⟨e, hsecond, hfourth, fun i hi hi' _ ↦ htrivial i hi hi'⟩
 
 /-- **The marked classification at `q = 2` with `n ≥ 4` even and twisted orientation image.** A
 Demushkin group at `p = 2` of even rank `n ≥ 4` whose canonical character has image the twisted
