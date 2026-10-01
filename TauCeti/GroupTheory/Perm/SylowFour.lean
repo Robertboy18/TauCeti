@@ -53,9 +53,14 @@ theorem wreathTwoToPermFour_injective : Function.Injective wreathTwoToPermFour :
 points are nontrivial blocks. -/
 theorem not_isPreprimitive_range_wreathTwoToPermFour :
     ¬ MulAction.IsPreprimitive wreathTwoToPermFour.range (Fin 4) := by
+  -- The imprimitive representation is the permutation representation of the imprimitive action;
+  -- both evaluate by `imprimitive_smul`.
+  have h : WreathProduct.imprimitiveToPerm (Multiplicative (ZMod 2)) (Fin 2) (ZMod 2) =
+      MulAction.toPermHom _ _ :=
+    MonoidHom.ext fun w ↦ Equiv.ext fun x ↦ by simp
   unfold wreathTwoToPermFour
-  rw [MonoidHom.range_comp, Equiv.isPreprimitive_map_permCongrHom_iff,
-    WreathProduct.imprimitiveToPerm_eq_toPermHom, MulAction.isPreprimitive_range_toPermHom_iff]
+  rw [MonoidHom.range_comp, Equiv.isPreprimitive_map_permCongrHom_iff, h,
+    MulAction.isPreprimitive_range_toPermHom_iff]
   exact WreathProduct.not_isPreprimitive_imprimitive
 
 private theorem wreathTwoToPermFour_rangeRestrict_bijective :
