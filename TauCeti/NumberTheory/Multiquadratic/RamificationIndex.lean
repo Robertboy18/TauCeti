@@ -39,6 +39,10 @@ degree `f` satisfy `g · f · 2 = [K : ℚ]`.
 
 ## Main results
 
+* `TauCeti.Multiquadratic.mul_div_natCast_sq` and
+  `TauCeti.Multiquadratic.not_dvd_ediv_mul_ediv`: for radicands `d i`, `d j` divisible by `p`,
+  `r i * r j / p` is a square root of `(d i / p) * (d j / p)`, an integer prime to `p` when neither
+  radicand is divisible by `p²`.
 * `TauCeti.Multiquadratic.apply_mul_apply_eq_mul_of_mem_inertia`: an inertia element acts by the
   same sign on the roots of any two radicands divisible by `p`.
 * `TauCeti.Multiquadratic.eq_of_mem_inertia_of_ne_one` and
@@ -72,6 +76,33 @@ namespace TauCeti.Multiquadratic
 variable {K : Type*} [Field K] [NumberField K] {ι : Type*} {d : ι → ℤ} {r : ι → K}
   {p : ℕ} [Fact p.Prime]
 
+/-! ### The product of two ramified roots -/
+
+/-- **The `p`-free parts of two radicands divisible by `p` have a product prime to `p`.** For
+integers `d i`, `d j` divisible by `p` but not by `p²`, the integer `(d i / p) * (d j / p)` is not
+divisible by `p`. -/
+theorem not_dvd_ediv_mul_ediv {i j : ι} (hi : (p : ℤ) ∣ d i) (hi2 : ¬ (p : ℤ) ^ 2 ∣ d i)
+    (hj : (p : ℤ) ∣ d j) (hj2 : ¬ (p : ℤ) ^ 2 ∣ d j) : ¬ (p : ℤ) ∣ d i / p * (d j / p) := by
+  have hp : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp Fact.out
+  intro h
+  rcases hp.dvd_or_dvd h with h | h <;> rw [Int.dvd_div_iff_mul_dvd ‹_›, ← pow_two] at h
+  exacts [hi2 h, hj2 h]
+
+/-- **The product of two ramified roots, divided by `p`, is a root of the product of the `p`-free
+parts.** For square roots `r i`, `r j` of integers `d i`, `d j` divisible by `p`, the element
+`r i * r j / p` squares to the integer `(d i / p) * (d j / p)`. -/
+theorem mul_div_natCast_sq (hr : ∀ i, r i ^ 2 = algebraMap ℤ K (d i)) {i j : ι}
+    (hi : (p : ℤ) ∣ d i) (hj : (p : ℤ) ∣ d j) :
+    (r i * r j / p) ^ 2 = algebraMap ℤ K (d i / p * (d j / p)) := by
+  obtain ⟨a, ha⟩ := hi
+  obtain ⟨b, hb⟩ := hj
+  have hp0 : (p : ℤ) ≠ 0 := by exact_mod_cast (Fact.out : p.Prime).ne_zero
+  have hp0' : (p : K) ≠ 0 := by exact_mod_cast (Fact.out : p.Prime).ne_zero
+  rw [div_pow, mul_pow, hr i, hr j, ha, hb, Int.mul_ediv_cancel_left _ hp0,
+    Int.mul_ediv_cancel_left _ hp0]
+  simp only [map_mul, map_natCast]
+  field_simp
+
 /-! ### The action of inertia on the roots -/
 
 /-- **Inertia acts by one sign on the roots of the radicands divisible by `p`.** Let `Q` be a
@@ -84,19 +115,9 @@ theorem apply_mul_apply_eq_mul_of_mem_inertia (hr : ∀ i, r i ^ 2 = algebraMap 
     (hj : (p : ℤ) ∣ d j) (hj2 : ¬ (p : ℤ) ^ 2 ∣ d j) (Q : Ideal (𝓞 K)) [Q.IsPrime]
     [Q.LiesOver (span {(p : ℤ)})] {τ : K ≃ₐ[ℚ] K} (hτ : τ ∈ Q.inertia (K ≃ₐ[ℚ] K)) :
     τ (r i) * τ (r j) = r i * r j := by
-  obtain ⟨a, ha⟩ := hi
-  obtain ⟨b, hb⟩ := hj
-  have hp : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp Fact.out
-  have hp0 : (p : K) ≠ 0 := by exact_mod_cast hp.ne_zero
-  have hpa : ¬ (p : ℤ) ∣ a := fun h => hi2 (by rw [ha, pow_two]; exact mul_dvd_mul_left _ h)
-  have hpb : ¬ (p : ℤ) ∣ b := fun h => hj2 (by rw [hb, pow_two]; exact mul_dvd_mul_left _ h)
-  have hpab : ¬ (p : ℤ) ∣ a * b := fun h => (hp.dvd_or_dvd h).elim hpa hpb
-  have hx : (r i * r j / p) ^ 2 = algebraMap ℤ K (a * b) := by
-    rw [div_pow, mul_pow, hr i, hr j, ha, hb]
-    field_simp
-    simp
-    ring
-  have h := apply_eq_self_of_mem_inertia hx hodd hpab Q hτ
+  have hp0 : (p : K) ≠ 0 := by exact_mod_cast (Fact.out : p.Prime).ne_zero
+  have h := apply_eq_self_of_mem_inertia (mul_div_natCast_sq hr hi hj) hodd
+    (not_dvd_ediv_mul_ediv hi hi2 hj hj2) Q hτ
   rw [map_div₀, map_mul, map_natCast] at h
   exact (div_left_inj' hp0).mp h
 

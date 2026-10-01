@@ -46,6 +46,9 @@ residue field below `P`. The comparison lemmas are `simp` lemmas oriented toward
   `ℤ` agree.
 * `Ideal.isArithFrobAt_ringOfIntegers_rat_iff`: the Frobenius conditions over `𝓞 ℚ` and over `ℤ`
   agree.
+* `Ideal.inertiaDeg_dvd_orderOf` and `Ideal.inertiaDeg_eq_one_iff_mem_inertia`: at any prime, the
+  residue degree over `ℤ` divides the order of a Frobenius, and is `1` exactly when the Frobenius
+  lies in inertia.
 * `Ideal.inertiaDeg_eq_orderOf` and
   `Ideal.ncard_primesOver_mul_inertiaDeg_eq_finrank_of_isUnramifiedAt`:
   the unramified Frobenius order and prime-count formulas over `ℤ`.
@@ -223,6 +226,34 @@ theorem inertiaDeg_eq_orderOf [IsGalois ℚ K] (Q : Ideal (𝓞 K)) [Q.IsPrime]
   rw [← Ideal.inertiaDeg_ringOfIntegers_rat_eq_int Q hQ,
     Ideal.orderOf_eq_inertiaDeg_of_isArithFrobAt Q hQ
       ((Ideal.isArithFrobAt_ringOfIntegers_rat_iff σ Q).mpr hσ)]
+
+/-- **The residue degree over `ℤ` divides the order of a Frobenius.** At any prime `Q` of a Galois
+number field above the rational prime `p`, ramified or not, the residue degree of `Q` divides the
+order of an arithmetic Frobenius at `Q`; it is the order of the residue Frobenius, a homomorphic
+image. -/
+theorem inertiaDeg_dvd_orderOf [IsGalois ℚ K] (Q : Ideal (𝓞 K)) [Q.IsPrime]
+    [Q.LiesOver (span {(p : ℤ)})] {σ : K ≃ₐ[ℚ] K} (hσ : IsArithFrobAt ℤ σ Q) :
+    Q.inertiaDeg ℤ ∣ orderOf σ := by
+  have hp0 : (span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact_mod_cast (Fact.out : p.Prime).ne_zero
+  have hQ : Q ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hp0 Q
+  rw [← Ideal.inertiaDeg_ringOfIntegers_rat_eq_int Q hQ]
+  exact Ideal.inertiaDeg_dvd_orderOf_of_isArithFrobAt Q hQ
+    ((Ideal.isArithFrobAt_ringOfIntegers_rat_iff σ Q).mpr hσ)
+
+/-- **Residue degree one over `ℤ` means the Frobenius lies in inertia.** At any prime `Q` of a
+Galois number field above the rational prime `p`, ramified or not, the residue degree of `Q` is `1`
+exactly when an arithmetic Frobenius at `Q` lies in the inertia group of `Q`. At an unramified
+prime this reads `f = 1 ↔ σ = 1`. -/
+theorem inertiaDeg_eq_one_iff_mem_inertia [IsGalois ℚ K] (Q : Ideal (𝓞 K)) [Q.IsPrime]
+    [Q.LiesOver (span {(p : ℤ)})] {σ : K ≃ₐ[ℚ] K} (hσ : IsArithFrobAt ℤ σ Q) :
+    Q.inertiaDeg ℤ = 1 ↔ σ ∈ Q.inertia (K ≃ₐ[ℚ] K) := by
+  have hp0 : (span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact_mod_cast (Fact.out : p.Prime).ne_zero
+  have hQ : Q ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hp0 Q
+  rw [← Ideal.inertiaDeg_ringOfIntegers_rat_eq_int Q hQ]
+  exact Ideal.inertiaDeg_eq_one_iff_mem_inertia_of_isArithFrobAt Q hQ
+    ((Ideal.isArithFrobAt_ringOfIntegers_rat_iff σ Q).mpr hσ)
 
 /-- At an unramified prime of a Galois number field, the number of primes above `p` times the
 residue degree is `[K : ℚ]`. -/

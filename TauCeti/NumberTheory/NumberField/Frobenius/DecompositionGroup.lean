@@ -55,6 +55,11 @@ prime `τ • Q` gives the other.
   isomorphic to the automorphism group of the residue extension.
 * `Ideal.isCyclic_stabilizer_of_isUnramifiedAt`: the decomposition group of an unramified
   prime is cyclic.
+* `Ideal.orderOf_stabilizerHom_eq_inertiaDeg_of_isArithFrobAt`,
+  `Ideal.inertiaDeg_dvd_orderOf_of_isArithFrobAt` and
+  `Ideal.inertiaDeg_eq_one_iff_mem_inertia_of_isArithFrobAt`: at any nonzero prime `Q`, the
+  residue Frobenius has order `f(Q/𝔭)`, so `f(Q/𝔭)` divides the order of a Frobenius element and
+  is `1` exactly when that element lies in the inertia subgroup.
 * `Ideal.zpowers_sup_inertia_eq_stabilizer_of_isArithFrobAt`: at any nonzero prime `Q`, a
   Frobenius element together with the inertia subgroup generates the decomposition group.
 * `Ideal.orbit_stabilizer_eq_orbit_zpowers_of_isArithFrobAt`: on a set where the inertia
@@ -173,6 +178,49 @@ theorem stabilizerHom_eq_frobeniusAlgEquivOfAlgebraic (Q : Ideal (𝓞 L)) [Q.Is
     ← @Nat.card_eq_fintype_card _ (Fintype.ofFinite _)]
   simpa [MulAction.subgroup_smul_def, MulSemiringAction.toAlgHom_apply] using hσ.mk_apply x
 
+omit [IsGalois K L] in
+/-- **The order of the residue Frobenius is the inertia degree.** At any nonzero prime `Q`,
+ramified or not, the image in the residue Galois group of an arithmetic Frobenius `σ` at `Q` is the
+residue Frobenius, whose order is the degree of the residue extension, that is `f(Q / 𝔭)`. -/
+theorem orderOf_stabilizerHom_eq_inertiaDeg_of_isArithFrobAt (Q : Ideal (𝓞 L)) [Q.IsPrime]
+    (hQ : Q ≠ ⊥) {σ : L ≃ₐ[K] L} (hσ : IsArithFrobAt (𝓞 K) σ Q) :
+    let _ : Q.IsMaximal := (inferInstance : Q.IsPrime).isMaximal hQ
+    letI := Fintype.ofFinite (𝓞 K ⧸ Q.under (𝓞 K))
+    orderOf (Ideal.Quotient.stabilizerHom Q (Q.under (𝓞 K)) (L ≃ₐ[K] L) ⟨σ, hσ.mem_stabilizer⟩) =
+      Q.inertiaDeg (𝓞 K) := by
+  let _ : Q.IsMaximal := (inferInstance : Q.IsPrime).isMaximal hQ
+  let _ := Fintype.ofFinite (𝓞 K ⧸ Q.under (𝓞 K))
+  rw [stabilizerHom_eq_frobeniusAlgEquivOfAlgebraic Q hQ hσ,
+    FiniteField.orderOf_frobeniusAlgEquivOfAlgebraic,
+    Ideal.inertiaDeg_eq_of_isMaximal (Q.under (𝓞 K)) Q]
+
+omit [IsGalois K L] in
+/-- **The inertia degree divides the order of a Frobenius element.** At any nonzero prime `Q`,
+`f(Q / 𝔭)` is the order of the residue Frobenius, a homomorphic image of `σ`. At an unramified
+prime the two orders agree (`Ideal.orderOf_eq_inertiaDeg_of_isArithFrobAt`). -/
+theorem inertiaDeg_dvd_orderOf_of_isArithFrobAt (Q : Ideal (𝓞 L)) [Q.IsPrime] (hQ : Q ≠ ⊥)
+    {σ : L ≃ₐ[K] L} (hσ : IsArithFrobAt (𝓞 K) σ Q) :
+    Q.inertiaDeg (𝓞 K) ∣ orderOf σ := by
+  let _ : Q.IsMaximal := (inferInstance : Q.IsPrime).isMaximal hQ
+  let _ := Fintype.ofFinite (𝓞 K ⧸ Q.under (𝓞 K))
+  rw [← orderOf_stabilizerHom_eq_inertiaDeg_of_isArithFrobAt Q hQ hσ]
+  exact (orderOf_map_dvd _ _).trans (dvd_of_eq
+    (Subgroup.orderOf_coe (⟨σ, hσ.mem_stabilizer⟩ : MulAction.stabilizer (L ≃ₐ[K] L) Q)).symm)
+
+omit [IsGalois K L] in
+/-- **Residue degree one means the Frobenius lies in inertia.** At any nonzero prime `Q`, the
+residue extension is trivial exactly when an arithmetic Frobenius `σ` at `Q` acts trivially on the
+residue field, that is, lies in the inertia subgroup of `Q`. At an unramified prime this says
+`f(Q / 𝔭) = 1 ↔ σ = 1`. -/
+theorem inertiaDeg_eq_one_iff_mem_inertia_of_isArithFrobAt (Q : Ideal (𝓞 L)) [Q.IsPrime]
+    (hQ : Q ≠ ⊥) {σ : L ≃ₐ[K] L} (hσ : IsArithFrobAt (𝓞 K) σ Q) :
+    Q.inertiaDeg (𝓞 K) = 1 ↔ σ ∈ Q.inertia (L ≃ₐ[K] L) := by
+  let _ : Q.IsMaximal := (inferInstance : Q.IsPrime).isMaximal hQ
+  let _ := Fintype.ofFinite (𝓞 K ⧸ Q.under (𝓞 K))
+  rw [← orderOf_stabilizerHom_eq_inertiaDeg_of_isArithFrobAt Q hQ hσ, orderOf_eq_one_iff,
+    ← MonoidHom.mem_ker, Ideal.Quotient.ker_stabilizerHom]
+  exact Ideal.coe_mem_inertia.symm
+
 /-- **The order of a Frobenius element is the inertia degree.** For `Q` unramified over `𝓞 K`, an
 arithmetic Frobenius `σ` at `Q` has `orderOf σ = f(Q / 𝔭)`.
 
@@ -188,9 +236,7 @@ theorem orderOf_eq_inertiaDeg_of_isArithFrobAt (Q : Ideal (𝓞 L)) [Q.IsPrime]
   have key : orderOf (⟨σ, hσ.mem_stabilizer⟩ : MulAction.stabilizer (L ≃ₐ[K] L) Q) =
       Q.inertiaDeg (𝓞 K) := by
     rw [← orderOf_injective _ (stabilizerHom_injective_of_isUnramifiedAt Q),
-      stabilizerHom_eq_frobeniusAlgEquivOfAlgebraic Q hQ hσ,
-      FiniteField.orderOf_frobeniusAlgEquivOfAlgebraic,
-      Ideal.inertiaDeg_eq_of_isMaximal (Q.under (𝓞 K)) Q]
+      orderOf_stabilizerHom_eq_inertiaDeg_of_isArithFrobAt Q hQ hσ]
   exact (Subgroup.orderOf_coe (⟨σ, hσ.mem_stabilizer⟩ :
     MulAction.stabilizer (L ≃ₐ[K] L) Q)).trans key
 
