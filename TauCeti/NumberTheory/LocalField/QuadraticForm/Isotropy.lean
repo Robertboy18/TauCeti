@@ -96,12 +96,7 @@ theorem not_anisotropic_presentedForm_three_iff (w : Fin 3 → Kˣ) :
     simp only [hilbertSymbol_mul_left h2, hilbertSymbol_mul_right h2]
     rw [hilbertSymbol_comm (w 0) (-1)]
     simp only [mul_comm, mul_left_comm, mul_assoc]
-  -- Two signs agree exactly when their product is `1`.
-  constructor
-  · intro h
-    rw [Int.units_eq_iff_mul_eq_one, ← key, h, Int.units_mul_self]
-  · intro h
-    rw [Int.units_eq_iff_mul_eq_one, key, h, Int.units_mul_self]
+  exact Int.units_eq_iff_eq_of_mul_eq_mul key
 
 /-- If `abcd` is a nonsquare, the binary forms `⟨a, b⟩` and `⟨c, d⟩` have unit values `x` and
 `-x` that are negatives of each other, so that `⟨a, b⟩ ⊥ ⟨c, d⟩` is isotropic. -/
@@ -160,34 +155,38 @@ theorem not_anisotropic_presentedForm_four_iff_of_isSquare (w : Fin 4 → Kˣ)
   -- characters `(·, -w₀w₁)_K` and `(·, -w₂w₃)_K` agree, and `w₀` itself is a value of
   -- `⟨w₀, w₁⟩`; so the condition is `(-1, -w₀w₁)_K (w₀, w₁)_K = (w₂, w₃)_K`.
   have hcong (x : Kˣ) : hilbertSymbol x (-(w 2 * w 3)) = hilbertSymbol x (-(w 0 * w 1)) :=
-    hilbertSymbol_congr_sq x x _ _ ⟨x, rfl⟩ (by rwa [neg_mul_neg, mul_comm, ← mul_assoc])
+    hilbertSymbol_congr_sq x x _ _ ⟨x, rfl⟩
+      (by rwa [neg_mul_neg, mul_comm (w 2 * w 3), ← mul_assoc])
   have hneg (x : Kˣ) : hilbertSymbol (-x) (-(w 0 * w 1)) =
       hilbertSymbol (-1) (-(w 0 * w 1)) * hilbertSymbol x (-(w 0 * w 1)) := by
     rw [neg_eq_neg_one_mul x, hilbertSymbol_mul_left h2]
   rw [not_anisotropic_presentedForm_two_add_iff (n := 2) w, hlast]
   simp only [mem_unitValueSet_binary_iff_hilbertSymbol_eq, hcong]
+  -- The common value `x` is forced to have `(x, -w₀w₁)_K = (w₀, w₁)_K`, and `w₀` is one such
+  -- value, so the existential collapses to the single sign equation.
+  have hex : (∃ x : Kˣ, hilbertSymbol x (-(w 0 * w 1)) = hilbertSymbol (w 0) (w 1) ∧
+      hilbertSymbol (-x) (-(w 0 * w 1)) = hilbertSymbol (w 2) (w 3)) ↔
+      hilbertSymbol (-1) (-(w 0 * w 1)) * hilbertSymbol (w 0) (w 1) =
+        hilbertSymbol (w 2) (w 3) := by
+    constructor
+    · rintro ⟨x, hx₁, hx₂⟩
+      rwa [hneg x, hx₁] at hx₂
+    · intro h
+      exact ⟨w 0, hab, by rw [hneg (w 0), hab, h]⟩
+  rw [hex]
   -- The two products expand to the same symbols, once `(w₀w₁, w₂w₃)_K = (-1, w₀w₁)_K` is used.
-  have key : hilbertSymbol (w 0) (w 1) * hilbertSymbol (w 2) (w 3) *
-      hilbertSymbol (-1) (-(w 0 * w 1)) =
+  have key : hilbertSymbol (-1) (-(w 0 * w 1)) * hilbertSymbol (w 0) (w 1) *
+      hilbertSymbol (w 2) (w 3) =
       hilbertSymbol (w 0) (w 1) * hilbertSymbol (w 0) (w 2) * hilbertSymbol (w 0) (w 3) *
         hilbertSymbol (w 1) (w 2) * hilbertSymbol (w 1) (w 3) * hilbertSymbol (w 2) (w 3) *
           hilbertSymbol (-1 : Kˣ) (-1) := by
     have habcd : hilbertSymbol (w 0 * w 1) (w 2 * w 3) = hilbertSymbol (-1 : Kˣ) (w 0 * w 1) := by
       rw [hilbertSymbol_congr_sq (w 0 * w 1) (w 0 * w 1) (w 2 * w 3) (w 0 * w 1) ⟨w 0 * w 1, rfl⟩
-        (by rwa [mul_comm, ← mul_assoc]), hilbertSymbol_self, hilbertSymbol_comm]
+        (by rwa [mul_comm (w 2 * w 3), ← mul_assoc]), hilbertSymbol_self, hilbertSymbol_comm]
     rw [neg_eq_neg_one_mul (w 0 * w 1), hilbertSymbol_mul_right h2, ← habcd]
     simp only [hilbertSymbol_mul_left h2, hilbertSymbol_mul_right h2]
     simp only [mul_comm, mul_left_comm, mul_assoc]
-  constructor
-  · rintro ⟨x, hx₁, hx₂⟩
-    rw [hneg x, hx₁] at hx₂
-    rw [Int.units_eq_iff_mul_eq_one, ← key, ← hx₂,
-      mul_comm (hilbertSymbol (-1) (-(w 0 * w 1))) (hilbertSymbol (w 0) (w 1)), ← mul_assoc,
-      Int.units_mul_self, one_mul, Int.units_mul_self]
-  · intro hε
-    refine ⟨w 0, hab, ?_⟩
-    rw [hneg (w 0), hab, Int.units_eq_iff_mul_eq_one, mul_comm _ (hilbertSymbol (w 0) (w 1)),
-      mul_right_comm, key, hε, Int.units_mul_self]
+  exact Int.units_eq_iff_eq_of_mul_eq_mul key
 
 /-- **Ternary representation.** A diagonal form `⟨a, b, c⟩` over `K` represents `-x` for every
 unit `x` such that `xabc` is a nonsquare: a ternary form represents every unit outside one square
