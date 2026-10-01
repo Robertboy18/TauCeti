@@ -80,7 +80,7 @@ theorem isPrimitiveRoot_ofAdd_one (n : ℕ) :
 /-- **`ℤ/n` written multiplicatively has enough `n`-th roots of unity**: `ofAdd 1` is a primitive
 one, and its roots of unity form a cyclic group, being a subgroup of the cyclic group of units of
 `Multiplicative (ZMod n)`. -/
-instance instHasEnoughRootsOfUnityMultiplicativeZMod (n : ℕ) [NeZero n] :
+instance instHasEnoughRootsOfUnityMultiplicativeZMod (n : ℕ) :
     HasEnoughRootsOfUnity (Multiplicative (ZMod n)) n where
   prim := ⟨_, isPrimitiveRoot_ofAdd_one n⟩
   cyc := by
