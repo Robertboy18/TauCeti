@@ -21,7 +21,7 @@ the generic fibre.
 
 ## Main results
 
-* `TauCeti.AlgebraicGeometry.genericPoint_eq_of_flat`: a flat morphism between irreducible
+* `AlgebraicGeometry.Scheme.Hom.genericPoint_eq_of_flat`: a flat morphism between irreducible
   schemes sends the generic point to the generic point.
 
 ## References
@@ -36,20 +36,14 @@ open AlgebraicGeometry
 
 namespace TauCeti
 
-namespace AlgebraicGeometry
-
 universe u
 
 /-- A flat morphism between irreducible schemes sends the generic point to the generic point. -/
-theorem genericPoint_eq_of_flat {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [IrreducibleSpace X]
-    [IrreducibleSpace Y] : f (genericPoint X) = genericPoint Y := by
+theorem _root_.AlgebraicGeometry.Scheme.Hom.genericPoint_eq_of_flat {X Y : Scheme.{u}} (f : X ⟶ Y)
+    [Flat f] [IrreducibleSpace X] [IrreducibleSpace Y] : f (genericPoint X) = genericPoint Y := by
   -- Flat morphisms are generalizing, so the generic point of `Y` lifts to a generization of the
   -- generic point of `X`, which can only be that generic point itself.
   obtain ⟨η, hη, hfη⟩ := Flat.generalizingMap f (genericPoint_specializes (f (genericPoint X)))
-  have : η = genericPoint X :=
-    Inseparable.eq (inseparable_iff_specializes_and.mpr ⟨hη, genericPoint_specializes η⟩)
-  rw [← hfη, this]
-
-end AlgebraicGeometry
+  rw [← hfη, (hη.antisymm (genericPoint_specializes η)).eq]
 
 end TauCeti

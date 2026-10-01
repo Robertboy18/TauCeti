@@ -10,6 +10,7 @@ public import Mathlib.AlgebraicGeometry.Noetherian
 public import Mathlib.AlgebraicGeometry.Stalk
 public import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
 public import TauCeti.AlgebraicGeometry.Scheme.CodimensionOnePoint
+public import TauCeti.AlgebraicGeometry.Scheme.GenericPoint
 
 /-!
 # Irreducible components of the zero locus of a global function
@@ -42,6 +43,10 @@ points of the total space at which the uniformizer vanishes.
 * `TauCeti.AlgebraicGeometry.Scheme.fromSpecStalk_mem_basicOpen_iff`: a point of the spectrum of
   a local ring of `X` lies in the basic open of a section exactly when the germ of that section
   is outside the corresponding prime ideal;
+* `TauCeti.AlgebraicGeometry.Scheme.germ_mem_maximalIdeal_of_mem_zeroLocus` and
+  `TauCeti.AlgebraicGeometry.Scheme.maximalIdeal_mem_minimalPrimes_of_maximal`: at a point of the
+  zero locus of a global function the germ of the function lies in the maximal ideal of the local
+  ring, and at a maximal point of the zero locus the maximal ideal is a minimal prime over the germ;
 * `TauCeti.AlgebraicGeometry.Scheme.coheight_lt_top`: coheights are finite on a locally
   Noetherian scheme;
 * `TauCeti.AlgebraicGeometry.Scheme.genericPoint_notMem_zeroLocus`: a nonzero global function on
@@ -92,7 +97,7 @@ theorem fromSpecStalk_mem_basicOpen_iff {U : X.Opens} {x : X} (hxU : x ∈ U) (f
 
 /-- The germ of a global function at a point of its zero locus lies in the maximal ideal of the
 local ring there. -/
-private lemma germ_mem_maximalIdeal_of_mem_zeroLocus {a : Γ(X, ⊤)} {x : X}
+theorem germ_mem_maximalIdeal_of_mem_zeroLocus {a : Γ(X, ⊤)} {x : X}
     (hx : x ∈ X.zeroLocus {a}) :
     X.presheaf.germ ⊤ x trivial a ∈ IsLocalRing.maximalIdeal (X.presheaf.stalk x) := by
   rw [Scheme.zeroLocus_singleton, Set.mem_compl_iff, SetLike.mem_coe,
@@ -102,7 +107,7 @@ private lemma germ_mem_maximalIdeal_of_mem_zeroLocus {a : Γ(X, ⊤)} {x : X}
 /-- At a maximal point `x` of the zero locus of a global function `a`, the maximal ideal of the
 local ring is a minimal prime over the germ of `a`: a smaller prime containing the germ would be
 a generization of `x` inside the zero locus. -/
-private lemma maximalIdeal_mem_minimalPrimes_of_maximal {a : Γ(X, ⊤)} {x : X}
+theorem maximalIdeal_mem_minimalPrimes_of_maximal {a : Γ(X, ⊤)} {x : X}
     (hx : Maximal (· ∈ X.zeroLocus {a}) x) :
     IsLocalRing.maximalIdeal (X.presheaf.stalk x) ∈
       (Ideal.span {X.presheaf.germ ⊤ x trivial a}).minimalPrimes := by
@@ -146,11 +151,6 @@ theorem genericPoint_notMem_zeroLocus {a : Γ(X, ⊤)} (ha : a ≠ 0) :
     genericPoint X ∉ X.zeroLocus {a} := by
   rw [Scheme.zeroLocus_singleton, Set.mem_compl_iff, SetLike.mem_coe, not_not]
   exact genericPoint_mem_basicOpen ha
-
-/-- A point of a scheme of coheight zero is the generic point. -/
-private lemma eq_genericPoint_of_isMax {y : X} (hy : IsMax y) : y = genericPoint X :=
-  Inseparable.eq (inseparable_iff_specializes_and.mpr
-    ⟨hy (genericPoint_specializes y), genericPoint_specializes y⟩)
 
 end Integral
 

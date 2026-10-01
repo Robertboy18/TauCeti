@@ -31,15 +31,20 @@ are finitely many components. The divisor of the pullback of `π` is an effectiv
 
 `div_X(π) = ∑ᵢ mᵢ [Cᵢ]`, with `mᵢ = ord_{Cᵢ}(π) > 0`
 
-the multiplicity of the component `Cᵢ` in the special fibre. These multiplicities and the finite
-component set are the first invariants of the numerical type of a regular model of a curve over a
-discrete valuation ring.
+the coefficient of the component `Cᵢ` in the divisor of `π`. When `R` is a discrete valuation
+ring and `π` is a uniformizer, this divisor is the special fibre `X_s` and `mᵢ` is the
+multiplicity of `Cᵢ` in `X_s`; these multiplicities and the finite component set are the first
+invariants of the numerical type of a regular model of a curve over a discrete valuation ring.
+For a general nonzero `π` in the maximal ideal the coefficients depend on `π`: replacing `π` by
+`π ^ 2` doubles them.
 
 The statements are phrased for an explicit structure morphism `toBase : X ⟶ Spec R` rather than
 for a bundled model, so that they apply to the total space `M.total` of any
 `TauCeti.Model` through `M.toBase`, whose flatness is an instance. For a discrete valuation
 ring the hypothesis `maximalIdeal R ≠ ⊥` is `IsDiscreteValuationRing.not_a_field R`, and the
-dimension hypothesis is the instance `Ring.DimensionLEOne.principal_ideal_ring`.
+dimension hypothesis is the instance `Ring.DimensionLEOne.principal_ideal_ring`. The results about
+`toBase` are stated in the namespace `AlgebraicGeometry.Scheme.Hom`, so they are available by dot
+notation on the structure morphism.
 
 ## Main results
 
@@ -48,21 +53,22 @@ dimension hypothesis is the instance `Ring.DimensionLEOne.principal_ideal_ring`.
 * `PrimeSpectrum.mem_asIdeal_iff_eq_closedPoint`: in a local ring of dimension at most one, a
   nonzero element of the maximal ideal lies in a prime exactly when that prime is the maximal
   ideal;
-* `TauCeti.base_eq_closedPoint_iff_mem_zeroLocus` and
-  `TauCeti.preimage_closedPoint_eq_zeroLocus`: the special fibre is the zero locus of the
-  pullback of a nonzero element of the maximal ideal;
-* `TauCeti.base_genericPoint_ne_closedPoint`: the generic point of an irreducible scheme flat
-  over `R` does not lie in the special fibre;
-* `TauCeti.maximal_base_eq_closedPoint_iff`: the generic points of the irreducible components of
-  the special fibre are the codimension-one points of `X` lying in it;
-* `TauCeti.exists_maximal_base_eq_closedPoint_specializes`: every point of the special fibre lies
-  on an irreducible component of it;
-* `TauCeti.finite_setOf_base_eq_closedPoint`: the special fibre of a Noetherian integral scheme
-  has finitely many irreducible components;
-* `TauCeti.ord_germToFunctionField_appTop_pos_iff`: the order of the pullback of `π` at a
-  codimension-one point is positive exactly when the point lies in the special fibre;
-* `TauCeti.mem_support_principalDivisor_appTop`: the divisor of the pullback of `π` is supported
-  exactly on the components of the special fibre.
+* `AlgebraicGeometry.Scheme.Hom.base_eq_closedPoint_iff_mem_zeroLocus` and
+  `AlgebraicGeometry.Scheme.Hom.preimage_closedPoint_eq_zeroLocus`: the special fibre is the zero
+  locus of the pullback of a nonzero element of the maximal ideal;
+* `AlgebraicGeometry.Scheme.Hom.base_genericPoint_ne_closedPoint`: the generic point of an
+  irreducible scheme flat over `R` does not lie in the special fibre;
+* `AlgebraicGeometry.Scheme.Hom.maximal_base_eq_closedPoint_iff`: the generic points of the
+  irreducible components of the special fibre are the codimension-one points of `X` lying in it;
+* `AlgebraicGeometry.Scheme.Hom.exists_maximal_base_eq_closedPoint_specializes`: every point of
+  the special fibre lies on an irreducible component of it;
+* `AlgebraicGeometry.Scheme.Hom.finite_setOf_base_eq_closedPoint`: the special fibre of a
+  Noetherian integral scheme has finitely many irreducible components;
+* `AlgebraicGeometry.Scheme.Hom.ord_germToFunctionField_appTop_pos_iff`: the order of the
+  pullback of `π` at a codimension-one point is positive exactly when the point lies in the special
+  fibre;
+* `AlgebraicGeometry.Scheme.Hom.mem_support_principalDivisor_appTop`: the divisor of the pullback
+  of `π` is supported exactly on the components of the special fibre.
 
 ## References
 
@@ -85,23 +91,20 @@ section LocalRing
 
 variable (R : Type u) [CommRing R] [IsLocalRing R] {X : Scheme.{u}} (toBase : X ⟶ Spec (.of R))
 
-/-- The image of the spectrum of the residue field of a local ring in the spectrum of the ring is
-the closed point. -/
-private lemma range_Spec_map_residue :
-    Set.range (Spec.map (CommRingCat.ofHom (algebraMap R (ResidueField R)))) =
-      {closedPoint R} := by
-  have key (q : Spec (.of (ResidueField R))) :
-      Spec.map (CommRingCat.ofHom (algebraMap R (ResidueField R))) q = closedPoint R := by
-    rw [Spec.map_apply, CommRingCat.hom_ofHom, ResidueField.algebraMap_eq]
-    exact PrimeSpectrum.comap_residue R q
-  ext p
-  exact ⟨fun ⟨q, hq⟩ ↦ hq ▸ key q, fun h ↦ ⟨closedPoint (ResidueField R), (key _).trans h.symm⟩⟩
-
 /-- The special fibre of a scheme over a local ring is, as a set, the preimage of the closed
+point: the special fibre is isomorphic over `X` to Mathlib's fibre of `toBase` at the closed
 point. -/
 theorem range_specialFiberι :
-    Set.range (specialFiberι R toBase) = toBase ⁻¹' {closedPoint R} := by
-  rw [specialFiberι, Scheme.Pullback.range_fst, range_Spec_map_residue]
+    Set.range (specialFiberι R toBase) = toBase ⁻¹' {closedPoint R} :=
+  calc Set.range (specialFiberι R toBase)
+      = Set.range (specialFiberι R toBase ∘ (specialFiberIsoFiberClosedPoint (.of R) toBase).inv) :=
+        ((specialFiberIsoFiberClosedPoint (.of R) toBase).inv.surjective.range_comp _).symm
+    _ = Set.range ((specialFiberIsoFiberClosedPoint (.of R) toBase).inv ≫ specialFiberι R toBase) :=
+        congrArg Set.range (funext fun x ↦ (Scheme.Hom.comp_apply _ _ x).symm)
+    _ = Set.range (toBase.fiberι (closedPoint R)) :=
+        congrArg (fun g : toBase.fiber (closedPoint R) ⟶ X ↦ Set.range g)
+          (specialFiberIsoFiberClosedPoint_inv_specialFiberι (.of R) toBase)
+    _ = toBase ⁻¹' {closedPoint R} := Scheme.Hom.range_fiberι toBase (closedPoint R)
 
 end LocalRing
 
@@ -121,8 +124,8 @@ variable {X : Scheme.{u}} (toBase : X ⟶ Spec (.of R))
 
 /-- A point of a scheme over a local ring of dimension at most one lies over the closed point
 exactly when the pullback of a nonzero element `π` of the maximal ideal vanishes at it. -/
-theorem base_eq_closedPoint_iff_mem_zeroLocus {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0)
-    (x : X) :
+theorem _root_.AlgebraicGeometry.Scheme.Hom.base_eq_closedPoint_iff_mem_zeroLocus {π : R}
+    (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) (x : X) :
     toBase x = closedPoint R ↔
       x ∈ X.zeroLocus {toBase.appTop ((Scheme.ΓSpecIso (.of R)).inv π)} := by
   rw [Scheme.zeroLocus_singleton, Set.mem_compl_iff, SetLike.mem_coe,
@@ -133,10 +136,11 @@ theorem base_eq_closedPoint_iff_mem_zeroLocus {π : R} (hπ : π ∈ maximalIdea
 
 /-- The special fibre of a scheme over a local ring of dimension at most one is the zero locus of
 the pullback of a nonzero element of the maximal ideal. -/
-theorem preimage_closedPoint_eq_zeroLocus {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) :
+theorem _root_.AlgebraicGeometry.Scheme.Hom.preimage_closedPoint_eq_zeroLocus {π : R}
+    (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) :
     toBase ⁻¹' {closedPoint R} =
       X.zeroLocus {toBase.appTop ((Scheme.ΓSpecIso (.of R)).inv π)} :=
-  Set.ext fun x ↦ base_eq_closedPoint_iff_mem_zeroLocus toBase hπ hπ0 x
+  Set.ext fun x ↦ toBase.base_eq_closedPoint_iff_mem_zeroLocus hπ hπ0 x
 
 section Irreducible
 
@@ -145,9 +149,9 @@ variable [IrreducibleSpace X]
 omit [Ring.DimensionLEOne R] in
 /-- The generic point of an irreducible scheme flat over a local domain which is not a field does
 not lie in the special fibre. -/
-theorem base_genericPoint_ne_closedPoint [IsDomain R] [Flat toBase] (hR : maximalIdeal R ≠ ⊥) :
-    toBase (genericPoint X) ≠ closedPoint R := by
-  rw [genericPoint_eq_of_flat toBase, genericPoint_eq_bot_of_affine]
+theorem _root_.AlgebraicGeometry.Scheme.Hom.base_genericPoint_ne_closedPoint [IsDomain R]
+    [Flat toBase] (hR : maximalIdeal R ≠ ⊥) : toBase (genericPoint X) ≠ closedPoint R := by
+  rw [toBase.genericPoint_eq_of_flat, genericPoint_eq_bot_of_affine]
   intro h
   have h' : (⊥ : Ideal R) = maximalIdeal R := congrArg PrimeSpectrum.asIdeal h
   exact hR h'.symm
@@ -155,12 +159,12 @@ theorem base_genericPoint_ne_closedPoint [IsDomain R] [Flat toBase] (hR : maxima
 /-- If the generic point of an irreducible scheme over a one-dimensional local ring does not lie
 in the special fibre, the pullback of a nonzero element of the maximal ideal is a nonzero global
 function. -/
-theorem appTop_ΓSpecIso_inv_ne_zero (hη : toBase (genericPoint X) ≠ closedPoint R) {π : R}
-    (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) :
+theorem _root_.AlgebraicGeometry.Scheme.Hom.appTop_ΓSpecIso_inv_ne_zero
+    (hη : toBase (genericPoint X) ≠ closedPoint R) {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) :
     toBase.appTop ((Scheme.ΓSpecIso (.of R)).inv π) ≠ 0 := by
   intro h
   apply hη
-  rw [base_eq_closedPoint_iff_mem_zeroLocus toBase hπ hπ0, h, Scheme.zeroLocus_singleton,
+  rw [toBase.base_eq_closedPoint_iff_mem_zeroLocus hπ hπ0, h, Scheme.zeroLocus_singleton,
     Scheme.basicOpen_zero]
   simp
 
@@ -169,11 +173,11 @@ end Irreducible
 variable [IsIntegral X]
 
 /-- The pullback of a nonzero element of the maximal ideal is a nonzero rational function. -/
-theorem germToFunctionField_appTop_ne_zero (hη : toBase (genericPoint X) ≠ closedPoint R)
-    {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) :
+theorem _root_.AlgebraicGeometry.Scheme.Hom.germToFunctionField_appTop_ne_zero
+    (hη : toBase (genericPoint X) ≠ closedPoint R) {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) :
     X.germToFunctionField ⊤ (toBase.appTop ((Scheme.ΓSpecIso (.of R)).inv π)) ≠ 0 :=
   (map_ne_zero_iff _ (X.germToFunctionField_injective ⊤)).mpr
-    (appTop_ΓSpecIso_inv_ne_zero toBase hη hπ hπ0)
+    (toBase.appTop_ΓSpecIso_inv_ne_zero hη hπ hπ0)
 
 variable [IsLocallyNoetherian X]
 
@@ -182,33 +186,36 @@ over a local ring of dimension at most one which is not a field, whose generic p
 in the special fibre, the generic points of the irreducible components of the special fibre, that
 is, its points maximal for the specialization order, are exactly the codimension-one points of `X`
 lying in the special fibre. -/
-theorem maximal_base_eq_closedPoint_iff (hR : maximalIdeal R ≠ ⊥)
-    (hη : toBase (genericPoint X) ≠ closedPoint R) {x : X} :
+theorem _root_.AlgebraicGeometry.Scheme.Hom.maximal_base_eq_closedPoint_iff
+    (hR : maximalIdeal R ≠ ⊥) (hη : toBase (genericPoint X) ≠ closedPoint R) {x : X} :
     Maximal (fun y ↦ toBase y = closedPoint R) x ↔
       toBase x = closedPoint R ∧ coheight x = 1 := by
   obtain ⟨π, hπ, hπ0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hR
-  simp only [base_eq_closedPoint_iff_mem_zeroLocus toBase hπ hπ0]
-  exact Scheme.maximal_mem_zeroLocus_iff (appTop_ΓSpecIso_inv_ne_zero toBase hη hπ hπ0)
+  simp only [toBase.base_eq_closedPoint_iff_mem_zeroLocus hπ hπ0]
+  exact Scheme.maximal_mem_zeroLocus_iff (toBase.appTop_ΓSpecIso_inv_ne_zero hη hπ hπ0)
 
 omit [IsIntegral X] in
 /-- Every point of the special fibre of a locally Noetherian scheme over a local ring of dimension
 at most one which is not a field lies on an irreducible component of the special fibre. -/
-theorem exists_maximal_base_eq_closedPoint_specializes (hR : maximalIdeal R ≠ ⊥) {x : X}
-    (hx : toBase x = closedPoint R) :
+theorem _root_.AlgebraicGeometry.Scheme.Hom.exists_maximal_base_eq_closedPoint_specializes
+    (hR : maximalIdeal R ≠ ⊥) {x : X} (hx : toBase x = closedPoint R) :
     ∃ y, Maximal (fun y ↦ toBase y = closedPoint R) y ∧ y ⤳ x := by
   obtain ⟨π, hπ, hπ0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hR
-  simp only [base_eq_closedPoint_iff_mem_zeroLocus toBase hπ hπ0] at hx ⊢
+  simp only [toBase.base_eq_closedPoint_iff_mem_zeroLocus hπ hπ0] at hx ⊢
   exact Scheme.exists_maximal_mem_zeroLocus_specializes hx
 
 /-- At a codimension-one point of `X`, the order of vanishing of the pullback of a nonzero
 element `π` of the maximal ideal is positive exactly when the point lies in the special fibre.
-This order is the multiplicity of the corresponding component of the special fibre. -/
-theorem ord_germToFunctionField_appTop_pos_iff (hη : toBase (genericPoint X) ≠ closedPoint R)
-    {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) {x : X} (hx : coheight x = 1) :
+This order is the coefficient of the corresponding component of the special fibre in the divisor
+of the pullback of `π`; when `R` is a discrete valuation ring and `π` is a uniformizer, it is the
+multiplicity of that component in the special fibre. -/
+theorem _root_.AlgebraicGeometry.Scheme.Hom.ord_germToFunctionField_appTop_pos_iff
+    (hη : toBase (genericPoint X) ≠ closedPoint R) {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0)
+    {x : X} (hx : coheight x = 1) :
     0 < X.ord (X.germToFunctionField ⊤ (toBase.appTop ((Scheme.ΓSpecIso (.of R)).inv π))) x ↔
       toBase x = closedPoint R := by
-  rw [Scheme.ord_germToFunctionField_pos_iff (appTop_ΓSpecIso_inv_ne_zero toBase hη hπ hπ0)
-    trivial hx, base_eq_closedPoint_iff_mem_zeroLocus toBase hπ hπ0]
+  rw [Scheme.ord_germToFunctionField_pos_iff (toBase.appTop_ΓSpecIso_inv_ne_zero hη hπ hπ0)
+    trivial hx, toBase.base_eq_closedPoint_iff_mem_zeroLocus hπ hπ0]
 
 end DimensionLEOne
 
@@ -220,25 +227,28 @@ variable {R : Type u} [CommRing R] [IsLocalRing R] [Ring.DimensionLEOne R]
 /-- The special fibre of a Noetherian integral scheme over a local ring of dimension at most one
 which is not a field, whose generic point does not lie in the special fibre, has finitely many
 irreducible components: only finitely many codimension-one points of `X` lie in it. -/
-theorem finite_setOf_base_eq_closedPoint (hR : maximalIdeal R ≠ ⊥)
-    (hη : toBase (genericPoint X) ≠ closedPoint R) :
+theorem _root_.AlgebraicGeometry.Scheme.Hom.finite_setOf_base_eq_closedPoint
+    (hR : maximalIdeal R ≠ ⊥) (hη : toBase (genericPoint X) ≠ closedPoint R) :
     {x : CodimensionOnePoint X | toBase x = closedPoint R}.Finite := by
   obtain ⟨π, hπ, hπ0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hR
-  simp only [base_eq_closedPoint_iff_mem_zeroLocus toBase hπ hπ0]
-  exact SchemeWeilDivisor.finite_setOf_mem_zeroLocus (appTop_ΓSpecIso_inv_ne_zero toBase hη hπ hπ0)
+  simp only [toBase.base_eq_closedPoint_iff_mem_zeroLocus hπ hπ0]
+  exact SchemeWeilDivisor.finite_setOf_mem_zeroLocus (toBase.appTop_ΓSpecIso_inv_ne_zero hη hπ hπ0)
 
 /-- **The divisor of a uniformizer is supported on the special fibre.** The principal divisor of
 the pullback of a nonzero element `π` of the maximal ideal is supported exactly on the
 codimension-one points of the special fibre, the generic points of its irreducible components.
 Together with `TauCeti.AlgebraicGeometry.SchemeWeilDivisor.isEffective_principalDivisor_ofMul_mk0`
-this is the decomposition `div_X(π) = ∑ᵢ mᵢ [Cᵢ]` with positive multiplicities `mᵢ`. -/
-theorem mem_support_principalDivisor_appTop (hη : toBase (genericPoint X) ≠ closedPoint R)
-    {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0) (x : CodimensionOnePoint X) :
+this is the decomposition `div_X(π) = ∑ᵢ mᵢ [Cᵢ]` with positive coefficients `mᵢ`; when `R` is a
+discrete valuation ring and `π` is a uniformizer, these are the multiplicities of the components
+of the special fibre. -/
+theorem _root_.AlgebraicGeometry.Scheme.Hom.mem_support_principalDivisor_appTop
+    (hη : toBase (genericPoint X) ≠ closedPoint R) {π : R} (hπ : π ∈ maximalIdeal R) (hπ0 : π ≠ 0)
+    (x : CodimensionOnePoint X) :
     x ∈ ((WeilDivisor.OrderSystem.ofScheme X).principalDivisor (Additive.ofMul
-        (Units.mk0 _ (germToFunctionField_appTop_ne_zero toBase hη hπ hπ0)))).support ↔
+        (Units.mk0 _ (toBase.germToFunctionField_appTop_ne_zero hη hπ hπ0)))).support ↔
       toBase x = closedPoint R := by
   rw [SchemeWeilDivisor.mem_support_principalDivisor_ofMul_mk0,
-    base_eq_closedPoint_iff_mem_zeroLocus toBase hπ hπ0]
+    toBase.base_eq_closedPoint_iff_mem_zeroLocus hπ hπ0]
 
 end Noetherian
 
