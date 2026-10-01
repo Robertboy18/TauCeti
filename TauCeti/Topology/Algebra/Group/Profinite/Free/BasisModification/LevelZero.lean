@@ -42,9 +42,11 @@ expands bilinearly. The **polarization identity**
 so for odd `p` only the bracket part of `ρ` obstructs additivity, and for `p = 2` the `p`-power
 part contributes `Σ_i c_i [v_i, w_i]` in addition. The second sum is not an artifact of the
 presentation: for the bracket class `ρ = [ξ_0, ξ_1]` in rank two, the modification
-`x_0 ↦ x_0 * x_1`, `x_1 ↦ x_1 * x_0` carries `ρ` to `-ρ`
+`x_0 ↦ x_0 * x_1`, `x_1 ↦ x_1 * x_0` has deviation `δ⁰_ρ(ω) = -ρ`
 (`TauCeti.freeProP.basisModificationDeltaZero_gradedBracket_gradedMkZero_fin_two`), whereas the
-terms linear in `ω` vanish there.
+terms linear in `ω` vanish there. Equivalently, the induced map `θ_*` sends `ρ` to
+`ρ + δ⁰_ρ(ω) = 0`: with `r = [x_0, x_1]` one has `θ_w r = [x_0 * x_1, x_1 * x_0] ∈ λ_2(F)`, so
+`θ_w r ≡ 1` modulo `λ_2(F)` and `r⁻¹ * θ_w r ≡ r⁻¹`.
 
 Through the deviation `θ_* - id` of an arbitrary endomorphism, the same formula computes the
 induced map of any continuous endomorphism `φ` of `F` on `gr_1(F)` from its effect on the generator
@@ -328,11 +330,12 @@ theorem basisModificationDeltaZero_add_of_two [Fintype X] (hp : p = 2)
 /-! ### The quadratic term is not an artifact -/
 
 /-- **A basis modification moving a bracket class by a quadratic term.** In `F = freeProP p (Fin 2)`
-the modification `x_0 ↦ x_0 * x_1`, `x_1 ↦ x_1 * x_0`, with classes `ω = (ξ_1, ξ_0)`, carries the
-bracket class `ρ = [ξ_0, ξ_1]` to `δ⁰_ρ(ω) = -ρ`: the terms of `δ⁰_ρ(ω)` linear in `ω` are
-`[ξ_1, ξ_1] - [ξ_0, ξ_0] = 0`, and the quadratic term is `[ξ_1, ξ_0] = -[ξ_0, ξ_1]`. For `p = 2`
-this class is nonzero (`TauCeti.gradedBracket_freeProP_two_ne_zero`), so the quadratic term of
-`δ⁰` cannot be dropped. -/
+the modification `x_0 ↦ x_0 * x_1`, `x_1 ↦ x_1 * x_0`, with classes `ω = (ξ_1, ξ_0)`, has
+deviation `δ⁰_ρ(ω) = -ρ` at the bracket class `ρ = [ξ_0, ξ_1]`: the terms of `δ⁰_ρ(ω)` linear in
+`ω` are `[ξ_1, ξ_1] - [ξ_0, ξ_0] = 0`, and the quadratic term is `[ξ_1, ξ_0] = -[ξ_0, ξ_1]`. The
+induced map `θ_*` therefore sends `ρ` to `ρ + δ⁰_ρ(ω) = 0`, as `[ξ_0 + ξ_1, ξ_1 + ξ_0] = 0`
+confirms. For `p = 2` the class `-ρ` is nonzero (`TauCeti.gradedBracket_freeProP_two_ne_zero`),
+so the quadratic term of `δ⁰` cannot be dropped. -/
 theorem basisModificationDeltaZero_gradedBracket_gradedMkZero_fin_two :
     basisModificationDeltaZero p (Fin 2)
         ![gradedMkZero p (freeProP p (Fin 2)) (of 1), gradedMkZero p (freeProP p (Fin 2)) (of 0)]
