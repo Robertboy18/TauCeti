@@ -18,8 +18,9 @@ further closure property: a category induced along a map into a thin category is
 The motivating instance is the category of members of a family `B` of opens of a topological
 space, `InducedCategory (Opens X) (Subtype.val : B → Opens X)`, which indexes the limits describing
 a presheaf adapted to `B`. Thinness makes the functor laws of functors between such index
-categories, and the fullness of such functors, instances of `Subsingleton.elim`, and their
-faithfulness automatic.
+categories instances of `Subsingleton.elim`, and it makes their faithfulness automatic. It does
+not by itself make such a functor full: a preimage must still be constructed, although thinness
+then discharges the equation the preimage has to satisfy.
 
 ## Main results
 
