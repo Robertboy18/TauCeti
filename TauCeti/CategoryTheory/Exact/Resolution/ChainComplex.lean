@@ -56,9 +56,13 @@ differential, and of every family of morphisms between the complexes of two reso
 recursive constructions of those families only typecheck when `(step … r).term (n + 1)` reduces to
 `r.term n`. It is moreover reducible, so that `simp` and `rw` unify a morphism typed with
 `(step … r).term (n + 1)` against one typed with `r.term n`; without this every lemma mixing the
-two would need an explicit `rfl` step. The augmentation and the differential are sealed behind
-their equations. `toChainComplex` is an abbreviation, exactly as Mathlib's `ChainComplex.of` is,
-so that its terms are the terms of the resolution definitionally.
+two would need an explicit `rfl` step. The price is that the equation lemmas of `term` are not simp
+lemmas: `simp` indexes left-hand sides at reducible transparency, so `(base hX).term 0` is unfolded
+before it could be matched and the lemmas would never fire. They are stated for `rw` and term-mode
+use. The augmentation and the differential are sealed behind their equations. `toChainComplex` is
+an abbreviation, exactly as Mathlib's `ChainComplex.of` is, so that its terms are the terms of the
+resolution definitionally; `simp` therefore computes its differentials through
+`ChainComplex.of_d`, and `toChainComplex_d` is the `rw` form of that lemma.
 
 ## References
 
@@ -91,16 +95,16 @@ beyond. -/
   | _, .step (Q := Q) _ _ _ _ _ _, 0 => Q
   | _, .step _ _ _ _ _ r, n + 1 => r.term n
 
-@[simp] theorem term_base_zero {X : C} (hX : P X) : (base (E := E) hX).term 0 = X := rfl
+theorem term_base_zero {X : C} (hX : P X) : (base (E := E) hX).term 0 = X := rfl
 
-@[simp] theorem term_base_succ {X : C} (hX : P X) (n : ℕ) :
+theorem term_base_succ {X : C} (hX : P X) (n : ℕ) :
     (base (E := E) hX).term (n + 1) = 0 := rfl
 
-@[simp] theorem term_step_zero {K Q X : C} (hQ : P Q) (i : K ⟶ Q) (p : Q ⟶ X)
+theorem term_step_zero {K Q X : C} (hQ : P Q) (i : K ⟶ Q) (p : Q ⟶ X)
     (zero : i ≫ p = 0) (hp : E.Conflation (ShortComplex.mk i p zero))
     (r : FiniteResolution E P K) : (step hQ i p zero hp r).term 0 = Q := rfl
 
-@[simp] theorem term_step_succ {K Q X : C} (hQ : P Q) (i : K ⟶ Q) (p : Q ⟶ X)
+theorem term_step_succ {K Q X : C} (hQ : P Q) (i : K ⟶ Q) (p : Q ⟶ X)
     (zero : i ≫ p = 0) (hp : E.Conflation (ShortComplex.mk i p zero))
     (r : FiniteResolution E P K) (n : ℕ) :
     (step hQ i p zero hp r).term (n + 1) = r.term n := rfl
@@ -187,7 +191,11 @@ differentials, `Kₙ` in degree `n` equal to the length, and zero beyond. -/
 noncomputable abbrev toChainComplex {X : C} (r : FiniteResolution E P X) : ChainComplex C ℕ :=
   ChainComplex.of r.term r.d r.d_comp_d
 
-@[simp] theorem toChainComplex_d {X : C} (r : FiniteResolution E P X) (n : ℕ) :
+/-- The differential of the complex in consecutive degrees. Not a simp lemma, since `simp` proves
+it from `ChainComplex.of_d` through the abbreviation; it is the form `rw` can use, which does not
+see `ChainComplex.of.d` through the abbreviation, and unifies with offset degrees such as
+`r.toChainComplex.d (n + 2) (n + 1)`. -/
+theorem toChainComplex_d {X : C} (r : FiniteResolution E P X) (n : ℕ) :
     r.toChainComplex.d (n + 1) n = r.d n :=
   ChainComplex.of_d _ _ n
 
