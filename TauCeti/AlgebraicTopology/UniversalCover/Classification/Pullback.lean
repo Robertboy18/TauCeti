@@ -20,7 +20,10 @@ its effect on monodromy.
 
 * `TauCeti.ConnectedCoveringSpace.pullback h` is the functor `ConnectedCoveringSpace Y ⥤
   ConnectedCoveringSpace X`; it keeps the total space and the maps of total spaces, and composes
-  the projection with `h.symm`.
+  the projection with `h.symm`. Pulling back along the identity is the identity functor, and
+  pulling back along a composite is the composite of the pullbacks in the reverse order
+  (`TauCeti.ConnectedCoveringSpace.pullback_refl`, `TauCeti.ConnectedCoveringSpace.pullback_trans`),
+  so the self-homeomorphisms of `X` act on its covers through this functor.
 * When `h x = y`, the fibre of the pulled-back cover over `x` is the fibre of the original cover
   over `y` (`TauCeti.ConnectedCoveringSpace.pullbackFiberEquiv`), and under that identification the
   monodromy of the pullback along a loop `γ` at `x` is the monodromy of the original cover along
@@ -29,9 +32,11 @@ its effect on monodromy.
   `π₁(X, x) ≃* π₁(Y, y)` induced by `h`.
 * Consequently a fibre-numbered cover of `(Y, y)` pulls back to a fibre-numbered cover of
   `(X, x)` whose numbered monodromy representation is the original one precomposed with that
-  isomorphism (`TauCeti.ConnectedFiberNumberedCover.permCongrHom_comp_monodromyPerm_pullback`).
-  Pullback descends to the isomorphism classes of numbered and of bare covers and commutes with
-  relabelling and with forgetting the numbering.
+  isomorphism (`TauCeti.ConnectedFiberNumberedCover.permCongrHom_comp_monodromyPerm_pullback`), a
+  pointed cover pulls back to a pointed cover, and a bare cover to a bare cover. Pullback descends
+  to the isomorphism classes of all three kinds of covers, satisfies the identity and composition
+  laws on the nose at every level, and commutes with relabelling and with the forgetful maps
+  between the levels.
 
 For the thrice-punctured sphere this is how the anharmonic self-homeomorphisms act on covers: the
 pullback along `z ↦ 1 − z`, which fixes the basepoint, realizes the exchange of the branch points
@@ -39,18 +44,25 @@ pullback along `z ↦ 1 − z`, which fixes the basepoint, realizes the exchange
 
 ## Main declarations
 
-* `TauCeti.ConnectedCoveringSpace.pullback`: the pullback functor along a homeomorphism of bases.
+* `TauCeti.ConnectedCoveringSpace.pullback`: the pullback functor along a homeomorphism of bases,
+  with `TauCeti.ConnectedCoveringSpace.pullback_refl` and
+  `TauCeti.ConnectedCoveringSpace.pullback_trans`.
 * `TauCeti.ConnectedCoveringSpace.pullbackFiberEquiv`,
   `TauCeti.ConnectedCoveringSpace.pullbackFiberEquiv_monodromy`: the fibre identification and its
   compatibility with monodromy.
-* `TauCeti.ConnectedFiberNumberedCover.pullback`, `TauCeti.ConnectedCover.pullback`: pullback of
-  numbered and of bare covers, with
+* `TauCeti.ConnectedFiberNumberedCover.pullback`, `TauCeti.ConnectedPointedCover.pullback`,
+  `TauCeti.ConnectedCover.pullback`: pullback of numbered, of pointed and of bare covers, with
   `TauCeti.ConnectedFiberNumberedCover.permCongrHom_comp_monodromyPerm_pullback` computing the
-  numbered monodromy of the pullback.
-* `TauCeti.ConnectedFiberNumberedCoverClass.pullback`, `TauCeti.ConnectedCoverClass.pullback`:
-  the descended maps on isomorphism classes, with
+  numbered monodromy of the pullback, and the laws `pullback_refl` and `pullback_pullback` in each
+  namespace.
+* `TauCeti.ConnectedFiberNumberedCoverClass.pullback`,
+  `TauCeti.ConnectedPointedCoverClass.pullback`, `TauCeti.ConnectedCoverClass.pullback`: the
+  descended maps on isomorphism classes, with their
+  `pullback_mk`, `pullback_refl` and `pullback_pullback` lemmas and the compatibilities
+  `TauCeti.ConnectedFiberNumberedCoverClass.pullback_smul`,
+  `TauCeti.ConnectedFiberNumberedCoverClass.markLabel_pullback`,
   `TauCeti.ConnectedFiberNumberedCoverClass.forgetNumbering_pullback` and
-  `TauCeti.ConnectedFiberNumberedCoverClass.pullback_smul`.
+  `TauCeti.ConnectedPointedCoverClass.forgetPoint_pullback`.
 
 ## References
 
@@ -66,15 +78,17 @@ universe u
 
 namespace TauCeti
 
-variable {X Y : TopCat.{u}}
+variable {X Y Z : TopCat.{u}}
 
 namespace ConnectedCoveringSpace
 
 /-- The pullback of connected covering spaces along a homeomorphism `h : X ≃ₜ Y` of bases: the
 total space is unchanged and the projection is composed with `h.symm`. On morphisms it is the
 identity on maps of total spaces. -/
--- The total space of the pullback must be visible as the original total space, so that its
--- fibres are subtypes of that space; hence this definition exposes the projection it composes.
+-- The total space of the pullback must be visible as the original total space: the statements of
+-- `pullback_obj_proj_apply`, `pullback_map_hom_left` and `pullbackFiberEquiv_apply_coe` apply the
+-- original projection and maps to points of the pullback, and do not typecheck when this
+-- definition is sealed ("definitions were not unfolded because their definition is not exposed").
 @[expose] def pullback (h : X ≃ₜ Y) : ConnectedCoveringSpace Y ⥤ ConnectedCoveringSpace X :=
   ObjectProperty.lift _ (ObjectProperty.ι _ ⋙ Over.map (TopCat.ofHom (h.symm : C(Y, X))))
     fun c => ⟨Over.isCoveringMap_iff.2 (c.isCoveringMap_proj.homeomorph_comp h.symm),
@@ -92,6 +106,17 @@ theorem pullback_obj_proj_apply (e : ((pullback h).obj c : TopCat)) :
 @[simp]
 theorem pullback_map_hom_left {c c' : ConnectedCoveringSpace Y} (f : c ⟶ c') :
     ((pullback h).map f).hom.left = f.hom.left :=
+  (rfl)
+
+/-- Pulling back along the identity is the identity functor. -/
+@[simp]
+theorem pullback_refl : pullback (Homeomorph.refl X) = 𝟭 (ConnectedCoveringSpace X) :=
+  (rfl)
+
+/-- Pulling back along a composite homeomorphism is the composite of the pullbacks, in the reverse
+order. -/
+@[simp]
+theorem pullback_trans (h' : Y ≃ₜ Z) : pullback (h.trans h') = pullback h' ⋙ pullback h :=
   (rfl)
 
 variable {x : X} {y : Y} (hx : h x = y)
@@ -147,13 +172,16 @@ theorem pullbackFiberEquiv_monodromy (γ : FundamentalGroup X x)
 
 end ConnectedCoveringSpace
 
-variable (h : X ≃ₜ Y) {x : X} {y : Y} (hx : h x = y) {n : ℕ}
+variable (h : X ≃ₜ Y) (h' : Y ≃ₜ Z) {x : X} {y : Y} {z : Z} (hx : h x = y) (hy : h' y = z) {n : ℕ}
+
+/-! ### Fibre-numbered covers -/
 
 namespace ConnectedFiberNumberedCover
 
 /-- The pullback of a fibre-numbered cover of `(Y, y)` along a homeomorphism `h` with `h x = y`:
 the pulled-back cover, with the fibre over `x` numbered through the fibre over `y`. -/
--- The type of `ν` depends on the projected cover, so this definition must expose that projection.
+-- The type of `ν` depends on the projected cover, so the statement of `pullback_ν` typechecks only
+-- when this definition is exposed.
 @[expose] def pullback (c : ConnectedFiberNumberedCover y n) : ConnectedFiberNumberedCover x n where
   cover := (ConnectedCoveringSpace.pullback h).obj c.cover
   ν := (ConnectedCoveringSpace.pullbackFiberEquiv h c.cover hx).trans c.ν
@@ -192,6 +220,19 @@ theorem permCongrHom_comp_monodromyPerm_pullback :
 theorem pullback_smul (τ : Perm (Fin n)) : (τ • c).pullback h hx = τ • c.pullback h hx :=
   (rfl)
 
+/-- Pulling back along the identity changes nothing. -/
+@[simp]
+theorem pullback_refl (hx : Homeomorph.refl X x = x) (c : ConnectedFiberNumberedCover x n) :
+    c.pullback (Homeomorph.refl X) hx = c :=
+  (rfl)
+
+/-- Pulling back twice is pulling back along the composite homeomorphism. -/
+@[simp]
+theorem pullback_pullback (c : ConnectedFiberNumberedCover z n) :
+    (c.pullback h' hy).pullback h hx =
+      c.pullback (h.trans h') ((h.trans_apply h' x).trans ((congrArg h' hx).trans hy)) :=
+  (rfl)
+
 end ConnectedFiberNumberedCover
 
 /-- A label-preserving isomorphism of numbered covers pulls back to one. -/
@@ -220,14 +261,144 @@ theorem pullback_smul (τ : Perm (Fin n)) (C : ConnectedFiberNumberedCoverClass 
   ind (fun c => by rw [smul_mk, pullback_mk, pullback_mk, smul_mk,
     ConnectedFiberNumberedCover.pullback_smul]) C
 
+/-- Pulling back along the identity changes nothing, on classes. -/
+@[simp]
+theorem pullback_refl (hx : Homeomorph.refl X x = x) (C : ConnectedFiberNumberedCoverClass x n) :
+    C.pullback (Homeomorph.refl X) hx = C :=
+  ind (fun c => by rw [pullback_mk, ConnectedFiberNumberedCover.pullback_refl]) C
+
+/-- Pulling back twice is pulling back along the composite homeomorphism, on classes. -/
+@[simp]
+theorem pullback_pullback (C : ConnectedFiberNumberedCoverClass z n) :
+    (C.pullback h' hy).pullback h hx =
+      C.pullback (h.trans h') ((h.trans_apply h' x).trans ((congrArg h' hx).trans hy)) :=
+  ind (fun c => by
+    rw [pullback_mk, pullback_mk, pullback_mk, ConnectedFiberNumberedCover.pullback_pullback]) C
+
 end ConnectedFiberNumberedCoverClass
+
+/-! ### Pointed covers -/
+
+namespace ConnectedPointedCover
+
+/-- The pullback of a pointed cover of `(Y, y)` along a homeomorphism `h` with `h x = y`: the
+pulled-back cover, pointed at the same point, which lies over `x` in the pullback. -/
+-- The type of `e` depends on the projected cover, so the statement of `pullback_e` typechecks only
+-- when this definition is exposed.
+@[expose] def pullback (c : ConnectedPointedCover y n) : ConnectedPointedCover x n where
+  cover := (ConnectedCoveringSpace.pullback h).obj c.cover
+  e := (ConnectedCoveringSpace.pullbackFiberEquiv h c.cover hx).symm c.e
+  nonempty_equiv_fin :=
+    c.nonempty_equiv_fin.map fun ν =>
+      (ConnectedCoveringSpace.pullbackFiberEquiv h c.cover hx).trans ν
+
+variable (c : ConnectedPointedCover y n)
+
+@[simp]
+theorem pullback_cover :
+    (c.pullback h hx).cover = (ConnectedCoveringSpace.pullback h).obj c.cover :=
+  (rfl)
+
+@[simp]
+theorem pullback_e :
+    (c.pullback h hx).e = (ConnectedCoveringSpace.pullbackFiberEquiv h c.cover hx).symm c.e :=
+  (rfl)
+
+/-- Pulling back along the identity changes nothing. -/
+@[simp]
+theorem pullback_refl (hx : Homeomorph.refl X x = x) (c : ConnectedPointedCover x n) :
+    c.pullback (Homeomorph.refl X) hx = c :=
+  (rfl)
+
+/-- Pulling back twice is pulling back along the composite homeomorphism. -/
+@[simp]
+theorem pullback_pullback (c : ConnectedPointedCover z n) :
+    (c.pullback h' hy).pullback h hx =
+      c.pullback (h.trans h') ((h.trans_apply h' x).trans ((congrArg h' hx).trans hy)) :=
+  (rfl)
+
+end ConnectedPointedCover
+
+/-- Marking a label commutes with pullback. -/
+@[simp]
+theorem ConnectedFiberNumberedCover.markLabel_pullback (c : ConnectedFiberNumberedCover y n)
+    (i : Fin n) : (c.pullback h hx).markLabel i = (c.markLabel i).pullback h hx :=
+  (rfl)
+
+/-- A pointed isomorphism of pointed covers pulls back to one. -/
+theorem ConnectedPointedCoverIso.pullback {c c' : ConnectedPointedCover y n}
+    (hcc : ConnectedPointedCoverIso c c') :
+    ConnectedPointedCoverIso (c.pullback h hx) (c'.pullback h hx) := by
+  obtain ⟨f, hf⟩ := connectedPointedCoverIso_iff_exists.1 hcc
+  exact connectedPointedCoverIso_iff_exists.2 ⟨(ConnectedCoveringSpace.pullback h).mapIso f, hf⟩
+
+namespace ConnectedPointedCoverClass
+
+open ConnectedFiberNumberedCoverClass
+
+/-- Pullback along `h`, on isomorphism classes of pointed covers: pull back the class of any
+numbering of the cover and mark the label of the chosen point again. This does not depend on the
+numbering because pullback commutes with relabelling
+(`TauCeti.ConnectedFiberNumberedCoverClass.pullback_smul`), and it is characterized by
+`TauCeti.ConnectedFiberNumberedCoverClass.markLabel_pullback` and `pullback_mk`. -/
+noncomputable def pullback (C : ConnectedPointedCoverClass y n) : ConnectedPointedCoverClass x n :=
+  Quotient.lift (s := MulAction.orbitRel (Perm (Fin n)) _)
+    (fun Ni : ConnectedFiberNumberedCoverClass y n × Fin n => (Ni.1.pullback h hx).markLabel Ni.2)
+    (fun _ Ni' hNN' => by
+      obtain ⟨τ, rfl⟩ := MulAction.mem_orbit_iff.1 (MulAction.orbitRel_apply.1 hNN')
+      rw [Prod.smul_fst, Prod.smul_snd, pullback_smul, markLabel_smul, Perm.smul_def,
+        symm_apply_apply])
+    (markedOrbitRelQuotientEquiv.symm C)
+
+end ConnectedPointedCoverClass
+
+/-- Marking a label commutes with pullback, on classes. -/
+@[simp]
+theorem ConnectedFiberNumberedCoverClass.markLabel_pullback
+    (C : ConnectedFiberNumberedCoverClass y n) (i : Fin n) :
+    (C.pullback h hx).markLabel i = (C.markLabel i).pullback h hx := by
+  rw [ConnectedPointedCoverClass.pullback, markedOrbitRelQuotientEquiv_symm_markLabel]
+  rfl
+
+/-- The pullback of the class of a pointed cover is the class of its pullback. -/
+@[simp]
+theorem ConnectedPointedCoverClass.pullback_mk (c : ConnectedPointedCover y n) :
+    (mk c).pullback h hx = mk (c.pullback h hx) := by
+  obtain ⟨N, i, hN⟩ := (mk c).exists_markLabel_eq
+  obtain ⟨c₀, rfl⟩ := ConnectedFiberNumberedCoverClass.mk_surjective N
+  rw [ConnectedFiberNumberedCoverClass.markLabel_mk] at hN
+  rw [← hN, ← ConnectedFiberNumberedCoverClass.markLabel_mk,
+    ← ConnectedFiberNumberedCoverClass.markLabel_pullback,
+    ConnectedFiberNumberedCoverClass.pullback_mk, ConnectedFiberNumberedCoverClass.markLabel_mk,
+    ConnectedFiberNumberedCover.markLabel_pullback, mk_eq_mk_iff]
+  exact (mk_eq_mk_iff.1 hN).pullback h hx
+
+namespace ConnectedPointedCoverClass
+
+/-- Pulling back along the identity changes nothing, on classes. -/
+@[simp]
+theorem pullback_refl (hx : Homeomorph.refl X x = x) (C : ConnectedPointedCoverClass x n) :
+    C.pullback (Homeomorph.refl X) hx = C := by
+  obtain ⟨c, rfl⟩ := mk_surjective C
+  rw [pullback_mk, ConnectedPointedCover.pullback_refl]
+
+/-- Pulling back twice is pulling back along the composite homeomorphism, on classes. -/
+@[simp]
+theorem pullback_pullback (C : ConnectedPointedCoverClass z n) :
+    (C.pullback h' hy).pullback h hx =
+      C.pullback (h.trans h') ((h.trans_apply h' x).trans ((congrArg h' hx).trans hy)) := by
+  obtain ⟨c, rfl⟩ := mk_surjective C
+  rw [pullback_mk, pullback_mk, pullback_mk, ConnectedPointedCover.pullback_pullback]
+
+end ConnectedPointedCoverClass
+
+/-! ### Bare covers -/
 
 namespace ConnectedCover
 
 /-- The pullback of a bare cover of `(Y, y)` of degree `n` along a homeomorphism `h` with
 `h x = y`, a bare cover of `(X, x)` of degree `n`. -/
--- The degree field is stated on the projected cover, so this definition exposes that projection.
-@[expose] def pullback (c : ConnectedCover y n) : ConnectedCover x n where
+def pullback (c : ConnectedCover y n) : ConnectedCover x n where
   cover := (ConnectedCoveringSpace.pullback h).obj c.cover
   nonempty_equiv_fin :=
     c.nonempty_equiv_fin.map fun ν =>
@@ -238,19 +409,31 @@ theorem pullback_cover (c : ConnectedCover y n) :
     (c.pullback h hx).cover = (ConnectedCoveringSpace.pullback h).obj c.cover :=
   (rfl)
 
-/-- Two bare covers with the same underlying cover are equal. -/
-private theorem ext_cover {c c' : ConnectedCover x n} (hc : c.cover = c'.cover) : c = c' := by
-  cases c
-  cases c'
-  cases hc
-  rfl
+/-- Pulling back along the identity changes nothing. -/
+@[simp]
+theorem pullback_refl (hx : Homeomorph.refl X x = x) (c : ConnectedCover x n) :
+    c.pullback (Homeomorph.refl X) hx = c :=
+  (rfl)
+
+/-- Pulling back twice is pulling back along the composite homeomorphism. -/
+@[simp]
+theorem pullback_pullback (c : ConnectedCover z n) :
+    (c.pullback h' hy).pullback h hx =
+      c.pullback (h.trans h') ((h.trans_apply h' x).trans ((congrArg h' hx).trans hy)) :=
+  (rfl)
 
 /-- Forgetting the numbering commutes with pullback. -/
 @[simp]
 theorem _root_.TauCeti.ConnectedFiberNumberedCover.forgetNumbering_pullback
     (c : ConnectedFiberNumberedCover y n) :
     (c.pullback h hx).forgetNumbering = c.forgetNumbering.pullback h hx :=
-  ext_cover (by simp)
+  ConnectedCover.ext (by simp)
+
+/-- Forgetting the chosen point commutes with pullback. -/
+@[simp]
+theorem _root_.TauCeti.ConnectedPointedCover.forgetPoint_pullback (c : ConnectedPointedCover y n) :
+    (c.pullback h hx).forgetPoint = c.forgetPoint.pullback h hx :=
+  ConnectedCover.ext (by simp)
 
 end ConnectedCover
 
@@ -260,8 +443,9 @@ open ConnectedFiberNumberedCoverClass
 
 /-- Pullback along `h`, on isomorphism classes of bare covers: pull back the class of any numbering
 of the cover and forget the numbering again. This does not depend on the numbering because pullback
-commutes with relabelling (`pullback_smul`), and it is characterized by
-`ConnectedFiberNumberedCoverClass.forgetNumbering_pullback` and `pullback_mk`. -/
+commutes with relabelling (`TauCeti.ConnectedFiberNumberedCoverClass.pullback_smul`), and it is
+characterized by `TauCeti.ConnectedFiberNumberedCoverClass.forgetNumbering_pullback` and
+`pullback_mk`. -/
 noncomputable def pullback (C : ConnectedCoverClass y n) : ConnectedCoverClass x n :=
   Quotient.lift (s := MulAction.orbitRel (Perm (Fin n)) _)
     (fun N : ConnectedFiberNumberedCoverClass y n => (N.pullback h hx).forgetNumbering)
@@ -290,5 +474,33 @@ theorem ConnectedCoverClass.pullback_mk (c : ConnectedCover y n) :
     ConnectedFiberNumberedCoverClass.pullback_mk,
     ConnectedFiberNumberedCoverClass.forgetNumbering_mk,
     ConnectedFiberNumberedCover.forgetNumbering_pullback, c.forgetNumbering_numbering]
+
+/-- Forgetting the chosen point commutes with pullback, on classes. -/
+@[simp]
+theorem ConnectedPointedCoverClass.forgetPoint_pullback (C : ConnectedPointedCoverClass y n) :
+    (C.pullback h hx).forgetPoint = C.forgetPoint.pullback h hx := by
+  obtain ⟨c, rfl⟩ := ConnectedPointedCoverClass.mk_surjective C
+  rw [ConnectedPointedCoverClass.pullback_mk, ConnectedPointedCoverClass.forgetPoint_mk,
+    ConnectedPointedCoverClass.forgetPoint_mk, ConnectedCoverClass.pullback_mk,
+    ConnectedPointedCover.forgetPoint_pullback]
+
+namespace ConnectedCoverClass
+
+/-- Pulling back along the identity changes nothing, on classes. -/
+@[simp]
+theorem pullback_refl (hx : Homeomorph.refl X x = x) (C : ConnectedCoverClass x n) :
+    C.pullback (Homeomorph.refl X) hx = C := by
+  obtain ⟨c, rfl⟩ := mk_surjective C
+  rw [pullback_mk, ConnectedCover.pullback_refl]
+
+/-- Pulling back twice is pulling back along the composite homeomorphism, on classes. -/
+@[simp]
+theorem pullback_pullback (C : ConnectedCoverClass z n) :
+    (C.pullback h' hy).pullback h hx =
+      C.pullback (h.trans h') ((h.trans_apply h' x).trans ((congrArg h' hx).trans hy)) := by
+  obtain ⟨c, rfl⟩ := mk_surjective C
+  rw [pullback_mk, pullback_mk, pullback_mk, ConnectedCover.pullback_pullback]
+
+end ConnectedCoverClass
 
 end TauCeti

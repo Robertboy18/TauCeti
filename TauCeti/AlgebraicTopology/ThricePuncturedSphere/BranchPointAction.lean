@@ -7,7 +7,7 @@ module
 
 public import TauCeti.AlgebraicTopology.ThricePuncturedSphere.Classification
 public import TauCeti.AlgebraicTopology.UniversalCover.Classification.Pullback
-public import TauCeti.Combinatorics.PermutationTriple.Passport.BranchPoints
+public import TauCeti.Combinatorics.PermutationTriple.BranchPoints
 
 /-!
 # Pulling covers of the thrice-punctured sphere back along `z ↦ 1 − z`
@@ -23,9 +23,10 @@ The computation is transport-free because `mob01` fixes the basepoint. Its induc
 `π₁(ℂ ∖ {0, 1}, 1/2)` exchanges `periph0` and `periph1` and carries `periphInf` to
 `periph1⁻¹ * periphInf * periph1`
 (`TauCeti.ThricePuncturedSphere.homeomorphMulEquivOfEq_mob01_periph0` and its companions), which
-are exactly the three components of `swap01`. The other five anharmonic maps move the basepoint,
-so they act on triples only after a choice of connecting path and are compared with their
-branch-point operations on isomorphism classes alone.
+are exactly the three components of `swap01`. Among the six anharmonic maps only the identity and
+`mob01` fix the basepoint `1/2`; the remaining four move it, so they act on triples only after a
+choice of connecting path and are compared with their branch-point operations on isomorphism
+classes alone.
 
 On isomorphism classes the statement reads: the pullback along `mob01` is the action of
 `MulOpposite.op (Equiv.swap 0 1)` on `TauCeti.ConnectedIsoClass`, the right action of `Perm (Fin 3)`
