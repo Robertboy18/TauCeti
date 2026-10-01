@@ -182,7 +182,7 @@ private theorem dualityMap_devissage (M : Type u) [AddCommGroup M] [TopologicalS
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   hG.isProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective (ZMod p)
     (Module.Baer.zmod_self p) moduleBaer_H2_zmod
-    (fun A _ _ _ _ _ _ hA htrivA ↦ hG.dualityMap_of_natCard_eq htriv A hA htrivA) M
+    (fun A _ _ _ _ _ _ hA htrivA _ ↦ hG.dualityMap_of_natCard_eq htriv A hA htrivA) M
     (isPPrimaryTorsion_iff.2 fun m ↦ ⟨1, by rw [pow_one, hM]⟩) hM
 
 variable (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
@@ -226,7 +226,9 @@ by the dévissage. -/
 theorem dualityMap0_injective : Function.Injective (dualityMap0 G M (ZMod p)) :=
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   hG.isProP.dualityMap0_injective (ZMod p) (Module.Baer.zmod_self p) moduleBaer_H2_zmod
-    (fun A _ _ _ _ _ _ hA htrivA ↦ hG.dualityMap_of_natCard_eq htriv A hA htrivA) M
+    (fun A _ _ _ _ _ _ hA htrivA _ ↦
+      have hd := hG.dualityMap_of_natCard_eq htriv A hA htrivA
+      ⟨hd.1, hd.2.1.1⟩) M
     (isPPrimaryTorsion_iff.2 fun m ↦ ⟨1, by rw [pow_one, hM]⟩) hM
 
 /-- **Tate's duality map `α₀` of an infinite Demushkin group is bijective** on every finite
