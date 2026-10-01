@@ -129,8 +129,10 @@ theorem demushkinWordTwoEvenPadic_natCast (a f : ℕ) :
   rw [demushkinWordTwoEvenPadic_def, demushkinWordTwoEven_def,
     ← hH.padicPow_natCast (x 0) (2 + a), Nat.cast_add, Nat.cast_ofNat]
 
-/-- At rank two the word is `x₁^{2+α} (x₁, x₂)`: the third generator is out of range, so the
-factor `x₃^q` is `1`, and the commutator product beyond `(x₁, x₂)` is empty. -/
+/-- At rank two, on a tuple whose third entry is `1` (as for the canonical generator tuple
+`TauCeti.freeProPGen 2 2`, whose third generator is out of range), the word is
+`x₁^{2+α} (x₁, x₂)`: the factor `x₃^q` is `1` by the hypothesis `x 2 = 1`, and the commutator
+product beyond `(x₁, x₂)` is empty. -/
 theorem demushkinWordTwoEvenPadic_two (hx : x 2 = 1) :
     demushkinWordTwoEvenPadic hH α q 2 x =
       hH.padicPow (x 0) (2 + α) * labuteComm (x 0) (x 1) := by
