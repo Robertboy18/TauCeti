@@ -43,10 +43,9 @@ Coind_U^G A × Coind_U^G B → Coind_U^G C,
 ```
 
 which is `G`-equivariant for the right-translation action and commutes with evaluation at `1`.
-Paired pointwise with the single `single g b` supported on one right coset, a coinduced function
-`f` gives the single `single g (μ (f g) b)`. Followed by the trace, the pointwise pairing is the
-pairing through which the internal hom out of a coinduced module is identified with a coinduced
-module, and the coefficient pairing along which Shapiro's isomorphism is multiplicative.
+Followed by the trace, the pointwise pairing is the pairing through which the internal hom out of
+a coinduced module is identified with a coinduced module, and the coefficient pairing along which
+Shapiro's isomorphism is multiplicative.
 
 ## Main definitions
 
@@ -59,7 +58,6 @@ module, and the coefficient pairing along which Shapiro's isomorphism is multipl
 * `TauCeti.DiscreteCoind.trace_pairing`: the coinduced trace commutes with the pairing.
 * `TauCeti.DiscreteCoind.pointwisePairing_smul`, `TauCeti.DiscreteCoind.eval_pointwisePairing`:
   the pointwise pairing is `G`-equivariant and commutes with evaluation at `1`.
-* `TauCeti.DiscreteCoind.pointwisePairing_single`: the pointwise pairing with a single is a single.
 
 ## References
 
@@ -181,21 +179,6 @@ theorem pointwisePairing_smul [ContinuousMul G] (g : G) (f : DiscreteCoind G U A
 theorem eval_pointwisePairing (f : DiscreteCoind G U A) (f' : DiscreteCoind G U B) :
     eval G U C (pointwisePairing U μ hμ f f') = μ (eval G U A f) (eval G U B f') := by
   simp
-
-/-- **Pairing pointwise with a single gives a single**: for an open subgroup `U`,
-`pointwisePairing μ f (single g b) = single g (μ (f g) b)`, both sides being supported on the
-right coset `U * g`. -/
-@[simp]
-theorem pointwisePairing_single [ContinuousMul G] [TopologicalSpace B] [DiscreteTopology B]
-    [ContinuousSMul U B] [TopologicalSpace C] [DiscreteTopology C] [ContinuousSMul U C]
-    (hU : IsOpen (U : Set G)) (f : DiscreteCoind G U A) (g : G) (b : B) :
-    pointwisePairing U μ hμ f (single G U B hU g b) = single G U C hU g (μ (f g) b) := by
-  ext x
-  rw [pointwisePairing_apply]
-  by_cases hx : x * g⁻¹ ∈ U
-  · obtain ⟨v, rfl⟩ : ∃ v : U, x = (v : G) * g := ⟨⟨x * g⁻¹, hx⟩, by simp⟩
-    rw [single_apply_mul, single_apply_mul, apply_mul, hμ]
-  · rw [single_apply_of_notMem hU _ hx, single_apply_of_notMem hU _ hx, map_zero]
 
 end Pointwise
 

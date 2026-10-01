@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.GroupAction.Equiv
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.FiniteIndex
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.Pairing
 public import TauCeti.Topology.Algebra.GroupAction.InternalHom.Basic
@@ -12,24 +13,28 @@ public import TauCeti.Topology.Algebra.GroupAction.InternalHom.Basic
 /-!
 # The internal hom out of a coinduced module
 
-Let `U` be an open subgroup of finite index of a topological group `G`, let `A` be a discrete
-`U`-module and `N` a `G`-module. The additive homomorphisms out of the coinduced module
-`Coind_U^G A`, carrying the conjugation action of `G` of `TauCeti.InternalHom`, form again a
+Let `U` be a subgroup of finite index of a topological group `G`, let `A` be a `U`-module and `N`
+a `G`-module. The additive homomorphisms out of the coinduced module `Coind_U^G A`, carrying the
+conjugation action of `G` of `TauCeti.InternalHom`, receive a `G`-equivariant homomorphism from a
 coinduced module:
 
 ```text
 Coind_U^G Hom(A, N) → Hom(Coind_U^G A, N),    F ↦ (f ↦ tr (g ↦ F g (f g))),
 ```
 
-the trace along `G ⧸ U` of the pointwise evaluation pairing, is a `G`-equivariant bijection
-(`TauCeti.DiscreteCoind.toInternalHom`). This is the finite-index coincidence of induction and
-coinduction read on the dual: for finite index, `Hom(Ind_U^G A, N) ≅ Coind_U^G Hom(A, N)`.
+the trace along `G ⧸ U` of the pointwise evaluation pairing (`TauCeti.DiscreteCoind.toInternalHom`).
+For an open `U` and a discrete `U`-module `A` it is injective, and it is bijective as soon as
+moreover the conjugation action of `U` on `Hom(A, N)` is continuous
+(`TauCeti.DiscreteCoind.toInternalHomEquiv`), which is the case for a finite `A` and a discrete
+`G`-module `N`. This is the finite-index coincidence of induction and coinduction read on the dual:
+for finite index, `Hom(Ind_U^G A, N) ≅ Coind_U^G Hom(A, N)`.
 
 On the single `single g a`, the coinduced function supported on the right coset `U * g` with
 value `a` at `g`, the image of `F` evaluates to `g⁻¹ • F g a` (`toInternalHom_single`). Since the
-singles span `Coind_U^G A` this gives injectivity, and for finite `A` also surjectivity: the
-preimage of `φ : Coind_U^G A →+ N` is `g ↦ (a ↦ g • φ (single g a))`, whose local constancy is the
-continuity of the conjugation action on the internal hom of finite discrete modules.
+singles span `Coind_U^G A` this gives injectivity. The preimage of `φ : Coind_U^G A →+ N` is
+`g ↦ (a ↦ g • φ (single g a))`, which is `U`-equivariant, hence locally constant exactly when the
+conjugation action of `U` on `Hom(A, N)` is continuous; for a finite discrete `A` and a discrete `N`
+this continuity is the `ContinuousSMul` instance of `TauCeti.InternalHom`.
 
 For the permutation module `Coind_U^G 𝔽_p` of an open subgroup `U` of a pro-`p` group this says
 that `Hom(Coind_U^G 𝔽_p, 𝔽_p) ≅ Coind_U^G 𝔽_p`: the permutation module is self-dual, so its
@@ -42,17 +47,28 @@ group (Serre, *Structure de certains pro-p-groupes*, §9.2).
 ## Main definitions
 
 * `TauCeti.DiscreteCoind.toInternalHom`: the `G`-equivariant homomorphism
-  `Coind_U^G Hom(A, N) →+[G] Hom(Coind_U^G A, N)`, trace of the pointwise evaluation pairing.
+  `Coind_U^G Hom(A, N) →+[G] Hom(Coind_U^G A, N)`, trace of the pointwise evaluation pairing, for
+  a subgroup `U` of finite index.
+* `TauCeti.DiscreteCoind.toInternalHomEquiv`: the additive equivalence
+  `Coind_U^G Hom(A, N) ≃+ Hom(Coind_U^G A, N)` it induces for an open `U`, a discrete `U`-module
+  `A` and a continuous conjugation action of `U` on `Hom(A, N)`.
 
 ## Main results
 
 * `TauCeti.DiscreteCoind.toAddMonoidHom_toInternalHom_apply` and
   `TauCeti.DiscreteCoind.toInternalHom_apply_eq_sum`: the value of `toInternalHom F` at `f`
   is the trace of `g ↦ F g (f g)`, that is `∑_{x : G ⧸ U} x.out • F x.out⁻¹ (f x.out⁻¹)`.
-* `TauCeti.DiscreteCoind.toInternalHom_single`: `toInternalHom F (single g a) = g⁻¹ • F g a`.
-* `TauCeti.DiscreteCoind.toInternalHom_injective`, `TauCeti.DiscreteCoind.toInternalHom_surjective`
-  and `TauCeti.DiscreteCoind.toInternalHom_bijective`: `toInternalHom` is a bijection when `A` is
-  finite.
+* `TauCeti.DiscreteCoind.toInternalHom_single`: `toInternalHom F (single g a) = g⁻¹ • F g a`, for
+  an open `U` and a discrete `U`-module `A`.
+* `TauCeti.DiscreteCoind.toInternalHom_injective`: `toInternalHom` is injective for an open `U` and
+  a discrete `U`-module `A`.
+* `TauCeti.DiscreteCoind.toInternalHom_surjective` and
+  `TauCeti.DiscreteCoind.toInternalHom_bijective`: `toInternalHom` is bijective for an open `U` and
+  a discrete `U`-module `A` whenever the conjugation action of `U` on `Hom(A, N)` is continuous, in
+  particular for a finite `A` and a discrete `G`-module `N`.
+* `TauCeti.DiscreteCoind.toInternalHomEquiv_smul` and
+  `TauCeti.DiscreteCoind.toInternalHomEquiv_symm_smul`: both directions of `toInternalHomEquiv`
+  are `G`-equivariant.
 
 ## References
 
@@ -79,8 +95,10 @@ variable {G : Type u} [Group G] [TopologicalSpace G] [ContinuousMul G] (U : Subg
 /-- **The internal hom out of a coinduced module.** For a subgroup `U` of finite index, a
 coinduced homomorphism `F : Coind_U^G Hom(A, N)` defines the homomorphism
 `f ↦ tr (g ↦ F g (f g))` on `Coind_U^G A`, the trace along `G ⧸ U` of the pointwise evaluation
-pairing. The assignment is `G`-equivariant for the conjugation action on the internal hom, and
-it is a bijection when `U` is open and `A` is finite (`toInternalHom_bijective`). -/
+pairing. The assignment is `G`-equivariant for the conjugation action on the internal hom. For an
+open `U` and a discrete `U`-module `A` it is injective (`toInternalHom_injective`), and it is a
+bijection when moreover the conjugation action of `U` on `Hom(A, N)` is continuous
+(`toInternalHom_bijective`), as it is for a finite `A` and a discrete `N`. -/
 noncomputable def toInternalHom :
     DiscreteCoind G U (InternalHom U A N) →+[G] InternalHom G (DiscreteCoind G U A) N where
   toFun F := InternalHom.of G ((trace G U N : DiscreteCoind G U N →+ N).comp
@@ -114,22 +132,24 @@ theorem toInternalHom_apply_eq_sum (F : DiscreteCoind G U (InternalHom U A N))
 
 section Open
 
-variable [TopologicalSpace A] [DiscreteTopology A] [ContinuousSMul U A]
-  [TopologicalSpace N] [DiscreteTopology N] [ContinuousSMul G N] (hU : IsOpen (U : Set G))
+variable [TopologicalSpace A] [DiscreteTopology A] [ContinuousSMul U A] (hU : IsOpen (U : Set G))
 
-/-- **`toInternalHom` on a single**: `toInternalHom F (single g a) = g⁻¹ • F g a`. Only the
-coset of `g⁻¹` contributes to the trace. Not a `simp` lemma, because
+/-- **`toInternalHom` on a single**: `toInternalHom F (single g a) = g⁻¹ • F g a`. The pointwise
+pairing `g' ↦ F g' (single g a g')` is supported on the right coset `U * g`, so only that coset
+contributes to the trace. Not a `simp` lemma, because
 `TauCeti.DiscreteCoind.toAddMonoidHom_toInternalHom_apply` already takes its left-hand side
 apart. -/
 theorem toInternalHom_single (F : DiscreteCoind G U (InternalHom U A N)) (g : G) (a : A) :
     (toInternalHom U A N F).toAddMonoidHom (single G U A hU g a) =
       g⁻¹ • (F g).toAddMonoidHom a := by
-  rw [toAddMonoidHom_toInternalHom_apply, pointwisePairing_single, trace_single,
-    InternalHom.evalPairing_apply]
+  rw [toAddMonoidHom_toInternalHom_apply, trace_eq_inv_smul_apply _ g, pointwisePairing_apply,
+    single_apply_self, InternalHom.evalPairing_apply]
+  intro x hx
+  rw [pointwisePairing_apply, single_apply_of_notMem hU a hx, map_zero]
 
 include hU in
-/-- `toInternalHom` is injective for an open subgroup `U`: a coinduced homomorphism is recovered
-from its image by evaluating on singles. -/
+/-- `toInternalHom` is injective for an open subgroup `U` and a discrete `U`-module `A`: a
+coinduced homomorphism is recovered from its image by evaluating on singles. -/
 theorem toInternalHom_injective : Function.Injective (toInternalHom U A N) := fun F F' h => by
   refine DiscreteCoind.ext fun g => InternalHom.ext (AddMonoidHom.ext fun a => ?_)
   have h' := congrArg
@@ -143,18 +163,19 @@ end Trace
 
 section Surjective
 
-variable {G : Type u} [Group G] [TopologicalSpace G] [IsTopologicalGroup G] (U : Subgroup G)
+variable {G : Type u} [Group G] [TopologicalSpace G] [ContinuousMul G] (U : Subgroup G)
   [U.FiniteIndex] (A : Type v) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
-  [Finite A] [DistribMulAction U A] [ContinuousSMul U A]
-  (N : Type w) [AddCommGroup N] [TopologicalSpace N] [DiscreteTopology N] [DistribMulAction G N]
-  [ContinuousSMul G N] (hU : IsOpen (U : Set G))
+  [DistribMulAction U A] [ContinuousSMul U A]
+  (N : Type w) [AddCommGroup N] [DistribMulAction G N] [ContinuousSMul U (InternalHom U A N)]
+  (hU : IsOpen (U : Set G))
 
 include hU in
-/-- `toInternalHom` is surjective for an open subgroup `U` and a finite `A`: a homomorphism
-`φ : Coind_U^G A →+ N` is the image of `g ↦ (a ↦ g • φ (single g a))`, which is `U`-equivariant
-by `single_mul`, hence locally constant because the conjugation action on `Hom(A, N)` is
-continuous, and which `toInternalHom` sends back to `φ` by the decomposition of a coinduced
-function into its singles. -/
+/-- `toInternalHom` is surjective for an open subgroup `U` and a discrete `U`-module `A` whose
+internal hom `Hom(A, N)` carries a continuous conjugation action of `U`, as it does for a finite `A`
+and a discrete `N`: a homomorphism `φ : Coind_U^G A →+ N` is the image of
+`g ↦ (a ↦ g • φ (single g a))`, which is `U`-equivariant by `single_mul`, hence locally constant
+by the continuity of the action on `Hom(A, N)`, and which `toInternalHom` sends back to `φ` by the
+decomposition of a coinduced function into its singles. -/
 theorem toInternalHom_surjective : Function.Surjective (toInternalHom U A N) := fun φ => by
   let k : G → InternalHom U A N := fun g => InternalHom.of U
     ((DistribSMul.toAddMonoidHom N g).comp (φ.toAddMonoidHom.comp (single G U A hU g)))
@@ -172,10 +193,35 @@ theorem toInternalHom_surjective : Function.Surjective (toInternalHom U A N) := 
 
 include hU in
 /-- **The internal hom out of a coinduced module is coinduced**: for an open subgroup `U` of
-finite index and a finite discrete `U`-module `A`, `toInternalHom` is a `G`-equivariant bijection
-`Coind_U^G Hom(A, N) ≅ Hom(Coind_U^G A, N)`. -/
+finite index and a discrete `U`-module `A` whose internal hom `Hom(A, N)` carries a continuous
+conjugation action of `U`, in particular for a finite `A` and a discrete `N`, `toInternalHom` is a
+`G`-equivariant bijection `Coind_U^G Hom(A, N) ≅ Hom(Coind_U^G A, N)`. -/
 theorem toInternalHom_bijective : Function.Bijective (toInternalHom U A N) :=
   ⟨toInternalHom_injective U A N hU, toInternalHom_surjective U A N hU⟩
+
+/-- **The internal hom out of a coinduced module is coinduced**, as an additive equivalence
+`Coind_U^G Hom(A, N) ≃+ Hom(Coind_U^G A, N)`: `toInternalHom` bundled with its inverse, under the
+hypotheses of `toInternalHom_bijective`. Its forward map is `toInternalHom`
+(`toInternalHomEquiv_apply`) and both directions are `G`-equivariant (`toInternalHomEquiv_smul`,
+`toInternalHomEquiv_symm_smul`). -/
+noncomputable def toInternalHomEquiv :
+    DiscreteCoind G U (InternalHom U A N) ≃+ InternalHom G (DiscreteCoind G U A) N :=
+  AddEquiv.ofBijective (toInternalHom U A N) (toInternalHom_bijective U A N hU)
+
+/-- `toInternalHomEquiv` is `toInternalHom` on elements. -/
+@[simp]
+theorem toInternalHomEquiv_apply (F : DiscreteCoind G U (InternalHom U A N)) :
+    toInternalHomEquiv U A N hU F = toInternalHom U A N F := (rfl)
+
+/-- `toInternalHomEquiv` is `G`-equivariant. -/
+theorem toInternalHomEquiv_smul (g : G) (F : DiscreteCoind G U (InternalHom U A N)) :
+    toInternalHomEquiv U A N hU (g • F) = g • toInternalHomEquiv U A N hU F := by
+  rw [toInternalHomEquiv_apply, toInternalHomEquiv_apply, _root_.map_smul]
+
+/-- The inverse of `toInternalHomEquiv` is `G`-equivariant. -/
+theorem toInternalHomEquiv_symm_smul (g : G) (φ : InternalHom G (DiscreteCoind G U A) N) :
+    (toInternalHomEquiv U A N hU).symm (g • φ) = g • (toInternalHomEquiv U A N hU).symm φ :=
+  AddEquiv.symm_map_smul_of_map_smul _ (toInternalHomEquiv_smul U A N hU) g φ
 
 end Surjective
 

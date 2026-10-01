@@ -161,6 +161,12 @@ theorem coe_neg (f : DiscreteCoind G U A) : ⇑(-f) = -⇑f := rfl
 @[simp]
 theorem coe_sub (f f' : DiscreteCoind G U A) : ⇑(f - f') = ⇑f - ⇑f' := rfl
 
+/-- The zero is pointwise, so that Mathlib's `sum_apply` applies. -/
+instance : IsZeroApply (DiscreteCoind G U A) G A where
+
+/-- The addition is pointwise, so that Mathlib's `sum_apply` applies. -/
+instance : IsAddApply (DiscreteCoind G U A) G A where
+
 /-- The `ℕ`-action is pointwise, so that Mathlib's `FunLike.coe_smul` and `smul_apply` apply. -/
 instance : IsSMulApply ℕ (DiscreteCoind G U A) G A where
 
@@ -531,6 +537,7 @@ theorem single_apply_self (g : G) (a : A) : single G U A hU g a g = a := by
   simpa using single_apply_mul hU g a 1
 
 /-- `single hU g a` vanishes off the right coset `U * g`. -/
+@[simp]
 theorem single_apply_of_notMem {g x : G} (a : A) (hx : x * g⁻¹ ∉ U) :
     single G U A hU g a x = 0 := by
   simp only [single_apply, hx, dite_false]
@@ -564,12 +571,6 @@ theorem smul_single (g' g : G) (a : A) :
     rw [hv, hx', single_apply_mul, single_apply_mul]
   · rw [single_apply_of_notMem hU a hx, single_apply_of_notMem hU a]
     simpa [mul_assoc] using hx
-
-omit [ContinuousMul G] [TopologicalSpace A] [DiscreteTopology A] [ContinuousSMul U A] in
-/-- A finite sum of coinduced functions is evaluated termwise. -/
-theorem finset_sum_apply {ι : Type*} (s : Finset ι) (f : ι → DiscreteCoind G U A) (x : G) :
-    (∑ i ∈ s, f i) x = ∑ i ∈ s, f i x :=
-  map_sum (AddMonoidHom.mk' (fun f : DiscreteCoind G U A => f x) fun _ _ => rfl) f s
 
 end Single
 
