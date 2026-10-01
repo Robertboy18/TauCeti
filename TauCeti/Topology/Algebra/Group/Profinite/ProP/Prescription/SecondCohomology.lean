@@ -29,10 +29,10 @@ its reduction to level `i`. Hence `H²(G, I(χ)/pⁱ)` is cyclic of order `pⁱ`
 The right exactness hypothesis holds when `G` is compact with `cd_p G ≤ 2`, because the connecting
 map `H²(G, I(χ)/p) → H³(G, I(χ)/pⁱ)` then vanishes
 (`TauCeti.ZModTwist.surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two`, in the
-module `TauCeti.Topology.Algebra.Group.Profinite.ProP.ZModTwist`). The hypotheses are met by the
-canonical character of an infinite Demushkin group, where the result is the finite-level form of
-the statement that the dualizing module of such a group is `ℚ_p/ℤ_p` with `G` acting through its
-orientation (Serre's exposé, §9); that specialization lives in
+module `TauCeti.Topology.Algebra.Group.Profinite.ProP.CohomologicalDimension`). The hypotheses are
+met by the canonical character of an infinite Demushkin group, where the result is the finite-level
+form of the statement that the dualizing module of such a group is `ℚ_p/ℤ_p` with `G` acting
+through its orientation (Serre's exposé, §9); that specialization lives in
 `TauCeti.Topology.Algebra.Group.Profinite.Demushkin.TwistedCoefficients`.
 
 ## Main results
