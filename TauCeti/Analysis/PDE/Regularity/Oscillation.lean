@@ -395,17 +395,16 @@ theorem exists_ae_value_mem_Icc_add_mul_rpow_mul_sub {pstar : ℝ≥0∞}
     rw [le_div_iff₀ (by positivity), mul_comm, ← le_div_iff₀ hr]
     exact hj
   have hpow : (1 - δ) ^ j ≤ 4 ^ α * (r / R) ^ α := by
-    have h1 : (1 - δ) ^ j = ((4 : ℝ) ^ j)⁻¹ ^ α := by
-      rw [← h4α, Real.inv_rpow (by positivity), ← Real.rpow_neg (by positivity),
-        ← Real.rpow_natCast (4 ^ (-α)) j, ← Real.rpow_mul (by norm_num),
-        ← Real.rpow_natCast 4 j, ← Real.rpow_mul (by norm_num)]
-      ring_nf
-    have h2 : ((4 : ℝ) ^ j)⁻¹ ≤ 4 * (r / R) := by
-      have := (div_lt_iff₀ hr).1 hj'
-      rw [inv_eq_one_div, div_le_iff₀ (by positivity),
-        show 4 * (r / R) * 4 ^ j = 4 ^ (j + 1) * r / R by rw [pow_succ]; ring,
-        le_div_iff₀ hR, one_mul]
-      exact this.le
+    -- `(1 - δ)ʲ = (4^(-α))ʲ = (4ʲ)^(-α) = ((4ʲ)⁻¹)^α`.
+    have h1 : (1 - δ) ^ j = ((4 : ℝ) ^ j)⁻¹ ^ α :=
+      calc (1 - δ) ^ j = ((4 : ℝ) ^ (-α)) ^ j := by rw [h4α]
+        _ = ((4 : ℝ) ^ j) ^ (-α) := Real.rpow_pow_comm (by norm_num) _ _
+        _ = ((4 : ℝ) ^ j)⁻¹ ^ α := Real.rpow_neg_eq_inv_rpow _ _
+    -- `(4ʲ)⁻¹ = 4 / 4ʲ⁺¹ ≤ 4 / (R / r) = 4 r / R`, since `R / r < 4ʲ⁺¹`.
+    have h2 : ((4 : ℝ) ^ j)⁻¹ ≤ 4 * (r / R) :=
+      calc ((4 : ℝ) ^ j)⁻¹ = 4 * (1 / 4 ^ (j + 1)) := by rw [pow_succ]; field_simp
+        _ ≤ 4 * (1 / (R / r)) := by gcongr
+        _ = 4 * (r / R) := by rw [one_div_div]
     rw [h1, ← Real.mul_rpow (by norm_num) (by positivity)]
     exact Real.rpow_le_rpow (by positivity) h2 hα.le
   refine ⟨m', ?_⟩
