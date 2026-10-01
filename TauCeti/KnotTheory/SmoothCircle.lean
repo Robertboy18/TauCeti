@@ -290,10 +290,6 @@ orientation of the standard circle. -/
 def unknot : SmoothCircleEmbedding (𝓡 3) (sphere (0 : EuclideanSpace ℝ (Fin 4)) 1) :=
   SmoothCircleEmbedding.greatCircle complexToEuclideanFour
 
-/-- The unknot is the great circle of the first coordinate plane. -/
-theorem unknot_def : unknot = SmoothCircleEmbedding.greatCircle complexToEuclideanFour := by
-  rfl
-
 /-- The unknot sends a point `z` of the standard circle to `(Re z, Im z, 0, 0)`. -/
 @[simp]
 theorem coe_unknot_apply (z : Circle) :

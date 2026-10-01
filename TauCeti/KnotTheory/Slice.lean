@@ -61,7 +61,6 @@ diffeomorphisms of the circle is not proved here.
 
 ## Main results
 
-* `TauCeti.isSmoothlySlice_iff`: the defining existence of a slice disc.
 * `TauCeti.IsSmoothSliceDisc.norm_eq_one_iff`: a slice disc meets the unit sphere exactly along
   the unit circle.
 * `TauCeti.IsSmoothSliceDisc.comp_unitClosedBallMap`: reparametrizing a slice disc by a linear
@@ -118,12 +117,6 @@ def IsSmoothlySlice (K : SmoothCircleEmbedding (𝓡 n) (sphere (0 : E) 1)) : Pr
   ∃ Φ : closedBall (0 : ℂ) 1 → closedBall (0 : E) 1, IsSmoothSliceDisc K Φ
 
 variable {K : SmoothCircleEmbedding (𝓡 n) (sphere (0 : E) 1)}
-
-/-- A smooth circle embedding is smoothly slice exactly when some map of the closed unit disc into
-the closed unit ball is a smooth slice disc for it. -/
-theorem isSmoothlySlice_iff :
-    IsSmoothlySlice K ↔ ∃ Φ : closedBall (0 : ℂ) 1 → closedBall (0 : E) 1, IsSmoothSliceDisc K Φ :=
-  Iff.rfl
 
 namespace IsSmoothSliceDisc
 
@@ -223,7 +216,9 @@ theorem isSmoothlySlice_greatCircle (ι : ℂ →ₗᵢ[ℝ] E) :
 
 /-- **The unknot is smoothly slice.** -/
 theorem isSmoothlySlice_unknot : IsSmoothlySlice unknot := by
-  rw [unknot_def]
+  have h : unknot = SmoothCircleEmbedding.greatCircle complexToEuclideanFour :=
+    SmoothEmbedding.ext fun z ↦ Subtype.ext (by simp)
+  rw [h]
   exact isSmoothlySlice_greatCircle complexToEuclideanFour
 
 end TauCeti

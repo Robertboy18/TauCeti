@@ -26,8 +26,6 @@ embedding of closed balls induced by a linear isometry, the flat disc that a gre
 
 * `LinearIsometry.isometry_unitClosedBallMap`, `LinearIsometry.isEmbedding_unitClosedBallMap`:
   the restriction is an isometry, hence (for a normed source) a topological embedding.
-* `LinearIsometry.norm_unitClosedBallMap_eq_one_iff`: the restriction maps a point to the unit
-  sphere exactly when the point lies on the unit sphere.
 -/
 
 public section
@@ -57,12 +55,6 @@ theorem isometry_unitClosedBallMap (f : E →ₗᵢ[R] F) : Isometry f.unitClose
 /-- The restriction of a linear isometry to the closed unit balls is continuous. -/
 theorem continuous_unitClosedBallMap (f : E →ₗᵢ[R] F) : Continuous f.unitClosedBallMap :=
   f.isometry_unitClosedBallMap.continuous
-
-/-- The restriction of a linear isometry to the closed unit balls maps a point to the unit sphere
-exactly when the point lies on the unit sphere. -/
-theorem norm_unitClosedBallMap_eq_one_iff (f : E →ₗᵢ[R] F) (x : closedBall (0 : E) 1) :
-    ‖(f.unitClosedBallMap x : F)‖ = 1 ↔ ‖(x : E)‖ = 1 := by
-  simp
 
 end Seminormed
 
