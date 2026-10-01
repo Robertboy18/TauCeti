@@ -41,6 +41,7 @@ this file names those two parts and records that they multiply to the degree.
   for the identity isogeny.
 * `TauCeti.Isogeny.separableDegree_comp` and `TauCeti.Isogeny.inseparableDegree_comp`: both are
   multiplicative under composition, matching `degree_comp`.
+* `TauCeti.Isogeny.isSeparable_comp`: a composite of separable isogenies is separable.
 * `TauCeti.Isogeny.separableDegree_eq_degree_of_isSeparable` and
   `TauCeti.Isogeny.inseparableDegree_eq_one_of_isSeparable`: a separable isogeny carries its
   whole degree in the separable part.
@@ -294,6 +295,15 @@ theorem inseparableDegree_comp (ψ : Isogeny W₂ W₃) (φ : Isogeny W₁ W₂)
     ψ.inseparableDegree_eq_finInsepDegree hψ, φ.inseparableDegree_eq_finInsepDegree hφ]
   exact (Field.finInsepDegree_mul_finInsepDegree_of_isAlgebraic W₃.FunctionField
     W₂.FunctionField W₁.FunctionField).symm
+
+/-- **A composite of separable isogenies is separable**: its inseparable degree is the product of
+two inseparable degrees equal to `1`. -/
+instance isSeparable_comp (ψ : Isogeny W₂ W₃) (φ : Isogeny W₁ W₂)
+    [Algebra.IsSeparable ψ.fieldPullback.fieldRange W₂.FunctionField]
+    [Algebra.IsSeparable φ.fieldPullback.fieldRange W₁.FunctionField] :
+    Algebra.IsSeparable (ψ.comp φ).fieldPullback.fieldRange W₁.FunctionField := by
+  rw [← inseparableDegree_eq_one_iff_isSeparable, inseparableDegree_comp,
+    ψ.inseparableDegree_eq_one_of_isSeparable, φ.inseparableDegree_eq_one_of_isSeparable, mul_one]
 
 end Isogeny
 
