@@ -127,10 +127,11 @@ variable {K : Type*} [Field K] (W : _root_.WeierstrassCurve.Affine K)
 
 open IntermediateField in
 /-- **The function field is generated over the constants by the generic point**: `K⟮x, y⟯ = K(W)`.
-Every affine function is a polynomial in `x` and `y`
-(`algebraMap_mem_adjoin_genericX_genericY`), and the function field is the fraction field of the
-affine functions. -/
+This is the form of generation that computes the image of an embedding of `K(W)` over `K` from
+its two values at `x` and `y` (`fieldRange_eq_adjoin_genericX_genericY`). -/
 theorem adjoin_genericX_genericY_eq_top : K⟮W.genericX, W.genericY⟯ = ⊤ := by
+  -- every affine function is a polynomial in `x` and `y`, and the function field is the fraction
+  -- field of the affine functions
   refine top_le_iff.1 fun z _ ↦ ?_
   have hz : z ∈ Subfield.closure
       (Set.range (algebraMap W.CoordinateRing W.FunctionField)) := by

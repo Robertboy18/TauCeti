@@ -7,6 +7,7 @@ module
 
 public import TauCeti.AlgebraicGeometry.EllipticCurve.Isogeny.Factorisation
 public import TauCeti.AlgebraicGeometry.EllipticCurve.Isogeny.RelativeFrobenius.Basic
+-- Proof-only: the degree bound on the exponent of a finite purely inseparable extension.
 import TauCeti.FieldTheory.PurelyInseparable.Exponent
 
 /-!
@@ -19,14 +20,6 @@ inseparable degree. The factor `φ_sep` is unique, and its degree is the separab
 In characteristic zero `p = 1`, the inseparable degree is `1 = 1 ^ r` for every `r`, and the
 statement says that every isogeny is separable.
 
-The proof is the subfield criterion of `Isogeny/Factorisation.lean`. Let `S` be the separable
-closure of `φ^*F(W₂)` in `F(W₁)`. Then `F(W₁)/S` is purely inseparable of degree `p ^ r`, so every
-`p ^ r`-th power of `F(W₁)` lies in `S` (`TauCeti.IsPurelyInseparable.pow_mem_of_finrank_le_pow`),
-and so does the pulled-back copy of `F(W₁⁽ᵖʳ⁾)`, which is generated over `F` by those powers
-(`TauCeti.Isogeny.fieldRange_iterateRelativeFrobeniusIsogeny`). Both have degree `p ^ r` under
-`F(W₁)`, so they coincide, and `φ^*F(W₂) ⊆ S` is the containment that makes `φ` factor through
-`F^r`. The factor is separable because its inseparable degree is `p ^ r / p ^ r = 1`.
-
 ## Main results
 
 * `TauCeti.Isogeny.existsUnique_comp_iterateRelativeFrobeniusIsogeny_eq_iff`: `φ` factors
@@ -38,7 +31,9 @@ and so does the pulled-back copy of `F(W₁⁽ᵖʳ⁾)`, which is generated ove
   degree.
 * `TauCeti.Isogeny.isSeparable_of_comp_iterateRelativeFrobeniusIsogeny_eq` and
   `TauCeti.Isogeny.inseparableDegree_eq_pow_of_comp_iterateRelativeFrobeniusIsogeny_eq`: a factor
-  of `φ` through `F^r` is separable exactly when `p ^ r` is the inseparable degree of `φ`.
+  of `φ` through `F^r` is separable exactly when `p ^ r` is the inseparable degree of `φ`, the two
+  directions of the equivalence
+  `isSeparable_iff_inseparableDegree_eq_pow_of_comp_iterateRelativeFrobeniusIsogeny_eq`.
 * `TauCeti.Isogeny.separableDegree_eq_of_comp_iterateRelativeFrobeniusIsogeny_eq` and
   `TauCeti.Isogeny.degree_eq_separableDegree_of_comp_iterateRelativeFrobeniusIsogeny_eq`: a
   factor through `F^r` has the separable degree of `φ`, which is its degree when it is separable.
@@ -141,16 +136,16 @@ section Factor
 
 variable {p φ} {r : ℕ} {χ : Isogeny (W₁.map (iterateFrobenius F p r)) W₂}
 
-/-- **A factor through a Frobenius power has the separable degree of the composite**: the
-Frobenius power has separable degree one, and separable degrees multiply. -/
+/-- **A factor through a Frobenius power has the separable degree of the composite**:
+`deg_s χ = deg_s φ` when `φ = χ ∘ F^r`. -/
 theorem separableDegree_eq_of_comp_iterateRelativeFrobeniusIsogeny_eq
     (hχ : χ.comp (iterateRelativeFrobeniusIsogeny p W₁ r) = φ) :
     χ.separableDegree = φ.separableDegree := by
   rw [← hχ, separableDegree_comp,
     separableDegree_eq_one_of_isPurelyInseparable (iterateRelativeFrobeniusIsogeny p W₁ r), mul_one]
 
-/-- **A factor of `φ` through `F^r` is separable when `p ^ r` is the inseparable degree of `φ`**:
-inseparable degrees multiply, and that of `F^r` is already `p ^ r`. -/
+/-- **A factor of `φ` through `F^r` is separable when `p ^ r` is the inseparable degree of
+`φ`.** -/
 theorem isSeparable_of_comp_iterateRelativeFrobeniusIsogeny_eq (hr : φ.inseparableDegree = p ^ r)
     (hχ : χ.comp (iterateRelativeFrobeniusIsogeny p W₁ r) = φ) :
     Algebra.IsSeparable χ.fieldPullback.fieldRange
@@ -171,6 +166,17 @@ theorem inseparableDegree_eq_pow_of_comp_iterateRelativeFrobeniusIsogeny_eq
   rw [← hχ, inseparableDegree_comp, inseparableDegree_eq_one_of_isSeparable, one_mul,
     inseparableDegree_eq_degree_of_isPurelyInseparable (iterateRelativeFrobeniusIsogeny p W₁ r),
     degree_iterateRelativeFrobeniusIsogeny]
+
+/-- **A factor of `φ` through `F^r` is separable exactly when `p ^ r` is the inseparable degree of
+`φ`**: the exponent `r` of a factorisation `φ = φ_sep ∘ F^r` with `φ_sep` separable is determined
+by `φ`, and the factor through that `F^r` is separable. -/
+theorem isSeparable_iff_inseparableDegree_eq_pow_of_comp_iterateRelativeFrobeniusIsogeny_eq
+    (hχ : χ.comp (iterateRelativeFrobeniusIsogeny p W₁ r) = φ) :
+    Algebra.IsSeparable χ.fieldPullback.fieldRange
+        (W₁.map (iterateFrobenius F p r)).FunctionField ↔
+      φ.inseparableDegree = p ^ r :=
+  ⟨fun _ ↦ inseparableDegree_eq_pow_of_comp_iterateRelativeFrobeniusIsogeny_eq hχ,
+    fun hr ↦ isSeparable_of_comp_iterateRelativeFrobeniusIsogeny_eq hr hχ⟩
 
 /-- **The separable factor of `φ` through `F^r` has degree the separable degree of `φ`**
 (Silverman II.2.12): `deg φ_sep = deg_s φ`. -/

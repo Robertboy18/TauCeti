@@ -82,16 +82,6 @@ No result here needs `W` to be elliptic, matching the isogeny API it extends; Ma
 `WeierstrassCurve.instIsEllipticMap` supplies `(W.map (frobenius F p)).IsElliptic` for a consumer
 that does want it.
 
-## Roadmap
-
-`TauCetiRoadmap/EllipticCurves/README.md`, **Layer 1**, the milestone "Relative Frobenius, a
-milestone and not a one-liner" (`README.md:429`), which asks for "the **Frobenius twist** `W^{(p)}`
-with its coefficient description and base-change API" — Mathlib's `WeierstrassCurve.map` along
-`frobenius`, consumed rather than redefined — and "the **relative Frobenius** `F_{W/K} : W →
-W^{(p)}` with its function-field pullback". The factorisation `φ = φ_sep ∘ F_{W/K}^r` of
-AEC II.2.12 is `Isogeny/RelativeFrobenius/Factorisation.lean`; base-change compatibility and
-Verschiebung remain.
-
 ## References
 
 * [J. Silverman, *The Arithmetic of Elliptic Curves*][silverman2009], II.2.11, whose N.B. is the
