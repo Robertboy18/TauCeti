@@ -331,6 +331,10 @@ section ConnectingMaps
 
 -- As in `Cup/ConnectingMap.lean`, these are not `simp` lemmas: the left-hand sides do not
 -- determine the original sequence.
+--
+-- `[Finite B]` is needed even though `B` appears in neither statement: the connecting maps of the
+-- dual sequence need `ContinuousSMul G (InternalHom G B N)` on its middle module, and the
+-- conjugation action on an internal hom is continuous only for a finite source.
 
 variable {G : Type uG} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
   {A : Type uA} [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
