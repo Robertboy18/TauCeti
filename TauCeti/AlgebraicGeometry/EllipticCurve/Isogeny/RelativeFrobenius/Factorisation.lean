@@ -15,10 +15,11 @@ import TauCeti.FieldTheory.PurelyInseparable.Exponent
 
 Every isogeny `φ : W₁ → W₂` over a field `F` of exponential characteristic `p` factors as
 `φ = φ_sep ∘ F^r`, where `F^r : W₁ → W₁⁽ᵖʳ⁾` is the `r`-fold relative Frobenius and `φ_sep` is a
-**separable** isogeny (Silverman II.2.12). The exponent `r` is determined by `φ`: `p ^ r` is its
-inseparable degree. The factor `φ_sep` is unique, and its degree is the separable degree of `φ`.
-In characteristic zero `p = 1`, the inseparable degree is `1 = 1 ^ r` for every `r`, and the
-statement says that every isogeny is separable.
+**separable** isogeny (Silverman II.2.12). The power `p ^ r` is determined by `φ`: it is the
+inseparable degree of `φ`, so for `p > 1` the exponent `r` is determined as well. The factor
+`φ_sep` is unique, and its degree is the separable degree of `φ`. In characteristic zero `p = 1`,
+every `r` has `p ^ r = 1`, the inseparable degree of `φ`, and the statement says that every isogeny
+is separable.
 
 ## Main results
 
@@ -158,7 +159,8 @@ theorem isSeparable_of_comp_iterateRelativeFrobeniusIsogeny_eq (hr : φ.insepara
   exact Nat.eq_of_mul_eq_mul_right (expChar_pow_pos F p r) (h.trans (one_mul _).symm)
 
 /-- **If `φ` has a separable factor through `F^r`, then `p ^ r` is its inseparable degree**: the
-exponent in the factorisation `φ = φ_sep ∘ F^r` is determined by `φ`. -/
+power `p ^ r` in a factorisation `φ = φ_sep ∘ F^r` with `φ_sep` separable is determined by `φ`, and
+with it the exponent `r` when `p > 1`. -/
 theorem inseparableDegree_eq_pow_of_comp_iterateRelativeFrobeniusIsogeny_eq
     [Algebra.IsSeparable χ.fieldPullback.fieldRange (W₁.map (iterateFrobenius F p r)).FunctionField]
     (hχ : χ.comp (iterateRelativeFrobeniusIsogeny p W₁ r) = φ) :
@@ -168,8 +170,8 @@ theorem inseparableDegree_eq_pow_of_comp_iterateRelativeFrobeniusIsogeny_eq
     degree_iterateRelativeFrobeniusIsogeny]
 
 /-- **A factor of `φ` through `F^r` is separable exactly when `p ^ r` is the inseparable degree of
-`φ`**: the exponent `r` of a factorisation `φ = φ_sep ∘ F^r` with `φ_sep` separable is determined
-by `φ`, and the factor through that `F^r` is separable. -/
+`φ`**: a factorisation `φ = φ_sep ∘ F^r` with `φ_sep` separable has `p ^ r` the inseparable degree
+of `φ`, which determines `r` when `p > 1`, and the factor through that `F^r` is separable. -/
 theorem isSeparable_iff_inseparableDegree_eq_pow_of_comp_iterateRelativeFrobeniusIsogeny_eq
     (hχ : χ.comp (iterateRelativeFrobeniusIsogeny p W₁ r) = φ) :
     Algebra.IsSeparable χ.fieldPullback.fieldRange
