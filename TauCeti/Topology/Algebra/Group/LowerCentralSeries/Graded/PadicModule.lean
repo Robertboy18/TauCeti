@@ -238,14 +238,10 @@ theorem IsProP.gradedBracket_gradedMkZero_padicPow_neg_add (hG : IsProP p G) (q 
     (u : ℤ_[p]) :
     gradedBracket q G 0 0 (gradedMkZero q G (hG.padicPow a (-u))) (gradedMkZero q G b) +
       gradedBracket q G 0 0 (gradedMkZero q G a) (gradedMkZero q G (hG.padicPow b u)) = 0 := by
-  have h₁ := hG.gradedBracket_padicPow_left (q := q) ⟨a, mem_pLowerCentralSeries_zero q a⟩
-    ⟨b, mem_pLowerCentralSeries_zero q b⟩ (-u)
-  have h₂ := hG.gradedBracket_padicPow_right (q := q) ⟨a, mem_pLowerCentralSeries_zero q a⟩
-    ⟨b, mem_pLowerCentralSeries_zero q b⟩ u
-  simp only [gradedMk_zero] at h₁ h₂
-  rw [h₁, h₂, ← gradedMk_mul, gradedMk_eq_zero_iff, Subgroup.coe_mul, Subgroup.coe_mk,
-    Subgroup.coe_mk, ← hG.padicPow_add, neg_add_cancel, hG.padicPow_zero]
-  exact one_mem _
+  let _ : Module ℤ_[p] (gradedPiece q G 0) := hG.gradedPieceModule q 0
+  let _ : Module ℤ_[p] (gradedPiece q G (0 + 0 + 1)) := hG.gradedPieceModule q (0 + 0 + 1)
+  rw [hG.gradedMkZero_padicPow, hG.gradedMkZero_padicPow, hG.gradedBracket_smul_left,
+    hG.gradedBracket_smul_right, neg_smul, neg_add_cancel]
 
 /-- The class of the commutator of the inverse of a conjugated `p`-adic power `c⁻¹ y ^ u c` with
 the inverse of `x ∈ λ_m` is `u` times the graded bracket of the classes of `y` and `x`. -/
