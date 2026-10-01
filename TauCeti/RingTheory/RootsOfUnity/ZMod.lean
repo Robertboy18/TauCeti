@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.Module.ZMod
-public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
 
 /-!
 # The `k`-th roots of unity of a domain, as `ℤ/k`
@@ -22,10 +22,20 @@ generator needs.
 Independently of any primitive root, `μ_k` of any commutative monoid is killed by `k`, so written
 additively it is a `ZMod k`-module.
 
+Conversely, `ℤ/n` written multiplicatively is itself a group of `n`-th roots of unity: `ofAdd 1` is
+a primitive `n`-th root of unity, and the group is cyclic, so `Multiplicative (ZMod n)` has enough
+`n`-th roots of unity in the sense of Mathlib's duality theory for finite abelian groups. This is
+what lets that theory serve the groups killed by `n`, whose characters with values in `ℤ/n` are
+their additive homomorphisms to `ZMod n`.
+
 ## Main results
 
 * `TauCeti.nsmul_additive_rootsOfUnity_eq_zero`: `k` kills `μ_k`, written additively, so that it
   is a `ZMod k`-module.
+* `TauCeti.isPrimitiveRoot_ofAdd_one` and `TauCeti.instHasEnoughRootsOfUnityMultiplicativeZMod`:
+  `ofAdd 1` is a primitive `n`-th root of unity in `Multiplicative (ZMod n)`, which has enough
+  `n`-th roots of unity, and `TauCeti.hasEnoughRootsOfUnity_multiplicative_zmod_exponent` has
+  enough `e`-th roots for the exponent `e` of any additive group killed by `n`.
 * `IsPrimitiveRoot.zmodEquivRootsOfUnity`: `ℤ/k ≃+ Additive (μ_k)`, given a primitive `k`-th root.
 * `IsPrimitiveRoot.coe_zmodEquivRootsOfUnity_apply_intCast` and
   `IsPrimitiveRoot.coe_zmodEquivRootsOfUnity_apply_natCast`: it sends `i` to `ζ ^ i`.
@@ -59,6 +69,34 @@ theorem nsmul_additive_rootsOfUnity_eq_zero (x : Additive (rootsOfUnity k M)) : 
 /-- `μ_k`, written additively, is a `ZMod k`-module, being killed by `k`. -/
 instance instModuleZModAdditiveRootsOfUnity : Module (ZMod k) (Additive (rootsOfUnity k M)) :=
   AddCommGroup.zmodModule (nsmul_additive_rootsOfUnity_eq_zero k)
+
+/-- **`ofAdd 1` is a primitive `n`-th root of unity in `ℤ/n` written multiplicatively**: its order
+is the additive order of `1 : ZMod n`, which is `n`. -/
+theorem isPrimitiveRoot_ofAdd_one (n : ℕ) :
+    IsPrimitiveRoot (Multiplicative.ofAdd (1 : ZMod n)) n := by
+  have := IsPrimitiveRoot.orderOf (Multiplicative.ofAdd (1 : ZMod n))
+  rwa [orderOf_ofAdd_eq_addOrderOf, ZMod.addOrderOf_one] at this
+
+/-- **`ℤ/n` written multiplicatively has enough `n`-th roots of unity**: `ofAdd 1` is a primitive
+one, and its roots of unity form a cyclic group, being a subgroup of the cyclic group of units of
+`Multiplicative (ZMod n)`. -/
+instance instHasEnoughRootsOfUnityMultiplicativeZMod (n : ℕ) [NeZero n] :
+    HasEnoughRootsOfUnity (Multiplicative (ZMod n)) n where
+  prim := ⟨_, isPrimitiveRoot_ofAdd_one n⟩
+  cyc := by
+    have : IsCyclic (Multiplicative (ZMod n))ˣ :=
+      isCyclic_of_surjective toUnits toUnits.surjective
+    infer_instance
+
+/-- **`ℤ/n` written multiplicatively has enough roots of unity for every group killed by `n`**:
+the exponent of such a group divides `n`. This is the hypothesis of Mathlib's duality theory for
+finite abelian groups, `CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity` and
+`CommGroup.card_monoidHom_of_hasEnoughRootsOfUnity`, with the target `Multiplicative (ZMod n)`. -/
+theorem hasEnoughRootsOfUnity_multiplicative_zmod_exponent {n : ℕ} [NeZero n] {M : Type*}
+    [AddMonoid M] (hM : ∀ x : M, n • x = 0) :
+    HasEnoughRootsOfUnity (Multiplicative (ZMod n)) (Monoid.exponent (Multiplicative M)) :=
+  HasEnoughRootsOfUnity.of_dvd _ (Monoid.exponent_dvd_of_forall_pow_eq_one fun g => by
+    rw [← ofAdd_toAdd g, ← ofAdd_nsmul, hM, ofAdd_zero])
 
 end TauCeti
 
