@@ -48,7 +48,9 @@ curvature zero it is the Hom complex of the underlying ordinary DG right modules
 ## Implementation notes
 
 As for `TauCeti.dgRightModuleHomComplex`, the complex is exposed so that the component types in
-its public differential application lemma reduce to the homogeneous-cochain modules.
+its public differential application lemma reduce to the homogeneous-cochain modules, and
+`dgRightModuleCochains.curvedDifferential` is exposed so that it unfolds to the graded commutator,
+whose composition laws it inherits.
 
 ## References
 
@@ -84,16 +86,11 @@ variable {hM : IsCurvedDGRightModule h ℳ dM} {hN : IsCurvedDGRightModule h ℳ
 /-- The differential on homogeneous right-module cochains between two curved differential graded
 right modules over the same curved algebra: the graded commutator with the two module
 differentials. -/
+@[expose]
 def curvedDifferential (p : ℤ) :
     dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) p →ₗ[R]
       dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) (p + 1) :=
   gradedCommutator hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz p
-
-/-- The curved Hom differential is the graded commutator with the module differentials. -/
-theorem curvedDifferential_def (p : ℤ) :
-    curvedDifferential (hM := hM) (hN := hN) p =
-      gradedCommutator hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz p :=
-  (rfl)
 
 /-- Evaluating the curved Hom differential gives the graded commutator with the module
 differentials. -/
@@ -160,7 +157,8 @@ def curvedDGRightModuleHomComplex (hM : IsCurvedDGRightModule h ℳ dM)
     (fun p ↦ ModuleCat.of R
       (dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) p))
     (fun p ↦ ModuleCat.ofHom (dgRightModuleCochains.curvedDifferential (hM := hM) (hN := hN) p))
-    (fun p ↦ ModuleCat.hom_ext <| dgRightModuleCochains.curvedDifferential_comp_self p)
+    (fun p ↦ ModuleCat.hom_ext <|
+      dgRightModuleCochains.curvedDifferential_comp_self (hM := hM) (hN := hN) p)
 
 /-- The degree-`p` term of the curved Hom complex is the module of degree-`p` homogeneous
 cochains. -/
@@ -196,10 +194,7 @@ modules of curvature zero, the curved Hom complex is the ordinary DG Hom complex
 theorem curvedDGRightModuleHomComplex_zero {hDG : IsDGAlgebra 𝒜 d}
     (hM : IsDGRightModule hDG ℳ dM) (hN : IsDGRightModule hDG ℳN dN) :
     curvedDGRightModuleHomComplex hM.isCurvedDGRightModule_zero hN.isCurvedDGRightModule_zero =
-      dgRightModuleHomComplex hM hN := by
-  unfold curvedDGRightModuleHomComplex dgRightModuleHomComplex
-  congr 1
-  funext p
-  rw [dgRightModuleCochains.curvedDifferential_isCurvedDGRightModule_zero]
+      dgRightModuleHomComplex hM hN :=
+  rfl
 
 end TauCeti

@@ -39,7 +39,8 @@ degree-zero cocycles are exactly `TauCeti.DGRightModuleHom`.
 
 `dgRightModuleHomComplex` is exposed because the component types of its public differential
 application lemma reduce to the advertised homogeneous-cochain modules.  The element-level API is
-given by `dgRightModuleCochains.differential_apply`.
+given by `dgRightModuleCochains.differential_apply`.  `dgRightModuleCochains.differential` is
+exposed so that it unfolds to the graded commutator, whose composition laws it inherits.
 
 ## References
 
@@ -215,16 +216,11 @@ theorem gradedCommutator_gradedCommutator_apply (p : ℤ)
 end gradedCommutator
 
 /-- The differential on homogeneous right-module cochains. -/
+@[expose]
 def differential (p : ℤ) :
     dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) p →ₗ[R]
       dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) (p + 1) :=
   gradedCommutator hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz p
-
-/-- The differential is the graded commutator with the module differentials. -/
-theorem differential_def (p : ℤ) :
-    differential (hM := hM) (hN := hN) p =
-      gradedCommutator hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz p :=
-  (rfl)
 
 /-- Evaluating the differential gives the graded commutator with the module differentials. -/
 @[simp]
@@ -255,7 +251,8 @@ def dgRightModuleHomComplex (hM : IsDGRightModule h ℳ dM)
     (fun p ↦ ModuleCat.of R
       (dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) p))
     (fun p ↦ ModuleCat.ofHom (dgRightModuleCochains.differential (hM := hM) (hN := hN) p))
-    (fun p ↦ ModuleCat.hom_ext <| dgRightModuleCochains.differential_comp_self p)
+    (fun p ↦ ModuleCat.hom_ext <|
+      dgRightModuleCochains.differential_comp_self (hM := hM) (hN := hN) p)
 
 /-- The degree-`p` term of the Hom complex is the module of degree-`p` homogeneous cochains. -/
 @[simp]

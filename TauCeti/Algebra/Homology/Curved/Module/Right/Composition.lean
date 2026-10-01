@@ -74,15 +74,14 @@ theorem curvedDifferential_comp {p q : ℤ}
     curvedDifferential (hM := hM) (hN := hP) (p + q) (comp g f rfl) =
       comp (curvedDifferential (hM := hN) (hN := hP) p g) f (by omega) +
         p.negOnePow • comp g (curvedDifferential (hM := hM) (hN := hN) q f) (by omega) := by
-  simp only [curvedDifferential_def]
-  exact gradedCommutator_comp _ _ _ _ _ _ g f
+  exact gradedCommutator_comp hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz
+    hP.isHomogeneous hP.leibniz g f
 
 /-- The identity cochain of a curved module is closed. -/
 @[simp]
 theorem curvedDifferential_id (hM : IsCurvedDGRightModule h ℳ dM) :
     curvedDifferential (hM := hM) (hN := hM) 0 (id (R := R) (A := A) (ℳ := ℳ)) = 0 := by
-  rw [curvedDifferential_def]
-  exact gradedCommutator_id _ _
+  exact gradedCommutator_id hM.isHomogeneous hM.leibniz
 
 end dgRightModuleCochains
 
