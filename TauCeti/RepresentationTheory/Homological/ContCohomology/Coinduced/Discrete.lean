@@ -29,8 +29,6 @@ and the one Shapiro's lemma is stated against.
   counit of coinduction;
 * `TauCeti.DiscreteCoind.map`: the linear map induced by a `U`-equivariant linear map of
   coefficients;
-* `TauCeti.DiscreteCoind.unit`: the unit of coinduction `M → Coind_U^G M`, sending an element of
-  a discrete `G`-module to its orbit map;
 * `TauCeti.DiscreteCoind.trace` and `TauCeti.DiscreteCoind.traceLinear`: for finite-index `U`, the
   trace `TauCeti.coindTrace` on the discrete carrier, as a `G`-equivariant additive map and as a
   linear map;
@@ -43,9 +41,8 @@ and the one Shapiro's lemma is stated against.
   discrete carrier is continuous, so `Coind_U^G A` is a discrete `G`-module;
 * `TauCeti.DiscreteCoind.instContinuousSMulScalar`: for compact `G` and discrete coefficients,
   scalar multiplication is continuous;
-* `TauCeti.DiscreteCoind.unit_smul`, `TauCeti.DiscreteCoind.unit_injective` and
-  `TauCeti.DiscreteCoind.map_unit`: the unit is `G`-equivariant, injective (a section of the
-  counit) and natural in the coefficients;
+* `TauCeti.DiscreteCoind.unit_injective` and `TauCeti.DiscreteCoind.map_unit`: the unit is
+  injective (a section of the counit) and natural in the coefficients;
 * `TauCeti.DiscreteCoind.trace_apply`, `TauCeti.DiscreteCoind.trace_eq_sum_transversal` and
   `TauCeti.DiscreteCoind.trace_map`: the trace formula, along any transversal, and its naturality
   in the coefficients;
@@ -336,55 +333,6 @@ theorem evalLinear_apply (f : DiscreteCoind G U A) : evalLinear (R := R) G U A f
 
 end Map
 
-section Unit
-
-variable {M : Type*} [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
-  [DistribMulAction G M] [ContinuousSMul G M]
-
-variable (G U M) in
-/-- **The unit of coinduction** `M → Coind_U^G M`, for a discrete `G`-module `M` regarded as a
-`U`-module by restriction: `m` goes to its orbit map `x ↦ x • m`, which is locally constant because
-the action is continuous and `M` is discrete, and `U`-equivariant because the action is. It is
-`G`-equivariant for the right-translation action (`TauCeti.DiscreteCoind.unit_smul`) and a section
-of the counit, hence injective (`TauCeti.DiscreteCoind.unit_injective`). -/
-def unit : M →+ DiscreteCoind G U M where
-  toFun m := mk G U M (fun x => x • m)
-    ((IsLocallyConstant.iff_continuous _).2 (continuous_id.smul continuous_const))
-    fun u g => by rw [Subgroup.smul_def, mul_smul]
-  map_zero' := ext fun x => smul_zero x
-  map_add' m m' := ext fun x => smul_add x m m'
-
-@[simp]
-theorem unit_apply (m : M) (x : G) : unit G U M m x = x • m := (rfl)
-
-variable (G U M) in
-/-- The unit is injective, being a section of the counit: evaluating the orbit map of `m` at `1`
-gives back `m`. -/
-theorem unit_injective : Function.Injective (unit G U M) :=
-  Function.LeftInverse.injective (g := eval G U M) fun m => by simp
-
-variable (G U M) in
-/-- The unit is `G`-equivariant for the right-translation action on `Coind_U^G M`. -/
-theorem unit_smul [ContinuousMul G] (g : G) (m : M) :
-    unit G U M (g • m) = g • unit G U M m :=
-  ext fun x => (mul_smul x g m).symm
-
-variable {R : Type*} [Semiring R] [Module R M] [SMulCommClass U R M]
-  {N : Type*} [AddCommGroup N] [TopologicalSpace N] [DiscreteTopology N] [DistribMulAction G N]
-  [ContinuousSMul G N] [Module R N] [SMulCommClass U R N]
-
-/-- **The unit is natural in the coefficient module**: for a `G`-equivariant linear map
-`f : M → N` of discrete `G`-modules, coinducing `f` carries the orbit map of `m` to the orbit map
-of `f m`. The `U`-equivariance `TauCeti.DiscreteCoind.map` asks for is the restriction of the
-`G`-equivariance `hf`. -/
-@[simp]
-theorem map_unit (f : M →ₗ[R] N) (hf : ∀ (g : G) (m : M), f (g • m) = g • f m) (m : M) :
-    map f (fun u m => hf u m) (unit G U M m) = unit G U N (f m) := by
-  ext x
-  rw [map_apply, unit_apply, unit_apply, hf]
-
-end Unit
-
 section Trace
 
 variable [ContinuousMul G] [U.FiniteIndex]
@@ -486,6 +434,24 @@ theorem eval_unit (m : M) : eval G U M (unit G U M m) = m := by
 /-- The unit is injective, being retracted by evaluation at `1`. -/
 theorem unit_injective : Function.Injective (unit G U M) := fun m m' h => by
   simpa using congrArg (eval G U M) h
+
+section Naturality
+
+variable {R : Type*} [Semiring R] [Module R M] [SMulCommClass U R M]
+  {N : Type*} [AddCommGroup N] [TopologicalSpace N] [DiscreteTopology N] [DistribMulAction G N]
+  [ContinuousSMul G N] [Module R N] [SMulCommClass U R N]
+
+/-- **The unit is natural in the coefficient module**: for a `G`-equivariant linear map
+`f : M → N` of discrete `G`-modules, coinducing `f` carries the orbit map of `m` to the orbit map
+of `f m`. The `U`-equivariance `TauCeti.DiscreteCoind.map` asks for is the restriction of the
+`G`-equivariance `hf`. -/
+@[simp]
+theorem map_unit (f : M →ₗ[R] N) (hf : ∀ (g : G) (m : M), f (g • m) = g • f m) (m : M) :
+    map f (fun u m => hf u m) (unit G U M m) = unit G U N (f m) := by
+  ext x
+  rw [map_apply, unit_apply, unit_apply, hf]
+
+end Naturality
 
 section FiniteIndex
 

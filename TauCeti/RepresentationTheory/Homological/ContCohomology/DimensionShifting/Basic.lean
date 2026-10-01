@@ -80,9 +80,8 @@ connecting map, which is an isomorphism (`TauCeti.ContCohomology.isIso_coindBotS
 As for `TauCeti.DiscreteCoind`, the quotient is a type synonym carrying the discrete topology; the
 quotient topology inherited from `QuotientAddGroup` is not the one used for coefficients. Its
 `G`-action is induced by the right-translation action on `Coind_1^G M`, which preserves the image
-of `M` because the embedding is equivariant (`TauCeti.DiscreteCoind.unit_smul`), and
-it is continuous because the stabilizer of a class contains the open stabilizer of any
-representative.
+of `M` because the embedding is `G`-equivariant, and it is continuous because the stabilizer of a
+class contains the open stabilizer of any representative.
 
 Compactness of `G` makes the right-translation action on `Coind_1^G M` continuous. The underlying
 quotient and its algebraic action do not require compactness, but its `ContinuousSMul` instance
@@ -133,17 +132,22 @@ variable (G : Type u) [Group G] [TopologicalSpace G]
   (M : Type v) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
   [DistribMulAction G M] [ContinuousSMul G M]
 
+section ContinuousMul
+
+variable [ContinuousMul G]
+
 /-- **The dimension-shifting module `Coind_1^G M ⧸ M`**, the cokernel of the unit
 `TauCeti.DiscreteCoind.unit G ⊥ M`, the embedding `M ↪ Coind_1^G M` by orbit maps, carrying the
 discrete topology. -/
 @[expose] def DimensionShiftQuotient : Type _ :=
-  DiscreteCoind G ⊥ M ⧸ (DiscreteCoind.unit G ⊥ M).range
+  DiscreteCoind G ⊥ M ⧸ (DiscreteCoind.unit G ⊥ M).toAddMonoidHom.range
 
 namespace DimensionShiftQuotient
 
 /-- `Coind_1^G M ⧸ M` is an additive group, as a quotient of `Coind_1^G M`. -/
 instance : AddCommGroup (DimensionShiftQuotient G M) :=
-  inferInstanceAs (AddCommGroup (DiscreteCoind G ⊥ M ⧸ (DiscreteCoind.unit G ⊥ M).range))
+  inferInstanceAs
+    (AddCommGroup (DiscreteCoind G ⊥ M ⧸ (DiscreteCoind.unit G ⊥ M).toAddMonoidHom.range))
 
 /-- `Coind_1^G M ⧸ M` carries the discrete topology. -/
 instance : TopologicalSpace (DimensionShiftQuotient G M) := ⊥
@@ -162,7 +166,7 @@ theorem mk_surjective : Function.Surjective (mk G M) := QuotientAddGroup.mk'_sur
 /-- A coinduced element dies in the quotient exactly when it is an orbit map. -/
 @[simp]
 theorem mk_eq_zero_iff {f : DiscreteCoind G ⊥ M} :
-    mk G M f = 0 ↔ f ∈ (DiscreteCoind.unit G ⊥ M).range :=
+    mk G M f = 0 ↔ f ∈ (DiscreteCoind.unit G ⊥ M).toAddMonoidHom.range :=
   QuotientAddGroup.eq_zero_iff f
 
 /-- Induction on `Coind_1^G M ⧸ M`: a property of the classes of all coinduced elements holds for
@@ -172,16 +176,12 @@ theorem induction_on {motive : DimensionShiftQuotient G M → Prop} (q : Dimensi
     (h : ∀ f : DiscreteCoind G ⊥ M, motive (mk G M f)) : motive q :=
   QuotientAddGroup.induction_on q h
 
-section Action
-
-variable [ContinuousMul G]
-
 /-- Right translation on `Coind_1^G M`, descended to the quotient; the image of `M` is preserved
 because the embedding is equivariant. -/
 instance : DistribMulAction G (DimensionShiftQuotient G M) where
   smul g := QuotientAddGroup.map _ _ (DistribSMul.toAddMonoidHom (DiscreteCoind G ⊥ M) g) <| by
     rintro _ ⟨m, rfl⟩
-    exact ⟨g • m, DiscreteCoind.unit_smul G ⊥ M g m⟩
+    exact ⟨g • m, _root_.map_smul (DiscreteCoind.unit G ⊥ M) g m⟩
   one_smul q := induction_on q fun f => congrArg (mk G M) (one_smul G f)
   mul_smul g h q := induction_on q fun f => congrArg (mk G M) (mul_smul g h f)
   smul_zero g := map_zero (QuotientAddGroup.map _ _ _ _)
@@ -191,43 +191,43 @@ instance : DistribMulAction G (DimensionShiftQuotient G M) where
 @[simp]
 theorem mk_smul (g : G) (f : DiscreteCoind G ⊥ M) : mk G M (g • f) = g • mk G M f := (rfl)
 
-end Action
-
-/-- The action on the quotient is continuous: the stabilizer of a class contains the stabilizer of
-any representative, which is open. -/
-instance [IsTopologicalGroup G] [CompactSpace G] :
-    ContinuousSMul G (DimensionShiftQuotient G M) := by
-  refine continuousSMul_iff_stabilizer_isOpen.2 fun q => ?_
-  obtain ⟨f, rfl⟩ := mk_surjective q
-  refine Subgroup.isOpen_mono (fun g hg => ?_) (stabilizer_isOpen G f)
-  rw [MulAction.mem_stabilizer_iff] at hg ⊢
-  rw [← mk_smul, hg]
-
 end DimensionShiftQuotient
-
-variable [ContinuousMul G]
 
 /-- **The short exact sequence `0 → M → Coind_1^G M → Coind_1^G M ⧸ M → 0`** of discrete
 `G`-modules on which dimension shifting runs. -/
 def coindBotShortExact :
     DiscreteShortExact G M (DiscreteCoind G ⊥ M) (DimensionShiftQuotient G M) where
-  incl := DiscreteCoind.unit G ⊥ M
+  incl := (DiscreteCoind.unit G ⊥ M).toAddMonoidHom
   proj := DimensionShiftQuotient.mk G M
-  incl_equivariant := DiscreteCoind.unit_smul G ⊥ M
+  incl_equivariant g m := _root_.map_smul (DiscreteCoind.unit G ⊥ M) g m
   proj_equivariant := DimensionShiftQuotient.mk_smul
-  incl_injective := DiscreteCoind.unit_injective G ⊥ M
+  incl_injective := DiscreteCoind.unit_injective
   proj_surjective := DimensionShiftQuotient.mk_surjective
   exact _ := DimensionShiftQuotient.mk_eq_zero_iff
 
 /-- The first map of the dimension-shifting short exact sequence is the unit `M → Coind_1^G M`. -/
 @[simp]
-theorem coindBotShortExact_incl : (coindBotShortExact G M).incl = DiscreteCoind.unit G ⊥ M := (rfl)
+theorem coindBotShortExact_incl :
+    (coindBotShortExact G M).incl = (DiscreteCoind.unit G ⊥ M).toAddMonoidHom := (rfl)
 
 /-- The second map of the dimension-shifting short exact sequence is the projection `Coind_1^G M →
 Coind_1^G M ⧸ M`. -/
 @[simp]
 theorem coindBotShortExact_proj :
     (coindBotShortExact G M).proj = DimensionShiftQuotient.mk G M := (rfl)
+
+end ContinuousMul
+
+variable {G M} in
+/-- The action on the quotient is continuous: the stabilizer of a class contains the stabilizer of
+any representative, which is open. -/
+instance DimensionShiftQuotient.instContinuousSMul [IsTopologicalGroup G] [CompactSpace G] :
+    ContinuousSMul G (DimensionShiftQuotient G M) := by
+  refine continuousSMul_iff_stabilizer_isOpen.2 fun q => ?_
+  obtain ⟨f, rfl⟩ := DimensionShiftQuotient.mk_surjective q
+  refine Subgroup.isOpen_mono (fun g hg => ?_) (stabilizer_isOpen G f)
+  rw [MulAction.mem_stabilizer_iff] at hg ⊢
+  rw [← DimensionShiftQuotient.mk_smul, hg]
 
 end Embedding
 

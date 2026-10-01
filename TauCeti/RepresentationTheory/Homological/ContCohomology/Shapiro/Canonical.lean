@@ -57,8 +57,6 @@ carried out in `TauCeti.RepresentationTheory.Homological.ContCohomology.Shapiro.
 
 * `TauCeti.ContinuousCohomology.shapiroMap_eq_res_comp_coeffMap`: the Shapiro map is restriction
   followed by the coefficient map of the counit.
-* `TauCeti.ContinuousCohomology.coeffMap_unit_comp_shapiroMap`: the coefficient map of the unit
-  `M → Coind_U^G M` followed by the Shapiro map is restriction to `U`.
 * `TauCeti.ContinuousCohomology.shapiroMap_naturality`: the Shapiro map is natural in the
   coefficient module.
 * `TauCeti.ContinuousCohomology.explicitH0Iso_shapiroMap`,
@@ -144,40 +142,6 @@ theorem shapiroMap_eq_res_comp_coeffMap (n : ℕ) :
       fun u f => DiscreteCoind.eval_smul u f) f).trans
     (ofDiscreteModuleMap_hom_apply (G := U) (DiscreteCoind.eval G U A).toIntLinearMap
       (fun u f => DiscreteCoind.eval_smul u f) f)
-
-/-- **The Shapiro map composed with the unit is restriction**: for a discrete `G`-module `M`, the
-coefficient map of the unit `M → Coind_U^G M` of `TauCeti.DiscreteCoind.unit`, followed by the
-Shapiro map of `M` regarded as a `U`-module, is restriction to `U`. This is what identifies the
-image of a class under `Hⁿ(G, M) → Hⁿ(G, Coind_U^G M) ≅ Hⁿ(U, M)` with its restriction. -/
-theorem coeffMap_unit_comp_shapiroMap (M : Type u) [AddCommGroup M] [TopologicalSpace M]
-    [DiscreteTopology M] [DistribMulAction G M] [ContinuousSMul G M] (n : ℕ) :
-    coeffMap (ofDiscreteModuleMap (DiscreteCoind.unit G U M).toIntLinearMap
-        (DiscreteCoind.unit_smul G U M)) n ≫ shapiroMap U M n =
-      res U (ofDiscreteModule ℤ G M) n := by
-  rw [shapiroMap_eq_res_comp_coeffMap]
-  -- Restriction is natural in the coefficients, so the left side is restriction followed by the
-  -- coefficient map of the composite `M → Coind_U^G M → M` of the unit and the counit, which is
-  -- the identity. The composites are reassociated by hand, as in `shapiroMap_naturality` below.
-  refine (coeffMap_comp_res_assoc U _ n _).trans
-    ((congrArg (res U _ n ≫ ·) ((coeffMap_comp _ _ n).symm.trans
-      ((congrArg (coeffMap · n) ?_).trans (coeffMap_id _ n)))).trans (Category.comp_id _))
-  -- The unit is a section of the counit. Stated for `m : M` before the extensionality step, since
-  -- `simp` does not see through the restricted carrier `TopRep.res U.subtype (ofDiscreteModule …)`.
-  have hm : ∀ m : M, DiscreteCoind.eval G U M (DiscreteCoind.unit G U M m) = m := fun m => by simp
-  refine TopRep.hom_ext (DFunLike.ext _ _ fun m => ?_)
-  -- Not `rfl`: `DiscreteCoind.eval` and `DiscreteCoind.unit` are not exposed, so the evaluation
-  -- lemmas are applied with their morphisms spelled out, the middle object of the composite being
-  -- `TopRep.res U.subtype (ofDiscreteModule ℤ G _)` on one side and `ofDiscreteModule ℤ U _` on
-  -- the other.
-  exact (TopRep.comp_apply ((TopRep.resFunctor (U.subtype : U →* G)).map
-      (ofDiscreteModuleMap (DiscreteCoind.unit G U M).toIntLinearMap
-        (DiscreteCoind.unit_smul G U M)))
-      (ofDiscreteModuleMap (DiscreteCoind.eval G U M).toIntLinearMap
-        fun u f => DiscreteCoind.eval_smul u f) m).trans
-    (((ofDiscreteModuleMap_hom_apply (G := U) (DiscreteCoind.eval G U M).toIntLinearMap
-        (fun u f => DiscreteCoind.eval_smul u f) (DiscreteCoind.unit G U M m)).trans
-      (hm m)).trans
-      (TopRep.id_apply (TopRep.res (U.subtype : U →* G) (ofDiscreteModule ℤ G M)) m).symm)
 
 /-- **The Shapiro map is natural in the coefficient module**: for a `U`-equivariant homomorphism
 `f : A → B` of discrete `U`-modules, the coefficient map of its coinduction

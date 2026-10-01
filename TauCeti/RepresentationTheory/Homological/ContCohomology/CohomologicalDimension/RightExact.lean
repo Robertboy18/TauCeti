@@ -83,8 +83,10 @@ theorem subsingleton_continuousCohomology_succ_of_forall_coeffMap_proj_surjectiv
   obtain ⟨V, hV⟩ := exists_openSubgroup_res_eq_zero (ofDiscreteModule_isSmoothDiscrete ℤ G M) x
   -- the unit `ι : M → Coind_V^G M`, its image `N ≅ M`, and the short exact sequence
   -- `0 → N → Coind_V^G M → Coind_V^G M ⧸ N → 0`
-  let ι : M →+ DiscreteCoind G V.toSubgroup M := DiscreteCoind.unit G V.toSubgroup M
-  have hι : ∀ (g : G) (m : M), ι (g • m) = g • ι m := DiscreteCoind.unit_smul G V.toSubgroup M
+  let ι : M →+ DiscreteCoind G V.toSubgroup M :=
+    (DiscreteCoind.unit G V.toSubgroup M).toAddMonoidHom
+  have hι : ∀ (g : G) (m : M), ι (g • m) = g • ι m := fun g m =>
+    _root_.map_smul (DiscreteCoind.unit G V.toSubgroup M) g m
   let N : AddSubgroup (DiscreteCoind G V.toSubgroup M) := ι.range
   have hN : ∀ g : G, ∀ f ∈ N, g • f ∈ N := by
     rintro g _ ⟨m, rfl⟩
@@ -106,7 +108,8 @@ theorem subsingleton_continuousCohomology_succ_of_forall_coeffMap_proj_surjectiv
     QuotientAddGroup.induction_on c fun f => by
       rw [← QuotientAddGroup.mk_nsmul, hBp, QuotientAddGroup.mk_zero]
   -- the equivariant isomorphism `M ≃ N`
-  have hinj : Function.Injective ι := DiscreteCoind.unit_injective G V.toSubgroup M
+  have hinj : Function.Injective ι :=
+    DiscreteCoind.unit_injective (G := G) (U := V.toSubgroup) (M := M)
   let e : M ≃ₗ[ℤ] N := (AddMonoidHom.ofInjective hinj).toIntLinearEquiv
   have he : ∀ (g : G) (m : M), e (g • m) = g • e m := fun g m =>
     Subtype.ext ((AddMonoidHom.ofInjective_apply hinj (x := g • m)).trans ((hι g m).trans
