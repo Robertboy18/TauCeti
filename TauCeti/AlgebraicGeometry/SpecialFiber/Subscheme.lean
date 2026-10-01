@@ -20,9 +20,10 @@ global function `π` pulled back to `X`.
 
 The identification `X_s = V(π)` holds for every scheme over `R`: this file places no hypothesis on
 `X`. Whether `V(π)` is an effective Cartier divisor is a separate question, which depends on `X`:
-it is one exactly when the pullback of `π` is a non-zero-divisor locally on `X`, as it is when `X`
-is flat over `R`, and it fails for instance for `X = Spec (R ⧸ 𝔪)`, where `π` pulls back to zero
-and `X_s = X`. For a discrete valuation ring and an integral, locally Noetherian `X` flat over
+it is one exactly when the pullback of `π` is a non-zero-divisor locally on `X`, as it is when `π`
+is a non-zero-divisor of `R` (for instance a uniformizer of a discrete valuation ring) and `X` is
+flat over `R`, and it fails for instance for `X = Spec (R ⧸ 𝔪)`, where `π` pulls back to zero and
+`X_s = X`. For a discrete valuation ring and an integral, locally Noetherian `X` flat over
 `R`, this file and `TauCeti.AlgebraicGeometry.SpecialFiber.Components` give the two halves of
 `X_s = div_X(π)`: the Weil divisor of `π` is supported on the components of `X_s` with their
 multiplicities, and the closed subscheme cut out by the equation `π` is `X_s` itself. Identifying
