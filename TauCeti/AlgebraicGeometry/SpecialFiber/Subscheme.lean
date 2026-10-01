@@ -56,7 +56,7 @@ the maximal ideal `𝔪` of the base. -/
 theorem ker_specialFiberι :
     (specialFiberι R toBase).ker =
       Scheme.IdealSheafData.ofIdealTop
-        ((maximalIdeal R).map ((Scheme.ΓSpecIso (.of R)).inv ≫ toBase.appTop).hom) := by
+        ((maximalIdeal R).map (toBase.appTop.hom.comp (Scheme.ΓSpecIso (.of R)).inv.hom)) := by
   have := isClosedImmersion_Spec_map_residue R
   rw [specialFiberι, Scheme.Hom.ker_pullback_fst_Spec_map, CommRingCat.hom_ofHom,
     ResidueField.algebraMap_eq, ker_residue]
@@ -70,8 +70,7 @@ theorem ker_specialFiberι_eq_ofIdealTop_span {π : R} (hπ : maximalIdeal R = I
     (specialFiberι R toBase).ker =
       Scheme.IdealSheafData.ofIdealTop
         (Ideal.span {toBase.appTop ((Scheme.ΓSpecIso (.of R)).inv π)}) := by
-  rw [ker_specialFiberι, hπ, Ideal.map_span, Set.image_singleton, CommRingCat.hom_comp,
-    RingHom.comp_apply]
+  rw [ker_specialFiberι, hπ, Ideal.map_span, Set.image_singleton, RingHom.comp_apply]
 
 variable (R)
 
@@ -81,7 +80,8 @@ base. -/
 noncomputable def specialFiberIsoSubscheme :
     (specialFiber R toBase).left ≅
       (Scheme.IdealSheafData.ofIdealTop
-        ((maximalIdeal R).map ((Scheme.ΓSpecIso (.of R)).inv ≫ toBase.appTop).hom)).subscheme :=
+        ((maximalIdeal R).map
+          (toBase.appTop.hom.comp (Scheme.ΓSpecIso (.of R)).inv.hom))).subscheme :=
   haveI := isClosedImmersion_specialFiberι R toBase
   have h := (Scheme.IdealSheafData.ker_subschemeι _).trans (ker_specialFiberι R toBase).symm
   haveI := IsClosedImmersion.isIso_lift _ (specialFiberι R toBase) h
@@ -93,7 +93,8 @@ inclusions into the total space. -/
 lemma specialFiberIsoSubscheme_hom_subschemeι :
     (specialFiberIsoSubscheme R toBase).hom ≫
         (Scheme.IdealSheafData.ofIdealTop
-          ((maximalIdeal R).map ((Scheme.ΓSpecIso (.of R)).inv ≫ toBase.appTop).hom)).subschemeι =
+          ((maximalIdeal R).map
+            (toBase.appTop.hom.comp (Scheme.ΓSpecIso (.of R)).inv.hom))).subschemeι =
       specialFiberι R toBase :=
   IsClosedImmersion.lift_fac _ _ _
 
@@ -103,7 +104,8 @@ with the inclusions into the total space. -/
 lemma specialFiberIsoSubscheme_inv_specialFiberι :
     (specialFiberIsoSubscheme R toBase).inv ≫ specialFiberι R toBase =
       (Scheme.IdealSheafData.ofIdealTop
-        ((maximalIdeal R).map ((Scheme.ΓSpecIso (.of R)).inv ≫ toBase.appTop).hom)).subschemeι := by
+        ((maximalIdeal R).map
+          (toBase.appTop.hom.comp (Scheme.ΓSpecIso (.of R)).inv.hom))).subschemeι := by
   rw [Iso.inv_comp_eq, specialFiberIsoSubscheme_hom_subschemeι]
 
 /-- The zero scheme of `𝔪·𝒪_X`, with its inclusion into the total space and its induced morphism
@@ -112,7 +114,8 @@ it is the special fibre. -/
 theorem isPullback_subschemeι_specialFiber :
     IsPullback
       (Scheme.IdealSheafData.ofIdealTop
-        ((maximalIdeal R).map ((Scheme.ΓSpecIso (.of R)).inv ≫ toBase.appTop).hom)).subschemeι
+        ((maximalIdeal R).map
+          (toBase.appTop.hom.comp (Scheme.ΓSpecIso (.of R)).inv.hom))).subschemeι
       ((specialFiberIsoSubscheme R toBase).inv ≫ (specialFiber R toBase).hom)
       toBase (Spec.map (CommRingCat.ofHom (algebraMap R (ResidueField R)))) :=
   (isPullback_specialFiber R toBase).of_iso (specialFiberIsoSubscheme R toBase) (Iso.refl _)

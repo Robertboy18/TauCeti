@@ -131,8 +131,8 @@ theorem _root_.AlgebraicGeometry.Scheme.Hom.ker_pullback_fst_Spec_map {R S : Com
     (φ : R ⟶ S) [IsClosedImmersion (Spec.map φ)] (f : X ⟶ Spec R) :
     (pullback.fst f (Spec.map φ)).ker =
       Scheme.IdealSheafData.ofIdealTop
-        ((RingHom.ker φ.hom).map ((Scheme.ΓSpecIso R).inv ≫ f.appTop).hom) := by
+        ((RingHom.ker φ.hom).map (f.appTop.hom.comp (Scheme.ΓSpecIso R).inv.hom)) := by
   rw [Scheme.IdealSheafData.ker_fst_of_isClosedImmersion, Scheme.Hom.ker_Spec_map,
-    Scheme.IdealSheafData.comap_ofIdealTop, Ideal.map_map, CommRingCat.hom_comp]
+    Scheme.IdealSheafData.comap_ofIdealTop, Ideal.map_map]
 
 end TauCeti
