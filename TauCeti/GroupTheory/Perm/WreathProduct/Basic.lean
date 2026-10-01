@@ -381,6 +381,12 @@ theorem imprimitive_smul (w : WreathProduct D ι) (x : ι × Λ) :
 def imprimitiveToPerm : WreathProduct D ι →* Equiv.Perm (ι × Λ) :=
   MulAction.toPermHom (WreathProduct D ι) (ι × Λ)
 
+/-- The imprimitive permutation representation is the permutation representation
+`MulAction.toPermHom` of the imprimitive action. -/
+theorem imprimitiveToPerm_eq_toPermHom :
+    imprimitiveToPerm D ι Λ = MulAction.toPermHom (WreathProduct D ι) (ι × Λ) := by
+  rfl
+
 /-- The imprimitive permutation representation evaluates via the imprimitive action. -/
 @[simp]
 theorem imprimitiveToPerm_apply (w : WreathProduct D ι) (x : ι × Λ) :
