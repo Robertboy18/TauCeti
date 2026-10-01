@@ -18,10 +18,15 @@ the elements of `𝔪`. When `𝔪 = (π)` is principal, for instance when `R` i
 ring and `π` a uniformizer, the special fibre is therefore the zero scheme `V(π)` of the single
 global function `π` pulled back to `X`.
 
-For a discrete valuation ring, this is the scheme-theoretic statement that the special fibre `X_s`
-is the effective Cartier divisor `div_X(π)`: the Weil divisor of `π` is supported on the components
-of `X_s` with their multiplicities (`TauCeti.AlgebraicGeometry.SpecialFiber.Components`), and the
-closed subscheme cut out by the local equation `π` is `X_s` itself.
+The identification `X_s = V(π)` holds for every scheme over `R`: this file places no hypothesis on
+`X`. Whether `V(π)` is an effective Cartier divisor is a separate question, which depends on `X`:
+it is one exactly when the pullback of `π` is a non-zero-divisor locally on `X`, as it is when `X`
+is flat over `R`, and it fails for instance for `X = Spec (R ⧸ 𝔪)`, where `π` pulls back to zero
+and `X_s = X`. For a discrete valuation ring and an integral, locally Noetherian `X` flat over
+`R`, this file and `TauCeti.AlgebraicGeometry.SpecialFiber.Components` give the two halves of
+`X_s = div_X(π)`: the Weil divisor of `π` is supported on the components of `X_s` with their
+multiplicities, and the closed subscheme cut out by the equation `π` is `X_s` itself. Identifying
+`V(π)` with the divisor of `π` through the `CartierDivisor` API is not done here.
 
 ## Main results
 
