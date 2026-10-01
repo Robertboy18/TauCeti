@@ -89,6 +89,12 @@ def curvedDifferential (p : ℤ) :
       dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) (p + 1) :=
   gradedCommutator hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz p
 
+/-- The curved Hom differential is the graded commutator with the module differentials. -/
+theorem curvedDifferential_def (p : ℤ) :
+    curvedDifferential (hM := hM) (hN := hN) p =
+      gradedCommutator hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz p :=
+  (rfl)
+
 /-- Evaluating the curved Hom differential gives the graded commutator with the module
 differentials. -/
 @[simp]
@@ -124,7 +130,8 @@ theorem curvedDifferential_zero_eq_zero_iff
     one_smul, Submodule.coe_zero, LinearMap.zero_apply, sub_eq_zero]
 
 /-- The curved Hom differential of a cochain `k` of degree `-1`, an **odd homotopy**, is the
-boundary `dN ∘ k + k ∘ dM`.  No Koszul sign appears: the algebra acts on the other side. -/
+boundary `dN ∘ k + k ∘ dM`: in the degree `-1` case of the graded commutator, the Koszul sign
+`(-1) ^ (-1) = -1` turns the subtraction into an addition. -/
 theorem curvedDifferential_neg_one_apply
     (k : dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) (-1)) (x : M) :
     ((curvedDifferential (hM := hM) (hN := hN) (-1) k).1 : M →ₗ[Aᵐᵒᵖ] N) x =

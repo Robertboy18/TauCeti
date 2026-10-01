@@ -220,6 +220,12 @@ def differential (p : ℤ) :
       dgRightModuleCochains (R := R) (A := A) (ℳ := ℳ) (ℳN := ℳN) (p + 1) :=
   gradedCommutator hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz p
 
+/-- The differential is the graded commutator with the module differentials. -/
+theorem differential_def (p : ℤ) :
+    differential (hM := hM) (hN := hN) p =
+      gradedCommutator hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz p :=
+  (rfl)
+
 /-- Evaluating the differential gives the graded commutator with the module differentials. -/
 @[simp]
 theorem differential_apply (p : ℤ)
