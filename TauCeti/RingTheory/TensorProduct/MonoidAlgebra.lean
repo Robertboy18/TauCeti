@@ -13,8 +13,8 @@ public import Mathlib.RingTheory.TensorProduct.Maps
 # Base change of a monoid algebra along a commutative algebra
 
 For a commutative ring `R`, a commutative `R`-algebra `S` and a monoid `G`, the base change
-`R[G] ⊗[R] S` of the monoid algebra is the monoid algebra `S[G]`: `x ⊗ s` is sent to `s • x̄`,
-where `x̄` is `x` with its coefficients pushed forward to `S`. Mathlib's
+`R[G] ⊗[R] S` of the monoid algebra is the monoid algebra `S[G]`: `x ⊗ s` is sent to `s • x'`,
+where `x'` is `x` with its coefficients pushed forward to `S`. Mathlib's
 `MonoidAlgebra.scalarTensorEquiv` is this isomorphism, with the two tensor factors in the other
 order, for a *commutative* monoid; the version here has no commutativity hypothesis on `G`, so
 that it applies to the group algebra of a nonabelian finite group.
@@ -51,7 +51,7 @@ private theorem commute_mapAlgHom_algebraMap (x : MonoidAlgebra R G) (s : S) :
   (Algebra.commutes s _).symm
 
 /-- The forward direction of `tensorAlgEquiv`, as an `R`-algebra homomorphism out of the tensor
-product: `x ⊗ s ↦ x̄ * s`. -/
+product: `x ⊗ s ↦ x' * s`, where `x'` has the coefficients of `x` pushed forward to `S`. -/
 private noncomputable def toMonoidAlgebra :
     MonoidAlgebra R G ⊗[R] S →ₐ[R] MonoidAlgebra S G :=
   Algebra.TensorProduct.lift (mapAlgHom G (Algebra.ofId R S))
@@ -97,7 +97,7 @@ private theorem ofMonoidAlgebra_comp_toMonoidAlgebra :
 
 /-- **Base change of a monoid algebra.** For a commutative `R`-algebra `S`, the base change
 `R[G] ⊗[R] S` of the monoid algebra of an arbitrary monoid `G` is the monoid algebra `S[G]`,
-by `x ⊗ s ↦ s • x̄` where `x̄` has the coefficients of `x` pushed forward to `S`. -/
+by `x ⊗ s ↦ s • x'` where `x'` has the coefficients of `x` pushed forward to `S`. -/
 noncomputable def tensorAlgEquiv : MonoidAlgebra R G ⊗[R] S ≃ₐ[R] MonoidAlgebra S G :=
   AlgEquiv.ofRingEquiv (f := RingEquiv.ofRingHom (toMonoidAlgebra R S G).toRingHom
     (ofMonoidAlgebra R S G) (toMonoidAlgebra_comp_ofMonoidAlgebra R S G)
