@@ -32,9 +32,10 @@ Alexander degree zero between the homologies of two knot grids identifies their 
 (`GridDiagram.IsKnot.tau_eq_of_linearEquiv`); this is how an invariance theorem for `GH⁻` will
 descend to `τ`. A homogeneous `K[U]`-linear map of Alexander degree `δ` from `GH⁻(G)` to
 `GH⁻(G')` with a left inverse up to multiplication by a power of `U` satisfies
-`τ(G') ≤ τ(G) - δ` (`GridDiagram.IsKnot.tau_le_tau_sub_of_comp_eq_X_pow_smul`); the crossing
-change maps of Ozsváth--Stipsicz--Szabó, Chapter 6, supply such pairs of maps in degrees `0` and
-`-1`, and the resulting two inequalities bound the change of `τ` under a crossing change.
+`τ(G') ≤ τ(G) - δ`, provided `K` is Noetherian and `GH⁻(G)` is not torsion
+(`GridDiagram.IsKnot.tau_le_tau_sub_of_comp_eq_X_pow_smul`); the crossing change maps of
+Ozsváth--Stipsicz--Szabó, Chapter 6, supply such pairs of maps in degrees `0` and `-1`, and the
+resulting two inequalities bound the change of `τ` under a crossing change.
 
 Finally, over a field, when the `X`-marking state `G.X` receives an even number of counted
 rectangles from every grid state and has the largest Alexander grading of any grid state,
@@ -50,12 +51,14 @@ hypotheses; their values of `τ` are in `TorusLink/Tau.lean`.
 ## Main results
 
 * `TauCeti.GridDiagram.IsKnot.isGreatest_nonTorsionDegrees_neg_tau` and
-  `TauCeti.GridDiagram.IsKnot.le_neg_tau`: `-τ(G)` is the greatest non-torsion Alexander degree
-  when `GH⁻(G)` is not torsion, and an upper bound for the non-torsion degrees in general.
+  `TauCeti.GridDiagram.IsKnot.le_neg_tau`: over a Noetherian `K`, `-τ(G)` is the greatest
+  non-torsion Alexander degree when `GH⁻(G)` is not torsion, and an upper bound for the
+  non-torsion degrees without that hypothesis.
 * `TauCeti.GridDiagram.IsKnot.tau_eq_of_linearEquiv`: a degree-zero graded `K[U]`-isomorphism
   of unblocked homologies identifies the invariants.
-* `TauCeti.GridDiagram.IsKnot.tau_le_tau_sub_of_comp_eq_X_pow_smul`: a homogeneous map of
-  degree `δ` with a left inverse up to a power of `U` gives `τ(G') ≤ τ(G) - δ`.
+* `TauCeti.GridDiagram.IsKnot.tau_le_tau_sub_of_comp_eq_X_pow_smul`: over a Noetherian `K`, a
+  homogeneous map of degree `δ` out of a non-torsion `GH⁻(G)` with a left inverse up to a power
+  of `U` gives `τ(G') ≤ τ(G) - δ`.
 * `TauCeti.GridDiagram.IsKnot.tau_eq_neg_alexanderℤ_X`: `τ(G)` from the `X`-marking state when
   that state is a parity-protected cycle of maximal Alexander grading.
 
@@ -84,8 +87,9 @@ variable (K : Type*) [CommRing K] [CharP K 2]
 /-- **The invariant `τ` of a knot grid diagram**: minus the largest Alexander degree of a
 homogeneous element of the unblocked grid homology `GH⁻(G)` that is not `K[U]`-torsion.
 
-The supremum is attained as soon as `GH⁻(G)` is not a torsion module
-(`isGreatest_nonTorsionDegrees_neg_tau`). This is the invariant of the diagram; it is the
+Over a Noetherian `K`, the supremum is attained as soon as `GH⁻(G)` is not a torsion module
+(`isGreatest_nonTorsionDegrees_neg_tau`); if `GH⁻(G)` is torsion the value is `0`, the supremum
+of the empty set. This is the invariant of the diagram; it is the
 concordance invariant `τ` of the presented knot once the invariance of `GH⁻` under grid moves is
 available (`tau_eq_of_linearEquiv`). -/
 noncomputable def tau : ℤ :=

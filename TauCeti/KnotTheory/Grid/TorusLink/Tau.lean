@@ -58,16 +58,19 @@ theorem two_mul_tau_torusLink :
   rw [IsKnot.tau_def, mul_neg, two_mul_supNonTorsionDegree_torusLink h K]
 
 /-- On the `5 × 5` trefoil grid, `τ = -1`. -/
+@[simp]
 theorem tau_torusLink_one_two : ((isKnot_torusLink_iff 1 2).mpr (by decide)).tau K = -1 := by
   have h := two_mul_tau_torusLink (p := 1) (q := 2) (by decide) K
   omega
 
 /-- On the `7 × 7` grid of the `(3, 4)` torus knot, `τ = -3`. -/
+@[simp]
 theorem tau_torusLink_two_three : ((isKnot_torusLink_iff 2 3).mpr (by decide)).tau K = -3 := by
   have h := two_mul_tau_torusLink (p := 2) (q := 3) (by decide) K
   omega
 
 /-- **`τ` of an unknot grid is zero**: the unknot grids are the torus link grids with `q = 0`. -/
+@[simp]
 theorem tau_unknot (hU : (unknot p).IsKnot) : hU.tau K = 0 := by
   -- `unknot p` is `torusLink p 0`; the diagram is rewritten under the dependent binder `hU`.
   revert hU
