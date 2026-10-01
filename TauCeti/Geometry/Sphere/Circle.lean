@@ -16,13 +16,8 @@ The unit sphere `sphere (0 : EuclideanSpace ℝ (Fin 2)) 1` is isometric to Math
 circle `Circle = {z : ℂ | ‖z‖ = 1}` via the standard orthonormal basis isometry
 `Complex.orthonormalBasisOneI`.
 
-The circle is also the boundary of the closed unit disc of `ℂ`; `Circle.toClosedBall` records
-that inclusion, the boundary parametrization along which a knot presentation is read off a slice
-disc.
-
 ## Main declarations
 
-* `Circle.toClosedBall`: a point of the unit circle, as a point of the closed unit disc of `ℂ`.
 * `TauCeti.EuclideanSpace.sphereIsometryEquivCircle`: the isometry equivalence between the unit
   circle in two-dimensional Euclidean space and `Circle`.
 * `TauCeti.EuclideanSpace.sphereHomeomorphCircle`: the homeomorphism between the unit circle in
@@ -42,37 +37,6 @@ disc.
 -/
 
 public section
-
-namespace Circle
-
-open Metric
-
-/-- A point of the unit circle, as a point of the closed unit disc of `ℂ`: the inclusion of the
-circle as the boundary of the disc. -/
-def toClosedBall (z : Circle) : closedBall (0 : ℂ) 1 :=
-  ⟨z, mem_closedBall_zero_iff.2 (norm_coe z).le⟩
-
-@[simp]
-theorem coe_toClosedBall (z : Circle) : (z.toClosedBall : ℂ) = z :=
-  (rfl)
-
-theorem toClosedBall_injective : Function.Injective toClosedBall := fun z w h ↦
-  ext (by simpa using Subtype.ext_iff.1 h)
-
-theorem continuous_toClosedBall : Continuous toClosedBall :=
-  continuous_induced_rng.2 continuous_subtype_val
-
-/-- The points of the closed unit disc of `ℂ` of norm one are exactly the points of the circle. -/
-theorem range_toClosedBall :
-    Set.range toClosedBall = {x : closedBall (0 : ℂ) 1 | ‖(x : ℂ)‖ = 1} := by
-  ext x
-  constructor
-  · rintro ⟨z, rfl⟩
-    simp
-  · intro hx
-    exact ⟨⟨x, mem_sphere_zero_iff_norm.2 hx⟩, Subtype.ext rfl⟩
-
-end Circle
 
 namespace TauCeti
 

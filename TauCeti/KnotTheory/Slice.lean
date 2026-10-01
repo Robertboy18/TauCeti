@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Geometry.Manifold.Instances.ClosedBall
-public import TauCeti.Geometry.Sphere.Circle
 public import TauCeti.KnotTheory.SmoothCircle
 import Mathlib.Analysis.Complex.Isometry
 
@@ -26,7 +25,8 @@ disc of `ℂ` to the closed unit ball of `E` which
   the half-space models of `TauCeti.instChartedSpaceClosedBall`);
 * is properly embedded: the preimage of the manifold boundary of `Dⁿ⁺¹`, the unit sphere, is the
   manifold boundary of `D²`, the unit circle; and
-* restricts to `K` on the boundary circle, through the inclusion `Circle.toClosedBall`.
+* restricts to `K` on the boundary circle, through the inclusion
+  `Set.inclusion Metric.sphere_subset_closedBall` of the circle into the disc.
 
 No separate neatness condition is needed. Mathlib's `Manifold.IsImmersion` is a chart normal form,
 not an injectivity condition on the differential: around every point there are half-space charts of
@@ -109,7 +109,7 @@ structure IsSmoothSliceDisc (K : SmoothCircleEmbedding (𝓡 n) (sphere (0 : E) 
   preimage_boundary : Φ ⁻¹' (𝓡∂ (n + 1)).boundary (closedBall (0 : E) 1) =
     (𝓡∂ 2).boundary (closedBall (0 : ℂ) 1)
   /-- The disc restricts to `K` on its boundary circle. -/
-  apply_toClosedBall (z : Circle) : (Φ z.toClosedBall : E) = K z
+  apply_inclusion (z : Circle) : (Φ (Set.inclusion sphere_subset_closedBall z) : E) = K z
 
 /-- A smooth circle embedding `K : S¹ → Sⁿ` is **smoothly slice** if it bounds a smooth slice disc
 in the closed unit ball `Dⁿ⁺¹`. -/
@@ -146,11 +146,11 @@ theorem norm_eq_one_iff (h : IsSmoothSliceDisc K Φ) (x : closedBall (0 : ℂ) 1
   simpa [boundary_closedBall] using hx
 
 /-- The image of the boundary circle under a slice disc for `K` is the image of `K`. -/
-theorem image_range_toClosedBall (h : IsSmoothSliceDisc K Φ) :
-    (Subtype.val ∘ Φ) '' range Circle.toClosedBall = Subtype.val '' range K := by
+theorem image_range_inclusion (h : IsSmoothSliceDisc K Φ) :
+    (Subtype.val ∘ Φ) '' range (fun z : Circle ↦ Set.inclusion sphere_subset_closedBall z) =
+      Subtype.val '' range K := by
   ext y
-  simp only [mem_image, mem_range, exists_exists_eq_and, Function.comp_apply,
-    h.apply_toClosedBall]
+  simp only [mem_image, mem_range, exists_exists_eq_and, Function.comp_apply, h.apply_inclusion]
 
 /-- Reparametrizing a slice disc for `K` by a linear isometry `e` of the plane gives a slice disc
 for the reparametrization of `K` along the circle: if `σ : Circle → Circle` is `e` on the circle
@@ -167,10 +167,11 @@ theorem comp_unitClosedBallMap (h : IsSmoothSliceDisc K Φ) (e : ℂ ≃ₗᵢ[�
     rw [preimage_comp, h.preimage_boundary]
     ext x
     simp [boundary_closedBall]
-  apply_toClosedBall z := by
-    have hz : e.toLinearIsometry.unitClosedBallMap z.toClosedBall = (σ z).toClosedBall :=
+  apply_inclusion z := by
+    have hz : e.toLinearIsometry.unitClosedBallMap (Set.inclusion sphere_subset_closedBall z) =
+        Set.inclusion sphere_subset_closedBall (σ z) :=
       Subtype.ext (by simp [hσ])
-    rw [Function.comp_apply, hz, h.apply_toClosedBall, hK']
+    rw [Function.comp_apply, hz, h.apply_inclusion, hK']
 
 end IsSmoothSliceDisc
 
@@ -207,7 +208,7 @@ theorem isSmoothSliceDisc_greatCircle_unitClosedBallMap (ι : ℂ →ₗᵢ[ℝ]
   preimage_boundary := by
     ext x
     simp [boundary_closedBall]
-  apply_toClosedBall z := by simp
+  apply_inclusion z := by simp
 
 /-- **Great circles are smoothly slice**: they bound flat discs. -/
 theorem isSmoothlySlice_greatCircle (ι : ℂ →ₗᵢ[ℝ] E) :
