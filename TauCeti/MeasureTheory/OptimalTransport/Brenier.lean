@@ -243,8 +243,8 @@ theorem IsCoupling.gradient_fenchelConjugate_comp_gradient_ae_eq_id (hπ : IsCou
     (eq_graphPlan_gradient_of_ae_mem_subdifferential hπ.fst_eq hμ hconv hlsc hbot hsub).2
   have h₂ := (map_swap_eq_graphPlan_gradient_fenchelConjugate hπ.snd_eq hν hsub).2
   rw [h₁] at h₂
-  exact comp_ae_eq_id_of_map_swap_graphPlan_eq (measurable_gradient _).aemeasurable
-    (measurable_gradient _).aemeasurable h₂
+  exact (comp_ae_eq_id_of_map_swap_graphPlan_eq (measurable_gradient _).aemeasurable
+    (measurable_gradient _).aemeasurable h₂).1
 
 /-- **Conjugate potentials give inverse maps.** Let `π` couple `μ` and `ν`, both absolutely
 continuous with respect to an additive Haar measure on a finite-dimensional real inner product
@@ -259,13 +259,9 @@ theorem IsCoupling.gradient_comp_gradient_fenchelConjugate_ae_eq_id (hπ : IsCou
   have h₁ :=
     (eq_graphPlan_gradient_of_ae_mem_subdifferential hπ.fst_eq hμ hconv hlsc hbot hsub).2
   have h₂ := (map_swap_eq_graphPlan_gradient_fenchelConjugate hπ.snd_eq hν hsub).2
-  have hππ : (π.map Prod.swap).map Prod.swap = π :=
-    MeasurableEquiv.map_map_symm (ν := π) MeasurableEquiv.prodComm
-  have h₃ : (graphPlan (∇ fun y => (fenchelConjugate (innerₗ E) u y).toReal) ν).map Prod.swap =
-      graphPlan (∇ fun x => (u x).toReal) μ := by
-    rw [← h₂, hππ, h₁]
-  exact comp_ae_eq_id_of_map_swap_graphPlan_eq (measurable_gradient _).aemeasurable
-    (measurable_gradient _).aemeasurable h₃
+  rw [h₁] at h₂
+  exact (comp_ae_eq_id_of_map_swap_graphPlan_eq (measurable_gradient _).aemeasurable
+    (measurable_gradient _).aemeasurable h₂).2
 
 /-- **Uniqueness of the optimal quadratic plan.** Between finite measures on a finite-dimensional
 real inner product space, if the source `μ` is absolutely continuous with respect to an additive
