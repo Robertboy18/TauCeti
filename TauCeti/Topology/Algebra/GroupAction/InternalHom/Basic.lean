@@ -317,6 +317,11 @@ instance [Finite M] [Finite N] : Finite (InternalHom G M N) :=
   Finite.of_injective (fun φ : InternalHom G M N => (φ.toAddMonoidHom : M → N))
     fun _ _ h => InternalHom.ext (DFunLike.coe_injective h)
 
+/-- The internal hom out of a trivial module is trivial: every homomorphism out of it is zero. -/
+instance [Subsingleton M] : Subsingleton (InternalHom G M N) :=
+  ⟨fun φ ψ => InternalHom.ext (AddMonoidHom.ext fun m => by
+    rw [Subsingleton.elim m 0, map_zero, map_zero])⟩
+
 section Additive
 
 variable (G) {N : Type*} [AddCommMonoid N]
@@ -362,6 +367,12 @@ theorem of_nsmul (n : ℕ) (φ : M →+ N) : of G (n • φ) = n • of G φ := 
 theorem nsmul_eq_zero {n : ℕ} (hN : ∀ x : N, n • x = 0) (φ : InternalHom G M N) : n • φ = 0 := by
   ext m
   simp [hN]
+
+/-- A natural number killing the domain kills the internal hom. -/
+theorem nsmul_eq_zero_of_domain {n : ℕ} (hM : ∀ x : M, n • x = 0) (φ : InternalHom G M N) :
+    n • φ = 0 := by
+  ext m
+  simp [← map_nsmul, hM]
 
 end Additive
 
@@ -614,6 +625,12 @@ theorem precomp_surjective {p : ℕ} [Fact p.Prime] (hM' : ∀ x : M', p • x =
   obtain ⟨ψ, hψ⟩ :=
     AddMonoidHom.exists_comp_eq_of_injective hM' (f := (f : M →+ M')) hf φ.toAddMonoidHom
   exact ⟨of G ψ, InternalHom.ext hψ⟩
+
+/-- Precomposition with a bijection onto a module killed by a prime `p` is bijective. -/
+theorem precomp_bijective {p : ℕ} [Fact p.Prime] (hM' : ∀ x : M', p • x = 0)
+    {f : M →+[G] M'} (hf : Function.Bijective f) :
+    Function.Bijective (precomp G f (N := N)) :=
+  ⟨precomp_injective hf.2, precomp_surjective hM' hf.1⟩
 
 end Surjective
 
