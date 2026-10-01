@@ -10,6 +10,7 @@ public import TauCeti.GroupTheory.Torsion
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.HomologySequence
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.FixedPoints
 public import TauCeti.Topology.Algebra.GroupAction.QuotientAddGroup
+import TauCeti.LinearAlgebra.Exact
 
 /-!
 # Dévissage of finite `p`-primary coefficients for pro-`p` groups
@@ -153,11 +154,8 @@ theorem IsProP.subsingleton_continuousCohomology_of_forall_natCard_eq_smul_eq_se
     (fun M _ _ _ _ _ _ ↦
       ContinuousCohomology.subsingleton_continuousCohomology_ofDiscreteModule_of_subsingleton M n)
     h (fun A B C _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ S _ _ _ _ _ hA hC ↦ ?_) M hM
-  · -- exactness in the middle of `Hⁿ(G, A) → Hⁿ(G, B) → Hⁿ(G, C)`
-    have hex := S.longExact_exact₂ n
-    refine subsingleton_of_forall_eq 0 fun x ↦ ?_
-    obtain ⟨a, rfl⟩ := (hex x).1 (Subsingleton.elim _ _)
-    rw [Subsingleton.elim a 0, map_zero]
+  · -- exactness in the middle of `Hⁿ(G, A) → Hⁿ(G, B) → Hⁿ(G, C)`, with trivial outer terms
+    exact subsingleton_of_exact (S.longExact_exact₂ n)
 
 /-- **Dévissage for pro-`p` groups, elementary abelian test class.** Let `G` be a compact pro-`p`
 group. If `Hⁿ(G, A)` vanishes for every finite discrete `G`-module `A` killed by `p` on which `G`

@@ -31,14 +31,15 @@ one is an equivalence, by dévissage; that is the pro-`p` reduction of `cd_p` in
 trivial discrete `G`-modules of prime order `p`, and the results here identify their cohomology
 with `cohomFp p G n`: such a module is cyclic of order `p`, hence `G`-equivariantly isomorphic to
 the carrier of `trivialFp p G`, so its cohomology is additively equivalent to `cohomFp p G n`
-(`TauCeti.cohomFpAddEquivOfNatCardEq`), and in particular vanishes, or is finite, exactly when
-`cohomFp p G n` does.
+(`TauCeti.nonempty_cohomFp_addEquiv_of_natCard_eq`), and in particular vanishes, or is finite,
+exactly when `cohomFp p G n` does. The equivalence depends on a choice of generator of the module,
+and only its existence is recorded.
 
 ## Main results
 
 * `TauCeti.isPPrimaryTorsion_trivialFp_V`: the carrier of `trivialFp p G` is `p`-primary torsion.
-* `TauCeti.cohomFpAddEquivOfNatCardEq`: the cohomology of `𝔽_p` is additively equivalent to the
-  cohomology of any trivial discrete `G`-module of prime order `p`.
+* `TauCeti.nonempty_cohomFp_addEquiv_of_natCard_eq`: the cohomology of `𝔽_p` is additively
+  equivalent to the cohomology of any trivial discrete `G`-module of prime order `p`.
 * `TauCeti.subsingleton_continuousCohomology_iff_subsingleton_cohomFp_of_natCard_eq`,
   `TauCeti.finite_continuousCohomology_iff_finite_cohomFp_of_natCard_eq`: the cohomology of a
   trivial discrete `G`-module of prime order `p` vanishes, resp. is finite, exactly when that of
@@ -84,36 +85,38 @@ section PrimeOrder
 variable [Fact p.Prime] (A : Type u) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
   [DistribMulAction G A] (hA : Nat.card A = p) (htriv : ∀ (g : G) (a : A), g • a = a) (n : ℕ)
 
+include hA htriv
+
 /-- **The cohomology of `𝔽_p` is that of any trivial discrete `G`-module of prime order `p`.** Such
 a module `A` is cyclic of order `p`, hence `G`-equivariantly isomorphic to the carrier of
-`trivialFp p G`, and the cohomology of that carrier as a discrete `ℤ`-module is `cohomFp p G n`.
-The equivalence depends on a choice of generator of `A`. -/
-noncomputable def cohomFpAddEquivOfNatCardEq :
-    cohomFp p G n ≃+ continuousCohomology n (ofDiscreteModule ℤ G A) :=
+`trivialFp p G` once a generator is chosen, and the cohomology of that carrier as a discrete
+`ℤ`-module is `cohomFp p G n`. The equivalence depends on the choice of generator, so only its
+existence is recorded. -/
+theorem nonempty_cohomFp_addEquiv_of_natCard_eq :
+    Nonempty (cohomFp p G n ≃+ continuousCohomology n (ofDiscreteModule ℤ G A)) := by
+  obtain ⟨a, ha⟩ := (isAddCyclic_of_prime_card hA).exists_generator
   let e : (trivialFp p G).V ≃ₗ[ℤ] A :=
-    ((trivialFpEquiv p G).toAddEquiv.trans
-      (zmodAddEquivOfGenerator (isAddCyclic_of_prime_card hA).exists_generator.choose_spec
-        hA)).toIntLinearEquiv
+    ((trivialFpEquiv p G).toAddEquiv.trans (zmodAddEquivOfGenerator ha hA)).toIntLinearEquiv
   have he : ∀ (g : G) (m : (trivialFp p G).V), e (g • m) = g • e m := fun g m ↦ by
     rw [smul_trivialFp_V, htriv]
-  (ofDiscreteModuleRestrictScalarsIntEquiv (trivialFp p G) n).symm.trans
+  exact ⟨(ofDiscreteModuleRestrictScalarsIntEquiv (trivialFp p G) n).symm.trans
     ((ContinuousCohomology.continuousCohomologyFunctor ℤ G n).mapIso
-      (ofDiscreteModuleIso e he)).toContinuousLinearEquiv.toAddEquiv
-
-include hA htriv
+      (ofDiscreteModuleIso e he)).toContinuousLinearEquiv.toAddEquiv⟩
 
 /-- **The cohomology of a trivial discrete `G`-module of prime order `p` vanishes exactly when that
 of `𝔽_p` does.** -/
 theorem subsingleton_continuousCohomology_iff_subsingleton_cohomFp_of_natCard_eq :
     Subsingleton (continuousCohomology n (ofDiscreteModule ℤ G A)) ↔
       Subsingleton (cohomFp p G n) :=
-  (cohomFpAddEquivOfNatCardEq A hA htriv n).toEquiv.subsingleton_congr.symm
+  let ⟨e⟩ := nonempty_cohomFp_addEquiv_of_natCard_eq A hA htriv n
+  e.toEquiv.subsingleton_congr.symm
 
 /-- **The cohomology of a trivial discrete `G`-module of prime order `p` is finite exactly when that
 of `𝔽_p` is.** -/
 theorem finite_continuousCohomology_iff_finite_cohomFp_of_natCard_eq :
     Finite (continuousCohomology n (ofDiscreteModule ℤ G A)) ↔ Finite (cohomFp p G n) :=
-  (cohomFpAddEquivOfNatCardEq A hA htriv n).toEquiv.finite_iff.symm
+  let ⟨e⟩ := nonempty_cohomFp_addEquiv_of_natCard_eq A hA htriv n
+  e.toEquiv.finite_iff.symm
 
 end PrimeOrder
 

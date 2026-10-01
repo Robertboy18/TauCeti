@@ -11,8 +11,9 @@ public import TauCeti.Topology.Algebra.Group.Profinite.ProP.FiniteCohomology
 /-!
 # The second cohomology of a Demushkin group with finite coefficients is finite
 
-A Demushkin group `G` has `H²(G, 𝔽_p)` one-dimensional, hence finite. The finiteness dévissage
-for pro-`p` groups (`TauCeti.IsProP.finite_continuousCohomology_of_finite_cohomFp`) then makes
+A Demushkin group `G` has `H²(G, 𝔽_p)` one-dimensional, hence finite
+(`TauCeti.IsDemushkin.finite_cohomFp_two`). The finiteness dévissage for pro-`p` groups
+(`TauCeti.IsProP.finite_continuousCohomology_of_finite_cohomFp`) then makes
 `H²(G, M)` finite for every finite discrete `p`-primary `G`-module `M`, whatever the action. This
 holds for every Demushkin group, including the finite one `ℤ/2`, and uses no bound on the
 cohomological dimension of `G`.
@@ -24,7 +25,6 @@ compared by counting, and the count needs `H²(G, M)` to be finite for the finit
 
 ## Main results
 
-* `TauCeti.IsDemushkin.finite_cohomFp_two`: `H²(G, 𝔽_p)` is finite.
 * `TauCeti.IsDemushkin.finite_continuousCohomology_two`,
   `TauCeti.IsDemushkin.finite_H2`: `H²(G, M)` is finite for every finite discrete `p`-primary
   `G`-module `M`, on Mathlib's carrier and on the explicit cocycle model.
@@ -51,13 +51,6 @@ namespace IsDemushkin
 
 variable (hG : IsDemushkin p G)
 include hG
-
-omit [CompactSpace G] in
-/-- **`H²(G, 𝔽_p)` of a Demushkin group is finite**, being one-dimensional over `𝔽_p`. -/
-theorem finite_cohomFp_two : Finite (cohomFp p G 2) :=
-  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  have := Module.finite_of_finrank_eq_succ hG.finrank_cohomFp_two
-  Module.finite_of_finite (ZMod p)
 
 /-- **`H²(G, M)` of a Demushkin group is finite for every finite `p`-primary `M`**, on Mathlib's
 carrier. -/
