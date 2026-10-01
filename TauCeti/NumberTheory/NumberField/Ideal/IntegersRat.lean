@@ -227,11 +227,11 @@ theorem inertiaDeg_eq_orderOf [IsGalois ℚ K] (Q : Ideal (𝓞 K)) [Q.IsPrime]
     Ideal.orderOf_eq_inertiaDeg_of_isArithFrobAt Q hQ
       ((Ideal.isArithFrobAt_ringOfIntegers_rat_iff σ Q).mpr hσ)]
 
-/-- **The residue degree over `ℤ` divides the order of a Frobenius.** At any prime `Q` of a Galois
+/-- **The residue degree over `ℤ` divides the order of a Frobenius.** At any prime `Q` of a
 number field above the rational prime `p`, ramified or not, the residue degree of `Q` divides the
 order of an arithmetic Frobenius at `Q`; it is the order of the residue Frobenius, a homomorphic
 image. -/
-theorem inertiaDeg_dvd_orderOf [IsGalois ℚ K] (Q : Ideal (𝓞 K)) [Q.IsPrime]
+theorem inertiaDeg_dvd_orderOf (Q : Ideal (𝓞 K)) [Q.IsPrime]
     [Q.LiesOver (span {(p : ℤ)})] {σ : K ≃ₐ[ℚ] K} (hσ : IsArithFrobAt ℤ σ Q) :
     Q.inertiaDeg ℤ ∣ orderOf σ := by
   have hp0 : (span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
@@ -242,10 +242,10 @@ theorem inertiaDeg_dvd_orderOf [IsGalois ℚ K] (Q : Ideal (𝓞 K)) [Q.IsPrime]
     ((Ideal.isArithFrobAt_ringOfIntegers_rat_iff σ Q).mpr hσ)
 
 /-- **Residue degree one over `ℤ` means the Frobenius lies in inertia.** At any prime `Q` of a
-Galois number field above the rational prime `p`, ramified or not, the residue degree of `Q` is `1`
+number field above the rational prime `p`, ramified or not, the residue degree of `Q` is `1`
 exactly when an arithmetic Frobenius at `Q` lies in the inertia group of `Q`. At an unramified
 prime this reads `f = 1 ↔ σ = 1`. -/
-theorem inertiaDeg_eq_one_iff_mem_inertia [IsGalois ℚ K] (Q : Ideal (𝓞 K)) [Q.IsPrime]
+theorem inertiaDeg_eq_one_iff_mem_inertia (Q : Ideal (𝓞 K)) [Q.IsPrime]
     [Q.LiesOver (span {(p : ℤ)})] {σ : K ≃ₐ[ℚ] K} (hσ : IsArithFrobAt ℤ σ Q) :
     Q.inertiaDeg ℤ = 1 ↔ σ ∈ Q.inertia (K ≃ₐ[ℚ] K) := by
   have hp0 : (span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
