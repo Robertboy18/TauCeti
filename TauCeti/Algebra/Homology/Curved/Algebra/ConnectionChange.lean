@@ -56,7 +56,18 @@ open DirectSum
 namespace TauCeti
 
 variable {R A : Type*} [CommRing R] [Ring A] [Algebra R A]
-variable (𝒜 : ℤ → Submodule R A) [GradedAlgebra 𝒜]
+
+section Decomposition
+
+/-!
+### The twisted differential
+
+The twisted differential only uses the homogeneous decomposition of `A`, through the Koszul sign
+of `TauCeti.InternalGrading.koszulTwist`; the graded multiplication enters only in the
+change-of-connection theorems below.
+-/
+
+variable (𝒜 : ℤ → Submodule R A) [DirectSum.Decomposition 𝒜]
 
 /-- The graded commutator with an element `a` of odd degree: on a homogeneous element `b`,
 `a * b - (-1) ^ |b| • (b * a)`. For `a` of degree one this is the inner derivation by `a`. -/
@@ -88,7 +99,9 @@ theorem connectionChange_apply_of_mem {p : ℤ} {b : A} (hb : b ∈ 𝒜 p) (d :
     connectionChange 𝒜 d a b = d b + a * b - p.negOnePow • (b * a) := by
   rw [connectionChange_apply, oddInnerDerivation_apply_of_mem 𝒜 hb, add_sub_assoc]
 
-variable {𝒜} {d : A →ₗ[R] A} {w : A}
+end Decomposition
+
+variable {𝒜 : ℤ → Submodule R A} [GradedAlgebra 𝒜] {d : A →ₗ[R] A} {w : A}
 
 /-- **Change of connection.** Twisting the differential of a curved differential graded algebra
 by a connection form `a` of degree one changes the curvature to `w - d a - a * a`. -/
