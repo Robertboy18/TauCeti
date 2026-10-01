@@ -23,11 +23,19 @@ A **smooth slice disc** for `K` (`TauCeti.IsSmoothSliceDisc K Φ`) is a map `Φ`
 disc of `ℂ` to the closed unit ball of `E` which
 
 * is a smooth embedding in the sense of manifolds with boundary (`Manifold.IsSmoothEmbedding` for
-  the half-space models of `TauCeti.instChartedSpaceClosedBall`), so in particular is neat: it
-  meets the boundary sphere transversally;
+  the half-space models of `TauCeti.instChartedSpaceClosedBall`);
 * is properly embedded: the preimage of the manifold boundary of `Dⁿ⁺¹`, the unit sphere, is the
   manifold boundary of `D²`, the unit circle; and
 * restricts to `K` on the boundary circle, through the inclusion `Circle.toClosedBall`.
+
+No separate neatness condition is needed. Mathlib's `Manifold.IsImmersion` is a chart normal form,
+not an injectivity condition on the differential: around every point there are half-space charts of
+the disc and of the ball in which `Φ` is the restriction of a linear map `u ↦ equiv (u, 0)` on the
+whole chart target (`Manifold.ImmersionAtProp`). The boundary coordinate of the ball therefore pulls
+back to a linear functional on the model half-plane, nonnegative on the half-plane and, by
+`preimage_boundary`, vanishing exactly on its boundary line; so it is a positive multiple of the
+boundary coordinate of the disc. Hence a smooth slice disc is neat: it meets the boundary sphere
+transversally, as in the usual notion of a properly embedded smooth slice disc.
 
 `K` is smoothly slice (`TauCeti.IsSmoothlySlice K`) when such a disc exists. Topological
 sliceness, where the disc is only required to be locally flat, is deliberately a separate notion:
