@@ -95,6 +95,11 @@ theorem multiplierRing_mul_spanSingleton
 def IsProperFractionalIdeal (I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K) : Prop :=
   O.multiplierRing I = O.toSubalgebra.toSubring
 
+/-- Properness is equality of the multiplier ring with the order. -/
+theorem isProperFractionalIdeal_def (I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K) :
+    O.IsProperFractionalIdeal I ↔ O.multiplierRing I = O.toSubalgebra.toSubring :=
+  Iff.rfl
+
 /-- Properness says exactly that any field element stabilizing the ideal belongs to the order. -/
 theorem isProperFractionalIdeal_iff (I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K) :
     O.IsProperFractionalIdeal I ↔
