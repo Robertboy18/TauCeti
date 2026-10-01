@@ -68,9 +68,9 @@ theorem intTrace_mem_maximalIdeal_pow_of_mem {m r : ℕ} {x : 𝒪[L]} (hx : x �
     (h : ramificationIndex K L * r ≤ m + differentExponent K L) :
     Algebra.intTrace 𝒪[K] 𝒪[L] x ∈ 𝓂[K] ^ r := by
   rw [differentExponent_def] at h
-  exact (map_intTrace_pow_le_pow_iff 𝒪[K] (IsDiscreteValuationRing.not_a_field 𝒪[K])
-    (IsDiscreteValuationRing.not_a_field 𝒪[L]) (map_maximalIdeal_eq_maximalIdeal_pow K L) m r).mpr
-    h (Submodule.mem_map_of_mem ((Submodule.restrictScalars_mem ..).mpr hx))
+  exact (map_intTrace_pow_le_pow_iff 𝒪[K] (IsDiscreteValuationRing.not_a_field 𝒪[L])
+    (map_maximalIdeal_eq_maximalIdeal_pow K L) m r).mpr h
+    (Submodule.mem_map_of_mem ((Submodule.restrictScalars_mem ..).mpr hx))
 
 variable (K L)
 

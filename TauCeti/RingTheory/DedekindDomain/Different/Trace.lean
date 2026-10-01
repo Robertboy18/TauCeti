@@ -12,12 +12,14 @@ import TauCeti.RingTheory.IntegralClosure.IntegralRestrict
 # The trace of the powers of a prime, through the different
 
 Let `B` be a Dedekind domain, module-finite over a Dedekind domain `A` with `Frac B / Frac A`
-separable, and let `P` be a nonzero prime of `B` which is the only prime above a nonzero ideal
-`p` of `A`, so that `p · B = P ^ e`. Write `d` for the multiplicity of `P` in the different ideal
+separable, and let `P` be a nonzero prime of `B` which is the only prime above an ideal `p` of
+`A`, so that `p · B = P ^ e`. Write `d` for the multiplicity of `P` in the different ideal
 `𝔡(B/A)`. The trace dual of `B` is `𝔡⁻¹`, so the integral trace carries `P ^ m` into `p ^ r`
-exactly when `P ^ m` lies in the fractional ideal `p ^ r 𝔡⁻¹ = P ^ (e r - d)`, that is, exactly
-when `e r ≤ m + d`. When `A` is a discrete valuation ring with maximal ideal `p`, every ideal of
-`A` is a power of `p` and the criterion determines the image completely:
+exactly when `P ^ m` lies in the fractional ideal `p ^ r 𝔡⁻¹`. Its `P`-adic valuation is
+`e r - d`, and its valuation at every other prime of `B` is nonpositive, since `P` is the only
+prime above `p`; so the condition is exactly `e r ≤ m + d`. When `A` is a discrete valuation
+ring with maximal ideal `p`, every ideal of `A` is a power of `p` and the criterion determines the
+image completely:
 
 `Tr(P ^ m) = p ^ ((m + d) / e)`,
 
@@ -59,13 +61,19 @@ variable [IsDedekindDomain A] [IsDedekindDomain B] [Module.IsTorsionFree A B] [M
 variable [Algebra.IsSeparable (FractionRing A) (FractionRing B)]
 variable {p : Ideal A} {P : Ideal B} [P.IsPrime] {e : ℕ}
 
-/-- **The trace of a power of the prime above `p`.** If `p · B = P ^ e` for a nonzero ideal `p` of
-`A` and a nonzero prime `P` of `B`, the integral trace carries `P ^ m` into `p ^ r` exactly when
+/-- **The trace of a power of the prime above `p`.** If `p · B = P ^ e` for an ideal `p` of `A`
+and a nonzero prime `P` of `B`, the integral trace carries `P ^ m` into `p ^ r` exactly when
 `e * r ≤ m + d`, where `d` is the multiplicity of `P` in the different ideal. -/
-theorem map_intTrace_pow_le_pow_iff (hp : p ≠ ⊥) (hP : P ≠ ⊥)
-    (hPe : p.map (algebraMap A B) = P ^ e) (m r : ℕ) :
+theorem map_intTrace_pow_le_pow_iff (hP : P ≠ ⊥) (hPe : p.map (algebraMap A B) = P ^ e)
+    (m r : ℕ) :
     ((P ^ m).restrictScalars A).map (Algebra.intTrace A B) ≤ p ^ r ↔
       e * r ≤ m + multiplicity P (differentIdeal A B) := by
+  have hp : p ≠ ⊥ := by
+    rintro rfl
+    rw [Ideal.map_bot] at hPe
+    rcases Nat.eq_zero_or_pos e with rfl | he
+    · simp at hPe
+    · exact hP ((Ideal.pow_eq_bot he.ne').mp hPe.symm)
   rw [Submodule.map_le_iff_le_comap, IsConcreteLE.le_iff]
   simp only [Submodule.restrictScalars_mem, Submodule.mem_comap]
   rcases le_or_gt m (e * r) with hm | hm
@@ -107,13 +115,12 @@ theorem map_intTrace_pow_eq_maximalIdeal_pow (hP : P ≠ ⊥)
   -- Every step of the filtration of `A` compares with the image through the trace criterion.
   have key : ∀ r, ((P ^ m).restrictScalars A).map (Algebra.intTrace A B) ≤ maximalIdeal A ^ r ↔
       r ≤ (m + d) / e := fun r ↦ by
-    rw [map_intTrace_pow_le_pow_iff A hp hP hPe, Nat.le_div_iff_mul_le he, mul_comm]
+    rw [map_intTrace_pow_le_pow_iff A hP hPe, Nat.le_div_iff_mul_le he, mul_comm]
   have hJ : ((P ^ m).restrictScalars A).map (Algebra.intTrace A B) ≠ ⊥ := fun h ↦ by
     have := (key ((m + d) / e + 1)).mp (h.le.trans bot_le)
     omega
-  obtain ⟨ϖ, hϖ⟩ := IsDiscreteValuationRing.exists_irreducible A
-  obtain ⟨s, hs⟩ := IsDiscreteValuationRing.ideal_eq_span_pow_irreducible hJ hϖ
-  rw [← Ideal.span_singleton_pow, ← hϖ.maximalIdeal_eq] at hs
+  obtain ⟨s, hs⟩ :=
+    exists_maximalIdeal_pow_eq_of_principal A (IsPrincipalIdealRing.principal _) _ hJ
   have hanti := Ideal.pow_right_strictAnti (maximalIdeal A) hp hp'
   rw [hs] at key ⊢
   congr 1

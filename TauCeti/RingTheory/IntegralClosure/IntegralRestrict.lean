@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.RingTheory.IntegralClosure.IntegralRestrict
+import TauCeti.RingTheory.Ideal.Operations
 
 /-!
 # The integral trace on extended ideals
@@ -13,7 +14,9 @@ public import Mathlib.RingTheory.IntegralClosure.IntegralRestrict
 Mathlib's `Algebra.intTrace A B` is the trace of a finite extension of integrally closed domains
 `B / A`, restricted from the fraction fields to the rings themselves. This file records that it
 is compatible with the ideals of the base: the trace carries the extended ideal `p · B` of an
-ideal `p` of `A` back into `p`, because it is `A`-linear with values in `A`.
+ideal `p` of `A` back into `p`. This is the case of the trace of the general fact
+`LinearMap.apply_mem_of_mem_smul_top`, that an `A`-linear functional carries `p • B` into `p`,
+since `p • B` is the extended ideal `p · B`.
 
 This is the elementary half of the computation of the trace of an ideal of `B`. The other half,
 which reads the exact image off the different ideal, is in
@@ -33,16 +36,9 @@ variable [IsDomain A] [IsIntegrallyClosed A] [IsDomain B] [IsIntegrallyClosed B]
 variable [Module.Finite A B] [Module.IsTorsionFree A B]
 
 /-- The integral trace carries the extended ideal `p · B` of an ideal `p` of the base ring back
-into `p`. -/
+into `p`: it is an `A`-linear functional on `B`, and `p · B = p • B`. -/
 theorem intTrace_mem_of_mem_map {p : Ideal A} {x : B} (hx : x ∈ p.map (algebraMap A B)) :
-    intTrace A B x ∈ p := by
-  have hx' : x ∈ p • (⊤ : Submodule A B) := by
-    rw [Ideal.smul_top_eq_map]
-    exact hx
-  refine Submodule.smul_induction_on hx' (fun a ha y _ ↦ ?_) fun y z hy hz ↦ ?_
-  · rw [map_smul, smul_eq_mul]
-    exact p.mul_mem_right _ ha
-  · rw [map_add]
-    exact p.add_mem hy hz
+    intTrace A B x ∈ p :=
+  (intTrace A B).apply_mem_of_mem_smul_top (by rwa [Ideal.smul_top_eq_map])
 
 end Algebra
