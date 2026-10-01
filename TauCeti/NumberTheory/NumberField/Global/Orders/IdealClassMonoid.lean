@@ -187,7 +187,7 @@ theorem lift_mk (φ : O.nonzeroFractionalIdeals →* M) (h : O.homothetyCon ≤ 
 nonzero fractional ideals. -/
 theorem lift_unique (φ : O.nonzeroFractionalIdeals →* M) (h : O.homothetyCon ≤ Con.ker φ)
     (ψ : IdealClassMonoid O →* M) (hψ : ∀ I, ψ (mk O I) = φ I) : ψ = lift O φ h :=
-  MonoidHom.ext fun c => induction_on O c fun I => (hψ I).trans (lift_mk O φ h I).symm
+  Con.lift_unique h ψ (MonoidHom.ext hψ)
 
 end Lift
 
@@ -203,8 +203,8 @@ def multiplierRing (c : IdealClassMonoid O) : Subring K :=
 /-- The multiplier ring of the class of a nonzero fractional ideal is its multiplier ring. -/
 @[simp]
 theorem multiplierRing_mk (I : O.nonzeroFractionalIdeals) :
-    (mk O I).multiplierRing = O.multiplierRing I := by
-  rfl
+    (mk O I).multiplierRing = O.multiplierRing I :=
+  Con.liftOn_coe _ _ _ I
 
 /-- An ideal class is proper when its multiplier ring is the order, that is, when its
 representatives are proper fractional ideals. -/
@@ -239,8 +239,9 @@ def unitsMk : O.invertibleProperFractionalIdeals →* (IdealClassMonoid O)ˣ :=
 /-- The unit attached to an invertible fractional ideal is its ideal class. -/
 @[simp]
 theorem coe_unitsMk (I : O.invertibleProperFractionalIdeals) :
-    (unitsMk O I : IdealClassMonoid O) = mk O ⟨I, I.isUnit.mem_nonZeroDivisors⟩ := by
-  rfl
+    (unitsMk O I : IdealClassMonoid O) = mk O ⟨I, I.isUnit.mem_nonZeroDivisors⟩ :=
+  (Units.coe_map _ _).trans
+    (congrArg (mk O) (Subtype.ext (val_unitsNonZeroDivisorsEquiv_symm_apply_coe I)))
 
 /-- Every unit of the ideal class monoid is the class of an invertible fractional ideal. -/
 theorem unitsMk_surjective : Function.Surjective (unitsMk O) := by
