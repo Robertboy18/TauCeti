@@ -45,11 +45,13 @@ killed by every continuous crossed homomorphism for `χ` by the prescription pro
 canonical character, and the successive approximation inside `X` carries the normal-form word to
 it.
 
-The same groups are presented by Labute's words at a finite level: for every finite `f > g` the
-word `x₁^{2 + 2^g} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` presents a Demushkin group of rank
-`n ≥ 4` whose canonical character has image `U^[g]`, so by the uniqueness theorem it presents the
-same group as the level-`∞` word. The level is therefore not an invariant in this branch: it is
-free above `g = v₂(α)`.
+The same groups are presented by Labute's words at a finite level and with any exponent of the
+same valuation: for every natural `α` of exact divisibility depth `g` and every finite `f > g`,
+the word `x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` presents a Demushkin group of rank
+`n ≥ 4` whose canonical character has image `U^[g]`, and so does `x₁^{2 + α} (x₁, x₂)` in rank
+two, so by the uniqueness theorem they present the same group as the level-`∞` word with
+`α = 2^g`. Neither the exponent within its valuation nor the level above `g = v₂(α)` is an
+invariant in this branch.
 
 ## Main results
 
@@ -65,11 +67,14 @@ free above `g = v₂(α)`.
 * `TauCeti.IsDemushkin.nonempty_continuousMulEquiv_of_even_demushkinRank_of_range_eq`:
   **uniqueness**: two Demushkin groups at `p = 2` of the same even rank whose canonical characters
   have the same twisted image `U^[f]` are topologically isomorphic.
-* `TauCeti.nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_two_pow`,
-  `TauCeti.nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_two_pow_of_lt`: **the
-  level is free above `v₂(α)`**: for `n ≥ 4` even, `g ≥ 2` and finite levels `f, f' > g`, the
-  words `x₁^{2 + 2^g} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯` and `x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯` present
-  topologically isomorphic groups, and so do the levels `f` and `f'`.
+* `TauCeti.nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd`,
+  `TauCeti.nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd_of_not_dvd`,
+  `TauCeti.nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoRankTwo_of_not_dvd`: **the
+  exponent within its valuation and the level above `v₂(α)` are free**: for `n ≥ 4` even, `g ≥ 2`,
+  natural exponents `α, α'` of exact divisibility depth `g` and finite levels `f, f' > g`, the
+  words `x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯` and `x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯` present
+  topologically isomorphic groups, so do the pairs `(α, f)` and `(α', f')`, and in rank two so do
+  `x₁^{2 + α} (x₁, x₂)` and `x₁^{2 + 2^g} (x₁, x₂)`.
 
 ## References
 
@@ -337,45 +342,77 @@ theorem IsDemushkin.nonempty_continuousMulEquiv_of_even_demushkinRank_of_range_e
   rw [hn] at e
   exact ⟨e.trans e'.symm⟩
 
-/-! ### The level above `v₂(α)`
+/-! ### The exponent within its valuation and the level above `v₂(α)`
 
-In the even-rank dyadic word `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` with `α = 2^g`,
-`g ≥ 2`, every finite level `f > g` presents the group of the level-`∞` word
-`x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`: both are Demushkin groups of rank `n` whose
-canonical characters have image `U^[g]`, so the uniqueness theorem identifies them. -/
+In the even-rank dyadic word `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` with a natural
+exponent `α` of exact divisibility depth `g ≥ 2`, that is `2^g ∣ α` and `2^{g+1} ∤ α`, every finite
+level `f > g` presents the group of the level-`∞` word with `α = 2^g`,
+`x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`, and so does the rank-two word `x₁^{2+α} (x₁, x₂)`:
+all are Demushkin groups of rank `n` whose canonical characters have image `U^[g]`, so the
+uniqueness theorem identifies them. -/
 
-/-- **The level above `v₂(α)` is free** (corollary to Labute, Theorems 4 and 5). For `n ≥ 4` even,
-`g ≥ 2` and a finite level `f > g`, the pro-`2` group presented on `n` generators by
-`x₁^{2 + 2^g} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` is topologically isomorphic to the one
+/-- **The exponent within its valuation and the level above it are free** (corollary to Labute,
+Theorems 4 and 5). For `n ≥ 4` even, a natural exponent `α` of exact divisibility depth `g ≥ 2` and
+a finite level `f > g`, the pro-`2` group presented on `n` generators by
+`x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` is topologically isomorphic to the one
 presented by `x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`: both are Demushkin groups of rank
 `n` whose canonical characters have image the twisted subgroup `U^[g]`. -/
-theorem nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_two_pow (hn : Even n)
-    (hn₃ : 3 < n) {g f : ℕ} (hg : 2 ≤ g) (hgf : g < f) :
-    Nonempty (presentedProP 2 (Fin n) {demushkinWordTwoEven (2 ^ g) f n (freeProPGen 2 n)} ≃ₜ*
+theorem nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd (hn : Even n)
+    (hn₃ : 3 < n) {a g f : ℕ} (hg : 2 ≤ g) (hag : 2 ^ g ∣ a) (hag' : ¬ 2 ^ (g + 1) ∣ a)
+    (hgf : g < f) :
+    Nonempty (presentedProP 2 (Fin n) {demushkinWordTwoEven a f n (freeProPGen 2 n)} ≃ₜ*
       presentedProP 2 (Fin n) {demushkinWordNeTwo (2 + 2 ^ g) n (freeProPGen 2 n)}) := by
   obtain ⟨w, hw⟩ := exists_val_eq_neg_one_add_two_pow (by omega : 1 ≤ g)
-  have ha : 2 ∣ 2 ^ g := dvd_pow_self 2 (by omega)
+  have ha : 2 ∣ a := (dvd_pow_self 2 (by omega : g ≠ 0)).trans hag
   have hH := isDemushkin_presentedProP_demushkinWordTwoEven hn (by omega) ha (by omega : 0 < f)
   have hrank := demushkinRank_presentedProP_demushkinWordTwoEven ha (by omega) hH
   obtain ⟨e⟩ := hH.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_range_eq
     (by rw [hrank]; exact hn) hg hw
-    (range_demushkinCharacter_eq_of_equiv_demushkinWordTwoEven_two_pow hH hg hgf hn hn₃ hw
-      (ContinuousMulEquiv.refl _))
+    (range_demushkinCharacter_eq_of_equiv_demushkinWordTwoEven_of_not_dvd hH hg
+      (by exact_mod_cast (PadicInt.pow_p_dvd_natCast_iff g a).mpr hag)
+      (fun h ↦ hag' ((PadicInt.pow_p_dvd_natCast_iff (g + 1) a).mp (by exact_mod_cast h)))
+      hgf hn hn₃ hw (ContinuousMulEquiv.refl _))
   rw [hrank] at e
   exact ⟨e⟩
 
-/-- **Two finite levels above `v₂(α)` present the same group.** For `n ≥ 4` even, `g ≥ 2` and
-finite levels `f, f' > g`, the words `x₁^{2 + 2^g} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` and
-`x₁^{2 + 2^g} (x₁, x₂) x₃^{2^{f'}} (x₃, x₄) ⋯ (x_{n-1}, x_n)` present topologically isomorphic
+/-- **Two exponents of the same valuation and two finite levels above it present the same
+group.** For `n ≥ 4` even, natural exponents `α, α'` of exact divisibility depth `g ≥ 2` and finite
+levels `f, f' > g`, the words `x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` and
+`x₁^{2 + α'} (x₁, x₂) x₃^{2^{f'}} (x₃, x₄) ⋯ (x_{n-1}, x_n)` present topologically isomorphic
 pro-`2` groups. -/
-theorem nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_two_pow_of_lt (hn : Even n)
-    (hn₃ : 3 < n) {g f f' : ℕ} (hg : 2 ≤ g) (hgf : g < f) (hgf' : g < f') :
-    Nonempty (presentedProP 2 (Fin n) {demushkinWordTwoEven (2 ^ g) f n (freeProPGen 2 n)} ≃ₜ*
-      presentedProP 2 (Fin n) {demushkinWordTwoEven (2 ^ g) f' n (freeProPGen 2 n)}) := by
+theorem nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd_of_not_dvd
+    (hn : Even n) (hn₃ : 3 < n) {a a' g f f' : ℕ} (hg : 2 ≤ g) (hag : 2 ^ g ∣ a)
+    (hag' : ¬ 2 ^ (g + 1) ∣ a) (hgf : g < f) (hag₁ : 2 ^ g ∣ a') (hag₁' : ¬ 2 ^ (g + 1) ∣ a')
+    (hgf' : g < f') :
+    Nonempty (presentedProP 2 (Fin n) {demushkinWordTwoEven a f n (freeProPGen 2 n)} ≃ₜ*
+      presentedProP 2 (Fin n) {demushkinWordTwoEven a' f' n (freeProPGen 2 n)}) := by
   obtain ⟨e⟩ :=
-    nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_two_pow hn hn₃ hg hgf
+    nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd hn hn₃ hg hag hag' hgf
   obtain ⟨e'⟩ :=
-    nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_two_pow hn hn₃ hg hgf'
+    nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd hn hn₃ hg hag₁ hag₁'
+      hgf'
   exact ⟨e.trans e'.symm⟩
+
+/-- **The exponent within its valuation is free in rank two** (corollary to Labute, Theorems 4
+and 5). For a natural exponent `α` of exact divisibility depth `g ≥ 2`, the pro-`2` group presented
+on two generators by `x₁^{2 + α} (x₁, x₂)` is topologically isomorphic to the one presented by
+`x₁^{2 + 2^g} (x₁, x₂)`: both are Demushkin groups of rank `2` whose canonical characters have
+image the twisted subgroup `U^[g]`. -/
+theorem nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoRankTwo_of_not_dvd {a g : ℕ}
+    (hg : 2 ≤ g) (hag : 2 ^ g ∣ a) (hag' : ¬ 2 ^ (g + 1) ∣ a) :
+    Nonempty (presentedProP 2 (Fin 2) {demushkinWordTwoRankTwo a (freeProPGen 2 2)} ≃ₜ*
+      presentedProP 2 (Fin 2) {demushkinWordNeTwo (2 + 2 ^ g) 2 (freeProPGen 2 2)}) := by
+  obtain ⟨w, hw⟩ := exists_val_eq_neg_one_add_two_pow (by omega : 1 ≤ g)
+  have ha : 2 ∣ a := (dvd_pow_self 2 (by omega : g ≠ 0)).trans hag
+  have hH := isDemushkin_presentedProP_demushkinWordTwoRankTwo ha
+  have hrank := demushkinRank_presentedProP_demushkinWordTwoRankTwo ha hH
+  obtain ⟨e⟩ := hH.exists_continuousMulEquiv_presentedProP_demushkinWordNeTwo_of_range_eq
+    (by rw [hrank]; exact even_two) hg hw
+    (range_demushkinCharacter_eq_of_equiv_demushkinWordTwoRankTwo_of_not_dvd hH hg
+      (by exact_mod_cast (PadicInt.pow_p_dvd_natCast_iff g a).mpr hag)
+      (fun h ↦ hag' ((PadicInt.pow_p_dvd_natCast_iff (g + 1) a).mp (by exact_mod_cast h)))
+      hw (ContinuousMulEquiv.refl _))
+  rw [hrank] at e
+  exact ⟨e⟩
 
 end TauCeti
