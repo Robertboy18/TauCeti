@@ -68,7 +68,6 @@ theorem continuous_unitClosedBallMap (f : E →ₗᵢ[R] F) : Continuous f.unitC
 
 /-- The restriction of a linear isometry to the closed unit balls maps a point to the unit sphere
 exactly when the point lies on the unit sphere. -/
-@[simp]
 theorem norm_unitClosedBallMap_eq_one_iff (f : E →ₗᵢ[R] F) (x : closedBall (0 : E) 1) :
     ‖(f.unitClosedBallMap x : F)‖ = 1 ↔ ‖(x : E)‖ = 1 := by
   simp
