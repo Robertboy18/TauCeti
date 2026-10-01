@@ -172,12 +172,9 @@ private theorem dualityMap_devissage (M : Type u) [AddCommGroup M] [TopologicalS
       { e₀.toAddMonoidHom with
         map_smul' := fun g a ↦ by rw [MonoidHom.id_apply, htrivA g a, htriv g] }
     have he : Function.Bijective e := e₀.bijective
-    exact ⟨(dualityMap0_bijective_of_bijective (ZModModule.char_nsmul_eq_zero p) he
-        (hG.dualityMap0_zmod_bijective htriv)).2,
-      dualityMap1_bijective_of_bijective (ZModModule.char_nsmul_eq_zero p) he
-        (hG.dualityMap1_zmod_bijective htriv),
-      (dualityMap2_bijective_of_bijective (ZModModule.char_nsmul_eq_zero p) he
-        (dualityMap2_zmod_bijective htriv)).1⟩
+    exact ⟨(dualityMap0_bijective_of_bijective he (hG.dualityMap0_zmod_bijective htriv)).2,
+      dualityMap1_bijective_of_bijective he (hG.dualityMap1_zmod_bijective htriv),
+      (dualityMap2_bijective_of_bijective he (dualityMap2_zmod_bijective htriv)).1⟩
   · -- the extension step: the four lemmas along `0 → A → B → C → 0`
     obtain ⟨h₀A, h₁A, h₂A⟩ := hA (S.nsmul_eq_zero_left hB)
     obtain ⟨h₀C, h₁C, h₂C⟩ := hC (S.nsmul_eq_zero_right hB)
