@@ -28,18 +28,15 @@ The argument reduces to the duality at `𝔽_p` coefficients
 Multiplication by `pⁱ⁻¹` is an injective `G`-map `I(χ)/p →+[G] I(χ)/pⁱ` whose range is the
 `p`-torsion of `I(χ)/pⁱ`, and the induced map `H²(G, I(χ)/p) → H²(G, I(χ)/pⁱ)` is injective, by the
 prescription property of `χ`, with range the `p`-torsion of the cyclic group `H²(G, I(χ)/pⁱ)`, by
-counting. On a module `M` killed by `p`, the internal homs `Hom(M, I(χ)/p)` and `Hom(M, I(χ)/pⁱ)`
-are therefore identified, and every homomorphism from the `p`-torsion group
-`H²⁻ʲ(G, Hom(M, I(χ)/p))` to `H²(G, I(χ)/pⁱ)` factors through `H²(G, I(χ)/p)`; so each `αⱼ` at
-level `pⁱ` is the one at level
-`p` read through these identifications (`TauCeti.ContCohomology.explicitCoeff2_dualityMap0` and its
-companions). Finally `I(χ)/p` is `𝔽_p` with trivial action, because a pro-`p` group acts trivially
-on it.
+counting (`TauCeti.IsDemushkin.exists_explicitCoeff2_mulPow_eq_of_nsmul_eq_zero`). On a module `M`
+killed by `p`, the internal homs `Hom(M, I(χ)/p)` and `Hom(M, I(χ)/pⁱ)` are therefore identified,
+and every homomorphism from the `p`-torsion group `H²⁻ʲ(G, Hom(M, I(χ)/p))` to `H²(G, I(χ)/pⁱ)`
+factors through `H²(G, I(χ)/p)`; so each `αⱼ` at level `pⁱ` is the one at level `p` read through
+these identifications (`TauCeti.ContCohomology.explicitCoeff2_dualityMap0` and its companions).
+Finally `I(χ)/p` is `𝔽_p` with trivial action, because a pro-`p` group acts trivially on it.
 
 ## Main results
 
-* `TauCeti.IsDemushkin.exists_explicitCoeff2_mulPow_eq_of_nsmul_eq_zero`: the `pⁱ`-torsion of
-  `H²(G, I(χ)/pⁱ⁺ʲ)` is the image of `H²(G, I(χ)/pⁱ)` under multiplication by `pʲ`.
 * `TauCeti.IsDemushkin.dualityMap0_zModTwist_bijective`,
   `TauCeti.IsDemushkin.dualityMap1_zModTwist_bijective`,
   `TauCeti.IsDemushkin.dualityMap2_zModTwist_bijective`: for an infinite Demushkin group, `i ≥ 1`
@@ -72,41 +69,6 @@ variable {p : ℕ} [Fact p.Prime] {G : Type u} [Group G] [TopologicalSpace G] [I
 namespace IsDemushkin
 
 include hG
-
-/-- **The `pⁱ`-torsion of `H²(G, I(χ)/pⁿ)` is the image of `H²(G, I(χ)/pⁱ)`**, for `i + j = n` and
-an infinite Demushkin group `G` with canonical character `χ`: multiplication by `pʲ` is injective on
-`H²` by the prescription property, its image lies in the `pⁱ`-torsion, and the `pⁱ`-torsion of the
-cyclic group `H²(G, I(χ)/pⁿ)` has at most `pⁱ` elements. -/
-theorem exists_explicitCoeff2_mulPow_eq_of_nsmul_eq_zero {i j n : ℕ} (h : i + j = n)
-    {y : H2 G (ZModTwist (demushkinCharacter hG) n)} (hy : p ^ i • y = 0) :
-    ∃ x, explicitCoeff2 G (ZModTwist (demushkinCharacter hG) i)
-      (ZModTwist.mulPow (demushkinCharacter hG) h) continuous_of_discreteTopology x = y := by
-  classical
-  have hp : p.Prime := Fact.out
-  set F := explicitCoeff2 G (ZModTwist (demushkinCharacter hG) i)
-    (ZModTwist.mulPow (demushkinCharacter hG) h) continuous_of_discreteTopology
-  have hinj : Function.Injective F :=
-    (hasPrescriptionProperty_demushkinCharacter hG).injective_explicitCoeff2_mulPow h
-  have : Finite (H2 G (ZModTwist (demushkinCharacter hG) n)) :=
-    Nat.finite_of_card_ne_zero ((hG.natCard_H2_zModTwist_demushkinCharacter n).trans_ne
-      (pow_ne_zero n hp.ne_zero))
-  have := hG.isAddCyclic_H2_zModTwist_demushkinCharacter n
-  let := Fintype.ofFinite (H2 G (ZModTwist (demushkinCharacter hG) n))
-  -- the image of `F` lies in the `pⁱ`-torsion `T`, which has at most `pⁱ` elements
-  set T : Finset (H2 G (ZModTwist (demushkinCharacter hG) n)) := {z | p ^ i • z = 0} with hT
-  have hsub : Set.range F ⊆ ↑T := by
-    rintro _ ⟨x, rfl⟩
-    simp only [hT, Finset.coe_filter, Finset.mem_univ, true_and, Set.mem_ofPred_eq]
-    rw [← map_nsmul, nsmul_H2_eq_zero (ZModTwist.pow_nsmul_eq_zero _ i), map_zero]
-  have hcard : (T : Set (H2 G (ZModTwist (demushkinCharacter hG) n))).ncard ≤
-      (Set.range F).ncard := by
-    rw [Set.ncard_coe_finset, Set.ncard_range_of_injective hinj,
-      hG.natCard_H2_zModTwist_demushkinCharacter i]
-    exact IsAddCyclic.card_nsmul_eq_zero_le (pow_pos hp.pos i)
-  have hy' : y ∈ Set.range F := by
-    rw [Set.eq_of_subset_of_ncard_le hsub hcard]
-    simpa [hT] using hy
-  exact hy'
 
 variable {i : ℕ} (hi : 0 < i)
 include hi

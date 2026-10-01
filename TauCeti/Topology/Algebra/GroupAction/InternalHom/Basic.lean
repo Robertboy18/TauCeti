@@ -634,13 +634,11 @@ theorem postcomp_bijective_of_forall_nsmul_eq_zero {f : N →+[G] N'} (hf : Func
       simpa only [AddMonoidHom.compHom_apply_apply, toAddMonoidHom_postcomp] using hφ)⟩
 
 /-- Postcomposition with a bijection is bijective: `Hom(M, -)` takes isomorphisms to isomorphisms.
-The inverse is postcomposition with the inverse bijection. -/
+This is the case `n = 0` of `postcomp_bijective_of_forall_nsmul_eq_zero`. -/
 theorem postcomp_bijective {f : N →+[G] N'} (hf : Function.Bijective f) :
     Function.Bijective (postcomp G f (M := M)) :=
-  ⟨postcomp_injective hf.1, fun ψ =>
-    ⟨of G ((AddEquiv.ofBijective (f : N →+ N') hf).symm.toAddMonoidHom.comp ψ.toAddMonoidHom),
-      InternalHom.ext (AddMonoidHom.ext fun m =>
-        (AddEquiv.ofBijective (f : N →+ N') hf).apply_symm_apply (ψ.toAddMonoidHom m))⟩⟩
+  postcomp_bijective_of_forall_nsmul_eq_zero hf.1 (n := 0) (fun x => zero_nsmul x)
+    fun y _ => hf.2 y
 
 end Postcomp
 
