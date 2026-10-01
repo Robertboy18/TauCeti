@@ -53,10 +53,11 @@ slice.
 * `TauCeti.IsSmoothSliceDisc K Φ`: `Φ` is a smooth slice disc for `K`.
 * `TauCeti.IsSmoothlySlice K`: `K` bounds a smooth slice disc.
 
-Sliceness is a property of the oriented knot rather than of its parametrization, and does not
-depend on the orientation either: rotating the parametrization or reversing it reparametrizes the
-slice disc by the corresponding linear isometry of the plane, which is a diffeomorphism of the disc
-(`LinearIsometryEquiv.unitClosedBallDiffeomorph`).
+Sliceness is invariant under the two canonical reparametrizations of the circle, rotation and
+reversal: each reparametrizes the slice disc by the corresponding linear isometry of the plane,
+which is a diffeomorphism of the disc (`LinearIsometryEquiv.unitClosedBallDiffeomorph`). In
+particular sliceness does not depend on the orientation of the knot. Invariance under arbitrary
+diffeomorphisms of the circle is not proved here.
 
 ## Main results
 
@@ -180,7 +181,7 @@ theorem comp_unitClosedBallMap (h : IsSmoothSliceDisc K Φ) (e : ℂ ≃ₗᵢ[�
 
 end IsSmoothSliceDisc
 
-/-! ### Invariance under reparametrization -/
+/-! ### Invariance under rotation and reversal -/
 
 /-- Rotating the parametrization of a smoothly slice knot gives a smoothly slice knot. -/
 theorem IsSmoothlySlice.rotate (h : IsSmoothlySlice K) (a : Circle) :

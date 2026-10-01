@@ -25,7 +25,7 @@ embedding of closed balls induced by a linear isometry, the flat disc that a gre
 ## Main results
 
 * `LinearIsometry.isometry_unitClosedBallMap`, `LinearIsometry.isEmbedding_unitClosedBallMap`:
-  the restriction is an isometry, hence a topological embedding.
+  the restriction is an isometry, hence (for a normed source) a topological embedding.
 * `LinearIsometry.norm_unitClosedBallMap_eq_one_iff`: the restriction maps a point to the unit
   sphere exactly when the point lies on the unit sphere.
 -/
@@ -36,17 +36,14 @@ open Metric
 
 namespace LinearIsometry
 
-variable {R E F : Type*} [Semiring R] [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [Module R E] [Module R F]
+section Seminormed
 
-/-- A linear isometry maps the closed unit ball into the closed unit ball. -/
-theorem map_mem_closedBall_zero_one (f : E →ₗᵢ[R] F) {x : E} (hx : x ∈ closedBall (0 : E) 1) :
-    f x ∈ closedBall (0 : F) 1 := by
-  simpa using hx
+variable {R E F : Type*} [Semiring R] [SeminormedAddCommGroup E] [SeminormedAddCommGroup F]
+  [Module R E] [Module R F]
 
 /-- The restriction of a linear isometry to the closed unit balls. -/
 def unitClosedBallMap (f : E →ₗᵢ[R] F) (x : closedBall (0 : E) 1) : closedBall (0 : F) 1 :=
-  ⟨f x, f.map_mem_closedBall_zero_one x.2⟩
+  ⟨f x, f.map_zero ▸ f.isometry.mapsTo_closedBall 0 1 x.2⟩
 
 @[simp]
 theorem coe_unitClosedBallMap_apply (f : E →ₗᵢ[R] F) (x : closedBall (0 : E) 1) :
@@ -57,19 +54,28 @@ theorem coe_unitClosedBallMap_apply (f : E →ₗᵢ[R] F) (x : closedBall (0 : 
 theorem isometry_unitClosedBallMap (f : E →ₗᵢ[R] F) : Isometry f.unitClosedBallMap :=
   Isometry.of_dist_eq fun x y => by simp [Subtype.dist_eq]
 
-/-- The restriction of a linear isometry to the closed unit balls is a topological embedding. -/
-theorem isEmbedding_unitClosedBallMap (f : E →ₗᵢ[R] F) :
-    Topology.IsEmbedding f.unitClosedBallMap := by
-  exact f.isometry_unitClosedBallMap.isEmbedding
-
 /-- The restriction of a linear isometry to the closed unit balls is continuous. -/
 theorem continuous_unitClosedBallMap (f : E →ₗᵢ[R] F) : Continuous f.unitClosedBallMap :=
-  f.isEmbedding_unitClosedBallMap.continuous
+  f.isometry_unitClosedBallMap.continuous
 
 /-- The restriction of a linear isometry to the closed unit balls maps a point to the unit sphere
 exactly when the point lies on the unit sphere. -/
 theorem norm_unitClosedBallMap_eq_one_iff (f : E →ₗᵢ[R] F) (x : closedBall (0 : E) 1) :
     ‖(f.unitClosedBallMap x : F)‖ = 1 ↔ ‖(x : E)‖ = 1 := by
   simp
+
+end Seminormed
+
+section Normed
+
+variable {R E F : Type*} [Semiring R] [NormedAddCommGroup E] [SeminormedAddCommGroup F]
+  [Module R E] [Module R F]
+
+/-- The restriction of a linear isometry to the closed unit balls is a topological embedding. -/
+theorem isEmbedding_unitClosedBallMap (f : E →ₗᵢ[R] F) :
+    Topology.IsEmbedding f.unitClosedBallMap :=
+  f.isometry_unitClosedBallMap.isEmbedding
+
+end Normed
 
 end LinearIsometry

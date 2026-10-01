@@ -28,7 +28,8 @@ This file develops that restriction independently of the manifold structure on s
 ## Main results
 
 * `LinearIsometry.isometry_unitSphereMap`, `LinearIsometry.isEmbedding_unitSphereMap`: the
-  restriction of a linear isometry is an isometry, hence a topological embedding.
+  restriction of a linear isometry is an isometry, hence (for a normed source) a topological
+  embedding.
 * `LinearIsometryEquiv.isometry_unitSphereEquiv`: the restriction is an isometry.
 * `TauCeti.LinearMap.eq_of_eqOn_unitSphere`: a real linear map is determined by its
   values on the unit sphere.
@@ -47,18 +48,15 @@ open Metric Module
 
 namespace LinearIsometry
 
-variable {R E F : Type*} [Semiring R]
-variable [NormedAddCommGroup E] [NormedAddCommGroup F]
-variable [Module R E] [Module R F]
+section Seminormed
 
-/-- A linear isometry maps unit vectors to unit vectors. -/
-theorem map_mem_unitSphere (f : E →ₗᵢ[R] F) {x : E} (hx : x ∈ sphere (0 : E) 1) :
-    f x ∈ sphere (0 : F) 1 := by
-  simpa using hx
+variable {R E F : Type*} [Semiring R]
+variable [SeminormedAddCommGroup E] [SeminormedAddCommGroup F]
+variable [Module R E] [Module R F]
 
 /-- A linear isometry restricts to a map of the corresponding unit spheres. -/
 def unitSphereMap (f : E →ₗᵢ[R] F) (x : sphere (0 : E) 1) : sphere (0 : F) 1 :=
-  ⟨f x, f.map_mem_unitSphere x.2⟩
+  ⟨f x, f.map_zero ▸ f.isometry.mapsTo_sphere 0 1 x.2⟩
 
 @[simp]
 theorem coe_unitSphereMap_apply (f : E →ₗᵢ[R] F) (x : sphere (0 : E) 1) :
@@ -69,19 +67,29 @@ theorem coe_unitSphereMap_apply (f : E →ₗᵢ[R] F) (x : sphere (0 : E) 1) :
 theorem isometry_unitSphereMap (f : E →ₗᵢ[R] F) : Isometry f.unitSphereMap :=
   Isometry.of_dist_eq fun x y => by simp [Subtype.dist_eq]
 
-/-- The restriction of a linear isometry to the unit spheres is a topological embedding. -/
-theorem isEmbedding_unitSphereMap (f : E →ₗᵢ[R] F) : Topology.IsEmbedding f.unitSphereMap := by
-  exact f.isometry_unitSphereMap.isEmbedding
-
 /-- The restriction of a linear isometry to the unit spheres is continuous. -/
 theorem continuous_unitSphereMap (f : E →ₗᵢ[R] F) : Continuous f.unitSphereMap :=
-  f.isEmbedding_unitSphereMap.continuous
+  f.isometry_unitSphereMap.continuous
 
 /-- The restriction of a linear isometry to the unit spheres commutes with the antipodal map. -/
 @[simp]
 theorem unitSphereMap_neg (f : E →ₗᵢ[R] F) (x : sphere (0 : E) 1) :
     f.unitSphereMap (-x) = -f.unitSphereMap x :=
   Subtype.ext <| by simp
+
+end Seminormed
+
+section Normed
+
+variable {R E F : Type*} [Semiring R]
+variable [NormedAddCommGroup E] [SeminormedAddCommGroup F]
+variable [Module R E] [Module R F]
+
+/-- The restriction of a linear isometry to the unit spheres is a topological embedding. -/
+theorem isEmbedding_unitSphereMap (f : E →ₗᵢ[R] F) : Topology.IsEmbedding f.unitSphereMap :=
+  f.isometry_unitSphereMap.isEmbedding
+
+end Normed
 
 end LinearIsometry
 
