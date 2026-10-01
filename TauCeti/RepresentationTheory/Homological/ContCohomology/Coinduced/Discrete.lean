@@ -156,8 +156,8 @@ theorem coe_neg (f : DiscreteCoind G U A) : ⇑(-f) = -⇑f := rfl
 @[simp]
 theorem coe_sub (f f' : DiscreteCoind G U A) : ⇑(f - f') = ⇑f - ⇑f' := rfl
 
-@[simp]
-theorem coe_nsmul (k : ℕ) (f : DiscreteCoind G U A) : ⇑(k • f) = k • ⇑f := rfl
+/-- The `ℕ`-action is pointwise, so that Mathlib's `FunLike.coe_smul` and `smul_apply` apply. -/
+instance : IsSMulApply ℕ (DiscreteCoind G U A) G A where
 
 section Scalar
 

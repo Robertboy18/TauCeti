@@ -101,7 +101,7 @@ theorem subsingleton_continuousCohomology_succ_of_forall_coeffMap_proj_surjectiv
   -- the three modules of the sequence are finite and killed by `p`
   have hBp : ∀ f : DiscreteCoind G V.toSubgroup M, p • f = 0 := fun f =>
     DiscreteCoind.ext fun y => by
-      rw [DiscreteCoind.coe_nsmul, Pi.smul_apply, hM, DiscreteCoind.coe_zero, Pi.zero_apply]
+      rw [FunLike.coe_smul, Pi.smul_apply, hM, DiscreteCoind.coe_zero, Pi.zero_apply]
   have hNp : ∀ a : N, p • a = 0 := fun a =>
     Subtype.ext ((AddSubmonoidClass.coe_nsmul a p).trans (hBp a))
   have hQp : ∀ c : DiscreteCoind G V.toSubgroup M ⧸ N, p • c = 0 := fun c =>
