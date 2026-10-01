@@ -199,10 +199,6 @@ theorem toChainComplex_d {X : C} (r : FiniteResolution E P X) (n : ℕ) :
     r.toChainComplex.d (n + 1) n = r.d n :=
   ChainComplex.of_d _ _ n
 
-@[simp] theorem toChainComplex_d_one_zero {X : C} (r : FiniteResolution E P X) :
-    r.toChainComplex.d 1 0 = r.d 0 :=
-  ChainComplex.of_d _ _ 0
-
 end FiniteResolution
 
 end ExactStructure

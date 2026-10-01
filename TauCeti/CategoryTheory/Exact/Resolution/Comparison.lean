@@ -187,7 +187,7 @@ noncomputable def liftHomotopyZero (hP : P ≤ E.isProjective) {X Y : C} {r : Fi
     (hφ : φ.f 0 ≫ r'.aug = 0) : Homotopy φ 0 :=
   let H := liftHomotopyZeroAux hP r r' (fun n => φ.f n)
     (fun n => by simpa using φ.comm (n + 1) n) hφ
-  Homotopy.mkChainComplex φ H.1 (by rw [toChainComplex_d_one_zero]; exact H.2.1) fun n => by
+  Homotopy.mkChainComplex φ H.1 (by rw [toChainComplex_d]; exact H.2.1) fun n => by
     rw [toChainComplex_d, toChainComplex_d]
     exact H.2.2 n
 
