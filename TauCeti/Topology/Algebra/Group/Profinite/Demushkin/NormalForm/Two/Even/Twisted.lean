@@ -46,12 +46,14 @@ canonical character, and the successive approximation inside `X` carries the nor
 it.
 
 The same groups are presented by Labute's words at a finite level and with any exponent of the
-same valuation: for every natural `α` of exact divisibility depth `g` and every finite `f > g`,
-the word `x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` presents a Demushkin group of rank
-`n ≥ 4` whose canonical character has image `U^[g]`, and so does `x₁^{2 + α} (x₁, x₂)` in rank
-two, so by the uniqueness theorem they present the same group as the level-`∞` word with
-`α = 2^g`. Neither the exponent within its valuation nor the level above `g = v₂(α)` is an
-invariant in this branch.
+same valuation, rank by rank. For every natural `α` of exact divisibility depth `g` and every
+finite `f > g`, the word `x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` presents a
+Demushkin group of rank `n ≥ 4` whose canonical character has image `U^[g]`, so by the uniqueness
+theorem it presents the same group as the rank-`n` level-`∞` word
+`x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`. In rank two the word `x₁^{2 + α} (x₁, x₂)`
+presents a Demushkin group of rank `2` with the same image, hence the same group as the rank-two
+word `x₁^{2 + 2^g} (x₁, x₂)`. Neither the exponent within its valuation nor the level above
+`g = v₂(α)` is an invariant in this branch.
 
 ## Main results
 
@@ -68,12 +70,11 @@ invariant in this branch.
   **uniqueness**: two Demushkin groups at `p = 2` of the same even rank whose canonical characters
   have the same twisted image `U^[f]` are topologically isomorphic.
 * `TauCeti.nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd`,
-  `TauCeti.nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd_of_not_dvd`,
   `TauCeti.nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoRankTwo_of_not_dvd`: **the
   exponent within its valuation and the level above `v₂(α)` are free**: for `n ≥ 4` even, `g ≥ 2`,
-  natural exponents `α, α'` of exact divisibility depth `g` and finite levels `f, f' > g`, the
-  words `x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯` and `x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯` present
-  topologically isomorphic groups, so do the pairs `(α, f)` and `(α', f')`, and in rank two so do
+  a natural exponent `α` of exact divisibility depth `g` and a finite level `f > g`, the
+  `n`-generator words `x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯` and
+  `x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯` present topologically isomorphic groups, and in rank two so do
   `x₁^{2 + α} (x₁, x₂)` and `x₁^{2 + 2^g} (x₁, x₂)`.
 
 ## References
@@ -344,12 +345,13 @@ theorem IsDemushkin.nonempty_continuousMulEquiv_of_even_demushkinRank_of_range_e
 
 /-! ### The exponent within its valuation and the level above `v₂(α)`
 
-In the even-rank dyadic word `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` with a natural
-exponent `α` of exact divisibility depth `g ≥ 2`, that is `2^g ∣ α` and `2^{g+1} ∤ α`, every finite
-level `f > g` presents the group of the level-`∞` word with `α = 2^g`,
-`x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`, and so does the rank-two word `x₁^{2+α} (x₁, x₂)`:
-all are Demushkin groups of rank `n` whose canonical characters have image `U^[g]`, so the
-uniqueness theorem identifies them. -/
+In the even-rank dyadic word `x₁^{2+α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` on `n ≥ 4`
+generators with a natural exponent `α` of exact divisibility depth `g ≥ 2`, that is `2^g ∣ α` and
+`2^{g+1} ∤ α`, every finite level `f > g` presents the group of the rank-`n` level-`∞` word with
+`α = 2^g`, `x₁^{2 + 2^g} (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`: both are Demushkin groups of rank `n`
+whose canonical characters have image `U^[g]`, so the uniqueness theorem identifies them. In rank
+two the word `x₁^{2+α} (x₁, x₂)` likewise presents the group of the rank-two word
+`x₁^{2 + 2^g} (x₁, x₂)`, both Demushkin groups of rank `2` with image `U^[g]`. -/
 
 /-- **The exponent within its valuation and the level above it are free** (corollary to Labute,
 Theorems 4 and 5). For `n ≥ 4` even, a natural exponent `α` of exact divisibility depth `g ≥ 2` and
@@ -374,24 +376,6 @@ theorem nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dv
       hgf hn hn₃ hw (ContinuousMulEquiv.refl _))
   rw [hrank] at e
   exact ⟨e⟩
-
-/-- **Two exponents of the same valuation and two finite levels above it present the same
-group.** For `n ≥ 4` even, natural exponents `α, α'` of exact divisibility depth `g ≥ 2` and finite
-levels `f, f' > g`, the words `x₁^{2 + α} (x₁, x₂) x₃^{2^f} (x₃, x₄) ⋯ (x_{n-1}, x_n)` and
-`x₁^{2 + α'} (x₁, x₂) x₃^{2^{f'}} (x₃, x₄) ⋯ (x_{n-1}, x_n)` present topologically isomorphic
-pro-`2` groups. -/
-theorem nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd_of_not_dvd
-    (hn : Even n) (hn₃ : 3 < n) {a a' g f f' : ℕ} (hg : 2 ≤ g) (hag : 2 ^ g ∣ a)
-    (hag' : ¬ 2 ^ (g + 1) ∣ a) (hgf : g < f) (hag₁ : 2 ^ g ∣ a') (hag₁' : ¬ 2 ^ (g + 1) ∣ a')
-    (hgf' : g < f') :
-    Nonempty (presentedProP 2 (Fin n) {demushkinWordTwoEven a f n (freeProPGen 2 n)} ≃ₜ*
-      presentedProP 2 (Fin n) {demushkinWordTwoEven a' f' n (freeProPGen 2 n)}) := by
-  obtain ⟨e⟩ :=
-    nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd hn hn₃ hg hag hag' hgf
-  obtain ⟨e'⟩ :=
-    nonempty_continuousMulEquiv_presentedProP_demushkinWordTwoEven_of_not_dvd hn hn₃ hg hag₁ hag₁'
-      hgf'
-  exact ⟨e.trans e'.symm⟩
 
 /-- **The exponent within its valuation is free in rank two** (corollary to Labute, Theorems 4
 and 5). For a natural exponent `α` of exact divisibility depth `g ≥ 2`, the pro-`2` group presented

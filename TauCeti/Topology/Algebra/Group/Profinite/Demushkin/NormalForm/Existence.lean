@@ -75,7 +75,8 @@ Theorem 1 through the dyadic normal forms and is not proved here.
   `TauCeti.range_eq_of_hasPrescriptionProperty_demushkinWordTwoRankTwo_of_not_dvd`: the image of
   the canonical character of each normal form, as the image of any character with the prescription
   property; the last two are the twisted subgroups `U^[g]` of the words whose exponent `α` has
-  exact divisibility depth `g` below the level.
+  exact divisibility depth `g`, below the level `f` in the even-rank word on `n ≥ 4` generators
+  and with no level condition in rank two.
 * `TauCeti.exists_isDemushkin_range_eq_bot_of_even`,
   `TauCeti.exists_isDemushkin_range_eq_unitsPrincipal_of_even`,
   `TauCeti.exists_isDemushkin_range_eq_zpowers_neg_one_of_even`,
