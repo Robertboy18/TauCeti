@@ -13,7 +13,8 @@ public import TauCeti.Algebra.Homology.HomologicalComplex
 /-!
 # Constructions on chain homotopies
 
-Two constructions producing new chain homotopies from old ones.
+Three constructions of chain homotopies: two produce new homotopies from old ones, and the
+third assembles a null-homotopy from components given all at once.
 
 `Homotopy.descCokernel` descends a homotopy along a degreewise cokernel.  Let `p : L ⟶ M` exhibit
 `M` in each degree as the cokernel of `u : K ⟶ L`, and let `p' : L' ⟶ M'` be any morphism of
