@@ -278,6 +278,15 @@ theorem gradedFunctional_gradedPowIterBracket (m : ℕ) (g h : G) :
 
 end IsCrossedHom
 
+/-- **A continuous crossed homomorphism of a pro-`p` group vanishes modulo `p` on the Frattini
+subgroup.** For a continuous character `χ : G → ℤ_pˣ` of a pro-`p` group `G` and a continuous
+crossed homomorphism `f` for `χ`, `p ∣ f g` for `g ∈ λ_1(G) = Φ(G)`: the case `k = 1` of
+`TauCeti.IsCrossedHom.pow_dvd_apply_of_mem_pLowerCentralSeries`, since `χ ≡ 1 mod p`. -/
+theorem IsCrossedHom.dvd_apply_of_mem_pLowerCentralSeries_one (hG : IsProP p G)
+    {f : G → ℤ_[p]} (hf : IsCrossedHom χ f) (hfc : Continuous f) {g : G}
+    (hg : g ∈ pLowerCentralSeries p G 1) : (p : ℤ_[p]) ∣ f g := by
+  simpa using hf.pow_dvd_apply_of_mem_pLowerCentralSeries (hG.mem_unitsPrincipal_one χ) hfc hg
+
 /-! ### Crossed homomorphisms on `p`-adic powers -/
 
 namespace IsCrossedHom
@@ -309,14 +318,5 @@ theorem map_padicPow_of_eq_one {x : G} (hx : χ x = 1) (l : ℤ_[p]) :
   exact congrFun h l
 
 end IsCrossedHom
-
-/-- **A continuous crossed homomorphism of a pro-`p` group vanishes modulo `p` on the Frattini
-subgroup.** For a continuous character `χ : G → ℤ_pˣ` of a pro-`p` group `G` and a continuous
-crossed homomorphism `f` for `χ`, `p ∣ f g` for `g ∈ λ_1(G) = Φ(G)`: the case `k = 1` of
-`TauCeti.IsCrossedHom.pow_dvd_apply_of_mem_pLowerCentralSeries`, since `χ ≡ 1 mod p`. -/
-theorem IsCrossedHom.dvd_apply_of_mem_pLowerCentralSeries_one (hG : IsProP p G)
-    {f : G → ℤ_[p]} (hf : IsCrossedHom χ f) (hfc : Continuous f) {g : G}
-    (hg : g ∈ pLowerCentralSeries p G 1) : (p : ℤ_[p]) ∣ f g := by
-  simpa using hf.pow_dvd_apply_of_mem_pLowerCentralSeries (hG.mem_unitsPrincipal_one χ) hfc hg
 
 end TauCeti
