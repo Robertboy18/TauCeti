@@ -146,12 +146,6 @@ noncomputable def isoOfRangeEq : X ≅ Y where
   hom_inv_id := by rw [← cancel_mono f]; simp
   inv_hom_id := by rw [← cancel_mono g]; simp
 
-@[simp]
-theorem isoOfRangeEq_hom : (isoOfRangeEq f g e).hom = lift g f e.le := (rfl)
-
-@[simp]
-theorem isoOfRangeEq_inv : (isoOfRangeEq f g e).inv = lift f g e.ge := (rfl)
-
 @[reassoc (attr := simp)]
 theorem isoOfRangeEq_hom_comp : (isoOfRangeEq f g e).hom ≫ g = f :=
   lift_fac g f e.le
