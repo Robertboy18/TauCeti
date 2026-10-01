@@ -980,23 +980,6 @@ theorem explicitCoeff2Equiv_symm_apply [ContinuousMul G] {N : Type uN} [AddCommG
         he' x :=
   (rfl)
 
-omit [TopologicalSpace G] [TopologicalSpace M] [IsTopologicalAddGroup M] [ContinuousSMul G M] in
-/-- The additive equivalence of a bijective equivariant homomorphism is equivariant. The statement
-is spelled on the equivalence so that it can be fed to the coefficient equivalences. -/
-private theorem ofBijective_smul {N : Type uN} [AddCommGroup N] [DistribMulAction G N]
-    {f : M →+[G] N} (hf : Function.Bijective f) (g : G) (m : M) :
-    AddEquiv.ofBijective (f : M →+ N) hf (g • m) = g • AddEquiv.ofBijective (f : M →+ N) hf m :=
-  map_smul f g m
-
-omit [TopologicalSpace G] [TopologicalSpace M] [IsTopologicalAddGroup M] [ContinuousSMul G M] in
-/-- The equivariant homomorphism carried by the additive equivalence of a bijective equivariant
-homomorphism is that homomorphism. -/
-private theorem ofBijective_toDistribMulActionHom {N : Type uN} [AddCommGroup N]
-    [DistribMulAction G N] {f : M →+[G] N} (hf : Function.Bijective f) :
-    ({ (AddEquiv.ofBijective (f : M →+ N) hf).toAddMonoidHom with
-      map_smul' := ofBijective_smul G M hf } : M →+[G] N) = f :=
-  DistribMulActionHom.ext fun _ => rfl
-
 /-- A bijective equivariant homomorphism of discrete coefficient modules induces a bijection on
 explicit first cohomology. -/
 theorem explicitCoeff1_bijective [DiscreteTopology M] {N : Type uN} [AddCommGroup N]
@@ -1005,13 +988,14 @@ theorem explicitCoeff1_bijective [DiscreteTopology M] {N : Type uN} [AddCommGrou
     Function.Bijective (explicitCoeff1 G M f continuous_of_discreteTopology) := by
   have h := (explicitCoeff1Equiv G M (AddEquiv.ofBijective (f : M →+ N) hf)
     continuous_of_discreteTopology continuous_of_discreteTopology
-    (ofBijective_smul G M hf)).bijective
+    (AddEquiv.ofBijective_smul hf)).bijective
   have e : ⇑(explicitCoeff1Equiv G M (AddEquiv.ofBijective (f : M →+ N) hf)
-      continuous_of_discreteTopology continuous_of_discreteTopology (ofBijective_smul G M hf)) =
+      continuous_of_discreteTopology continuous_of_discreteTopology
+      (AddEquiv.ofBijective_smul hf)) =
       ⇑(explicitCoeff1 G M f continuous_of_discreteTopology) := funext fun x => by
     rw [explicitCoeff1Equiv_apply]
     exact congrArg (fun φ : M →+[G] N => explicitCoeff1 G M φ continuous_of_discreteTopology x)
-      (ofBijective_toDistribMulActionHom G M hf)
+      (AddEquiv.ofBijective_toDistribMulActionHom hf)
   rwa [e] at h
 
 /-- A bijective equivariant homomorphism of discrete coefficient modules induces a bijection on
@@ -1022,13 +1006,14 @@ theorem explicitCoeff2_bijective [ContinuousMul G] [DiscreteTopology M] {N : Typ
     Function.Bijective (explicitCoeff2 G M f continuous_of_discreteTopology) := by
   have h := (explicitCoeff2Equiv G M (AddEquiv.ofBijective (f : M →+ N) hf)
     continuous_of_discreteTopology continuous_of_discreteTopology
-    (ofBijective_smul G M hf)).bijective
+    (AddEquiv.ofBijective_smul hf)).bijective
   have e : ⇑(explicitCoeff2Equiv G M (AddEquiv.ofBijective (f : M →+ N) hf)
-      continuous_of_discreteTopology continuous_of_discreteTopology (ofBijective_smul G M hf)) =
+      continuous_of_discreteTopology continuous_of_discreteTopology
+      (AddEquiv.ofBijective_smul hf)) =
       ⇑(explicitCoeff2 G M f continuous_of_discreteTopology) := funext fun x => by
     rw [explicitCoeff2Equiv_apply]
     exact congrArg (fun φ : M →+[G] N => explicitCoeff2 G M φ continuous_of_discreteTopology x)
-      (ofBijective_toDistribMulActionHom G M hf)
+      (AddEquiv.ofBijective_toDistribMulActionHom hf)
   rwa [e] at h
 
 end NamedMaps
