@@ -296,19 +296,19 @@ theorem inseparableDegree_comp (ψ : Isogeny W₂ W₃) (φ : Isogeny W₁ W₂)
   exact (Field.finInsepDegree_mul_finInsepDegree_of_isAlgebraic W₃.FunctionField
     W₂.FunctionField W₁.FunctionField).symm
 
-/-- **A composite of separable isogenies is separable**: its inseparable degree is the product of
-two inseparable degrees equal to `1`.
-
-This is deliberately a theorem rather than a global instance: as an instance it adds two
-`Algebra.IsSeparable` subgoals to every failing search for the separability of a composite, and
-`simp` runs that search whenever it tries `separableDegree_eq_degree_of_isSeparable` or
-`inseparableDegree_eq_one_of_isSeparable` on `(ψ.comp φ).separableDegree`, where it then exceeds
-the typeclass heartbeat budget instead of failing. Consumers that need the composite's separability
-as an instance activate it with `attribute [local instance] isSeparable_comp`. -/
+-- Deliberately a theorem rather than a global instance: as an instance it adds two
+-- `Algebra.IsSeparable` subgoals to every failing search for the separability of a composite, and
+-- `simp` runs that search whenever it tries `separableDegree_eq_degree_of_isSeparable` or
+-- `inseparableDegree_eq_one_of_isSeparable` on `(ψ.comp φ).separableDegree`, where it then
+-- exceeds the typeclass heartbeat budget instead of failing.
+/-- **A composite of separable isogenies is separable.** This is a theorem, not a global instance;
+a consumer that needs the composite's separability as an instance activates it with
+`attribute [local instance] isSeparable_comp`. -/
 theorem isSeparable_comp (ψ : Isogeny W₂ W₃) (φ : Isogeny W₁ W₂)
     [Algebra.IsSeparable ψ.fieldPullback.fieldRange W₂.FunctionField]
     [Algebra.IsSeparable φ.fieldPullback.fieldRange W₁.FunctionField] :
     Algebra.IsSeparable (ψ.comp φ).fieldPullback.fieldRange W₁.FunctionField := by
+  -- the inseparable degree of the composite is the product of two inseparable degrees equal to `1`
   rw [← inseparableDegree_eq_one_iff_isSeparable, inseparableDegree_comp,
     ψ.inseparableDegree_eq_one_of_isSeparable, φ.inseparableDegree_eq_one_of_isSeparable, mul_one]
 

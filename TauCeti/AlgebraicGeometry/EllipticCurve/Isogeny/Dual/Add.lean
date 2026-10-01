@@ -25,11 +25,12 @@ Nondegeneracy of the pairing gives `χ̂ T = φ̂ T + ψ̂ T` on `W₂[N]`, and 
 the `ℓ`-torsion for every prime `ℓ` other than the characteristic are equal
 (`TauCeti.Isogeny.Hom.ext_pointMap_of_prime_zsmul_eq_zero`).
 
-Additivity of the dual is what makes the degree a quadratic form on the morphisms: writing
-`deg f = f̂ ∘ f`, the pairing `(f, g) ↦ f̂ ∘ g + ĝ ∘ f = deg (f + g) − deg f − deg g` is bilinear
-exactly because the dual is additive (Silverman III.6.3). Silverman proves the additivity by the
-Picard-group description of the dual; the argument here replaces it with the Weil pairing, whose
-compatibility with the dual (Silverman III.8.2) is already available.
+Additivity of the dual is what makes the degree a quadratic form on the morphisms: writing `[m]`
+for the multiplication-by-`m` endomorphism, `f̂ ∘ f = [deg f]`, so the pairing
+`(f, g) ↦ f̂ ∘ g + ĝ ∘ f = [deg (f + g) − deg f − deg g]` is bilinear exactly because the dual is
+additive (Silverman III.6.3). Silverman proves the additivity by the Picard-group description of
+the dual; the argument here replaces it with the Weil pairing, whose compatibility with the dual
+(Silverman III.8.2) is already available.
 
 ## Main result
 
@@ -76,17 +77,19 @@ private theorem pointMap_dual_eq_add_of_zsmul_eq_zero
       (Hom.ofIsogeny ρ).pointMap S ∈ Submodule.torsionBy ℤ W₂.Point (N : ℤ) :=
     (Submodule.mem_torsionBy_iff _ _).mpr (by
       rw [← Hom.pointMap_zsmul, (Submodule.mem_torsionBy_iff _ _).mp S.2, Hom.pointMap_zero])
-  let Sχ : Submodule.torsionBy ℤ W₂.Point (N : ℤ) := ⟨_, himg χ⟩
   let Sφ : Submodule.torsionBy ℤ W₂.Point (N : ℤ) := ⟨_, himg φ⟩
   let Sψ : Submodule.torsionBy ℤ W₂.Point (N : ℤ) := ⟨_, himg ψ⟩
-  have hS : Sχ = Sφ + Sψ := Subtype.ext <| by
-    rw [Submodule.coe_add]
-    exact (congrArg (fun f : Hom W₁ W₂ ↦ f.pointMap S) hχ).trans (Hom.add_pointMap _ _ _)
-  -- adjointness moves the duals across the pairing, where `χ S = φ S + ψ S`
-  rw [map_sub, map_add, ← χ.weilPairing_eq_weilPairing_dual N hN (S' := Sχ) (T := T') rfl rfl,
-    ← φ.weilPairing_eq_weilPairing_dual N hN (S' := Sφ) (T := T') rfl rfl,
-    ← ψ.weilPairing_eq_weilPairing_dual N hN (S' := Sψ) (T := T') rfl rfl, hS, map_add,
-    AddMonoidHom.add_apply, sub_self]
+  have hS : (Hom.ofIsogeny χ).pointMap S = Sφ + Sψ :=
+    (congrArg (fun f : Hom W₁ W₂ ↦ f.pointMap S) hχ).trans (Hom.add_pointMap _ _ _)
+  -- adjointness moves each dual across the pairing, where `χ S = φ S + ψ S`
+  have eχ : weilPairing W₁ N hN S Tχ = weilPairing W₂ N hN (Sφ + Sψ) T' :=
+    (χ.weilPairing_eq_weilPairing_dual N hN hS rfl).symm
+  have eφ : weilPairing W₁ N hN S Tφ = weilPairing W₂ N hN Sφ T' :=
+    (φ.weilPairing_eq_weilPairing_dual N hN rfl rfl).symm
+  have eψ : weilPairing W₁ N hN S Tψ = weilPairing W₂ N hN Sψ T' :=
+    (ψ.weilPairing_eq_weilPairing_dual N hN rfl rfl).symm
+  -- and the pairing is additive in each variable
+  simp only [map_sub, map_add, AddMonoidHom.add_apply, eχ, eφ, eψ, sub_self]
 
 omit [DecidableEq F] in
 /-- **The dual isogeny is additive** (Silverman III.6.2(b)): if the separable isogenies `φ` and

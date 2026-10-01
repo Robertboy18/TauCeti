@@ -129,11 +129,19 @@ theorem pointMap_pointMap_dual [DecidableEq F] (Q : W₂.Point) :
 (Silverman III.4.8, for `φ̂`). -/
 @[simp]
 theorem dual_comp_mulByIntIsogenyOfNeZero {n : ℤ} (hn : n ≠ 0) :
-    φ.dual.comp (mulByIntIsogenyOfNeZero W₂ hn) = (mulByIntIsogenyOfNeZero W₁ hn).comp φ.dual :=
-  comp_right_inj.mp <| by
-    rw [comp_assoc, ← comp_mulByIntIsogenyOfNeZero φ hn, ← comp_assoc, dual_comp, comp_assoc,
-      dual_comp, mulByIntIsogenyOfNeZero_comp_mulByIntIsogenyOfNeZero,
-      mulByIntIsogenyOfNeZero_comp_mulByIntIsogenyOfNeZero, mulByIntIsogeny_inj, mul_comm]
+    φ.dual.comp (mulByIntIsogenyOfNeZero W₂ hn) = (mulByIntIsogenyOfNeZero W₁ hn).comp φ.dual := by
+  have hd : (φ.degree : ℤ) ≠ 0 := mod_cast φ.degree_ne_zero
+  -- composed with `φ`, both sides are multiplication by `n · deg φ`
+  refine comp_right_inj (φ := φ) |>.mp ?_
+  calc (φ.dual.comp (mulByIntIsogenyOfNeZero W₂ hn)).comp φ
+      = (φ.dual.comp φ).comp (mulByIntIsogenyOfNeZero W₁ hn) := by
+        rw [comp_assoc, ← comp_mulByIntIsogenyOfNeZero φ hn, comp_assoc]
+    _ = mulByIntIsogenyOfNeZero W₁ (mul_ne_zero hd hn) := by
+        rw [dual_comp φ, mulByIntIsogenyOfNeZero_comp_mulByIntIsogenyOfNeZero]
+    _ = mulByIntIsogenyOfNeZero W₁ (mul_ne_zero hn hd) :=
+        (mulByIntIsogeny_inj W₁ _ _).mpr (mul_comm _ _)
+    _ = ((mulByIntIsogenyOfNeZero W₁ hn).comp φ.dual).comp φ := by
+        rw [comp_assoc, dual_comp φ, mulByIntIsogenyOfNeZero_comp_mulByIntIsogenyOfNeZero]
 
 /-- **The dual of a separable isogeny commutes with integer multiples of points**:
 `φ̂ (n • Q) = n • φ̂ Q`. -/
@@ -159,16 +167,26 @@ variable {W₃ : WeierstrassCurve.Affine F} [W₃.IsElliptic] (ψ : Isogeny W₂
   [Algebra.IsSeparable ψ.fieldPullback.fieldRange W₂.FunctionField]
 
 -- `(ψ.comp φ).dual` needs the composite to be separable; `isSeparable_comp` is not a global
--- instance (see its docstring), so it is activated locally for the statement below.
+-- instance (see the comment at its definition), so it is activated locally for the statement
+-- below.
 attribute [local instance] isSeparable_comp
 
 /-- **The dual of a composite is the composite of the duals in the opposite order**:
 `(ψ ∘ φ)^ = φ̂ ∘ ψ̂` (Silverman III.6.2(c)). -/
-theorem dual_comp_dual : φ.dual.comp ψ.dual = (ψ.comp φ).dual :=
-  (eq_dual_iff_comp_eq (ψ.comp φ)).mpr <| by
-    rw [comp_assoc, ← comp_assoc ψ.dual, dual_comp, ← comp_mulByIntIsogenyOfNeZero φ,
-      ← comp_assoc, dual_comp, mulByIntIsogenyOfNeZero_comp_mulByIntIsogenyOfNeZero,
-      mulByIntIsogeny_inj, degree_comp, Nat.cast_mul, mul_comm]
+theorem dual_comp_dual : φ.dual.comp ψ.dual = (ψ.comp φ).dual := by
+  have hφ : (φ.degree : ℤ) ≠ 0 := mod_cast φ.degree_ne_zero
+  have hψ : (ψ.degree : ℤ) ≠ 0 := mod_cast ψ.degree_ne_zero
+  -- `φ̂ ∘ ψ̂` composed with `ψ ∘ φ` cancels `ψ̂ ∘ ψ` to `[deg ψ]`, then `φ̂ ∘ φ` to `[deg φ]`
+  refine (eq_dual_iff_comp_eq (ψ.comp φ)).mpr ?_
+  calc (φ.dual.comp ψ.dual).comp (ψ.comp φ)
+      = φ.dual.comp ((ψ.dual.comp ψ).comp φ) := by rw [comp_assoc, comp_assoc]
+    _ = (φ.dual.comp φ).comp (mulByIntIsogenyOfNeZero W₁ hψ) := by
+        rw [dual_comp ψ, ← comp_mulByIntIsogenyOfNeZero φ, comp_assoc]
+    _ = mulByIntIsogenyOfNeZero W₁ (mul_ne_zero hφ hψ) := by
+        rw [dual_comp φ, mulByIntIsogenyOfNeZero_comp_mulByIntIsogenyOfNeZero]
+    _ = mulByIntIsogenyOfNeZero W₁ (n := (ψ.comp φ).degree)
+          (mod_cast (ψ.comp φ).degree_ne_zero) := by
+        rw [mulByIntIsogeny_inj, degree_comp, Nat.cast_mul, mul_comm]
 
 variable (W : WeierstrassCurve.Affine F) [W.IsElliptic]
 
