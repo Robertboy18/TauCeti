@@ -27,7 +27,7 @@ estimates for level sets into a pointwise gain on a smaller ball.
   way the oscillation of `u` drops from `M - m` to at most `(1 - δ)(M - m)`.
 * **Power-law decay.** Iterating over the balls `B(x₀, R / 4ʲ)`, the oscillation of a weak
   solution on `B(x₀, R / 4ʲ)` is at most `(1 - δ)ʲ` times its oscillation on `B(x₀, R)`, hence
-  at most `C (r / R)^α` times it on `B(x₀, r)` for every `0 < r ≤ R`, with `α > 0` and `C`
+  at most `C (r / R)^α` times it on `B(x₀, r)` for every `0 < r ≤ R`, with `0 < α ≤ 1` and `C`
   depending only on `λ`, `Λ`, the dimension and the Haar normalization.
 * **Interior oscillation estimate.** Combined with De Giorgi's local boundedness theorem, the
   oscillation of a weak solution on `B(x₀, r)`, `r ≤ R/2`, is at most
@@ -348,18 +348,19 @@ theorem exists_ae_value_mem_Icc_add_pow_mul_sub {pstar : ℝ≥0∞} (hpstar : p
 
 /-- **Power-law oscillation decay (De Giorgi).** Let `2*` be the Sobolev exponent of `W^{1,2}` in
 dimension `n`, so that `1/2* + 1/n = 1/2` and `2* < ∞` (this forces `n ≥ 3`). There are
-`α > 0` and `C > 0`, depending only on `λ`, `Λ`, the dimension and the normalization of the
+`α ∈ (0, 1]` and `C > 0`, depending only on `λ`, `Λ`, the dimension and the normalization of the
 additive Haar measure `mu`, such that the following holds. Let `a` be measurable and uniformly
 elliptic on `Ω` with constants `λ, Λ`, and let `u ∈ H¹(Ω)` be a weak solution of
 `-∂ⱼ(aⁱʲ ∂ᵢu) = 0`. If `B(x₀, R) ⊆ Ω` and `u ∈ [m, M]` almost everywhere on `B(x₀, R)`, then
 for every radius `0 < r ≤ R`, almost everywhere on `B(x₀, r)` the function `u` takes values in
 an interval of length `C (r / R)^α (M - m)`.
 
-The exponent is `α = log(1/(1 - δ)) / log 4`, where `δ` is the constant of
-`TauCeti.PDE.exists_ae_value_mem_Icc_add_pow_mul_sub`, and `C = 4^α`. -/
+The exponent is `α = min (log(1/(1 - δ)) / log 4) 1`, where `δ` is the constant of
+`TauCeti.PDE.exists_ae_value_mem_Icc_add_pow_mul_sub`, and `C = 4^α`; the cap at `1` is the
+range in which the estimate yields Hölder continuity. -/
 theorem exists_ae_value_mem_Icc_add_mul_rpow_mul_sub {pstar : ℝ≥0∞}
     (hpstar : pstar ≠ (∞ : ℝ≥0∞)) (hexp : pstar⁻¹ + (Fintype.card ι : ℝ≥0∞)⁻¹ = 2⁻¹) :
-    ∃ α C : ℝ, 0 < α ∧ 0 < C ∧ ∀ {Omega : Opens (EuclideanSpace ℝ ι)}
+    ∃ α C : ℝ, 0 < α ∧ α ≤ 1 ∧ 0 < C ∧ ∀ {Omega : Opens (EuclideanSpace ℝ ι)}
       {a : EuclideanSpace ℝ ι → Matrix ι ι ℝ} {u : W1p mu Omega 2}
       {x₀ : EuclideanSpace ℝ ι} {R r m M : ℝ},
       UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ ι)) a lam Lam →
@@ -372,13 +373,15 @@ theorem exists_ae_value_mem_Icc_add_mul_rpow_mul_sub {pstar : ℝ≥0∞}
   obtain ⟨δ, hδ0, hδ1, hiter⟩ :=
     exists_ae_value_mem_Icc_add_pow_mul_sub (mu := mu) (lam := lam) (Lam := Lam) hpstar hexp
   have hδ' : 0 < 1 - δ := sub_pos.2 hδ1
-  -- The exponent `α` is defined by `4^(-α) = 1 - δ`.
-  set α := Real.logb 4 (1 - δ)⁻¹ with hα_def
-  have hα : 0 < α := Real.logb_pos (by norm_num) ((one_lt_inv₀ hδ').2 (by linarith))
-  have h4α : (4 : ℝ) ^ (-α) = 1 - δ := by
-    rw [Real.rpow_neg (by norm_num), hα_def, Real.rpow_logb (by norm_num) (by norm_num)
+  -- The exponent `α₀` is defined by `4^(-α₀) = 1 - δ`; the Hölder exponent is `α = min α₀ 1`.
+  set α₀ := Real.logb 4 (1 - δ)⁻¹ with hα₀_def
+  have hα₀ : 0 < α₀ := Real.logb_pos (by norm_num) ((one_lt_inv₀ hδ').2 (by linarith))
+  have h4α₀ : (4 : ℝ) ^ (-α₀) = 1 - δ := by
+    rw [Real.rpow_neg (by norm_num), hα₀_def, Real.rpow_logb (by norm_num) (by norm_num)
       (inv_pos.2 hδ'), inv_inv]
-  refine ⟨α, 4 ^ α, hα, by positivity, ?_⟩
+  set α := min α₀ 1 with hα_def
+  have hα : 0 < α := lt_min hα₀ one_pos
+  refine ⟨α, 4 ^ α, hα, min_le_right _ _, by positivity, ?_⟩
   intro Omega a u x₀ R r m M h ha hu hr hrR hball hmM
   have hR : 0 < R := hr.trans_le hrR
   have hmM' : m ≤ M := by
@@ -387,7 +390,7 @@ theorem exists_ae_value_mem_Icc_add_mul_rpow_mul_sub {pstar : ℝ≥0∞}
     obtain ⟨x, hx⟩ := hmM.exists
     exact nonempty_Icc.1 ⟨_, hx⟩
   -- Choose `j` with `4ʲ ≤ R / r < 4ʲ⁺¹`, so that `B(x₀, r) ⊆ B(x₀, R / 4ʲ)` and
-  -- `(1 - δ)ʲ = (4ʲ)^(-α) ≤ (4 r / R)^α`.
+  -- `(1 - δ)ʲ = (4ʲ)^(-α₀) ≤ (4ʲ)^(-α) ≤ (4 r / R)^α`.
   obtain ⟨j, hj, hj'⟩ := exists_nat_pow_near ((one_le_div hr).2 hrR) (by norm_num : (1 : ℝ) < 4)
   obtain ⟨m', hm'⟩ := hiter h ha hu hR hball hmM j
   have hsub : ball x₀ r ⊆ ball x₀ (R / 4 ^ j) := by
@@ -395,18 +398,22 @@ theorem exists_ae_value_mem_Icc_add_mul_rpow_mul_sub {pstar : ℝ≥0∞}
     rw [le_div_iff₀ (by positivity), mul_comm, ← le_div_iff₀ hr]
     exact hj
   have hpow : (1 - δ) ^ j ≤ 4 ^ α * (r / R) ^ α := by
-    -- `(1 - δ)ʲ = (4^(-α))ʲ = (4ʲ)^(-α) = ((4ʲ)⁻¹)^α`.
-    have h1 : (1 - δ) ^ j = ((4 : ℝ) ^ j)⁻¹ ^ α :=
-      calc (1 - δ) ^ j = ((4 : ℝ) ^ (-α)) ^ j := by rw [h4α]
-        _ = ((4 : ℝ) ^ j) ^ (-α) := Real.rpow_pow_comm (by norm_num) _ _
-        _ = ((4 : ℝ) ^ j)⁻¹ ^ α := Real.rpow_neg_eq_inv_rpow _ _
+    -- `(1 - δ)ʲ = (4^(-α₀))ʲ = (4ʲ)^(-α₀) = ((4ʲ)⁻¹)^α₀ ≤ ((4ʲ)⁻¹)^α`, since `(4ʲ)⁻¹ ≤ 1` and
+    -- `α ≤ α₀`.
+    have h1 : (1 - δ) ^ j ≤ ((4 : ℝ) ^ j)⁻¹ ^ α :=
+      calc (1 - δ) ^ j = ((4 : ℝ) ^ (-α₀)) ^ j := by rw [h4α₀]
+        _ = ((4 : ℝ) ^ j) ^ (-α₀) := Real.rpow_pow_comm (by norm_num) _ _
+        _ = ((4 : ℝ) ^ j)⁻¹ ^ α₀ := Real.rpow_neg_eq_inv_rpow _ _
+        _ ≤ ((4 : ℝ) ^ j)⁻¹ ^ α :=
+          Real.rpow_le_rpow_of_exponent_ge (by positivity)
+            (inv_le_one_of_one_le₀ (one_le_pow₀ (by norm_num))) (min_le_left _ _)
     -- `(4ʲ)⁻¹ = 4 / 4ʲ⁺¹ ≤ 4 / (R / r) = 4 r / R`, since `R / r < 4ʲ⁺¹`.
     have h2 : ((4 : ℝ) ^ j)⁻¹ ≤ 4 * (r / R) :=
       calc ((4 : ℝ) ^ j)⁻¹ = 4 * (1 / 4 ^ (j + 1)) := by rw [pow_succ]; field_simp
         _ ≤ 4 * (1 / (R / r)) := by gcongr
         _ = 4 * (r / R) := by rw [one_div_div]
-    rw [h1, ← Real.mul_rpow (by norm_num) (by positivity)]
-    exact Real.rpow_le_rpow (by positivity) h2 hα.le
+    rw [← Real.mul_rpow (by norm_num) (by positivity)]
+    exact h1.trans (Real.rpow_le_rpow (by positivity) h2 hα.le)
   refine ⟨m', ?_⟩
   filter_upwards [ae_restrict_of_ae_restrict_of_subset hsub hm'] with x hx
   refine mem_Icc.2 ⟨(mem_Icc.1 hx).1, (mem_Icc.1 hx).2.trans ?_⟩
@@ -414,7 +421,7 @@ theorem exists_ae_value_mem_Icc_add_mul_rpow_mul_sub {pstar : ℝ≥0∞}
 
 /-- **De Giorgi's interior oscillation estimate.** Let `2*` be the Sobolev exponent of `W^{1,2}`
 in dimension `n`, so that `1/2* + 1/n = 1/2` and `2* < ∞` (this forces `n ≥ 3`). There are
-`α > 0` and `C > 0`, depending only on `λ`, `Λ`, the dimension and the normalization of the
+`α ∈ (0, 1]` and `C > 0`, depending only on `λ`, `Λ`, the dimension and the normalization of the
 additive Haar measure `mu`, such that the following holds. Let `a` be measurable and uniformly
 elliptic on `Ω` with constants `λ, Λ`, and let `u ∈ H¹(Ω)` be a weak solution of
 `-∂ⱼ(aⁱʲ ∂ᵢu) = 0`. If `B(x₀, R) ⊆ Ω` and `0 < r ≤ R/2`, then almost everywhere on `B(x₀, r)`
@@ -428,7 +435,7 @@ norm through De Giorgi's local boundedness theorem, and the power law
 is the a-priori estimate behind the interior Hölder continuity of weak solutions. -/
 theorem exists_ae_value_mem_Icc_add_mul_rpow_mul_rpow_mul_sqrt_setIntegral {pstar : ℝ≥0∞}
     (hpstar : pstar ≠ (∞ : ℝ≥0∞)) (hexp : pstar⁻¹ + (Fintype.card ι : ℝ≥0∞)⁻¹ = 2⁻¹) :
-    ∃ α C : ℝ, 0 < α ∧ 0 < C ∧ ∀ {Omega : Opens (EuclideanSpace ℝ ι)}
+    ∃ α C : ℝ, 0 < α ∧ α ≤ 1 ∧ 0 < C ∧ ∀ {Omega : Opens (EuclideanSpace ℝ ι)}
       {a : EuclideanSpace ℝ ι → Matrix ι ι ℝ} {u : W1p mu Omega 2}
       {x₀ : EuclideanSpace ℝ ι} {R r : ℝ},
       UniformlyEllipticOn (Omega : Set (EuclideanSpace ℝ ι)) a lam Lam →
@@ -441,10 +448,10 @@ theorem exists_ae_value_mem_Icc_add_mul_rpow_mul_rpow_mul_sqrt_setIntegral {psta
   obtain ⟨D, hD, hbound⟩ :=
     exists_ae_abs_value_le_mul_rpow_mul_sqrt_setIntegral (mu := mu) (lam := lam) (Lam := Lam)
       hpstar hexp
-  obtain ⟨α, C, hα, hC, hpow⟩ :=
+  obtain ⟨α, C, hα, hα1, hC, hpow⟩ :=
     exists_ae_value_mem_Icc_add_mul_rpow_mul_sub (mu := mu) (lam := lam) (Lam := Lam)
       hpstar hexp
-  refine ⟨α, C * 2 ^ α * (2 * D), hα, by positivity, ?_⟩
+  refine ⟨α, C * 2 ^ α * (2 * D), hα, hα1, by positivity, ?_⟩
   intro Omega a u x₀ R r h ha hu hr hrR hball
   have hR : 0 < R := by linarith
   set K := D * R ^ (-(Fintype.card ι : ℝ) / 2) * √(∫ x in ball x₀ R, W1p.value u x ^ 2 ∂mu)
