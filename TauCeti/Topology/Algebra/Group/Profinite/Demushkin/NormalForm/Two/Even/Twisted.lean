@@ -79,7 +79,7 @@ invariant in this branch.
 ## References
 
 * J. P. Labute, *Classification of Demushkin groups*, Canad. J. Math. 19 (1967), 106–132, §4,
-  Theorem 5.
+  Theorems 4 and 5 and the corollary to Theorem 4.
 * J. Neukirch, A. Schmidt and K. Wingberg, *Cohomology of Number Fields*, 2nd ed., (3.9.19).
 -/
 
