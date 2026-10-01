@@ -16,9 +16,10 @@ The right modules over a curved differential graded algebra `(A, d, w)` form a d
 graded category.  The Hom complex from `M` to `N` is `TauCeti.curvedDGRightModuleHomComplex`,
 whose degree-`p` cochains are the right-module maps raising internal degree by `p`, with the
 graded commutator `f ↦ dN ∘ f - (-1) ^ p f ∘ dM` as differential; composition of homogeneous
-cochains is composition of the underlying maps.  Individual curved modules have no cohomology,
-but the Hom differential squares to zero because source and target have the *same* curvature,
-and the graded Leibniz rule for composition holds verbatim.  This file installs the differential
+cochains is composition of the underlying maps.  An individual curved module has no cohomology in
+general, since its differential squares to the curvature action rather than to zero, but the Hom
+differential squares to zero because source and target have the *same* curvature, and the graded
+Leibniz rule for composition holds verbatim.  This file installs the differential
 graded structure on the bundled curved right modules `TauCeti.CurvedDGRightModuleCat` through the
 explicit Hom-complex data of `TauCeti/CategoryTheory/DG/HomComplexData.lean`, and identifies its
 calculus with the cochain calculus: the differential is the graded commutator with the module
@@ -37,7 +38,8 @@ addition.  The **curved homotopy category** is
 `TauCeti.DGHomotopyCategory R (CurvedDGRightModuleCat h)`: it has the curved modules as objects
 and homotopy classes of closed degree-zero morphisms as morphisms, two closed morphisms being
 identified exactly when their difference is the boundary of an odd homotopy.  No homology enters:
-a curved module has none, and the homotopy category is the quotient by boundaries alone.
+a curved module has no cohomology in general, and the homotopy category is the quotient by
+boundaries alone.
 
 ## Main definitions
 
