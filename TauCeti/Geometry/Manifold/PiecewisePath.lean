@@ -32,8 +32,10 @@ bundled paths carrying irrelevant partition data.
   `TauCeti.Manifold.IsPiecewiseContMDiffOn.mono`: appending a `C^n` piece and restricting to a
   nondegenerate subinterval preserve piecewise `C^n` regularity.
 
-This is the metric-independent finite-partition regularity API used in Layer 0 of the Hopf--Rinow
-roadmap. The explicit-partition subinterval induction follows the pattern of the Apache-2.0
+This is a metric-independent finite-partition regularity API for curves in a manifold: it only
+involves the differentiable structure, so that Riemannian length and distance comparisons can be
+built on top of it by integrating along the pieces. The explicit-partition subinterval induction
+follows the pattern of the Apache-2.0
 [`frenzymath/Poincare-Conjecture`](https://github.com/frenzymath/Poincare-Conjecture)
 formalization, revision `24f32e4d600878bfaac6bc2f2f9324175571c321`, as used in
 `TauCeti/Geometry/Manifold/Riemannian/EDistComparison.lean`.
