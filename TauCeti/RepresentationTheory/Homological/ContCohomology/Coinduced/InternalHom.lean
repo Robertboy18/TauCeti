@@ -118,8 +118,9 @@ variable [TopologicalSpace A] [DiscreteTopology A] [ContinuousSMul U A]
   [TopologicalSpace N] [DiscreteTopology N] [ContinuousSMul G N] (hU : IsOpen (U : Set G))
 
 /-- **`toInternalHom` on a single**: `toInternalHom F (single g a) = g⁻¹ • F g a`. Only the
-coset of `g⁻¹` contributes to the trace. -/
-@[simp]
+coset of `g⁻¹` contributes to the trace. Not a `simp` lemma, because
+`TauCeti.DiscreteCoind.toAddMonoidHom_toInternalHom_apply` already takes its left-hand side
+apart. -/
 theorem toInternalHom_single (F : DiscreteCoind G U (InternalHom U A N)) (g : G) (a : A) :
     (toInternalHom U A N F).toAddMonoidHom (single G U A hU g a) =
       g⁻¹ • (F g).toAddMonoidHom a := by

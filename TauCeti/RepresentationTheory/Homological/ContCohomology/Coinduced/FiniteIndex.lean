@@ -191,8 +191,9 @@ attribute [local instance] Subgroup.fintypeQuotientOfFiniteIndex
 
 /-- **The trace of a single**: `tr (single g m) = g⁻¹ • m`. In the trace
 `∑_{x : G ⧸ U} x.out • f x.out⁻¹` of `f = single g m` only the coset `x = g⁻¹ U` contributes,
-and there `x.out⁻¹ = u * g` with `u = x.out⁻¹ * g⁻¹`, so the term is `x.out • u • m = g⁻¹ • m`. -/
-@[simp]
+and there `x.out⁻¹ = u * g` with `u = x.out⁻¹ * g⁻¹`, so the term is `x.out • u • m = g⁻¹ • m`.
+Not a `simp` lemma, because `TauCeti.DiscreteCoind.trace_apply` already takes its left-hand side
+apart. -/
 theorem trace_single (hU : IsOpen (U : Set G)) (g : G) (m : M) :
     trace G U M (single G U M hU g m) = g⁻¹ • m := by
   rw [trace_apply, Finset.sum_eq_single (QuotientGroup.mk g⁻¹)]

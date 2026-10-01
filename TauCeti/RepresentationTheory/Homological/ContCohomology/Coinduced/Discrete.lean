@@ -516,8 +516,8 @@ open Classical in
 private theorem single_apply (g : G) (a : A) (x : G) :
     single G U A hU g a x = if h : x * g⁻¹ ∈ U then (⟨x * g⁻¹, h⟩ : U) • a else 0 := (rfl)
 
-/-- `single hU g a` takes the value `u • a` at `u * g`. -/
-@[simp]
+/-- `single hU g a` takes the value `u • a` at `u * g`. Not a `simp` lemma: `simp` already proves
+it from `TauCeti.DiscreteCoind.apply_mul` and `TauCeti.DiscreteCoind.single_apply_self`. -/
 theorem single_apply_mul (g : G) (a : A) (u : U) : single G U A hU g a ((u : G) * g) = u • a := by
   have h : (u : G) * g * g⁻¹ ∈ U := by simp
   simp only [single_apply, h, dite_true]
