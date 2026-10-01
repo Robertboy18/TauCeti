@@ -26,19 +26,19 @@ of the group algebra over any commutative ring `R` mapping to `k`. The rationali
 
 ## Main definitions
 
-* `TauCeti.MonoidAlgebra.tensorAlgEquiv`: the `R`-algebra isomorphism `R[G] ⊗[R] S ≃ₐ[R] S[G]`.
+* `MonoidAlgebra.tensorAlgEquiv`: the `R`-algebra isomorphism `R[G] ⊗[R] S ≃ₐ[R] S[G]`.
 
 ## Main results
 
-* `TauCeti.MonoidAlgebra.isSemisimpleRing_tensor`: `R[G] ⊗[R] k` is a semisimple ring when `k` is
+* `MonoidAlgebra.isSemisimpleRing_tensor`: `R[G] ⊗[R] k` is a semisimple ring when `k` is
   a field in which the order of the finite group `G` is nonzero.
 -/
 
 public section
 
-namespace TauCeti.MonoidAlgebra
+namespace MonoidAlgebra
 
-open _root_.MonoidAlgebra TensorProduct
+open TensorProduct
 
 section Equiv
 
@@ -128,4 +128,4 @@ instance isSemisimpleRing_tensor (R : Type*) [CommRing R] (k : Type*) [Field k] 
     IsSemisimpleRing (MonoidAlgebra R G ⊗[R] k) :=
   (tensorAlgEquiv R k G).symm.toRingEquiv.isSemisimpleRing
 
-end TauCeti.MonoidAlgebra
+end MonoidAlgebra
