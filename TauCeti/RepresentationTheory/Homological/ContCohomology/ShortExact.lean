@@ -399,9 +399,10 @@ the exactness of `S`: injectivity on the left is `InternalHom.precomp_injective`
 the middle is `InternalHom.exact_precomp`, for every `N`. It holds for every `N` when `B` is killed
 by a prime `p`, since `A` embeds in `B` and `Hom(-, N)` is exact on `𝔽_p`-vector spaces
 (`InternalHom.precomp_surjective`), and it holds when `B` is killed by `n` and `N` satisfies Baer's
-criterion over `ℤ/nℤ`, for instance `N = ℤ/nℤ` with any action
-(`InternalHom.precomp_surjective_of_baer`). Evaluation identifies the two maps:
-`evalPairing_dual_incl` and `evalPairing_dual_proj`. -/
+criterion over `ℤ/nℤ`, for instance `N = ℤ/nℤ` with any action when `n ≠ 0`
+(`InternalHom.precomp_surjective_of_baer`); `precomp_inclDistribMulActionHom_surjective` and
+`precomp_inclDistribMulActionHom_surjective_of_baer` state the two cases for the inclusion of `S`.
+Evaluation identifies the two maps: `evalPairing_dual_incl` and `evalPairing_dual_proj`. -/
 def dual (hsurj : Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N))) :
     DiscreteShortExact G (InternalHom G C N) (InternalHom G B N) (InternalHom G A N) where
   incl := (InternalHom.precomp G S.projDistribMulActionHom).toAddMonoidHom
@@ -412,6 +413,21 @@ def dual (hsurj : Function.Surjective (InternalHom.precomp G S.inclDistribMulAct
   proj_surjective := hsurj
   exact := InternalHom.exact_precomp S.inclDistribMulActionHom S.projDistribMulActionHom
     S.proj_surjective S.exact
+
+/-- **The extension hypothesis of `dual` for a sequence killed by a prime.** If `B` is killed by a
+prime `p`, precomposition with the inclusion of `S` is surjective on internal homs into any `N`. -/
+theorem precomp_inclDistribMulActionHom_surjective {p : ℕ} [Fact p.Prime]
+    (hB : ∀ b : B, p • b = 0) :
+    Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N)) :=
+  InternalHom.precomp_surjective hB S.inclDistribMulActionHom_injective
+
+/-- **The extension hypothesis of `dual` for a sequence killed by `n` and a Baer target.** If `B` is
+killed by `n` and `N` satisfies Baer's criterion over `ℤ/nℤ`, precomposition with the inclusion of
+`S` is surjective on internal homs into `N`. -/
+theorem precomp_inclDistribMulActionHom_surjective_of_baer {n : ℕ} [Module (ZMod n) N]
+    (hN : Module.Baer (ZMod n) N) (hB : ∀ b : B, n • b = 0) :
+    Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N)) :=
+  InternalHom.precomp_surjective_of_baer hN hB S.inclDistribMulActionHom_injective
 
 variable (hsurj : Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N)))
 

@@ -332,11 +332,12 @@ end NaturalityInModuleFinite
 
 /-! ### Compatibility with the connecting maps of a short exact sequence and of its dual
 
-Let `0 → A → B → C → 0` be a short exact sequence of finite discrete `G`-modules killed by a prime
-`p`, and let `0 → C' → B' → A' → 0` be its dual sequence `DiscreteShortExact.dual`, where
-`X' = InternalHom G X N`. The sub-object `C'` of the dual sequence pairs with the quotient `C` of
-the original one, and the quotient `A'` pairs with the sub-object `A`, so the two sequences are a
-compatibly paired pair in the sense of
+Let `0 → A → B → C → 0` be a short exact sequence of finite discrete `G`-modules and let
+`0 → C' → B' → A' → 0` be its dual sequence `DiscreteShortExact.dual`, where
+`X' = InternalHom G X N`; the dual sequence exists whenever homomorphisms `A →+ N` extend to
+`B`, for instance when `B` is killed by a prime. The sub-object `C'` of the dual sequence pairs
+with the quotient `C` of the original one, and the quotient `A'` pairs with the sub-object `A`, so
+the two sequences are a compatibly paired pair in the sense of
 `TauCeti/RepresentationTheory/Homological/ContCohomology/Cup/ConnectingMap.lean`, and the
 adjointness identities there specialize to the evaluation pairings. -/
 

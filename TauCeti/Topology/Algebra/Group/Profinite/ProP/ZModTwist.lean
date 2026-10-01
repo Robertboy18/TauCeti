@@ -52,7 +52,7 @@ its generators. `I(χ)/p` is `ZModTwist χ 1`, the module at `i = 1`, with carri
 ## Main results
 
 * `TauCeti.ZModTwist.isProP_multiplicative`: `I(χ)/pⁱ` is pro-`p`.
-* `TauCeti.ZModTwist.baer`: `I(χ)/pⁱ` satisfies Baer's criterion over `ℤ/pⁱ`, so that
+* `TauCeti.ZModTwist.moduleBaer`: `I(χ)/pⁱ` satisfies Baer's criterion over `ℤ/pⁱ`, so that
   `Hom(-, I(χ)/pⁱ)` is exact on the modules killed by `pⁱ` and the twisted dual `M^∨(χ)` of a short
   exact sequence of such modules is again short exact
   (`TauCeti.ContCohomology.DiscreteShortExact.dual`).
@@ -156,16 +156,22 @@ instance : DiscreteTopology (ZModTwist χ i) := ⟨rfl⟩
 
 instance : Finite (ZModTwist χ i) := Finite.of_equiv _ (equiv χ i).symm.toEquiv
 
-/-- `I(χ)/pⁱ` is a `ℤ/pⁱ`-module, being killed by `pⁱ`; the scalar action is through `equiv`. -/
+/-- `I(χ)/pⁱ` is a `ℤ/pⁱ`-module, being killed by `pⁱ` (`AddCommGroup.zmodModule`); `equiv` is
+`ℤ/pⁱ`-linear for it, as every additive homomorphism of `ℤ/pⁱ`-modules is, and the scalar `c` acts
+on the residue class `x.val` by multiplication (`val_zmod_smul`). -/
 instance : Module (ZMod (p ^ i)) (ZModTwist χ i) :=
   AddCommGroup.zmodModule fun x => (equiv χ i).injective <| by
     rw [map_nsmul, map_zero, equiv_apply, ZModModule.char_nsmul_eq_zero]
+
+@[simp]
+theorem val_zmod_smul (c : ZMod (p ^ i)) (x : ZModTwist χ i) : (c • x).val = c * x.val := by
+  rw [← equiv_apply, ZMod.map_smul, equiv_apply, smul_eq_mul]
 
 /-- **`I(χ)/pⁱ` is an injective `ℤ/pⁱ`-module**, in the form of Baer's criterion: it is `ℤ/pⁱ` as
 a `ℤ/pⁱ`-module, which is self-injective (`Module.Baer.zmod_self`). Hence `Hom(-, I(χ)/pⁱ)` is exact
 on the modules killed by `pⁱ`, which is what makes the twisted dual `M ↦ Hom(M, I(χ)/pⁱ)` exact on
 short exact sequences of such modules (`TauCeti.InternalHom.precomp_surjective_of_baer`). -/
-theorem baer : Module.Baer (ZMod (p ^ i)) (ZModTwist χ i) :=
+theorem moduleBaer : Module.Baer (ZMod (p ^ i)) (ZModTwist χ i) :=
   Module.Baer.of_equiv ((equiv χ i).symm.toLinearEquiv fun c x => ZMod.map_smul _ c x)
     (Module.Baer.zmod_self _)
 

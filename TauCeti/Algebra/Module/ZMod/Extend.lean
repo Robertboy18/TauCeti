@@ -30,8 +30,8 @@ identity of `2ℤ/4ℤ ≅ ℤ/2ℤ` does not extend along the inclusion `2ℤ/4
 For arbitrary `n` the extension property holds for the targets `W` that are injective
 `ℤ/nℤ`-modules, in the form of Baer's criterion `Module.Baer (ZMod n) W`: an additive homomorphism
 `A →+ W` between `ℤ/nℤ`-modules is linear, and `Module.Baer.extension_property` extends it along
-`f`. The case `n = 0` is the extension property of a divisible group, and the target `W = ℤ/nℤ` is
-covered by `Module.Baer.zmod_self`.
+`f`. The case `n = 0` is the extension property of a divisible group, and for `n ≠ 0` the target
+`W = ℤ/nℤ` is covered by `Module.Baer.zmod_self`.
 
 These are the algebraic inputs to the duality statements for the finite `𝔽_p[G]`-modules and the
 finite `ℤ/pⁱ[G]`-modules of a profinite group.

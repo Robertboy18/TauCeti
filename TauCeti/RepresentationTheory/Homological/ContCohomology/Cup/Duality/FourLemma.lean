@@ -18,7 +18,11 @@ Let `G` be a topological group, let `N` be a discrete `G`-module, and for a fini
 `αᵢ : Hⁱ(G, M) → Hom(H²⁻ⁱ(G, M'), H²(G, N))`, `i = 0, 1, 2`, for Tate's duality maps
 (`TauCeti.ContCohomology.dualityMap0`, `dualityMap1`, `dualityMap2`). This file compares the
 duality maps of the three terms of a short exact sequence `0 → A → B → C → 0` of finite discrete
-`G`-modules killed by a prime `p`.
+`G`-modules. The compatibilities with the connecting maps (`dualityMap1_explicitDelta0`,
+`dualityMap2_explicitDelta1`) need only the dual sequence `DiscreteShortExact.dual`, hence only the
+extension hypothesis that precomposition with the inclusion is surjective; the four lemmas assume
+that the sequence is killed by a prime `p`, which supplies that hypothesis and, through
+`Function.Exact.compHom'`, the exactness of the `Hom(-, H²(G, N))`-dual bottom row.
 
 The long exact cohomology sequence of `S` and the `Hom(-, H²(G, N))`-dual of the long exact
 sequence of the dual sequence `0 → C' → B' → A' → 0` form a ladder
@@ -127,8 +131,7 @@ then `α₁(B)` is injective. -/
 theorem DiscreteShortExact.dualityMap1_injective (h₀C : Function.Surjective (dualityMap0 G C N))
     (h₁A : Function.Injective (dualityMap1 G A N)) (h₁C : Function.Injective (dualityMap1 G C N)) :
     Function.Injective (dualityMap1 G B N) := by
-  have hd : Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N)) :=
-    InternalHom.precomp_surjective hB S.inclDistribMulActionHom_injective
+  have hd := S.precomp_inclDistribMulActionHom_surjective (N := N) hB
   refine AddMonoidHom.injective_of_surjective_of_injective_of_injective S.explicitDelta0
     (explicitCoeff1 G A S.inclDistribMulActionHom continuous_of_discreteTopology)
     (explicitCoeff1 G B S.projDistribMulActionHom continuous_of_discreteTopology)
@@ -160,8 +163,7 @@ then `α₁(B)` is surjective. -/
 theorem DiscreteShortExact.dualityMap1_surjective (h₁A : Function.Surjective (dualityMap1 G A N))
     (h₁C : Function.Surjective (dualityMap1 G C N)) (h₂A : Function.Injective (dualityMap2 G A N)) :
     Function.Surjective (dualityMap1 G B N) := by
-  have hd : Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N)) :=
-    InternalHom.precomp_surjective hB S.inclDistribMulActionHom_injective
+  have hd := S.precomp_inclDistribMulActionHom_surjective (N := N) hB
   refine AddMonoidHom.surjective_of_surjective_of_surjective_of_injective
     (explicitCoeff1 G A S.inclDistribMulActionHom continuous_of_discreteTopology)
     (explicitCoeff1 G B S.projDistribMulActionHom continuous_of_discreteTopology) S.explicitDelta1
@@ -191,8 +193,7 @@ theorem DiscreteShortExact.dualityMap1_surjective (h₁A : Function.Surjective (
 theorem DiscreteShortExact.dualityMap0_surjective (h₀A : Function.Surjective (dualityMap0 G A N))
     (h₀C : Function.Surjective (dualityMap0 G C N)) (h₁A : Function.Injective (dualityMap1 G A N)) :
     Function.Surjective (dualityMap0 G B N) := by
-  have hd : Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N)) :=
-    InternalHom.precomp_surjective hB S.inclDistribMulActionHom_injective
+  have hd := S.precomp_inclDistribMulActionHom_surjective (N := N) hB
   refine AddMonoidHom.surjective_of_surjective_of_surjective_of_injective
     (explicitCoeff0 G A S.inclDistribMulActionHom) (explicitCoeff0 G B S.projDistribMulActionHom)
     S.explicitDelta0
@@ -224,8 +225,7 @@ omit [Finite A] in
 theorem DiscreteShortExact.dualityMap2_injective (h₁C : Function.Surjective (dualityMap1 G C N))
     (h₂A : Function.Injective (dualityMap2 G A N)) (h₂C : Function.Injective (dualityMap2 G C N)) :
     Function.Injective (dualityMap2 G B N) := by
-  have hd : Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N)) :=
-    InternalHom.precomp_surjective hB S.inclDistribMulActionHom_injective
+  have hd := S.precomp_inclDistribMulActionHom_surjective (N := N) hB
   refine AddMonoidHom.injective_of_surjective_of_injective_of_injective S.explicitDelta1
     (explicitCoeff2 G A S.inclDistribMulActionHom continuous_of_discreteTopology)
     (explicitCoeff2 G B S.projDistribMulActionHom continuous_of_discreteTopology)
@@ -254,8 +254,7 @@ connecting image killed by `α₁`, hence zero, and `δ⁰` is injective on `H�
 theorem DiscreteShortExact.dualityMap0_injective_of_explicitCoeff0_eq_zero
     (h : explicitCoeff0 G B S.projDistribMulActionHom = 0)
     (h₁A : Function.Injective (dualityMap1 G A N)) : Function.Injective (dualityMap0 G C N) := by
-  have hd : Function.Surjective (InternalHom.precomp G S.inclDistribMulActionHom (N := N)) :=
-    InternalHom.precomp_surjective hB S.inclDistribMulActionHom_injective
+  have hd := S.precomp_inclDistribMulActionHom_surjective (N := N) hB
   refine (injective_iff_map_eq_zero _).2 fun x hx => ?_
   have hδ : S.explicitDelta0 x = 0 := by
     refine h₁A (AddMonoidHom.ext fun b => ?_)
