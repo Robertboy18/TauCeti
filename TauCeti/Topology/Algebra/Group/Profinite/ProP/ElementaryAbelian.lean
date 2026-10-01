@@ -266,13 +266,14 @@ variable (p : ℕ) [Fact p.Prime] (ι : Type u)
 
 /-- **The coordinate projections of `(ℤ/p)^ι` are linearly independent characters.** Read in the
 continuous `𝔽_p`-dual of the product, the projections `(ℤ/p)^ι → ℤ/p` onto the coordinates are
-linearly independent over `𝔽_p`: evaluating a linear combination at the standard basis vector at
-`j` returns its `j`-th coefficient. -/
+linearly independent over `𝔽_p`. -/
 theorem linearIndependent_ofMul_proj_pi_multiplicative_zmod :
     LinearIndependent (ZMod p) fun i : ι ↦ (Additive.ofMul (ContinuousMonoidHom.proj i) :
       continuousZModDual p (ι → Multiplicative (ZMod p))) := by
   classical
   refine linearIndependent_iff'.mpr fun s g hg j hj ↦ ?_
+  -- evaluating the vanishing linear combination at the standard basis vector at `j` returns its
+  -- `j`-th coefficient
   have h := congrArg
     (continuousZModDual.evalₗ (Pi.mulSingle j (Multiplicative.ofAdd (1 : ZMod p)))) hg
   simp only [map_sum, map_smul, continuousZModDual.evalₗ_apply, toMul_ofMul,
@@ -282,15 +283,15 @@ theorem linearIndependent_ofMul_proj_pi_multiplicative_zmod :
   simpa using h
 
 /-- **`d((ℤ/p)^ι) = #ι`.** The topological generator rank of the product `(ℤ/p)^ι` of copies of
-`ℤ/p` indexed by an arbitrary type `ι` is the cardinality of `ι`. The standard basis vectors
-converge to `1` and generate a dense subgroup, which bounds the rank by `#ι`; the coordinate
-projections are `#ι` linearly independent continuous characters, and the dimension of the
-continuous `𝔽_p`-dual bounds the rank from below. For finite `ι` this is the natural-number
-statement `TauCeti.topologicalGeneratorRankNat_pi_multiplicative_zmod`. -/
+`ℤ/p` indexed by an arbitrary type `ι` is the cardinality of `ι`. For finite `ι` this is the
+natural-number statement `TauCeti.topologicalGeneratorRankNat_pi_multiplicative_zmod`. -/
 @[simp]
 theorem topologicalGeneratorRank_pi_multiplicative_zmod :
     topologicalGeneratorRank (ι → Multiplicative (ZMod p)) = #ι := by
   classical
+  -- Upper bound: the standard basis vectors converge to `1` and generate a dense subgroup.
+  -- Lower bound: the coordinate projections are `#ι` linearly independent continuous characters,
+  -- and the dimension of the continuous `𝔽_p`-dual bounds the rank from below.
   refine le_antisymm ?_ ?_
   · -- The standard basis vectors `Pi.mulSingle i (ofAdd 1)` form a topological generating set of
     -- cardinality `#ι` converging to `1`.
@@ -307,7 +308,8 @@ theorem topologicalGeneratorRank_pi_multiplicative_zmod :
     calc topologicalGeneratorRank (ι → Multiplicative (ZMod p))
         ≤ #(Set.range fun i : ι ↦ Pi.mulSingle i (Multiplicative.ofAdd (1 : ZMod p))) :=
           topologicalGeneratorRank_le (tendsto_mulSingle_cofinite _).convergesToOne_range
-            (topologicalClosure_closure_range_mulSingle_eq_top hg)
+            (topologicalClosure_closure_range_mulSingle_eq_top
+              (by rw [hg]; exact top_unique (Subgroup.le_topologicalClosure _)))
       _ = #ι := Cardinal.mk_range_eq _ hinj
   · calc #ι ≤ Module.rank (ZMod p) (continuousZModDual p (ι → Multiplicative (ZMod p))) :=
           (linearIndependent_ofMul_proj_pi_multiplicative_zmod p ι).cardinal_le_rank

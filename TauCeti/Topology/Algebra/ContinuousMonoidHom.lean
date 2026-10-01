@@ -124,11 +124,11 @@ theorem _root_.ContinuousMonoidHom.coe_mk {A B : Type*} [Monoid A] [TopologicalS
   rfl
 
 /-- The projection of a product `∀ i, A i` of topological monoids onto its `i`-th factor, as a
-continuous homomorphism: Mathlib's `Pi.evalMonoidHom`, continuous by `continuous_apply`. This is
-the analogue for products of `ContinuousMonoidHom.fst` and `ContinuousMonoidHom.snd`. -/
+continuous homomorphism. This is the analogue for products of `ContinuousMonoidHom.fst` and
+`ContinuousMonoidHom.snd`. -/
 @[to_additive /-- The projection of a product `∀ i, A i` of topological additive monoids onto its
-`i`-th factor, as a continuous additive homomorphism: Mathlib's `Pi.evalAddMonoidHom`, continuous
-by `continuous_apply`. -/]
+`i`-th factor, as a continuous additive homomorphism. This is the analogue for products of
+`ContinuousAddMonoidHom.fst` and `ContinuousAddMonoidHom.snd`. -/]
 def _root_.ContinuousMonoidHom.proj {ι : Type*} {A : ι → Type*} [∀ i, Monoid (A i)]
     [∀ i, TopologicalSpace (A i)] (i : ι) : (∀ i, A i) →ₜ* A i :=
   ⟨Pi.evalMonoidHom A i, continuous_apply i⟩

@@ -61,15 +61,13 @@ variable {ι : Type*} [DecidableEq ι] {M : ι → Type*} [∀ i, One (M i)]
 
 /-- **The coordinate embeddings of a product tend to `1` along the cofinite filter.** For any
 family `x`, the element `Pi.mulSingle i (x i)` of the product, supported at the single coordinate
-`i`, tends to `1` as `i` leaves every finite set: a neighbourhood of `1` in the product topology
-constrains finitely many coordinates, and `Pi.mulSingle i (x i)` is `1` away from `i`. -/
+`i`, tends to `1` as `i` leaves every finite set. -/
 @[to_additive /-- **The coordinate embeddings of a product tend to `0` along the cofinite
 filter.** For any family `x`, the element `Pi.single i (x i)` of the product, supported at the
-single coordinate `i`, tends to `0` as `i` leaves every finite set: a neighbourhood of `0` in the
-product topology constrains finitely many coordinates, and `Pi.single i (x i)` is `0` away from
-`i`. -/]
+single coordinate `i`, tends to `0` as `i` leaves every finite set. -/]
 theorem tendsto_mulSingle_cofinite (x : ∀ i, M i) :
     Tendsto (fun i ↦ Pi.mulSingle i (x i)) cofinite (𝓝 1) := by
+  -- coordinatewise: the `j`-th coordinate of `Pi.mulSingle i (x i)` is `1` as soon as `i ≠ j`
   rw [tendsto_pi_nhds]
   intro j
   refine tendsto_const_nhds.congr' ((eventually_cofinite_ne j).mono fun i hij ↦ ?_)
