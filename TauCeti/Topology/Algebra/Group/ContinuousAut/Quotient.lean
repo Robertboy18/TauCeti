@@ -54,6 +54,7 @@ theorem mapQuotient_mk [N.Normal] (φ : ContinuousAut G) (x : G) :
 
 /-- Two continuous automorphisms induce the same automorphism of a characteristic quotient
 exactly when they agree modulo the subgroup at every point. -/
+@[simp]
 theorem mapQuotient_eq_iff [N.Normal] {φ ψ : ContinuousAut G} :
     mapQuotient hN φ = mapQuotient hN ψ ↔ ∀ x : G, (φ x : G ⧸ N) = ψ x := by
   refine ⟨fun h x ↦ ?_, fun h ↦ MulEquiv.ext fun q ↦ ?_⟩
