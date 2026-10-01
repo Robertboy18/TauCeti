@@ -18,13 +18,14 @@ import TauCeti.GroupTheory.GroupAction.Stabilizer
 /-!
 # The norm of `1 + x` under an action of a group of prime order
 
-Let a finite group `G` act on a commutative ring `R` by ring automorphisms. Expanding the product
-`∏_{g ∈ G} (1 + g • x)` gives the sum, over all subsets `S ⊆ G`, of the products `∏_{h ∈ S} h • x`.
-The empty subset contributes `1`, the full subset contributes the "norm" `∏_{g} g • x`, and `G`
-permutes the remaining subsets by translation. When `G` has prime order, every nonempty proper
-subset has trivial stabilizer, so the sum over each orbit of subsets is the "trace" `∑_{g} g • z`
-of the product `z` attached to any one of its members; the singletons form one such orbit, with
-trace `∑_{g} g • x`. Collecting the orbits of the subsets with at least two elements gives
+Let a finite group `G` act on a commutative semiring `R` by semiring automorphisms. Expanding the
+product `∏_{g ∈ G} (1 + g • x)` gives the sum, over all subsets `S ⊆ G`, of the products
+`∏_{h ∈ S} h • x`. The empty subset contributes `1`, the full subset contributes the "norm"
+`∏_{g} g • x`, and `G` permutes the remaining subsets by translation. When `G` has prime order,
+every nonempty proper subset has trivial stabilizer, so the sum over each orbit of subsets is the
+"trace" `∑_{g} g • z` of the product `z` attached to any one of its members; the singletons form
+one such orbit, with trace `∑_{g} g • x`. Collecting the orbits of the subsets with at least two
+elements gives
 
 `∏_{g} (1 + g • x) = 1 + ∑_{g} g • x + ∑_{g} g • y + ∏_{g} g • x`
 
@@ -78,7 +79,7 @@ theorem prod_smul_mem_span_orbit_sq_of_one_lt_card {S : Finset G} (hS : 1 < S.ca
 
 variable (G) in
 /-- **The product `∏_{g} (1 + g • x)` for a group of prime order.** If `G` is a group of prime
-order acting on a commutative ring `R` by ring automorphisms, then
+order acting on a commutative semiring `R` by semiring automorphisms, then
 
 `∏_{g} (1 + g • x) = 1 + ∑_{g} g • x + ∑_{g} g • y + ∏_{g} g • x`
 
