@@ -33,8 +33,9 @@ sends a class `b ∈ H²(G, 𝔽_p)` to `c ↦ c • b`, which is bijective for 
 Demushkin groups.
 
 The dévissage is the general one for pro-`p` groups
-(`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective`, with
-`N = 𝔽_p` and `n = p`): every finite `𝔽_p[G]`-module of a pro-`p` group is an iterated extension
+(`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_injective` and
+`TauCeti.IsProP.dualityMap1_surjective_dualityMap2_injective`, with `N = 𝔽_p` and `n = p`): every
+finite `𝔽_p[G]`-module of a pro-`p` group is an iterated extension
 of trivial modules of order `p`, and the four lemmas along a short exact sequence carry
 surjectivity of `α₀`, bijectivity of `α₁` and injectivity of `α₂` from the two ends of an
 extension to its middle; the Baer hypothesis on `H²(G, 𝔽_p)` holds because it is an
@@ -143,8 +144,9 @@ theorem dualityMap0_zmod_bijective : Function.Bijective (dualityMap0 G (ZMod p) 
 /-! ### Dévissage: the duality maps on every finite `𝔽_p[G]`-module -/
 
 /-- On a trivial `G`-module of order `p`, which is `𝔽_p` up to a `G`-equivariant isomorphism, the
-three duality maps of a Demushkin group are bijective, here in the form consumed by the dévissage
-`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective`. -/
+three duality maps of a Demushkin group are bijective, here in the form consumed by the dévissages
+`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_injective` and
+`TauCeti.IsProP.dualityMap1_surjective_dualityMap2_injective`. -/
 private theorem dualityMap_of_natCard_eq (A : Type u) [AddCommGroup A] [TopologicalSpace A]
     [DiscreteTopology A] [DistribMulAction G A] [ContinuousSMul G A] [Finite A]
     (hA : Nat.card A = p) (htrivA : ∀ (g : G) (a : A), g • a = a) :
@@ -164,9 +166,10 @@ private theorem dualityMap_of_natCard_eq (A : Type u) [AddCommGroup A] [Topologi
 
 /-- **The dévissage of Tate's duality argument.** On every finite discrete `G`-module `M` killed
 by `p`, `α₀` is surjective, `α₁` is bijective and `α₂` is injective: this holds on the trivial
-modules of order `p`, which are `𝔽_p`, and passes through extensions by the four lemmas
-(`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective`, with
-`n = p` and `N = 𝔽_p`). -/
+modules of order `p`, which are `𝔽_p`, and passes through extensions by the four lemmas: the two
+dévissages `TauCeti.IsProP.dualityMap0_surjective_dualityMap1_injective` and
+`TauCeti.IsProP.dualityMap1_surjective_dualityMap2_injective`, with `n = p` and `N = 𝔽_p`, run side
+by side. -/
 private theorem dualityMap_devissage (M : Type u) [AddCommGroup M] [TopologicalSpace M]
     [DiscreteTopology M] [DistribMulAction G M] [ContinuousSMul G M] [Finite M]
     (hM : ∀ x : M, p • x = 0) :
@@ -174,10 +177,17 @@ private theorem dualityMap_devissage (M : Type u) [AddCommGroup M] [TopologicalS
       Function.Bijective (dualityMap1 G M (ZMod p)) ∧
         Function.Injective (dualityMap2 G M (ZMod p)) :=
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  hG.isProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective (ZMod p)
-    (Module.Baer.zmod_self p) (Module.Baer.of_isSemisimpleRing (ZMod p) _)
-    (fun A _ _ _ _ _ _ hA htrivA _ ↦ hG.dualityMap_of_natCard_eq htriv A hA htrivA) M
-    (isPPrimaryTorsion_iff.2 fun m ↦ ⟨1, by rw [pow_one, hM]⟩) hM
+  have hBaer := Module.Baer.of_isSemisimpleRing (ZMod p) (H2 G (ZMod p))
+  have hMp : IsPPrimaryTorsion p M := isPPrimaryTorsion_iff.2 fun m ↦ ⟨1, by rw [pow_one, hM]⟩
+  have ⟨h₀, h₁⟩ := hG.isProP.dualityMap0_surjective_dualityMap1_injective (ZMod p)
+    (Module.Baer.zmod_self p) hBaer
+    (fun A _ _ _ _ _ _ hA htrivA _ ↦ ((hG.dualityMap_of_natCard_eq htriv A hA htrivA).imp_right
+      fun h ↦ h.1.1)) M hMp hM
+  have ⟨h₁', h₂⟩ := hG.isProP.dualityMap1_surjective_dualityMap2_injective (ZMod p)
+    (Module.Baer.zmod_self p) hBaer
+    (fun A _ _ _ _ _ _ hA htrivA _ ↦ ((hG.dualityMap_of_natCard_eq htriv A hA htrivA).2.imp_left
+      fun h ↦ h.2)) M hMp hM
+  ⟨h₀, ⟨h₁, h₁'⟩, h₂⟩
 
 variable (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
   [DistribMulAction G M] [ContinuousSMul G M] [Finite M] (hM : ∀ x : M, p • x = 0)

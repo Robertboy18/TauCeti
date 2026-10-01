@@ -7,7 +7,6 @@ module
 
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Coinduced.TraceShortExact
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Duality.FourLemma
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.H2ZMod
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Coeffaceable
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Devissage
 
@@ -23,9 +22,8 @@ dévissage argument: if `α₀` is surjective and `α₁` injective on every dis
 `p` with trivial action killed by `n`, then the same holds on every finite `p`-primary discrete
 `G`-module killed by `n` (`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_injective`), and
 likewise for `α₁` surjective and `α₂` injective
-(`TauCeti.IsProP.dualityMap1_surjective_dualityMap2_injective`); the two run side by side in
-`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective`. The induction
-is `TauCeti.IsProP.finite_pPrimary_induction` along the trivial filtration, and the inductive step
+(`TauCeti.IsProP.dualityMap1_surjective_dualityMap2_injective`). The induction is
+`TauCeti.IsProP.finite_pPrimary_induction` along the trivial filtration, and the inductive step
 is the four lemmas along a short exact sequence `0 → A → B → C → 0` killed by `n`
 (`TauCeti.ContCohomology.DiscreteShortExact.dualityMap0_surjective` and its companions), whose
 `N`-dual sequence exists because `N` is Baer, and whose `Hom(-, H²(G, N))`-dual bottom row is exact
@@ -53,8 +51,6 @@ not part of this file.
   `TauCeti.IsProP.dualityMap1_surjective_dualityMap2_injective`: the two dévissages of Tate's
   duality maps, from the trivial modules of order `p` to every finite `p`-primary module killed
   by `n`.
-* `TauCeti.IsProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective`: the two
-  dévissages together.
 * `TauCeti.IsProP.dualityMap0_injective`: for an infinite profinite pro-`p` group, `α₀` is injective
   on every such module.
 
@@ -174,36 +170,5 @@ theorem IsProP.dualityMap1_surjective_dualityMap2_injective :
       S.dualityMap2_injective hsurj hB hH2 h₁C h₂A h₂C⟩
 
 end InjectiveSurjective
-
-section Combined
-
-variable (h : ∀ (A : Type u) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
-    [DistribMulAction G A] [ContinuousSMul G A] [Finite A], Nat.card A = p →
-    (∀ (g : G) (a : A), g • a = a) → (∀ a : A, n • a = 0) →
-    Function.Surjective (dualityMap0 G A N) ∧ Function.Bijective (dualityMap1 G A N) ∧
-      Function.Injective (dualityMap2 G A N))
-  (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M] [DistribMulAction G M]
-  [ContinuousSMul G M] [Finite M] (hM : IsPPrimaryTorsion p M) (hMn : ∀ m : M, n • m = 0)
-
-include h hM hMn
-
-/-- **The dévissage of Tate's duality maps.** Let `G` be a pro-`p` group and `N` a discrete
-`G`-module which is a Baer `ℤ/nℤ`-module with `H²(G, N)` a Baer `ℤ/nℤ`-module. If Tate's duality
-maps `α₀`, `α₁`, `α₂` into `H²(G, N)` are respectively surjective, bijective and injective on every
-discrete `G`-module of order `p` with trivial action killed by `n`, then they are so on every finite
-`p`-primary discrete `G`-module `M` killed by `n`: the two dévissages
-`IsProP.dualityMap0_surjective_dualityMap1_injective` and
-`IsProP.dualityMap1_surjective_dualityMap2_injective` run side by side. -/
-theorem IsProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective :
-    Function.Surjective (dualityMap0 G M N) ∧ Function.Bijective (dualityMap1 G M N) ∧
-      Function.Injective (dualityMap2 G M N) :=
-  have ⟨h₀, h₁⟩ := hG.dualityMap0_surjective_dualityMap1_injective N hN hH2
-    (fun A _ _ _ _ _ _ hA htrivA hAn ↦ ⟨(h A hA htrivA hAn).1, (h A hA htrivA hAn).2.1.1⟩) M hM hMn
-  have ⟨h₁', h₂⟩ := hG.dualityMap1_surjective_dualityMap2_injective N hN hH2
-    (fun A _ _ _ _ _ _ hA htrivA hAn ↦ ⟨(h A hA htrivA hAn).2.1.2, (h A hA htrivA hAn).2.2⟩) M hM
-    hMn
-  ⟨h₀, ⟨h₁, h₁'⟩, h₂⟩
-
-end Combined
 
 end TauCeti
