@@ -53,14 +53,14 @@ are those of `‖x - y‖ ^ 2`, whose transport cost is twice as large
 * `TauCeti.IsOptimalCoupling.exists_support_subset_subdifferential` — on any real inner product
   space, the support of an optimal quadratic plan of finite cost lies in the subdifferential graph
   of a proper lower semicontinuous convex function;
-* `TauCeti.IsCoupling.eq_graphPlan_gradient_of_ae_mem_subdifferential` — for an absolutely
-  continuous source, a plan concentrated on the subdifferential graph of a proper lower
+* `TauCeti.eq_graphPlan_gradient_of_ae_mem_subdifferential` — for an absolutely continuous
+  source, a plan concentrated on the subdifferential graph of a proper lower
   semicontinuous convex function is the graph plan of its gradient, differentiable almost
   everywhere;
 * `TauCeti.IsOptimalCoupling.exists_eq_graphPlan_gradient` — for an absolutely continuous source,
   an optimal quadratic plan of finite cost is the graph plan of the gradient of such a function,
   differentiable almost everywhere;
-* `TauCeti.IsCoupling.map_swap_eq_graphPlan_gradient_fenchelConjugate`,
+* `TauCeti.map_swap_eq_graphPlan_gradient_fenchelConjugate`,
   `TauCeti.IsCoupling.gradient_fenchelConjugate_comp_gradient_ae_eq_id` and
   `TauCeti.IsCoupling.gradient_comp_gradient_fenchelConjugate_ae_eq_id` — for an absolutely
   continuous target, the exchanged plan is the graph plan of the gradient of the conjugate
@@ -149,14 +149,14 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDim
   [MeasurableSpace E] [BorelSpace E] {ρ : Measure E} [ρ.IsAddHaarMeasure]
   {μ ν : Measure E} {π : Measure (E × E)}
 
-/-- **A plan on a subdifferential graph is the graph plan of the gradient.** Let `π` couple `μ`
-and `ν` on a finite-dimensional real inner product space, with `μ` absolutely continuous with
-respect to an additive Haar measure, and let `u : E → EReal` be convex, lower semicontinuous and
-never `⊥`. If `y ∈ ∂u(x)` for `π`-almost every `(x, y)`, then `u` is finite near `μ`-almost every
-point with differentiable real representative there, and `π` is the graph plan of the gradient of
-that real representative. -/
-theorem IsCoupling.eq_graphPlan_gradient_of_ae_mem_subdifferential (hπ : IsCoupling π μ ν)
-    (hμ : μ ≪ ρ) {u : E → EReal} (hconv : Convex ℝ {p : E × ℝ | u p.1 ≤ p.2})
+/-- **A plan on a subdifferential graph is the graph plan of the gradient.** Let `π` be a plan
+with first marginal `μ` on a finite-dimensional real inner product space, with `μ` absolutely
+continuous with respect to an additive Haar measure, and let `u : E → EReal` be convex, lower
+semicontinuous and never `⊥`. If `y ∈ ∂u(x)` for `π`-almost every `(x, y)`, then `u` is finite
+near `μ`-almost every point with differentiable real representative there, and `π` is the graph
+plan of the gradient of that real representative. -/
+theorem eq_graphPlan_gradient_of_ae_mem_subdifferential (hπ : π.fst = μ) (hμ : μ ≪ ρ)
+    {u : E → EReal} (hconv : Convex ℝ {p : E × ℝ | u p.1 ≤ p.2})
     (hlsc : LowerSemicontinuous u) (hbot : ∀ x, u x ≠ ⊥)
     (hsub : ∀ᵐ z ∂π, z.2 ∈ subdifferential (innerₗ E) u z.1) :
     (∀ᵐ x ∂μ, (∀ᶠ x' in 𝓝 x, u x' ≠ ⊤) ∧ DifferentiableAt ℝ (fun x' => (u x').toReal) x) ∧
@@ -164,7 +164,7 @@ theorem IsCoupling.eq_graphPlan_gradient_of_ae_mem_subdifferential (hπ : IsCoup
   -- The effective domain of `u` contains the first coordinate of almost every point of `π`,
   -- hence `μ`-almost every point, since `π` has first marginal `μ`.
   have hdom : ∀ᵐ x ∂μ, u x ≠ ⊤ := by
-    rw [← hπ.fst_eq]
+    rw [← hπ]
     refine (ae_map_iff measurable_fst.aemeasurable
       (hlsc.measurable (measurableSet_singleton ⊤).compl)).2 ?_
     filter_upwards [hsub] with z hz
@@ -178,11 +178,11 @@ theorem IsCoupling.eq_graphPlan_gradient_of_ae_mem_subdifferential (hπ : IsCoup
   -- At almost every point of `π` the second coordinate is a subgradient at the first, which is
   -- then the gradient.
   have hgraph : ∀ᵐ z ∂π, z.2 = ∇ (fun x => (u x).toReal) z.1 := by
-    rw [← hπ.fst_eq] at hdiff
+    rw [← hπ] at hdiff
     filter_upwards [ae_of_ae_map measurable_fst.aemeasurable hdiff, hsub] with z ⟨hdom, hd⟩ hz
     exact (gradient_toReal_eq_of_mem_subdifferential hz hdom hd).symm
   refine ⟨hdiff, ?_⟩
-  rw [eq_graphPlan_of_ae_snd_eq (measurable_gradient _).aemeasurable hgraph, hπ.fst_eq]
+  rw [eq_graphPlan_of_ae_snd_eq (measurable_gradient _).aemeasurable hgraph, hπ]
 
 /-- **An optimal quadratic plan is induced by the gradient of a convex function.** Let `π` be an
 optimal plan of finite cost for `‖x - y‖ ^ 2 / 2` between finite measures `μ` and `ν` on a
@@ -203,28 +203,28 @@ theorem IsOptimalCoupling.exists_eq_graphPlan_gradient [IsFiniteMeasure μ] (hμ
   have hsub' : ∀ᵐ z ∂π, z.2 ∈ subdifferential (innerₗ E) u z.1 := by
     filter_upwards [π.support_mem_ae] with z hz using hsub hz
   obtain ⟨hdiff, hgraph⟩ :=
-    h.toIsCoupling.eq_graphPlan_gradient_of_ae_mem_subdifferential hμ hconv hlsc hbot hsub'
+    eq_graphPlan_gradient_of_ae_mem_subdifferential h.fst_eq hμ hconv hlsc hbot hsub'
   exact ⟨u, hconv, hlsc, hbot, hdiff, hgraph⟩
 
-/-- **The exchanged plan is the graph plan of the gradient of the conjugate.** Let `π` couple `μ`
-and `ν` on a finite-dimensional real inner product space, with `ν` absolutely continuous with
-respect to an additive Haar measure, and let `u : E → EReal` be any function such that
-`y ∈ ∂u(x)` for `π`-almost every `(x, y)`. Then the Legendre–Fenchel conjugate `u⋆` of `u` for
-the inner product is finite near `ν`-almost every point with differentiable real representative
-there, and the plan with exchanged coordinates is the graph plan over `ν` of the gradient of that
-real representative. -/
-theorem IsCoupling.map_swap_eq_graphPlan_gradient_fenchelConjugate (hπ : IsCoupling π μ ν)
-    (hν : ν ≪ ρ) {u : E → EReal} (hsub : ∀ᵐ z ∂π, z.2 ∈ subdifferential (innerₗ E) u z.1) :
+/-- **The exchanged plan is the graph plan of the gradient of the conjugate.** Let `π` be a plan
+with second marginal `ν` on a finite-dimensional real inner product space, with `ν` absolutely
+continuous with respect to an additive Haar measure, and let `u : E → EReal` be any function such
+that `y ∈ ∂u(x)` for `π`-almost every `(x, y)`. Then the Legendre–Fenchel conjugate `u⋆` of `u`
+for the inner product is finite near `ν`-almost every point with differentiable real
+representative there, and the plan with exchanged coordinates is the graph plan over `ν` of the
+gradient of that real representative. -/
+theorem map_swap_eq_graphPlan_gradient_fenchelConjugate (hπ : π.snd = ν) (hν : ν ≪ ρ)
+    {u : E → EReal} (hsub : ∀ᵐ z ∂π, z.2 ∈ subdifferential (innerₗ E) u z.1) :
     (∀ᵐ y ∂ν, (∀ᶠ y' in 𝓝 y, fenchelConjugate (innerₗ E) u y' ≠ ⊤) ∧
         DifferentiableAt ℝ (fun y' => (fenchelConjugate (innerₗ E) u y').toReal) y) ∧
       π.map Prod.swap = graphPlan (∇ fun y => (fenchelConjugate (innerₗ E) u y).toReal) ν := by
   rcases eq_zero_or_neZero π with rfl | hne
-  · obtain rfl : ν = 0 := hπ.snd_eq.symm.trans Measure.snd_zero
+  · obtain rfl : ν = 0 := hπ.symm.trans Measure.snd_zero
     simp
   -- `u` is finite somewhere since `π` is not zero, so `u⋆` never takes the value `⊥`.
   have := ae_neBot.2 hne.out
   obtain ⟨z, hz⟩ := hsub.exists
-  exact hπ.swap.eq_graphPlan_gradient_of_ae_mem_subdifferential hν
+  exact eq_graphPlan_gradient_of_ae_mem_subdifferential (Measure.fst_map_swap.trans hπ) hν
     (convex_epigraph_fenchelConjugate (innerₗ E) u) (lowerSemicontinuous_fenchelConjugate_innerₗ u)
     (fenchelConjugate_ne_bot (innerₗ E) (ne_top_of_mem_subdifferential (innerₗ E) hz))
     (ae_mem_subdifferential_fenchelConjugate_map_swap hsub)
@@ -239,8 +239,9 @@ theorem IsCoupling.gradient_fenchelConjugate_comp_gradient_ae_eq_id (hπ : IsCou
     (hlsc : LowerSemicontinuous u) (hbot : ∀ x, u x ≠ ⊥)
     (hsub : ∀ᵐ z ∂π, z.2 ∈ subdifferential (innerₗ E) u z.1) :
     (∇ fun y => (fenchelConjugate (innerₗ E) u y).toReal) ∘ (∇ fun x => (u x).toReal) =ᵐ[μ] id := by
-  have h₁ := (hπ.eq_graphPlan_gradient_of_ae_mem_subdifferential hμ hconv hlsc hbot hsub).2
-  have h₂ := (hπ.map_swap_eq_graphPlan_gradient_fenchelConjugate hν hsub).2
+  have h₁ :=
+    (eq_graphPlan_gradient_of_ae_mem_subdifferential hπ.fst_eq hμ hconv hlsc hbot hsub).2
+  have h₂ := (map_swap_eq_graphPlan_gradient_fenchelConjugate hπ.snd_eq hν hsub).2
   rw [h₁] at h₂
   exact comp_ae_eq_id_of_map_swap_graphPlan_eq (measurable_gradient _).aemeasurable
     (measurable_gradient _).aemeasurable h₂
@@ -255,8 +256,9 @@ theorem IsCoupling.gradient_comp_gradient_fenchelConjugate_ae_eq_id (hπ : IsCou
     (hlsc : LowerSemicontinuous u) (hbot : ∀ x, u x ≠ ⊥)
     (hsub : ∀ᵐ z ∂π, z.2 ∈ subdifferential (innerₗ E) u z.1) :
     (∇ fun x => (u x).toReal) ∘ (∇ fun y => (fenchelConjugate (innerₗ E) u y).toReal) =ᵐ[ν] id := by
-  have h₁ := (hπ.eq_graphPlan_gradient_of_ae_mem_subdifferential hμ hconv hlsc hbot hsub).2
-  have h₂ := (hπ.map_swap_eq_graphPlan_gradient_fenchelConjugate hν hsub).2
+  have h₁ :=
+    (eq_graphPlan_gradient_of_ae_mem_subdifferential hπ.fst_eq hμ hconv hlsc hbot hsub).2
+  have h₂ := (map_swap_eq_graphPlan_gradient_fenchelConjugate hπ.snd_eq hν hsub).2
   have hππ : (π.map Prod.swap).map Prod.swap = π :=
     MeasurableEquiv.map_map_symm (ν := π) MeasurableEquiv.prodComm
   have h₃ : (graphPlan (∇ fun y => (fenchelConjugate (innerₗ E) u y).toReal) ν).map Prod.swap =
@@ -370,9 +372,9 @@ theorem exists_isKantorovichOptimalTransportMap_gradient_and_gradient_fenchelCon
   have hsub' : ∀ᵐ z ∂π, z.2 ∈ subdifferential (innerₗ E) u z.1 := by
     filter_upwards [π.support_mem_ae] with z hz using hsub hz
   obtain ⟨hdiff, hgraph⟩ :=
-    hπ.toIsCoupling.eq_graphPlan_gradient_of_ae_mem_subdifferential hμ hconv hlsc hbot hsub'
+    eq_graphPlan_gradient_of_ae_mem_subdifferential hπ.fst_eq hμ hconv hlsc hbot hsub'
   obtain ⟨hdiff', hgraph'⟩ :=
-    hπ.toIsCoupling.map_swap_eq_graphPlan_gradient_fenchelConjugate hν hsub'
+    map_swap_eq_graphPlan_gradient_fenchelConjugate hπ.snd_eq hν hsub'
   -- The quadratic cost is symmetric, so the exchanged plan is optimal from `ν` to `μ`.
   have hswap : IsOptimalCoupling (fun z : E × E => ENNReal.ofReal (‖z.1 - z.2‖ ^ 2 / 2))
       (π.map Prod.swap) ν μ := by

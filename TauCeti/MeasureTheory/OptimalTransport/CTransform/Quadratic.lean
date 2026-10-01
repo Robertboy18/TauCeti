@@ -34,8 +34,6 @@ measure-theoretic hypotheses is used here. Every bridge in this file accounts fo
   and `TauCeti.cSuperdifferential_norm_sub_sq_div_two` — the two `c`-transforms, `c`-concavity
   on the source and on the target, and the `c`-superdifferential for the quadratic cost in terms
   of the Legendre–Fenchel conjugate and the subdifferential of `‖·‖ ^ 2 / 2 - φ`;
-* `TauCeti.lowerSemicontinuous_fenchelConjugate_innerₗ` — Legendre–Fenchel conjugates for the
-  inner product are lower semicontinuous;
 * `TauCeti.IsCyclicallyMonotone.exists_fenchelConjugate_innerₗ_subset_subdifferential`
   — **Rockafellar's theorem for the quadratic cost**: a `c`-cyclically monotone set lies in the
   subdifferential graph of a Legendre–Fenchel conjugate for the inner product.
@@ -57,13 +55,6 @@ open scoped RealInnerProductSpace
 namespace TauCeti
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-
-/-- The Legendre–Fenchel conjugate for the inner product pairing is lower semicontinuous, the
-inner product being continuous in each variable. -/
-theorem lowerSemicontinuous_fenchelConjugate_innerₗ (f : E → EReal) :
-    LowerSemicontinuous (fenchelConjugate (innerₗ E) f) :=
-  lowerSemicontinuous_fenchelConjugate (innerₗ E)
-    (fun x => (continuous_const.inner continuous_id).congr fun y => (innerₗ_apply_apply x y).symm) f
 
 /-- The `c`-transform of a potential `φ` for the quadratic cost is `‖y‖ ^ 2 / 2 - u⋆ y`, where
 `u = ‖·‖ ^ 2 / 2 - φ` and `u⋆` is its Legendre–Fenchel conjugate for the inner product. -/
