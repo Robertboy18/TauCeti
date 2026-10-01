@@ -380,6 +380,15 @@ theorem differential_transfer : (𝒜.transfer c hh hincl hproj).differential = 
 theorem isMinimal_transfer (hdH : dH = 0) : (𝒜.transfer c hh hincl hproj).IsMinimal := by
   rw [isMinimal_def, differential_transfer, hdH]
 
+/-- The letterwise inclusion of a two-letter word. -/
+private theorem map_incl_of_two (x y : H) :
+    ReducedTensorWords.map (R := R) c.incl (of R H (2 : ℕ+) (PiTensorProduct.tprod R ![x, y])) =
+      of R A (2 : ℕ+) (PiTensorProduct.tprod R ![c.incl x, c.incl y]) := by
+  refine (map_of_tprod (R := R) c.incl (2 : ℕ+) ![x, y]).trans ?_
+  congr 2
+  funext i
+  fin_cases i <;> rfl
+
 /-- The transferred binary operation is `p m₂ (i ⊗ i)`. -/
 @[simp]
 theorem mul_transfer (a b : H) :
@@ -390,13 +399,6 @@ theorem mul_transfer (a b : H) :
     simp only [mul_zero, Int.negOnePow_zero, Units.val_one, Int.cast_one, one_smul,
       LinearMap.comp_apply] at h
     rw [h, ← LinearMap.comp_apply τ, InternalGrading.koszulTwist_comp_self, LinearMap.id_apply]
-  have hw : ReducedTensorWords.map (R := R) c.incl
-      (of R H (2 : ℕ+) (PiTensorProduct.tprod R ![τ a, b])) =
-        of R A (2 : ℕ+) (PiTensorProduct.tprod R ![c.incl (τ a), c.incl b]) := by
-    refine (map_of_tprod (R := R) c.incl (2 : ℕ+) ![τ a, b]).trans ?_
-    congr 2
-    funext i
-    fin_cases i <;> rfl
   have hfil : of R A (2 : ℕ+) (PiTensorProduct.tprod R ![c.incl (τ a), c.incl b]) ∈
       filtration R A 2 := by
     rw [← prepend_ofLetter]
@@ -412,7 +414,8 @@ theorem mul_transfer (a b : H) :
     rw [← LinearMap.comp_apply (letter R A), letter_comp_higherBarDifferential,
       𝒜.higherTaylor_of (2 : ℕ+) (by decide), taylor_of_two, hτi, mul_apply]
   rw [hab, transfer_taylor, LinearMap.comp_apply, letter_transferBarDifferential, letter_of_two,
-    map_zero, zero_add, hw, 𝒜.perturbationSeries_of_mem_filtration_two c hh hincl hproj hfil, hδ]
+    map_zero, zero_add, 𝒜.map_incl_of_two c,
+    𝒜.perturbationSeries_of_mem_filtration_two c hh hincl hproj hfil, hδ]
 
 /-! ### Arity three and the quadratic component of the extending morphism -/
 
@@ -466,6 +469,26 @@ private theorem map_incl_of_three (x y z : H) :
   funext i
   fin_cases i <;> rfl
 
+include hincl in
+/-- The degree-one Koszul twist of the suspended grading sends an included twisted letter to minus
+the included letter. -/
+private theorem koszulTwist_shift_one_incl_apply (x : H) :
+    (𝒜.grading.shift 1).koszulTwist 1 (c.incl (GH.koszulTwist 1 x)) = -c.incl x := by
+  rw [InternalGrading.koszulTwist_one_shift_one, LinearMap.neg_apply,
+    𝒜.koszulTwist_incl_apply c hincl, GH.koszulTwist_koszulTwist]
+
+include hh hincl in
+/-- The **twisted binary homotopy**: the Koszul twist of the homotopy of the product of two
+twisted included inputs is minus the homotopy of the product of the inputs, since the twist
+commutes with the binary operation and the inclusion and anticommutes with the homotopy. -/
+private theorem koszulTwist_homotopy_m_two_incl (x y : H) :
+    𝒜.grading.koszulTwist 1 (c.homotopy
+        (𝒜.m 2 ![c.incl (GH.koszulTwist 1 x), c.incl (GH.koszulTwist 1 y)])) =
+      -c.homotopy (𝒜.m 2 ![c.incl x, c.incl y]) := by
+  rw [← 𝒜.koszulTwist_incl_apply c hincl x, ← 𝒜.koszulTwist_incl_apply c hincl y,
+    ← koszulTwist_m_two, 𝒜.homotopy_koszulTwist_apply c hh, map_neg,
+    InternalGrading.koszulTwist_koszulTwist]
+
 /-- The tensor-trick homotopy applied to the higher bar differential of an included three-letter
 word: the side conditions `h i = 0` and `p i = 1` kill all but three terms. -/
 private theorem barTensorTrick_homotopy_higherBarDifferential_of_three (x y z : H) :
@@ -476,14 +499,14 @@ private theorem barTensorTrick_homotopy_higherBarDifferential_of_three (x y z : 
         of R A (2 : ℕ+) (PiTensorProduct.tprod R
           ![c.incl x, c.homotopy (𝒜.m 2 ![c.incl (GH.koszulTwist 1 y), c.incl z])]) +
         ofLetter R A (c.homotopy (𝒜.m 3 ![c.incl x, c.incl (GH.koszulTwist 1 y), c.incl z])) := by
+  -- Structural evaluation: the tensor-trick homotopy on each word of the higher bar differential.
   rw [barTensorTrick_homotopy, higherBarDifferential_of_three, 𝒜.koszulTwist_incl_apply c hincl x,
     𝒜.koszulTwist_incl_apply c hincl y, map_add, map_sub, c.reducedTensorWordsHomotopy_of_two,
     c.reducedTensorWordsHomotopy_of_two, c.reducedTensorWordsHomotopy_ofLetter,
-    InternalGrading.koszulTwist_one_shift_one, LinearMap.neg_apply, LinearMap.neg_apply,
-    𝒜.koszulTwist_incl_apply c hincl (GH.koszulTwist 1 x), GH.koszulTwist_koszulTwist,
-    c.proj_incl_apply, c.homotopy_incl_apply, c.homotopy_incl_apply]
-  simp only [← prepend_ofLetter, map_zero, LinearMap.zero_apply, map_neg, LinearMap.neg_apply,
-    add_zero, zero_add, sub_neg_eq_add]
+    𝒜.koszulTwist_shift_one_incl_apply c hincl x]
+  -- The side conditions and additive normalization.
+  simp only [c.proj_incl_apply, c.homotopy_incl_apply, ← prepend_ofLetter, map_zero,
+    LinearMap.zero_apply, map_neg, LinearMap.neg_apply, add_zero, zero_add, sub_neg_eq_add]
 
 /-- The letter component of the perturbation operator on an included three-letter word. -/
 private theorem letter_perturbationSeries_of_three (x y z : H) :
@@ -497,16 +520,26 @@ private theorem letter_perturbationSeries_of_three (x y z : H) :
   have hlt (w : ReducedTensorWords R A) :
       letter R A (𝒜.higherBarDifferential w) = 𝒜.higherTaylor w :=
     LinearMap.congr_fun 𝒜.letter_comp_higherBarDifferential w
-  have hl0 (u : A) : 𝒜.higherTaylor (ofLetter R A u) = 0 := by
-    have h := LinearMap.congr_fun 𝒜.higherTaylor_comp_ofLetter u
-    rwa [LinearMap.comp_apply, LinearMap.zero_apply] at h
+  -- The leading term `δ` of the perturbation operator: the ternary operation on the word.
+  have h₁ : letter R A (𝒜.higherBarDifferential
+      (of R A (3 : ℕ+) (PiTensorProduct.tprod R ![c.incl x, c.incl y, c.incl z]))) =
+        𝒜.m 3 ![c.incl x, c.incl (GH.koszulTwist 1 y), c.incl z] := by
+    rw [hlt, 𝒜.higherTaylor_of (3 : ℕ+) (by decide), taylor_of_three,
+      𝒜.koszulTwist_incl_apply c hincl y]
+  -- The correction term `δ K δ`: the two binary products of a contracted adjacent pair.
+  have h₂ : letter R A (𝒜.higherBarDifferential ((𝒜.barTensorTrick c hh hincl hproj).homotopy
+      (𝒜.higherBarDifferential
+        (of R A (3 : ℕ+) (PiTensorProduct.tprod R ![c.incl x, c.incl y, c.incl z]))))) =
+        𝒜.m 2 ![𝒜.grading.koszulTwist 1
+          (c.homotopy (𝒜.m 2 ![c.incl (GH.koszulTwist 1 x), c.incl y])), c.incl z] +
+        𝒜.m 2 ![c.incl (GH.koszulTwist 1 x),
+          c.homotopy (𝒜.m 2 ![c.incl (GH.koszulTwist 1 y), c.incl z])] := by
+    rw [𝒜.barTensorTrick_homotopy_higherBarDifferential_of_three c hh hincl hproj]
+    simp only [map_add, higherBarDifferential_ofLetter, add_zero, hlt]
+    rw [𝒜.higherTaylor_of (2 : ℕ+) (by decide), 𝒜.higherTaylor_of (2 : ℕ+) (by decide),
+      taylor_of_two, taylor_of_two, 𝒜.koszulTwist_incl_apply c hincl x]
   rw [𝒜.perturbationSeries_of_mem_filtration_three c hh hincl hproj
-    (of_mem_filtration R A (k := (3 : ℕ+)) (by decide) _), map_sub, hlt, hlt,
-    𝒜.higherTaylor_of (3 : ℕ+) (by decide), taylor_of_three,
-    𝒜.barTensorTrick_homotopy_higherBarDifferential_of_three c hh hincl hproj, map_add, map_add,
-    𝒜.higherTaylor_of (2 : ℕ+) (by decide), 𝒜.higherTaylor_of (2 : ℕ+) (by decide), taylor_of_two,
-    taylor_of_two, hl0, add_zero, sub_add_eq_sub_sub, 𝒜.koszulTwist_incl_apply c hincl x,
-    𝒜.koszulTwist_incl_apply c hincl y]
+    (of_mem_filtration R A (k := (3 : ℕ+)) (by decide) _), map_sub, h₁, h₂, sub_add_eq_sub_sub]
 
 /-- The **transferred ternary operation**, in the form of the Kontsevich--Soibelman/Merkulov
 formulas: the ternary operation of `𝒜` on the included inputs, plus the two binary products in
@@ -520,46 +553,54 @@ theorem m_three_transfer (x y z : H) :
         c.proj (𝒜.m 2 ![c.homotopy (𝒜.m 2 ![c.incl x, c.incl y]), c.incl z]) -
         c.proj (𝒜.m 2 ![c.incl (GH.koszulTwist 1 x),
           c.homotopy (𝒜.m 2 ![c.incl y, c.incl z])]) := by
-  -- The ternary operation is the Taylor map on the word `x (τ y) z`, `τ` the Koszul twist.
-  have hxyz : (𝒜.transfer c hh hincl hproj).m 3 ![x, y, z] =
-      (𝒜.transfer c hh hincl hproj).taylor
-        (of R H (3 : ℕ+) (PiTensorProduct.tprod R ![x, GH.koszulTwist 1 y, z])) := by
-    rw [taylor_of_three, transfer_grading, GH.koszulTwist_koszulTwist]
+  -- Structural evaluation: the ternary operation is the projection of the letter component of the
+  -- perturbation operator on the included word `x (τ y) z`, `τ` the Koszul twist.
+  have hX : (𝒜.transfer c hh hincl hproj).m 3 ![x, y, z] =
+      c.proj (letter R A ((𝒜.barTensorTrick c hh hincl hproj).perturbationSeries
+        𝒜.higherBarDifferential (of R A (3 : ℕ+) (PiTensorProduct.tprod R
+          ![c.incl x, c.incl (GH.koszulTwist 1 y), c.incl z])))) := by
+    have hxyz : (𝒜.transfer c hh hincl hproj).m 3 ![x, y, z] =
+        (𝒜.transfer c hh hincl hproj).taylor
+          (of R H (3 : ℕ+) (PiTensorProduct.tprod R ![x, GH.koszulTwist 1 y, z])) := by
+      rw [taylor_of_three, transfer_grading, GH.koszulTwist_koszulTwist]
+    rw [hxyz, transfer_taylor, LinearMap.comp_apply, letter_transferBarDifferential,
+      letter_of_of_ne_one R H (n := (3 : ℕ+)) (by decide), map_zero, zero_add,
+      𝒜.map_incl_of_three c]
+  -- The Koszul signs: the twisted binary homotopy carries the sign of the middle term.
   have hneg (u v : A) : 𝒜.m 2 ![-u, v] = -𝒜.m 2 ![u, v] := by
     simpa only [mul_apply, LinearMap.neg_apply] using LinearMap.congr_fun (𝒜.mul.map_neg u) v
-  rw [hxyz, transfer_taylor, LinearMap.comp_apply, letter_transferBarDifferential,
-    letter_of_of_ne_one R H (n := (3 : ℕ+)) (by decide), map_zero, zero_add,
-    𝒜.map_incl_of_three c, 𝒜.letter_perturbationSeries_of_three c hh hincl hproj,
-    GH.koszulTwist_koszulTwist, ← 𝒜.koszulTwist_incl_apply c hincl x,
-    ← 𝒜.koszulTwist_incl_apply c hincl y, ← koszulTwist_m_two, 𝒜.homotopy_koszulTwist_apply c hh,
-    map_neg, InternalGrading.koszulTwist_koszulTwist, hneg, map_sub, map_sub, map_neg,
-    sub_neg_eq_add]
+  rw [hX, 𝒜.letter_perturbationSeries_of_three c hh hincl hproj, GH.koszulTwist_koszulTwist,
+    𝒜.koszulTwist_homotopy_m_two_incl c hh hincl x y, hneg]
+  simp only [map_add, map_sub, sub_neg_eq_add]
 
 /-- The **quadratic component of the extending morphism** is `f₂ = -h m₂ (i ⊗ i)`. -/
 @[simp]
 theorem component_two_transferInclusion (x y : H) :
     (𝒜.transferInclusion c hh hincl hproj).component 2 ![x, y] =
       -c.homotopy (𝒜.m 2 ![c.incl x, c.incl y]) := by
-  have hw : (fun i : Fin 2 ↦ (𝒜.transfer c hh hincl hproj).grading.koszulTwist
-      (((2 : ℕ) : ℤ) - 1 - i) (![x, y] i)) = ![GH.koszulTwist 1 x, y] := by
-    funext i
-    fin_cases i <;> simp [transfer_grading, InternalGrading.koszulTwist_zero]
-  have hcomp : (𝒜.transferInclusion c hh hincl hproj).component 2 ![x, y] =
-      (𝒜.transferInclusion c hh hincl hproj).taylor
-        (of R H (2 : ℕ+) (PiTensorProduct.tprod R ![GH.koszulTwist 1 x, y])) := by
-    refine (AInfinityHom.component_apply _ 2 two_pos ![x, y]).trans ?_
-    rw [hw]
-    rfl
-  have hmap : ReducedTensorWords.map (R := R) c.incl
-      (of R H (2 : ℕ+) (PiTensorProduct.tprod R ![GH.koszulTwist 1 x, y])) =
-        of R A (2 : ℕ+) (PiTensorProduct.tprod R ![c.incl (GH.koszulTwist 1 x), c.incl y]) := by
-    refine (map_of_tprod (R := R) c.incl (2 : ℕ+) ![GH.koszulTwist 1 x, y]).trans ?_
-    congr 2
-    funext i
-    fin_cases i <;> rfl
-  rw [hcomp, AInfinityHom.taylor_def, LinearMap.comp_apply, barMap_transferInclusion,
-    LinearMap.sub_apply, LinearMap.comp_apply, LinearMap.comp_apply, hmap, map_sub, letter_of_two,
-    zero_sub, 𝒜.perturbationSeries_of_mem_filtration_two c hh hincl hproj
+  -- Structural evaluation: the quadratic component is minus the letter component of `K X` on the
+  -- included word `(τ x) y`, `τ` the Koszul twist.
+  have hX : (𝒜.transferInclusion c hh hincl hproj).component 2 ![x, y] =
+      -letter R A (c.reducedTensorWordsHomotopy (𝒜.grading.shift 1)
+        ((𝒜.barTensorTrick c hh hincl hproj).perturbationSeries 𝒜.higherBarDifferential
+          (of R A (2 : ℕ+)
+            (PiTensorProduct.tprod R ![c.incl (GH.koszulTwist 1 x), c.incl y])))) := by
+    have hw : (fun i : Fin 2 ↦ (𝒜.transfer c hh hincl hproj).grading.koszulTwist
+        (((2 : ℕ) : ℤ) - 1 - i) (![x, y] i)) = ![GH.koszulTwist 1 x, y] := by
+      funext i
+      fin_cases i <;> simp [transfer_grading, InternalGrading.koszulTwist_zero]
+    have hcomp : (𝒜.transferInclusion c hh hincl hproj).component 2 ![x, y] =
+        (𝒜.transferInclusion c hh hincl hproj).taylor
+          (of R H (2 : ℕ+) (PiTensorProduct.tprod R ![GH.koszulTwist 1 x, y])) := by
+      refine (AInfinityHom.component_apply _ 2 two_pos ![x, y]).trans ?_
+      rw [hw]
+      rfl
+    rw [hcomp, AInfinityHom.taylor_def, LinearMap.comp_apply, barMap_transferInclusion,
+      LinearMap.sub_apply, LinearMap.comp_apply, LinearMap.comp_apply, 𝒜.map_incl_of_two c,
+      map_sub, letter_of_two, zero_sub]
+  -- On a two-letter word `X` is the higher bar differential, which collapses the word to the
+  -- binary operation; the two Koszul twists of the first letter cancel.
+  rw [hX, 𝒜.perturbationSeries_of_mem_filtration_two c hh hincl hproj
       (of_mem_filtration R A (k := (2 : ℕ+)) (by decide) _),
     higherBarDifferential_of_two, c.reducedTensorWordsHomotopy_ofLetter, letter_ofLetter,
     𝒜.koszulTwist_incl_apply c hincl, GH.koszulTwist_koszulTwist]
