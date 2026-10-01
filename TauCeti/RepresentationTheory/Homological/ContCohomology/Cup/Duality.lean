@@ -149,12 +149,13 @@ end OneOneAndTwoZero
 /-! ### Naturality in the module
 
 For a `G`-map `f : M →+[G] M'` the dual map is precomposition,
-`f^* = InternalHom.precomp G f : InternalHom G M' N →+[G] InternalHom G M N`, and the two evaluation
-pairings are intertwined by `(f^* φ) m = φ (f m)`. On cohomology this is the adjunction
-`⟨φ, f_* b⟩ = ⟨f^* φ, b⟩`, one identity per shape. Each follows from the naturality of the cup
-product in the pairing, applied twice: once from the mixed pairing `(φ, m) ↦ φ (f m)` of
-`InternalHom G M' N` with `M` to the evaluation pairing of `M'`, along `(id, f)`, and once from the
-mixed pairing to the evaluation pairing of `M`, along `(f^*, id)`. -/
+`f^* = InternalHom.precomp G f : InternalHom G M' N →+[G] InternalHom G M N`, and the evaluation
+pairings of `M` and of `M'` are intertwined by `(f^* φ) m = φ (f m)`. On cohomology this is the
+adjunction `⟨φ, f_* b⟩ = ⟨f^* φ, b⟩`, one identity for each of the three shapes `(0, 2)`, `(1, 1)`
+and `(2, 0)`. Each follows from the naturality of the cup product in the pairing, applied twice:
+once from the mixed pairing `(φ, m) ↦ φ (f m)` of `InternalHom G M' N` with `M` to the evaluation
+pairing of `M'`, along `(id, f)`, and once from the mixed pairing to the evaluation pairing of `M`,
+along `(f^*, id)`. -/
 
 section NaturalityInModule
 
