@@ -8,6 +8,7 @@ module
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.ConnectingMapComparison
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.H2ZMod
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TopologicallyFinitelyGenerated
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp.Explicit
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.EulerCharacteristic.Basic
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.FiniteCohomology
 
@@ -41,7 +42,7 @@ topologically finitely generated group.
 Applied to the permutation module `Coind_U^G 𝔽_p` of an open subgroup `U`, of order `p ^ [G : U]`,
 Shapiro's lemma in degrees `0`, `1` and `2` turns the identity into the **three-term Euler
 formula**: if `H²(G, 𝔽_p)` is finite then so is `H²(U, 𝔽_p) ≅ H²(G, Coind_U^G 𝔽_p)`
-(`TauCeti.IsProP.finite_cohomFp_two_openSubgroup`, by the finiteness dévissage, with no hypothesis
+(`TauCeti.IsProP.finite_cohomFp_openSubgroup`, by the finiteness dévissage, with no hypothesis
 on `H³`), and in `ℤ`
 
 ```text
@@ -243,7 +244,7 @@ Then, in `ℤ`,
 
 the identity `χ(U) = [G : U] * χ(G)` for `χ = dim H⁰ - dim H¹ + dim H²` with `𝔽_p` coefficients,
 since `dim H⁰ = 1` and `dim H¹ = d` for the trivial module `𝔽_p`. The space `H²(U, 𝔽_p)` is finite
-by `TauCeti.IsProP.finite_cohomFp_two_openSubgroup`. -/
+by `TauCeti.IsProP.finite_cohomFp_openSubgroup`. -/
 theorem one_sub_topologicalGeneratorRankNat_add_finrank_H2 :
     (1 : ℤ) - topologicalGeneratorRankNat U.toSubgroup (hfg.of_openSubgroup U) +
         Module.finrank (ZMod p) (H2 U.toSubgroup (ZMod p)) =
@@ -251,7 +252,7 @@ theorem one_sub_topologicalGeneratorRankNat_add_finrank_H2 :
         Module.finrank (ZMod p) (H2 G (ZMod p))) := by
   -- `H²(U, 𝔽_p)` is finite because `H²(G, 𝔽_p)` is, by the finiteness dévissage
   have : Finite (cohomFp p G 2) := Finite.of_equiv _ (cohomFpAddEquivH2 p G htriv).symm.toEquiv
-  have := hG.finite_cohomFp_two_openSubgroup U
+  have := hG.finite_cohomFp_openSubgroup (n := 2) U
   have : CompactSpace U.toSubgroup := isCompact_iff_compactSpace.mp U.isClosed.isCompact
   have : Finite (H2 U.toSubgroup (ZMod p)) :=
     Finite.of_equiv _ (cohomFpAddEquivH2 p U.toSubgroup fun u m ↦ htriv u m).toEquiv

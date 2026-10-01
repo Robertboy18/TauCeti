@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Exact.Finite
+public import TauCeti.GroupTheory.Index.Exact
 public import TauCeti.GroupTheory.Torsion
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.HomologySequence
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.FixedPoints
@@ -14,7 +14,7 @@ public import TauCeti.Topology.Algebra.GroupAction.QuotientAddGroup
 /-!
 # Dévissage of finite `p`-primary coefficients for pro-`p` groups
 
-Let `G` be a compact pro-`p` group. A finite discrete `p`-primary `G`-module `M` is built from
+Let `G` be a pro-`p` group. A finite discrete `p`-primary `G`-module `M` is built from
 copies of `𝔽_p` with trivial action: by the trivial-filtration theorem
 `TauCeti.exists_addSubgroup_natCard_eq_invariant_of_isProP`, every nonzero such `M` contains a
 `G`-stable subgroup `N` of order `p` on which `G` acts trivially, and `M ⧸ N` is again finite and
@@ -23,10 +23,11 @@ holds for the zero module and for the trivial modules of order `p`, and which pa
 `M ⧸ N` to `M` for every such extension, holds for every `M`. This is the **dévissage induction
 principle** `TauCeti.IsProP.finite_pPrimary_induction`, the pro-`p` case of dévissage
 (NSW (3.3.2), final clause; Koch takes it as the definition of cohomological dimension for pro-`p`
-groups).
+groups). The principle itself needs no topology on `G` beyond the pro-`p` hypothesis; compactness
+enters only through the long exact cohomology sequence in the corollaries below.
 
-Two properties of the continuous cohomology `Hⁿ(G, -)` in a fixed degree `n` are run through it,
-using exactness of the long exact sequence at `Hⁿ(G, M)`
+For a compact pro-`p` group `G`, two properties of the continuous cohomology `Hⁿ(G, -)` in a fixed
+degree `n` are run through it, using exactness of the long exact sequence at `Hⁿ(G, M)`
 (`TauCeti.ContCohomology.DiscreteShortExact.longExact_exact₂`), which passes a property from
 `Hⁿ(G, N)` and `Hⁿ(G, M ⧸ N)` to `Hⁿ(G, M)`. If `Hⁿ(G, A)` vanishes for every discrete `G`-module
 `A` of order `p` with **trivial** action, then it vanishes for every finite discrete `p`-primary
@@ -44,8 +45,8 @@ continuous cohomology with filtered colimits of coefficients, and is not part of
 ## Main results
 
 * `TauCeti.IsProP.finite_pPrimary_induction`: **the dévissage induction principle**: a property of
-  finite discrete `p`-primary modules of a compact pro-`p` group holds everywhere once it holds for
-  the zero module and the trivial modules of order `p` and is closed under extensions by a trivial
+  finite discrete `p`-primary modules of a pro-`p` group holds everywhere once it holds for the
+  zero module and the trivial modules of order `p` and is closed under extensions by a trivial
   module of order `p`.
 * `TauCeti.IsProP.subsingleton_continuousCohomology_of_forall_natCard_eq_smul_eq_self`: for a
   compact pro-`p` group, vanishing of `Hⁿ` on the trivial modules of order `p` gives vanishing on
@@ -80,31 +81,33 @@ variable {p : ℕ} [hp : Fact p.Prime] {G : Type u} [Group G] [TopologicalSpace 
 
 omit [IsTopologicalGroup G] [CompactSpace G] in
 /-- **The dévissage induction principle for pro-`p` groups.** Let `G` be a pro-`p` group and let
-`P` be a property of discrete `G`-modules. Suppose that `P` holds for the zero module and for every
-discrete `G`-module of order `p` with trivial action, and that `P` is closed under extensions by
-such a module: for every short exact sequence `0 → A → B → C → 0` of finite discrete `G`-modules
-with `A` of order `p` and trivial action, `P A` and `P C` imply `P B`. Then `P` holds for every
-finite discrete `p`-primary `G`-module. -/
+`motive` be a property of discrete `G`-modules. Suppose that `motive` holds for the zero module and
+for every discrete `G`-module of order `p` with trivial action, and that `motive` is closed under
+extensions by such a module: for every short exact sequence `0 → A → B → C → 0` of finite discrete
+`p`-primary `G`-modules with `A` of order `p` and trivial action, `motive A` and `motive C` imply
+`motive B`. Then `motive` holds for every finite discrete `p`-primary `G`-module. -/
 theorem IsProP.finite_pPrimary_induction (hG : IsProP p G)
-    {P : ∀ (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
+    {motive : ∀ (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
       [DistribMulAction G M] [ContinuousSMul G M], Prop}
     (zero : ∀ (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
-      [DistribMulAction G M] [ContinuousSMul G M] [Subsingleton M], P M)
+      [DistribMulAction G M] [ContinuousSMul G M] [Subsingleton M], motive M)
     (prime : ∀ (A : Type u) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
       [DistribMulAction G A] [ContinuousSMul G A] [Finite A], Nat.card A = p →
-      (∀ (g : G) (a : A), g • a = a) → P A)
+      (∀ (g : G) (a : A), g • a = a) → motive A)
     (extension : ∀ (A B C : Type u) [AddCommGroup A] [TopologicalSpace A] [DiscreteTopology A]
       [DistribMulAction G A] [ContinuousSMul G A] [Finite A] [AddCommGroup B] [TopologicalSpace B]
       [DiscreteTopology B] [DistribMulAction G B] [ContinuousSMul G B] [Finite B] [AddCommGroup C]
       [TopologicalSpace C] [DiscreteTopology C] [DistribMulAction G C] [ContinuousSMul G C]
       [Finite C], DiscreteShortExact G A B C → Nat.card A = p → (∀ (g : G) (a : A), g • a = a) →
-      P A → P C → P B)
+      IsPPrimaryTorsion p A → IsPPrimaryTorsion p B → IsPPrimaryTorsion p C →
+      motive A → motive C → motive B)
     (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
-    [DistribMulAction G M] [ContinuousSMul G M] [Finite M] (hM : IsPPrimaryTorsion p M) : P M := by
+    [DistribMulAction G M] [ContinuousSMul G M] [Finite M] (hM : IsPPrimaryTorsion p M) :
+    motive M := by
   -- strong induction on the order of the coefficient module
   suffices H : ∀ (k : ℕ) (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
       [DistribMulAction G M] [ContinuousSMul G M] [Finite M], IsPPrimaryTorsion p M →
-      Nat.card M = k → P M from
+      Nat.card M = k → motive M from
     H _ M hM rfl
   intro k
   induction k using Nat.strong_induction_on with
@@ -123,11 +126,13 @@ theorem IsProP.finite_pPrimary_induction (hG : IsProP p G)
   have : ContinuousSMul G (M ⧸ N) := N.quotientDistribMulAction_continuousSMul hN
   have hNtriv : ∀ (g : G) (a : N), g • a = a := fun g a ↦
     Subtype.ext ((N.restrictDistribMulAction_coe_smul hN g a).trans (hNfix g a a.2))
+  have hMN : IsPPrimaryTorsion p (M ⧸ N) :=
+    hM.of_surjective (QuotientAddGroup.mk' N) (QuotientAddGroup.mk'_surjective N)
   refine extension N M (M ⧸ N) (DiscreteShortExact.ofAddSubgroup N hN) hNcard hNtriv
+    (isPPrimaryTorsion_of_natCard_eq_pow (hNcard.trans (pow_one p).symm)) hM hMN
     (prime N hNcard hNtriv) ?_
   -- the quotient has smaller order, and the induction hypothesis applies to it
-  refine ih _ ?_ (M ⧸ N)
-    (hM.of_surjective (QuotientAddGroup.mk' N) (QuotientAddGroup.mk'_surjective N)) rfl
+  refine ih _ ?_ (M ⧸ N) hMN rfl
   rw [← hk, AddSubgroup.card_eq_card_quotient_mul_card_addSubgroup N, hNcard]
   exact lt_mul_of_one_lt_right Nat.card_pos hp.out.one_lt
 
@@ -144,11 +149,10 @@ theorem IsProP.subsingleton_continuousCohomology_of_forall_natCard_eq_smul_eq_se
     [DistribMulAction G M] [ContinuousSMul G M] [Finite M] (hM : IsPPrimaryTorsion p M) :
     Subsingleton (continuousCohomology n (ofDiscreteModule ℤ G M)) := by
   refine hG.finite_pPrimary_induction
-    (P := fun M _ _ _ _ _ ↦ Subsingleton (continuousCohomology n (ofDiscreteModule ℤ G M)))
-    (fun M _ _ _ _ _ _ ↦ ?_) h
-    (fun A B C _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ S _ _ hA hC ↦ ?_) M hM
-  · have : Subsingleton (ofDiscreteModule ℤ G M) := ‹Subsingleton M›
-    exact ContinuousCohomology.subsingleton_continuousCohomology_of_subsingleton _ n
+    (motive := fun M _ _ _ _ _ ↦ Subsingleton (continuousCohomology n (ofDiscreteModule ℤ G M)))
+    (fun M _ _ _ _ _ _ ↦
+      ContinuousCohomology.subsingleton_continuousCohomology_ofDiscreteModule_of_subsingleton M n)
+    h (fun A B C _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ S _ _ _ _ _ hA hC ↦ ?_) M hM
   · -- exactness in the middle of `Hⁿ(G, A) → Hⁿ(G, B) → Hⁿ(G, C)`
     have hex := S.longExact_exact₂ n
     refine subsingleton_of_forall_eq 0 fun x ↦ ?_
@@ -216,13 +220,13 @@ theorem IsProP.finite_continuousCohomology_of_forall_natCard_eq_smul_eq_self (hG
     [DistribMulAction G M] [ContinuousSMul G M] [Finite M] (hM : IsPPrimaryTorsion p M) :
     Finite (continuousCohomology n (ofDiscreteModule ℤ G M)) := by
   refine hG.finite_pPrimary_induction
-    (P := fun M _ _ _ _ _ ↦ Finite (continuousCohomology n (ofDiscreteModule ℤ G M)))
-    (fun M _ _ _ _ _ _ ↦ ?_) h
-    (fun A B C _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ S _ _ hA hC ↦ ?_) M hM
-  · have : Subsingleton (ofDiscreteModule ℤ G M) := ‹Subsingleton M›
-    have := ContinuousCohomology.subsingleton_continuousCohomology_of_subsingleton
-      (ofDiscreteModule ℤ G M) n
-    exact Finite.of_subsingleton
+    (motive := fun M _ _ _ _ _ ↦ Finite (continuousCohomology n (ofDiscreteModule ℤ G M)))
+    (fun M _ _ _ _ _ _ ↦
+      have :=
+        ContinuousCohomology.subsingleton_continuousCohomology_ofDiscreteModule_of_subsingleton
+          (R := ℤ) (G := G) M n
+      Finite.of_subsingleton)
+    h (fun A B C _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ S _ _ _ _ _ hA hC ↦ ?_) M hM
   · -- exactness in the middle of `Hⁿ(G, A) → Hⁿ(G, B) → Hⁿ(G, C)`, with finite outer terms
     exact (S.longExact_exact₂ n).finite
 
