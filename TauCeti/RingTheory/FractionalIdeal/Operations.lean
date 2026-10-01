@@ -8,10 +8,11 @@ module
 public import Mathlib.RingTheory.FractionalIdeal.Operations
 
 /-!
-# Transport of fractional ideals along ring equivalences
+# Operations on fractional ideals
 
 Two facts about Mathlib's `FractionalIdeal.ringEquivOfRingEquiv`, the transport of fractional
-ideals along a ring equivalence `f : R ≃+* R'` extended to fraction rings.
+ideals along a ring equivalence `f : R ≃+* R'` extended to fraction rings, and the cancellation law
+for scaling a fractional ideal by a unit.
 
 ## Main results
 
@@ -19,6 +20,8 @@ ideals along a ring equivalence `f : R ≃+* R'` extended to fraction rings.
   fractional ideals of two fraction rings of `R` is transport along the identity.
 * `FractionalIdeal.ringEquivOfRingEquiv_coeIdeal`: transport sends the fractional ideal of an ideal
   `I` to that of `Ideal.map f I`.
+* `FractionalIdeal.spanSingleton_inv_mul_cancel_left`: scaling by a unit and then by its inverse
+  returns the fractional ideal.
 -/
 
 public section
@@ -92,5 +95,17 @@ theorem ringEquivOfRingEquiv_coeIdeal (K L : Type*)
       erw [IsFractionRing.semilinearEquivOfRingEquiv_algebraMap]; rfl⟩
 
 end RingEquiv
+
+section SpanSingleton
+
+variable {R : Type*} [CommRing R] {S : Submonoid R} {P : Type*} [CommRing P] [Algebra R P]
+  [IsLocalization S P]
+
+/-- Scaling a fractional ideal by a unit and then by its inverse returns the ideal. -/
+theorem spanSingleton_inv_mul_cancel_left (x : Pˣ) (I : FractionalIdeal S P) :
+    spanSingleton S ((x⁻¹ : Pˣ) : P) * (spanSingleton S (x : P) * I) = I := by
+  rw [← mul_assoc, spanSingleton_mul_spanSingleton, Units.inv_mul, spanSingleton_one, one_mul]
+
+end SpanSingleton
 
 end FractionalIdeal

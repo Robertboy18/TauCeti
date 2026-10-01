@@ -10,12 +10,13 @@ public import Mathlib.RingTheory.FractionalIdeal.Basic
 /-!
 # Fractional ideals of a domain have no zero divisors
 
-Mathlib proves that the submodules of an algebra without zero divisors have no zero divisors
-(`Submodule.mul_eq_bot`) and that the fractional ideals of a Dedekind domain form a cancellative
-monoid with zero. Between the two sits the general fact recorded here: the fractional ideals of
-any commutative ring inside an algebra without zero divisors have no zero divisors, so a product of
-nonzero fractional ideals is nonzero. In particular the nonzero fractional ideals of an order in a
-number field, which need not be invertible, form the submonoid `(FractionalIdeal O⁰ K)⁰`.
+Mathlib proves that the submodules of an algebra without zero divisors have no zero divisors and
+that the fractional ideals of a Dedekind domain form a cancellative monoid with zero. Between the
+two sits the general fact recorded here, pulled back from the submodule instance along the injective
+coercion `FractionalIdeal.coeToSubmodule`: the fractional ideals of any commutative ring inside an
+algebra without zero divisors have no zero divisors, so a product of nonzero fractional ideals is
+nonzero. In particular the nonzero fractional ideals of an order in a number field, which need not
+be invertible, form the submonoid `(FractionalIdeal O⁰ K)⁰`.
 -/
 
 public section
@@ -26,10 +27,7 @@ variable {R : Type*} [CommRing R] {S : Submonoid R} {P : Type*} [CommRing P] [Al
 
 /-- A product of fractional ideals is zero only if a factor is, when the ambient algebra has no
 zero divisors. -/
-instance [NoZeroDivisors P] : NoZeroDivisors (FractionalIdeal S P) where
-  eq_zero_or_eq_zero_of_mul_eq_zero {I J} h := by
-    have hIJ : (I : Submodule R P) * J = ⊥ := by
-      rw [← coe_mul, coeToSubmodule_eq_bot, h]
-    exact (Submodule.mul_eq_bot.mp hIJ).imp coeToSubmodule_eq_bot.mp coeToSubmodule_eq_bot.mp
+instance [NoZeroDivisors P] : NoZeroDivisors (FractionalIdeal S P) :=
+  coeToSubmodule_injective.noZeroDivisors _ coe_zero coe_mul
 
 end FractionalIdeal

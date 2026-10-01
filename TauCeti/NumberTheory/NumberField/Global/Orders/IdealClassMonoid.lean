@@ -8,6 +8,7 @@ module
 public import TauCeti.NumberTheory.NumberField.Global.Orders.Picard
 public import TauCeti.RingTheory.FractionalIdeal.Basic
 public import Mathlib.GroupTheory.Congruence.Hom
+import TauCeti.RingTheory.FractionalIdeal.Operations
 
 /-!
 # The ideal class monoid of a number-field order
@@ -27,6 +28,8 @@ invertible fractional ideals, and the unit group of the ideal class monoid is th
   nonzero fractional ideals of an order.
 * `TauCeti.GlobalNumberFields.IdealClassMonoid`: the ideal class monoid of an order.
 * `TauCeti.GlobalNumberFields.IdealClassMonoid.mk`: the class of a nonzero fractional ideal.
+* `TauCeti.GlobalNumberFields.NumberFieldOrder.mkIdealClassMonoid`: the class of a proper
+  fractional ideal.
 * `TauCeti.GlobalNumberFields.IdealClassMonoid.lift`: the universal property of the quotient.
 * `TauCeti.GlobalNumberFields.IdealClassMonoid.multiplierRing`: the multiplier ring of a class,
   with `IdealClassMonoid.IsProper` for the classes of proper fractional ideals.
@@ -62,13 +65,9 @@ namespace NumberFieldOrder
 variable (O : NumberFieldOrder K)
 
 /-- The monoid of nonzero fractional ideals of an order. Unlike
-`NumberFieldOrder.invertibleProperFractionalIdeals`, it contains the noninvertible ideals. -/
+`NumberFieldOrder.invertibleProperFractionalIdeals`, it contains the noninvertible ideals.
+Membership is nonvanishing, by `mem_nonZeroDivisors_iff_ne_zero`. -/
 abbrev nonzeroFractionalIdeals := (FractionalIdeal (nonZeroDivisors O.toSubalgebra) K)⁰
-
-/-- A fractional ideal of an order is a nonzero divisor exactly when it is nonzero. -/
-theorem mem_nonzeroFractionalIdeals_iff {I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K} :
-    I ∈ O.nonzeroFractionalIdeals ↔ I ≠ 0 :=
-  mem_nonZeroDivisors_iff_ne_zero
 
 /-- Two nonzero fractional ideals of an order are homothetic when one is a nonzero scalar multiple
 of the other. Homothety is a congruence on the monoid of nonzero fractional ideals. -/
@@ -80,8 +79,7 @@ def homothetyCon : Con O.nonzeroFractionalIdeals where
       symm := by
         rintro I J ⟨x, hx⟩
         refine ⟨x⁻¹, ?_⟩
-        rw [← hx, ← mul_assoc, spanSingleton_mul_spanSingleton, Units.inv_mul, spanSingleton_one,
-          one_mul]
+        rw [← hx, spanSingleton_inv_mul_cancel_left]
       trans := by
         rintro I J L ⟨x, hx⟩ ⟨y, hy⟩
         refine ⟨y * x, ?_⟩
@@ -144,17 +142,9 @@ theorem mk_eq_mk_iff {I J : O.nonzeroFractionalIdeals} :
 theorem mk_eq_one_iff {I : O.nonzeroFractionalIdeals} :
     mk O I = 1 ↔ ∃ x : Kˣ, spanSingleton (nonZeroDivisors O.toSubalgebra) (x : K) =
       (I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K) := by
-  rw [← map_one (mk O), mk_eq_mk_iff]
-  constructor
-  · rintro ⟨x, hx⟩
-    refine ⟨x⁻¹, ?_⟩
-    rw [← one_mul (I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K),
-      ← spanSingleton_one (S := nonZeroDivisors O.toSubalgebra), ← Units.inv_mul x,
-      ← spanSingleton_mul_spanSingleton, mul_assoc, hx, OneMemClass.coe_one, mul_one]
-  · rintro ⟨x, hx⟩
-    refine ⟨x⁻¹, ?_⟩
-    rw [← hx, spanSingleton_mul_spanSingleton, Units.inv_mul, spanSingleton_one,
-      OneMemClass.coe_one]
+  rw [← map_one (mk O)]
+  refine (Con.eq _).trans (Iff.trans ⟨O.homothetyCon.symm, O.homothetyCon.symm⟩ ?_)
+  simp [NumberFieldOrder.homothetyCon_iff]
 
 /-- The ideal class of a nonzero fractional ideal is a unit of the ideal class monoid exactly when
 the ideal is invertible. Noninvertible ideals therefore have classes that are not units. -/
@@ -167,9 +157,10 @@ theorem isUnit_mk_iff {I : O.nonzeroFractionalIdeals} :
     have hIJ : mk O (I * J) = 1 := by
       rw [map_mul, ← hu, hJ, Units.mul_inv]
     obtain ⟨x, hx⟩ := (mk_eq_one_iff O).mp hIJ
-    refine IsUnit.of_mul_eq_one (J * spanSingleton (nonZeroDivisors O.toSubalgebra) (x : K)⁻¹) ?_
-    rw [← mul_assoc, ← Submonoid.coe_mul, ← hx, spanSingleton_mul_spanSingleton,
-      mul_inv_cancel₀ x.ne_zero, spanSingleton_one]
+    have hx' : IsUnit (spanSingleton (nonZeroDivisors O.toSubalgebra) (x : K)) :=
+      (mul_inv_cancel_iff_isUnit K).mp (spanSingleton_mul_inv K x.ne_zero)
+    rw [hx, Submonoid.coe_mul] at hx'
+    exact isUnit_of_mul_isUnit_left hx'
   · intro hI
     obtain ⟨J, hJ⟩ := hI.exists_right_inv
     have hJ0 : J ≠ 0 := ne_zero_of_mul_eq_one J I (by rwa [mul_comm])
@@ -220,11 +211,16 @@ representatives are proper fractional ideals. -/
 def IsProper (c : IdealClassMonoid O) : Prop :=
   c.multiplierRing = O.toSubalgebra.toSubring
 
+/-- Properness of an ideal class is equality of its multiplier ring with the order. -/
+theorem isProper_def (c : IdealClassMonoid O) :
+    c.IsProper ↔ c.multiplierRing = O.toSubalgebra.toSubring :=
+  Iff.rfl
+
 /-- The class of a nonzero fractional ideal is proper exactly when the ideal is. -/
 @[simp]
 theorem isProper_mk_iff {I : O.nonzeroFractionalIdeals} :
     (mk O I).IsProper ↔ O.IsProperFractionalIdeal I := by
-  rw [IsProper, multiplierRing_mk, O.isProperFractionalIdeal_def]
+  rw [isProper_def, multiplierRing_mk, O.isProperFractionalIdeal_def]
 
 /-- Every unit of the ideal class monoid is a proper class; the converse fails for non-Gorenstein
 orders, whose proper noninvertible ideals have proper nonunit classes. -/
@@ -284,5 +280,23 @@ theorem picEquivUnits_mkPic (I : O.invertibleProperFractionalIdeals) :
   exact QuotientGroup.kerLift_mk (unitsMk O) I
 
 end IdealClassMonoid
+
+namespace NumberFieldOrder
+
+variable (O : NumberFieldOrder K)
+
+/-- The ideal class of a proper fractional ideal of an order. Proper fractional ideals are nonzero,
+so no separate nonvanishing hypothesis is needed. -/
+def mkIdealClassMonoid (I : O.properFractionalIdeals) : IdealClassMonoid O :=
+  IdealClassMonoid.mk O ⟨I, mem_nonZeroDivisors_of_ne_zero I.2.ne_zero⟩
+
+/-- The class of a proper fractional ideal is its class as a nonzero fractional ideal. -/
+@[simp]
+theorem mkIdealClassMonoid_eq_mk (I : O.properFractionalIdeals) :
+    O.mkIdealClassMonoid I =
+      IdealClassMonoid.mk O ⟨I, mem_nonZeroDivisors_of_ne_zero I.2.ne_zero⟩ := by
+  rfl
+
+end NumberFieldOrder
 
 end TauCeti.GlobalNumberFields
