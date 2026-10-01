@@ -40,16 +40,10 @@ Read on the canonical character of a Demushkin group isomorphic to the presented
 gives the marking of the generators and the image invariant, and in particular identifies the
 endpoint of the even-rank dyadic family: a Demushkin group isomorphic to
 `⟨x₁, …, xₙ ∣ x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯⟩` with `4 ∣ α` and `q ∈ {0} ∪ {2^f : f ≥ 2}` has
-orientation image `{±1}` only when `α = 0` and `q = 0`
+orientation image `{±1}` only when `α = 0` and, as soon as the factor `x₃^q` is present, `q = 0`
 (`TauCeti.IsDemushkin.eq_zero_and_eq_zero_of_range_demushkinCharacter_eq_zpowers_neg_one`), in
 which case its relator is `x₁² (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`
 (`TauCeti.demushkinWordTwoEvenPadic_zero_zero`).
-
-The proof of the forced values is the computation on a derivation of
-`TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Prescription`, with the one new
-ingredient that a continuous crossed homomorphism is `ℤ_2`-linear along the `2`-adic powers of an
-element on which the character is trivial
-(`TauCeti.IsCrossedHom.map_padicPow_of_eq_one`).
 
 ## Main definitions
 
@@ -77,13 +71,16 @@ element on which the character is trivial
   `range_demushkinCharacter_…_of_equiv_demushkinWordTwoEvenPadic` theorems: both tables read on
   the canonical character of a Demushkin group along an isomorphism onto the presented group.
 * `TauCeti.IsDemushkin.eq_zero_and_eq_zero_of_range_demushkinCharacter_eq_zpowers_neg_one`: the
-  image `{±1}` forces `α = 0` and `q = 0`.
+  image `{±1}` forces `α = 0`, and `q = 0` whenever the factor `x₃^q` is present.
 
 ## References
 
 * J. P. Labute, *Classification of Demushkin groups*, Canad. J. Math. 19 (1967), 106–132, §3,
   Theorem 3, Theorem 4 and its corollary.
 * J. Neukirch, A. Schmidt and K. Wingberg, *Cohomology of Number Fields*, 2nd ed., Chapter III, §9.
+* The forced-value theorems adapt those of
+  `TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Prescription` for the
+  natural-exponent word `TauCeti.demushkinWordTwoEven`.
 -/
 
 public section
@@ -224,11 +221,12 @@ variable {n : ℕ} (α : ℤ_[2]) (q : ℕ)
 
 /-- **The tabulated values give the prescription property** (Labute, Theorem 4, existence). A
 continuous character of the pro-`2` group presented by
-`x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)` with `χ(x₂) (1 + α) = -1`, `χ(x₄) (1 - q) = 1`
-and `χ(x_i) = 1` otherwise has the prescription property. -/
+`x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)` with `χ(x₂) (1 + α) = -1`, with
+`χ(x₄) (1 - q) = 1` when the factor `x₃^q` is present (`2 < n`), and with `χ(x_i) = 1` otherwise
+has the prescription property. -/
 theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_of_apply_eq
     (h₁ : (χ (presentedProPGen 2 n _ 1) : ℤ_[2]) * (1 + α) = -1)
-    (h₃ : (χ (presentedProPGen 2 n _ 3) : ℤ_[2]) * (1 - q) = 1)
+    (h₃ : 2 < n → (χ (presentedProPGen 2 n _ 3) : ℤ_[2]) * (1 - q) = 1)
     (h : ∀ i, i ≠ 1 → i ≠ 3 → χ (presentedProPGen 2 n _ i) = 1) : HasPrescriptionProperty χ := by
   refine presentedProP.hasPrescriptionProperty_of_forall_isCrossedHom_eq_zero
     fun F hFc hF r hr ↦ ?_
@@ -270,33 +268,36 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_of_apply
       ((Units.mul_right_eq_zero (χ (presentedProPGen 2 n _ 1))).1 ?_)
     linear_combination (χ (presentedProPGen 2 n _ 1) : ℤ_[2]) * hc23 +
       (χ (presentedProPGen 2 n _ 3) : ℤ_[2]) * hc01 -
-      (χ (presentedProPGen 2 n _ 1) : ℤ_[2]) * F (freeProPGen 2 n 2) * h₃ +
+      (χ (presentedProPGen 2 n _ 1) : ℤ_[2]) * F (freeProPGen 2 n 2) * h₃ (by omega) +
       (χ (presentedProPGen 2 n _ 3) : ℤ_[2]) * F (freeProPGen 2 n 0) * h₁
-  · -- For `n ≤ 3` the generator `x₄` is `1`, so the clause `χ(x₄)(1 - q) = 1` forces `q = 0`, and
-    -- the word is `x₁^{2+α} (x₁, x₂)`.
-    have hq : q = 0 := by
-      rw [presentedProPGen_eq_one_of_le 2 n _ (by omega), map_one, Units.val_one, one_mul,
-        sub_eq_self] at h₃
-      exact_mod_cast h₃
-    subst hq
+  · -- For `n ≤ 3` the word is `x₁^{2+α} (x₁, x₂) x₃^q`, and the factor `x₃^q` contributes nothing:
+    -- at `n = 3` the generator `x₄` is `1`, so the clause `χ(x₄)(1 - q) = 1` forces `q = 0`, and
+    -- for `n ≤ 2` the generator `x₃` is `1`.
+    have hterm : (∑ j ∈ range q, (1 : ℤ_[2]) ^ j) * F (freeProPGen 2 n 2) = 0 := by
+      rcases le_or_gt 3 n with hn₃ | hn₃
+      · have hq : q = 0 := by
+          have h₃' := h₃ (by omega)
+          rw [presentedProPGen_eq_one_of_le 2 n _ (by omega), map_one, Units.val_one, one_mul,
+            sub_eq_self] at h₃'
+          exact_mod_cast h₃'
+        rw [hq, sum_range_zero, zero_mul]
+      · rw [freeProPGen_eq_one_of_le 2 (by omega), hF.map_one, mul_zero]
     rw [presentedProP.comp_mk_freeProPGen] at hc01
-    rw [(by omega : n / 2 - 1 = 0), sum_range_zero, sum_range_zero, zero_mul, zero_add, zero_add,
-      one_mul]
+    rw [(by omega : n / 2 - 1 = 0), sum_range_zero, zero_add, hterm, zero_add, one_mul]
     refine (Units.mul_right_eq_zero (χ (presentedProPGen 2 n _ 1))).1 ?_
     linear_combination hc01 + F (freeProPGen 2 n 0) * h₁
 
-/-- **The prescription property forces the tabulated values** (Labute, Theorem 4, the forced
-computation on a derivation). For `α` and `q` even and `n ≥ 2` even, with `q = 0` when `n = 2`, a
-continuous character of the pro-`2` group presented by
+/-- **The prescription property forces the tabulated values** (Labute, Theorem 4). For `α` and `q`
+even and `n ≥ 2` even, a continuous character of the pro-`2` group presented by
 `x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)` has the prescription property exactly when
-`χ(x₂) (1 + α) = -1`, `χ(x₄) (1 - q) = 1` and `χ(x_i) = 1` for every other `i`. At `n = 2` the
-third clause says `χ(x₁) = 1`, and the second is `1 - q = 1`, which is why `q = 0` is assumed
-there: the factor `x₃^q` is `1` in rank two whatever `q` is. -/
+`χ(x₂) (1 + α) = -1`, `χ(x₄) (1 - q) = 1` when the factor `x₃^q` is present (`2 < n`), and
+`χ(x_i) = 1` for every other `i`. At `n = 2` the relator is `x₁^{2+α} (x₁, x₂)` whatever `q` is,
+and the conditions read `χ(x₂) (1 + α) = -1` and `χ(x₁) = 1`. -/
 theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα : 2 ∣ α)
-    (hq : 2 ∣ q) (hn : Even n) (hn₁ : 1 < n) (hq₀ : n = 2 → q = 0) :
+    (hq : 2 ∣ q) (hn : Even n) (hn₁ : 1 < n) :
     HasPrescriptionProperty χ ↔
       (χ (presentedProPGen 2 n _ 1) : ℤ_[2]) * (1 + α) = -1 ∧
-        (χ (presentedProPGen 2 n _ 3) : ℤ_[2]) * (1 - q) = 1 ∧
+        (2 < n → (χ (presentedProPGen 2 n _ 3) : ℤ_[2]) * (1 - q) = 1) ∧
         ∀ i, i ≠ 1 → i ≠ 3 → χ (presentedProPGen 2 n _ i) = 1 := by
   refine ⟨fun hχ ↦ ?_, fun h ↦
     hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_of_apply_eq α q χ h.1 h.2.1
@@ -392,27 +393,23 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα
     rw [presentedProP.comp_mk_freeProPGen, presentedProP.comp_mk_freeProPGen, hx0, Units.val_one,
       one_mul, sub_self, zero_mul, add_zero, hFv 0, ite_eq_left rfl, mul_one] at hc
     linear_combination (χ (presentedProPGen 2 n _ 1) : ℤ_[2]) * hr - hc
-  · -- `j = 3`: `q + χ(x₄)⁻¹ - 1 = 0`; at `n = 2` the clause reads `1 - q = 1`.
-    rcases le_or_gt 4 n with hn₄ | hn₄
-    · obtain ⟨F, hFc, hF, hFv, hFr⟩ :=
-        hχ.exists_continuous_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels
-          (by omega : 2 < n)
-      have hr := hFr _ rfl
-      rw [hF.map_demushkinWordTwoEvenPadic, hsum 2 le_rfl (by omega) F hF hFv,
-        hF.map_labuteComm_eq_zero_of_eq_zero (x := freeProPGen 2 n 0) (y := freeProPGen 2 n 1)
-          (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)]),
-        hF.map_padicPow_eq_zero_of_eq_zero hFc _ (by rw [hFv, ite_eq_right (by omega)]),
-        presentedProP.comp_mk_freeProPGen, hx2, Units.val_one] at hr
-      simp only [Nat.sub_self, Nat.zero_div, Nat.zero_add, hFv 2, ite_eq_left, one_pow, mul_one,
-        mul_zero, add_zero, sum_const, card_range, nsmul_eq_mul, ← mul_add] at hr
-      replace hr := (Units.mul_right_eq_zero _).1 hr
-      have hc := hF.mul_mul_map_labuteComm (freeProPGen 2 n 2) (freeProPGen 2 n 3)
-      rw [presentedProP.comp_mk_freeProPGen, presentedProP.comp_mk_freeProPGen, hx2,
-        Units.val_one, one_mul, sub_self, zero_mul, add_zero, hFv 2, ite_eq_left rfl, mul_one] at hc
-      linear_combination hc - (χ (presentedProPGen 2 n _ 3) : ℤ_[2]) * hr
-    · obtain rfl := hq₀ (by omega)
-      rw [presentedProPGen_eq_one_of_le 2 n _ (by omega), map_one, Units.val_one, one_mul,
-        Nat.cast_zero, sub_zero]
+  · -- `j = 3`: `q + χ(x₄)⁻¹ - 1 = 0`.
+    intro hn₂
+    obtain ⟨F, hFc, hF, hFv, hFr⟩ :=
+      hχ.exists_continuous_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels hn₂
+    have hr := hFr _ rfl
+    rw [hF.map_demushkinWordTwoEvenPadic, hsum 2 le_rfl hn₂ F hF hFv,
+      hF.map_labuteComm_eq_zero_of_eq_zero (x := freeProPGen 2 n 0) (y := freeProPGen 2 n 1)
+        (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)]),
+      hF.map_padicPow_eq_zero_of_eq_zero hFc _ (by rw [hFv, ite_eq_right (by omega)]),
+      presentedProP.comp_mk_freeProPGen, hx2, Units.val_one] at hr
+    simp only [Nat.sub_self, Nat.zero_div, Nat.zero_add, hFv 2, ite_eq_left, one_pow, mul_one,
+      mul_zero, add_zero, sum_const, card_range, nsmul_eq_mul, ← mul_add] at hr
+    replace hr := (Units.mul_right_eq_zero _).1 hr
+    have hc := hF.mul_mul_map_labuteComm (freeProPGen 2 n 2) (freeProPGen 2 n 3)
+    rw [presentedProP.comp_mk_freeProPGen, presentedProP.comp_mk_freeProPGen, hx2,
+      Units.val_one, one_mul, sub_self, zero_mul, add_zero, hFv 2, ite_eq_left rfl, mul_one] at hc
+    linear_combination hc - (χ (presentedProPGen 2 n _ 3) : ℤ_[2]) * hr
   · by_cases hin : i < n
     · rcases Nat.lt_or_ge i 4 with h4 | h4
       · rcases (by omega : i = 0 ∨ i = 2) with rfl | rfl
@@ -533,34 +530,33 @@ theorem hasPrescriptionProperty_orientationTwoEvenPadic (hn₃ : 3 < n)
     HasPrescriptionProperty (orientationTwoEvenPadic α q n v u) :=
   hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_of_apply_eq α q _
     (by rw [orientationTwoEvenPadic_presentedProPGen_one α q n v u (by omega)]; exact hv)
-    (by rw [orientationTwoEvenPadic_presentedProPGen_three α q n v u hn₃]; exact hu)
+    (fun _ ↦ by rw [orientationTwoEvenPadic_presentedProPGen_three α q n v u hn₃]; exact hu)
     fun _ hi₁ hi₃ ↦ orientationTwoEvenPadic_presentedProPGen_of_ne α q n v u hi₁ hi₃
 
 /-- **The orientation with the canonical value has the prescription property in rank two**: for
 the relator `x₁^{2+α} (x₁, x₂)`, the character with `χ(x₂) = v`, `v (1 + α) = -1`, and `χ(x₁) = 1`,
-whatever the unused marked value `u`. -/
+whatever `q`, which does not enter the rank-two relator, and the unused marked value `u`. -/
 theorem hasPrescriptionProperty_orientationTwoEvenPadic_two (hv : (v : ℤ_[2]) * (1 + α) = -1) :
-    HasPrescriptionProperty (orientationTwoEvenPadic α 0 2 v u) :=
-  hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_of_apply_eq α 0 _
-    (by rw [orientationTwoEvenPadic_presentedProPGen_one α 0 2 v u one_lt_two]; exact hv)
-    (by rw [presentedProPGen_eq_one_of_le 2 2 _ (by norm_num), map_one]; simp)
-    fun _ hi₁ hi₃ ↦ orientationTwoEvenPadic_presentedProPGen_of_ne α 0 2 v u hi₁ hi₃
+    HasPrescriptionProperty (orientationTwoEvenPadic α q 2 v u) :=
+  hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_of_apply_eq α q _
+    (by rw [orientationTwoEvenPadic_presentedProPGen_one α q 2 v u one_lt_two]; exact hv)
+    (fun h ↦ absurd h (by norm_num))
+    fun _ hi₁ hi₃ ↦ orientationTwoEvenPadic_presentedProPGen_of_ne α q 2 v u hi₁ hi₃
 
 variable {α q n}
 
-/-- **Uniqueness of the canonical character**: for `α` and `q` even and `n ≥ 2` even, with `q = 0`
-when `n = 2`, a character with the prescription property is the orientation with marked values its
-own values `χ(x₂)` and `χ(x₄)`. -/
+/-- **Uniqueness of the canonical character**: for `α` and `q` even and `n ≥ 2` even, a character
+with the prescription property is the orientation with marked values its own values `χ(x₂)` and
+`χ(x₄)`. -/
 theorem eq_orientationTwoEvenPadic_of_hasPrescriptionProperty (hα : 2 ∣ α) (hq : 2 ∣ q)
-    (hn : Even n) (hn₁ : 1 < n) (hq₀ : n = 2 → q = 0)
+    (hn : Even n) (hn₁ : 1 < n)
     {χ : presentedProP 2 (Fin n)
       {demushkinWordTwoEvenPadic (isProP_freeProP 2 (Fin n)) α q n (freeProPGen 2 n)} →ₜ* ℤ_[2]ˣ}
     (hχ : HasPrescriptionProperty χ) :
     χ = orientationTwoEvenPadic α q n (χ (presentedProPGen 2 n _ 1))
       (χ (presentedProPGen 2 n _ 3)) := by
   obtain ⟨-, -, h⟩ :=
-    (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff α q χ hα hq hn hn₁
-      hq₀).1 hχ
+    (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff α q χ hα hq hn hn₁).1 hχ
   refine presentedProP.hom_ext_of fun i ↦ ?_
   rw [orientationTwoEvenPadic_of, ← presentedProPGen_val]
   split_ifs with hi₁ hi₃
@@ -570,10 +566,9 @@ theorem eq_orientationTwoEvenPadic_of_hasPrescriptionProperty (hα : 2 ∣ α) (
 
 /-- **The presented group has exactly one character with the prescription property** (Labute,
 Theorem 4, for the normal form `x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)` with `α`, `q` even
-and `n ≥ 2` even, `q = 0` when `n = 2`): the orientation with `χ(x₂) = -(1 + α)⁻¹` and
-`χ(x₄) = (1 - q)⁻¹`. -/
+and `n ≥ 2` even): the orientation with `χ(x₂) = -(1 + α)⁻¹` and `χ(x₄) = (1 - q)⁻¹`. -/
 theorem existsUnique_hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic (hα : 2 ∣ α)
-    (hq : 2 ∣ q) (hn : Even n) (hn₁ : 1 < n) (hq₀ : n = 2 → q = 0) :
+    (hq : 2 ∣ q) (hn : Even n) (hn₁ : 1 < n) :
     ∃! χ : presentedProP 2 (Fin n)
       {demushkinWordTwoEvenPadic (isProP_freeProP 2 (Fin n)) α q n (freeProPGen 2 n)} →ₜ* ℤ_[2]ˣ,
       HasPrescriptionProperty χ := by
@@ -587,17 +582,20 @@ theorem existsUnique_hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenP
     · exact hasPrescriptionProperty_orientationTwoEvenPadic α q n v _ (by omega) hv
         hunit.val_inv_mul
     · obtain rfl : n = 2 := by obtain ⟨k, hk⟩ := hn; omega
-      obtain rfl := hq₀ rfl
-      exact hasPrescriptionProperty_orientationTwoEvenPadic_two α v _ hv
-  · obtain ⟨h₁, h₃, -⟩ :=
-      (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff α q χ hα hq hn hn₁
-        hq₀).1 hχ
-    rw [eq_orientationTwoEvenPadic_of_hasPrescriptionProperty hα hq hn hn₁ hq₀ hχ]
-    congr 1
-    · exact Units.val_inj.1 (by linear_combination (χ (presentedProPGen 2 n _ 1) : ℤ_[2]) * hv -
+      exact hasPrescriptionProperty_orientationTwoEvenPadic_two α q v _ hv
+  · obtain ⟨h₁, h₃, h⟩ :=
+      (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff α q χ hα hq hn hn₁).1 hχ
+    refine presentedProP.hom_ext_of fun i ↦ ?_
+    have hi := i.isLt
+    rw [orientationTwoEvenPadic_of, ← presentedProPGen_val]
+    split_ifs with hi₁ hi₃
+    · rw [hi₁]
+      exact Units.val_inj.1 (by linear_combination (χ (presentedProPGen 2 n _ 1) : ℤ_[2]) * hv -
         (v : ℤ_[2]) * h₁)
-    · exact Units.val_inj.1
-        (Units.inv_eq_of_mul_eq_one_left (by rw [IsUnit.unit_spec]; exact h₃)).symm
+    · rw [hi₃]
+      exact Units.val_inj.1 (Units.inv_eq_of_mul_eq_one_left
+        (by rw [IsUnit.unit_spec]; exact h₃ (by omega))).symm
+    · exact h i hi₁ hi₃
 
 end Orientation
 
@@ -620,10 +618,10 @@ theorem range_eq_unitsPlusMinus_of_hasPrescriptionProperty_demushkinWordTwoEvenP
   have hq₂ : 2 ∣ 2 ^ f := dvd_pow_self 2 (by omega)
   obtain ⟨h₁, h₃, -⟩ :=
     (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff α _ χ hα₂ hq₂ hn
-      (by omega) (by omega)).1 hχ
+      (by omega)).1 hχ
+  replace h₃ := h₃ (by omega)
   push_cast at h₃
-  have h := eq_orientationTwoEvenPadic_of_hasPrescriptionProperty hα₂ hq₂ hn (by omega) (by omega)
-    hχ
+  have h := eq_orientationTwoEvenPadic_of_hasPrescriptionProperty hα₂ hq₂ hn (by omega) hχ
   have hr := range_orientationTwoEvenPadic α (2 ^ f) n (χ (presentedProPGen 2 n _ 1))
     (χ (presentedProPGen 2 n _ 3)) hn₃
   rw [← h] at hr
@@ -648,14 +646,14 @@ theorem range_eq_of_hasPrescriptionProperty_demushkinWordTwoEvenPadic_of_not_dvd
       ((PadicInt.norm_lt_one_iff_dvd _).2 h2)
   obtain ⟨h₁, h₃, -⟩ :=
     (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff α q χ hα₂ hq hn
-      (by omega) (by omega)).1 hχ
+      (by omega)).1 hχ
+  replace h₃ := h₃ (by omega)
   have hv := (neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one h₁).mpr hαg
   have hv' : -χ (presentedProPGen 2 n _ 1) ∉ unitsPrincipal 2 (g + 1) := fun h ↦
     hαg' ((neg_mem_unitsPrincipal_iff_of_val_mul_one_add_eq_neg_one h₁).mp h)
   have hu : χ (presentedProPGen 2 n _ 3) ∈ unitsPrincipal 2 (g + 1) :=
     (mem_unitsPrincipal_iff_of_val_mul_one_sub_eq_one h₃).mpr (by exact_mod_cast hqg)
-  have h := eq_orientationTwoEvenPadic_of_hasPrescriptionProperty hα₂ hq hn (by omega) (by omega)
-    hχ
+  have h := eq_orientationTwoEvenPadic_of_hasPrescriptionProperty hα₂ hq hn (by omega) hχ
   have hr := range_orientationTwoEvenPadic α q n (χ (presentedProPGen 2 n _ 1))
     (χ (presentedProPGen 2 n _ 3)) hn₃
   rw [← h] at hr
@@ -672,14 +670,15 @@ theorem range_eq_zpowers_neg_one_of_hasPrescriptionProperty_demushkinWordTwoEven
   subst hα hq
   obtain ⟨h₁, h₃, -⟩ :=
     (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff 0 0 χ (dvd_zero 2)
-      (dvd_zero 2) hn hn₁ fun _ ↦ rfl).1 hχ
+      (dvd_zero 2) hn hn₁).1 hχ
   have hv : χ (presentedProPGen 2 n _ 1) = -1 := Units.ext (by simpa using h₁)
-  have hu : χ (presentedProPGen 2 n _ 3) = 1 := Units.ext (by simpa using h₃)
   have h := eq_orientationTwoEvenPadic_of_hasPrescriptionProperty (dvd_zero 2) (dvd_zero 2) hn hn₁
-    (fun _ ↦ rfl) hχ
-  rw [hv, hu] at h
+    hχ
+  rw [hv] at h
   rcases le_or_gt 4 n with hn₄ | hn₄
-  · rw [h, range_orientationTwoEvenPadic 0 0 n _ _ (by omega), Subgroup.zpowers_one_eq_bot,
+  · have hu : χ (presentedProPGen 2 n _ 3) = 1 := Units.ext (by simpa using h₃ (by omega))
+    rw [hu] at h
+    rw [h, range_orientationTwoEvenPadic 0 0 n _ _ (by omega), Subgroup.zpowers_one_eq_bot,
       sup_bot_eq, topologicalClosure_zpowers_neg_one]
   · rw [h, range_orientationTwoEvenPadic_of_le_three 0 0 n _ _ hn₁ (by omega),
       topologicalClosure_zpowers_neg_one]
@@ -696,18 +695,18 @@ include hG
 
 /-- **The character table on the canonical character.** Along an isomorphism
 `e : G ≃ₜ* ⟨x₁, …, xₙ ∣ x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)⟩`, for `α` and `q` even
-and `n ≥ 2` even, with `q = 0` when `n = 2`, the canonical character of `G` satisfies
-`χ(x₂)(1 + α) = -1`, `χ(x₄)(1 - q) = 1` and `χ(x_i) = 1` otherwise, the generators being read back
-in `G` through `e⁻¹`. -/
+and `n ≥ 2` even, the canonical character of `G` satisfies `χ(x₂)(1 + α) = -1`, `χ(x₄)(1 - q) = 1`
+when the factor `x₃^q` is present (`2 < n`), and `χ(x_i) = 1` otherwise, the generators being read
+back in `G` through `e⁻¹`. -/
 theorem demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoEvenPadic (hα : 2 ∣ α)
-    (hq : 2 ∣ q) (hn : Even n) (hn₁ : 1 < n) (hq₀ : n = 2 → q = 0)
+    (hq : 2 ∣ q) (hn : Even n) (hn₁ : 1 < n)
     (e : G ≃ₜ* presentedProP 2 (Fin n)
       {demushkinWordTwoEvenPadic (isProP_freeProP 2 (Fin n)) α q n (freeProPGen 2 n)}) :
     (demushkinCharacter hG (e.symm (presentedProPGen 2 n _ 1)) : ℤ_[2]) * (1 + α) = -1 ∧
-      (demushkinCharacter hG (e.symm (presentedProPGen 2 n _ 3)) : ℤ_[2]) * (1 - q) = 1 ∧
+      (2 < n → (demushkinCharacter hG (e.symm (presentedProPGen 2 n _ 3)) : ℤ_[2]) * (1 - q) = 1) ∧
       ∀ i, i ≠ 1 → i ≠ 3 → demushkinCharacter hG (e.symm (presentedProPGen 2 n _ i)) = 1 :=
-  (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff α q _ hα hq hn hn₁
-    hq₀).1 (hasPrescriptionProperty_demushkinCharacter hG).comp_equiv
+  (hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff α q _ hα hq hn hn₁).1
+    (hasPrescriptionProperty_demushkinCharacter hG).comp_equiv
 
 /-- **A Demushkin group isomorphic to the even dyadic normal form with `q = 2^f` and `2^f ∣ α` has
 orientation image `{±1} × U^(f)`**, for `f ≥ 2` and `n ≥ 4` even. -/
@@ -745,23 +744,24 @@ theorem range_demushkinCharacter_eq_zpowers_neg_one_of_equiv_demushkinWordTwoEve
     range_eq_zpowers_neg_one_of_hasPrescriptionProperty_demushkinWordTwoEvenPadic hα hq hn hn₁
 
 /-- **The image `{±1}` pins the endpoint of the even dyadic family.** If a Demushkin group is
-isomorphic to `⟨x₁, …, xₙ ∣ x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)⟩` with `4 ∣ α`, with
-`q = 0` or `q = 2^f` for some `f ≥ 2`, and with `q = 0` when `n = 2`, and its canonical character
-has image `{±1}`, then `α = 0` and `q = 0`: the values `χ(x₂) = -(1 + α)⁻¹` and `χ(x₄) = (1 - q)⁻¹`
-are then `±1`, which forces `α ∈ {0, -2}` and `q ∈ {0, 2}`, and `4 ∣ α`, `q ≠ 2` leave `α = 0` and
-`q = 0`. The relator is then `x₁² (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`
-(`TauCeti.demushkinWordTwoEvenPadic_zero_zero`). -/
+isomorphic to `⟨x₁, …, xₙ ∣ x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)⟩` with `4 ∣ α` and
+with `q = 0` or `q = 2^f` for some `f ≥ 2`, and its canonical character has image `{±1}`, then
+`α = 0`, and `q = 0` as soon as the factor `x₃^q` is present (`2 < n`; at `n = 2` the relator
+`x₁^{2+α} (x₁, x₂)` does not involve `q`). The relator is then
+`x₁² (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)` (`TauCeti.demushkinWordTwoEvenPadic_zero_zero`, and
+`TauCeti.demushkinWordTwoEvenPadic_two` at `n = 2`). -/
 theorem IsDemushkin.eq_zero_and_eq_zero_of_range_demushkinCharacter_eq_zpowers_neg_one (hα : 4 ∣ α)
-    (hq : q = 0 ∨ ∃ f, 2 ≤ f ∧ q = 2 ^ f) (hn : Even n) (hn₁ : 1 < n) (hq₀ : n = 2 → q = 0)
+    (hq : q = 0 ∨ ∃ f, 2 ≤ f ∧ q = 2 ^ f) (hn : Even n) (hn₁ : 1 < n)
     (e : G ≃ₜ* presentedProP 2 (Fin n)
       {demushkinWordTwoEvenPadic (isProP_freeProP 2 (Fin n)) α q n (freeProPGen 2 n)})
-    (hA : (demushkinCharacter hG).toMonoidHom.range = Subgroup.zpowers (-1)) : α = 0 ∧ q = 0 := by
+    (hA : (demushkinCharacter hG).toMonoidHom.range = Subgroup.zpowers (-1)) :
+    α = 0 ∧ (2 < n → q = 0) := by
   have hα₂ : 2 ∣ α := (Dvd.intro 2 (by norm_num)).trans hα
   have hq₂ : 2 ∣ q := by
     rcases hq with rfl | ⟨f, hf, rfl⟩
     exacts [dvd_zero 2, dvd_pow_self 2 (by omega)]
   obtain ⟨h₁, h₃, -⟩ :=
-    demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoEvenPadic hG hα₂ hq₂ hn hn₁ hq₀ e
+    demushkinCharacter_apply_equiv_symm_of_equiv_demushkinWordTwoEvenPadic hG hα₂ hq₂ hn hn₁ e
   -- Every value of the character is `±1`.
   have hmem : ∀ i, demushkinCharacter hG (e.symm (presentedProPGen 2 n _ i)) = 1 ∨
       demushkinCharacter hG (e.symm (presentedProPGen 2 n _ i)) = -1 := fun i ↦
@@ -779,7 +779,9 @@ theorem IsDemushkin.eq_zero_and_eq_zero_of_range_demushkinCharacter_eq_zpowers_n
       exact PadicInt.p_nonunit (p := 2) (IsUnit.of_mul_eq_one (-c) h1)
     · rw [h, Units.val_neg, Units.val_one] at h₁
       linear_combination -h₁
-  · rcases hmem 3 with h | h
+  · intro hn₂
+    replace h₃ := h₃ hn₂
+    rcases hmem 3 with h | h
     · rw [h, Units.val_one, one_mul, sub_eq_self] at h₃
       exact_mod_cast h₃
     · -- `χ(x₄) = -1` would give `q = 2`, which is neither `0` nor `2^f` with `f ≥ 2`.

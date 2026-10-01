@@ -51,9 +51,7 @@ namespace TauCeti.IsProP
 variable {p : ℕ} [Fact p.Prime] {P : Type*} [Group P] [TopologicalSpace P]
   [IsTopologicalGroup P] [CompactSpace P] [TotallyDisconnectedSpace P]
 
-/-- **A `p`-adic power with exponent divisible by `p` lies in the pro-`p` Frattini subgroup**: for
-`l = p * m` the power `a ^ l` is the `p`-adic power `(a ^ p) ^ m` of the `p`-th power `a ^ p`, which
-lies in the closed subgroup `Φ(P)`. -/
+/-- **A `p`-adic power with exponent divisible by `p` lies in the pro-`p` Frattini subgroup.** -/
 theorem padicPow_mem_proPFrattini_of_dvd (hP : IsProP p P) {l : ℤ_[p]} (hl : (p : ℤ_[p]) ∣ l)
     (a : P) : hP.padicPow a l ∈ proPFrattini p P := by
   obtain ⟨m, rfl⟩ := hl

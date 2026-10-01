@@ -292,8 +292,7 @@ variable [CompactSpace G] [TotallyDisconnectedSpace G] {f : G → ℤ_[p]} (hf :
 include hf hfc
 
 /-- **A continuous crossed homomorphism vanishing at `x` vanishes on the `p`-adic powers of
-`x`**: it vanishes on the natural powers `x ^ k`, whose values are multiples of `f x`, and the
-exponents form a dense subset of `ℤ_p`. -/
+`x`.** -/
 theorem map_padicPow_eq_zero_of_eq_zero {x : G} (hx : f x = 0) (l : ℤ_[p]) :
     f (hG.padicPow x l) = 0 := by
   have h : (fun l : ℤ_[p] ↦ f (hG.padicPow x l)) = fun _ ↦ 0 :=
@@ -304,8 +303,7 @@ theorem map_padicPow_eq_zero_of_eq_zero {x : G} (hx : f x = 0) (l : ℤ_[p]) :
   exact congrFun h l
 
 /-- **On an element where the character is trivial, a continuous crossed homomorphism is
-`ℤ_p`-linear along `p`-adic powers**: `f (x ^ l) = l * f x` for `l ∈ ℤ_p`, by continuity from the
-natural powers. -/
+`ℤ_p`-linear along `p`-adic powers**: `f (x ^ l) = l * f x` for `l ∈ ℤ_p`. -/
 theorem map_padicPow_of_eq_one {x : G} (hx : χ x = 1) (l : ℤ_[p]) :
     f (hG.padicPow x l) = l * f x := by
   have h : (fun l : ℤ_[p] ↦ f (hG.padicPow x l)) = fun l ↦ l * f x :=
