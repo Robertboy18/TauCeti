@@ -33,7 +33,10 @@ bundled paths carrying irrelevant partition data.
   nondegenerate subinterval preserve piecewise `C^n` regularity.
 
 This is the metric-independent finite-partition regularity API used in Layer 0 of the Hopf--Rinow
-roadmap.
+roadmap. The explicit-partition subinterval induction follows the pattern of the Apache-2.0
+[`frenzymath/Poincare-Conjecture`](https://github.com/frenzymath/Poincare-Conjecture)
+formalization, revision `24f32e4d600878bfaac6bc2f2f9324175571c321`, as used in
+`TauCeti/Geometry/Manifold/Riemannian/EDistComparison.lean`.
 
 ## References
 
@@ -185,16 +188,17 @@ private theorem isPiecewiseContMDiffOn_of_partition_of_subset :
   | succ k ih =>
       intro τ hτ hγ s t hs hst ht
       have ht' : t ≤ τ (Fin.last (k + 1)).succ := by simpa only [Fin.succ_last] using ht
+      -- the partition with its last vertex removed
+      have hτ' : ∀ i : Fin (k + 1), τ i.castSucc.castSucc < τ i.castSucc.succ := fun i ↦ by
+        simpa only [Fin.succ_castSucc] using hτ i.castSucc
+      have hγ' : ∀ i : Fin (k + 1), ContMDiffOn (modelWithCornersSelf ℝ ℝ) I n γ
+          (Icc (τ i.castSucc.castSucc) (τ i.castSucc.succ)) := fun i ↦ by
+        simpa only [Fin.succ_castSucc] using hγ i.castSucc
       rcases le_or_gt t (τ (Fin.last (k + 1)).castSucc) with htm | hmt
-      · exact ih (fun i ↦ τ i.castSucc)
-          (fun i ↦ by simpa only [Fin.succ_castSucc] using hτ i.castSucc)
-          (fun i ↦ by simpa only [Fin.succ_castSucc] using hγ i.castSucc) hs hst htm
+      · exact ih (fun i ↦ τ i.castSucc) hτ' hγ' hs hst htm
       rcases le_or_gt (τ (Fin.last (k + 1)).castSucc) s with hms | hsm
       · exact .of_contMDiffOn hst ((hγ (Fin.last (k + 1))).mono (Icc_subset_Icc hms ht'))
-      · have hfirst := ih (fun i ↦ τ i.castSucc)
-          (fun i ↦ by simpa only [Fin.succ_castSucc] using hτ i.castSucc)
-          (fun i ↦ by simpa only [Fin.succ_castSucc] using hγ i.castSucc) hs hsm le_rfl
-        exact hfirst.trans_contMDiffOn hmt
+      · exact (ih (fun i ↦ τ i.castSucc) hτ' hγ' hs hsm le_rfl).trans_contMDiffOn hmt
           ((hγ (Fin.last (k + 1))).mono (Icc_subset_Icc le_rfl ht'))
 
 /-- A piecewise `C^n` path is piecewise `C^n` on every nondegenerate subinterval of its parameter

@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.Gauss.Minimization
 public import TauCeti.Geometry.Manifold.Riemannian.ArcLength
+import TauCeti.Analysis.Normed.Module.Ray
 import TauCeti.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.Convex.StrictConvexSpace
 import Mathlib.Analysis.InnerProductSpace.Convex
@@ -30,22 +31,23 @@ pausing, changing speed, or breaking a minimizer never yields a different unpara
 The argument runs on a general compact parameter interval `[a, b]`. The polar length comparison
 forces the norm of the logarithm to equal the arc length travelled so far; on each `C¹` piece of a
 partition, the equality case of the Gauss lemma then confines the logarithm to the ray through the
-endpoint of that piece, and the rays are chained through the partition points. The `C¹` statements
-on `[0, 1]` are the one-piece special cases.
+endpoint of that piece, and the rays are chained through the partition points
+(`TauCeti.sameRay_of_partition_of_monotoneOn_norm`). A `C¹` competitor is the one-piece case,
+reached through `IsPiecewiseContMDiffOn.of_contMDiffOn`.
 
 ## Main results
 
 * `TauCeti.Manifold.IsNormalDomain.enorm_riemannianLog_eq_pathELength_of_piecewise`: along a
   piecewise `C¹` minimizer from the centre, the norm of the logarithm equals the length travelled
   so far.
+* `TauCeti.Manifold.IsNormalDomain.monotoneOn_norm_riemannianLog_of_pathELength_eq_of_piecewise`:
+  the norm of the logarithm is nondecreasing along a piecewise `C¹` minimizer.
 * `TauCeti.Manifold.IsNormalDomain.riemannianLog_eq_smul_of_pathELength_eq_of_piecewise`: the
   logarithm of a piecewise `C¹` minimizer lies on the ray through `v`, at the radius given by its
   norm.
 * `IsNormalDomain.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_eq_of_piecewise` and
   its `_le` variant: a piecewise `C¹` minimizer is the radial geodesic composed with a continuous
   nondecreasing surjection of its parameter interval onto `[0, 1]`.
-* `TauCeti.Manifold.IsNormalDomain.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_eq` and
-  the other unsuffixed names: the `C¹` special cases on `[0, 1]`.
 
 ## References
 
@@ -62,48 +64,6 @@ open scoped ContDiff ENNReal Manifold Topology
 noncomputable section
 
 namespace TauCeti.Manifold
-
-section Partition
-
-variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {w : ℝ → F}
-
-/-- **Rays chain through a partition.** If a path `w` in a real normed space lies, on each piece of
-an ordered partition, on the ray of its value at the end of that piece, and its norm is
-nondecreasing, then every value lies on the ray of the final value. Monotonicity of the norm rules
-out a zero at a partition point preceded by a nonzero value. -/
-private theorem sameRay_of_partition :
-    ∀ {k : ℕ} (τ : Fin (k + 2) → ℝ), (∀ i : Fin (k + 1), τ i.castSucc ≤ τ i.succ) →
-      (∀ i : Fin (k + 1), ∀ t ∈ Icc (τ i.castSucc) (τ i.succ),
-        SameRay ℝ (w t) (w (τ i.succ))) →
-      MonotoneOn (fun t ↦ ‖w t‖) (Icc (τ 0) (τ (Fin.last (k + 1)))) →
-      ∀ {t : ℝ}, t ∈ Icc (τ 0) (τ (Fin.last (k + 1))) →
-        SameRay ℝ (w t) (w (τ (Fin.last (k + 1)))) := by
-  intro k
-  induction k with
-  | zero =>
-      intro τ _ hpiece _ t ht
-      simpa using hpiece 0 t (by simpa using ht)
-  | succ k ih =>
-      intro τ hτ hpiece hmono t ht
-      have hτmono : Monotone τ := Fin.monotone_iff_le_succ.mpr hτ
-      have hlast : τ (Fin.last (k + 1)).succ = τ (Fin.last (k + 2)) := by rw [Fin.succ_last]
-      rcases le_or_gt (τ (Fin.last (k + 1)).castSucc) t with hmt | htm
-      · simpa only [hlast] using hpiece (Fin.last (k + 1)) t ⟨hmt, hlast ▸ ht.2⟩
-      · have hm : τ (Fin.last (k + 1)).castSucc ∈ Icc (τ 0) (τ (Fin.last (k + 2))) :=
-          ⟨hτmono (Fin.zero_le _), hτmono (Fin.le_last _)⟩
-        have h₁ : SameRay ℝ (w t) (w (τ (Fin.last (k + 1)).castSucc)) :=
-          ih (fun i ↦ τ i.castSucc)
-            (fun i ↦ by simpa only [Fin.succ_castSucc] using hτ i.castSucc)
-            (fun i u hu ↦ by simpa only [Fin.succ_castSucc] using hpiece i.castSucc u hu)
-            (hmono.mono (Icc_subset_Icc le_rfl (hτmono (Fin.le_last _)))) ⟨ht.1, htm.le⟩
-        have h₂ : SameRay ℝ (w (τ (Fin.last (k + 1)).castSucc)) (w (τ (Fin.last (k + 2)))) := by
-          simpa only [hlast] using hpiece (Fin.last (k + 1)) _ ⟨le_rfl, hτ _⟩
-        refine h₁.trans h₂ fun hm0 ↦ Or.inl ?_
-        have hle := hmono ht hm htm.le
-        simp only [hm0, norm_zero] at hle
-        exact norm_le_zero_iff.1 hle
-
-end Partition
 
 section RadialNorm
 
@@ -154,18 +114,6 @@ theorem IsNormalDomain.enorm_riemannianLog_eq_pathELength_of_piecewise (h : IsNo
   rw [← ENNReal.ofReal_toReal hA_top, ENNReal.ofReal_le_ofReal_iff (norm_nonneg _)]
   linarith
 
-/-- **Radial norm equals arc length along a minimizer.** If a `C¹` curve from the centre of a
-normal neighbourhood has length equal to the norm of the logarithm of its endpoint, then at every
-intermediate time the norm of its logarithm equals the length travelled so far. -/
-theorem IsNormalDomain.enorm_riemannianLog_eq_pathELength (h : IsNormalDomain I M p U)
-    (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Icc 0 1))
-    (hγU : MapsTo γ (Icc 0 1) (riemannianExp I M p '' U)) (hγ0 : γ 0 = p)
-    (hlen : pathELength I γ 0 1 = ‖riemannianLog I M p U (γ 1)‖ₑ) {t : ℝ}
-    (ht : t ∈ Icc 0 1) :
-    ‖riemannianLog I M p U (γ t)‖ₑ = pathELength I γ 0 t :=
-  h.enorm_riemannianLog_eq_pathELength_of_piecewise (.of_contMDiffOn zero_lt_one hγ) hγU hγ0
-    hlen ht
-
 /-- The exponential image of a `C¹` path in a normal domain is a `C¹` curve. -/
 private theorem contMDiffOn_riemannianExp_comp (h : IsNormalDomain I M p U)
     {w : ℝ → TangentSpace I p} {c d : ℝ} (hw : ContDiffOn ℝ 1 w (Icc c d))
@@ -190,7 +138,7 @@ private theorem continuousOn_norm_curveVelocityWithin_riemannianExp_comp
 norm grows exactly by the arc length of `exp_p ∘ w`, the derivative of `w` at an interior time
 where `w` does not vanish is a nonnegative multiple of `w` itself. -/
 private theorem hasDerivAt_of_norm_eq_add_integral (h : IsNormalDomain I M p U)
-    {w : ℝ → TangentSpace I p} {c d : ℝ} (hcd : c < d) (hw : ContDiffOn ℝ 1 w (Icc c d))
+    {w : ℝ → TangentSpace I p} {c d : ℝ} (hw : ContDiffOn ℝ 1 w (Icc c d))
     (hdom : MapsTo w (Icc c d) U)
     (hr : ∀ t ∈ Icc c d, ‖w t‖ = ‖w c‖ + ∫ u in c..t,
       ‖curveVelocityWithin I (riemannianExp I M p ∘ w) (Icc c d) u‖)
@@ -203,7 +151,7 @@ private theorem hasDerivAt_of_norm_eq_add_integral (h : IsNormalDomain I M p U)
   have hN : Icc c d ∈ 𝓝 t := Icc_mem_nhds ht.1 ht.2
   have hdomt : w t ∈ expDomain I M p := h.subset_expDomain (hdom htIcc)
   have hσ : ContinuousOn σ (Icc c d) :=
-    continuousOn_norm_curveVelocityWithin_riemannianExp_comp h hcd hw hdom
+    continuousOn_norm_curveVelocityWithin_riemannianExp_comp h (ht.1.trans ht.2) hw hdom
   -- the derivative of `w` at `t`
   have hwt' : HasDerivAt w (deriv w t) t :=
     (((hw t htIcc).contDiffAt hN).differentiableAt one_ne_zero).hasDerivAt
@@ -276,7 +224,6 @@ private theorem sameRay_of_norm_eq_add_integral (h : IsNormalDomain I M p U)
       ‖curveVelocityWithin I (riemannianExp I M p ∘ w) (Icc c d) u‖)
     {t : ℝ} (ht : t ∈ Icc c d) : SameRay ℝ (w t) (w d) := by
   set σ : ℝ → ℝ := fun u ↦ ‖curveVelocityWithin I (riemannianExp I M p ∘ w) (Icc c d) u‖
-    with hσ_def
   have hσ : ContinuousOn σ (Icc c d) :=
     continuousOn_norm_curveVelocityWithin_riemannianExp_comp h hcd hw hdom
   have hσ0 : ∀ u ∈ Icc c d, 0 ≤ σ u := fun u _ ↦ norm_nonneg _
@@ -295,7 +242,7 @@ private theorem sameRay_of_norm_eq_add_integral (h : IsNormalDomain I M p U)
       (hσ.intervalIntegrable_of_Icc hcd.le) ht hs' hs.1
   have hne : ∀ s ∈ Icc t d, ‖w s‖ ≠ 0 := fun s hs ↦ (hpos.trans_le (hmono s hs)).ne'
   have hderiv : ∀ s ∈ Ioo t d, HasDerivAt w ((σ s / ‖w s‖) • w s) s := fun s hs ↦
-    hasDerivAt_of_norm_eq_add_integral h hcd hw hdom hr ⟨ht.1.trans_lt hs.1, hs.2⟩
+    hasDerivAt_of_norm_eq_add_integral h hw hdom hr ⟨ht.1.trans_lt hs.1, hs.2⟩
       (norm_ne_zero_iff.1 (hne s (Ioo_subset_Icc_self hs)))
   have hwcont : ContinuousOn w (Icc t d) := hw.continuousOn.mono (Icc_subset_Icc ht.1 le_rfl)
   have hσt : ContinuousOn σ (Icc t d) := hσ.mono (Icc_subset_Icc ht.1 le_rfl)
@@ -385,11 +332,30 @@ variable [FiniteDimensional ℝ E] [I.Boundaryless]
 
 variable {p : M} {U : Set (TangentSpace I p)} {γ : ℝ → M} {v : TangentSpace I p} {a b : ℝ}
 
+/-- **The radial norm is nondecreasing along a piecewise `C¹` minimizer.** Along a piecewise `C¹`
+curve from the centre `p` of a normal neighbourhood to `exp_p v`, staying in the neighbourhood and
+having the length of the radial segment to `v`, the norm of the logarithm is nondecreasing in the
+parameter. -/
+theorem IsNormalDomain.monotoneOn_norm_riemannianLog_of_pathELength_eq_of_piecewise
+    (h : IsNormalDomain I M p U) (hv : v ∈ U) (hγ : IsPiecewiseContMDiffOn I 1 γ a b)
+    (hγU : MapsTo γ (Icc a b) (riemannianExp I M p '' U)) (hγa : γ a = p)
+    (hγb : γ b = riemannianExp I M p v)
+    (hlen : pathELength I γ a b =
+      pathELength I (fun t : ℝ ↦ riemannianExp I M p (t • v)) 0 1) :
+    MonotoneOn (fun u ↦ ‖riemannianLog I M p U (γ u)‖) (Icc a b) := by
+  have hlen' : pathELength I γ a b = ‖riemannianLog I M p U (γ b)‖ₑ := by
+    rw [hlen, pathELength_riemannianExp_smul_zero_one h hv, hγb, h.riemannianLog_riemannianExp hv]
+  intro s hs u hu hsu
+  refine enorm_le_iff_norm_le.1 ?_
+  rw [h.enorm_riemannianLog_eq_pathELength_of_piecewise hγ hγU hγa hlen' hs,
+    h.enorm_riemannianLog_eq_pathELength_of_piecewise hγ hγU hγa hlen' hu]
+  exact pathELength_mono le_rfl hsu
+
 /-- **Rigidity of piecewise `C¹` length minimizers in a normal neighbourhood.** A piecewise `C¹`
 curve from the centre `p` of a normal neighbourhood to `exp_p v` that stays in the neighbourhood
 and has the length of the radial segment to `v` has, at each time, a logarithm on the ray through
-`v` at distance equal to the length travelled so far. The competitor may pause, slow down, or have
-corners, but it cannot leave the radial ray. -/
+`v`, at the radius given by its norm. The competitor may pause, slow down, or have corners, but it
+cannot leave the radial ray. -/
 theorem IsNormalDomain.riemannianLog_eq_smul_of_pathELength_eq_of_piecewise
     (h : IsNormalDomain I M p U) (hv : v ∈ U) (hγ : IsPiecewiseContMDiffOn I 1 γ a b)
     (hγU : MapsTo γ (Icc a b) (riemannianExp I M p '' U)) (hγa : γ a = p)
@@ -405,14 +371,14 @@ theorem IsNormalDomain.riemannianLog_eq_smul_of_pathELength_eq_of_piecewise
   -- the radial norm is the arc length travelled so far, hence nondecreasing
   have hr : ∀ u ∈ Icc a b, ‖riemannianLog I M p U (γ u)‖ₑ = pathELength I γ a u :=
     fun u hu ↦ h.enorm_riemannianLog_eq_pathELength_of_piecewise hγ hγU hγa hlen' hu
-  have hmono : MonotoneOn (fun u ↦ ‖riemannianLog I M p U (γ u)‖) (Icc a b) :=
-    fun s hs u hu hsu ↦ enorm_le_iff_norm_le.1
-      ((hr s hs).trans_le ((pathELength_mono le_rfl hsu).trans_eq (hr u hu).symm))
+  have hmono := h.monotoneOn_norm_riemannianLog_of_pathELength_eq_of_piecewise hv hγ hγU hγa hγb
+    hlen
   -- on each piece of a partition the logarithm stays on the ray of the piece's endpoint
   have hray : SameRay ℝ (riemannianLog I M p U (γ t)) (riemannianLog I M p U (γ b)) := by
     obtain ⟨k, τ, rfl, rfl, hτ, hpieces⟩ := hγ.exists_partition
     have hτmono : Monotone τ := Fin.monotone_iff_le_succ.mpr fun i ↦ (hτ i).le
-    refine sameRay_of_partition τ (fun i ↦ (hτ i).le) (fun i u hu ↦ ?_) hmono ht
+    refine sameRay_of_partition_of_monotoneOn_norm τ (fun i ↦ (hτ i).le) (fun i u hu ↦ ?_)
+      hmono ht
     have hsub : Icc (τ i.castSucc) (τ i.succ) ⊆ Icc (τ 0) (τ (Fin.last (k + 1))) :=
       Icc_subset_Icc (hτmono (Fin.zero_le _)) (hτmono (Fin.le_last _))
     refine h.sameRay_riemannianLog_of_enorm_eq_add_pathELength (hτ i) (hpieces i)
@@ -428,22 +394,6 @@ theorem IsNormalDomain.riemannianLog_eq_smul_of_pathELength_eq_of_piecewise
     rw [div_eq_inv_mul, mul_smul, hray.norm_smul_eq, smul_smul,
       inv_mul_cancel₀ (norm_ne_zero_iff.2 hv0), one_smul]
 
-/-- **Rigidity of length minimizers in a normal neighbourhood.** A `C¹` curve from the centre
-`p` of a normal neighbourhood to `exp_p v` that stays in the neighbourhood and has the length of
-the radial segment to `v` has, at each time, a logarithm on the ray through `v` at distance equal
-to the length travelled so far. The competitor may pause or slow down, but it cannot leave the
-radial ray. -/
-theorem IsNormalDomain.riemannianLog_eq_smul_of_pathELength_eq (h : IsNormalDomain I M p U)
-    (hv : v ∈ U) (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Icc 0 1))
-    (hγU : MapsTo γ (Icc 0 1) (riemannianExp I M p '' U)) (hγ0 : γ 0 = p)
-    (hγ1 : γ 1 = riemannianExp I M p v)
-    (hlen : pathELength I γ 0 1 =
-      pathELength I (fun t : ℝ ↦ riemannianExp I M p (t • v)) 0 1)
-    {t : ℝ} (ht : t ∈ Icc 0 1) :
-    riemannianLog I M p U (γ t) = (‖riemannianLog I M p U (γ t)‖ / ‖v‖) • v :=
-  h.riemannianLog_eq_smul_of_pathELength_eq_of_piecewise hv (.of_contMDiffOn zero_lt_one hγ) hγU
-    hγ0 hγ1 hlen ht
-
 /-- A length-minimizing piecewise `C¹` curve from the centre of a normal neighbourhood to
 `exp_p v` is, at each time, the exponential of a nonnegative multiple of `v`, at the radius given
 by its logarithm. -/
@@ -457,20 +407,6 @@ theorem IsNormalDomain.eq_riemannianExp_smul_of_pathELength_eq_of_piecewise
     γ t = riemannianExp I M p ((‖riemannianLog I M p U (γ t)‖ / ‖v‖) • v) := by
   rw [← h.riemannianLog_eq_smul_of_pathELength_eq_of_piecewise hv hγ hγU hγa hγb hlen ht,
     h.riemannianExp_riemannianLog (hγU ht)]
-
-/-- A length-minimizing `C¹` curve from the centre of a normal neighbourhood to `exp_p v` is, at
-each time, the exponential of a nonnegative multiple of `v`, at the radius given by its
-logarithm. -/
-theorem IsNormalDomain.eq_riemannianExp_smul_of_pathELength_eq (h : IsNormalDomain I M p U)
-    (hv : v ∈ U) (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Icc 0 1))
-    (hγU : MapsTo γ (Icc 0 1) (riemannianExp I M p '' U)) (hγ0 : γ 0 = p)
-    (hγ1 : γ 1 = riemannianExp I M p v)
-    (hlen : pathELength I γ 0 1 =
-      pathELength I (fun t : ℝ ↦ riemannianExp I M p (t • v)) 0 1)
-    {t : ℝ} (ht : t ∈ Icc 0 1) :
-    γ t = riemannianExp I M p ((‖riemannianLog I M p U (γ t)‖ / ‖v‖) • v) :=
-  h.eq_riemannianExp_smul_of_pathELength_eq_of_piecewise hv (.of_contMDiffOn zero_lt_one hγ) hγU
-    hγ0 hγ1 hlen ht
 
 /-- **Piecewise `C¹` minimizers are reparametrized radial geodesics.** A piecewise `C¹` curve on
 `[a, b]` from the centre of a normal neighbourhood to `exp_p v`, staying in the neighbourhood and
@@ -499,8 +435,8 @@ theorem IsNormalDomain.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_eq
       rwa [hφa, hφb] at hsurj
     · rw [h.eq_riemannianExp_smul_of_pathELength_eq_of_piecewise hv hγ hγU hγa hγb hlen ht, hv0,
         smul_zero, smul_zero]
-  have hlen' : pathELength I γ a b = ‖riemannianLog I M p U (γ b)‖ₑ := by
-    rw [hlen, pathELength_riemannianExp_smul_zero_one h hv, hγb, h.riemannianLog_riemannianExp hv]
+  have hmono := h.monotoneOn_norm_riemannianLog_of_pathELength_eq_of_piecewise hv hγ hγU hγa hγb
+    hlen
   have hcont : ContinuousOn (fun t ↦ ‖riemannianLog I M p U (γ t)‖ / ‖v‖) (Icc a b) :=
     ((h.continuousOn_riemannianLog.comp hγ.continuousOn hγU).norm).div_const _
   have h0 : ‖riemannianLog I M p U (γ a)‖ / ‖v‖ = 0 := by
@@ -509,31 +445,10 @@ theorem IsNormalDomain.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_eq
     rw [hγb, h.riemannianLog_riemannianExp hv, div_self (norm_ne_zero_iff.2 hv0)]
   refine ⟨fun t ↦ ‖riemannianLog I M p U (γ t)‖ / ‖v‖, ?_, ?_, ?_, h0, h1,
     fun t ht ↦ h.eq_riemannianExp_smul_of_pathELength_eq_of_piecewise hv hγ hγU hγa hγb hlen ht⟩
-  · intro s hs t ht hst
-    have hle := h.enorm_riemannianLog_eq_pathELength_of_piecewise hγ hγU hγa hlen' hs ▸
-      h.enorm_riemannianLog_eq_pathELength_of_piecewise hγ hγU hγa hlen' ht ▸
-      pathELength_mono (I := I) (γ := γ) le_rfl hst
-    exact div_le_div_of_nonneg_right (enorm_le_iff_norm_le.1 hle) (norm_nonneg _)
+  · exact fun s hs t ht hst ↦ div_le_div_of_nonneg_right (hmono hs ht hst) (norm_nonneg _)
   · exact hcont
   · have hsurj := hcont.surjOn_Icc (left_mem_Icc.2 hab) (right_mem_Icc.2 hab)
     rwa [h0, h1] at hsurj
-
-/-- **Minimizers are reparametrized radial geodesics.** A `C¹` curve from the centre of a normal
-neighbourhood to `exp_p v`, staying in the neighbourhood and having the length of the radial
-segment, is the radial geodesic `t ↦ exp_p (t • v)` composed with a continuous nondecreasing
-surjection of `[0, 1]` onto itself. Pauses of the competitor are absorbed by the
-reparametrization. -/
-theorem IsNormalDomain.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_eq
-    (h : IsNormalDomain I M p U) (hv : v ∈ U) (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Icc 0 1))
-    (hγU : MapsTo γ (Icc 0 1) (riemannianExp I M p '' U)) (hγ0 : γ 0 = p)
-    (hγ1 : γ 1 = riemannianExp I M p v)
-    (hlen : pathELength I γ 0 1 =
-      pathELength I (fun t : ℝ ↦ riemannianExp I M p (t • v)) 0 1) :
-    ∃ φ : ℝ → ℝ, MonotoneOn φ (Icc 0 1) ∧ ContinuousOn φ (Icc 0 1) ∧
-      SurjOn φ (Icc 0 1) (Icc 0 1) ∧ φ 0 = 0 ∧ φ 1 = 1 ∧
-      ∀ t ∈ Icc (0 : ℝ) 1, γ t = riemannianExp I M p (φ t • v) :=
-  h.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_eq_of_piecewise hv
-    (.of_contMDiffOn zero_lt_one hγ) hγU hγ0 hγ1 hlen
 
 /-- A piecewise `C¹` curve on `[a, b]` from the centre of a normal neighbourhood to `exp_p v`,
 staying in the neighbourhood and no longer than the radial segment, is the radial geodesic
@@ -549,21 +464,6 @@ theorem IsNormalDomain.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_le
       ∀ t ∈ Icc a b, γ t = riemannianExp I M p (φ t • v) :=
   h.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_eq_of_piecewise hv hγ hγU hγa hγb
     (le_antisymm hlen (h.pathELength_riemannianExp_smul_le_of_piecewise hv hγ hγU hγa hγb))
-
-/-- A `C¹` curve from the centre of a normal neighbourhood to `exp_p v`, staying in the
-neighbourhood and no longer than the radial segment, is the radial geodesic composed with a
-continuous nondecreasing surjection of `[0, 1]` onto itself. -/
-theorem IsNormalDomain.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_le
-    (h : IsNormalDomain I M p U) (hv : v ∈ U) (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Icc 0 1))
-    (hγU : MapsTo γ (Icc 0 1) (riemannianExp I M p '' U)) (hγ0 : γ 0 = p)
-    (hγ1 : γ 1 = riemannianExp I M p v)
-    (hlen : pathELength I γ 0 1 ≤
-      pathELength I (fun t : ℝ ↦ riemannianExp I M p (t • v)) 0 1) :
-    ∃ φ : ℝ → ℝ, MonotoneOn φ (Icc 0 1) ∧ ContinuousOn φ (Icc 0 1) ∧
-      SurjOn φ (Icc 0 1) (Icc 0 1) ∧ φ 0 = 0 ∧ φ 1 = 1 ∧
-      ∀ t ∈ Icc (0 : ℝ) 1, γ t = riemannianExp I M p (φ t • v) :=
-  h.exists_monotoneOn_eq_riemannianExp_smul_of_pathELength_le_of_piecewise hv
-    (.of_contMDiffOn zero_lt_one hγ) hγU hγ0 hγ1 hlen
 
 end Rigidity
 

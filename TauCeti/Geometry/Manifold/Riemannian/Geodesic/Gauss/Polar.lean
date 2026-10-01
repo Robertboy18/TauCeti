@@ -284,8 +284,8 @@ theorem ofReal_abs_norm_riemannianLog_sub_norm_riemannianLog_le_pathELength_of_p
   exact h.ofReal_abs_norm_riemannianLog_sub_norm_riemannianLog_le_pathELength zero_le_one
     hη.contMDiffOn hηU
 
-/-- A piecewise `C¹` curve from the centre of a normal neighbourhood to a point `q` has length at
-least the norm of `log_p q`. -/
+/-- Along a piecewise `C¹` curve starting at the centre `p` of a normal neighbourhood, the length
+travelled up to any parameter `t` is at least the norm of `log_p (γ t)`. -/
 theorem ofReal_norm_riemannianLog_le_pathELength_of_piecewise
     (h : IsNormalDomain I M p U) (hγ : IsPiecewiseContMDiffOn I 1 γ a b)
     (hγU : MapsTo γ (Icc a b) (riemannianExp I M p '' U)) (hγa : γ a = p) {t : ℝ}
