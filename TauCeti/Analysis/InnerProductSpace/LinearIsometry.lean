@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.InnerProductSpace.Projection.Basic
 public import Mathlib.Analysis.Normed.Operator.LinearIsometry
 public import Mathlib.Topology.Algebra.Module.FiniteDimension
@@ -20,8 +21,9 @@ map to be written in charts, so this decomposition is what exhibits a linear iso
 of spheres and balls it induces, as immersions.
 
 A linear isometry also carries the orthogonal complement of a vector into the orthogonal
-complement of its image, compatibly with the orthogonal projections; this is how it transports
-the stereographic charts of unit spheres.
+complement of its image; this is how it transports the stereographic charts of unit spheres. For
+Euclidean spaces, a linear isometry matching a pair of standard basis vectors matches the
+corresponding coordinates; this is how it transports the half-space charts of closed balls.
 
 ## Main definitions
 
@@ -32,8 +34,9 @@ the stereographic charts of unit spheres.
 
 ## Main results
 
-* `LinearIsometry.starProjection_orthogonalComplement_singleton_map`: a linear isometry commutes
-  with the orthogonal projections onto the complements of a vector and of its image.
+* `LinearIsometry.apply_eq_of_map_single`: a linear isometry of Euclidean spaces sending the `i`-th
+  standard basis vector to the `j`-th one reads the `i`-th coordinate off as the `j`-th coordinate
+  of the image.
 -/
 
 public section
@@ -48,14 +51,6 @@ open scoped InnerProductSpace
 
 variable {E F : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [NormedAddCommGroup F]
   [InnerProductSpace ℝ F]
-
-/-- A linear isometry commutes with the orthogonal projections onto the orthogonal complement of a
-vector `v` and onto the orthogonal complement of its image `w`. -/
-theorem starProjection_orthogonalComplement_singleton_map (f : E →ₗᵢ[ℝ] F) {v : E} {w : F}
-    (hw : f v = w) (y : E) : (ℝ ∙ w)ᗮ.starProjection (f y) = f ((ℝ ∙ v)ᗮ.starProjection y) := by
-  subst hw
-  simp only [Submodule.starProjection_orthogonal_val, Submodule.starProjection_singleton,
-    f.inner_map_map, f.norm_map, map_sub, map_smul]
 
 /-- A linear isometry `f` maps the orthogonal complement of `v` into the orthogonal complement of
 `f v`. -/
@@ -99,5 +94,20 @@ the first factor. -/
 theorem prodOrthogonalRangeEquiv_apply_zero (f : E →ₗᵢ[ℝ] F) (u : E) :
     f.prodOrthogonalRangeEquiv (u, 0) = f u := by
   simp
+
+section EuclideanSpace
+
+variable {𝕜 ι κ : Type*} [RCLike 𝕜] [Fintype ι] [Fintype κ] [DecidableEq ι] [DecidableEq κ]
+
+/-- A linear isometry of Euclidean spaces sending the `i`-th standard basis vector to the `j`-th
+one reads the `i`-th coordinate of its argument off as the `j`-th coordinate of the image. -/
+theorem apply_eq_of_map_single {L : EuclideanSpace 𝕜 ι →ₗᵢ[𝕜] EuclideanSpace 𝕜 κ} {i : ι} {j : κ}
+    (hL : L (EuclideanSpace.single i 1) = EuclideanSpace.single j 1) (u : EuclideanSpace 𝕜 ι) :
+    L u j = u i := by
+  have h := L.inner_map_map (EuclideanSpace.single i 1) u
+  rw [hL] at h
+  simpa [EuclideanSpace.inner_single_left] using h
+
+end EuclideanSpace
 
 end LinearIsometry

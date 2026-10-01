@@ -85,10 +85,16 @@ theorem stereographic_unitSphereMap (v x : sphere (0 : F) 1) :
     stereographic (norm_eq_of_mem_sphere (ι.unitSphereMap v)) (ι.unitSphereMap x) =
       ι.orthogonalComplementSingletonMap (ι.coe_unitSphereMap_apply v).symm
         (stereographic (norm_eq_of_mem_sphere v) x) := by
+  -- `ι` maps the line `ℝ ∙ v` onto the line `ℝ ∙ ι v`, so it commutes with the orthogonal
+  -- projections onto the orthogonal complements of these lines.
+  have key : (ℝ ∙ (ι v : E))ᗮ.starProjection (ι x) = ι ((ℝ ∙ (v : F))ᗮ.starProjection x) := by
+    have h := ι.map_starProjection (ℝ ∙ (v : F)) x
+    simp only [Submodule.map_span, Set.image_singleton, coe_toLinearMap] at h
+    simp only [Submodule.starProjection_orthogonal_val, map_sub, h]
   apply Subtype.ext
   simp only [stereographic_apply, Submodule.coe_smul, Submodule.coe_orthogonalProjectionOnto_apply,
-    coe_unitSphereMap_apply, coe_orthogonalComplementSingletonMap_apply, ι.inner_map_map,
-    ι.starProjection_orthogonalComplement_singleton_map rfl, map_smul]
+    coe_unitSphereMap_apply, coe_orthogonalComplementSingletonMap_apply, ι.inner_map_map, key,
+    map_smul]
 
 /-- The linear isometry of model Euclidean spaces through which the stereographic charts at `v`
 and at `ι v` read the map `ι` of unit spheres: conjugate the restriction of `ι` to the orthogonal

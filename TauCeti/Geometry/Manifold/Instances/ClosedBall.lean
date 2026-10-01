@@ -394,15 +394,6 @@ private theorem exists_linearIsometryEquiv_comp_eq (φ : F ≃ₗᵢ[ℝ] Euclid
       (ι.comp φ.symm.toLinearIsometry), ?_, fun y ↦ by simp⟩
   simpa [w] using Submodule.reflection_sub hw
 
-/-- A linear isometry of the model space fixing `e₀` preserves the half-space coordinate. -/
-private theorem apply_zero_eq_of_map_single
-    {L : EuclideanSpace ℝ (Fin m) →ₗᵢ[ℝ] EuclideanSpace ℝ (Fin n)}
-    (hL : L (EuclideanSpace.single (0 : Fin m) (1 : ℝ)) = EuclideanSpace.single (0 : Fin n) (1 : ℝ))
-    (u : EuclideanSpace ℝ (Fin m)) : L u 0 = u 0 := by
-  have h := L.inner_map_map e₀ u
-  rw [hL] at h
-  simpa [EuclideanSpace.inner_single_left] using h
-
 variable {k : ℕ∞ω}
 
 /-- The restriction of a linear isometry to the closed unit balls is an immersion at every point,
@@ -427,7 +418,7 @@ theorem _root_.LinearIsometry.isImmersionAt_unitClosedBallMap (x : closedBall (0
   rw [OpenPartialHomeomorph.extend_target', closedBallChart_target, image_univ,
     range_modelWithCornersEuclideanHalfSpace] at hu
   have hu : 0 ≤ u 0 := hu
-  have hLu : 0 ≤ L u 0 := by rw [apply_zero_eq_of_map_single hL]; exact hu
+  have hLu : 0 ≤ L u 0 := by rw [LinearIsometry.apply_eq_of_map_single hL]; exact hu
   -- `L` fixes the centre `-e₀` of the inversion, so it commutes with the inversion.
   have key (y : EuclideanSpace ℝ (Fin m)) :
       inversion (-e₀) √2 (L y) = L (inversion (-e₀) √2 y) := by

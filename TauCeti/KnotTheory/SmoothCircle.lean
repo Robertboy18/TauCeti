@@ -236,28 +236,22 @@ attribute [local instance] finrank_real_complex_fact'
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] {n : ℕ}
   [Fact (finrank ℝ E = n + 1)]
 
-/-- The map `z ↦ ι z` from the standard circle to the unit sphere of `E` is a smooth embedding. -/
-private theorem isSmoothEmbedding_unitSphereMap_mk (ι : ℂ →ₗᵢ[ℝ] E) :
-    Manifold.IsSmoothEmbedding (𝓡 1) (𝓡 n) ∞
-      fun z : Circle ↦ ι.unitSphereMap ⟨z, mem_sphere_zero_iff_norm.2 (Circle.norm_coe z)⟩ :=
-  -- `Circle` is by definition the unit sphere of `ℂ`, carrying the charted-space structure of
-  -- that sphere, and `⟨z, _⟩` is `z` by structure eta, so the smooth-embedding property of
-  -- `ι.unitSphereMap` applies verbatim.
-  ι.isSmoothEmbedding_unitSphereMap
-
 /-- The **great circle** of the unit sphere of `E` cut out by a linear isometric copy
 `ι : ℂ →ₗᵢ[ℝ] E` of the complex plane, parametrized by the standard circle through `ι`. -/
 def greatCircle (ι : ℂ →ₗᵢ[ℝ] E) : SmoothCircleEmbedding (𝓡 n) (sphere (0 : E) 1) :=
   SmoothEmbedding.ofIsSmoothEmbedding
     (fun z : Circle ↦ ι.unitSphereMap ⟨z, mem_sphere_zero_iff_norm.2 (Circle.norm_coe z)⟩)
-    (isSmoothEmbedding_unitSphereMap_mk ι)
+    -- `Circle` is by definition the unit sphere of `ℂ`, carrying the charted-space structure of
+    -- that sphere, and `⟨z, _⟩` is `z` by structure eta, so the smooth-embedding property of
+    -- `ι.unitSphereMap` applies verbatim.
+    ι.isSmoothEmbedding_unitSphereMap
 
 /-- A great circle sends a point `z` of the standard circle to `ι z`. -/
 @[simp]
 theorem coe_greatCircle_apply (ι : ℂ →ₗᵢ[ℝ] E) (z : Circle) :
-    (greatCircle (n := n) ι z : E) = ι z := by
-  rw [greatCircle, SmoothEmbedding.ofIsSmoothEmbedding_apply,
-    LinearIsometry.coe_unitSphereMap_apply]
+    (greatCircle (n := n) ι z : E) = ι z :=
+  (congrArg Subtype.val (SmoothEmbedding.ofIsSmoothEmbedding_apply _ _ z)).trans
+    (ι.coe_unitSphereMap_apply _)
 
 end GreatCircle
 

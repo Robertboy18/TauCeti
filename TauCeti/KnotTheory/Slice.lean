@@ -215,11 +215,10 @@ theorem isSmoothlySlice_greatCircle (ι : ℂ →ₗᵢ[ℝ] E) :
     IsSmoothlySlice (SmoothCircleEmbedding.greatCircle (n := n) ι) :=
   (isSmoothSliceDisc_greatCircle_unitClosedBallMap ι).isSmoothlySlice
 
-/-- **The unknot is smoothly slice.** -/
-theorem isSmoothlySlice_unknot : IsSmoothlySlice unknot := by
-  have h : unknot = SmoothCircleEmbedding.greatCircle complexToEuclideanFour :=
-    SmoothEmbedding.ext fun z ↦ Subtype.ext (by simp)
-  rw [h]
-  exact isSmoothlySlice_greatCircle complexToEuclideanFour
+/-- **The unknot is smoothly slice**: it bounds the flat disc of the first coordinate plane. -/
+theorem isSmoothlySlice_unknot : IsSmoothlySlice unknot :=
+  IsSmoothSliceDisc.isSmoothlySlice (Φ := complexToEuclideanFour.unitClosedBallMap)
+    { isSmoothSliceDisc_greatCircle_unitClosedBallMap complexToEuclideanFour with
+      apply_inclusion := fun z ↦ by simp }
 
 end TauCeti
