@@ -22,14 +22,14 @@ its restriction `G.op ⋙ ℱ` along `G.op`. In other words, for every object `X
 
 For the inclusion of a basis of a topological space into its opens, this says that a sheaf is
 determined on every open `V` by its values on the basic opens contained in `V`: it is the
-adaptedness of `TauCeti.TopCat.Presheaf.IsAdapted` for every sheaf.
+adaptedness of `TopCat.Presheaf.IsAdapted` for every sheaf.
 
 ## Main results
 
 * `CategoryTheory.Functor.IsDenseSubsite.isIso_ranAdjunction_unit_app`: the unit of the
   Kan-extension adjunction is an isomorphism at a sheaf.
-* `CategoryTheory.Functor.IsDenseSubsite.rightExtensionIsoRan`: the right extension `(ℱ, 𝟙)` of
-  `G.op ⋙ ℱ` along `G.op` is isomorphic to the one given by `G.op.ran`.
+* `CategoryTheory.Functor.IsDenseSubsite.isRightKanExtension`: a sheaf, with the identity as
+  counit, is a right Kan extension of its restriction to a dense subsite.
 * `CategoryTheory.Functor.IsDenseSubsite.isPointwiseRightKanExtension`: a sheaf is the pointwise
   right Kan extension of its restriction to a dense subsite.
 
@@ -66,16 +66,11 @@ theorem isIso_ranAdjunction_unit_app (ℱ : Sheaf K A) :
     (IsIso ((sheafToPresheaf K A).map ((G.sheafAdjunctionCocontinuous A J K).unit.app ℱ)))
 
 include J in
-/-- A sheaf `ℱ`, with the identity as counit, is isomorphic as a right extension of `G.op ⋙ ℱ`
-along `G.op` to the right Kan extension `G.op.ran.obj (G.op ⋙ ℱ)` with its counit. -/
-noncomputable def rightExtensionIsoRan (ℱ : Sheaf K A) :
-    RightExtension.mk ℱ.obj (𝟙 (G.op ⋙ ℱ.obj)) ≅
-      RightExtension.mk _ (G.op.ranCounit.app (G.op ⋙ ℱ.obj)) :=
-  haveI := isIso_ranAdjunction_unit_app G J K ℱ
-  CostructuredArrow.isoMk (asIso ((G.op.ranAdjunction A).unit.app ℱ.obj)) (by
-    -- the compatibility of the two counits is the first triangle identity of the adjunction
-    have := (G.op.ranAdjunction A).left_triangle_components ℱ.obj
-    rwa [ranAdjunction_counit] at this)
+/-- A sheaf `ℱ`, with the identity as counit, is a right Kan extension of its restriction
+`G.op ⋙ ℱ` along `G.op`. -/
+theorem isRightKanExtension (ℱ : Sheaf K A) :
+    ℱ.obj.IsRightKanExtension (𝟙 (G.op ⋙ ℱ.obj)) :=
+  (G.op.isIso_ranAdjunction_unit_app_iff ℱ.obj).mp (isIso_ranAdjunction_unit_app G J K ℱ)
 
 include J in
 /-- **A sheaf is the pointwise right Kan extension of its restriction to a dense subsite.** For
@@ -83,8 +78,8 @@ every object `X` of `D`, the restriction maps of `ℱ` exhibit `ℱ.obj (op X)` 
 values `ℱ.obj (op (G.obj Y))` over the arrows `G.obj Y ⟶ X`. -/
 noncomputable def isPointwiseRightKanExtension (ℱ : Sheaf K A) :
     (RightExtension.mk ℱ.obj (𝟙 (G.op ⋙ ℱ.obj))).IsPointwiseRightKanExtension :=
-  (RightExtension.isPointwiseRightKanExtensionEquivOfIso (rightExtensionIsoRan G J K ℱ)).symm
-    (G.op.isPointwiseRightKanExtensionRanCounit (G.op ⋙ ℱ.obj))
+  haveI := isRightKanExtension G J K ℱ
+  isPointwiseRightKanExtensionOfIsRightKanExtension ℱ.obj (𝟙 (G.op ⋙ ℱ.obj))
 
 end CategoryTheory.Functor.IsDenseSubsite
 
