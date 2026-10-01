@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Duality.Shapiro
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Duality.OpenSubgroup
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Duality
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.Finite
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.CohomologicalDimension
