@@ -32,6 +32,8 @@ exponent, so the graded bracket is `ℤ_p`-bilinear.
   the same statements for classes in the graded pieces.
 * `TauCeti.IsProP.gradedBracket_smul_left`, `TauCeti.IsProP.gradedBracket_smul_right`: the graded
   bracket is `ℤ_p`-linear in each variable.
+* `TauCeti.IsProP.gradedBracket_gradedMkZero_padicPow_neg_add`: the brackets `[a^{-u}, b]` and
+  `[a, b^u]` of degree-zero classes cancel.
 * `TauCeti.IsProP.gradedMk_commutatorElement_inv_conj_padicPow_inv`: the commutator of the inverse
   of a conjugated `p`-adic power `c⁻¹ y ^ u c` with `x⁻¹` has class `u` times the graded bracket
   of the classes of `y` and `x`.
@@ -229,6 +231,21 @@ theorem IsProP.gradedBracket_smul_right (hG : IsProP p G) {q j k : ℕ} (u : ℤ
   rw [← hG.gradedMk_padicPow y u, hG.gradedBracket_padicPow_right x y u,
     gradedBracket_gradedMk]
   exact hG.gradedMk_padicPow ⟨_, commutator_mem_pLowerCentralSeries x.2 y.2⟩ u
+
+/-- **The brackets `[a^{-u}, b]` and `[a, b^u]` of degree-zero classes cancel**: both are the
+`p`-adic power, with opposite exponents, of the class of the commutator `⁅a, b⁆`. -/
+theorem IsProP.gradedBracket_gradedMkZero_padicPow_neg_add (hG : IsProP p G) (q : ℕ) (a b : G)
+    (u : ℤ_[p]) :
+    gradedBracket q G 0 0 (gradedMkZero q G (hG.padicPow a (-u))) (gradedMkZero q G b) +
+      gradedBracket q G 0 0 (gradedMkZero q G a) (gradedMkZero q G (hG.padicPow b u)) = 0 := by
+  have h₁ := hG.gradedBracket_padicPow_left (q := q) ⟨a, mem_pLowerCentralSeries_zero q a⟩
+    ⟨b, mem_pLowerCentralSeries_zero q b⟩ (-u)
+  have h₂ := hG.gradedBracket_padicPow_right (q := q) ⟨a, mem_pLowerCentralSeries_zero q a⟩
+    ⟨b, mem_pLowerCentralSeries_zero q b⟩ u
+  simp only [gradedMk_zero] at h₁ h₂
+  rw [h₁, h₂, ← gradedMk_mul, gradedMk_eq_zero_iff, Subgroup.coe_mul, Subgroup.coe_mk,
+    Subgroup.coe_mk, ← hG.padicPow_add, neg_add_cancel, hG.padicPow_zero]
+  exact one_mem _
 
 /-- The class of the commutator of the inverse of a conjugated `p`-adic power `c⁻¹ y ^ u c` with
 the inverse of `x ∈ λ_m` is `u` times the graded bracket of the classes of `y` and `x`. -/
