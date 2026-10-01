@@ -67,7 +67,7 @@ which excludes `ℤ/2`, the finite Demushkin group, whose `cd_2` is infinite.
   `TauCeti.isDemushkin_iff_finrank_cohomFp_two_openSubgroup_index_eq`: **the recognition
   criterion through `dim H²`**, as an equivalence: `G` is Demushkin if and only if `cd_p G = 2`
   and `dim H²(U, 𝔽_p) = 1` for every open normal `U`, respectively for every open normal `U` of
-  index `p`.
+  index `p`. The first does not assume `dim H²(G, 𝔽_p) = 1`, which is the case `U = ⊤`.
 * `TauCeti.isDemushkin_iff_topologicalGeneratorRankNat_openSubgroup` and
   `TauCeti.isDemushkin_iff_topologicalGeneratorRankNat_openSubgroup_index_eq`: **the recognition
   criterion through the ranks**, as an equivalence: `G` is Demushkin if and only if `cd_p G = 2`
@@ -339,19 +339,27 @@ theorem isDemushkin_iff_finrank_cohomFp_two_openSubgroup_index_eq :
   have : Infinite G := hD.infinite_of_two_le_demushkinRank (by rw [demushkinRank_def]; exact hn)
   exact ⟨hD.cohomologicalDimensionAt_eq_two, fun U _ _ ↦ hD.finrank_cohomFp_two_openSubgroup U⟩
 
+omit h2 in
 /-- **Recognition of Demushkin groups by `H²` of the open normal subgroups, as an equivalence**
-(NSW (3.9.15), (i) ⇔ (ii)). A topologically finitely generated one-relator pro-`p` group `G` with
-`d(G) > 1` is a Demushkin group if and only if `cd_p G = 2` and `dim H²(U, 𝔽_p) = 1` for every
-open normal subgroup `U`. -/
+(NSW (3.9.15), (i) ⇔ (ii)). A topologically finitely generated pro-`p` group `G` with `d(G) > 1`
+is a Demushkin group if and only if `cd_p G = 2` and `dim H²(U, 𝔽_p) = 1` for every open normal
+subgroup `U`. The one-relator hypothesis `dim H²(G, 𝔽_p) = 1` of NSW's statement is the case
+`U = ⊤` of the right-hand side, so it is not assumed here. -/
 theorem isDemushkin_iff_finrank_cohomFp_two_openSubgroup :
     IsDemushkin p G ↔ cohomologicalDimensionAt.{u} p G = 2 ∧
       ∀ U : OpenSubgroup G, (U : Subgroup G).Normal →
         Module.finrank (ZMod p) (cohomFp p (U : Subgroup G) 2) = 1 := by
-  refine ⟨fun hD ↦ ?_, fun ⟨hcd, hU⟩ ↦
-    (isDemushkin_iff_finrank_cohomFp_two_openSubgroup_index_eq
-      hG hfg h2 hn).2 ⟨hcd, fun U hUn _ ↦ hU U hUn⟩⟩
-  have : Infinite G := hD.infinite_of_two_le_demushkinRank (by rw [demushkinRank_def]; exact hn)
-  exact ⟨hD.cohomologicalDimensionAt_eq_two, fun U _ ↦ hD.finrank_cohomFp_two_openSubgroup U⟩
+  refine ⟨fun hD ↦ ?_, fun ⟨hcd, hU⟩ ↦ ?_⟩
+  · have : Infinite G := hD.infinite_of_two_le_demushkinRank (by rw [demushkinRank_def]; exact hn)
+    exact ⟨hD.cohomologicalDimensionAt_eq_two, fun U _ ↦ hD.finrank_cohomFp_two_openSubgroup U⟩
+  -- the one-relator hypothesis is the case `U = ⊤`, transported along `G ≃ₜ* ⊤`
+  have h2 : Module.finrank (ZMod p) (cohomFp p G 2) = 1 :=
+    (finrank_cohomFp_two_congr p
+      { Subgroup.topEquiv.symm with
+        continuous_toFun := continuous_id.subtype_mk fun x ↦ Subgroup.mem_top x
+        continuous_invFun := continuous_subtype_val }).trans (hU ⊤ Subgroup.normal_top)
+  exact (isDemushkin_iff_finrank_cohomFp_two_openSubgroup_index_eq hG hfg h2 hn).2
+    ⟨hcd, fun U hUn _ ↦ hU U hUn⟩
 
 /-- **Recognition of Demushkin groups by the ranks of the subgroups of index `p`, as an
 equivalence** (NSW (3.9.15), (i) ⇔ (iii), in the sharpened form over the subgroups of index `p`).
