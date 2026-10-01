@@ -321,8 +321,9 @@ noncomputable def H1InternalHomZModEquiv :
 that of `ZMod n`, along evaluation at `1`. -/
 noncomputable def H2InternalHomZModEquiv :
     H2 G (InternalHom G (ZMod n) (ZMod n)) ≃+ H2 G (ZMod n) :=
-  explicitCoeff2Equiv G (InternalHom G (ZMod n) (ZMod n)) (InternalHom.zmodEquiv G)
-    continuous_of_discreteTopology continuous_of_discreteTopology (InternalHom.zmodEquiv_smul htriv)
+  explicitMap2Equiv G (InternalHom G (ZMod n) (ZMod n)) G (ZMod n) (ContinuousMulEquiv.refl G)
+    (InternalHom.zmodEquiv G) continuous_of_discreteTopology continuous_of_discreteTopology
+    (InternalHom.zmodEquiv_smul htriv)
 
 /-- On cocycle classes, `H1InternalHomZModEquiv` evaluates the cocycle at `1` pointwise: it is the
 cocycle pushforward along `TauCeti.InternalHom.zmodEquiv`, whose values are given by
@@ -345,7 +346,14 @@ theorem H2InternalHomZModEquiv_mk (c : Z2 G (InternalHom G (ZMod n) (ZMod n))) :
         (InternalHom.zmodEquiv G (n := n) (A := ZMod n)).toAddMonoidHom
         continuous_of_discreteTopology (fun g φ => InternalHom.zmodEquiv_smul htriv g φ) c :
           H2 G (ZMod n)) := by
-  rw [H2InternalHomZModEquiv, explicitCoeff2Equiv_mk]
+  rw [H2InternalHomZModEquiv]
+  -- `explicitMap2Equiv` is sealed, so its `_apply` lemma is used as a term rather than rewritten
+  refine ((explicitMap2Equiv_apply G (InternalHom G (ZMod n) (ZMod n)) G (ZMod n)
+    (ContinuousMulEquiv.refl G) (InternalHom.zmodEquiv G) continuous_of_discreteTopology
+    continuous_of_discreteTopology (InternalHom.zmodEquiv_smul htriv) c).trans
+    (explicitMap2_mk G (InternalHom G (ZMod n) (ZMod n)) G (ZMod n) (ContinuousMulEquiv.refl G)
+      (InternalHom.zmodEquiv G (n := n) (A := ZMod n)).toAddMonoidHom
+      continuous_of_discreteTopology (fun g φ => InternalHom.zmodEquiv_smul htriv g φ) c)).trans ?_
   rfl
 
 /-- **`α₀` at trivial `ZMod n` coefficients is scalar multiplication**: `α₀ m b = m • b`, reading

@@ -26,9 +26,9 @@ degrees, and `explicitRes1_eq_explicitMap1`, `explicitRes2_eq_explicitMap2`,
 `explicitCoeff1_eq_explicitMap1` and `explicitCoeff2_eq_explicitMap2` exhibit each of them as the
 compatible pair it is, so that a theorem proved for a general pair specializes to all four. They
 are the positive-degree counterparts of `explicitRes0_eq_explicitMap0` and
-`explicitCoeff0_eq_explicitMap0`. The constructions `explicitCoeff1Equiv` and `explicitCoeff2Equiv`
-upgrade a continuous equivariant additive equivalence of coefficient modules to additive
-equivalences on explicit `H¹` and `H²`.
+`explicitCoeff0_eq_explicitMap0`. The construction `explicitCoeff1Equiv` upgrades a continuous
+equivariant additive equivalence of coefficient modules to an additive equivalence on explicit
+`H¹`.
 
 This is functoriality of the *explicit* model: the carriers are the quotients `Z¹/B¹` and `Z²/B²`
 of plain continuous cochains. Mathlib's `ContinuousCohomology.map` is the compatible-pair pullback
@@ -921,82 +921,6 @@ theorem explicitCoeff2_comp [ContinuousMul G]
     (fun g m => f.map_smul g m) G P (ContinuousMonoidHom.id G) q hq
     (fun g n => q.map_smul g n) using 1 <;>
     ext <;> rfl
-
-/-- An equivariant additive equivalence of topological coefficient modules induces an additive
-equivalence on explicit second continuous cohomology, the degree-two counterpart of
-`TauCeti.ContCohomology.explicitCoeff1Equiv`. Both directions are required to be continuous; for
-discrete coefficient modules this follows automatically from discreteness. -/
-noncomputable def explicitCoeff2Equiv [ContinuousMul G]
-    {N : Type uN} [AddCommGroup N] [TopologicalSpace N]
-    [IsTopologicalAddGroup N] [DistribMulAction G N] [ContinuousSMul G N]
-    (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
-    (hequiv : ∀ (g : G) (m : M), e (g • m) = g • e m) : H2 G M ≃+ H2 G N := by
-  let f : M →+[G] N :=
-    { e.toAddMonoidHom with map_smul' := hequiv }
-  let q : N →+[G] M :=
-    { e.symm.toAddMonoidHom with
-      map_smul' := AddEquiv.symm_map_smul_of_map_smul e hequiv }
-  have hf : Continuous f := he
-  have hq : Continuous q := he'
-  exact
-    { toFun := explicitCoeff2 G M f hf
-      invFun := explicitCoeff2 G N q hq
-      left_inv := fun x => by
-        rw [← AddMonoidHom.comp_apply, ← explicitCoeff2_comp G M f q hf hq]
-        have hqf : q.comp f = DistribMulActionHom.id G := by
-          ext m
-          exact e.symm_apply_apply m
-        simp [hqf]
-      right_inv := fun x => by
-        rw [← AddMonoidHom.comp_apply, ← explicitCoeff2_comp G N q f hq hf]
-        have hfq : f.comp q = DistribMulActionHom.id G := by
-          ext n
-          exact e.apply_symm_apply n
-        simp [hfq]
-      map_add' := map_add (explicitCoeff2 G M f hf) }
-
-/-- The coefficient equivalence on `H²` is the coefficient map induced by its forward
-equivariant additive homomorphism. -/
-@[simp]
-theorem explicitCoeff2Equiv_apply [ContinuousMul G]
-    {N : Type uN} [AddCommGroup N] [TopologicalSpace N]
-    [IsTopologicalAddGroup N] [DistribMulAction G N] [ContinuousSMul G N]
-    (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
-    (hequiv : ∀ (g : G) (m : M), e (g • m) = g • e m) (x : H2 G M) :
-    explicitCoeff2Equiv G M e he he' hequiv x =
-      explicitCoeff2 G M { e.toAddMonoidHom with map_smul' := hequiv } he x :=
-  (rfl)
-
-/-- The inverse coefficient equivalence on `H²` is the coefficient map induced by the inverse
-equivariant additive homomorphism. -/
-@[simp]
-theorem explicitCoeff2Equiv_symm_apply [ContinuousMul G]
-    {N : Type uN} [AddCommGroup N] [TopologicalSpace N]
-    [IsTopologicalAddGroup N] [DistribMulAction G N] [ContinuousSMul G N]
-    (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
-    (hequiv : ∀ (g : G) (m : M), e (g • m) = g • e m) (x : H2 G N) :
-    (explicitCoeff2Equiv G M e he he' hequiv).symm x =
-      explicitCoeff2 G N
-        { e.symm.toAddMonoidHom with
-          map_smul' := AddEquiv.symm_map_smul_of_map_smul e hequiv }
-        he' x :=
-  (rfl)
-
-/-- On cocycle classes, the coefficient equivalence on `H²` postcomposes the cocycle with the
-given equivalence of coefficients. -/
-theorem explicitCoeff2Equiv_mk [ContinuousMul G]
-    {N : Type uN} [AddCommGroup N] [TopologicalSpace N]
-    [IsTopologicalAddGroup N] [DistribMulAction G N] [ContinuousSMul G N]
-    (e : M ≃+ N) (he : Continuous e) (he' : Continuous e.symm)
-    (hequiv : ∀ (g : G) (m : M), e (g • m) = g • e m) (c : Z2 G M) :
-    explicitCoeff2Equiv G M e he he' hequiv (c : H2 G M) =
-      (cocyclesMap2 G M G N (ContinuousMonoidHom.id G)
-        ({ e.toAddMonoidHom with map_smul' := hequiv } : M →+[G] N) he
-        (fun g m => ({ e.toAddMonoidHom with map_smul' := hequiv } : M →+[G] N).map_smul g m) c :
-          H2 G N) := by
-  let f : M →+[G] N := { e.toAddMonoidHom with map_smul' := hequiv }
-  rw [explicitCoeff2Equiv_apply]
-  exact explicitCoeff2_mk G M f he c
 
 end NamedMaps
 
