@@ -27,22 +27,9 @@ This is Neukirch–Schmidt–Wingberg (1.5.2) in every degree; in degrees `0` an
 explicit statement `TauCeti.ContCohomology.DiscreteShortExact.explicitCor_delta0` and
 `explicitCor_delta1` on inhomogeneous cochains.
 
-The proof has no cochains in it. Corestriction is the inverse of Shapiro's isomorphism followed by
-the coefficient map of the trace `Coind_U^G M → M`, and the Shapiro maps commute with the
-connecting maps (`TauCeti.ContCohomology.DiscreteShortExact.delta_shapiroMap`), so the square
-reduces to the naturality of the connecting map in the morphism of short exact sequences
-
-```text
-0 → Coind_U^G A → Coind_U^G B → Coind_U^G C → 0
-         |              |              |
-        tr             tr             tr
-         v              v              v
-0 →      A       →      B       →      C       → 0
-```
-
-formed by the three traces, which commute with the inclusions and the projections because the trace
-is natural in the coefficients: both sides are the finite sum `∑ g • f (g⁻¹)` over a transversal,
-and the maps of `S` are additive and equivariant.
+Corestriction here is the all-degree map of `Corestriction/AllDegrees.lean`, built through the
+coinduced module `Coind_U^G M` and its trace (Brown, Chapter III, §9), and the statement is the
+counterpart for corestriction of `Inflation/ConnectingMap.lean`.
 
 ## Main results
 
