@@ -266,14 +266,19 @@ theorem differential_comp {p q : ℤ}
     differential (hM := hM) (hN := hP) (p + q) (comp g f rfl) =
       comp (differential (hM := hN) (hN := hP) p g) f (by omega) +
         p.negOnePow • comp g (differential (hM := hM) (hN := hN) q f) (by omega) := by
-  exact gradedCommutator_comp hM.isHomogeneous hM.leibniz hN.isHomogeneous hN.leibniz
-    hP.isHomogeneous hP.leibniz g f
+  ext x
+  simpa only [gradedCommutator_apply, differential_apply, comp_apply, Submodule.coe_add,
+    LinearMap.add_apply, Submodule.coe_smul_of_tower, LinearMap.smul_apply] using
+    LinearMap.congr_fun (congrArg Subtype.val (gradedCommutator_comp hM.isHomogeneous hM.leibniz
+      hN.isHomogeneous hN.leibniz hP.isHomogeneous hP.leibniz g f)) x
 
 /-- The identity cochain is closed. -/
 @[simp]
 theorem differential_id (hM : IsDGRightModule h ℳ dM) :
     differential (hM := hM) (hN := hM) 0 (id (R := R) (A := A) (ℳ := ℳ)) = 0 := by
-  exact gradedCommutator_id hM.isHomogeneous hM.leibniz
+  ext x
+  simpa only [gradedCommutator_apply, differential_apply] using
+    LinearMap.congr_fun (congrArg Subtype.val (gradedCommutator_id hM.isHomogeneous hM.leibniz)) x
 
 end dgRightModuleCochains
 
