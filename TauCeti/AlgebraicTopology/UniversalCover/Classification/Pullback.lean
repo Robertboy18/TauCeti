@@ -220,10 +220,13 @@ theorem permCongrHom_comp_monodromyPerm_pullback :
 theorem pullback_smul (τ : Perm (Fin n)) : (τ • c).pullback h hx = τ • c.pullback h hx :=
   (rfl)
 
+-- Here and in the `pullback_refl` lemmas below, `(y := x)` pins the target point: a bare `rfl`
+-- would elaborate it as `Homeomorph.refl X x`, and the generic `pullback` lemmas then no longer
+-- rewrite the resulting term.
 /-- Pulling back along the identity changes nothing. -/
 @[simp]
-theorem pullback_refl (hx : Homeomorph.refl X x = x) (c : ConnectedFiberNumberedCover x n) :
-    c.pullback (Homeomorph.refl X) hx = c :=
+theorem pullback_refl (c : ConnectedFiberNumberedCover x n) :
+    c.pullback (Homeomorph.refl X) (y := x) rfl = c :=
   (rfl)
 
 /-- Pulling back twice is pulling back along the composite homeomorphism. -/
@@ -263,9 +266,10 @@ theorem pullback_smul (τ : Perm (Fin n)) (C : ConnectedFiberNumberedCoverClass 
 
 /-- Pulling back along the identity changes nothing, on classes. -/
 @[simp]
-theorem pullback_refl (hx : Homeomorph.refl X x = x) (C : ConnectedFiberNumberedCoverClass x n) :
-    C.pullback (Homeomorph.refl X) hx = C :=
-  ind (fun c => by rw [pullback_mk, ConnectedFiberNumberedCover.pullback_refl]) C
+theorem pullback_refl (C : ConnectedFiberNumberedCoverClass x n) :
+    C.pullback (Homeomorph.refl X) (y := x) rfl = C :=
+  ind (fun c =>
+    (pullback_mk _ _ c).trans (congrArg mk (ConnectedFiberNumberedCover.pullback_refl c))) C
 
 /-- Pulling back twice is pulling back along the composite homeomorphism, on classes. -/
 @[simp]
@@ -306,8 +310,8 @@ theorem pullback_e :
 
 /-- Pulling back along the identity changes nothing. -/
 @[simp]
-theorem pullback_refl (hx : Homeomorph.refl X x = x) (c : ConnectedPointedCover x n) :
-    c.pullback (Homeomorph.refl X) hx = c :=
+theorem pullback_refl (c : ConnectedPointedCover x n) :
+    c.pullback (Homeomorph.refl X) (y := x) rfl = c :=
   (rfl)
 
 /-- Pulling back twice is pulling back along the composite homeomorphism. -/
@@ -377,10 +381,10 @@ namespace ConnectedPointedCoverClass
 
 /-- Pulling back along the identity changes nothing, on classes. -/
 @[simp]
-theorem pullback_refl (hx : Homeomorph.refl X x = x) (C : ConnectedPointedCoverClass x n) :
-    C.pullback (Homeomorph.refl X) hx = C := by
+theorem pullback_refl (C : ConnectedPointedCoverClass x n) :
+    C.pullback (Homeomorph.refl X) (y := x) rfl = C := by
   obtain ⟨c, rfl⟩ := mk_surjective C
-  rw [pullback_mk, ConnectedPointedCover.pullback_refl]
+  exact (pullback_mk _ _ c).trans (congrArg mk (ConnectedPointedCover.pullback_refl c))
 
 /-- Pulling back twice is pulling back along the composite homeomorphism, on classes. -/
 @[simp]
@@ -411,8 +415,8 @@ theorem pullback_cover (c : ConnectedCover y n) :
 
 /-- Pulling back along the identity changes nothing. -/
 @[simp]
-theorem pullback_refl (hx : Homeomorph.refl X x = x) (c : ConnectedCover x n) :
-    c.pullback (Homeomorph.refl X) hx = c :=
+theorem pullback_refl (c : ConnectedCover x n) :
+    c.pullback (Homeomorph.refl X) (y := x) rfl = c :=
   (rfl)
 
 /-- Pulling back twice is pulling back along the composite homeomorphism. -/
@@ -488,10 +492,10 @@ namespace ConnectedCoverClass
 
 /-- Pulling back along the identity changes nothing, on classes. -/
 @[simp]
-theorem pullback_refl (hx : Homeomorph.refl X x = x) (C : ConnectedCoverClass x n) :
-    C.pullback (Homeomorph.refl X) hx = C := by
+theorem pullback_refl (C : ConnectedCoverClass x n) :
+    C.pullback (Homeomorph.refl X) (y := x) rfl = C := by
   obtain ⟨c, rfl⟩ := mk_surjective C
-  rw [pullback_mk, ConnectedCover.pullback_refl]
+  exact (pullback_mk _ _ c).trans (congrArg mk (ConnectedCover.pullback_refl c))
 
 /-- Pulling back twice is pulling back along the composite homeomorphism, on classes. -/
 @[simp]

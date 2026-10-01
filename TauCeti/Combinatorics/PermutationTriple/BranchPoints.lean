@@ -696,6 +696,11 @@ def reindexBranchPoints (t : ConnectedTriple n) (ρ : Perm (Fin 3)) : ConnectedT
 theorem coe_reindexBranchPoints (t : ConnectedTriple n) (ρ : Perm (Fin 3)) :
     (t.reindexBranchPoints ρ).1 = t.1.reindexBranchPoints ρ := (rfl)
 
+/-- Reordering the branch points along the identity permutation changes nothing. -/
+@[simp]
+theorem reindexBranchPoints_one (t : ConnectedTriple n) : t.reindexBranchPoints 1 = t :=
+  Subtype.ext (PermutationTriple.reindexBranchPoints_one t.1)
+
 /-- Reordering the branch points commutes with relabeling the sheets. -/
 @[simp]
 theorem reindexBranchPoints_smul (τ : Perm (Fin n)) (t : ConnectedTriple n) (ρ : Perm (Fin 3)) :
@@ -728,8 +733,7 @@ action on `TauCeti.PermutationTriple.IsoClass` to the connected classes. -/
 instance : MulAction (Perm (Fin 3))ᵐᵒᵖ (ConnectedIsoClass n) where
   one_smul c := by
     obtain ⟨t, rfl⟩ := mk_surjective c
-    rw [← MulOpposite.op_one, op_smul_mk]
-    exact congrArg mk (Subtype.ext (PermutationTriple.reindexBranchPoints_one _))
+    rw [← MulOpposite.op_one, op_smul_mk, ConnectedTriple.reindexBranchPoints_one]
   mul_smul ρ ρ' c := by
     obtain ⟨t, rfl⟩ := mk_surjective c
     induction ρ using MulOpposite.rec' with | h ρ => ?_
