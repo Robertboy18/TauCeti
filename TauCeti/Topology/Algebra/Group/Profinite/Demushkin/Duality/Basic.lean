@@ -5,9 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.RingTheory.SimpleModule.InjectiveProjective
 public import TauCeti.Algebra.Module.ZMod.Injective
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.TrivialFp.Cup
+public import TauCeti.RingTheory.SimpleModule.InjectiveProjective
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.CupForm
 public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.FiniteCoefficients
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.TateDuality
@@ -162,12 +162,6 @@ private theorem dualityMap_of_natCard_eq (A : Type u) [AddCommGroup A] [Topologi
     dualityMap1_bijective_of_bijective he (hG.dualityMap1_zmod_bijective htriv),
     (dualityMap2_bijective_of_bijective he (dualityMap2_zmod_bijective htriv)).1⟩
 
-omit [LocallyCompactSpace G] hG htriv in
-/-- `H²(G, 𝔽_p)` satisfies Baer's criterion over `𝔽_p`: it is an `𝔽_p`-vector space, and every
-module over a semisimple ring is injective. -/
-private theorem moduleBaer_H2_zmod : Module.Baer (ZMod p) (H2 G (ZMod p)) :=
-  Module.Baer.of_injective (Module.injective_of_isSemisimpleRing (ZMod p) _)
-
 /-- **The dévissage of Tate's duality argument.** On every finite discrete `G`-module `M` killed
 by `p`, `α₀` is surjective, `α₁` is bijective and `α₂` is injective: this holds on the trivial
 modules of order `p`, which are `𝔽_p`, and passes through extensions by the four lemmas
@@ -181,7 +175,7 @@ private theorem dualityMap_devissage (M : Type u) [AddCommGroup M] [TopologicalS
         Function.Injective (dualityMap2 G M (ZMod p)) :=
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   hG.isProP.dualityMap0_surjective_dualityMap1_bijective_dualityMap2_injective (ZMod p)
-    (Module.Baer.zmod_self p) moduleBaer_H2_zmod
+    (Module.Baer.zmod_self p) (Module.Baer.of_isSemisimpleRing (ZMod p) _)
     (fun A _ _ _ _ _ _ hA htrivA _ ↦ hG.dualityMap_of_natCard_eq htriv A hA htrivA) M
     (isPPrimaryTorsion_iff.2 fun m ↦ ⟨1, by rw [pow_one, hM]⟩) hM
 
@@ -225,7 +219,8 @@ trace along a deep enough open subgroup vanishes on invariants, with `α₁` inj
 by the dévissage. -/
 theorem dualityMap0_injective : Function.Injective (dualityMap0 G M (ZMod p)) :=
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  hG.isProP.dualityMap0_injective (ZMod p) (Module.Baer.zmod_self p) moduleBaer_H2_zmod
+  hG.isProP.dualityMap0_injective (ZMod p) (Module.Baer.zmod_self p)
+    (Module.Baer.of_isSemisimpleRing (ZMod p) _)
     (fun A _ _ _ _ _ _ hA htrivA _ ↦
       have hd := hG.dualityMap_of_natCard_eq htriv A hA htrivA
       ⟨hd.1, hd.2.1.1⟩) M
