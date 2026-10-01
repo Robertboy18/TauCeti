@@ -32,9 +32,10 @@ for finite index, `Hom(Ind_U^G A, N) ≅ Coind_U^G Hom(A, N)`.
 On the single `single g a`, the coinduced function supported on the right coset `U * g` with
 value `a` at `g`, the image of `F` evaluates to `g⁻¹ • F g a` (`toInternalHom_single`). Since the
 singles span `Coind_U^G A` this gives injectivity. The preimage of `φ : Coind_U^G A →+ N` is
-`g ↦ (a ↦ g • φ (single g a))`, which is `U`-equivariant, hence locally constant exactly when the
-conjugation action of `U` on `Hom(A, N)` is continuous; for a finite discrete `A` and a discrete `N`
-this continuity is the `ContinuousSMul` instance of `TauCeti.InternalHom`.
+`g ↦ (a ↦ g • φ (single g a))` (`toInternalHomEquiv_symm_apply`), which is `U`-equivariant, hence
+locally constant when the conjugation action of `U` on `Hom(A, N)` is continuous; for a finite
+discrete `A` and a discrete `N` this continuity is the `ContinuousSMul` instance of
+`TauCeti.InternalHom`.
 
 For the permutation module `Coind_U^G 𝔽_p` of an open subgroup `U` of a pro-`p` group this says
 that `Hom(Coind_U^G 𝔽_p, 𝔽_p) ≅ Coind_U^G 𝔽_p`: the permutation module is self-dual, so its
@@ -66,6 +67,8 @@ group (Serre, *Structure de certains pro-p-groupes*, §9.2).
   `TauCeti.DiscreteCoind.toInternalHom_bijective`: `toInternalHom` is bijective for an open `U` and
   a discrete `U`-module `A` whenever the conjugation action of `U` on `Hom(A, N)` is continuous, in
   particular for a finite `A` and a discrete `G`-module `N`.
+* `TauCeti.DiscreteCoind.toInternalHomEquiv_symm_apply`: the inverse of `toInternalHomEquiv` sends
+  `φ` to `g ↦ (a ↦ g • φ (single g a))`.
 * `TauCeti.DiscreteCoind.toInternalHomEquiv_smul` and
   `TauCeti.DiscreteCoind.toInternalHomEquiv_symm_smul`: both directions of `toInternalHomEquiv`
   are `G`-equivariant.
@@ -202,8 +205,9 @@ theorem toInternalHom_bijective : Function.Bijective (toInternalHom U A N) :=
 /-- **The internal hom out of a coinduced module is coinduced**, as an additive equivalence
 `Coind_U^G Hom(A, N) ≃+ Hom(Coind_U^G A, N)`: `toInternalHom` bundled with its inverse, under the
 hypotheses of `toInternalHom_bijective`. Its forward map is `toInternalHom`
-(`toInternalHomEquiv_apply`) and both directions are `G`-equivariant (`toInternalHomEquiv_smul`,
-`toInternalHomEquiv_symm_smul`). -/
+(`toInternalHomEquiv_apply`), its inverse sends `φ` to `g ↦ (a ↦ g • φ (single g a))`
+(`toInternalHomEquiv_symm_apply`), and both directions are `G`-equivariant
+(`toInternalHomEquiv_smul`, `toInternalHomEquiv_symm_smul`). -/
 noncomputable def toInternalHomEquiv :
     DiscreteCoind G U (InternalHom U A N) ≃+ InternalHom G (DiscreteCoind G U A) N :=
   AddEquiv.ofBijective (toInternalHom U A N) (toInternalHom_bijective U A N hU)
@@ -212,6 +216,16 @@ noncomputable def toInternalHomEquiv :
 @[simp]
 theorem toInternalHomEquiv_apply (F : DiscreteCoind G U (InternalHom U A N)) :
     toInternalHomEquiv U A N hU F = toInternalHom U A N F := (rfl)
+
+/-- The inverse of `toInternalHomEquiv` sends `φ : Coind_U^G A →+ N` to the coinduced homomorphism
+`g ↦ (a ↦ g • φ (single g a))`: evaluating `φ` on the single `single g a` recovers `g⁻¹ • F g a`
+(`toInternalHom_single`), so `g • φ (single g a) = F g a`. -/
+@[simp]
+theorem toInternalHomEquiv_symm_apply (φ : InternalHom G (DiscreteCoind G U A) N) (g : G) (a : A) :
+    ((toInternalHomEquiv U A N hU).symm φ g).toAddMonoidHom a =
+      g • φ.toAddMonoidHom (single G U A hU g a) := by
+  conv_rhs => rw [← (toInternalHomEquiv U A N hU).apply_symm_apply φ, toInternalHomEquiv_apply,
+    toInternalHom_single, smul_inv_smul]
 
 /-- `toInternalHomEquiv` is `G`-equivariant. -/
 theorem toInternalHomEquiv_smul (g : G) (F : DiscreteCoind G U (InternalHom U A N)) :
