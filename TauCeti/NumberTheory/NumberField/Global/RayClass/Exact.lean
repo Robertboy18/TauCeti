@@ -306,7 +306,7 @@ theorem mulExact_residueSignRayClass_rayClassToClassGroup (𝔪 : Modulus K) :
 
 /-- The residue and signs of the unit `-1`: residue `-1` and sign `-1` at every real place of the
 modulus. -/
-@[simp] theorem unitsResidueSignHom_neg_one (𝔪 : Modulus K) :
+theorem unitsResidueSignHom_neg_one (𝔪 : Modulus K) :
     unitsResidueSignHom 𝔪 (-1) = (-1, fun _ ↦ -1) := by
   rw [unitsResidueSignHom_apply]
   refine Prod.ext ?_ (funext fun w ↦ ?_)
