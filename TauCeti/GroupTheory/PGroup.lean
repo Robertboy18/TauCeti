@@ -111,10 +111,8 @@ theorem disjoint_of_not_dvd_natCard_of_isPGroup [Fact p.Prime] {C Q : Subgroup G
 /-- A group that is a `p`-group and a `q`-group for coprime `p` and `q` is trivial. -/
 theorem _root_.IsPGroup.subsingleton_of_coprime {q : ℕ} (hp : IsPGroup p G) (hq : IsPGroup q G)
     (hpq : p.Coprime q) : Subsingleton G :=
-  subsingleton_of_forall_eq 1 fun g ↦ by
-    obtain ⟨k, hk⟩ := hp g
-    exact orderOf_eq_one_iff.mp <| Nat.eq_one_of_dvd_coprimes
-      (hq.orderOf_coprime (hpq.symm.pow_right k) g) dvd_rfl (orderOf_dvd_of_pow_eq_one hk)
+  Subgroup.subsingleton_iff.mp <| subsingleton_of_bot_eq_top
+    (disjoint_self.mp ((hp.to_subgroup ⊤).disjoint_of_coprime (hq.to_subgroup ⊤) hpq)).symm
 
 /-- **A group that is a `p`-group and a `q`-group for two distinct primes is trivial.** -/
 theorem _root_.IsPGroup.subsingleton_of_ne {q : ℕ} [Fact p.Prime] [Fact q.Prime]
