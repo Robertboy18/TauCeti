@@ -61,8 +61,9 @@ Herbrand shift instead.
   `TauCeti.map_normUnits_unitFiltration_le`: the norm carries `U(L, e(L/K) i)` into `U(K,i)`.
 * `TauCeti.coe_norm_integerRing` and `TauCeti.coe_trace_integerRing`: the norm and trace of
   `𝒪[L]` over `𝒪[K]` restrict the norm and trace of `L/K`.
-* `TauCeti.algebraMap_norm_integerRing` and `TauCeti.algebraMap_trace_integerRing`: in a Galois
-  extension, the norm and trace of an integer are the product and the sum of its conjugates.
+* `TauCeti.algebraMap_norm_integerRing_eq_prod_automorphisms` and
+  `TauCeti.algebraMap_trace_integerRing_eq_sum_automorphisms`: in a Galois extension, the norm
+  and trace of an integer are the product and the sum of its conjugates.
 
 ## References
 
@@ -369,7 +370,7 @@ variable [IsGalois K L]
 
 /-- In a Galois extension, the norm of an integer `z` of `L`, read in `𝒪[L]`, is the product of
 the Galois conjugates of `z`. -/
-theorem algebraMap_norm_integerRing (z : 𝒪[L]) :
+theorem algebraMap_norm_integerRing_eq_prod_automorphisms (z : 𝒪[L]) :
     algebraMap 𝒪[K] 𝒪[L] (Algebra.norm 𝒪[K] z) = ∏ σ : L ≃ₐ[K] L, σ • z := by
   apply Subtype.ext
   rw [coe_algebraMap_integerRing, coe_norm_integerRing, Algebra.norm_eq_prod_automorphisms,
@@ -378,7 +379,7 @@ theorem algebraMap_norm_integerRing (z : 𝒪[L]) :
 
 /-- In a Galois extension, the trace of an integer `z` of `L`, read in `𝒪[L]`, is the sum of the
 Galois conjugates of `z`. -/
-theorem algebraMap_trace_integerRing (z : 𝒪[L]) :
+theorem algebraMap_trace_integerRing_eq_sum_automorphisms (z : 𝒪[L]) :
     algebraMap 𝒪[K] 𝒪[L] (Algebra.trace 𝒪[K] 𝒪[L] z) = ∑ σ : L ≃ₐ[K] L, σ • z := by
   apply Subtype.ext
   rw [coe_algebraMap_integerRing, coe_trace_integerRing, _root_.trace_eq_sum_automorphisms,

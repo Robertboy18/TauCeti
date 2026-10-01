@@ -23,8 +23,9 @@ element `y` of `𝓂[L]^(2m)`, and
 
 This is the shape in which the norm is computed on the unit filtration of such an extension: the
 valuations of the two traces are read off from the behaviour of the trace on powers of the maximal
-ideal, and `v_K(N_{L/K}(x)) = v_L(x)` since the extension is totally ramified or unramified. It is
-Lemma 5 of Serre, *Local Fields*, Chapter V, §3, stated for the integer rings.
+ideal, and `v_K(N_{L/K}(x)) = f(L/K) v_L(x)`, which is `v_L(x)` when the extension is totally
+ramified and `ℓ v_L(x)` when it is unramified. It is Lemma 5 of Serre, *Local Fields*, Chapter V,
+§3, stated for the integer rings.
 
 ## Main results
 
@@ -71,7 +72,8 @@ theorem exists_norm_one_add_eq_of_mem_maximalIdeal_pow (hℓ : (Module.finrank K
     exact Ideal.mul_mono hJ hJ hy
   · -- Read the identity in `𝒪[L]`, where norm and trace are the product and sum of conjugates.
     apply FaithfulSMul.algebraMap_injective 𝒪[K] 𝒪[L]
-    simp only [map_add, map_one, algebraMap_norm_integerRing, algebraMap_trace_integerRing]
+    simp only [map_add, map_one, algebraMap_norm_integerRing_eq_prod_automorphisms,
+      algebraMap_trace_integerRing_eq_sum_automorphisms]
     simpa only [smul_add, smul_one] using h
 
 end TauCeti
