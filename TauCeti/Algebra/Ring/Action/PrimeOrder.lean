@@ -113,8 +113,9 @@ theorem exists_prod_one_add_smul_eq_of_prime_card [Fintype G] (hG : (Nat.card G)
     rw [mem_coe, hmemB] at hS
     exact prod_smul_mem_span_orbit_sq_of_one_lt_card hS.1 x
   · -- Expand the product over all subsets of `G` and split off `∅`, the singletons and `univ`.
-    rw [prod_one_add, powerset_univ, sum_finset_eq_add_sum_singleton_add_sum_filter_add
-      (Nat.card_eq_fintype_card (α := G) ▸ hG.one_lt), ← hB, hsumB, prod_empty]
+    rw [prod_one_add, sum_powerset_eq_add_sum_singleton_add_sum_filter_add
+      (by rw [card_univ, ← Nat.card_eq_fintype_card]; exact hG.one_lt), powerset_univ, ← hB,
+      hsumB, prod_empty]
     simp only [prod_singleton]
 
 end TauCeti.MulSemiringAction
