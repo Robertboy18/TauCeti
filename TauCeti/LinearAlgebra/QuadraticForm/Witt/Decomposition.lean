@@ -47,6 +47,8 @@ decomposition follows from the regular one.
   index and anisotropic part.
 * `TauCeti.RegularFormClass.rank_eq_two_mul_wittIndex_add`: the rank formula
   `rank c = 2 * wittIndex c + rank (anisotropicPart c)`.
+* `TauCeti.RegularFormClass.eq_hyperbolicClass_of_rank_eq_two_of_not_anisotropic`: an isotropic
+  class of rank two is the hyperbolic class.
 * `QuadraticForm.exists_equivalent_hyperbolicPresentation_prod`: the decomposition read as an
   isometry of quadratic forms.
 
@@ -349,6 +351,19 @@ theorem RegularFormClass.two_mul_wittIndex_le_rank (c : RegularFormClass K) :
     2 * RegularFormClass.wittIndex c ≤ RegularFormClass.rank c := by
   rw [RegularFormClass.rank_eq_two_mul_wittIndex_add c]
   exact Nat.le_add_right _ _
+
+/-- An isotropic class of rank two is the hyperbolic class. -/
+theorem RegularFormClass.eq_hyperbolicClass_of_rank_eq_two_of_not_anisotropic
+    {c : RegularFormClass K} (hc : RegularFormClass.rank c = 2)
+    (h : ¬ RegularFormClass.Anisotropic c) : c = hyperbolicClass K := by
+  have hm : RegularFormClass.wittIndex c ≠ 0 := fun h0 =>
+    h (RegularFormClass.wittIndex_eq_zero_iff.mp h0)
+  have hrank := RegularFormClass.rank_eq_two_mul_wittIndex_add c
+  rw [hc] at hrank
+  have hw : RegularFormClass.wittIndex c = 1 := by omega
+  have hpart : RegularFormClass.anisotropicPart c = 0 :=
+    RegularFormClass.rank_eq_zero_iff.mp (by omega)
+  rw [RegularFormClass.wittDecomposition c, hw, hpart, one_nsmul, add_zero]
 
 end Decomposition
 

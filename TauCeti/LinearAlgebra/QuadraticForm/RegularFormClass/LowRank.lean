@@ -135,13 +135,7 @@ discriminant is the class of `-1`, that is, exactly when it is the hyperbolic cl
 theorem not_anisotropic_iff_discr_eq_neg_one_of_rank_eq_two {x : RegularFormClass K}
     (hx : x.rank = 2) : ¬x.Anisotropic ↔ discr x = squareClass (-1 : Kˣ) := by
   refine ⟨fun h => ?_, fun h => ?_⟩
-  · -- An isotropic class of rank two is one hyperbolic plane and nothing else.
-    have hm : x.wittIndex ≠ 0 := fun h0 => h (wittIndex_eq_zero_iff.mp h0)
-    have hrank := rank_eq_two_mul_wittIndex_add x
-    rw [hx] at hrank
-    have hw : x.wittIndex = 1 := by omega
-    have hpart : x.anisotropicPart = 0 := rank_eq_zero_iff.mp (by omega)
-    rw [wittDecomposition x, hw, hpart, one_nsmul, add_zero]
+  · rw [eq_hyperbolicClass_of_rank_eq_two_of_not_anisotropic hx h]
     exact discr_hyperbolicClass
   · rw [eq_hyperbolicClass_of_rank_eq_two_of_discr_eq_neg_one hx h]
     simpa using not_anisotropic_hyperbolicClass_add (0 : RegularFormClass K)

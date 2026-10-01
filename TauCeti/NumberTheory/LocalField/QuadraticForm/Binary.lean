@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.NumberTheory.LocalField.QuadraticForm.Hasse
+import TauCeti.Algebra.Ring.Int.Units
 import TauCeti.LinearAlgebra.QuadraticForm.Witt.Cancellation
 
 /-!
@@ -49,7 +50,7 @@ theorem mem_unitValueSet_binary_iff_hilbertSymbol_eq (a b c : Kˣ) :
     ← Units.val_mul, ← Units.val_neg,
     ← hilbertSymbol_eq_one_iff_mem_quadraticNormSubgroup (-(a * b)),
     hilbertSymbol_mul_right (Invertible.ne_zero 2), hself, hilbertSymbol_comm (-(a * b)) c]
-  rw [mul_eq_one_iff_eq_inv, Int.units_inv_eq_self, eq_comm]
+  rw [← Int.units_eq_iff_mul_eq_one, eq_comm]
 
 /-- **Local binary classification.** Two binary diagonal forms over a nonarchimedean local field
 are isometric exactly when their discriminants and local Hasse invariants agree. -/
