@@ -8,8 +8,7 @@ module
 public import TauCeti.LinearAlgebra.QuadraticForm.RegularFormClass.LowRank
 public import TauCeti.NumberTheory.LocalField.QuadraticForm.Binary
 public import TauCeti.NumberTheory.LocalField.QuadraticForm.Realization
-import TauCeti.NumberTheory.LocalField.QuadraticForm.UnramifiedClass
-import TauCeti.NumberTheory.LocalField.Squares
+import TauCeti.Algebra.Ring.Int.Units
 
 /-!
 # Isotropy of quadratic forms over a local field, rank by rank
@@ -40,10 +39,6 @@ square classes, and a ternary form, which represents every unit outside one squa
 
 ## Main results
 
-* `TauCeti.exists_hilbertSymbol_eq_and_hilbertSymbol_eq`: for nonsquares `a`, `b` with `ab` a
-  nonsquare, the characters `(·, a)_K` and `(·, b)_K` take every pair of values.
-* `TauCeti.exists_not_isSquare_hilbertSymbol_eq_one`: the norm group of `K(√a)` contains a
-  nonsquare, for every `a`.
 * `TauCeti.RegularFormClass.not_anisotropic_iff_localHasse_eq_of_rank_eq_three`: the ternary
   criterion `s = (-1, -d)_K`.
 * `TauCeti.RegularFormClass.not_anisotropic_iff_discr_ne_zero_or_localHasse_eq_of_rank_eq_four`:
@@ -73,63 +68,9 @@ namespace TauCeti
 variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K]
   [IsNonarchimedeanLocalField K] [Invertible (2 : K)]
 
-/-! ### Prescribing two values of the Hilbert symbol -/
-
-/-- **The norm group of `K(√a)` contains a nonsquare.** For every `a ∈ Kˣ` there is a nonsquare
-`b` with `(b, a)_K = 1`: among a uniformizer `π`, the unramified unit `Δ` and their product, three
-nonsquares, the symbols with `a` multiply to `1`, so one of them is `1`. -/
-theorem exists_not_isSquare_hilbertSymbol_eq_one (a : Kˣ) :
-    ∃ b : Kˣ, ¬IsSquare b ∧ hilbertSymbol b a = 1 := by
-  have h2 : (2 : K) ≠ 0 := Invertible.ne_zero 2
-  obtain ⟨π, hπ⟩ := exists_isUniformizer K
-  obtain ⟨Δ, hΔ, hΔv, -⟩ := exists_unramified_class h2
-  by_cases hπa : hilbertSymbol π a = 1
-  · exact ⟨π, not_isSquare_of_isUniformizer hπ, hπa⟩
-  by_cases hΔa : hilbertSymbol Δ a = 1
-  · exact ⟨Δ, hΔ, hΔa⟩
-  refine ⟨π * Δ,
-    not_isSquare_mul_of_isUniformizer_of_even_toAdd_normalizedValuation hπ (hΔv ▸ Even.zero), ?_⟩
-  rw [hilbertSymbol_mul_left h2, Int.units_ne_iff_eq_neg.mp hπa, Int.units_ne_iff_eq_neg.mp hΔa]
-  decide
-
-/-- For a nonsquare `a` and any `b` with `ab` a nonsquare, some `y ∈ Kˣ` has `(y, a)_K = -1` and
-`(y, b)_K = 1`: the character `(·, a)_K` is nontrivial and differs from `(·, b)_K`. -/
-theorem exists_hilbertSymbol_eq_neg_one_and_eq_one {a b : Kˣ} (ha : ¬IsSquare a)
-    (hab : ¬IsSquare (a * b)) :
-    ∃ y : Kˣ, hilbertSymbol y a = -1 ∧ hilbertSymbol y b = 1 := by
-  have h2 : (2 : K) ≠ 0 := Invertible.ne_zero 2
-  obtain ⟨x₁, hx₁⟩ := exists_hilbertSymbol_eq_neg_one h2 ha
-  obtain ⟨x₃, hx₃⟩ := exists_hilbertSymbol_eq_neg_one h2 hab
-  rw [hilbertSymbol_comm] at hx₁ hx₃
-  rw [hilbertSymbol_mul_right h2] at hx₃
-  rcases Int.units_eq_one_or (hilbertSymbol x₁ b) with h₁ | h₁
-  · exact ⟨x₁, hx₁, h₁⟩
-  rcases Int.units_eq_one_or (hilbertSymbol x₃ a) with h₃ | h₃
-  · rw [h₃, one_mul] at hx₃
-    exact ⟨x₁ * x₃, by rw [hilbertSymbol_mul_left h2, hx₁, h₃, mul_one],
-      by rw [hilbertSymbol_mul_left h2, h₁, hx₃]; decide⟩
-  · rw [h₃, neg_one_mul, neg_inj] at hx₃
-    exact ⟨x₃, h₃, hx₃⟩
-
-/-- **Two distinct nontrivial characters take every pair of values.** For nonsquares `a`, `b`
-with `ab` a nonsquare, every pair of signs `(s, t)` is `((x, a)_K, (x, b)_K)` for some
-`x ∈ Kˣ`. -/
-theorem exists_hilbertSymbol_eq_and_hilbertSymbol_eq {a b : Kˣ} (ha : ¬IsSquare a)
-    (hb : ¬IsSquare b) (hab : ¬IsSquare (a * b)) (s t : ℤˣ) :
-    ∃ x : Kˣ, hilbertSymbol x a = s ∧ hilbertSymbol x b = t := by
-  have h2 : (2 : K) ≠ 0 := Invertible.ne_zero 2
-  obtain ⟨y, hya, hyb⟩ := exists_hilbertSymbol_eq_neg_one_and_eq_one ha hab
-  obtain ⟨z, hzb, hza⟩ := exists_hilbertSymbol_eq_neg_one_and_eq_one hb (mul_comm a b ▸ hab)
-  rcases Int.units_eq_one_or s with rfl | rfl <;> rcases Int.units_eq_one_or t with rfl | rfl
-  · exact ⟨1, hilbertSymbol_one_left a, hilbertSymbol_one_left b⟩
-  · exact ⟨z, hza, hzb⟩
-  · exact ⟨y, hya, hyb⟩
-  · exact ⟨y * z, by rw [hilbertSymbol_mul_left h2, hya, hza, mul_one],
-      by rw [hilbertSymbol_mul_left h2, hyb, hzb, one_mul]⟩
-
 /-! ### Diagonal forms of rank three, four and five -/
 
-/-- **Ternary isotropy** (Serre IV Thm 6 (iii)). A diagonal form `⟨a, b, c⟩` over `K` is
+/-- **Ternary isotropy** (Serre IV Thm 6 (ii)). A diagonal form `⟨a, b, c⟩` over `K` is
 isotropic exactly when its local Hasse invariant `(a, b)(a, c)(b, c)` is `(-1, -abc)_K`. -/
 theorem not_anisotropic_presentedForm_three_iff (w : Fin 3 → Kˣ) :
     ¬(presentedForm ⟨3, w⟩).Anisotropic ↔
@@ -139,11 +80,7 @@ theorem not_anisotropic_presentedForm_three_iff (w : Fin 3 → Kˣ) :
   -- `⟨w₀, w₁, w₂⟩` is isotropic exactly when `⟨w₁, w₂⟩` represents `-w₀`, that is, when
   -- `(-w₀, -w₁w₂)_K = (w₁, w₂)_K`.
   have htail : presentedForm ⟨2, fun i : Fin 2 => w i.succ⟩ =
-      weightedSumSquares K ![(w 1 : K), (w 2 : K)] := by
-    rw [presentedForm_eq_weightedSumSquares_coe]
-    congr 1
-    funext i
-    fin_cases i <;> rfl
+      weightedSumSquares K ![(w 1 : K), (w 2 : K)] := presentedForm_two _
   refine (not_anisotropic_presentedForm_succ_iff w).trans ?_
   rw [htail, mem_unitValueSet_binary_iff_hilbertSymbol_eq]
   -- Both products expand to the same seven symbols.
@@ -158,11 +95,9 @@ theorem not_anisotropic_presentedForm_three_iff (w : Fin 3 → Kˣ) :
   -- Two signs agree exactly when their product is `1`.
   constructor
   · intro h
-    refine (mul_eq_one_iff_eq_inv.mp ?_).trans (Int.units_inv_eq_self _)
-    rw [← key, h, Int.units_mul_self]
+    rw [Int.units_eq_iff_mul_eq_one, ← key, h, Int.units_mul_self]
   · intro h
-    refine (mul_eq_one_iff_eq_inv.mp ?_).trans (Int.units_inv_eq_self _)
-    rw [key, h, Int.units_mul_self]
+    rw [Int.units_eq_iff_mul_eq_one, key, h, Int.units_mul_self]
 
 /-- If `abcd` is a nonsquare, the binary forms `⟨a, b⟩` and `⟨c, d⟩` have unit values `x` and
 `-x` that are negatives of each other, so that `⟨a, b⟩ ⊥ ⟨c, d⟩` is isotropic. -/
@@ -189,46 +124,29 @@ theorem exists_mem_unitValueSet_binary_and_neg_mem_of_not_isSquare (a b c d : K�
       hilbertSymbol_eq_one_of_isSquare_right _ hcd']
   -- Otherwise `(·, -ab)_K` and `(·, -cd)_K` are distinct nontrivial characters.
   have hprod : ¬IsSquare (-(a * b) * -(c * d)) := by rwa [neg_mul_neg, ← mul_assoc]
-  obtain ⟨x, hx₁, hx₂⟩ := exists_hilbertSymbol_eq_and_hilbertSymbol_eq hab' hcd' hprod
+  obtain ⟨x, hx₁, hx₂⟩ := exists_hilbertSymbol_eq_and_hilbertSymbol_eq h2 hab' hcd' hprod
     (hilbertSymbol a b) (hilbertSymbol (-1) (-(c * d)) * hilbertSymbol c d)
   refine ⟨x, hx₁, ?_⟩
   rw [neg_eq_neg_one_mul x, hilbertSymbol_mul_left h2, hx₂, ← mul_assoc, Int.units_mul_self,
     one_mul]
 
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] [Invertible (2 : K)] in
-/-- The first two weights of a quaternary presentation, as a binary diagonal form. -/
-private theorem presentedForm_castAdd_two (w : Fin 4 → Kˣ) :
-    presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩ =
-      weightedSumSquares K ![(w 0 : K), (w 1 : K)] := by
-  rw [presentedForm_eq_weightedSumSquares_coe]
-  congr 1
-  funext i
-  fin_cases i <;> rfl
-
-omit [ValuativeRel K] [TopologicalSpace K] [IsNonarchimedeanLocalField K] [Invertible (2 : K)] in
-/-- The last two weights of a quaternary presentation, as a binary diagonal form. -/
-private theorem presentedForm_natAdd_two (w : Fin 4 → Kˣ) :
-    presentedForm ⟨2, fun i => w (Fin.natAdd 2 i)⟩ =
-      weightedSumSquares K ![(w 2 : K), (w 3 : K)] := by
-  rw [presentedForm_eq_weightedSumSquares_coe]
-  congr 1
-  funext i
-  fin_cases i <;> rfl
-
-/-- **Quaternary isotropy, nonsquare discriminant** (Serre IV Thm 6 (iv)). A diagonal form
+/-- **Quaternary isotropy, nonsquare discriminant** (Serre IV Thm 6 (iii)). A diagonal form
 `⟨a, b, c, d⟩` over `K` whose discriminant `abcd` is a nonsquare is isotropic. -/
 theorem not_anisotropic_presentedForm_four_of_not_isSquare (w : Fin 4 → Kˣ)
     (h : ¬IsSquare (w 0 * w 1 * w 2 * w 3)) : ¬(presentedForm ⟨4, w⟩).Anisotropic := by
-  intro hani
-  have hprod :=
-    (equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 2) w).anisotropic_iff.mp hani
-  rw [presentedForm_castAdd_two, presentedForm_natAdd_two] at hprod
-  obtain ⟨x, hx₁, hx₂⟩ :=
-    exists_mem_unitValueSet_binary_and_neg_mem_of_not_isSquare (w 0) (w 1) (w 2) (w 3) h
-  exact not_anisotropic_prod_of_represents_neg (mem_unitValueSet.mp hx₁)
-    (by simpa using mem_unitValueSet.mp hx₂) x.ne_zero hprod
+  have hfirst : presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩ =
+      weightedSumSquares K ![(w 0 : K), (w 1 : K)] := presentedForm_two _
+  have hlast : presentedForm ⟨2, fun i => w (Fin.natAdd 2 i)⟩ =
+      weightedSumSquares K ![(w 2 : K), (w 3 : K)] := presentedForm_two _
+  have hw0 : w 0 ∈ unitValueSet (presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩) := by
+    rw [hfirst]
+    exact mem_unitValueSet_binary_left _ _
+  rw [(equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 2) w).anisotropic_iff,
+    not_anisotropic_prod_iff_exists_mem_unitValueSet_neg_mem (nondegenerate_presentedForm _)
+      (nondegenerate_presentedForm _) ⟨w 0, hw0⟩, hfirst, hlast]
+  exact exists_mem_unitValueSet_binary_and_neg_mem_of_not_isSquare (w 0) (w 1) (w 2) (w 3) h
 
-/-- **Quaternary isotropy, square discriminant** (Serre IV Thm 6 (iv)). A diagonal form
+/-- **Quaternary isotropy, square discriminant** (Serre IV Thm 6 (iii)). A diagonal form
 `⟨a, b, c, d⟩` over `K` whose discriminant `abcd` is a square is isotropic exactly when its local
 Hasse invariant `∏_{i<j} (aᵢ, aⱼ)_K` is `(-1, -1)_K`. -/
 theorem not_anisotropic_presentedForm_four_iff_of_isSquare (w : Fin 4 → Kˣ)
@@ -238,44 +156,28 @@ theorem not_anisotropic_presentedForm_four_iff_of_isSquare (w : Fin 4 → Kˣ)
         hilbertSymbol (w 1) (w 2) * hilbertSymbol (w 1) (w 3) * hilbertSymbol (w 2) (w 3) =
           hilbertSymbol (-1 : Kˣ) (-1) := by
   have h2 : (2 : K) ≠ 0 := Invertible.ne_zero 2
+  have hfirst : presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩ =
+      weightedSumSquares K ![(w 0 : K), (w 1 : K)] := presentedForm_two _
+  have hlast : presentedForm ⟨2, fun i => w (Fin.natAdd 2 i)⟩ =
+      weightedSumSquares K ![(w 2 : K), (w 3 : K)] := presentedForm_two _
   have hab : hilbertSymbol (w 0) (-(w 0 * w 1)) = hilbertSymbol (w 0) (w 1) :=
     (mem_unitValueSet_binary_iff_hilbertSymbol_eq (w 0) (w 1) (w 0)).mp
       (mem_unitValueSet_binary_left (w 0) (w 1))
+  have hw0 : w 0 ∈ unitValueSet (presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩) := by
+    rw [hfirst]
+    exact mem_unitValueSet_binary_left _ _
   -- `⟨w₀, w₁⟩ ⊥ ⟨w₂, w₃⟩` is isotropic exactly when `⟨w₀, w₁⟩` has a unit value `x` with `-x` a
-  -- value of `⟨w₂, w₃⟩`.
-  have hiff : ¬(presentedForm ⟨4, w⟩).Anisotropic ↔
-      ∃ x : Kˣ, x ∈ unitValueSet (weightedSumSquares K ![(w 0 : K), (w 1 : K)]) ∧
-        -x ∈ unitValueSet (weightedSumSquares K ![(w 2 : K), (w 3 : K)]) := by
-    rw [← presentedForm_castAdd_two w, ← presentedForm_natAdd_two w]
-    refine ((equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 2)
-      w).anisotropic_iff.not).trans ?_
-    constructor
-    · intro hiso
-      by_cases hcd : (presentedForm ⟨2, fun i => w (Fin.natAdd 2 i)⟩).Anisotropic
-      · obtain ⟨x, y, hx, hxy⟩ := hcd.exists_ne_zero_eq_neg_of_not_anisotropic_prod
-          (nondegenerate_presentedForm _).radical_eq_bot hiso
-        refine ⟨Units.mk0 _ hx, mem_unitValueSet.mpr ((represents_iff _ _).mpr ⟨x, rfl⟩),
-          mem_unitValueSet.mpr ((represents_iff _ _).mpr ⟨y, ?_⟩)⟩
-        rw [Units.val_neg, Units.val_mk0, hxy, neg_neg]
-      · -- An isotropic `⟨w₂, w₃⟩` represents every scalar, in particular `-w₀`.
-        refine ⟨w 0, ?_, ?_⟩
-        · rw [presentedForm_castAdd_two]
-          exact mem_unitValueSet_binary_left (w 0) (w 1)
-        · rw [mem_unitValueSet, Units.val_neg]
-          exact represents_of_nondegenerate_of_not_anisotropic _ (nondegenerate_presentedForm _)
-            hcd _
-    · rintro ⟨x, hx₁, hx₂⟩
-      exact not_anisotropic_prod_of_represents_neg (mem_unitValueSet.mp hx₁)
-        (by simpa using mem_unitValueSet.mp hx₂) x.ne_zero
-  -- Since `-w₀w₁` and `-w₂w₃` lie in the same square class, the two characters `(·, -w₀w₁)_K`
-  -- and `(·, -w₂w₃)_K` agree, and `w₀` itself is a value of `⟨w₀, w₁⟩`; so the condition is
-  -- `(-1, -w₀w₁)_K (w₀, w₁)_K = (w₂, w₃)_K`.
+  -- value of `⟨w₂, w₃⟩`. Since `-w₀w₁` and `-w₂w₃` lie in the same square class, the two
+  -- characters `(·, -w₀w₁)_K` and `(·, -w₂w₃)_K` agree, and `w₀` itself is a value of
+  -- `⟨w₀, w₁⟩`; so the condition is `(-1, -w₀w₁)_K (w₀, w₁)_K = (w₂, w₃)_K`.
   have hcong (x : Kˣ) : hilbertSymbol x (-(w 2 * w 3)) = hilbertSymbol x (-(w 0 * w 1)) :=
     hilbertSymbol_congr_sq x x _ _ ⟨x, rfl⟩ (by rwa [neg_mul_neg, mul_comm, ← mul_assoc])
   have hneg (x : Kˣ) : hilbertSymbol (-x) (-(w 0 * w 1)) =
       hilbertSymbol (-1) (-(w 0 * w 1)) * hilbertSymbol x (-(w 0 * w 1)) := by
     rw [neg_eq_neg_one_mul x, hilbertSymbol_mul_left h2]
-  rw [hiff]
+  rw [(equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 2) w).anisotropic_iff,
+    not_anisotropic_prod_iff_exists_mem_unitValueSet_neg_mem (nondegenerate_presentedForm _)
+      (nondegenerate_presentedForm _) ⟨w 0, hw0⟩, hfirst, hlast]
   simp only [mem_unitValueSet_binary_iff_hilbertSymbol_eq, hcong]
   -- The two products expand to the same symbols, once `(w₀w₁, w₂w₃)_K = (-1, w₀w₁)_K` is used.
   have key : hilbertSymbol (w 0) (w 1) * hilbertSymbol (w 2) (w 3) *
@@ -292,43 +194,32 @@ theorem not_anisotropic_presentedForm_four_iff_of_isSquare (w : Fin 4 → Kˣ)
   constructor
   · rintro ⟨x, hx₁, hx₂⟩
     rw [hneg x, hx₁] at hx₂
-    refine (mul_eq_one_iff_eq_inv.mp ?_).trans (Int.units_inv_eq_self _)
-    rw [← key, ← hx₂]
-    have hcomm : hilbertSymbol (w 0) (w 1) *
-        (hilbertSymbol (-1) (-(w 0 * w 1)) * hilbertSymbol (w 0) (w 1)) *
-          hilbertSymbol (-1) (-(w 0 * w 1)) =
-        hilbertSymbol (w 0) (w 1) * hilbertSymbol (w 0) (w 1) *
-          (hilbertSymbol (-1) (-(w 0 * w 1)) * hilbertSymbol (-1) (-(w 0 * w 1))) := by
-      simp only [mul_comm, mul_left_comm, mul_assoc]
-    rw [hcomm, Int.units_mul_self, Int.units_mul_self, one_mul]
+    rw [Int.units_eq_iff_mul_eq_one, ← key, ← hx₂,
+      mul_comm (hilbertSymbol (-1) (-(w 0 * w 1))) (hilbertSymbol (w 0) (w 1)), ← mul_assoc,
+      Int.units_mul_self, one_mul, Int.units_mul_self]
   · intro hε
     refine ⟨w 0, hab, ?_⟩
-    rw [hneg (w 0), hab]
-    refine (mul_eq_one_iff_eq_inv.mp ?_).trans (Int.units_inv_eq_self _)
-    rw [mul_comm _ (hilbertSymbol (w 0) (w 1)), mul_right_comm, key, hε, Int.units_mul_self]
+    rw [hneg (w 0), hab, Int.units_eq_iff_mul_eq_one, mul_comm _ (hilbertSymbol (w 0) (w 1)),
+      mul_right_comm, key, hε, Int.units_mul_self]
 
-/-- **Isotropy in rank five** (Serre IV Thm 6 (v)). Every diagonal form of rank five over `K`
+/-- **Isotropy in rank five** (Serre IV Thm 6 (iv)). Every diagonal form of rank five over `K`
 is isotropic. -/
 theorem not_anisotropic_presentedForm_five (w : Fin 5 → Kˣ) :
     ¬(presentedForm ⟨5, w⟩).Anisotropic := by
   have h2 : (2 : K) ≠ 0 := Invertible.ne_zero 2
-  intro hani
-  have hprod :=
-    (equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 3) w).anisotropic_iff.mp hani
   have hfirst : presentedForm ⟨2, fun i => w (Fin.castAdd 3 i)⟩ =
-      weightedSumSquares K ![(w 0 : K), (w 1 : K)] := by
-    rw [presentedForm_eq_weightedSumSquares_coe]
-    congr 1
-    funext i
-    fin_cases i <;> rfl
+      weightedSumSquares K ![(w 0 : K), (w 1 : K)] := presentedForm_two _
   have hlast : (fun i : Fin 3 => w (Fin.natAdd 2 i)) = ![w 2, w 3, w 4] :=
     funext fun i => by fin_cases i <;> rfl
-  rw [hfirst, hlast] at hprod
-  -- A unit value `x` of `⟨w₀, w₁⟩` with `-x` a value of `⟨w₂, w₃, w₄⟩` contradicts anisotropy.
-  have hval (x : Kˣ) (hx : x ∈ unitValueSet (weightedSumSquares K ![(w 0 : K), (w 1 : K)]))
-      (hx' : -x ∈ unitValueSet (presentedForm ⟨3, ![w 2, w 3, w 4]⟩)) : False :=
-    not_anisotropic_prod_of_represents_neg (mem_unitValueSet.mp hx)
-      (by simpa using mem_unitValueSet.mp hx') x.ne_zero hprod
+  have hw0 : w 0 ∈ unitValueSet (presentedForm ⟨2, fun i => w (Fin.castAdd 3 i)⟩) := by
+    rw [hfirst]
+    exact mem_unitValueSet_binary_left _ _
+  -- `⟨w₀, …, w₄⟩` is isotropic as soon as a unit value `x` of `⟨w₀, w₁⟩` has `-x` a value of
+  -- `⟨w₂, w₃, w₄⟩`.
+  rw [(equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 3) w).anisotropic_iff,
+    not_anisotropic_prod_iff_exists_mem_unitValueSet_neg_mem (nondegenerate_presentedForm _)
+      (nondegenerate_presentedForm _) ⟨w 0, hw0⟩, hfirst, hlast]
+  rw [hfirst] at hw0
   -- `⟨w₂, w₃, w₄⟩` represents `-x` as soon as `⟨x, w₂, w₃, w₄⟩` has a nonsquare discriminant.
   have hter (x : Kˣ) (hx : ¬IsSquare (x * (w 2 * w 3 * w 4))) :
       -x ∈ unitValueSet (presentedForm ⟨3, ![w 2, w 3, w 4]⟩) := by
@@ -343,18 +234,16 @@ theorem not_anisotropic_presentedForm_five (w : Fin 5 → Kˣ) :
     simpa using h4
   -- The values `w₀` and `w₀ n` of `⟨w₀, w₁⟩`, with `n` a nonsquare norm from `K(√(-w₀w₁))`, lie
   -- in distinct square classes, so one of them has a nonsquare product with `w₂w₃w₄`.
-  obtain ⟨n, hn, hn'⟩ := exists_not_isSquare_hilbertSymbol_eq_one (-(w 0 * w 1))
-  have hw0 : w 0 ∈ unitValueSet (weightedSumSquares K ![(w 0 : K), (w 1 : K)]) :=
-    mem_unitValueSet_binary_left _ _
+  obtain ⟨n, hn, hn'⟩ := exists_not_isSquare_hilbertSymbol_eq_one h2 (-(w 0 * w 1))
   have hw0n : w 0 * n ∈ unitValueSet (weightedSumSquares K ![(w 0 : K), (w 1 : K)]) := by
     rw [mem_unitValueSet_binary_iff_hilbertSymbol_eq, hilbertSymbol_mul_left h2, hn', mul_one]
     exact (mem_unitValueSet_binary_iff_hilbertSymbol_eq _ _ _).mp hw0
   by_cases hsq : IsSquare (w 0 * (w 2 * w 3 * w 4))
-  · refine hval _ hw0n (hter _ fun h => hn ?_)
+  · refine ⟨_, hw0n, hter _ fun h => hn ?_⟩
     have hcancel : w 0 * n * (w 2 * w 3 * w 4) * (w 0 * (w 2 * w 3 * w 4))⁻¹ = n := by
       rw [mul_right_comm (w 0) n, mul_comm (w 0 * (w 2 * w 3 * w 4)) n, mul_inv_cancel_right]
     exact hcancel ▸ h.mul hsq.inv
-  · exact hval _ hw0 (hter _ hsq)
+  · exact ⟨_, hw0, hter _ hsq⟩
 
 /-- **Isotropy in rank at least five.** Every diagonal form of rank at least five over `K` is
 isotropic. -/
@@ -368,7 +257,7 @@ theorem not_anisotropic_presentedForm_of_five_le {n : ℕ} (hn : 5 ≤ n) (w : F
 
 namespace RegularFormClass
 
-/-- **Ternary isotropy** (Serre IV Thm 6 (iii)). A regular-form class of rank three over `K` is
+/-- **Ternary isotropy** (Serre IV Thm 6 (ii)). A regular-form class of rank three over `K` is
 isotropic exactly when its local Hasse invariant is `(-1, -d)_K`, where `d` is its
 discriminant. -/
 theorem not_anisotropic_iff_localHasse_eq_of_rank_eq_three {x : RegularFormClass K}
@@ -384,7 +273,7 @@ theorem not_anisotropic_iff_localHasse_eq_of_rank_eq_three {x : RegularFormClass
       prod_prod_Ioi_three, discr_mk, Fin.prod_univ_three, ← squareClass_mul,
       hilbertSymbolOnSquareClasses_squareClass, neg_one_mul]
 
-/-- **Quaternary isotropy** (Serre IV Thm 6 (iv)). A regular-form class of rank four over `K` is
+/-- **Quaternary isotropy** (Serre IV Thm 6 (iii)). A regular-form class of rank four over `K` is
 isotropic exactly when its discriminant is not the class of `1`, or its discriminant is the class
 of `1` and its local Hasse invariant is `(-1, -1)_K`. -/
 theorem not_anisotropic_iff_discr_ne_zero_or_localHasse_eq_of_rank_eq_four
@@ -404,7 +293,7 @@ theorem not_anisotropic_iff_discr_ne_zero_or_localHasse_eq_of_rank_eq_four
     · simp only [h, not_false_eq_true, true_or, iff_true]
       exact not_anisotropic_presentedForm_four_of_not_isSquare w h
 
-/-- **Isotropy in rank at least five** (Serre IV Thm 6 (v)). Every regular-form class of rank at
+/-- **Isotropy in rank at least five** (Serre IV Thm 6 (iv)). Every regular-form class of rank at
 least five over `K` is isotropic. -/
 theorem not_anisotropic_of_five_le_rank {x : RegularFormClass K} (hx : 5 ≤ x.rank) :
     ¬x.Anisotropic := by
@@ -440,7 +329,7 @@ variable {K : Type*} [Field K] [ValuativeRel K] [TopologicalSpace K]
   [IsNonarchimedeanLocalField K] [Invertible (2 : K)]
 variable {V : Type*} [AddCommGroup V] [Module K V] [FiniteDimensional K V]
 
-/-- **Ternary isotropy** (Serre IV Thm 6 (iii)). A regular quadratic form on a space of dimension
+/-- **Ternary isotropy** (Serre IV Thm 6 (ii)). A regular quadratic form on a space of dimension
 three over `K` is isotropic exactly when its local Hasse invariant is `(-1, -d)_K`, where `d` is
 its discriminant. -/
 theorem not_anisotropic_iff_localHasse_eq_of_finrank_eq_three (Q : QuadraticForm K V)
@@ -452,7 +341,7 @@ theorem not_anisotropic_iff_localHasse_eq_of_finrank_eq_three (Q : QuadraticForm
   exact RegularFormClass.not_anisotropic_iff_localHasse_eq_of_rank_eq_three
     (by rwa [rank_formClass])
 
-/-- **Quaternary isotropy** (Serre IV Thm 6 (iv)). A regular quadratic form on a space of
+/-- **Quaternary isotropy** (Serre IV Thm 6 (iii)). A regular quadratic form on a space of
 dimension four over `K` is isotropic exactly when its discriminant is not the class of `1`, or its
 discriminant is the class of `1` and its local Hasse invariant is `(-1, -1)_K`. -/
 theorem not_anisotropic_iff_discr_ne_zero_or_localHasse_eq_of_finrank_eq_four
@@ -463,7 +352,7 @@ theorem not_anisotropic_iff_discr_ne_zero_or_localHasse_eq_of_finrank_eq_four
   exact RegularFormClass.not_anisotropic_iff_discr_ne_zero_or_localHasse_eq_of_rank_eq_four
     (by rwa [rank_formClass])
 
-/-- **Isotropy in dimension at least five** (Serre IV Thm 6 (v)). Every regular quadratic form on
+/-- **Isotropy in dimension at least five** (Serre IV Thm 6 (iv)). Every regular quadratic form on
 a space of dimension at least five over `K` is isotropic. -/
 theorem not_anisotropic_of_five_le_finrank (Q : QuadraticForm K V) (hQ : Q.Nondegenerate)
     (hV : 5 ≤ Module.finrank K V) : ¬Q.Anisotropic := by

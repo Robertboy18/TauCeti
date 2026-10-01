@@ -120,6 +120,15 @@ theorem presentedForm_eq_weightedSumSquares_coe {n : ℕ} (w : Fin n → Kˣ) :
   ext x
   simp only [weightedSumSquares_apply, Units.smul_def, smul_eq_mul]
 
+/-- A binary presented form `⟨w₀, w₁⟩` is the weighted sum of squares with the two coerced weights
+`w₀`, `w₁`, which is the shape in which the binary value and classification criteria are stated. -/
+theorem presentedForm_two (w : Fin 2 → Kˣ) :
+    presentedForm ⟨2, w⟩ = weightedSumSquares K ![(w 0 : K), (w 1 : K)] := by
+  rw [presentedForm_eq_weightedSumSquares_coe]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
 /-- A presented form is regular: all its weights are units, so its radical vanishes. -/
 theorem nondegenerate_presentedForm [Invertible (2 : K)] (p : RegularFormPresentation K) :
     (presentedForm p).Nondegenerate := by

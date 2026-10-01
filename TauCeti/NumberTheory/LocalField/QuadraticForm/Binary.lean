@@ -83,16 +83,11 @@ private theorem eq_of_rank_eq_two {x y : RegularFormClass K} (hx : x.rank = 2)
       subst m n
       have hw : w = ![w 0, w 1] := by ext i; fin_cases i <;> rfl
       have hv : v = ![v 0, v 1] := by ext i; fin_cases i <;> rfl
-      rw [hw, hv] at hd hs ⊢
+      rw [hw, hv] at hd hs
       rw [discr_mk, discr_mk, Fin.prod_univ_two, Fin.prod_univ_two,
         squareClass_eq_iff_isSquare_mul] at hd
       rw [localHasse_mk_binary, localHasse_mk_binary] at hs
-      rw [mk_eq_mk_iff, presentedForm_eq_weightedSumSquares_coe,
-        presentedForm_eq_weightedSumSquares_coe]
-      have coe_vec (a b : Kˣ) : (fun i => (![a, b] i : K)) = ![(a : K), (b : K)] := by
-        ext i
-        fin_cases i <;> rfl
-      rw [coe_vec, coe_vec]
+      rw [mk_eq_mk_iff, presentedForm_two, presentedForm_two]
       exact (equivalent_binary_iff_isSquare_and_hilbertSymbol_eq _ _ _ _).mpr ⟨hd, hs⟩
 
 /-- **Local classification in rank at most two.** Equal rank, discriminant and local Hasse
@@ -163,11 +158,7 @@ theorem mem_unitValueSet_iff_hilbertSymbol_eq_localHasse_of_finrank_eq_two
   rw [formClass_mk Q hQ ⟨2, w⟩ hw, hwvec, RegularFormClass.localHasse_mk_binary,
     RegularFormClass.discr_mk, Fin.prod_univ_two, ← squareClass_mul, neg_one_mul,
     hilbertSymbolOnSquareClasses_squareClass, hw.unitValueSet_eq]
-  rw [presentedForm_eq_weightedSumSquares_coe]
-  have coe_vec : (fun i => (w i : K)) = ![(w 0 : K), (w 1 : K)] := by
-    ext i
-    fin_cases i <;> rfl
-  rw [coe_vec]
+  rw [presentedForm_two]
   exact mem_unitValueSet_binary_iff_hilbertSymbol_eq _ _ _
 
 end QuadraticForm
