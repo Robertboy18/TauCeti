@@ -8,7 +8,9 @@ module
 public import TauCeti.Data.ZMod.MulCastHom
 public import TauCeti.GroupTheory.Torsion
 public import TauCeti.NumberTheory.Padics.RingHoms
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.ConnectingMapComparison
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.ExplicitFunctoriality
+public import TauCeti.RepresentationTheory.Homological.ContCohomology.FiniteCoefficients
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.ShortExact
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.PadicUnits
 
@@ -65,6 +67,9 @@ its generators. `I(χ)/p` is `ZModTwist χ 1`, the module at `i = 1`, with carri
   `TauCeti.ZModTwist.explicitCoeff2_mulPow_explicitCoeff2_reduce` is the induced identity on `H²`.
 * `TauCeti.ZModTwist.pow_nsmul_eq_zero`, `TauCeti.ZModTwist.isPPrimaryTorsion`: `pⁱ` kills
   `I(χ)/pⁱ`, which is therefore `p`-primary torsion.
+* `TauCeti.ZModTwist.surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two`: for a
+  compact group with `cd_p G ≤ 2`, every reduction `H²(G, I(χ)/pⁿ) → H²(G, I(χ)/pʲ)` is surjective,
+  because the next term `H³` of the long exact sequence vanishes.
 
 ## References
 
@@ -420,17 +425,27 @@ theorem explicitCoeff2_mulPow_explicitCoeff2_reduce (h : i + j = n) (x : H2 G (Z
         (explicitCoeff2 G (ZModTwist χ n) (reduce χ (Nat.le.intro h))
           continuous_of_discreteTopology x) =
       p ^ j • x := by
-  induction x using QuotientAddGroup.induction_on with
-  | _ c =>
-    rw [explicitCoeff2_mk, explicitCoeff2_mk, ← QuotientAddGroup.mk_nsmul]
-    refine congrArg (fun z : Z2 G (ZModTwist χ n) ↦ (z : H2 G (ZModTwist χ n)))
-      (Subtype.ext (funext fun ⟨g, k⟩ ↦ ?_))
-    rw [AddSubmonoidClass.coe_nsmul, Pi.smul_apply]
-    refine (cocyclesMap2_apply _ _ _ _ _ _ _ _ _ g k).trans ?_
-    refine (congrArg (mulPow χ h) (cocyclesMap2_apply _ _ _ _ _ _ _ _ c g k)).trans ?_
-    exact mulPow_reduce χ h _
+  rw [← AddMonoidHom.comp_apply, ← explicitCoeff2_comp]
+  exact explicitCoeff2_eq_nsmul G _ _ _ (mulPow_reduce χ h) x
 
 end DegreeTwo
+
+/-! ### Right exactness of `H²` on the twisted coefficients from `cd_p G ≤ 2` -/
+
+/-- **`cd_p G ≤ 2` makes `H²(G, -)` right exact on the twisted coefficients**: for a compact group
+`G` with `cd_p G ≤ 2`, every reduction `H²(G, I(χ)/pⁿ) → H²(G, I(χ)/pʲ)`, `j ≤ n`, is surjective,
+because the next term `H³(G, I(χ)/pⁿ⁻ʲ)` of the long exact sequence vanishes. -/
+theorem surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two
+    [IsTopologicalGroup G] [CompactSpace G] (h : cohomologicalDimensionAt.{u} p G ≤ 2)
+    {j n : ℕ} (hj : j ≤ n) :
+    Function.Surjective (explicitCoeff2 G (ZModTwist χ n) (reduce χ hj)
+      continuous_of_discreteTopology) := by
+  obtain ⟨i, rfl⟩ := Nat.exists_eq_add_of_le' hj
+  have : Subsingleton (continuousCohomology 3 (ofDiscreteModule ℤ G (ZModTwist χ i))) :=
+    (cohomologicalDimensionAt_le_iff_forall_finite (Fact.out : p.Prime).ne_zero 2).1 h _
+      (isPPrimaryTorsion χ i) 3 (by norm_num)
+  have hS := (shortExact χ (rfl : i + j = i + j)).explicitCoeff2_proj_surjective_of_subsingleton
+  rwa [shortExact_projDistribMulActionHom] at hS
 
 end ZModTwist
 

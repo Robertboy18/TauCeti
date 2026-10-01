@@ -5,8 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.ConnectingMapComparison
-public import TauCeti.RepresentationTheory.Homological.ContCohomology.FiniteCoefficients
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Prescription.Basic
 
 /-!
@@ -30,16 +28,15 @@ its reduction to level `i`. Hence `H²(G, I(χ)/pⁱ)` is cyclic of order `pⁱ`
 
 The right exactness hypothesis holds when `G` is compact with `cd_p G ≤ 2`, because the connecting
 map `H²(G, I(χ)/p) → H³(G, I(χ)/pⁱ)` then vanishes
-(`TauCeti.ZModTwist.surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two`). The
-hypotheses are met by the canonical character of an infinite Demushkin group, where the result is
-the finite-level form of the statement that the dualizing module of such a group is `ℚ_p/ℤ_p` with
-`G` acting through its orientation (Serre's exposé, §9); that specialization lives in
+(`TauCeti.ZModTwist.surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two`, in the
+module `TauCeti.Topology.Algebra.Group.Profinite.ProP.ZModTwist`). The hypotheses are met by the
+canonical character of an infinite Demushkin group, where the result is the finite-level form of
+the statement that the dualizing module of such a group is `ℚ_p/ℤ_p` with `G` acting through its
+orientation (Serre's exposé, §9); that specialization lives in
 `TauCeti.Topology.Algebra.Group.Profinite.Demushkin.TwistedCoefficients`.
 
 ## Main results
 
-* `TauCeti.ZModTwist.surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two`: for a
-  compact group with `cd_p G ≤ 2`, every reduction `H²(G, I(χ)/pⁿ) → H²(G, I(χ)/pʲ)` is surjective.
 * `TauCeti.HasPrescriptionProperty.natCard_H2_zModTwist`: `H²(G, I(χ)/pⁱ)` has order `pⁱ`.
 * `TauCeti.HasPrescriptionProperty.addOrderOf_eq_pow_of_explicitCoeff2_reduce_ne_zero`: a class
   of `H²(G, I(χ)/pⁱ⁺¹)` with nonzero reduction to `H²(G, I(χ)/p)` has order `pⁱ⁺¹`.
@@ -64,24 +61,6 @@ universe u
 open ContCohomology
 
 variable {p : ℕ} [Fact p.Prime] {G : Type u} [Group G] [TopologicalSpace G] {χ : G →ₜ* ℤ_[p]ˣ}
-
-/-! ### Right exactness of `H²` on the twisted coefficients from `cd_p G ≤ 2` -/
-
-/-- **`cd_p G ≤ 2` makes `H²(G, -)` right exact on the twisted coefficients**: for a compact group
-`G` with `cd_p G ≤ 2`, every reduction `H²(G, I(χ)/pⁿ) → H²(G, I(χ)/pʲ)`, `j ≤ n`, is surjective,
-because the next term `H³(G, I(χ)/pⁿ⁻ʲ)` of the long exact sequence vanishes. -/
-theorem ZModTwist.surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two
-    [IsTopologicalGroup G] [CompactSpace G] (h : cohomologicalDimensionAt.{u} p G ≤ 2)
-    {j n : ℕ} (hj : j ≤ n) :
-    Function.Surjective (explicitCoeff2 G (ZModTwist χ n) (ZModTwist.reduce χ hj)
-      continuous_of_discreteTopology) := by
-  obtain ⟨i, rfl⟩ := Nat.exists_eq_add_of_le' hj
-  have : Subsingleton (continuousCohomology 3 (ofDiscreteModule ℤ G (ZModTwist χ i))) :=
-    (cohomologicalDimensionAt_le_iff_forall_finite (Fact.out : p.Prime).ne_zero 2).1 h _
-      (ZModTwist.isPPrimaryTorsion χ i) 3 (by norm_num)
-  have hS := (ZModTwist.shortExact χ (rfl : i + j = i + j))
-    |>.explicitCoeff2_proj_surjective_of_subsingleton
-  rwa [ZModTwist.shortExact_projDistribMulActionHom] at hS
 
 /-! ### The order and cyclicity of `H²(G, I(χ)/pⁱ)` -/
 

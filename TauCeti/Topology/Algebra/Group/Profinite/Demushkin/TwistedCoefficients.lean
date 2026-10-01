@@ -88,7 +88,7 @@ reduction `H²(G, I(χ)/pⁿ) → H²(G, I(χ)/pʲ)`, `j ≤ n`, is surjective, 
 theorem surjective_explicitCoeff2_reduce_demushkinCharacter {j n : ℕ} (hj : j ≤ n) :
     Function.Surjective (explicitCoeff2 G (ZModTwist (demushkinCharacter hG) n)
       (ZModTwist.reduce _ hj) continuous_of_discreteTopology) :=
-  ZModTwist.surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two
+  ZModTwist.surjective_explicitCoeff2_reduce_of_cohomologicalDimensionAt_le_two _
     hG.cohomologicalDimensionAt_eq_two.le hj
 
 /-- **The order of `H²(G, I(χ)/pⁱ)`** for an infinite Demushkin group `G` with canonical character
