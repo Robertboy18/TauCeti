@@ -151,7 +151,7 @@ theorem IsCrossedHom.eq_one_of_map_labuteComm_eq_zero_right {x y : H} (hx : F x 
 
 /-- The value of a crossed homomorphism on a product of Labute commutators indexed by
 `List.range m` is the sum of the values on the factors. -/
-private theorem IsCrossedHom.map_list_range_prod_labuteComm (m : ℕ) (x y : ℕ → H) :
+theorem IsCrossedHom.map_list_range_prod_labuteComm (m : ℕ) (x y : ℕ → H) :
     F ((List.range m).map fun i ↦ labuteComm (x i) (y i)).prod =
       ∑ i ∈ range m, F (labuteComm (x i) (y i)) := by
   rw [hF.map_list_prod_of_forall_eq_one, List.map_map, Finset.sum_eq_multiset_sum,
