@@ -162,6 +162,29 @@ theorem IsCrossedHom.map_list_range_prod_labuteComm (m : ℕ) (x y : ℕ → H) 
     intro i _
     rw [map_labuteComm, labuteComm_eq_one]
 
+/-- For `n` even and a crossed homomorphism `F` with `F (x_i) = δ_{ij}` for some `2 ≤ j < n`, only
+the factor containing `x_j` contributes to the sum of its values on the commutators
+`(x₃, x₄), …, (x_{n-1}, x_n)` (the `0`-based pairs `(x (2i+2), x (2i+3))` for `i < n / 2 - 1`): the
+sum is the value on the factor `(x (2 ((j-2)/2) + 2), x (2 ((j-2)/2) + 3))`. -/
+theorem IsCrossedHom.sum_map_labuteComm_eq_of_forall_eq_ite {n j : ℕ} (hn : Even n) (hj₂ : 2 ≤ j)
+    (hj : j < n) {x : ℕ → H} (hFv : ∀ i, F (x i) = if i = j then 1 else 0) :
+    ∑ i ∈ range (n / 2 - 1), F (labuteComm (x (2 * i + 2)) (x (2 * i + 3))) =
+      F (labuteComm (x (2 * ((j - 2) / 2) + 2)) (x (2 * ((j - 2) / 2) + 3))) := by
+  obtain ⟨k, rfl⟩ := hn
+  exact Finset.sum_eq_single _
+    (fun i _ hi ↦ hF.map_labuteComm_eq_zero_of_eq_zero
+      (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)]))
+    fun h0 ↦ absurd (mem_range.2 (by omega)) h0
+
+/-- For a crossed homomorphism `F` with `F (x_i) = δ_{ij}` for some `j < 2`, the sum of its values
+on the commutators `(x₃, x₄), …, (x_{n-1}, x_n)` (the `0`-based pairs `(x (2i+2), x (2i+3))` for
+`i < n / 2 - 1`) is `0`. -/
+theorem IsCrossedHom.sum_map_labuteComm_eq_zero_of_forall_eq_ite (n : ℕ) {j : ℕ} (hj : j < 2)
+    {x : ℕ → H} (hFv : ∀ i, F (x i) = if i = j then 1 else 0) :
+    ∑ i ∈ range (n / 2 - 1), F (labuteComm (x (2 * i + 2)) (x (2 * i + 3))) = 0 :=
+  Finset.sum_eq_zero fun i _ ↦ hF.map_labuteComm_eq_zero_of_eq_zero
+    (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)])
+
 /-- The value of a crossed homomorphism on the `q ≠ 2` normal-form word
 `x₁^q (x₁, x₂)(x₃, x₄) ⋯ (x_{n-1}, x_n)`. -/
 theorem IsCrossedHom.map_demushkinWordNeTwo (q n : ℕ) (x : ℕ → H) :
@@ -836,27 +859,6 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEven_iff (ha : 2 �
       proPFrattini 2 (freeProP 2 (Fin n)) :=
     Set.singleton_subset_iff.2 (demushkinWordTwoEven_mem_proPFrattini ha hf n _)
   obtain ⟨k, hk⟩ := hn
-  -- For the crossed homomorphism `F` with `F (x_i) = δ_{ij}`, `j ≥ 2`, only the commutator factor
-  -- containing `x_j` contributes to the value on the relator.
-  have hsum : ∀ j, 2 ≤ j → j < n → ∀ F : freeProP 2 (Fin n) → ℤ_[2],
-      IsCrossedHom (χ.comp (presentedProP.mk 2 _)) F →
-      (∀ i, F (freeProPGen 2 n i) = if i = j then 1 else 0) →
-      ∑ i ∈ range (n / 2 - 1),
-          F (labuteComm (freeProPGen 2 n (2 * i + 2)) (freeProPGen 2 n (2 * i + 3))) =
-        F (labuteComm (freeProPGen 2 n (2 * ((j - 2) / 2) + 2))
-          (freeProPGen 2 n (2 * ((j - 2) / 2) + 3))) :=
-    fun j hj₂ hj F hF hFv ↦ Finset.sum_eq_single _
-      (fun i _ hi ↦ hF.map_labuteComm_eq_zero_of_eq_zero
-        (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)]))
-      fun h0 ↦ absurd (mem_range.2 (by omega)) h0
-  -- For `j ≤ 2` no commutator factor beyond `(x₁, x₂)` contributes.
-  have hsum₀ : ∀ j, j < 2 → ∀ F : freeProP 2 (Fin n) → ℤ_[2],
-      IsCrossedHom (χ.comp (presentedProP.mk 2 _)) F →
-      (∀ i, F (freeProPGen 2 n i) = if i = j then 1 else 0) →
-      ∑ i ∈ range (n / 2 - 1),
-        F (labuteComm (freeProPGen 2 n (2 * i + 2)) (freeProPGen 2 n (2 * i + 3))) = 0 :=
-    fun j hj F hF hFv ↦ Finset.sum_eq_zero fun i _ ↦ hF.map_labuteComm_eq_zero_of_eq_zero
-      (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)])
   -- For `j ≥ 5` the commutator factor `(x_a, x_b)` containing `x_j` has `F (x_a, x_b) = 0`.
   have hval : ∀ j, 4 ≤ j → j < n → ∀ F : freeProP 2 (Fin n) → ℤ_[2],
       IsCrossedHom (χ.comp (presentedProP.mk 2 _)) F →
@@ -865,7 +867,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEven_iff (ha : 2 �
       F (labuteComm (freeProPGen 2 n (2 * ((j - 2) / 2) + 2))
         (freeProPGen 2 n (2 * ((j - 2) / 2) + 3))) = 0 := by
     intro j hj₄ hj F hF hFv hFr
-    rw [hF.map_demushkinWordTwoEven, hsum j (by omega) hj F hF hFv,
+    rw [hF.map_demushkinWordTwoEven,
+      hF.sum_map_labuteComm_eq_of_forall_eq_ite ⟨k, hk⟩ (by omega) hj hFv,
       hF.map_labuteComm_eq_zero_of_eq_zero (x := freeProPGen 2 n 0) (y := freeProPGen 2 n 1)
         (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)])] at hFr
     simp only [hFv 0, hFv 2, ite_eq_right (show (0 : ℕ) ≠ j by omega),
@@ -877,7 +880,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEven_iff (ha : 2 �
     obtain ⟨F, hF, hFv, hFr⟩ :=
       hχ.exists_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels (by omega : 1 < n)
     have hr := hFr _ rfl
-    rw [hF.map_demushkinWordTwoEven, hsum₀ 1 one_lt_two F hF hFv] at hr
+    rw [hF.map_demushkinWordTwoEven,
+      hF.sum_map_labuteComm_eq_zero_of_forall_eq_ite n one_lt_two hFv] at hr
     simp only [hFv 0, hFv 2, ite_eq_right zero_ne_one, ite_eq_right (show (2 : ℕ) ≠ 1 by omega),
       mul_zero, add_zero, zero_add, ← Units.val_pow_eq_pow_val] at hr
     rw [← presentedProP.comp_mk_freeProPGen]
@@ -887,7 +891,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEven_iff (ha : 2 �
   have hx2 : χ (presentedProPGen 2 n _ 2) = 1 := by
     obtain ⟨F, hF, hFv, hFr⟩ := hχ.exists_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels hn₃
     have hr := hFr _ rfl
-    rw [hF.map_demushkinWordTwoEven, hsum 3 (by omega) hn₃ F hF hFv,
+    rw [hF.map_demushkinWordTwoEven,
+      hF.sum_map_labuteComm_eq_of_forall_eq_ite ⟨k, hk⟩ (by omega) hn₃ hFv,
       hF.map_labuteComm_eq_zero_of_eq_zero (x := freeProPGen 2 n 0) (y := freeProPGen 2 n 1)
         (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)])] at hr
     simp only [hFv 0, hFv 2, ite_eq_right (show (0 : ℕ) ≠ 3 by omega),
@@ -902,7 +907,7 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEven_iff (ha : 2 �
     obtain ⟨F, hF, hFv, hFr⟩ :=
       hχ.exists_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels (by omega : 0 < n)
     have hr := hFr _ rfl
-    rw [hF.map_demushkinWordTwoEven, hsum₀ 0 two_pos F hF hFv,
+    rw [hF.map_demushkinWordTwoEven, hF.sum_map_labuteComm_eq_zero_of_forall_eq_ite n two_pos hFv,
       presentedProP.comp_mk_freeProPGen, hx0, Units.val_one] at hr
     simp only [hFv 0, hFv 2, ite_eq_left, ite_eq_right (show (2 : ℕ) ≠ 0 by omega), one_pow,
       one_mul, mul_one, mul_zero, zero_add, add_zero, sum_const, card_range, nsmul_eq_mul,
@@ -915,7 +920,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEven_iff (ha : 2 �
     obtain ⟨F, hF, hFv, hFr⟩ :=
       hχ.exists_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels (by omega : 2 < n)
     have hr := hFr _ rfl
-    rw [hF.map_demushkinWordTwoEven, hsum 2 le_rfl (by omega) F hF hFv,
+    rw [hF.map_demushkinWordTwoEven,
+      hF.sum_map_labuteComm_eq_of_forall_eq_ite ⟨k, hk⟩ le_rfl (by omega) hFv,
       hF.map_labuteComm_eq_zero_of_eq_zero (x := freeProPGen 2 n 0) (y := freeProPGen 2 n 1)
         (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)]),
       presentedProP.comp_mk_freeProPGen, presentedProP.comp_mk_freeProPGen, hx0, hx2,

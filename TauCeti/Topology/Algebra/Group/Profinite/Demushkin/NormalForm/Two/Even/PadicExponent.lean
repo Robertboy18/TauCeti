@@ -133,6 +133,7 @@ theorem demushkinWordTwoEvenPadic_natCast (a f : ℕ) :
 `TauCeti.freeProPGen 2 2`, whose third generator is out of range), the word is
 `x₁^{2+α} (x₁, x₂)`: the factor `x₃^q` is `1` by the hypothesis `x 2 = 1`, and the commutator
 product beyond `(x₁, x₂)` is empty. -/
+@[simp]
 theorem demushkinWordTwoEvenPadic_two (hx : x 2 = 1) :
     demushkinWordTwoEvenPadic hH α q 2 x =
       hH.padicPow (x 0) (2 + α) * labuteComm (x 0) (x 1) := by
@@ -164,6 +165,7 @@ variable {K : Type*} [Group K] [TopologicalSpace K] [IsTopologicalGroup K] [Comp
   [TotallyDisconnectedSpace K] (hK : IsProP 2 K)
 
 /-- A continuous homomorphism of pro-`2` groups reads the word on the image tuple. -/
+@[simp]
 theorem map_demushkinWordTwoEvenPadic (φ : H →ₜ* K) :
     φ (demushkinWordTwoEvenPadic hH α q n x) = demushkinWordTwoEvenPadic hK α q n (φ ∘ x) := by
   have hpp : φ (hH.padicPow (x 0) (2 + α)) = hK.padicPow (φ (x 0)) (2 + α) :=
@@ -213,6 +215,34 @@ theorem IsCrossedHom.map_demushkinWordTwoEvenPadic {F' : Type*} [FunLike F' H �
     Units.val_pow_eq_pow_val, hF.map_list_range_prod_labuteComm, map_labuteComm, labuteComm_eq_one,
     Units.val_one]
   ring
+
+section DeltaValue
+
+variable {hH α q n x}
+
+/-- For `n` even and a continuous crossed homomorphism `F` with `F (x_i) = δ_{ij}` for some
+`3 ≤ j < n` (so `x_j` is `x₄` or a later generator) which kills the word
+`x₁^{2+α} (x₁, x₂) x₃^q (x₃, x₄) ⋯ (x_{n-1}, x_n)`, the value of `F` on the commutator factor
+containing `x_j` is `0`. -/
+theorem IsCrossedHom.map_labuteComm_eq_zero_of_map_demushkinWordTwoEvenPadic_eq_zero
+    {χ : H →ₜ* ℤ_[2]ˣ} {F : H → ℤ_[2]} (hF : IsCrossedHom χ F) (hFc : Continuous F) (hn : Even n)
+    {j : ℕ} (hj₃ : 3 ≤ j) (hj : j < n)
+    (hFv : ∀ i, F (x i) = if i = j then 1 else 0)
+    (hFr : F (demushkinWordTwoEvenPadic hH α q n x) = 0) :
+    F (labuteComm (x (2 * ((j - 2) / 2) + 2)) (x (2 * ((j - 2) / 2) + 3))) = 0 := by
+  have h0j : (0 : ℕ) ≠ j := by omega
+  have h1j : (1 : ℕ) ≠ j := by omega
+  have h2j : (2 : ℕ) ≠ j := by omega
+  rw [hF.map_demushkinWordTwoEvenPadic,
+    hF.sum_map_labuteComm_eq_of_forall_eq_ite hn (by omega) hj hFv,
+    hF.map_labuteComm_eq_zero_of_eq_zero (x := x 0) (y := x 1)
+      (by rw [hFv, ite_eq_right h0j]) (by rw [hFv, ite_eq_right h1j]),
+    hF.map_padicPow_eq_zero_of_eq_zero hFc _ (by rw [hFv, ite_eq_right h0j])] at hFr
+  simp only [hFv 2, ite_eq_right h2j, mul_zero, add_zero, ← Units.val_pow_eq_pow_val,
+    ← Units.val_mul] at hFr
+  exact (Units.mul_right_eq_zero _).1 hFr
+
+end DeltaValue
 
 end Word
 
@@ -318,53 +348,18 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα
       have h2 : freeProPGen 2 2 2 = 1 := freeProPGen_eq_one_of_le 2 le_rfl
       rw [demushkinWordTwoEvenPadic_two _ _ _ _ h2, ← demushkinWordTwoEvenPadic_two _ α 0 _ h2]
       exact demushkinWordTwoEvenPadic_mem_proPFrattini _ α 0 2 _ hα (dvd_zero 2)
-  obtain ⟨k, hk⟩ := hn
-  -- For the crossed homomorphism `F` with `F (x_i) = δ_{ij}`, `j ≥ 2`, only the commutator factor
-  -- containing `x_j` contributes to the value on the relator.
-  have hsum : ∀ j, 2 ≤ j → j < n → ∀ F : freeProP 2 (Fin n) → ℤ_[2],
-      IsCrossedHom (χ.comp (presentedProP.mk 2 _)) F →
-      (∀ i, F (freeProPGen 2 n i) = if i = j then 1 else 0) →
-      ∑ i ∈ range (n / 2 - 1),
-          F (labuteComm (freeProPGen 2 n (2 * i + 2)) (freeProPGen 2 n (2 * i + 3))) =
-        F (labuteComm (freeProPGen 2 n (2 * ((j - 2) / 2) + 2))
-          (freeProPGen 2 n (2 * ((j - 2) / 2) + 3))) :=
-    fun j hj₂ hj F hF hFv ↦ Finset.sum_eq_single _
-      (fun i _ hi ↦ hF.map_labuteComm_eq_zero_of_eq_zero
-        (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)]))
-      fun h0 ↦ absurd (mem_range.2 (by omega)) h0
-  -- For `j ≤ 2` no commutator factor beyond `(x₁, x₂)` contributes.
-  have hsum₀ : ∀ j, j < 2 → ∀ F : freeProP 2 (Fin n) → ℤ_[2],
-      IsCrossedHom (χ.comp (presentedProP.mk 2 _)) F →
-      (∀ i, F (freeProPGen 2 n i) = if i = j then 1 else 0) →
-      ∑ i ∈ range (n / 2 - 1),
-        F (labuteComm (freeProPGen 2 n (2 * i + 2)) (freeProPGen 2 n (2 * i + 3))) = 0 :=
-    fun j hj F hF hFv ↦ Finset.sum_eq_zero fun i _ ↦ hF.map_labuteComm_eq_zero_of_eq_zero
-      (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)])
-  -- For `j ≥ 4` the commutator factor `(x_a, x_b)` containing `x_j` has `F (x_a, x_b) = 0`; the
-  -- `2`-adic power `x₁^{2+α}` is killed because `F (x₁) = 0`.
-  have hval : ∀ j, 3 ≤ j → j < n → ∀ F : freeProP 2 (Fin n) → ℤ_[2], Continuous F →
-      IsCrossedHom (χ.comp (presentedProP.mk 2 _)) F →
-      (∀ i, F (freeProPGen 2 n i) = if i = j then 1 else 0) →
-      F (demushkinWordTwoEvenPadic (isProP_freeProP 2 (Fin n)) α q n (freeProPGen 2 n)) = 0 →
-      F (labuteComm (freeProPGen 2 n (2 * ((j - 2) / 2) + 2))
-        (freeProPGen 2 n (2 * ((j - 2) / 2) + 3))) = 0 := by
-    intro j hj₃ hj F hFc hF hFv hFr
-    rw [hF.map_demushkinWordTwoEvenPadic, hsum j (by omega) hj F hF hFv,
-      hF.map_labuteComm_eq_zero_of_eq_zero (x := freeProPGen 2 n 0) (y := freeProPGen 2 n 1)
-        (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)]),
-      hF.map_padicPow_eq_zero_of_eq_zero hFc _ (by rw [hFv, ite_eq_right (by omega)])] at hFr
-    simp only [hFv 2, ite_eq_right (show (2 : ℕ) ≠ j by omega), mul_zero, add_zero,
-      ← Units.val_pow_eq_pow_val, ← Units.val_mul] at hFr
-    exact (Units.mul_right_eq_zero _).1 hFr
+  have ⟨k, hk⟩ := hn
+  have h21 : (2 : ℕ) ≠ 1 := by omega
+  have h20 : (2 : ℕ) ≠ 0 := by omega
   -- `j = 2`: `χ(x₁) = 1`.
   have hx0 : χ (presentedProPGen 2 n _ 0) = 1 := by
     obtain ⟨F, hFc, hF, hFv, hFr⟩ :=
       hχ.exists_continuous_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels hn₁
     have hr := hFr _ rfl
-    rw [hF.map_demushkinWordTwoEvenPadic, hsum₀ 1 one_lt_two F hF hFv,
+    rw [hF.map_demushkinWordTwoEvenPadic,
+      hF.sum_map_labuteComm_eq_zero_of_forall_eq_ite n one_lt_two hFv,
       hF.map_padicPow_eq_zero_of_eq_zero hFc _ (by rw [hFv, ite_eq_right zero_ne_one])] at hr
-    simp only [hFv 2, ite_eq_right (show (2 : ℕ) ≠ 1 by omega), mul_zero, add_zero,
-      zero_add] at hr
+    simp only [hFv 2, ite_eq_right h21, mul_zero, add_zero, zero_add] at hr
     rw [← presentedProP.comp_mk_freeProPGen]
     exact hF.eq_one_of_map_labuteComm_eq_zero_right (by rw [hFv, ite_eq_right zero_ne_one])
       (by rw [hFv, ite_eq_left rfl]) ((Units.mul_right_eq_zero _).1 hr)
@@ -377,7 +372,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα
     · obtain ⟨F, hFc, hF, hFv, hFr⟩ :=
         hχ.exists_continuous_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels
           (by omega : 3 < n)
-      have hc := hval 3 le_rfl (by omega) F hFc hF hFv (hFr _ rfl)
+      have hc := hF.map_labuteComm_eq_zero_of_map_demushkinWordTwoEvenPadic_eq_zero hFc hn le_rfl
+        (by omega) hFv (hFr _ rfl)
       rw [(by omega : 2 * ((3 - 2) / 2) + 2 = 2), (by omega : 2 * ((3 - 2) / 2) + 3 = 3)] at hc
       rw [← presentedProP.comp_mk_freeProPGen]
       exact hF.eq_one_of_map_labuteComm_eq_zero_right (by rw [hFv, ite_eq_right (by omega)])
@@ -398,10 +394,11 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα
           (χ.comp (presentedProP.mk 2 _) : freeProP 2 (Fin n) →* ℤ_[2]ˣ)
           (χ.comp (presentedProP.mk 2 _)).continuous _ _
       rw [e, hx0', isProP_units_padicInt_two.one_padicPow]
-    rw [hF.map_demushkinWordTwoEvenPadic, hsum₀ 0 two_pos F hF hFv, hχpp,
+    rw [hF.map_demushkinWordTwoEvenPadic,
+      hF.sum_map_labuteComm_eq_zero_of_forall_eq_ite n two_pos hFv, hχpp,
       hF.map_padicPow_of_eq_one hFc _ hx0', Units.val_one] at hr
-    simp only [hFv 0, hFv 2, ite_eq_left, ite_eq_right (show (2 : ℕ) ≠ 0 by omega), one_mul,
-      mul_one, mul_zero, zero_add, add_zero] at hr
+    simp only [hFv 0, hFv 2, ite_eq_left, ite_eq_right h20, one_mul, mul_one, mul_zero, zero_add,
+      add_zero] at hr
     have hc := hF.mul_mul_map_labuteComm (freeProPGen 2 n 0) (freeProPGen 2 n 1)
     rw [presentedProP.comp_mk_freeProPGen, presentedProP.comp_mk_freeProPGen, hx0, Units.val_one,
       one_mul, sub_self, zero_mul, add_zero, hFv 0, ite_eq_left rfl, mul_one] at hc
@@ -411,7 +408,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα
     obtain ⟨F, hFc, hF, hFv, hFr⟩ :=
       hχ.exists_continuous_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels hn₂
     have hr := hFr _ rfl
-    rw [hF.map_demushkinWordTwoEvenPadic, hsum 2 le_rfl hn₂ F hF hFv,
+    rw [hF.map_demushkinWordTwoEvenPadic,
+      hF.sum_map_labuteComm_eq_of_forall_eq_ite hn le_rfl hn₂ hFv,
       hF.map_labuteComm_eq_zero_of_eq_zero (x := freeProPGen 2 n 0) (y := freeProPGen 2 n 1)
         (by rw [hFv, ite_eq_right (by omega)]) (by rw [hFv, ite_eq_right (by omega)]),
       hF.map_padicPow_eq_zero_of_eq_zero hFc _ (by rw [hFv, ite_eq_right (by omega)]),
@@ -434,7 +432,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα
       · obtain ⟨F, hFc, hF, hFv, hFr⟩ :=
           hχ.exists_continuous_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels
             (by omega : i + 1 < n)
-        have hc := hval (i + 1) (by omega) (by omega) F hFc hF hFv (hFr _ rfl)
+        have hc := hF.map_labuteComm_eq_zero_of_map_demushkinWordTwoEvenPadic_eq_zero hFc hn
+          (by omega) (by omega) hFv (hFr _ rfl)
         rw [(by omega : 2 * ((i + 1 - 2) / 2) + 2 = i),
           (by omega : 2 * ((i + 1 - 2) / 2) + 3 = i + 1)] at hc
         exact hF.eq_one_of_map_labuteComm_eq_zero_right (by rw [hFv, ite_eq_right (by omega)])
@@ -442,7 +441,8 @@ theorem hasPrescriptionProperty_presentedProP_demushkinWordTwoEvenPadic_iff (hα
       · obtain ⟨F, hFc, hF, hFv, hFr⟩ :=
           hχ.exists_continuous_isCrossedHom_comp_mk_forall_freeProPGen_eq_ite hrels
             (by omega : i - 1 < n)
-        have hc := hval (i - 1) (by omega) (by omega) F hFc hF hFv (hFr _ rfl)
+        have hc := hF.map_labuteComm_eq_zero_of_map_demushkinWordTwoEvenPadic_eq_zero hFc hn
+          (by omega) (by omega) hFv (hFr _ rfl)
         rw [(by omega : 2 * ((i - 1 - 2) / 2) + 2 = i - 1),
           (by omega : 2 * ((i - 1 - 2) / 2) + 3 = i)] at hc
         exact hF.eq_one_of_map_labuteComm_eq_zero_left (by rw [hFv, ite_eq_left rfl])
