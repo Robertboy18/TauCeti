@@ -48,8 +48,9 @@ onto the restriction to its image (`TauCeti.PreAdicSpace.restrictIso`).
 * `TauCeti.PreAdicSpace.isSheafy_of_isAdapted_of_isSheaf_affinoidOpens`: an object of `𝒱^pre`
   whose open affinoid subspaces form a basis and whose presheaf is adapted to them and a sheaf on
   them is sheafy.
-* `TauCeti.PreAdicSpace.isLocallyAffinoid.instIsClosedUnderIsomorphisms`: being locally affinoid is
-  invariant under isomorphism.
+* `TauCeti.PreAdicSpace.isLocallyAffinoid.instIsClosedUnderIsomorphisms`,
+  `TauCeti.PreAdicSpace.isPreAdic.instIsClosedUnderIsomorphisms`: being locally affinoid, and being
+  pre-adic, are invariant under isomorphism.
 
 ## References
 
@@ -126,6 +127,32 @@ theorem isPreAdic.isLocallyAffinoid {X : PreAdicSpace.{u}} (h : isPreAdic X) :
 theorem isPreAdic.isAdapted {X : PreAdicSpace.{u}} (h : isPreAdic X) :
     X.toPresheafedSpace.presheaf.IsAdapted X.affinoidOpens :=
   h.2
+
+/-- An open of `Y` is an open affinoid subspace of `Y` exactly when its preimage under an
+isomorphism `e : X ≅ Y` is an open affinoid subspace of `X`. -/
+theorem map_hom_base_mem_affinoidOpens_iff {X Y : PreAdicSpace.{u}} (e : X ≅ Y) {U : Opens Y} :
+    (Opens.map e.hom.base).obj U ∈ X.affinoidOpens ↔ U ∈ Y.affinoidOpens := by
+  refine ⟨fun hU ↦ ?_, fun hU ↦ ?_⟩
+  · have h := map_inv_base_mem_affinoidOpens X e hU
+    rwa [← Opens.map_comp_obj, ← comp_base, e.inv_hom_id, id_toHom,
+      AlgebraicGeometry.PresheafedSpace.id_base, Opens.map_id_obj] at h
+  · have h := map_inv_base_mem_affinoidOpens Y e.symm hU
+    rwa [Iso.symm_inv] at h
+
+/-- Being pre-adic is invariant under isomorphism in `𝒱^pre`: an isomorphism `e : X ≅ Y` is a
+homeomorphism identifying the structure presheaves, and it matches the open affinoid subspaces of
+`X` and `Y`, so adaptedness is transported along it. -/
+instance isPreAdic.instIsClosedUnderIsomorphisms : isPreAdic.{u}.IsClosedUnderIsomorphisms where
+  of_iso {X Y} e hX := by
+    -- inside `isPreAdic.*`, the bare name `isLocallyAffinoid` is the accessor above
+    refine ⟨ObjectProperty.prop_of_iso PreAdicSpace.isLocallyAffinoid e hX.isLocallyAffinoid, ?_⟩
+    -- `Y.presheaf ≅ e_* X.presheaf` through `e.hom.c`, and `X.presheaf` is adapted to the open
+    -- affinoid subspaces of `X`, so `e_* X.presheaf` is adapted to the opens of `Y` whose
+    -- preimages are open affinoid subspaces of `X`, which are the open affinoid subspaces of `Y`
+    have : IsIso (forgetToPresheafedSpace.map e.hom) := inferInstance
+    have h := ((hX.isAdapted.pushforward_of_iso (forgetToTop.mapIso e)).of_iso
+      (asIso (forgetToPresheafedSpace.map e.hom).c).symm)
+    exact h.mono fun U hU ↦ (map_hom_base_mem_affinoidOpens_iff e).mp hU
 
 /-- **The sheaf condition on the open affinoid subspaces suffices for an adapted presheaf.** If
 the open affinoid subspaces of `X` form a basis and the structure presheaf is adapted to them and
