@@ -77,6 +77,16 @@ theorem prod_prod_Ioi_eq_of_two {M : Type*} [CommMonoid M] {m : ℕ}
   simp only [Fin.prod_univ_succ, Fin.prod_Ioi_zero, Fin.prod_Ioi_succ, Fin.succ_zero_eq_one]
   ac_rfl
 
+/-- The product over the three increasing pairs of `Fin 3`. -/
+theorem prod_prod_Ioi_three {M : Type*} [CommMonoid M] (f : Fin 3 → Fin 3 → M) :
+    ∏ i, ∏ j ∈ Ioi i, f i j = f 0 1 * f 0 2 * f 1 2 := by
+  simp [Fin.prod_univ_succ, Fin.prod_Ioi_succ, mul_assoc]
+
+/-- The product over the six increasing pairs of `Fin 4`. -/
+theorem prod_prod_Ioi_four {M : Type*} [CommMonoid M] (f : Fin 4 → Fin 4 → M) :
+    ∏ i, ∏ j ∈ Ioi i, f i j = f 0 1 * f 0 2 * f 0 3 * f 1 2 * f 1 3 * f 2 3 := by
+  simp [Fin.prod_univ_succ, Fin.prod_Ioi_succ, mul_assoc]
+
 /-- A pair product on a tuple extended by a final entry splits into the old pairs and the
 pairings with that entry. -/
 theorem prod_prod_Ioi_snoc {A M : Type*} [CommMonoid M] {n : ℕ}

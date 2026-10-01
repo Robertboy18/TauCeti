@@ -336,6 +336,22 @@ theorem equivalent_presentedForm_append_prod (p q : RegularFormPresentation K) :
       ((presentedForm p).prod (presentedForm q)) :=
   ⟨presentedFormAppendIsometryEquiv p q⟩
 
+/-- A presentation of rank `m + n` is the concatenation of its first `m` and its last `n`
+weights. -/
+theorem RegularFormPresentation.append_castAdd_natAdd {m n : ℕ} (w : Fin (m + n) → Kˣ) :
+    RegularFormPresentation.append ⟨m, fun i => w (Fin.castAdd n i)⟩
+      ⟨n, fun i => w (Fin.natAdd m i)⟩ = ⟨m + n, w⟩ := by
+  rw [RegularFormPresentation.append_def, Fin.append_castAdd_natAdd]
+
+/-- The form presented by `m + n` weights is isometric to the orthogonal sum of the forms
+presented by its first `m` and by its last `n` weights. -/
+theorem equivalent_presentedForm_prod_castAdd_natAdd {m n : ℕ} (w : Fin (m + n) → Kˣ) :
+    (presentedForm ⟨m + n, w⟩).Equivalent
+      ((presentedForm ⟨m, fun i => w (Fin.castAdd n i)⟩).prod
+        (presentedForm ⟨n, fun i => w (Fin.natAdd m i)⟩)) := by
+  rw [← RegularFormPresentation.append_castAdd_natAdd]
+  exact equivalent_presentedForm_append_prod _ _
+
 /-- Peeling the first weight off a presentation of positive rank exhibits the presented form as
 the orthogonal sum of the line `⟨w 0⟩` and the presentation of the remaining weights:
 `⟨w 0⟩ ⊥ ⟨w 1, …, w n⟩ ≅ ⟨w 0, …, w n⟩`. The first factor is carried by `K` itself rather than by
@@ -356,6 +372,17 @@ theorem presentedForm_tail_isRepresentedBy {n : ℕ} (w : Fin (n + 1) → Kˣ) :
       (presentedForm ⟨n + 1, w⟩) :=
   (QuadraticMap.isRepresentedBy_prod_right _ _).trans
     (QuadraticMap.Equivalent.isRepresentedBy ⟨presentedFormConsIsometryEquiv w⟩)
+
+/-- A diagonal form `⟨w₀, w₁, …, wₙ⟩` is isotropic exactly when `⟨w₁, …, wₙ⟩` represents
+`-w₀`. -/
+theorem not_anisotropic_presentedForm_succ_iff [Invertible (2 : K)] {n : ℕ}
+    (w : Fin (n + 1) → Kˣ) :
+    ¬(presentedForm ⟨n + 1, w⟩).Anisotropic ↔
+      -w 0 ∈ unitValueSet (presentedForm ⟨n, fun i ↦ w i.succ⟩) := by
+  rw [mem_unitValueSet_iff_not_anisotropic_prod _ (nondegenerate_presentedForm _),
+    ← QuadraticMap.Equivalent.anisotropic_iff ⟨presentedFormConsIsometryEquiv w⟩,
+    ← QuadraticMap.Equivalent.anisotropic_iff ⟨QuadraticMap.IsometryEquiv.prodComm _ _⟩]
+  simp
 
 private theorem presentedFormConsIsometryEquiv_toLinearEquiv {n : ℕ} (w : Fin (n + 1) → Kˣ) :
     (presentedFormConsIsometryEquiv w).toLinearEquiv =
