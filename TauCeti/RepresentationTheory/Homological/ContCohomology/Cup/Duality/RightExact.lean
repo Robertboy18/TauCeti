@@ -76,11 +76,11 @@ theorem DiscreteShortExact.explicitCoeff2_proj_surjective_of_dualityMap2 (hB : �
   intro y
   -- `f^* : H⁰(G, C') → H⁰(G, B')` is injective, because `f = proj` is surjective.
   have hf : Function.Surjective S.projDistribMulActionHom :=
-    fun c ↦ (S.proj_surjective c).imp fun _ hb ↦ by simpa using hb
+    fun c ↦ (S.proj_surjective c).imp fun _ hb ↦ (S.projDistribMulActionHom_apply _).trans hb
   have hι : Function.Injective
       (explicitCoeff0 G (InternalHom G C N) (InternalHom.precomp G S.projDistribMulActionHom)) :=
     fun φ φ' h ↦ Subtype.ext (InternalHom.precomp_injective hf
-      (by simpa using congrArg Subtype.val h))
+      (by simpa only [coe_explicitCoeff0] using congrArg Subtype.val h))
   -- `H⁰(G, B')` is killed by `p`, because `B` is.
   have hB' : ∀ x : H0 G (InternalHom G B N), p • x = 0 := fun x ↦ Subtype.ext <| by
     rw [AddSubgroup.coe_nsmul, AddSubgroup.coe_zero]
