@@ -391,19 +391,18 @@ theorem _root_.QuadraticMap.mem_unitValueSet_iff_not_anisotropic_prod
       ¬(Q.prod ((-(a : K)) • (QuadraticMap.sq : QuadraticForm K K))).Anisotropic :=
   mem_unitValueSet_iff_not_anisotropic_prod_of_radical_eq_bot Q hQ.radical_eq_bot a
 
-/-- The orthogonal sum of a nondegenerate form `Q₁` with some unit value and a nondegenerate form
-`Q₂` on a nonzero space is isotropic exactly when some unit value `x` of `Q₁` has `-x` a value of
-`Q₂`. -/
+/-- The orthogonal sum of a form `Q₁` with trivial radical and some unit value and a form `Q₂`
+with trivial radical on a nonzero space is isotropic exactly when some unit value `x` of `Q₁` has
+`-x` a value of `Q₂`. -/
 theorem _root_.QuadraticMap.not_anisotropic_prod_iff_exists_mem_unitValueSet_neg_mem
     {V' : Type*} [AddCommGroup V'] [Module K V'] [Nontrivial V']
-    {Q₁ : QuadraticForm K V} {Q₂ : QuadraticForm K V'} (hQ₁ : Q₁.Nondegenerate)
-    (hQ₂ : Q₂.Nondegenerate) (h : (unitValueSet Q₁).Nonempty) :
+    {Q₁ : QuadraticForm K V} {Q₂ : QuadraticForm K V'} (hQ₁ : Q₁.radical = ⊥)
+    (hQ₂ : Q₂.radical = ⊥) (h : (unitValueSet Q₁).Nonempty) :
     ¬(Q₁.prod Q₂).Anisotropic ↔ ∃ x : Kˣ, x ∈ unitValueSet Q₁ ∧ -x ∈ unitValueSet Q₂ := by
   constructor
   · intro hiso
     by_cases hani : Q₂.Anisotropic
-    · obtain ⟨x, y, hx, hxy⟩ :=
-        hani.exists_ne_zero_eq_neg_of_not_anisotropic_prod hQ₁.radical_eq_bot hiso
+    · obtain ⟨x, y, hx, hxy⟩ := hani.exists_ne_zero_eq_neg_of_not_anisotropic_prod hQ₁ hiso
       refine ⟨Units.mk0 _ hx, mem_unitValueSet.mpr ((represents_iff _ _).mpr ⟨x, rfl⟩),
         mem_unitValueSet.mpr ((represents_iff _ _).mpr ⟨y, ?_⟩)⟩
       rw [Units.val_neg, Units.val_mk0, hxy, neg_neg]
@@ -412,7 +411,7 @@ theorem _root_.QuadraticMap.not_anisotropic_prod_iff_exists_mem_unitValueSet_neg
       obtain ⟨a, ha⟩ := h
       refine ⟨a, ha, ?_⟩
       rw [mem_unitValueSet, Units.val_neg]
-      exact represents_of_nondegenerate_of_not_anisotropic _ hQ₂ hani _
+      exact represents_of_radical_eq_bot_of_not_anisotropic _ hQ₂ hani _
   · rintro ⟨x, hx₁, hx₂⟩
     exact not_anisotropic_prod_of_represents_neg (mem_unitValueSet.mp hx₁)
       (by simpa using mem_unitValueSet.mp hx₂) x.ne_zero

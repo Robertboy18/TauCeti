@@ -47,10 +47,14 @@ square classes, and a ternary form, which represents every unit outside one squa
   is isotropic.
 * `TauCeti.RegularFormClass.exists_rank_eq_four_and_anisotropic`: there is an anisotropic class of
   rank four, so `u(K) = 4`.
+* `TauCeti.neg_mem_unitValueSet_presentedForm_three_of_not_isSquare`: a ternary diagonal form
+  represents every unit outside one square class.
 * `QuadraticForm.not_anisotropic_iff_localHasse_eq_of_finrank_eq_three`,
   `QuadraticForm.not_anisotropic_iff_discr_ne_zero_or_localHasse_eq_of_finrank_eq_four`,
   `QuadraticForm.not_anisotropic_of_five_le_finrank`: the same criteria for regular forms on
   finite-dimensional spaces.
+* `QuadraticForm.exists_nondegenerate_and_anisotropic_fin_four`: an anisotropic regular form on
+  `Fin 4 → K`.
 
 ## References
 
@@ -101,15 +105,13 @@ theorem not_anisotropic_presentedForm_three_iff (w : Fin 3 → Kˣ) :
 
 /-- If `abcd` is a nonsquare, the binary forms `⟨a, b⟩` and `⟨c, d⟩` have unit values `x` and
 `-x` that are negatives of each other, so that `⟨a, b⟩ ⊥ ⟨c, d⟩` is isotropic. -/
-theorem exists_mem_unitValueSet_binary_and_neg_mem_of_not_isSquare (a b c d : Kˣ)
+private theorem exists_mem_unitValueSet_binary_and_neg_mem_of_not_isSquare (a b c d : Kˣ)
     (h : ¬IsSquare (a * b * c * d)) :
     ∃ x : Kˣ, x ∈ unitValueSet (weightedSumSquares K ![(a : K), (b : K)]) ∧
       -x ∈ unitValueSet (weightedSumSquares K ![(c : K), (d : K)]) := by
   have h2 : (2 : K) ≠ 0 := Invertible.ne_zero 2
-  have hab : hilbertSymbol a (-(a * b)) = hilbertSymbol a b :=
-    (mem_unitValueSet_binary_iff_hilbertSymbol_eq a b a).mp (mem_unitValueSet_binary_left a b)
-  have hcd : hilbertSymbol c (-(c * d)) = hilbertSymbol c d :=
-    (mem_unitValueSet_binary_iff_hilbertSymbol_eq c d c).mp (mem_unitValueSet_binary_left c d)
+  have hab : hilbertSymbol a (-(a * b)) = hilbertSymbol a b := hilbertSymbol_neg_self_mul h2 a b
+  have hcd : hilbertSymbol c (-(c * d)) = hilbertSymbol c d := hilbertSymbol_neg_self_mul h2 c d
   simp only [mem_unitValueSet_binary_iff_hilbertSymbol_eq]
   by_cases hab' : IsSquare (-(a * b))
   · -- `⟨a, b⟩` is a hyperbolic plane and represents every unit, in particular `-c`.
@@ -134,16 +136,9 @@ theorem exists_mem_unitValueSet_binary_and_neg_mem_of_not_isSquare (a b c d : K�
 `⟨a, b, c, d⟩` over `K` whose discriminant `abcd` is a nonsquare is isotropic. -/
 theorem not_anisotropic_presentedForm_four_of_not_isSquare (w : Fin 4 → Kˣ)
     (h : ¬IsSquare (w 0 * w 1 * w 2 * w 3)) : ¬(presentedForm ⟨4, w⟩).Anisotropic := by
-  have hfirst : presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩ =
-      weightedSumSquares K ![(w 0 : K), (w 1 : K)] := presentedForm_two _
   have hlast : presentedForm ⟨2, fun i => w (Fin.natAdd 2 i)⟩ =
       weightedSumSquares K ![(w 2 : K), (w 3 : K)] := presentedForm_two _
-  have hw0 : w 0 ∈ unitValueSet (presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩) := by
-    rw [hfirst]
-    exact mem_unitValueSet_binary_left _ _
-  rw [(equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 2) w).anisotropic_iff,
-    not_anisotropic_prod_iff_exists_mem_unitValueSet_neg_mem (nondegenerate_presentedForm _)
-      (nondegenerate_presentedForm _) ⟨w 0, hw0⟩, hfirst, hlast]
+  rw [not_anisotropic_presentedForm_two_add_iff (n := 2) w, hlast]
   exact exists_mem_unitValueSet_binary_and_neg_mem_of_not_isSquare (w 0) (w 1) (w 2) (w 3) h
 
 /-- **Quaternary isotropy, square discriminant** (Serre IV Thm 6 (iii)). A diagonal form
@@ -156,16 +151,10 @@ theorem not_anisotropic_presentedForm_four_iff_of_isSquare (w : Fin 4 → Kˣ)
         hilbertSymbol (w 1) (w 2) * hilbertSymbol (w 1) (w 3) * hilbertSymbol (w 2) (w 3) =
           hilbertSymbol (-1 : Kˣ) (-1) := by
   have h2 : (2 : K) ≠ 0 := Invertible.ne_zero 2
-  have hfirst : presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩ =
-      weightedSumSquares K ![(w 0 : K), (w 1 : K)] := presentedForm_two _
   have hlast : presentedForm ⟨2, fun i => w (Fin.natAdd 2 i)⟩ =
       weightedSumSquares K ![(w 2 : K), (w 3 : K)] := presentedForm_two _
   have hab : hilbertSymbol (w 0) (-(w 0 * w 1)) = hilbertSymbol (w 0) (w 1) :=
-    (mem_unitValueSet_binary_iff_hilbertSymbol_eq (w 0) (w 1) (w 0)).mp
-      (mem_unitValueSet_binary_left (w 0) (w 1))
-  have hw0 : w 0 ∈ unitValueSet (presentedForm ⟨2, fun i => w (Fin.castAdd 2 i)⟩) := by
-    rw [hfirst]
-    exact mem_unitValueSet_binary_left _ _
+    hilbertSymbol_neg_self_mul h2 (w 0) (w 1)
   -- `⟨w₀, w₁⟩ ⊥ ⟨w₂, w₃⟩` is isotropic exactly when `⟨w₀, w₁⟩` has a unit value `x` with `-x` a
   -- value of `⟨w₂, w₃⟩`. Since `-w₀w₁` and `-w₂w₃` lie in the same square class, the two
   -- characters `(·, -w₀w₁)_K` and `(·, -w₂w₃)_K` agree, and `w₀` itself is a value of
@@ -175,9 +164,7 @@ theorem not_anisotropic_presentedForm_four_iff_of_isSquare (w : Fin 4 → Kˣ)
   have hneg (x : Kˣ) : hilbertSymbol (-x) (-(w 0 * w 1)) =
       hilbertSymbol (-1) (-(w 0 * w 1)) * hilbertSymbol x (-(w 0 * w 1)) := by
     rw [neg_eq_neg_one_mul x, hilbertSymbol_mul_left h2]
-  rw [(equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 2) w).anisotropic_iff,
-    not_anisotropic_prod_iff_exists_mem_unitValueSet_neg_mem (nondegenerate_presentedForm _)
-      (nondegenerate_presentedForm _) ⟨w 0, hw0⟩, hfirst, hlast]
+  rw [not_anisotropic_presentedForm_two_add_iff (n := 2) w, hlast]
   simp only [mem_unitValueSet_binary_iff_hilbertSymbol_eq, hcong]
   -- The two products expand to the same symbols, once `(w₀w₁, w₂w₃)_K = (-1, w₀w₁)_K` is used.
   have key : hilbertSymbol (w 0) (w 1) * hilbertSymbol (w 2) (w 3) *
@@ -202,48 +189,46 @@ theorem not_anisotropic_presentedForm_four_iff_of_isSquare (w : Fin 4 → Kˣ)
     rw [hneg (w 0), hab, Int.units_eq_iff_mul_eq_one, mul_comm _ (hilbertSymbol (w 0) (w 1)),
       mul_right_comm, key, hε, Int.units_mul_self]
 
+/-- **Ternary representation.** A diagonal form `⟨a, b, c⟩` over `K` represents `-x` for every
+unit `x` such that `xabc` is a nonsquare: a ternary form represents every unit outside one square
+class. -/
+theorem neg_mem_unitValueSet_presentedForm_three_of_not_isSquare (w : Fin 3 → Kˣ) (x : Kˣ)
+    (hx : ¬IsSquare (x * (w 0 * w 1 * w 2))) : -x ∈ unitValueSet (presentedForm ⟨3, w⟩) := by
+  -- `⟨x, a, b, c⟩` has nonsquare discriminant, so it is isotropic, so `⟨a, b, c⟩` represents `-x`.
+  have h4 := (not_anisotropic_presentedForm_succ_iff ![x, w 0, w 1, w 2]).mp
+    (not_anisotropic_presentedForm_four_of_not_isSquare ![x, w 0, w 1, w 2]
+      (by simpa [mul_assoc] using hx))
+  -- The tail of `⟨x, a, b, c⟩` is `⟨a, b, c⟩`; the rewrite goes through the dependent rank index,
+  -- which `simp` cannot do.
+  have htail : (fun i : Fin 3 => ![x, w 0, w 1, w 2] i.succ) = w :=
+    funext fun i => by fin_cases i <;> rfl
+  rw [htail] at h4
+  simpa using h4
+
 /-- **Isotropy in rank five** (Serre IV Thm 6 (iv)). Every diagonal form of rank five over `K`
 is isotropic. -/
 theorem not_anisotropic_presentedForm_five (w : Fin 5 → Kˣ) :
     ¬(presentedForm ⟨5, w⟩).Anisotropic := by
   have h2 : (2 : K) ≠ 0 := Invertible.ne_zero 2
-  have hfirst : presentedForm ⟨2, fun i => w (Fin.castAdd 3 i)⟩ =
-      weightedSumSquares K ![(w 0 : K), (w 1 : K)] := presentedForm_two _
   have hlast : (fun i : Fin 3 => w (Fin.natAdd 2 i)) = ![w 2, w 3, w 4] :=
     funext fun i => by fin_cases i <;> rfl
-  have hw0 : w 0 ∈ unitValueSet (presentedForm ⟨2, fun i => w (Fin.castAdd 3 i)⟩) := by
-    rw [hfirst]
-    exact mem_unitValueSet_binary_left _ _
   -- `⟨w₀, …, w₄⟩` is isotropic as soon as a unit value `x` of `⟨w₀, w₁⟩` has `-x` a value of
   -- `⟨w₂, w₃, w₄⟩`.
-  rw [(equivalent_presentedForm_prod_castAdd_natAdd (m := 2) (n := 3) w).anisotropic_iff,
-    not_anisotropic_prod_iff_exists_mem_unitValueSet_neg_mem (nondegenerate_presentedForm _)
-      (nondegenerate_presentedForm _) ⟨w 0, hw0⟩, hfirst, hlast]
-  rw [hfirst] at hw0
-  -- `⟨w₂, w₃, w₄⟩` represents `-x` as soon as `⟨x, w₂, w₃, w₄⟩` has a nonsquare discriminant.
-  have hter (x : Kˣ) (hx : ¬IsSquare (x * (w 2 * w 3 * w 4))) :
-      -x ∈ unitValueSet (presentedForm ⟨3, ![w 2, w 3, w 4]⟩) := by
-    have h4 := (not_anisotropic_presentedForm_succ_iff ![x, w 2, w 3, w 4]).mp
-      (not_anisotropic_presentedForm_four_of_not_isSquare ![x, w 2, w 3, w 4]
-        (by simpa [mul_assoc] using hx))
-    -- The tail of `⟨x, w₂, w₃, w₄⟩` is `⟨w₂, w₃, w₄⟩`; the rewrite goes through the dependent
-    -- rank index, which `simp` cannot do.
-    have htail : (fun i : Fin 3 => ![x, w 2, w 3, w 4] i.succ) = ![w 2, w 3, w 4] :=
-      funext fun i => by fin_cases i <;> rfl
-    rw [htail] at h4
-    simpa using h4
+  rw [not_anisotropic_presentedForm_two_add_iff (n := 3) w, hlast]
   -- The values `w₀` and `w₀ n` of `⟨w₀, w₁⟩`, with `n` a nonsquare norm from `K(√(-w₀w₁))`, lie
   -- in distinct square classes, so one of them has a nonsquare product with `w₂w₃w₄`.
+  have hw0 := mem_unitValueSet_binary_left (w 0) (w 1 : K)
   obtain ⟨n, hn, hn'⟩ := exists_not_isSquare_hilbertSymbol_eq_one h2 (-(w 0 * w 1))
   have hw0n : w 0 * n ∈ unitValueSet (weightedSumSquares K ![(w 0 : K), (w 1 : K)]) := by
     rw [mem_unitValueSet_binary_iff_hilbertSymbol_eq, hilbertSymbol_mul_left h2, hn', mul_one]
     exact (mem_unitValueSet_binary_iff_hilbertSymbol_eq _ _ _).mp hw0
   by_cases hsq : IsSquare (w 0 * (w 2 * w 3 * w 4))
-  · refine ⟨_, hw0n, hter _ fun h => hn ?_⟩
+  · refine ⟨_, hw0n,
+      neg_mem_unitValueSet_presentedForm_three_of_not_isSquare ![w 2, w 3, w 4] _ fun h => hn ?_⟩
     have hcancel : w 0 * n * (w 2 * w 3 * w 4) * (w 0 * (w 2 * w 3 * w 4))⁻¹ = n := by
       rw [mul_right_comm (w 0) n, mul_comm (w 0 * (w 2 * w 3 * w 4)) n, mul_inv_cancel_right]
     exact hcancel ▸ h.mul hsq.inv
-  · exact ⟨_, hw0, hter _ hsq⟩
+  · exact ⟨_, hw0, neg_mem_unitValueSet_presentedForm_three_of_not_isSquare ![w 2, w 3, w 4] _ hsq⟩
 
 /-- **Isotropy in rank at least five.** Every diagonal form of rank at least five over `K` is
 isotropic. -/
@@ -358,5 +343,18 @@ theorem not_anisotropic_of_five_le_finrank (Q : QuadraticForm K V) (hQ : Q.Nonde
     (hV : 5 ≤ Module.finrank K V) : ¬Q.Anisotropic := by
   rw [← anisotropic_formClass Q hQ]
   exact RegularFormClass.not_anisotropic_of_five_le_rank (by rwa [rank_formClass])
+
+/-- **`u(K) = 4`** (O'Meara 63:19). There is an anisotropic regular quadratic form on the
+four-dimensional space `Fin 4 → K`. -/
+theorem exists_nondegenerate_and_anisotropic_fin_four :
+    ∃ Q : QuadraticForm K (Fin 4 → K), Q.Nondegenerate ∧ Q.Anisotropic := by
+  obtain ⟨x, hx, hani⟩ := RegularFormClass.exists_rank_eq_four_and_anisotropic (K := K)
+  induction x using Quotient.inductionOn with
+  | h p =>
+    obtain ⟨n, w⟩ := p
+    rw [RegularFormClass.rank_mk] at hx
+    subst hx
+    exact ⟨presentedForm ⟨4, w⟩, nondegenerate_presentedForm ⟨4, w⟩,
+      (RegularFormClass.anisotropic_mk _).mp hani⟩
 
 end QuadraticForm

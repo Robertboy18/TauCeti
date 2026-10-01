@@ -51,7 +51,8 @@ field in `TauCeti.NumberTheory.HilbertSymbol.NormSubgroup`, as
   radicand.
 * `TauCeti.hilbertSymbol_mul_right` and `TauCeti.hilbertSymbol_mul_left`: the Hilbert symbol is
   bilinear in both arguments.
-* `TauCeti.hilbertSymbol_self_mul`: `(a, ab)_K = (a, -b)_K`.
+* `TauCeti.hilbertSymbol_self_mul` and `TauCeti.hilbertSymbol_neg_self_mul`:
+  `(a, ab)_K = (a, -b)_K` and `(a, -ab)_K = (a, b)_K`.
 * `TauCeti.exists_hilbertSymbol_eq_neg_one`: for every nonsquare `a` there is a `b` with
   `(a, b)_K = -1`.
 * `TauCeti.exists_hilbertSymbol_eq_and_hilbertSymbol_eq`: for nonsquares `a`, `b` with `ab` a
@@ -115,6 +116,12 @@ theorem hilbertSymbol_self_mul (h2 : (2 : K) ≠ 0) (a b : Kˣ) :
     hilbertSymbol a (a * b) = hilbertSymbol a (-b) := by
   rw [← neg_mul_neg, hilbertSymbol_mul_right h2, hilbertSymbol_neg_self, one_mul]
 
+/-- If `2 ≠ 0` in `K`, then `(a, -ab)_K = (a, b)_K`: the two second arguments differ by the norm
+`-a` from `K(√a)`. -/
+theorem hilbertSymbol_neg_self_mul (h2 : (2 : K) ≠ 0) (a b : Kˣ) :
+    hilbertSymbol a (-(a * b)) = hilbertSymbol a b := by
+  rw [← mul_neg, hilbertSymbol_self_mul h2, neg_neg]
+
 /-- The Hilbert symbol is multiplicative on integer powers of its second argument. -/
 @[simp]
 theorem hilbertSymbol_zpow_right (h2 : (2 : K) ≠ 0)
@@ -147,7 +154,7 @@ theorem exists_hilbertSymbol_eq_neg_one (h2 : (2 : K) ≠ 0) {a : Kˣ} (ha : ¬I
 /-- If `2 ≠ 0` in `K`, then for a nonsquare `a` and any `b` with `ab` a nonsquare, some `y ∈ Kˣ`
 has `(y, a)_K = -1` and `(y, b)_K = 1`: the character `(·, a)_K` is nontrivial and differs from
 `(·, b)_K`. -/
-theorem exists_hilbertSymbol_eq_neg_one_and_eq_one (h2 : (2 : K) ≠ 0) {a b : Kˣ}
+private theorem exists_hilbertSymbol_eq_neg_one_and_eq_one (h2 : (2 : K) ≠ 0) {a b : Kˣ}
     (ha : ¬IsSquare a) (hab : ¬IsSquare (a * b)) :
     ∃ y : Kˣ, hilbertSymbol y a = -1 ∧ hilbertSymbol y b = 1 := by
   have : Invertible (2 : K) := invertibleOfNonzero h2

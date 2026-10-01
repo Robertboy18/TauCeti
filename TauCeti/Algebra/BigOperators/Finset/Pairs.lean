@@ -40,6 +40,8 @@ sign of the permutation.
   pairs separates into the strictly increasing pairs and the diagonal.
 * `TauCeti.prod_prod_Ioi_eq_of_two`: separates the first pair and its cross terms from a product
   over the increasing pairs of a finite ordinal.
+* `TauCeti.prod_prod_Ioi_three` and `TauCeti.prod_prod_Ioi_four`: the products over the increasing
+  pairs of `Fin 3` and of `Fin 4`, written out.
 * `TauCeti.prod_prod_Ioi_snoc`: splits the pair product of a tuple with a final entry.
 * `TauCeti.prod_prod_Ioi_append`: the pair product of appended tuples splits into the pair
   products of each tuple and their cross terms.
