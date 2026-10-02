@@ -206,6 +206,7 @@ noncomputable abbrev spaComapTopHom : TopCat.of ↥(spa Bplus) ⟶ TopCat.of ↥
 open scoped Classical in
 /-- **The preimage of a basic open is a basic open**: the preimage of `R(T/s)` under the induced
 map of adic spectra is `R(φ(T)/φ(s))`. This is `spaComap_preimage_rationalSubset` for `Opens`. -/
+@[simp]
 theorem map_spaComapTopHom_obj_spaBasicOpen (T : Finset A) (s : A) :
     (TopologicalSpace.Opens.map (spaComapTopHom φ hφ hplus)).obj (spaBasicOpen Aplus T s) =
       spaBasicOpen Bplus (T.image φ) (φ s) :=
