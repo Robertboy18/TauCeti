@@ -19,9 +19,11 @@ public import TauCeti.Topology.Algebra.Group.Profinite.Demushkin.NormalForm.Two.
 Labute's classification says that a Demushkin group is determined up to topological isomorphism
 by its rank `n` and the image of its canonical character `χ : G → ℤ_pˣ`. This file proves that
 uniqueness statement in full, in two forms. The relator form is Labute's Theorem 2: two relators
-`r, r' ∈ Φ(F)` of the free pro-`p` group `F` on `n` generators presenting Demushkin groups whose
-canonical characters have the same image are carried to each other by a continuous automorphism of
-`F`. The intrinsic form follows: two Demushkin groups of the same rank whose canonical characters
+`r, r'` of the free pro-`p` group `F` on `n` generators presenting Demushkin groups whose canonical
+characters have the same image are carried to each other by a continuous automorphism of `F`; such
+relators lie in `Φ(F)` automatically, since a one-relator presentation of a Demushkin group is
+minimal (`TauCeti.IsDemushkin.mem_proPFrattini_of_presentedProP_singleton`). The intrinsic form
+follows: two Demushkin groups of the same rank whose canonical characters
 have the same image are topologically isomorphic. The relator form is what turns "isomorphic" into
 "isomorphic by a change of basis of `F`", so that the normal forms of the classification are a
 normalization of the relator and not a choice.
@@ -48,8 +50,8 @@ groups through presentations by relators in `Φ(F)`.
 ## Main results
 
 * `TauCeti.freeProP.exists_continuousMulEquiv_apply_eq_of_range_demushkinCharacter_eq`:
-  **Labute's Theorem 2**, two relators in `Φ(F)` presenting Demushkin groups whose canonical
-  characters have the same image are carried to each other by a continuous automorphism of `F`.
+  **Labute's Theorem 2**, two relators presenting Demushkin groups whose canonical characters have
+  the same image are carried to each other by a continuous automorphism of `F`.
 * `TauCeti.IsDemushkin.nonempty_continuousMulEquiv_of_range_demushkinCharacter_eq`: **uniqueness in
   the classification of Demushkin groups**, two Demushkin groups of the same rank whose canonical
   characters have the same image are topologically isomorphic.
@@ -122,18 +124,19 @@ theorem freeProP.exists_continuousMulEquiv_apply_eq_of_range_demushkinCharacter_
       hr' hG' hf (h.symm.trans hrange)
     exact ⟨e.trans e'.symm, by rw [ContinuousMulEquiv.trans_apply, he, ← he', e'.symm_apply_apply]⟩
 
-/-- **Labute's Theorem 2.** Let `r, r' ∈ Φ(F)` be relators of the free pro-`p` group on `n`
+/-- **Labute's Theorem 2.** Let `r, r'` be relators of the free pro-`p` group `F` on `n`
 generators whose presented groups are Demushkin groups whose canonical characters have the same
 image. Then a continuous automorphism of `F` carries `r` to `r'`; in particular the closed normal
 closures of `r` and `r'` are carried to each other, so two Demushkin relators with the same
-invariants differ by a change of basis of `F`. -/
+invariants differ by a change of basis of `F`. The relators lie in `Φ(F)` and both groups have rank
+`n` automatically (`TauCeti.IsDemushkin.mem_proPFrattini_of_presentedProP_singleton`). -/
 theorem freeProP.exists_continuousMulEquiv_apply_eq_of_range_demushkinCharacter_eq
-    {r r' : freeProP p (Fin n)} (hr : r ∈ proPFrattini p (freeProP p (Fin n)))
-    (hr' : r' ∈ proPFrattini p (freeProP p (Fin n)))
-    (hG : IsDemushkin p (presentedProP p (Fin n) {r}))
+    {r r' : freeProP p (Fin n)} (hG : IsDemushkin p (presentedProP p (Fin n) {r}))
     (hG' : IsDemushkin p (presentedProP p (Fin n) {r'}))
     (h : (demushkinCharacter hG).toMonoidHom.range = (demushkinCharacter hG').toMonoidHom.range) :
     ∃ e : freeProP p (Fin n) ≃ₜ* freeProP p (Fin n), e r = r' := by
+  have hr := hG.mem_proPFrattini_of_presentedProP_singleton
+  have hr' := hG'.mem_proPFrattini_of_presentedProP_singleton
   by_cases hq : demushkinQ hG = 2
   swap
   · exact exists_continuousMulEquiv_apply_eq_of_demushkinQ_eq hr hr' hG hG'
@@ -216,7 +219,7 @@ theorem IsDemushkin.nonempty_continuousMulEquiv_of_range_demushkinCharacter_eq {
     isDemushkin_of_nondegenerate_degreeOneForm hr' (ContinuousMulEquiv.refl _)
       (hH.nondegenerate_degreeOneForm hr' e')
   obtain ⟨φ, hφ⟩ :=
-    freeProP.exists_continuousMulEquiv_apply_eq_of_range_demushkinCharacter_eq hr hr' hGr hHr
+    freeProP.exists_continuousMulEquiv_apply_eq_of_range_demushkinCharacter_eq hGr hHr
       ((range_demushkinCharacter_of_equiv hG hGr e.symm).trans
         (h.trans (range_demushkinCharacter_of_equiv hH hHr e'.symm).symm))
   exact ⟨e.symm.trans ((presentedProP.congrSingleton φ hφ).trans e')⟩
