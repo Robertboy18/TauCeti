@@ -466,8 +466,9 @@ private theorem PresentationIndex.rationalSubset_descend
       ((Opens.map (spaCompletionTopHom Aplus)).obj U)) :
     rationalSubset (completionPlus Aplus) j.pres.num j.pres.den =
       rationalSubset (completionPlus Aplus) ((j.descend (P := P)).completion (P' := P')).pres.num
-        ((j.descend (P := P)).completion (P' := P')).pres.den :=
-  (exists_presentationIndex_rationalSubset_eq j).choose_spec
+        ((j.descend (P := P)).completion (P' := P')).pres.den := by
+  rw [PresentationIndex.map_pres_num, PresentationIndex.map_pres_den]
+  exact (exists_presentationIndex_rationalSubset_eq j).choose_spec
 
 /-- The component at an index `i` of `U` of the comparison map from the completed side: project to
 the induced index, then descend from `Â⟨T/s⟩` to `A⟨T/s⟩`. -/
@@ -478,6 +479,7 @@ private noncomputable def presentationLimitCompletionLeg (i : PresentationIndex 
     Presentation.completionHom i.pres (i.completion (P' := P')).pres
       (by rw [PresentationIndex.map_pres_den]; rfl) fun t ht ↦ by
       classical
+      rw [PresentationIndex.map_pres_num] at ht
       obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
       exact ⟨t₀, ht₀, rfl⟩
 
@@ -536,7 +538,7 @@ private theorem presentationLimitDescendLeg_comp_restrictionHom
     (rationalSubset_subset_of_image_subset ?_) ?_).symm
   · have hsub := rationalSubset_subset_rationalSubset_of_le (completionPlus Aplus) h.le
     rw [j₁.rationalSubset_descend (P := P), j₂.rationalSubset_descend (P := P)] at hsub
-    exact hsub
+    simpa only [PresentationIndex.map_pres_num, PresentationIndex.map_pres_den] using hsub
   · simp only [ObjectProperty.FullSubcategory.comp_hom,
       Presentation.toCompletionLocTopHom_comp_mapHom_assoc,
       toCompletionLocTopHom_comp_homOfRationalSubsetSubset_assoc,
@@ -601,7 +603,8 @@ private theorem presentationLimitDescendHom_comp_presentationLimitCompletionHom
     ← Category.comp_id (presentationLimitπToPresentation Aplus U i)]
   refine (presentationLimitπToPresentation_comp_eq_of_subset hAplus
     (rationalSubset_subset_of_image_subset ?_) ?_).symm
-  · exact ((i.completion (P' := P')).rationalSubset_descend (P := P)).le
+  · simpa only [PresentationIndex.map_pres_num, PresentationIndex.map_pres_den] using
+      ((i.completion (P' := P')).rationalSubset_descend (P := P)).le
   · simp only [ObjectProperty.FullSubcategory.comp_hom, ObjectProperty.FullSubcategory.id_hom,
       Category.comp_id, Presentation.toCompletionLocTopHom_comp_mapHom_assoc,
       toCompletionLocTopHom_comp_homOfRationalSubsetSubset_assoc,
@@ -658,7 +661,8 @@ private theorem presentationLimitMap_comp_presentationLimitDescendHom
   · have e₁ := ((presentationIndexRestrict ((Opens.map (spaCompletionTopHom Aplus)).monotone
       hU)).obj j).rationalSubset_descend (P := P)
     simp only [presentationIndexRestrict_obj_pres] at e₁ ⊢
-    exact ((j.rationalSubset_descend (P := P)).symm.trans e₁).le
+    simpa only [PresentationIndex.map_pres_num, PresentationIndex.map_pres_den] using
+      ((j.rationalSubset_descend (P := P)).symm.trans e₁).le
   · simp [Presentation.toCompletionLocTopHom_comp_mapHom_assoc,
       toCompletionLocTopHom_comp_homOfRationalSubsetSubset_assoc,
       toCompletionLocTopHom_comp_homOfRationalSubsetSubset]

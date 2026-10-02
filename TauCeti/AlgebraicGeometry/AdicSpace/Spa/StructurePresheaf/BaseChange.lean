@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Topology.Category.TopCat.Opens
 public import TauCeti.AlgebraicGeometry.AdicSpace.Spa.Comap
 public import TauCeti.AlgebraicGeometry.AdicSpace.Spa.StructurePresheaf.Rational
 
@@ -44,8 +43,6 @@ general `φ` with sheafy target.
 * `TauCeti.Huber.PairOfDefinition.Presentation.mapHom`: the base change `A⟨p⟩ ⟶ B⟨q⟩` of `φ`.
 * `TauCeti.ValuationSpectrum.PresentationIndex.map`: the index of `Spa(B, B⁺)` induced by an
   index of `Spa(A, A⁺)`.
-* `TauCeti.ValuationSpectrum.spaComapTopHom`: the induced map `Spa(B, B⁺) → Spa(A, A⁺)` as a
-  morphism of `TopCat`.
 
 ## Main results
 
@@ -222,42 +219,17 @@ variable {A B : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [CommRing B] [TopologicalSpace B] [IsTopologicalRing B] {P : PairOfDefinition A}
   {P' : PairOfDefinition B} {Aplus : Subring A} {Bplus : Subring B}
 
-/-! ### The induced map of adic spectra -/
-
-variable (φ : A →+* B) (hφ : Continuous φ)
-
-omit [IsTopologicalRing A] [IsTopologicalRing B] in
-/-- The map of adic spectra `Spa(B, B⁺) → Spa(A, A⁺)` induced by `φ`, as a morphism of `TopCat`. -/
-noncomputable abbrev spaComapTopHom (hplus : ∀ a ∈ Aplus, φ a ∈ Bplus) :
-    TopCat.of ↥(spa Bplus) ⟶ TopCat.of ↥(spa Aplus) :=
-  TopCat.ofHom ⟨spaComap φ hφ Aplus Bplus hplus, continuous_spaComap φ hφ Aplus Bplus hplus⟩
-
-omit [IsTopologicalRing A] [IsTopologicalRing B] in
-open scoped Classical in
-/-- **The preimage of a basic open is a basic open**: the preimage of `R(T/s)` under the induced
-map of adic spectra is `R(φ(T)/φ(s))`. This is `spaComap_preimage_rationalSubset` for `Opens`. -/
-theorem map_spaComapTopHom_obj_spaBasicOpen (hplus : ∀ a ∈ Aplus, φ a ∈ Bplus) (T : Finset A)
-    (s : A) :
-    (Opens.map (spaComapTopHom φ hφ hplus)).obj (spaBasicOpen Aplus T s) =
-      spaBasicOpen Bplus (T.image φ) (φ s) :=
-  Opens.ext <| Set.ext fun w ↦ (Opens.mem_map.trans mem_spaBasicOpen).trans <|
-    (Set.ext_iff.mp (spaComap_preimage_rationalSubset φ hφ Aplus Bplus hplus T s) w).trans
-      mem_spaBasicOpen.symm
-
 /-! ### Transporting presentations -/
 
-variable (hopen : ∀ ⦃J : Ideal A⦄, IsOpen (J : Set A) → IsOpen (J.map φ : Set B))
+variable (φ : A →+* B) (hφ : Continuous φ)
+  (hopen : ∀ ⦃J : Ideal A⦄, IsOpen (J : Set A) → IsOpen (J.map φ : Set B))
 
 include hopen in
 open scoped Classical in
 /-- The image under `φ` of an index of `U`, as an index of any `V` containing the preimage of `U`
 under the induced map of adic spectra: its presentation is `(φ(T), φ(s))` for the presentation
 `(T, s)` of the index. -/
--- The body is exposed: the induced index is a piece of data whose presentation `(φ(T), φ(s))`
--- consumers compute with, matching numerators against `Finset.image φ T` and denominators against
--- `φ s` in membership and containment proofs; `map_pres_num` and `map_pres_den` record the two
--- equations, and `Finset.mem_image` arguments need them definitionally.
-@[expose] noncomputable def PresentationIndex.map (hplus : ∀ a ∈ Aplus, φ a ∈ Bplus)
+noncomputable def PresentationIndex.map (hplus : ∀ a ∈ Aplus, φ a ∈ Bplus)
     {U : Opens ↥(spa Aplus)} {V : Opens ↥(spa Bplus)}
     (hUV : ∀ w, spaComap φ hφ Aplus Bplus hplus w ∈ U → w ∈ V)
     (i : PresentationIndex (P := P) Aplus U) : PresentationIndex (P := P') Bplus V where
@@ -277,11 +249,13 @@ variable (hplus : ∀ a ∈ Aplus, φ a ∈ Bplus) {U : Opens ↥(spa Aplus)} {V
 omit [IsTopologicalRing A] in
 open scoped Classical in
 /-- The numerators of the induced index are the images of the numerators. -/
+@[simp]
 theorem PresentationIndex.map_pres_num (i : PresentationIndex (P := P) Aplus U) :
     (i.map (P' := P') φ hφ hopen hplus hUV).pres.num = i.pres.num.image φ := (rfl)
 
 omit [IsTopologicalRing A] in
 /-- The denominator of the induced index is the image of the denominator. -/
+@[simp]
 theorem PresentationIndex.map_pres_den (i : PresentationIndex (P := P) Aplus U) :
     (i.map (P' := P') φ hφ hopen hplus hUV).pres.den = φ i.pres.den := (rfl)
 
