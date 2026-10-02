@@ -142,9 +142,8 @@ theorem mk_eq_mk_iff {I J : O.nonzeroFractionalIdeals} :
 theorem mk_eq_one_iff {I : O.nonzeroFractionalIdeals} :
     mk O I = 1 ↔ ∃ x : Kˣ, spanSingleton (nonZeroDivisors O.toSubalgebra) (x : K) =
       (I : FractionalIdeal (nonZeroDivisors O.toSubalgebra) K) := by
-  rw [← map_one (mk O)]
-  refine (Con.eq _).trans (Iff.trans ⟨O.homothetyCon.symm, O.homothetyCon.symm⟩ ?_)
-  simp [NumberFieldOrder.homothetyCon_iff]
+  rw [← map_one (mk O), eq_comm, mk_eq_mk_iff]
+  simp
 
 /-- The ideal class of a nonzero fractional ideal is a unit of the ideal class monoid exactly when
 the ideal is invertible. Noninvertible ideals therefore have classes that are not units. -/
@@ -277,8 +276,8 @@ theorem picEquivUnits_mkPic (I : O.invertibleProperFractionalIdeals) :
       = I := Units.ext (Units.coe_mapEquiv _ I)
   simp only [picEquivUnits, NumberFieldOrder.mkPic, MulEquiv.trans_apply, ClassGroup.equiv_mk,
     canonicalEquiv_self, RingEquiv.coe_mulEquiv_refl, hI, QuotientGroup.mk'_apply,
-    QuotientGroup.quotientMulEquivOfEq_mk]
-  exact QuotientGroup.kerLift_mk (unitsMk O) I
+    QuotientGroup.quotientMulEquivOfEq_mk, QuotientGroup.quotientKerEquivOfSurjective,
+    QuotientGroup.quotientKerEquivOfRightInverse_apply, QuotientGroup.kerLift_mk]
 
 end IdealClassMonoid
 
