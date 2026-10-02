@@ -97,7 +97,6 @@ theorem isPreprimitive_referenceSubgroup_four_four :
 /-- **The primitive quartic labels.** Of the five transitive subgroups of the symmetric group on
 four points, the alternating group of `4T4` and the symmetric group of `4T5` are primitive, and
 the cyclic, Klein four and dihedral groups of `4T1`, `4T2` and `4T3` are not. -/
-@[simp]
 theorem isPreprimitive_referenceSubgroup_four_iff (j : TransitiveGroupIndex 4) :
     IsPreprimitive (referenceSubgroup 4 j) (Fin 4) ↔ 3 ≤ (j : ℕ) := by
   obtain ⟨a, ha⟩ := j
@@ -111,6 +110,7 @@ theorem isPreprimitive_referenceSubgroup_four_iff (j : TransitiveGroupIndex 4) :
 
 /-- **The primitivity column of the table of transitive groups of degree at most five.** A
 reference subgroup acts primitively unless its label is one of `4T1`, `4T2` and `4T3`. -/
+@[simp]
 theorem isPreprimitive_referenceSubgroup_iff :
     ∀ {n : ℕ} (j : TransitiveGroupIndex n),
       IsPreprimitive (referenceSubgroup n j) (Fin n) ↔ n ≠ 4 ∨ 3 ≤ (j : ℕ)
