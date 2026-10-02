@@ -12,6 +12,7 @@ import Mathlib.Algebra.Polynomial.SpecificDegree
 import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 import Mathlib.FieldTheory.KummerPolynomial
 import Mathlib.FieldTheory.Minpoly.Field
+import TauCeti.FieldTheory.Kummer.Extension
 
 /-!
 # The non-Galois cubic `ℚ₅(∛5)`
@@ -69,7 +70,10 @@ namespace NonGaloisCubic
 
 /-- `X³ − 5` is irreducible over `ℚ₅`: it is Eisenstein at `5`. -/
 local instance factIrreducible : Fact (Irreducible (X ^ 3 - C 5 : ℚ_[5][X])) :=
-  ⟨by simpa using Padic.X_pow_sub_C_p_irreducible_of_prime 5 Nat.prime_three⟩
+  ⟨by
+    have := X_pow_sub_C_irreducible_of_irreducible (R := ℤ_[5]) (K := ℚ_[5])
+      PadicInt.irreducible_p three_ne_zero
+    rwa [map_natCast, Nat.cast_ofNat] at this⟩
 
 instance : Field NonGaloisCubic := inferInstanceAs (Field (AdjoinRoot (X ^ 3 - C 5 : ℚ_[5][X])))
 
