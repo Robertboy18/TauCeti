@@ -13,6 +13,7 @@ public import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Connec
 public import TauCeti.RepresentationTheory.Homological.ContCohomology.H2ZMod
 public import TauCeti.Topology.Algebra.GroupAction.InternalHom.DoubleDual
 
+import Mathlib.Data.FunLike.Fintype
 import TauCeti.Algebra.Group.Hom.Instances
 import TauCeti.RepresentationTheory.Homological.ContCohomology.Cup.Naturality
 
@@ -1039,7 +1040,7 @@ theorem dualityMap2_bijective_of_injective_of_addEquiv_zmod (e : N ≃+ ZMod n)
     (h₂ : Function.Injective (dualityMap2 G M N)) : Function.Bijective (dualityMap2 G M N) := by
   have hM' : ∀ φ : InternalHom G M N, n • φ = 0 := InternalHom.nsmul_eq_zero_of_domain hM
   have : Finite (H2 G N) := Finite.of_equiv _ e₂.symm.toEquiv
-  have : Finite (H0 G (InternalHom G M N) →+ H2 G N) := Finite.of_injective _ DFunLike.coe_injective
+  have : Finite (H0 G (InternalHom G M N) →+ H2 G N) := DFunLike.finite _
   refine h₂.bijective_of_nat_card_le (le_of_eq ?_)
   -- `|Hom(H⁰(M'), H²(N))| = |H⁰(M')| = |Hom(H²(M''), H²(N))| = |H²(M'')| = |H²(M)|`
   have h₁ : Nat.card (H0 G (InternalHom G M N) →+ H2 G N) = Nat.card (H0 G (InternalHom G M N)) :=
@@ -1047,11 +1048,8 @@ theorem dualityMap2_bijective_of_injective_of_addEquiv_zmod (e : N ≃+ ZMod n)
   have h₂₃ := (Nat.card_congr (Equiv.ofBijective _ h₀)).trans
     (natCard_addMonoidHom_of_addEquiv_zmod e₂
       (nsmul_H2_eq_zero (InternalHom.nsmul_eq_zero_of_domain hM')))
-  have hev : Function.Bijective (InternalHom.eval G M N).toAddMonoidHom :=
-    InternalHom.eval_bijective_of_addEquiv_zmod e hM
-  have h₂₃₄ := h₂₃.trans (Nat.card_congr (explicitCoeff2Equiv G M (AddEquiv.ofBijective _ hev)
-    continuous_of_discreteTopology continuous_of_discreteTopology
-    fun g m ↦ map_smul (InternalHom.eval G M N) g m).symm.toEquiv)
+  have h₂₃₄ := h₂₃.trans (Nat.card_congr (Equiv.ofBijective _ (explicitCoeff2_bijective G M
+    (InternalHom.eval_bijective_of_addEquiv_zmod e hM))).symm)
   exact h₁.trans h₂₃₄
 
 end Counting

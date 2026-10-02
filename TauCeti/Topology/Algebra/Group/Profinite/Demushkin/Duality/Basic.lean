@@ -246,8 +246,7 @@ private theorem natCard_H2_zmod : Nat.card (H2 G (ZMod p)) = p := by
 omit [TotallyDisconnectedSpace G] [Infinite G] hM in
 /-- The explicit `H²(G, 𝔽_p)` of a Demushkin group is `𝔽_p`, being of order `p`. -/
 private theorem nonempty_addEquiv_H2_zmod : Nonempty (H2 G (ZMod p) ≃+ ZMod p) :=
-  have ⟨_, ha⟩ := (isAddCyclic_of_prime_card (hG.natCard_H2_zmod htriv)).exists_generator
-  ⟨(zmodAddEquivOfGenerator ha (hG.natCard_H2_zmod htriv)).symm⟩
+  ⟨addEquivOfPrimeCardEq (hG.natCard_H2_zmod htriv) (Nat.card_zmod p)⟩
 
 omit [TotallyDisconnectedSpace G] [Infinite G] hM in
 /-- **Homomorphisms into `H²(G, 𝔽_p)` of a Demushkin group are as many as their source**: for a
