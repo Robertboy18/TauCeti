@@ -7,6 +7,7 @@ module
 
 public import TauCeti.NumberTheory.LocalField.NatCastValuation
 public import Mathlib.NumberTheory.Padics.LocalField
+import Mathlib.Algebra.Polynomial.SpecificDegree
 import Mathlib.NumberTheory.LegendreSymbol.Basic
 import TauCeti.Algebra.Group.Units.Basic
 import TauCeti.NumberTheory.LocalField.PowerSubgroup.Basic
@@ -33,6 +34,7 @@ concrete p-adic norm and valuation APIs.
 * `Padic.not_isSquare_intCast_of_not_isSquare_zmod`: an integer that is not a square modulo a
   power of `p` is not a square in `ℚ_[p]`; `Padic.not_isSquare_five` (`5` in `ℚ_[2]`) and
   `Padic.not_isSquare_neg_three` (`-3` in `ℚ_[5]`) are its two instances.
+* `Padic.irreducible_X_sq_add_X_add_one`: `X² + X + 1` is irreducible over `ℚ_[5]`.
 
 The Padic and residue-field constructions used here are part of Mathlib's upstream
 `NumberTheory/Padics` development.
@@ -185,5 +187,16 @@ theorem not_isSquare_neg_three : ¬ IsSquare (-3 : ℚ_[5]) := by
   have h := not_isSquare_intCast_of_not_isSquare_zmod (p := 5) (a := -3) (k := 1)
     (by rintro ⟨x, hx⟩; revert x hx; decide)
   simpa using h
+
+open Polynomial in
+/-- `X² + X + 1` is irreducible over `ℚ_[5]`: a root `r` would make `(2r + 1)² = −3` a square. -/
+theorem irreducible_X_sq_add_X_add_one : Irreducible (X ^ 2 + X + 1 : ℚ_[5][X]) := by
+  have hdeg : (X ^ 2 + X + 1 : ℚ_[5][X]).natDegree = 2 := by compute_degree!
+  have hmonic : (X ^ 2 + X + 1 : ℚ_[5][X]).Monic := by monicity!
+  rw [hmonic.irreducible_iff_roots_eq_zero_of_degree_le_three (by omega) (by omega),
+    Multiset.eq_zero_iff_forall_notMem]
+  intro r hr
+  rw [mem_roots hmonic.ne_zero, IsRoot, eval_add, eval_add, eval_pow, eval_X, eval_one] at hr
+  exact not_isSquare_neg_three ⟨2 * r + 1, by linear_combination (-4 : ℚ_[5]) * hr⟩
 
 end Padic

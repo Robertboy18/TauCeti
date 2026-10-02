@@ -10,8 +10,6 @@ public import TauCeti.Algebra.MonoidAlgebra.Exactness
 public import TauCeti.NumberTheory.Padics.MultiplicativeCompletion.Basic
 import Mathlib.FieldTheory.Fixed
 import Mathlib.FieldTheory.Tower
-import Mathlib.LinearAlgebra.Dimension.Constructions
-import Mathlib.LinearAlgebra.Dimension.Free
 import TauCeti.LinearAlgebra.Dimension.Localization
 import TauCeti.NumberTheory.Padics.MultiplicativeCompletion.FreeQuotient
 
@@ -73,21 +71,6 @@ theorem finrank_padicCompletionUnits_tensorRat :
 
 end Dimension
 
-/-- The `ℤ_p`-rank of the rationalized model `(ℤ_p[G]^n × ℤ_p[G] ⧸ I_G) ⊗ ℚ_p` of `n` copies of
-the regular representation and one trivial one is `n · #G + 1`. -/
-private theorem finrank_pi_prod_quotient_tensorRat (G : Type*) [Group G] [Finite G] (n : ℕ) :
-    Module.finrank ℤ_[p] (((Fin n → MonoidAlgebra ℤ_[p] G) ×
-      (MonoidAlgebra ℤ_[p] G ⧸ RingHom.ker (MonoidAlgebra.augmentation ℤ_[p] G))) ⊗[ℤ_[p]] ℚ_[p]) =
-        n * Nat.card G + 1 := by
-  have := Module.Free.of_basis (MonoidAlgebra.basis G ℤ_[p])
-  have := Module.Finite.of_basis (MonoidAlgebra.basis G ℤ_[p])
-  rw [IsLocalization.finrank_tensorProduct (nonZeroDivisors ℤ_[p]) ℚ_[p] le_rfl,
-    ((LinearEquiv.refl ℤ_[p] _).prodCongr
-      (MonoidAlgebra.quotientKerAugmentationEquiv ℤ_[p] G)).finrank_eq,
-    Module.finrank_prod, Module.finrank_self, Module.finrank_pi_fintype,
-    Module.finrank_eq_nat_card_basis (MonoidAlgebra.basis G ℤ_[p])]
-  simp
-
 /-- **Rejection test for the Galois hypothesis of the rational decomposition.** Let `L/K` be a
 finite layer of `p`-adic fields whose automorphism group `Aut_K(L)` has fewer elements than the
 degree `[L : K]`, as happens for a non-Galois layer. Then `A(L) ⊗ ℚ_p` is **not**
@@ -109,7 +92,9 @@ theorem not_nonempty_padicCompletionUnits_tensorRat_linearEquiv_of_card_lt
   have := Module.Finite.left ℚ_[p] K L
   have := Module.Finite.right ℚ_[p] K L
   have hfinrank := (e.restrictScalars ℤ_[p]).finrank_eq
-  rw [finrank_padicCompletionUnits_tensorRat, finrank_pi_prod_quotient_tensorRat,
+  rw [finrank_padicCompletionUnits_tensorRat,
+    IsLocalization.finrank_tensorProduct (nonZeroDivisors ℤ_[p]) ℚ_[p] le_rfl,
+    MonoidAlgebra.finrank_pi_prod_quotient_ker_augmentation,
     ← Module.finrank_mul_finrank ℚ_[p] K L] at hfinrank
   have hpos : 0 < Module.finrank ℚ_[p] K := Module.finrank_pos
   have := Nat.mul_lt_mul_of_pos_left h hpos

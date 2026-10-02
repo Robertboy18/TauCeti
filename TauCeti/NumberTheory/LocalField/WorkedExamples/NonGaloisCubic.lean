@@ -8,7 +8,6 @@ module
 public import Mathlib.FieldTheory.Galois.Basic
 public import TauCeti.NumberTheory.LocalField.Padic
 public import TauCeti.NumberTheory.Padics.MultiplicativeCompletion.Rational
-import Mathlib.Algebra.Polynomial.SpecificDegree
 import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 import Mathlib.FieldTheory.KummerPolynomial
 import Mathlib.FieldTheory.Minpoly.Field
@@ -101,16 +100,6 @@ theorem cbrtFive_pow_three : cbrtFive ^ 3 = 5 :=
 theorem finrank_eq_three : Module.finrank ℚ_[5] NonGaloisCubic = 3 := by
   rw [powerBasis.finrank, powerBasis, AdjoinRoot.powerBasis_dim, natDegree_X_pow_sub_C]
 
-/-- `X² + X + 1` is irreducible over `ℚ₅`: a root `r` would make `(2r + 1)² = −3` a square. -/
-private theorem irreducible_X_sq_add_X_add_one : Irreducible (X ^ 2 + X + 1 : ℚ_[5][X]) := by
-  have hdeg : (X ^ 2 + X + 1 : ℚ_[5][X]).natDegree = 2 := by compute_degree!
-  have hmonic : (X ^ 2 + X + 1 : ℚ_[5][X]).Monic := by monicity!
-  rw [hmonic.irreducible_iff_roots_eq_zero_of_degree_le_three (by omega) (by omega),
-    Multiset.eq_zero_iff_forall_notMem]
-  intro r hr
-  rw [mem_roots hmonic.ne_zero, IsRoot, eval_add, eval_add, eval_pow, eval_X, eval_one] at hr
-  exact Padic.not_isSquare_neg_three ⟨2 * r + 1, by linear_combination (-4 : ℚ_[5]) * hr⟩
-
 /-- `ℚ₅(∛5)` contains no nontrivial cube root of unity: such a root would generate a quadratic
 subfield of a cubic extension. -/
 theorem eq_one_of_pow_three_eq_one {ζ : NonGaloisCubic} (hζ : ζ ^ 3 = 1) : ζ = 1 := by
@@ -119,7 +108,8 @@ theorem eq_one_of_pow_three_eq_one {ζ : NonGaloisCubic} (hζ : ζ ^ 3 = 1) : ζ
     have h : (ζ - 1) * (ζ ^ 2 + ζ + 1) = 0 := by linear_combination hζ
     exact (mul_eq_zero.mp h).resolve_left (sub_ne_zero.mpr hne)
   have hmin : minpoly ℚ_[5] ζ = X ^ 2 + X + 1 :=
-    (minpoly.eq_of_irreducible_of_monic irreducible_X_sq_add_X_add_one (by simpa using hq)
+    (minpoly.eq_of_irreducible_of_monic Padic.irreducible_X_sq_add_X_add_one
+      (by simpa using hq)
       (by monicity!)).symm
   have hdeg : Module.finrank ℚ_[5] ℚ_[5]⟮ζ⟯ = 2 := by
     rw [IntermediateField.adjoin.finrank (Algebra.IsIntegral.isIntegral ζ), hmin]
