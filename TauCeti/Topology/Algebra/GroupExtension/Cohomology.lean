@@ -820,8 +820,8 @@ theorem contCohomologyClass_map_eq_of_continuous_monoidHom (φ : X.E →* Y.E) (
     Y.toGroupExtension.contCohomologyClass_eq Y.continuous_inl Y.continuous_rightHom
       Y.inducesAction hσ'c hσ']
   exact (FactorSet.contCohomologyClass_congr (GroupExtension.factorSet_monoidHomComp
-    X.continuousSection X.continuousSection_one X.inducesAction Y.inducesAction f φ hinl hright
-    hσ') _).symm
+    X.continuousSection X.continuousSection_one X.inducesAction Y.inducesAction f φ hinl hright)
+    _).symm
 
 end Lift
 

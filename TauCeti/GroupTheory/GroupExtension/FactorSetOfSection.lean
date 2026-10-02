@@ -282,9 +282,9 @@ kernel, where both read `φ (σ g) * φ (σ h) * (φ (σ (g * h)))⁻¹`. -/
 theorem factorSet_monoidHomComp {N : Type*} [CommGroup N] [MulDistribMulAction G N]
     {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (σ : S.Section) (hσ : σ 1 = 1)
     (hact : InducesAction S) (hact' : InducesAction S') (f : M →*[G] N) (φ : E →* E')
-    (hinl : φ.comp S.inl = S'.inl.comp f.toMonoidHom) (hright : S'.rightHom.comp φ = S.rightHom)
-    (hσ' : σ.monoidHomComp φ hright 1 = 1) :
-    factorSet (σ.monoidHomComp φ hright) hσ' hact' = (factorSet σ hσ hact).map f := by
+    (hinl : φ.comp S.inl = S'.inl.comp f.toMonoidHom) (hright : S'.rightHom.comp φ = S.rightHom) :
+    factorSet (σ.monoidHomComp φ hright) (by rw [σ.monoidHomComp_apply, hσ, map_one]) hact' =
+      (factorSet σ hσ hact).map f := by
   ext ⟨g, h⟩
   refine S'.inl_injective ?_
   have key : S'.inl (f (factorSet σ hσ hact (g, h))) = φ (S.inl (factorSet σ hσ hact (g, h))) :=
