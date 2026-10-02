@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Algebra.MonoidAlgebra.Basic
 public import Mathlib.Algebra.MonoidAlgebra.MapDomain
 public import Mathlib.Algebra.MonoidAlgebra.Module
 public import Mathlib.RingTheory.Ideal.Maps
@@ -25,9 +24,6 @@ none of the further theory built on it.
 * `TauCeti.MonoidAlgebra.mem_ideal_smul_top_iff`: an element of `R[M]` lies in `I • R[M]` exactly
   when its coefficients lie in `I`, and `TauCeti.MonoidAlgebra.mapRingHom_eq_zero_iff`: the kernel
   of the coefficientwise map along `f : R →+* S` is `ker f • R[M]`.
-* `TauCeti.MonoidAlgebra.coeff_mapAlgEquiv`: the coefficients of the image of `x` under the
-  isomorphism `A[M] ≃ₐ[R] B[M]` induced by `e : A ≃ₐ[R] B` are the images under `e` of the
-  coefficients of `x`.
 
 ## References
 
@@ -88,15 +84,6 @@ theorem mapRingHom_eq_zero_iff [Monoid M] {S : Type*} [Semiring S] (f : R →+* 
       x ∈ RingHom.ker f • (⊤ : Submodule R (MonoidAlgebra R M)) := by
   rw [mem_ideal_smul_top_iff, ← MonoidAlgebra.coeff_inj]
   simp [Finsupp.ext_iff, MonoidAlgebra.coeff_mapRingHom]
-
-/-- The coefficient at `m` of the image of `x` under the isomorphism `A[M] ≃ₐ[R] B[M]` induced by
-`e : A ≃ₐ[R] B` on the coefficients is the image under `e` of the coefficient at `m` of `x`. -/
-@[simp]
-theorem coeff_mapAlgEquiv {A B : Type*} [Semiring A] [Semiring B] [Algebra R A] [Algebra R B]
-    [Monoid M] (e : A ≃ₐ[R] B) (x : MonoidAlgebra A M) (m : M) :
-    (MonoidAlgebra.mapAlgEquiv R M e x).coeff m = e (x.coeff m) :=
-  -- `mapAlgEquiv` is, by definition, `mapAlgHom` on the underlying algebra homomorphism.
-  MonoidAlgebra.coeff_mapAlgHom (e : A →ₐ[R] B) x m
 
 end MonoidAlgebra
 

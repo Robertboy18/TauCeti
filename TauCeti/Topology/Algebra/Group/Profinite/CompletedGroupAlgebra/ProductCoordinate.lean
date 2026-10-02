@@ -176,7 +176,8 @@ theorem proj_prodPowerSeriesCoordinate_eq_zero_iff (U : OpenNormalSubgroup Γ)
           ((c, δ) : (C × Γ) ⧸ ((openNormalSubgroupBot C).prod U).toSubgroup) =
         (proj ℤ_[p] Γ U (powerSeriesCoordinate hΓ hγ (f.coeff c))).coeff
           (δ : Γ ⧸ U.toSubgroup) := by
-    rw [coeff_proj_monoidAlgebraProdHom, MonoidAlgebra.coeff_mapAlgEquiv]
+    rw [coeff_proj_monoidAlgebraProdHom]
+    simp
   constructor
   · intro h c
     rw [← proj_powerSeriesCoordinate_eq_zero_iff hΓ hγ U]
