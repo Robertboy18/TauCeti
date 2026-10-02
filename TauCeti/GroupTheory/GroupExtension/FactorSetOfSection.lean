@@ -277,14 +277,15 @@ theorem inl_factorSet (σ : S.Section) (hσ : σ 1 = 1) (hact : InducesAction S)
 
 /-- **The factor set of a section transported along a homomorphism of extensions** `φ` over the
 identity of `G` that restricts to the equivariant `f` on the kernels is the pushforward along `f`
-of the factor set of the section: the two factor sets agree after the injective inclusion of the
-kernel, where both read `φ (σ g) * φ (σ h) * (φ (σ (g * h)))⁻¹`. -/
+of the factor set of the section. -/
 theorem factorSet_monoidHomComp {N : Type*} [CommGroup N] [MulDistribMulAction G N]
     {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (σ : S.Section) (hσ : σ 1 = 1)
     (hact : InducesAction S) (hact' : InducesAction S') (f : M →*[G] N) (φ : E →* E')
     (hinl : φ.comp S.inl = S'.inl.comp f.toMonoidHom) (hright : S'.rightHom.comp φ = S.rightHom) :
     factorSet (σ.monoidHomComp φ hright) (by rw [σ.monoidHomComp_apply, hσ, map_one]) hact' =
       (factorSet σ hσ hact).map f := by
+  -- The two factor sets agree after the injective inclusion of the kernel into `E'`, where both
+  -- read `φ (σ g) * φ (σ h) * (φ (σ (g * h)))⁻¹`.
   ext ⟨g, h⟩
   refine S'.inl_injective ?_
   have key : S'.inl (f (factorSet σ hσ hact (g, h))) = φ (S.inl (factorSet σ hσ hact (g, h))) :=

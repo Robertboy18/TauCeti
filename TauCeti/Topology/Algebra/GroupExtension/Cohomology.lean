@@ -783,10 +783,8 @@ variable (Y : ProfiniteGroupExtension G N)
 /-- **Lifting a coefficient map along the class** (Neukirch–Schmidt–Wingberg, I §5 Exercise 4,
 at `ϕ = id`). Let `X` be a profinite extension of `G` by `M` and `Y` one by `N`. If the
 continuous equivariant `f : M → N` carries the class of `X` to the class of `Y`, then `f` is the
-restriction to the kernels of a continuous homomorphism `X.E → Y.E` over the identity of `G`:
-the pushforward `X.map f hf` has the class of `Y`, so it is continuously equivalent to `Y`, and
-the canonical homomorphism `TauCeti.ProfiniteGroupExtension.mapHom` composed with that equivalence
-is the lift. The converse is
+restriction to the kernels of a continuous homomorphism `X.E → Y.E` over the identity of `G`.
+The converse is
 `TauCeti.ProfiniteGroupExtension.contCohomologyClass_map_eq_of_continuous_monoidHom`, and the
 lift is surjective when `f` is, by `GroupExtension.surjective_of_comp_inl_eq`. -/
 theorem exists_continuous_monoidHom_of_contCohomologyClass_map_eq
@@ -794,6 +792,8 @@ theorem exists_continuous_monoidHom_of_contCohomologyClass_map_eq
     ∃ φ : X.E →* Y.E, Continuous φ ∧
       φ.comp X.toGroupExtension.inl = Y.toGroupExtension.inl.comp f.toMonoidHom ∧
       Y.toGroupExtension.rightHom.comp φ = X.toGroupExtension.rightHom := by
+  -- The pushforward `X.map f hf` has the class of `Y`, so the classification gives a continuous
+  -- equivalence `e` of it with `Y`; the lift is `e` composed with the canonical `X.mapHom f hf`.
   obtain ⟨e, he⟩ := (exists_equiv_continuous_iff_contCohomologyClass_eq (X.map f hf) Y).2 h
   refine ⟨e.toMulEquiv.toMonoidHom.comp (X.mapHom f hf), he.comp (X.continuous_mapHom f hf),
     ?_, ?_⟩
@@ -804,13 +804,15 @@ theorem exists_continuous_monoidHom_of_contCohomologyClass_map_eq
 
 /-- **The converse of the lifting lemma.** A continuous homomorphism `φ : X.E → Y.E` over the
 identity of `G` that restricts to the continuous equivariant `f` on the kernels carries the class
-of `X` to the class of `Y`: `φ` transports the chosen continuous normalized section of `X` to a
-continuous normalized section of `Y` whose factor set is the pushforward along `f` of the factor
-set of `X` (`TauCeti.GroupExtension.factorSet_monoidHomComp`). -/
+of `X` to the class of `Y`. The forward direction is
+`TauCeti.ProfiniteGroupExtension.exists_continuous_monoidHom_of_contCohomologyClass_map_eq`. -/
 theorem contCohomologyClass_map_eq_of_continuous_monoidHom (φ : X.E →* Y.E) (hφ : Continuous φ)
     (hinl : φ.comp X.toGroupExtension.inl = Y.toGroupExtension.inl.comp f.toMonoidHom)
     (hright : Y.toGroupExtension.rightHom.comp φ = X.toGroupExtension.rightHom) :
     (X.map f hf).contCohomologyClass = Y.contCohomologyClass := by
+  -- `φ` transports the chosen continuous normalized section of `X` to a continuous normalized
+  -- section of `Y` whose factor set is the pushforward along `f` of the factor set of `X`
+  -- (`GroupExtension.factorSet_monoidHomComp`); both classes are then read off that factor set.
   have hσ' : X.continuousSection.monoidHomComp φ hright 1 = 1 := by
     simp [X.continuousSection_one]
   have hσ'c : Continuous ⇑(X.continuousSection.monoidHomComp φ hright) :=
