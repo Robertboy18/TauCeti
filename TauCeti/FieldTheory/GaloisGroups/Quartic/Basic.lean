@@ -6,10 +6,10 @@ Authors: The Tau Ceti contributors
 module
 
 import TauCeti.Algebra.Polynomial.SpecificDegree
+import TauCeti.FieldTheory.GaloisGroups.Blocks
 import TauCeti.GroupTheory.Perm.TransitiveGroupLabel.Even
 import TauCeti.GroupTheory.Perm.TransitiveGroupLabel.Primitive
 
-public import TauCeti.FieldTheory.GaloisGroups.Blocks
 public import TauCeti.FieldTheory.GaloisGroups.Resolvent.Label
 public import TauCeti.FieldTheory.GaloisGroups.Resolvent.Quartic.Discriminant
 public import TauCeti.GroupTheory.Perm.TransitiveGroupLabel.Classification
