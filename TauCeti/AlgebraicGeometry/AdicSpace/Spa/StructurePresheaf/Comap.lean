@@ -8,7 +8,7 @@ module
 public import Mathlib.Topology.Sheaves.SheafCondition.Sites
 public import TauCeti.AlgebraicGeometry.AdicSpace.Spa.StructurePresheaf.BaseChange
 
-import TauCeti.AlgebraicGeometry.AdicSpace.Spa.RationalSubset.Basis
+import TauCeti.AlgebraicGeometry.AdicSpace.Spa.StructurePresheaf.Cofinality
 
 /-!
 # The morphism of structure presheaves induced by a homomorphism of Huber pairs
@@ -64,18 +64,6 @@ open TauCeti.Huber TauCeti.Huber.PairOfDefinition
 variable {A B : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [CommRing B] [TopologicalSpace B] [IsTopologicalRing B] {P : PairOfDefinition A}
   {P' : PairOfDefinition B} {Aplus : Subring A} {Bplus : Subring B}
-
-/-! ### The rational opens of the indices of an open cover it -/
-
-/-- **Every point of an open lies in the rational open of one of its indices**: the rational opens
-`R(i)`, for `i` ranging over the indices of `U`, cover `U`. -/
-theorem exists_presentationIndex_mem (U : Opens ↥(spa Aplus)) {v : ↥(spa Aplus)} (hv : v ∈ U) :
-    ∃ i : PresentationIndex (P := P) Aplus U, v ∈ spaBasicOpen Aplus i.pres.num i.pres.den := by
-  -- `P` makes `A` a Huber ring, so the rational opens form a basis
-  have : IsHuberRing A := ⟨⟨P⟩⟩
-  obtain ⟨W, hW, hvW, hWU⟩ := Opens.isBasis_iff_nbhd.mp (isBasis_spaRationalOpens Aplus) hv
-  obtain ⟨T, s, hT, rfl⟩ := mem_spaRationalOpens_iff_exists_spaBasicOpen.mp hW
-  exact ⟨⟨⟨T, s, hasDenominatorPower_of_isOpen_span P T s _ hT⟩, hT, hWU⟩, hvW⟩
 
 /-! ### The components on the rational opens -/
 
@@ -165,7 +153,7 @@ private theorem ofArrows_mem_grothendieckTopology :
       (fun i ↦ homOfLE (i.comap (P' := P') φ hφ hopen hplus).le_open) ∈
       Opens.grothendieckTopology ↥(spa Bplus) ((Opens.map (spaComapTopHom φ hφ hplus)).obj U) := by
   intro w hw
-  obtain ⟨i, hi⟩ := exists_presentationIndex_mem (P := P) U (Opens.mem_map.mp hw)
+  obtain ⟨i, hi⟩ := exists_presentationIndex_mem (P := P) (Opens.mem_map.mp hw)
   refine ⟨_, homOfLE (i.comap (P' := P') φ hφ hopen hplus).le_open,
     Sieve.ofArrows_mk _ _ i, ?_⟩
   rw [PresentationIndex.spaBasicOpen_map_pres]
@@ -404,6 +392,7 @@ noncomputable def presentationLimitPresheafComap :
 
 /-- The component of `presentationLimitPresheafComap` at an open is `presentationLimitComap`,
 transported along the evaluation equations of the two presheaves. -/
+@[simp]
 theorem presentationLimitPresheafComap_app (U : (Opens ↥(spa Aplus))ᵒᵖ) :
     (presentationLimitPresheafComap φ hφ hopen hplus hBplus hsheaf).app U =
       eqToHom (presentationLimitPresheaf_obj P Aplus U) ≫
