@@ -39,16 +39,15 @@ are perfect pairings of finite abelian groups. The argument has three steps.
   (`TauCeti.ContCohomology.dualityMap0_bijective_of_injective_of_forall_nsmul_eq_zero` and its
   companions), and `I(χ)/p` is `𝔽_p` with trivial action, where the duality is
   `TauCeti.IsDemushkin.dualityMap0_bijective`, `dualityMap1_bijective`, `dualityMap2_bijective`.
-* **Dévissage.** Tate's dévissage over the order of `M`
-  (`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_injective`,
-  `TauCeti.IsProP.dualityMap1_surjective_dualityMap2_injective`,
-  `TauCeti.IsProP.dualityMap0_injective`), whose base case is the first step on the trivial
-  modules of order `p`, applies because both `I(χ)/pⁱ` and `H²(G, I(χ)/pⁱ) ≅ ℤ/pⁱ` satisfy Baer's
-  criterion over `ℤ/pⁱ`. It gives `α₀` and `α₁` bijective and `α₂` injective.
-* **Counting.** `α₂` is then bijective because `|H²(G, M)| = |H⁰(G, Hom(M, I(χ)/pⁱ))|`: `α₀` is
-  bijective on the dual module, `Hom(-, H²(G, I(χ)/pⁱ))` preserves the order of a finite group
-  killed by `pⁱ`, and `M` is its own double dual with values in `I(χ)/pⁱ`
-  (`TauCeti.InternalHom.eval_bijective_of_addEquiv_zmod`).
+* **Dévissage.** Tate's dévissage over the order of `M` for an infinite pro-`p` group
+  (`TauCeti.IsProP.dualityMap0_bijective_dualityMap1_bijective_dualityMap2_injective`), whose base
+  case is the first step on the trivial modules of order `p`, applies because both `I(χ)/pⁱ` and
+  `H²(G, I(χ)/pⁱ) ≅ ℤ/pⁱ` satisfy Baer's criterion over `ℤ/pⁱ`. It gives `α₀` and `α₁` bijective
+  and `α₂` injective.
+* **Counting.** `α₂` is then bijective by the general count
+  `TauCeti.ContCohomology.dualityMap2_bijective_of_injective_of_addEquiv_zmod`, as both `I(χ)/pⁱ`
+  and `H²(G, I(χ)/pⁱ)` are `ℤ/pⁱ`: `|H²(G, M)| = |H⁰(G, Hom(M, I(χ)/pⁱ))|`, since `α₀` is bijective
+  on the dual module and `M` is its own double dual with values in `I(χ)/pⁱ`.
 
 ## Main results
 
@@ -57,8 +56,6 @@ are perfect pairings of finite abelian groups. The argument has three steps.
   `TauCeti.IsDemushkin.dualityMap2_zModTwist_bijective`: **Tate's duality at level `pⁱ`**: for an
   infinite Demushkin group and a finite discrete `G`-module `M` killed by `pⁱ`, Tate's duality maps
   with coefficients `I(χ)/pⁱ` are bijective.
-* `TauCeti.IsDemushkin.natCard_addMonoidHom_H2_zModTwist`: homomorphisms from a finite group
-  killed by `pⁱ` into `H²(G, I(χ)/pⁱ)` are as many as their source.
 
 ## References
 
@@ -172,19 +169,21 @@ section Devissage
 variable (i : ℕ)
 
 /-- On a module of order `p` killed by `pⁱ`, the three duality maps with coefficients `I(χ)/pⁱ` are
-bijective, in the form the dévissages consume. For `i = 0` no such module exists. -/
+bijective, in the weaker form the dévissage consumes. For `i = 0` no such module exists. -/
 private theorem dualityMap_zModTwist_of_natCard_eq (A : Type u) [AddCommGroup A]
     [TopologicalSpace A] [DiscreteTopology A] [DistribMulAction G A] [ContinuousSMul G A]
     [Finite A] (hA : Nat.card A = p) (hAi : ∀ a : A, p ^ i • a = 0) :
-    Function.Bijective (dualityMap0 G A (ZModTwist (demushkinCharacter hG) i)) ∧
+    Function.Surjective (dualityMap0 G A (ZModTwist (demushkinCharacter hG) i)) ∧
       Function.Bijective (dualityMap1 G A (ZModTwist (demushkinCharacter hG) i)) ∧
-        Function.Bijective (dualityMap2 G A (ZModTwist (demushkinCharacter hG) i)) := by
+        Function.Injective (dualityMap2 G A (ZModTwist (demushkinCharacter hG) i)) := by
   rcases Nat.eq_zero_or_pos i with rfl | hi
   · -- a module killed by `p ^ 0 = 1` is trivial, so it cannot have order `p`
     have : Subsingleton A := subsingleton_of_forall_eq 0 fun a ↦ by simpa using hAi a
     exact absurd (hA.symm.trans (Nat.card_of_subsingleton (0 : A)))
       (Fact.out : p.Prime).one_lt.ne'
-  · exact hG.dualityMap_zModTwist_bijective_of_nsmul_eq_zero hi A fun a ↦ hA ▸ card_nsmul_eq_zero'
+  · have hd := hG.dualityMap_zModTwist_bijective_of_nsmul_eq_zero hi A
+      fun a ↦ hA ▸ card_nsmul_eq_zero'
+    exact ⟨hd.1.2, hd.2.1, hd.2.2.1⟩
 
 variable (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
   [DistribMulAction G M] [ContinuousSMul G M] [Finite M] (hM : ∀ x : M, p ^ i • x = 0)
@@ -192,26 +191,18 @@ variable (M : Type u) [AddCommGroup M] [TopologicalSpace M] [DiscreteTopology M]
 include hM
 
 /-- **The dévissage of Tate's duality maps at level `pⁱ`.** On every finite discrete `G`-module `M`
-killed by `pⁱ`, `α₀` is surjective, `α₁` is bijective and `α₂` is injective: the two dévissages
-`TauCeti.IsProP.dualityMap0_surjective_dualityMap1_injective` and
-`TauCeti.IsProP.dualityMap1_surjective_dualityMap2_injective`, with `n = pⁱ` and `N = I(χ)/pⁱ`, run
-side by side; their Baer hypotheses hold because `I(χ)/pⁱ` and `H²(G, I(χ)/pⁱ)` are both `ℤ/pⁱ`. -/
+killed by `pⁱ`, `α₀` and `α₁` are bijective and `α₂` is injective: the dévissage
+`TauCeti.IsProP.dualityMap0_bijective_dualityMap1_bijective_dualityMap2_injective` of an infinite
+pro-`p` group, with `n = pⁱ` and `N = I(χ)/pⁱ`, whose Baer hypotheses hold because `I(χ)/pⁱ` and
+`H²(G, I(χ)/pⁱ)` are both `ℤ/pⁱ`. -/
 private theorem dualityMap_zModTwist_devissage :
-    Function.Surjective (dualityMap0 G M (ZModTwist (demushkinCharacter hG) i)) ∧
+    Function.Bijective (dualityMap0 G M (ZModTwist (demushkinCharacter hG) i)) ∧
       Function.Bijective (dualityMap1 G M (ZModTwist (demushkinCharacter hG) i)) ∧
         Function.Injective (dualityMap2 G M (ZModTwist (demushkinCharacter hG) i)) :=
-  have hMp : IsPPrimaryTorsion p M := isPPrimaryTorsion_iff.2 fun m ↦ ⟨i, hM m⟩
-  have ⟨h₀, h₁⟩ := hG.isProP.dualityMap0_surjective_dualityMap1_injective _
+  hG.isProP.dualityMap0_bijective_dualityMap1_bijective_dualityMap2_injective _
     (ZModTwist.moduleBaer _ i) (hG.moduleBaer_H2_zModTwist_demushkinCharacter i)
-    (fun A _ _ _ _ _ _ hA _ hAi ↦
-      have hd := hG.dualityMap_zModTwist_of_natCard_eq i A hA hAi
-      ⟨hd.1.2, hd.2.1.1⟩) M hMp hM
-  have ⟨h₁', h₂⟩ := hG.isProP.dualityMap1_surjective_dualityMap2_injective _
-    (ZModTwist.moduleBaer _ i) (hG.moduleBaer_H2_zModTwist_demushkinCharacter i)
-    (fun A _ _ _ _ _ _ hA _ hAi ↦
-      have hd := hG.dualityMap_zModTwist_of_natCard_eq i A hA hAi
-      ⟨hd.2.1.2, hd.2.2.1⟩) M hMp hM
-  ⟨h₀, ⟨h₁, h₁'⟩, h₂⟩
+    (fun A _ _ _ _ _ _ hA _ hAi ↦ hG.dualityMap_zModTwist_of_natCard_eq i A hA hAi) M
+    (isPPrimaryTorsion_iff.2 fun m ↦ ⟨i, hM m⟩) hM
 
 /-- **Tate's duality map `α₀` of an infinite Demushkin group with coefficients `I(χ)/pⁱ` is
 bijective** on every finite discrete `G`-module `M` killed by `pⁱ`:
@@ -219,12 +210,7 @@ bijective** on every finite discrete `G`-module `M` killed by `pⁱ`:
 general `TauCeti.IsProP.dualityMap0_injective`, from the co-effaceability of `H⁰`. -/
 theorem dualityMap0_zModTwist_bijective :
     Function.Bijective (dualityMap0 G M (ZModTwist (demushkinCharacter hG) i)) :=
-  ⟨hG.isProP.dualityMap0_injective _ (ZModTwist.moduleBaer _ i)
-    (hG.moduleBaer_H2_zModTwist_demushkinCharacter i)
-    (fun A _ _ _ _ _ _ hA _ hAi ↦
-      have hd := hG.dualityMap_zModTwist_of_natCard_eq i A hA hAi
-      ⟨hd.1.2, hd.2.1.1⟩) M (isPPrimaryTorsion_iff.2 fun m ↦ ⟨i, hM m⟩) hM,
-    (hG.dualityMap_zModTwist_devissage i M hM).1⟩
+  (hG.dualityMap_zModTwist_devissage i M hM).1
 
 /-- **Tate's duality map `α₁` of an infinite Demushkin group with coefficients `I(χ)/pⁱ` is
 bijective** on every finite discrete `G`-module `M` killed by `pⁱ`:
@@ -233,58 +219,23 @@ theorem dualityMap1_zModTwist_bijective :
     Function.Bijective (dualityMap1 G M (ZModTwist (demushkinCharacter hG) i)) :=
   (hG.dualityMap_zModTwist_devissage i M hM).2.1
 
-omit hM in
-/-- **Homomorphisms into `H²(G, I(χ)/pⁱ)` of an infinite Demushkin group are as many as their
-source**: for a finite abelian group `V` killed by `pⁱ`, `|Hom(V, H²(G, I(χ)/pⁱ))| = |V|`, since
-`H²(G, I(χ)/pⁱ) ≅ ℤ/pⁱ`. -/
-theorem natCard_addMonoidHom_H2_zModTwist (V : Type*) [AddCommGroup V] [Finite V]
-    (hV : ∀ v : V, p ^ i • v = 0) :
-    Nat.card (V →+ H2 G (ZModTwist (demushkinCharacter hG) i)) = Nat.card V := by
-  have : NeZero (p ^ i) := ⟨pow_ne_zero _ (Fact.out : p.Prime).ne_zero⟩
-  obtain ⟨e⟩ := hG.nonempty_addEquiv_H2_zModTwist_demushkinCharacter_zmod i
-  rw [Nat.card_congr (AddEquiv.addMonoidHomCongrRight (M := V) e).toEquiv,
-    natCard_addMonoidHom_zmod hV]
-
 /-- **Tate's duality map `α₂` of an infinite Demushkin group with coefficients `I(χ)/pⁱ` is
 bijective** on every finite discrete `G`-module `M` killed by `pⁱ`:
 `H²(G, M) × H⁰(G, Hom(M, I(χ)/pⁱ)) → H²(G, I(χ)/pⁱ)` is a perfect pairing. It is injective by the
-dévissage, and `H²(G, M)` and `H⁰(G, M')` have the same finite order, since `α₀` is bijective on
-`M'` and `M` is its own double dual with values in `I(χ)/pⁱ`. -/
+dévissage and bijective by counting
+(`TauCeti.ContCohomology.dualityMap2_bijective_of_injective_of_addEquiv_zmod`), since `α₀` is
+bijective on `Hom(M, I(χ)/pⁱ)` and both `I(χ)/pⁱ` and `H²(G, I(χ)/pⁱ)` are `ℤ/pⁱ`. -/
 theorem dualityMap2_zModTwist_bijective :
     Function.Bijective (dualityMap2 G M (ZModTwist (demushkinCharacter hG) i)) := by
-  have hp : p.Prime := Fact.out
-  have : NeZero (p ^ i) := ⟨pow_ne_zero _ hp.ne_zero⟩
-  have hN : ∀ y : ZModTwist (demushkinCharacter hG) i, p ^ i • y = 0 :=
-    ZModTwist.pow_nsmul_eq_zero _ i
+  have : NeZero (p ^ i) := ⟨pow_ne_zero _ (Fact.out : p.Prime).ne_zero⟩
   have hM' : ∀ φ : InternalHom G M (ZModTwist (demushkinCharacter hG) i), p ^ i • φ = 0 :=
-    InternalHom.nsmul_eq_zero hN
-  have := hG.finite_H2 M (isPPrimaryTorsion_iff.2 fun m ↦ ⟨i, hM m⟩)
-  have : Finite (H2 G (ZModTwist (demushkinCharacter hG) i)) := Nat.finite_of_card_ne_zero
-    ((hG.natCard_H2_zModTwist_demushkinCharacter i).trans_ne (pow_ne_zero _ hp.ne_zero))
-  have : Finite (H0 G (InternalHom G M (ZModTwist (demushkinCharacter hG) i)) →+
-      H2 G (ZModTwist (demushkinCharacter hG) i)) :=
-    Finite.of_injective _ DFunLike.coe_injective
-  refine (hG.dualityMap_zModTwist_devissage i M hM).2.2.bijective_of_nat_card_le (le_of_eq ?_)
-  -- `|Hom(H⁰(M'), H²(N))| = |H⁰(M')| = |Hom(H²(M''), H²(N))| = |H²(M'')| = |H²(M)|`, with
-  -- `N = I(χ)/pⁱ`. The double dual `M''` is only ever named through the terms that produce it.
-  have h₁ : Nat.card (H0 G (InternalHom G M (ZModTwist (demushkinCharacter hG) i)) →+
-      H2 G (ZModTwist (demushkinCharacter hG) i)) =
-      Nat.card (H0 G (InternalHom G M (ZModTwist (demushkinCharacter hG) i))) :=
-    hG.natCard_addMonoidHom_H2_zModTwist i _ fun v ↦ Subtype.ext (by simpa using hM' v)
-  have hbij := hG.dualityMap0_zModTwist_bijective i
-    (InternalHom G M (ZModTwist (demushkinCharacter hG) i)) hM'
-  have hfin : Finite (H2 G (InternalHom G (InternalHom G M (ZModTwist (demushkinCharacter hG) i))
-      (ZModTwist (demushkinCharacter hG) i))) :=
-    hG.finite_H2 _ (isPPrimaryTorsion_iff.2 fun m ↦ ⟨i, InternalHom.nsmul_eq_zero hN m⟩)
-  have h₂₃ := (Nat.card_congr (Equiv.ofBijective _ hbij)).trans
-    (hG.natCard_addMonoidHom_H2_zModTwist i _ (nsmul_H2_eq_zero (InternalHom.nsmul_eq_zero hN)))
-  have hev : Function.Bijective
-      (InternalHom.eval G M (ZModTwist (demushkinCharacter hG) i)).toAddMonoidHom :=
-    InternalHom.eval_bijective_of_addEquiv_zmod (ZModTwist.equiv _ i) hM
-  have h₂₃₄ := h₂₃.trans (Nat.card_congr (explicitCoeff2Equiv G M (AddEquiv.ofBijective _ hev)
-    continuous_of_discreteTopology continuous_of_discreteTopology fun g m ↦
-      map_smul (InternalHom.eval G M (ZModTwist (demushkinCharacter hG) i)) g m).symm.toEquiv)
-  exact h₁.trans h₂₃₄
+    InternalHom.nsmul_eq_zero_of_domain hM
+  have := hG.finite_H2 (InternalHom G (InternalHom G M (ZModTwist (demushkinCharacter hG) i))
+    (ZModTwist (demushkinCharacter hG) i))
+    (isPPrimaryTorsion_iff.2 fun m ↦ ⟨i, InternalHom.nsmul_eq_zero_of_domain hM' m⟩)
+  obtain ⟨e₂⟩ := hG.nonempty_addEquiv_H2_zModTwist_demushkinCharacter_zmod i
+  exact dualityMap2_bijective_of_injective_of_addEquiv_zmod (ZModTwist.equiv _ i) e₂ hM
+    (hG.dualityMap0_zModTwist_bijective i _ hM') (hG.dualityMap_zModTwist_devissage i M hM).2.2
 
 end Devissage
 

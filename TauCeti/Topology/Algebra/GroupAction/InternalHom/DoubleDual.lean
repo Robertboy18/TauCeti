@@ -106,8 +106,7 @@ include e
 additive group `N ≃+ ZMod n`. -/
 theorem natCard_of_addEquiv_zmod [Finite M] (hM : ∀ x : M, n • x = 0) :
     Nat.card (InternalHom G M N) = Nat.card M := by
-  rw [← natCard_addMonoidHom_zmod hM,
-    ← Nat.card_congr (AddEquiv.addMonoidHomCongrRight (M := M) e).toEquiv]
+  rw [← natCard_addMonoidHom_of_addEquiv_zmod e hM]
   exact Nat.card_congr ⟨toAddMonoidHom, of G, fun _ => rfl, fun _ => rfl⟩
 
 variable [Group G] [DistribMulAction G M] [DistribMulAction G N]
