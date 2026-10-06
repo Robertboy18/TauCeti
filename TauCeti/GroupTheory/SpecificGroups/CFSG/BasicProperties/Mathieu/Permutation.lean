@@ -30,6 +30,7 @@ public section
 namespace TauCeti.Sporadic.Mathieu
 
 /-- Images of the two generators in the documented degree-11 permutation action. -/
+@[expose]
 def m11GeneratorImages (i : Fin m11Presentation.generatorCount) :
     Equiv.Perm (Fin 11) :=
   if i.val = 0 then
