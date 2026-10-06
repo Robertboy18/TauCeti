@@ -60,6 +60,7 @@ theorem eval_rotate_eq_one {w : Word} (hw : eval w = 1) (n : ℕ) :
     List.prod_rotate_eq_one_of_prod_eq_one
       ((m11Presentation.prod_toTableWord w).trans hw) n
 
+/-- Rotate a signed word, optionally inverting it first. -/
 @[expose]
 def variant (w : Word) (invert : Bool) (shift : ℕ) : Word :=
   (if invert then FreeGroup.invRev w else w).rotate shift
@@ -88,7 +89,9 @@ theorem reduced_conjugate_eq_one {w core : Word} (q : Word) (hw : eval w = 1)
   rw [eval_append, eval_append, eval_invRev] at heq
   exact conj_eq_one_iff.mp (heq.symm.trans hw)
 
+/-- The first cyclically reduced relation of the exact M11 presentation. -/
 abbrev original0 : Word := decode [1, 2, 2, 2, 1, 2, 1, 1, 1]
+/-- The second cyclically reduced relation of the exact M11 presentation. -/
 abbrev original1 : Word := decode [1, 0, 3, 2, 3, 2, 1, 0, 3, 0]
 
 theorem original0_eq_one : eval original0 = 1 := by
