@@ -10,11 +10,12 @@ public import Mathlib.GroupTheory.OrderOfElement
 public import Mathlib.GroupTheory.Subgroup.Simple
 
 /-!
-# Simplicity from an action of prime degree
+# Simplicity from primitive actions
 
-Suppose a nontrivial group acts faithfully and transitively on a set of prime
-cardinality `p`, with `p²` not dividing its order. If an element whose `p`th power is one
-normally generates the group, then the group is simple.
+Suppose a nontrivial group acts faithfully and primitively on a nonempty set whose
+cardinality is divisible by a prime `p`, with `p²` not dividing the group order.
+If an element whose `p`th power is one normally generates the group, then the group
+is simple. A faithful transitive action of prime degree is a special case.
 
 A nontrivial normal subgroup must act transitively, so its order is divisible by `p`.
 Its index is therefore coprime to `p`, forcing the chosen element into that subgroup.
@@ -29,16 +30,14 @@ namespace TauCeti
 
 open MulAction
 
-/-- A normal generator of order dividing the prime degree forces simplicity when that
-prime occurs only once in the group order. -/
-theorem isSimpleGroup_of_prime_degree_action
-    {G X : Type*} [Group G] [Nontrivial G]
-    [MulAction G X] [FaithfulSMul G X] [IsPretransitive G X]
-    (hp : (Nat.card X).Prime) (hcard : ¬ Nat.card X ^ 2 ∣ Nat.card G)
-    (a : G) (ha : a ^ Nat.card X = 1)
+/-- In a faithful primitive action, a prime divisor of the degree that occurs only once
+in the group order forces simplicity when an element of that prime order normally generates. -/
+theorem isSimpleGroup_of_prime_divisor_degree_action
+    {G X : Type*} [Group G] [Nontrivial G] [Nonempty X]
+    [MulAction G X] [FaithfulSMul G X] [IsPreprimitive G X]
+    {p : ℕ} (hp : p.Prime) (hdegree : p ∣ Nat.card X) (hcard : ¬ p ^ 2 ∣ Nat.card G)
+    (a : G) (ha : a ^ p = 1)
     (hgen : Subgroup.normalClosure ({a} : Set G) = ⊤) : IsSimpleGroup G := by
-  have : IsPreprimitive G X := IsPreprimitive.of_prime_card hp
-  have : Nonempty X := (Nat.card_ne_zero.mp hp.ne_zero).1
   refine ⟨fun N _ ↦ ?_⟩
   by_cases hN : N = ⊥
   · exact Or.inl hN
@@ -55,15 +54,16 @@ theorem isSimpleGroup_of_prime_degree_action
     simpa only [one_smul, subgroup_smul_def] using (mem_fixedPoints.mp hx ⟨n, hn⟩)
   have : IsPretransitive N X := IsQuasiPreprimitive.isPretransitive_of_normal hfixed
   let x : X := Classical.choice inferInstance
-  have hdiv : Nat.card X ∣ Nat.card N := by
+  have hdiv : p ∣ Nat.card N := by
+    apply hdegree.trans
     rw [← index_stabilizer_of_transitive N x]
     exact (stabilizer N x).index_dvd_card
-  have hindex : ¬ Nat.card X ∣ N.index := by
+  have hindex : ¬ p ∣ N.index := by
     intro hi
     apply hcard
     rw [← N.card_mul_index, pow_two]
     exact Nat.mul_dvd_mul hdiv hi
-  have hpow : (QuotientGroup.mk' N a) ^ Nat.card X = 1 := by
+  have hpow : (QuotientGroup.mk' N a) ^ p = 1 := by
     rw [← map_pow, ha, map_one]
   have horder : orderOf (QuotientGroup.mk' N a) = 1 := by
     rcases hp.eq_one_or_self_of_dvd _ (orderOf_dvd_of_pow_eq_one hpow) with h | h
@@ -75,5 +75,17 @@ theorem isSimpleGroup_of_prime_degree_action
   apply top_unique
   rw [← hgen]
   exact Subgroup.normalClosure_le_normal (Set.singleton_subset_iff.mpr hmem)
+
+/-- A normal generator of order dividing the prime degree forces simplicity when that
+prime occurs only once in the group order. -/
+theorem isSimpleGroup_of_prime_degree_action
+    {G X : Type*} [Group G] [Nontrivial G]
+    [MulAction G X] [FaithfulSMul G X] [IsPretransitive G X]
+    (hp : (Nat.card X).Prime) (hcard : ¬ Nat.card X ^ 2 ∣ Nat.card G)
+    (a : G) (ha : a ^ Nat.card X = 1)
+    (hgen : Subgroup.normalClosure ({a} : Set G) = ⊤) : IsSimpleGroup G := by
+  have : IsPreprimitive G X := IsPreprimitive.of_prime_card hp
+  have : Nonempty X := (Nat.card_ne_zero.mp hp.ne_zero).1
+  exact isSimpleGroup_of_prime_divisor_degree_action hp (dvd_refl _) hcard a ha hgen
 
 end TauCeti
