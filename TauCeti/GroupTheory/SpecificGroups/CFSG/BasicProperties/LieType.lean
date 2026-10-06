@@ -7,9 +7,9 @@ module
 
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.GraphTwisted
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.HalfFrobenius
-public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.TypeA
-public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.TypeBC
-public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.TypeDE
+public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.Type.A
+public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.Type.BC
+public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.Type.DE
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.BasicProperties.Unimodular
 
 /-!
