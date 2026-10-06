@@ -15,7 +15,8 @@ A `GroupPresentation.CosetCertificate` checks a table for a subgroup of the exac
 `GroupPresentation.Group`. Signed presentation words are encoded in a doubled alphabet:
 the first half consists of the generators, and the second half of their inverses.
 The table uses the presentation's relators together with both inverse-cancellation relations
-for each generator.
+for each generator. A certificate may also supply signed words with proofs that they equal one
+in the exact presented group.
 
 A checked table gives finite index without assuming finiteness of the presented group.
 When the subgroup is finite, it gives finiteness and the upper bound
@@ -107,17 +108,23 @@ theorem prod_tableRelators :
 
 The subgroup words need only belong to `H`; they need not generate it. In particular, one
 certificate can be used with a larger subgroup whose order is easier to bound. No finiteness
-assumption on `P.Group` or `H` is part of the certificate. -/
+assumption on `P.Group` or `H` is part of the certificate. Additional relators carry proofs in
+`P.Group`; checking that they close in the finite table does not establish their validity. -/
 structure CosetCertificate (H : Subgroup P.Group) (k : ℕ) where
   /-- The finite table, including its representative words. -/
   table : CosetTable (P.generatorCount + P.generatorCount) k
   /-- Signed words known to lie in the subgroup. -/
   subgroupWords : List (PresentationWord (Fin P.generatorCount))
+  /-- Additional signed relators, each proved equal to one in the exact presented group.
+  The empty default leaves the original relators and cancellations as the only scan words. -/
+  extraRelators : {rs : List (PresentationWord (Fin P.generatorCount)) //
+    ∀ w ∈ rs, PresentedGroup.mk P.relatorSet (FreeGroup.mk w) = 1} := ⟨[], by simp⟩
   /-- Edge deductions, using the doubled alphabet. -/
   deductions : List (Fin k × List (Fin (P.generatorCount + P.generatorCount)))
-  /-- Every edge follows from the presentation relators and the subgroup words. -/
+  /-- Every edge follows from the presentation relators, certified extras, and subgroup words. -/
   checked :
-    table.check P.tableRelators (subgroupWords.map PresentationWord.toTableWord) deductions = true
+    table.check (P.tableRelators ++ extraRelators.val.map PresentationWord.toTableWord)
+      (subgroupWords.map PresentationWord.toTableWord) deductions = true
   /-- Each subgroup word represents an element of the actual subgroup. -/
   subgroupWords_mem : ∀ w ∈ subgroupWords,
     PresentedGroup.mk P.relatorSet (FreeGroup.mk w) ∈ H
@@ -127,6 +134,16 @@ namespace CosetCertificate
 variable {P} {H : Subgroup P.Group} {k : ℕ} (C : P.CosetCertificate H k)
 
 include C
+
+private theorem prod_relators :
+    ∀ r ∈ P.tableRelators ++ C.extraRelators.val.map PresentationWord.toTableWord,
+      (r.map P.tableGenerators).prod = 1 := by
+  intro r hr
+  rcases List.mem_append.mp hr with hr | hr
+  · exact P.prod_tableRelators r hr
+  · obtain ⟨w, hw, rfl⟩ := List.mem_map.mp hr
+    rw [P.prod_toTableWord]
+    exact C.extraRelators.property w hw
 
 private theorem prod_subgroupWords :
     ∀ r ∈ C.subgroupWords.map PresentationWord.toTableWord,
@@ -138,12 +155,12 @@ private theorem prod_subgroupWords :
 
 /-- The certificate bounds the index of the subgroup by the number of table rows. -/
 theorem index_le : H.index ≤ k :=
-  CosetTable.index_le P.closure_range_tableGenerators C.checked P.prod_tableRelators
+  CosetTable.index_le P.closure_range_tableGenerators C.checked C.prod_relators
     C.prod_subgroupWords
 
 /-- A checked table certifies finite index, even when the subgroup is infinite. -/
 theorem finiteIndex : H.FiniteIndex :=
-  CosetTable.finiteIndex P.closure_range_tableGenerators C.checked P.prod_tableRelators
+  CosetTable.finiteIndex P.closure_range_tableGenerators C.checked C.prod_relators
     C.prod_subgroupWords
 
 /-- A finite subgroup and a checked finite coset table make the presented group finite. -/
