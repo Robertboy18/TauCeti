@@ -7,12 +7,14 @@ module
 
 public import Mathlib.GroupTheory.Perm.List
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.Sporadic.Mathieu
+public import TauCeti.GroupTheory.SpecificGroups.CFSG.Sporadic.Mathieu.TwentyFour
+public import TauCeti.GroupTheory.SpecificGroups.CFSG.Sporadic.Mathieu.TwentyThree
 
 /-!
-# Permutation representations of three Mathieu presentations
+# Permutation representations of the five Mathieu presentations
 
-The generator images recorded in `Sporadic.Mathieu` satisfy the exact transcribed relations of
-`M₁₁`, `M₁₂`, and `M₂₂`. This file checks those relations in Lean and constructs homomorphisms
+The generator images recorded with the sporadic presentations satisfy the exact transcribed
+relations of `M₁₁`, `M₁₂`, `M₂₂`, `M₂₃`, and `M₂₄`. This file constructs homomorphisms
 from the presented groups. Their images contain two noncommuting permutations, so each presented
 group is nontrivial and nonabelian.
 
@@ -199,6 +201,148 @@ theorem m22_nontrivial : Nontrivial m22Presentation.Group := by
   simp only [m22PermutationHom_of, map_one] at he
   have hn : m22GeneratorImages a ≠ 1 := by
     unfold m22GeneratorImages a
+    decide +kernel
+  exact hn he
+
+/-- Images of the two generators in the documented degree-23 permutation action. -/
+@[expose]
+def m23GeneratorImages (i : Fin m23Presentation.generatorCount) :
+    Equiv.Perm (Fin 23) :=
+  if i.val = 0 then
+    ([0, 5] : List (Fin 23)).formPerm⁻¹ *
+      ([2, 7] : List (Fin 23)).formPerm⁻¹ *
+      ([3, 20] : List (Fin 23)).formPerm⁻¹ *
+      ([6, 14] : List (Fin 23)).formPerm⁻¹ *
+      ([8, 9] : List (Fin 23)).formPerm⁻¹ *
+      ([11, 17] : List (Fin 23)).formPerm⁻¹ *
+      ([16, 19] : List (Fin 23)).formPerm⁻¹ *
+      ([18, 21] : List (Fin 23)).formPerm⁻¹
+  else
+    ([0, 15, 6, 7] : List (Fin 23)).formPerm⁻¹ *
+      ([1, 21, 14, 3] : List (Fin 23)).formPerm⁻¹ *
+      ([4, 12, 5, 11] : List (Fin 23)).formPerm⁻¹ *
+      ([9, 13, 18, 22] : List (Fin 23)).formPerm⁻¹ *
+      ([10, 20] : List (Fin 23)).formPerm⁻¹ *
+      ([17, 19] : List (Fin 23)).formPerm⁻¹
+
+/-- Every defining relator of the exact `M23` presentation evaluates to the identity. -/
+theorem m23_relators :
+    ∀ r ∈ m23Presentation.relatorSet, FreeGroup.lift m23GeneratorImages r = 1 := by
+  intro r hr
+  obtain ⟨t, ht, rfl⟩ := (GroupPresentation.mem_relatorSet_iff _ _).mp hr
+  rw [m23Presentation_transcribed] at ht
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at ht
+  rcases ht with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp only [Relator.toFreeGroup_mul, Relator.toFreeGroup_inv,
+      Relator.toFreeGroup_gen, Relator.toFreeGroup_pow, Relator.toFreeGroup_comm,
+      commutatorElement_def, map_mul, map_inv, map_pow,
+      FreeGroup.lift_apply_of, m23GeneratorImages] <;> decide +kernel
+
+/-- The permutation representation determined by the checked generator images. -/
+def m23PermutationHom : m23Presentation.Group →* Equiv.Perm (Fin 23) :=
+  PresentedGroup.toGroup m23_relators
+
+@[simp]
+theorem m23PermutationHom_of (i : Fin m23Presentation.generatorCount) :
+    m23PermutationHom (PresentedGroup.of i) = m23GeneratorImages i :=
+  PresentedGroup.toGroup.of m23_relators
+
+/-- The presentation is nonabelian, as witnessed by two noncommuting generator images. -/
+theorem m23_not_isMulCommutative : ¬ IsMulCommutative m23Presentation.Group := by
+  intro h
+  let a : Fin m23Presentation.generatorCount := ⟨0, by simp [GroupPresentation.generatorCount]⟩
+  let b : Fin m23Presentation.generatorCount := ⟨1, by simp [GroupPresentation.generatorCount]⟩
+  have hc := congrArg m23PermutationHom
+    (isMulCommutative_iff.mp h (PresentedGroup.of a) (PresentedGroup.of b))
+  simp only [map_mul, m23PermutationHom_of] at hc
+  have hn : m23GeneratorImages a * m23GeneratorImages b ≠
+      m23GeneratorImages b * m23GeneratorImages a := by
+    unfold m23GeneratorImages a b
+    decide +kernel
+  exact hn hc
+
+/-- The first generator acts nontrivially in the permutation representation. -/
+theorem m23_nontrivial : Nontrivial m23Presentation.Group := by
+  let a : Fin m23Presentation.generatorCount := ⟨0, by simp [GroupPresentation.generatorCount]⟩
+  refine ⟨⟨PresentedGroup.of a, 1, ?_⟩⟩
+  intro h
+  have he := congrArg m23PermutationHom h
+  simp only [m23PermutationHom_of, map_one] at he
+  have hn : m23GeneratorImages a ≠ 1 := by
+    unfold m23GeneratorImages a
+    decide +kernel
+  exact hn he
+
+/-- Images of the two generators in the documented degree-24 permutation action. -/
+@[expose]
+def m24GeneratorImages (i : Fin m24Presentation.generatorCount) :
+    Equiv.Perm (Fin 24) :=
+  if i.val = 0 then
+    ([0, 11] : List (Fin 24)).formPerm⁻¹ *
+      ([1, 4] : List (Fin 24)).formPerm⁻¹ *
+      ([2, 5] : List (Fin 24)).formPerm⁻¹ *
+      ([3, 10] : List (Fin 24)).formPerm⁻¹ *
+      ([6, 14] : List (Fin 24)).formPerm⁻¹ *
+      ([7, 17] : List (Fin 24)).formPerm⁻¹ *
+      ([8, 23] : List (Fin 24)).formPerm⁻¹ *
+      ([9, 20] : List (Fin 24)).formPerm⁻¹ *
+      ([12, 15] : List (Fin 24)).formPerm⁻¹ *
+      ([13, 19] : List (Fin 24)).formPerm⁻¹ *
+      ([16, 18] : List (Fin 24)).formPerm⁻¹ *
+      ([21, 22] : List (Fin 24)).formPerm⁻¹
+  else
+    ([1, 21, 11] : List (Fin 24)).formPerm⁻¹ *
+      ([3, 20, 16] : List (Fin 24)).formPerm⁻¹ *
+      ([5, 22, 10] : List (Fin 24)).formPerm⁻¹ *
+      ([6, 19, 14] : List (Fin 24)).formPerm⁻¹ *
+      ([9, 13, 15] : List (Fin 24)).formPerm⁻¹ *
+      ([17, 18, 23] : List (Fin 24)).formPerm⁻¹
+
+/-- Every defining relator of the exact `M24` presentation evaluates to the identity. -/
+theorem m24_relators :
+    ∀ r ∈ m24Presentation.relatorSet, FreeGroup.lift m24GeneratorImages r = 1 := by
+  intro r hr
+  obtain ⟨t, ht, rfl⟩ := (GroupPresentation.mem_relatorSet_iff _ _).mp hr
+  rw [m24Presentation_transcribed] at ht
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at ht
+  rcases ht with rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp only [Relator.toFreeGroup_mul, Relator.toFreeGroup_inv,
+      Relator.toFreeGroup_gen, Relator.toFreeGroup_pow, Relator.toFreeGroup_comm,
+      commutatorElement_def, map_mul, map_inv, map_pow,
+      FreeGroup.lift_apply_of, m24GeneratorImages] <;> decide +kernel
+
+/-- The permutation representation determined by the checked generator images. -/
+def m24PermutationHom : m24Presentation.Group →* Equiv.Perm (Fin 24) :=
+  PresentedGroup.toGroup m24_relators
+
+@[simp]
+theorem m24PermutationHom_of (i : Fin m24Presentation.generatorCount) :
+    m24PermutationHom (PresentedGroup.of i) = m24GeneratorImages i :=
+  PresentedGroup.toGroup.of m24_relators
+
+/-- The presentation is nonabelian, as witnessed by two noncommuting generator images. -/
+theorem m24_not_isMulCommutative : ¬ IsMulCommutative m24Presentation.Group := by
+  intro h
+  let a : Fin m24Presentation.generatorCount := ⟨0, by simp [GroupPresentation.generatorCount]⟩
+  let b : Fin m24Presentation.generatorCount := ⟨1, by simp [GroupPresentation.generatorCount]⟩
+  have hc := congrArg m24PermutationHom
+    (isMulCommutative_iff.mp h (PresentedGroup.of a) (PresentedGroup.of b))
+  simp only [map_mul, m24PermutationHom_of] at hc
+  have hn : m24GeneratorImages a * m24GeneratorImages b ≠
+      m24GeneratorImages b * m24GeneratorImages a := by
+    unfold m24GeneratorImages a b
+    decide +kernel
+  exact hn hc
+
+/-- The first generator acts nontrivially in the permutation representation. -/
+theorem m24_nontrivial : Nontrivial m24Presentation.Group := by
+  let a : Fin m24Presentation.generatorCount := ⟨0, by simp [GroupPresentation.generatorCount]⟩
+  refine ⟨⟨PresentedGroup.of a, 1, ?_⟩⟩
+  intro h
+  have he := congrArg m24PermutationHom h
+  simp only [m24PermutationHom_of, map_one] at he
+  have hn : m24GeneratorImages a ≠ 1 := by
+    unfold m24GeneratorImages a
     decide +kernel
   exact hn he
 
