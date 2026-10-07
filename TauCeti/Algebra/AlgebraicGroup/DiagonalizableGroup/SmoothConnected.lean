@@ -75,7 +75,7 @@ theorem connectedSpace_primeSpectrum_baseChange_coordinateRing
 group algebra over the extension field. -/
 private noncomputable def coordinateRingBaseChangeEquiv
     (k : Type u) [Field k] (G : FGCommGrpCat.{w})
-    (K : Type u) [Field K] [Algebra k K] :
+    (K : Type v) [Field K] [Algebra k K] :
     MonoidAlgebra k G ⊗[k] K ≃+* MonoidAlgebra K G :=
   (Algebra.TensorProduct.comm k _ K).toRingEquiv.trans
     (TauCeti.MonoidAlgebra.scalarTensorBialgEquiv k K (G := G)).toAlgEquiv.toRingEquiv
@@ -94,7 +94,7 @@ theorem geometricallyConnected_coordinateRing
 /-- **The coordinate Hopf algebra of a unique-product diagonalizable group is geometrically
 reduced.** -/
 theorem geometricallyReduced_coordinateRing
-    (k : Type u) [Field k] (G : FGCommGrpCat.{u}) [UniqueProds G] :
+    (k : Type u) [Field k] (G : FGCommGrpCat.{w}) [UniqueProds G] :
     geometricallyReducedCommHopfAlgProperty k
       (DiagonalizableGroup.coordinateRing k G).obj := by
   rw [geometricallyReducedCommHopfAlgProperty_iff]

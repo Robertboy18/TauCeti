@@ -27,6 +27,8 @@ needs to be of finite type; smoothness or reducedness is not required.
 ## Reference
 
 * J. S. Milne, *Algebraic Groups* (2017), Propositions 2.37 and 2.48, and §7.
+* The finite-type transport after base change adapts the formal argument in
+  [TauCeti#12485](https://github.com/TauCetiProject/TauCeti/pull/12485).
 -/
 
 public section
