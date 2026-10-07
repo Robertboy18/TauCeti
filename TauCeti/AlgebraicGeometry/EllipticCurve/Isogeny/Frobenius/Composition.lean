@@ -81,6 +81,7 @@ theorem frobenius_comp_injective :
     (comp_eq_zero_iff.1 hf).resolve_left (ofIsogeny_ne_zero _)
 
 /-- **Two morphisms agree exactly when they agree after composition with Frobenius.** -/
+@[simp]
 theorem frobenius_comp_inj {f g : Hom W₁ W} :
     (ofIsogeny (frobeniusIsogeny W)).comp f = (ofIsogeny (frobeniusIsogeny W)).comp g ↔ f = g :=
   frobenius_comp_injective.eq_iff
