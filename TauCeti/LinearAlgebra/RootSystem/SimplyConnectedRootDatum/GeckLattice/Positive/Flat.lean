@@ -15,9 +15,6 @@ The positive Geck carrier has torsion-free coordinate algebra over `ℤ`. Thus i
 morphism is flat, as are its pullbacks. The coordinate algebra presented by the positive
 base-change ideal is flat over every commutative base ring: the named comparison identifies it
 with scalar extension of the integral coordinate algebra.
-
-These results supply flatness for the positive member of the candidate pinning. They do not
-assert smoothness, connectedness, or Borel maximality.
 -/
 
 public section
