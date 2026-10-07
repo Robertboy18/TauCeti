@@ -22,11 +22,6 @@ If `K` is algebraically closed, ordinary connectedness of `K ⊗[k] H` suffices.
 connectedness can be checked over a single algebraically closed extension, such as the algebraic
 closure of `k`, without a finite-type assumption.
 
-The defining predicate tests extension fields in the universe of the base field. To obtain
-connectedness after an extension in any universe, first extend to the algebraic closure of the
-base field, then to a common overfield with the requested extension. Connectedness is preserved
-over the algebraically closed field and descends along the resulting injective map.
-
 Preservation compares an arbitrary further extension `L / K` with the original geometric
 connectedness condition using the canonical algebra equivalence
 
@@ -69,10 +64,7 @@ universe u v w
 
 /-- A geometrically connected commutative Hopf algebra has connected spectrum after every field
 extension, including extensions in a different universe from the base field.
-
-The defining predicate suffices because the algebraic closure lies in the base universe;
-connectedness over that closure persists in a common overfield and descends to the requested
-extension. No finite-type assumption is needed. -/
+No finite-type assumption is needed. -/
 theorem geometricallyConnectedCommHopfAlgProperty.connectedSpace_tensorProduct
     (k : Type u) (K : Type w) [Field k] [Field K] [Algebra k K]
     (H : CommHopfAlgCat.{v} k)
@@ -147,7 +139,9 @@ theorem geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace_baseChange
     geometricallyConnectedCommHopfAlgProperty k H ↔
       ConnectedSpace (PrimeSpectrum (K ⊗[k] (H : Type v))) :=
   (geometricallyConnectedCommHopfAlgProperty.baseChange_iff k K H).symm.trans
-    (geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace K
-      (CommHopfAlgCat.baseChange (K := K) H))
+    ((geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace K
+      (CommHopfAlgCat.baseChange (K := K) H)).trans
+      (PrimeSpectrum.homeomorphOfRingEquiv
+        (CommHopfAlgCat.baseChangeAlgEquiv (K := K) H).toRingEquiv).connectedSpace_iff)
 
 end TauCeti
