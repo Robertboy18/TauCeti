@@ -115,7 +115,7 @@ extending an element of `R[G]` to `k[G]` and then to `K[G]` agrees with extendin
 directly. -/
 theorem scalarTensorBialgEquiv_one_tmul_scalarTensorBialgEquiv_one_tmul {R : Type*}
     [CommSemiring R] [Algebra R k] [Algebra R K] [IsScalarTower R k K]
-    (y : _root_.MonoidAlgebra R G) :
+    {y : _root_.MonoidAlgebra R G} :
     scalarTensorBialgEquiv k K (1 ⊗ₜ[k] scalarTensorBialgEquiv R k (1 ⊗ₜ[R] y)) =
       scalarTensorBialgEquiv R K (1 ⊗ₜ[R] y) := by
   simp only [scalarTensorBialgEquiv_tmul, one_smul]
