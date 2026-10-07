@@ -18,6 +18,10 @@ of the base field. In particular, `H` is geometrically connected over `k` if and
 extension `K ⊗[k] H` is geometrically connected over any field extension `K / k`.
 The base field, extension field, and coordinate algebra may lie in independent universes.
 
+If `K` is algebraically closed, ordinary connectedness of `K ⊗[k] H` suffices. Thus geometric
+connectedness can be checked over a single algebraically closed extension, such as the algebraic
+closure of `k`, without a finite-type assumption.
+
 The defining predicate tests extension fields in the universe of the base field. To obtain
 connectedness after an extension in any universe, first extend to the algebraic closure of the
 base field, then to a common overfield with the requested extension. Connectedness is preserved
@@ -43,6 +47,8 @@ two scalar extensions, after which connectedness descends along an injective map
   descends from an extension of the base field.
 * `TauCeti.geometricallyConnectedCommHopfAlgProperty.baseChange_iff`: geometric connectedness is
   equivalent before and after extension of the base field.
+* `TauCeti.geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace_baseChange`: geometric
+  connectedness can be tested over any single algebraically closed extension.
 
 ## References
 
@@ -131,5 +137,17 @@ theorem geometricallyConnectedCommHopfAlgProperty.baseChange_iff
       geometricallyConnectedCommHopfAlgProperty k H :=
   ⟨geometricallyConnectedCommHopfAlgProperty.of_baseChange k K H,
     geometricallyConnectedCommHopfAlgProperty.baseChange k K H⟩
+
+/-- Geometric connectedness can be tested by ordinary connectedness after a single algebraically
+closed field extension. In particular, one may use the algebraic closure of the base field.
+Neither a finite-type hypothesis nor a common universe for the fields and algebra is needed. -/
+theorem geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace_baseChange
+    (k : Type u) (K : Type w) [Field k] [Field K] [Algebra k K] [IsAlgClosed K]
+    (H : CommHopfAlgCat.{v} k) :
+    geometricallyConnectedCommHopfAlgProperty k H ↔
+      ConnectedSpace (PrimeSpectrum (K ⊗[k] (H : Type v))) :=
+  (geometricallyConnectedCommHopfAlgProperty.baseChange_iff k K H).symm.trans
+    (geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace K
+      (CommHopfAlgCat.baseChange (K := K) H))
 
 end TauCeti
