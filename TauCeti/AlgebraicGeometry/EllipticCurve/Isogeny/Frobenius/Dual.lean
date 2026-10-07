@@ -201,6 +201,7 @@ theorem dualFrobenius_comp_add (f g : Hom W₁ W) :
     ofIsogeny_frobeniusIsogeny_comp_ofIsogeny_dualFrobeniusIsogeny, nsmul_comp, id_comp, smul_add]
 
 /-- **Composition with the dual of Frobenius respects subtraction in the inner morphism.** -/
+@[simp]
 theorem dualFrobenius_comp_sub (f g : Hom W₁ W) :
     (ofIsogeny (dualFrobeniusIsogeny W)).comp (f - g) =
       (ofIsogeny (dualFrobeniusIsogeny W)).comp f -
@@ -209,6 +210,7 @@ theorem dualFrobenius_comp_sub (f g : Hom W₁ W) :
     dualFrobenius_comp_add).map_sub f g
 
 /-- **Composition with the dual of Frobenius is `ℤ`-linear in the inner morphism.** -/
+@[simp]
 theorem dualFrobenius_comp_zsmul (n : ℤ) (f : Hom W₁ W) :
     (ofIsogeny (dualFrobeniusIsogeny W)).comp (n • f) =
       n • (ofIsogeny (dualFrobeniusIsogeny W)).comp f :=
