@@ -8,7 +8,7 @@ module
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Conjugation
 public import TauCeti.Algebra.AlgebraicGroup.Solvable.UpperTriangular
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.GeckLattice.Positive.Basic
-public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.GeckLattice.Positive.TriangularMatrices
+public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.GeckLattice.Positive.Triangular.Matrices
 
 /-!
 # Triangularity of the positive Geck subgroup scheme
