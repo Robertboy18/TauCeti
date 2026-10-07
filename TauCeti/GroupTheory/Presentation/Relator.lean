@@ -293,6 +293,13 @@ theorem eval_comm {α G : Type*} [Group G] (f : α → G) (r s : Relator α) :
     eval f (.comm r s) = ⁅eval f r, eval f s⁆ := by
   rfl
 
+/-- Evaluating after renaming generators is evaluation at the composed assignment.
+The renaming function need not be injective. -/
+@[simp]
+theorem eval_map {α β G : Type*} [Group G] (f : β → G) (g : α → β) (r : Relator α) :
+    eval f (r.map g) = eval (f ∘ g) r := by
+  induction r <;> simp_all
+
 /-- Evaluate an expression at the canonical free-group generators. This remains independent of
 `Relator.toWord`: the comparison theorem below checks that compilation preserves meaning. The
 five equation lemmas below are the public interface. -/
