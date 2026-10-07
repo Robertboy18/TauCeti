@@ -13,7 +13,12 @@ public import TauCeti.Algebra.Lie.E6.DoubledMinuscule.BaseChange
 The twelve numbered root subgroups and the weight torus of the doubled minuscule carrier
 specify a closed subgroup of `GL₅₄`. Its defining Hopf ideal is the common kernel of their
 coordinate maps. This module provides the generated subgroup's coordinate Hopf algebra and
-its basic comparison with the base-changed integral carrier.
+its basic comparison with the base-changed integral carrier. The surjective quotient coordinate
+map and the uniquely factored generator maps let representations be restricted to this subgroup.
+
+The quotient and generator-lift API follows
+`TauCeti.Algebra.Lie.E6.Minuscule.Generated.Basic`, using
+`TauCeti.CommHopfAlgCat.commonKernelLift`.
 -/
 
 public section
@@ -70,16 +75,45 @@ theorem generatedCoordinateHopfAlgebra_def :
         (generatedDefiningIdeal A) := by
   simp [generatedCoordinateHopfAlgebra]
 
-/-- Each generator factors uniquely through the generated subgroup's coordinate quotient. -/
-theorem existsUnique_generatorCoordinateMap_factor (j : Sum (Fin 6 ⊕ Fin 6) Unit) :
-    ∃! g : CommHopfAlgCat.quotient (GeneralLinear.coordinateHopfAlgebra A 54)
-        (generatedDefiningIdeal A) ⟶ generatorCoordinateAlgebra A j,
-      CommHopfAlgCat.mkQuotient (GeneralLinear.coordinateHopfAlgebra A 54)
-        (generatedDefiningIdeal A) ≫ g = generatorCoordinateMap A j := by
-  rw [generatedDefiningIdeal_def]
-  refine ⟨CommHopfAlgCat.commonKernelLift (generatorCoordinateMap A) j, ?_, ?_⟩
-  · exact CommHopfAlgCat.mkQuotient_comp_commonKernelLift (generatorCoordinateMap A) j
-  · intro g hg
-    exact CommHopfAlgCat.commonKernelLift_unique (generatorCoordinateMap A) j g hg
+/-- The quotient coordinate morphism, representing the generated subgroup's closed immersion
+into `GL₅₄`. -/
+noncomputable def generatedCoordinateMap :
+    GeneralLinear.coordinateHopfAlgebra A 54 ⟶ generatedCoordinateHopfAlgebra A :=
+  CommHopfAlgCat.mkQuotient (GeneralLinear.coordinateHopfAlgebra A 54) (generatedDefiningIdeal A)
+
+/-- The generated subgroup coordinate morphism is surjective. -/
+theorem generatedCoordinateMap_surjective : Function.Surjective (generatedCoordinateMap A).hom :=
+  CommHopfAlgCat.mkQuotient_surjective
+    (GeneralLinear.coordinateHopfAlgebra A 54) (generatedDefiningIdeal A)
+
+/-- The kernel of the generated subgroup coordinate morphism is its defining ideal. -/
+@[simp]
+theorem generatedCoordinateMap_ker :
+    RingHom.ker (generatedCoordinateMap A).hom = (generatedDefiningIdeal A).toIdeal :=
+  CommHopfAlgCat.mkQuotient_ker
+    (GeneralLinear.coordinateHopfAlgebra A 54) (generatedDefiningIdeal A)
+
+/-- The `j`th generator coordinate map factored through the generated subgroup. -/
+noncomputable def generatedCoordinateLift (j : Sum (Fin 6 ⊕ Fin 6) Unit) :
+    generatedCoordinateHopfAlgebra A ⟶ generatorCoordinateAlgebra A j :=
+  CommHopfAlgCat.commonKernelLift (generatorCoordinateMap A) j
+
+/-- Composing the quotient coordinate morphism with a generator lift recovers that generator. -/
+@[reassoc (attr := simp)]
+theorem generatedCoordinateMap_comp_generatedCoordinateLift (j : Sum (Fin 6 ⊕ Fin 6) Unit) :
+    generatedCoordinateMap A ≫ generatedCoordinateLift A j = generatorCoordinateMap A j :=
+  CommHopfAlgCat.mkQuotient_comp_commonKernelLift (generatorCoordinateMap A) j
+
+/-- Each lift is the unique factorization of its generator coordinate map. -/
+theorem generatedCoordinateLift_unique (j : Sum (Fin 6 ⊕ Fin 6) Unit)
+    (g : generatedCoordinateHopfAlgebra A ⟶ generatorCoordinateAlgebra A j)
+    (hg : generatedCoordinateMap A ≫ g = generatorCoordinateMap A j) :
+    g = generatedCoordinateLift A j :=
+  CommHopfAlgCat.commonKernelLift_unique (generatorCoordinateMap A) j g hg
+
+/-- The generated coordinate Hopf algebra is a finite-type algebra over the coefficient ring. -/
+instance : Algebra.FiniteType A (generatedCoordinateHopfAlgebra A) := by
+  rw [generatedCoordinateHopfAlgebra_def]
+  infer_instance
 
 end TauCeti.E6DoubledMinuscule
