@@ -74,18 +74,16 @@ theorem connectedSpace_primeSpectrum_baseChange_coordinateRing
 /-- Scalar extension identifies a diagonalizable-group coordinate ring with the corresponding
 group algebra over the extension field. -/
 private noncomputable def coordinateRingBaseChangeEquiv
-    (k : Type u) [Field k] (G : FGCommGrpCat.{u})
+    (k : Type u) [Field k] (G : FGCommGrpCat.{w})
     (K : Type u) [Field K] [Algebra k K] :
     MonoidAlgebra k G ⊗[k] K ≃+* MonoidAlgebra K G :=
   (Algebra.TensorProduct.comm k _ K).toRingEquiv.trans
-    (_root_.CommHopfAlgCat.ofIso
-      ((finiteTypeCommHopfAlgProperty K).ι.mapIso
-        (baseChangeCoordinateRingIso k K G))).toAlgEquiv.toRingEquiv
+    (TauCeti.MonoidAlgebra.scalarTensorBialgEquiv k K (G := G)).toAlgEquiv.toRingEquiv
 
 /-- **The coordinate Hopf algebra of a unique-product diagonalizable group is geometrically
 connected.** -/
 theorem geometricallyConnected_coordinateRing
-    (k : Type u) [Field k] (G : FGCommGrpCat.{u}) [UniqueProds G] :
+    (k : Type u) [Field k] (G : FGCommGrpCat.{w}) [UniqueProds G] :
     geometricallyConnectedCommHopfAlgProperty k
       (DiagonalizableGroup.coordinateRing k G).obj := by
   rw [geometricallyConnectedCommHopfAlgProperty_iff]
