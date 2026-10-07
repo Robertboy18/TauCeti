@@ -592,7 +592,7 @@ theorem commutator_eq_ker_parityHom
     commutator (PresentedGroup R) = h.parityHom.ker := by
   let u := Abelianization.of (PresentedGroup.of a : PresentedGroup R)
   have hu : (2 : ℤ) • Additive.ofMul u = 0 := by
-    change u ^ (2 : ℤ) = 1
+    rw [← ofMul_zpow, ofMul_eq_zero]
     simp [u, zpow_ofNat, sq, ← map_mul, h.of_mul_of]
   let f : Multiplicative (ZMod 2) →* Abelianization (PresentedGroup R) :=
     (ZMod.lift 2 ⟨zmultiplesHom _ (Additive.ofMul u), hu⟩).toMultiplicativeLeft
@@ -600,9 +600,10 @@ theorem commutator_eq_ker_parityHom
     apply PresentedGroup.ext
     intro x
     rw [MonoidHom.comp_apply, parityHom_of, habel]
-    change u = Additive.toMul (ZMod.lift 2 _ ((1 : ℤ) : ZMod 2))
-    rw [ZMod.lift_coe _ _ 1]
-    simp
+    dsimp only [f]
+    rw [AddMonoidHom.toMultiplicativeLeft_apply_apply, toAdd_ofAdd, ← Int.cast_one,
+      ZMod.lift_coe _ _ 1]
+    simp [u]
   refine le_antisymm (Abelianization.commutator_subset_ker _) ?_
   rw [← Abelianization.ker_of, hf]
   intro g hg
