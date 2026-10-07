@@ -8,6 +8,7 @@ module
 public import TauCeti.Algebra.AlgebraicGroup.CommHopfAlgCat.BaseChange
 public import TauCeti.Algebra.AlgebraicGroup.Connected.AlgebraicallyClosed
 import TauCeti.Algebra.TensorProduct.CommonOverfield
+import TauCeti.RingTheory.Idempotents.Connected.ScalarExtension
 
 /-!
 # Geometric connectedness under base change
@@ -15,6 +16,12 @@ import TauCeti.Algebra.TensorProduct.CommonOverfield
 Geometric connectedness of a commutative Hopf algebra is preserved by and descends along extension
 of the base field. In particular, `H` is geometrically connected over `k` if and only if the scalar
 extension `K ⊗[k] H` is geometrically connected over any field extension `K / k`.
+The base field, extension field, and coordinate algebra may lie in independent universes.
+
+The defining predicate tests extension fields in the universe of the base field. To obtain
+connectedness after an extension in any universe, first extend to the algebraic closure of the
+base field, then to a common overfield with the requested extension. Connectedness is preserved
+over the algebraically closed field and descends along the resulting injective map.
 
 Preservation compares an arbitrary further extension `L / K` with the original geometric
 connectedness condition using the canonical algebra equivalence
@@ -23,11 +30,13 @@ connectedness condition using the canonical algebra equivalence
 L ⊗[K] (K ⊗[k] H) ≃ L ⊗[k] H.
 ```
 
-For descent, a common overfield of `K` and an algebraically closed extension of `k` compares the
+For descent, a common overfield of `K` and an arbitrary extension of `k` compares the
 two scalar extensions, after which connectedness descends along an injective map.
 
 ## Main declarations
 
+* `TauCeti.geometricallyConnectedCommHopfAlgProperty.connectedSpace_tensorProduct`: geometric
+  connectedness gives connectedness after a field extension in any universe.
 * `TauCeti.geometricallyConnectedCommHopfAlgProperty.baseChange`: geometric connectedness is
   preserved by extension of the base field.
 * `TauCeti.geometricallyConnectedCommHopfAlgProperty.of_baseChange`: geometric connectedness
@@ -50,7 +59,31 @@ open scoped TensorProduct
 
 namespace TauCeti
 
-universe u
+universe u v w
+
+/-- A geometrically connected commutative Hopf algebra has connected spectrum after every field
+extension, including extensions in a different universe from the base field.
+
+The defining predicate suffices because the algebraic closure lies in the base universe;
+connectedness over that closure persists in a common overfield and descends to the requested
+extension. No finite-type assumption is needed. -/
+theorem geometricallyConnectedCommHopfAlgProperty.connectedSpace_tensorProduct
+    (k : Type u) (K : Type w) [Field k] [Field K] [Algebra k K]
+    (H : CommHopfAlgCat.{v} k)
+    (hH : geometricallyConnectedCommHopfAlgProperty k H) :
+    ConnectedSpace (PrimeSpectrum ((H : Type v) ⊗[k] K)) := by
+  let d := Algebra.TensorProduct.commonOverfield k (AlgebraicClosure k) K
+  have hclosure :
+      ConnectedSpace (PrimeSpectrum (AlgebraicClosure k ⊗[k] (H : Type v))) :=
+    hH.connectedSpace_algebraicClosureBaseChange
+  have hextended : ConnectedSpace (PrimeSpectrum
+      ((AlgebraicClosure k ⊗[k] (H : Type v)) ⊗[AlgebraicClosure k] d.Ω)) :=
+    connectedSpace_primeSpectrum_tensorProduct_of_isAlgClosed
+      (AlgebraicClosure k) (AlgebraicClosure k ⊗[k] (H : Type v)) d.Ω
+  have hΩ : ConnectedSpace (PrimeSpectrum ((H : Type v) ⊗[k] d.Ω)) :=
+    (PrimeSpectrum.homeomorphOfRingEquiv
+      (d.comparison H)).connectedSpace_iff.mp hextended
+  exact connectedSpace_primeSpectrum_of_injective (d.map H).toRingHom (d.map_injective H)
 
 /-- **Geometric connectedness is preserved by extension of the base field.**
 
@@ -58,8 +91,8 @@ For fields `k → K`, if the spectrum of `H ⊗[k] L` is connected for every fie
 `L / k`, then the spectrum of `(K ⊗[k] H) ⊗[K] L` is connected for every field extension
 `L / K`. The two rings are identified by cancellation of successive scalar extensions. -/
 theorem geometricallyConnectedCommHopfAlgProperty.baseChange
-    (k K : Type u) [Field k] [Field K] [Algebra k K]
-    (H : CommHopfAlgCat.{u} k)
+    (k : Type u) (K : Type w) [Field k] [Field K] [Algebra k K]
+    (H : CommHopfAlgCat.{v} k)
     (hH : geometricallyConnectedCommHopfAlgProperty k H) :
     geometricallyConnectedCommHopfAlgProperty K
       (CommHopfAlgCat.baseChange (K := K) H) := by
@@ -67,32 +100,32 @@ theorem geometricallyConnectedCommHopfAlgProperty.baseChange
   intro L _ _
   let _ : Algebra k L := Algebra.compHom L (algebraMap k K)
   let _ : IsScalarTower k K L := IsScalarTower.of_algebraMap_eq' rfl
-  rw [geometricallyConnectedCommHopfAlgProperty_iff] at hH
   exact (PrimeSpectrum.homeomorphOfRingEquiv
-    (Algebra.TensorProduct.baseChangeTowerRingEquiv k K H L)).connectedSpace_iff.mpr (hH L)
+    (Algebra.TensorProduct.baseChangeTowerRingEquiv k K H L)).connectedSpace_iff.mpr
+      (hH.connectedSpace_tensorProduct k L H)
 
 /-- **Geometric connectedness descends from an extension of the base field.**
 
 If `K ⊗[k] H` is geometrically connected over a field extension `K / k`, then `H` is
 geometrically connected over `k`. -/
 theorem geometricallyConnectedCommHopfAlgProperty.of_baseChange
-    (k K : Type u) [Field k] [Field K] [Algebra k K]
-    (H : CommHopfAlgCat.{u} k)
+    (k : Type u) (K : Type w) [Field k] [Field K] [Algebra k K]
+    (H : CommHopfAlgCat.{v} k)
     (hH : geometricallyConnectedCommHopfAlgProperty K
       (CommHopfAlgCat.baseChange (K := K) H)) :
     geometricallyConnectedCommHopfAlgProperty k H := by
-  rw [geometricallyConnectedCommHopfAlgProperty_iff] at hH
-  rw [geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace_of_isAlgClosed]
-  intro L _ _ _
+  rw [geometricallyConnectedCommHopfAlgProperty_iff]
+  intro L _ _
   let d := Algebra.TensorProduct.commonOverfield k K L
-  have hΩ : ConnectedSpace (PrimeSpectrum ((H : Type u) ⊗[k] d.Ω)) :=
-    (PrimeSpectrum.homeomorphOfRingEquiv (d.comparison H)).connectedSpace_iff.mp (hH d.Ω)
+  have hΩ : ConnectedSpace (PrimeSpectrum ((H : Type v) ⊗[k] d.Ω)) :=
+    (PrimeSpectrum.homeomorphOfRingEquiv (d.comparison H)).connectedSpace_iff.mp
+      (hH.connectedSpace_tensorProduct K d.Ω (CommHopfAlgCat.baseChange (K := K) H))
   exact connectedSpace_primeSpectrum_of_injective (d.map H).toRingHom (d.map_injective H)
 
 /-- Geometric connectedness is equivalent before and after extension of the base field. -/
 theorem geometricallyConnectedCommHopfAlgProperty.baseChange_iff
-    (k K : Type u) [Field k] [Field K] [Algebra k K]
-    (H : CommHopfAlgCat.{u} k) :
+    (k : Type u) (K : Type w) [Field k] [Field K] [Algebra k K]
+    (H : CommHopfAlgCat.{v} k) :
     geometricallyConnectedCommHopfAlgProperty K
         (CommHopfAlgCat.baseChange (K := K) H) ↔
       geometricallyConnectedCommHopfAlgProperty k H :=
