@@ -142,6 +142,8 @@ theorem geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace_baseChange
     ((geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace K
       (CommHopfAlgCat.baseChange (K := K) H)).trans
       (PrimeSpectrum.homeomorphOfRingEquiv
-        (CommHopfAlgCat.baseChangeAlgEquiv (K := K) H).toRingEquiv).connectedSpace_iff)
+        (AlgEquiv.refl :
+          (CommHopfAlgCat.baseChange (K := K) H : Type (max w v)) ≃ₐ[K]
+            K ⊗[k] (H : Type v)).toRingEquiv).connectedSpace_iff)
 
 end TauCeti
