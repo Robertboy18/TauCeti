@@ -16,10 +16,6 @@ The integral positive Geck carrier embeds into an upper-triangular group, so its
 commutative ring form a solvable group. Transport through the existing base-change coordinate
 isomorphism gives the same conclusion for the positive carrier over any new base ring. In
 particular, over a field it satisfies the geometric-points solvability property.
-
-This supplies the solvability condition for the candidate Borel subgroup in the Layer 9 pinning
-target of the ReductiveGroups roadmap. Smoothness, connectedness, and maximality among solvable
-subgroups require separate proofs.
 -/
 
 public section
@@ -49,7 +45,7 @@ theorem isSolvable_points_geckTorusPositiveBaseChange
   exact Group.isSolvable_of_isSolvable_injective (f := e.toMonoidHom) e.injective
 
 /-- Over every field, the positive Geck carrier has solvable geometric points. -/
-theorem geometricallySolvablePoints_geckTorusPositiveBaseChange
+theorem geometricallySolvablePointsCommHopfAlgProperty_geckTorusPositiveBaseChange
     (k : Type u) [Field k] :
     geometricallySolvablePointsCommHopfAlgProperty k
       (CommHopfAlgCat.quotient

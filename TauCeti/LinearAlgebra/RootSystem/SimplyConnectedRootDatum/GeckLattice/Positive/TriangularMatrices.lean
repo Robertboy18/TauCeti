@@ -23,9 +23,6 @@ becomes diagonal with the reordered weight characters.
 The cardinality transport in `geckWeightOrderingEquiv` identifies the ordered-weight API's
 `Fin (Fintype.card (Fin n))` with the original matrix index `Fin n`. Thus the conjugation acts
 on the same ambient general linear group as the positive Geck carrier.
-
-This supplies the matrix input for the Pinnings target of Layer 9 of
-`TauCetiRoadmap/ReductiveGroups/README.md`.
 -/
 
 public section
@@ -85,8 +82,7 @@ def geckWeightOrderingMatrix : Matrix.GeneralLinearGroup (Fin (t.geckDim ht)) �
 theorem coe_geckWeightOrderingMatrix :
     (t.geckWeightOrderingMatrix ht : Matrix (Fin (t.geckDim ht)) (Fin (t.geckDim ht)) ℤ) =
       Equiv.Perm.permMatrix ℤ (t.geckWeightOrderingEquiv ht).symm := by
-  change ((t.geckCoordinateBasisFin ht).reindex (t.geckWeightOrderingEquiv ht)).toMatrix
-      (t.geckCoordinateBasisFin ht) = _
+  simp only [geckWeightOrderingMatrix, geckOrderedWeightBasis]
   rw [Module.Basis.toMatrix_reindex, Module.Basis.toMatrix_self]
   exact (PEquiv.toMatrix_toPEquiv_eq _).symm
 
@@ -97,6 +93,8 @@ theorem coe_map_geckWeightOrderingMatrix :
     (Matrix.GeneralLinearGroup.map (algebraMap ℤ A) (t.geckWeightOrderingMatrix ht) :
       Matrix (Fin (t.geckDim ht)) (Fin (t.geckDim ht)) A) =
         Equiv.Perm.permMatrix A (t.geckWeightOrderingEquiv ht).symm := by
+  -- `GeneralLinearGroup.map_apply` is entrywise; expose the underlying matrix map
+  -- so that `PEquiv.map_toMatrix` applies directly to this matrix equality.
   change ((t.geckWeightOrderingMatrix ht :
     Matrix (Fin (t.geckDim ht)) (Fin (t.geckDim ht)) ℤ).map (algebraMap ℤ A)) = _
   rw [coe_geckWeightOrderingMatrix]
@@ -147,27 +145,37 @@ theorem isUpperUnitriangular_conj_geckRootSubgroupMatrix_inl (i : Fin t.rank)
         (Matrix.GeneralLinearGroup.map (algebraMap ℤ A) (t.geckWeightOrderingMatrix ht))⁻¹ :
           Matrix.GeneralLinearGroup (Fin (t.geckDim ht)) A) :
       Matrix (Fin (t.geckDim ht)) (Fin (t.geckDim ht)) A).IsUpperUnitriangular := by
-  rw [conj_geckRootSubgroupMatrix_eq_ordered]
+  rw [conj_geckRootSubgroupMatrix_eq_ordered, geckOrderedWeightBasis_eq_orderedWeightBasis]
   have hpos : 0 < t.weightDegree ht (t.rootGeneratorWeight ht (.inl i)) := by
     have hrow : t.rootGeneratorWeight ht (.inl i) = fun j => t.cartanMatrix i j := by
       funext j
       rw [rootGeneratorWeight_inl]
     rw [hrow, weightDegree_cartanMatrix_row]
     norm_num
-  apply isUpperUnitriangular_kostantRootSubgroupMatrix
+  have hordered := isUpperUnitriangular_kostantRootSubgroupMatrix_orderedWeightBasis
     (t.lieBasis ht).rootGenerator (t.lieBasis ht).h (t.geckRepresentation ht)
     (t.geckCoordinateLattice ht).toAddSubgroup
     (t.geckRepresentation_kostantForm_mem_geckCoordinateLattice ht)
-    (t.geckOrderedWeightBasis ht) (t.geckOrderedWeight ht) (.inl i)
+    (t.geckCoordinateBasisFin ht) (t.geckWeightFin ht) (t.weightDegree ht)
+    (t.isCartanWeightVector_geckCoordinateBasisFin ht)
     (t.isNilpotent_geckRepresentation_rootGenerator ht (.inl i))
+    (t.lie_lieBasis_h_rootGenerator ht (.inl i)) hpos q
+  let e := Fin.castOrderIso (Fintype.card_fin (t.geckDim ht))
+  have hbase :
+      ((orderedWeightBasis (t.weightDegree ht) (t.geckWeightFin ht)
+        (t.geckCoordinateBasisFin ht)).reindex e.toEquiv).baseChange A =
+      ((orderedWeightBasis (t.weightDegree ht) (t.geckWeightFin ht)
+        (t.geckCoordinateBasisFin ht)).baseChange A).reindex e.toEquiv := by
+    ext r
+    simp [Module.Basis.reindex_apply]
+  rw [Matrix.isUpperUnitriangular_def]
+  constructor
+  · intro r s hsr
+    simpa [kostantRootSubgroupMatrix_apply, hbase, Module.Basis.reindex_apply, e] using
+      hordered.isUpperTriangular (e.symm.lt_iff_lt.mpr hsr)
   · intro r
-    simpa [geckOrderedWeightBasis, geckOrderedWeight, Module.Basis.reindex_apply] using
-      t.isCartanWeightVector_geckCoordinateBasisFin ht ((t.geckWeightOrderingEquiv ht).symm r)
-  · exact t.lie_lieBasis_h_rootGenerator ht (.inl i)
-  · intro r s n hn hrs
-    rw [geckOrderedWeight_eq_orderedWeight, geckOrderedWeight_eq_orderedWeight] at hrs
-    exact (Fin.castOrderIso (Fintype.card_fin (t.geckDim ht))).symm.lt_iff_lt.mp
-      (orderedWeight_lt_of_eq_add_nsmul (t.weightDegree ht) (t.geckWeightFin ht) hpos hn hrs)
+    simpa [kostantRootSubgroupMatrix_apply, hbase, Module.Basis.reindex_apply, e] using
+      hordered.apply_diag (e.symm r)
 
 /-- Each original raising matrix is upper triangular after conjugation by the integral
 weight-ordering matrix. -/
