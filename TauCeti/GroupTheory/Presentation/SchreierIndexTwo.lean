@@ -590,22 +590,23 @@ theorem commutator_eq_ker_parityHom
     (habel : ∀ x : α, Abelianization.of (PresentedGroup.of x : PresentedGroup R) =
       Abelianization.of (PresentedGroup.of a)) :
     commutator (PresentedGroup R) = h.parityHom.ker := by
-  refine le_antisymm (Abelianization.commutator_subset_ker _) fun g hg => ?_
-  obtain ⟨z, rfl⟩ := PresentedGroup.mk_surjective R g
-  obtain ⟨L, rfl⟩ : ∃ L, FreeGroup.mk L = z := Quot.exists_rep z
-  rw [h.mk_mk_mem_ker_parityHom_iff] at hg
-  rw [← Abelianization.ker_of, MonoidHom.mem_ker]
-  have key : ∀ L : PresentationWord α,
-      Abelianization.of (PresentedGroup.mk R (FreeGroup.mk L)) =
-        Abelianization.of (PresentedGroup.of a : PresentedGroup R) ^ L.length := by
-    intro L
-    induction L with
-    | nil => simp [← FreeGroup.one_eq_mk]
-    | cons p L ih =>
-      obtain ⟨x, s⟩ := p
-      rw [h.mk_mk_cons, map_mul, ih, habel, List.length_cons, pow_succ']
-  obtain ⟨k, hk⟩ := hg
-  rw [key, hk, ← two_mul, pow_mul, ← map_pow, sq, h.of_mul_of, map_one, one_pow]
+  let u := Abelianization.of (PresentedGroup.of a : PresentedGroup R)
+  have hu : (2 : ℤ) • Additive.ofMul u = 0 := by
+    change u ^ (2 : ℤ) = 1
+    simp [u, zpow_ofNat, sq, ← map_mul, h.of_mul_of]
+  let f : Multiplicative (ZMod 2) →* Abelianization (PresentedGroup R) :=
+    (ZMod.lift 2 ⟨zmultiplesHom _ (Additive.ofMul u), hu⟩).toMultiplicativeLeft
+  have hf : Abelianization.of = f.comp h.parityHom := by
+    apply PresentedGroup.ext
+    intro x
+    rw [MonoidHom.comp_apply, parityHom_of, habel]
+    change u = Additive.toMul (ZMod.lift 2 _ ((1 : ℤ) : ZMod 2))
+    rw [ZMod.lift_coe _ _ 1]
+    simp
+  refine le_antisymm (Abelianization.commutator_subset_ker _) ?_
+  rw [← Abelianization.ker_of, hf]
+  intro g hg
+  simpa using congrArg f (MonoidHom.mem_ker.mp hg)
 
 /-- **Index-two Reidemeister--Schreier rewriting onto the commutator subgroup.** When all
 generators agree in the abelianization, the group presented by the rewrites of the source words is
