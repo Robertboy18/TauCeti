@@ -14,11 +14,12 @@ The twelve numbered root subgroups and the weight torus of the doubled minuscule
 specify a closed subgroup of `GL₅₄`. Its defining Hopf ideal is the common kernel of their
 coordinate maps. This module provides the generated subgroup's coordinate Hopf algebra and
 its basic comparison with the base-changed integral carrier. The surjective quotient coordinate
-map and the uniquely factored generator maps let representations be restricted to this subgroup.
+map and its universal property let coordinate morphisms descend to this subgroup; the uniquely
+factored generator maps let representations be restricted to it.
 
 The quotient and generator-lift API follows
 `TauCeti.Algebra.Lie.E6.Minuscule.Generated.Basic`, using
-`TauCeti.CommHopfAlgCat.commonKernelLift`.
+`TauCeti.CommHopfAlgCat.liftQuotient`.
 -/
 
 public section
@@ -93,23 +94,51 @@ theorem generatedCoordinateMap_ker :
   CommHopfAlgCat.mkQuotient_ker
     (GeneralLinear.coordinateHopfAlgebra A 54) (generatedDefiningIdeal A)
 
+/-- A coordinate morphism out of `O(GL₅₄)` killing the generated subgroup's defining ideal,
+factored through the generated subgroup. -/
+noncomputable def generatedCoordinateDesc {B : CommHopfAlgCat A}
+    (f : GeneralLinear.coordinateHopfAlgebra A 54 ⟶ B)
+    (hf : (generatedDefiningIdeal A).toIdeal ≤ RingHom.ker f.hom.toAlgHom.toRingHom) :
+    generatedCoordinateHopfAlgebra A ⟶ B :=
+  CommHopfAlgCat.liftQuotient (generatedDefiningIdeal A) f hf
+
+/-- Composing the quotient coordinate morphism with the descent of `f` recovers `f`. -/
+@[reassoc (attr := simp)]
+theorem generatedCoordinateMap_comp_generatedCoordinateDesc {B : CommHopfAlgCat A}
+    (f : GeneralLinear.coordinateHopfAlgebra A 54 ⟶ B)
+    (hf : (generatedDefiningIdeal A).toIdeal ≤ RingHom.ker f.hom.toAlgHom.toRingHom) :
+    generatedCoordinateMap A ≫ generatedCoordinateDesc A f hf = f :=
+  CommHopfAlgCat.mkQuotient_comp_liftQuotient (generatedDefiningIdeal A) f hf
+
+/-- The descent morphism is the unique factorization of `f` through the generated subgroup. -/
+theorem generatedCoordinateDesc_unique {B : CommHopfAlgCat A}
+    (f : GeneralLinear.coordinateHopfAlgebra A 54 ⟶ B)
+    (hf : (generatedDefiningIdeal A).toIdeal ≤ RingHom.ker f.hom.toAlgHom.toRingHom)
+    (g : generatedCoordinateHopfAlgebra A ⟶ B)
+    (hg : generatedCoordinateMap A ≫ g = f) :
+    g = generatedCoordinateDesc A f hf :=
+  CommHopfAlgCat.liftQuotient_unique (generatedDefiningIdeal A) f hf g hg
+
 /-- The `j`th generator coordinate map factored through the generated subgroup. -/
 noncomputable def generatedCoordinateLift (j : Sum (Fin 6 ⊕ Fin 6) Unit) :
     generatedCoordinateHopfAlgebra A ⟶ generatorCoordinateAlgebra A j :=
-  CommHopfAlgCat.commonKernelLift (generatorCoordinateMap A) j
+  generatedCoordinateDesc A (generatorCoordinateMap A j)
+    ((le_generatedDefiningIdeal_iff A _).mp le_rfl j)
 
 /-- Composing the quotient coordinate morphism with a generator lift recovers that generator. -/
 @[reassoc (attr := simp)]
 theorem generatedCoordinateMap_comp_generatedCoordinateLift (j : Sum (Fin 6 ⊕ Fin 6) Unit) :
     generatedCoordinateMap A ≫ generatedCoordinateLift A j = generatorCoordinateMap A j :=
-  CommHopfAlgCat.mkQuotient_comp_commonKernelLift (generatorCoordinateMap A) j
+  generatedCoordinateMap_comp_generatedCoordinateDesc A (generatorCoordinateMap A j)
+    ((le_generatedDefiningIdeal_iff A _).mp le_rfl j)
 
 /-- Each lift is the unique factorization of its generator coordinate map. -/
 theorem generatedCoordinateLift_unique (j : Sum (Fin 6 ⊕ Fin 6) Unit)
     (g : generatedCoordinateHopfAlgebra A ⟶ generatorCoordinateAlgebra A j)
     (hg : generatedCoordinateMap A ≫ g = generatorCoordinateMap A j) :
     g = generatedCoordinateLift A j :=
-  CommHopfAlgCat.commonKernelLift_unique (generatorCoordinateMap A) j g hg
+  generatedCoordinateDesc_unique A (generatorCoordinateMap A j)
+    ((le_generatedDefiningIdeal_iff A _).mp le_rfl j) g hg
 
 /-- The generated coordinate Hopf algebra is a finite-type algebra over the coefficient ring. -/
 instance : Algebra.FiniteType A (generatedCoordinateHopfAlgebra A) := by
