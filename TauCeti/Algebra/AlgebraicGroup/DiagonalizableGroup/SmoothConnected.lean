@@ -63,13 +63,12 @@ theorem connectedSpace_primeSpectrum_coordinateRing
 the resulting group algebra is a domain. -/
 theorem connectedSpace_primeSpectrum_baseChange_coordinateRing
     (k : Type u) (K : Type v) [CommRing k] [CommRing K] [Algebra k K]
-    (G : FGCommGrpCat.{u}) [IsDomain (MonoidAlgebra K G)] :
+    (G : FGCommGrpCat.{w}) [IsDomain (MonoidAlgebra K G)] :
     ConnectedSpace (PrimeSpectrum
       (CommHopfAlgCat.baseChange (K := K) (coordinateRing k G).obj)) := by
-  let e := baseChangeCoordinateHopfAlgebraIso k K G
+  let e := (TauCeti.MonoidAlgebra.scalarTensorBialgEquiv k K (G := G)).toAlgEquiv
   have := connectedSpace_primeSpectrum_coordinateRing K G
-  exact connectedSpace_primeSpectrum_of_injective e.hom.hom.toAlgHom.toRingHom
-    (ConcreteCategory.bijective_of_isIso e.hom).1
+  exact connectedSpace_primeSpectrum_of_injective e.toRingHom e.injective
 
 /-- Scalar extension identifies a diagonalizable-group coordinate ring with the corresponding
 group algebra over the extension field. -/
