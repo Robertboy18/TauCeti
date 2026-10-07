@@ -606,8 +606,7 @@ theorem commutator_eq_ker_parityHom
     simp [u]
   refine le_antisymm (Abelianization.commutator_subset_ker _) ?_
   rw [← Abelianization.ker_of, hf]
-  intro g hg
-  simpa using congrArg f (MonoidHom.mem_ker.mp hg)
+  exact h.parityHom.ker_le_comap f.ker
 
 /-- **Index-two Reidemeister--Schreier rewriting onto the commutator subgroup.** When all
 generators agree in the abelianization, the group presented by the rewrites of the source words is
