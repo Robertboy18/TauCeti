@@ -60,7 +60,6 @@ and with it the Hasse bound, are computed. The second is not proved here.
 * `TauCeti.Isogeny.pointMap_dualFrobeniusIsogeny_pointMap_frobeniusIsogeny` and
   `TauCeti.Isogeny.pointMap_frobeniusIsogeny_pointMap_dualFrobeniusIsogeny`: on points,
   `π̂ (π P) = q • P` and `π (π̂ P) = q • P`.
-* `TauCeti.Isogeny.Hom.frobenius_comp_injective`: composition with Frobenius cancels.
 * `TauCeti.Isogeny.Hom.dualFrobenius_comp_add`, `TauCeti.Isogeny.Hom.dualFrobenius_comp_sub` and
   `TauCeti.Isogeny.Hom.dualFrobenius_comp_zsmul`: composition with `π̂` is `ℤ`-linear in the
   inner morphism.
@@ -188,19 +187,6 @@ theorem pointMap_frobeniusIsogeny_pointMap_dualFrobeniusIsogeny [DecidableEq F] 
 namespace Hom
 
 variable {W} {W₁ : WeierstrassCurve.Affine F}
-
-/-- **Composition with Frobenius cancels**: `f ↦ π ∘ f` is injective on morphisms. -/
-theorem frobenius_comp_injective :
-    Function.Injective fun f : Hom W₁ W ↦ (ofIsogeny (frobeniusIsogeny W)).comp f :=
-  -- `f ↦ π ∘ f` is additive, and a composite vanishes only when a factor does
-  (injective_iff_map_eq_zero (AddMonoidHom.mk'
-    (fun f : Hom W₁ W ↦ (ofIsogeny (frobeniusIsogeny W)).comp f) frobenius_comp_add)).2 fun _ hf ↦
-    (comp_eq_zero_iff.1 hf).resolve_left (ofIsogeny_ne_zero _)
-
-/-- **Two morphisms agree exactly when they agree after composition with Frobenius.** -/
-theorem frobenius_comp_inj {f g : Hom W₁ W} :
-    (ofIsogeny (frobeniusIsogeny W)).comp f = (ofIsogeny (frobeniusIsogeny W)).comp g ↔ f = g :=
-  frobenius_comp_injective.eq_iff
 
 /-- **Composition with the dual of Frobenius is additive in the inner morphism**:
 `π̂ ∘ (f + g) = π̂ ∘ f + π̂ ∘ g`. -/
