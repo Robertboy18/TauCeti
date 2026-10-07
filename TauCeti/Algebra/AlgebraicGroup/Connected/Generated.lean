@@ -7,7 +7,8 @@ module
 
 public import TauCeti.Algebra.AlgebraicGroup.Connected.Comultiplication
 public import TauCeti.Algebra.AlgebraicGroup.Connected.AlgebraicallyClosed
-public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.BaseChange
+public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.CommonKernel.Basic
+import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.BaseChange
 import Mathlib.RingTheory.FiniteStability
 
 /-!
@@ -27,8 +28,11 @@ needs to be of finite type; smoothness or reducedness is not required.
 ## Reference
 
 * J. S. Milne, *Algebraic Groups* (2017), Propositions 2.37 and 2.48, and §7.
-* The finite-type transport after base change adapts the formal argument in
-  [TauCeti#12485](https://github.com/TauCetiProject/TauCeti/pull/12485).
+* The Tau Ceti contributors, finite-type transport in
+  `smoothCommHopfAlgProperty_quotient_commonKernelHopfIdeal_of_geometricallyReduced`,
+  `TauCeti.Algebra.AlgebraicGroup.HopfIdeal.CommonKernel.GeometricallyReduced`.
+  The finite-type base-change argument below adapts
+  [that formal proof](https://github.com/TauCetiProject/TauCeti/blob/2527db7c58c264a54ab77c2accbaf5a7c7a6f1a2/TauCeti/Algebra/AlgebraicGroup/HopfIdeal/CommonKernel/GeometricallyReduced.lean#L43-L53).
 -/
 
 public section
