@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Conjugation
+public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.UpperTriangular.Conjugation
 public import TauCeti.Algebra.AlgebraicGroup.Solvable.UpperTriangular
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.GeckLattice.Positive.Basic
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.GeckLattice.Positive.Triangular.Matrices
@@ -37,37 +37,6 @@ attribute [local instance high] Algebra.toModule
 
 variable (t : DynkinType) (ht : t.Valid)
 
-private theorem upperTriangular_comap_le_ker_of_conjugate {n : ℕ}
-    (P : Matrix.GeneralLinearGroup (Fin n) ℤ) {A : Type v} [CommRing A] [Algebra ℤ A]
-    (f : GeneralLinear.coordinateHopfAlgebra ℤ n →ₐ[ℤ] A)
-    (hf : ((Matrix.GeneralLinearGroup.map (algebraMap ℤ A) P *
-        GeneralLinear.pointsMulEquiv n (toConv f) *
-        (Matrix.GeneralLinearGroup.map (algebraMap ℤ A) P)⁻¹ :
-          Matrix.GeneralLinearGroup (Fin n) A) :
-        Matrix (Fin n) (Fin n) A).IsUpperTriangular) :
-    ((GeneralLinear.UpperTriangular.definingHopfIdeal ℤ n).comapOfSurjective
-      (GeneralLinear.conjCoordinateIso P).inv.hom
-      (ConcreteCategory.bijective_of_isIso (GeneralLinear.conjCoordinateIso P).inv).2).toIdeal ≤
-        RingHom.ker f.toRingHom := by
-  let c := GeneralLinear.conjCoordinateIso P
-  have hmatrix : ((GeneralLinear.pointToGeneralLinear n
-      (toConv (f.comp c.hom.hom.toAlgHom)) : Matrix.GeneralLinearGroup (Fin n) A) :
-      Matrix (Fin n) (Fin n) A).IsUpperTriangular := by
-    rw [← GeneralLinear.pointsMulEquiv_apply]
-    rw [GeneralLinear.pointsMulEquiv_toConv_comp_conjCoordinateIso]
-    exact hf
-  have hker := GeneralLinear.UpperTriangular.definingHopfIdeal_toIdeal_le_ker_of_isUpperTriangular
-    ℤ n (f.comp c.hom.hom.toAlgHom) hmatrix
-  intro x hx
-  have hinv : c.inv.hom x ∈ GeneralLinear.UpperTriangular.definingHopfIdeal ℤ n :=
-    HopfIdeal.mem_comapOfSurjective.mp hx
-  have hzero := hker hinv
-  have hc : c.hom.hom (c.inv.hom x) = x := by
-    rw [← _root_.CommHopfAlgCat.comp_apply, Iso.inv_hom_id, _root_.CommHopfAlgCat.id_apply]
-  rw [RingHom.mem_ker] at hzero ⊢
-  rw [AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom] at hzero ⊢
-  simpa only [AlgHom.comp_apply, BialgHom.coe_toAlgHom, hc] using hzero
-
 /-- Conjugation by the integral weight-ordering matrix carries the positive Geck defining ideal
 into triangular position. Equivalently, the pulled-back upper-triangular ideal is contained in the
 existing positive defining ideal. -/
@@ -80,7 +49,7 @@ theorem upperTriangular_comap_le_geckTorusPositiveDefiningIdeal :
   rw [t.le_geckTorusPositiveDefiningIdeal_iff ht]
   constructor
   · intro i
-    apply upperTriangular_comap_le_ker_of_conjugate
+    apply GeneralLinear.UpperTriangular.comap_le_ker_of_conjugate
     let q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ]
         AdditiveGroup.coordinateHopfAlgebra ℤ) := toConv (AlgHom.id ℤ _)
     have hmatrix := pointsMulEquiv_kostantRootSubgroupCoordinateMap
@@ -102,7 +71,7 @@ theorem upperTriangular_comap_le_geckTorusPositiveDefiningIdeal :
         (t.geckCoordinateBasisFin ht)).hom.toAlgHom) = _ at hmatrix
     rw [hmatrix]
     exact t.isUpperTriangular_conj_geckRootSubgroupMatrix_inl ht i q
-  · apply upperTriangular_comap_le_ker_of_conjugate
+  · apply GeneralLinear.UpperTriangular.comap_le_ker_of_conjugate
     let p : HopfAlgebra.points (R := ℤ)
         (H := MonoidAlgebra ℤ (SplitTorus.characterGroup (Fin t.rank)))
         (CommAlgCat.of ℤ (MonoidAlgebra ℤ (SplitTorus.characterGroup (Fin t.rank)))) :=
