@@ -6,9 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.G2.ShortRoot.PrimeField.Generated.Basic
-public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.CommonKernel.Reduced
-public import TauCeti.Algebra.AlgebraicGroup.AdditiveGroup.CoordinateBaseChange
-public import TauCeti.Algebra.AlgebraicGroup.DiagonalizableGroup.BaseChange
+public import TauCeti.Algebra.AlgebraicGroup.Smooth.CommHopfAlgCat
 import TauCeti.Algebra.Lie.G2.ShortRoot.PrimeField.Smooth
 import TauCeti.RingTheory.Smooth.GeometricallyReduced
 
