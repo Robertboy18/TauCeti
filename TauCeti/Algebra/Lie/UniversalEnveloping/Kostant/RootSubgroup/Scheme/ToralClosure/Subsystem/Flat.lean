@@ -5,8 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Subsystem.Basic
+public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Subsystem.BaseChange
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.CommonKernel.Flat
+public import TauCeti.AlgebraicGeometry.AffineGroupScheme.HopfSpec
 
 /-!
 # Flatness of torus and root-subsystem carriers
@@ -16,15 +17,18 @@ Kostant root subgroups has torsion-free coordinate algebra over `ℤ`, hence is 
 This follows from the common-kernel criterion: the generator maps have additive groups and
 a split torus as their sources, all with torsion-free coordinate algebras.
 
-Only the selected root operators are required to be nilpotent. The result applies in
-particular to the positive carrier used in constructing a pinning.
+Only the selected root operators are required to be nilpotent. The structural morphism is flat,
+and the coordinate algebra presented by the base-change ideal is flat over every commutative
+base ring. The result applies in particular to the positive carrier used in constructing a pinning.
 -/
 
 public section
 
+open AlgebraicGeometry
+
 namespace TauCeti.UniversalEnvelopingAlgebra
 
-universe u w
+universe u v w
 
 -- Use the scalar module of the coordinate algebra in the quotient flatness criterion.
 attribute [local instance high] Algebra.toModule
@@ -51,5 +55,22 @@ instance isTorsionFree_kostantTorusSubsystemCoordinateHopfAlgebra :
   refine @CommHopfAlgCat.isTorsionFree_quotient_commonKernelHopfIdeal ℤ _ _
     (GeneralLinear.coordinateHopfAlgebra ℤ n) (S ⊕ Unit) _ _ ?_
   rintro (i | j) <;> infer_instance
+
+/-- The structural morphism of an integral Kostant torus subsystem is flat. -/
+instance flat_kostantTorusSubsystemGroupScheme :
+    Flat (kostantTorusSubsystemGroupScheme e h ρ M hM b wt S hnilS).X.hom :=
+  (moduleFlat_iff_flat_hopfSpec ℤ _).mp inferInstance
+
+/-- The coordinate algebra of a Kostant torus subsystem remains flat after base change
+from `ℤ` to any commutative ring. -/
+instance flat_kostantTorusSubsystemBaseChangeCoordinateHopfAlgebra
+    (A : Type v) [CommRing A] :
+    Module.Flat A
+      (CommHopfAlgCat.quotient
+        (CommHopfAlgCat.baseChange (K := A) (GeneralLinear.coordinateHopfAlgebra ℤ n))
+        (kostantTorusSubsystemBaseChangeIdeal e h ρ M hM b wt S hnilS A)) :=
+  Module.Flat.of_linearEquiv
+    (_root_.CommHopfAlgCat.ofIso
+      (kostantTorusSubsystemBaseChangeIso e h ρ M hM b wt S hnilS A)).toAlgEquiv.toLinearEquiv
 
 end TauCeti.UniversalEnvelopingAlgebra

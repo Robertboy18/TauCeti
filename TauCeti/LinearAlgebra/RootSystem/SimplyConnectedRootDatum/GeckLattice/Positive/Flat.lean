@@ -20,6 +20,7 @@ with scalar extension of the integral coordinate algebra.
 public section
 
 open AlgebraicGeometry
+open TauCeti.UniversalEnvelopingAlgebra
 
 namespace TauCeti.DynkinType
 
@@ -40,8 +41,8 @@ instance isTorsionFree_geckTorusPositiveCoordinateHopfAlgebra :
 /-- The structural morphism of the integral positive Geck carrier is flat. -/
 instance flat_geckTorusPositiveGroupScheme :
     Flat (t.geckTorusPositiveGroupScheme ht).X.hom := by
-  rw [geckTorusPositiveGroupScheme_eq_quotientSpec]
-  exact (moduleFlat_iff_flat_hopfSpec ℤ _).mp inferInstance
+  rw [geckTorusPositiveGroupScheme_def]
+  infer_instance
 
 /-- The transported positive coordinate algebra is flat over every commutative base ring. -/
 instance flat_geckTorusPositiveBaseChangeCoordinateHopfAlgebra
@@ -50,9 +51,9 @@ instance flat_geckTorusPositiveBaseChangeCoordinateHopfAlgebra
       (CommHopfAlgCat.quotient
         (CommHopfAlgCat.baseChange (K := A)
           (GeneralLinear.coordinateHopfAlgebra ℤ (t.geckDim ht)))
-        (t.geckTorusPositiveBaseChangeIdeal ht A)) :=
-  Module.Flat.of_linearEquiv
-    (_root_.CommHopfAlgCat.ofIso
-      (t.geckTorusPositiveBaseChangeCoordinateIso ht A)).toAlgEquiv.toLinearEquiv
+        (t.geckTorusPositiveBaseChangeIdeal ht A)) := by
+  rw [geckTorusPositiveBaseChangeIdeal_def, geckTorusPositiveDefiningIdeal_def,
+    ← kostantTorusSubsystemBaseChangeIdeal_def]
+  infer_instance
 
 end TauCeti.DynkinType
