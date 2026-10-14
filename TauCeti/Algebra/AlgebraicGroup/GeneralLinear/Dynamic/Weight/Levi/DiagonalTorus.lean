@@ -25,9 +25,6 @@ diagonal split torus.
 
 * J. S. Milne, *Algebraic Groups* (2017), Chapters 12--13.
 * T. A. Springer, *Linear Algebraic Groups*, Sections 6.2--6.3.
-
-This advances the dynamic approach to parabolics and Levi decomposition in Layer 7,
-"Structure theory", of the ReductiveGroups roadmap.
 -/
 
 public section
@@ -47,34 +44,11 @@ private theorem weightLeviDefiningHopfIdeal_le_ker_diagonalTorusCoordinateMap
     (weightLeviDefiningHopfIdeal R w).toIdeal ≤
       RingHom.ker
         (diagonalTorusCoordinateMap (R := R) (N := N)).hom.toAlgHom.toRingHom := by
-  rw [weightLeviDefiningHopfIdeal_def, HopfIdeal.sup_toIdeal,
-    weightParabolicDefiningHopfIdeal_toIdeal,
-    weightParabolicDefiningHopfIdeal_toIdeal]
-  apply sup_le
-  · rw [Ideal.span_le]
-    intro x hx
-    rw [mem_weightParabolicRelationSet_iff] at hx
-    obtain ⟨i, j, hij, rfl⟩ := hx
-    rw [SetLike.mem_coe, RingHom.mem_ker]
-    -- The kernel API exposes the underlying `RingHom`; the coordinate API uses the bundled map.
-    change (diagonalTorusCoordinateMap (R := R) (N := N)).hom
-      (coordinateHopfAlgebraAlgEquiv R N
-        (coordinateRingMap R N (MvPolynomial.X (i, j)))) = 0
-    have hne : i ≠ j := fun h ↦ hij.ne (congrArg w h)
-    simpa only [hne, ↓reduceIte] using
-      diagonalTorusCoordinateMap_X (R := R) (N := N) i j
-  · rw [Ideal.span_le]
-    intro x hx
-    rw [mem_weightParabolicRelationSet_iff] at hx
-    obtain ⟨i, j, hij, rfl⟩ := hx
-    rw [SetLike.mem_coe, RingHom.mem_ker]
-    -- The kernel API exposes the underlying `RingHom`; the coordinate API uses the bundled map.
-    change (diagonalTorusCoordinateMap (R := R) (N := N)).hom
-      (coordinateHopfAlgebraAlgEquiv R N
-        (coordinateRingMap R N (MvPolynomial.X (i, j)))) = 0
-    have hne : i ≠ j := fun h ↦ hij.ne (congrArg (-w) h)
-    simpa only [hne, ↓reduceIte] using
-      diagonalTorusCoordinateMap_X (R := R) (N := N) i j
+  apply weightLeviDefiningHopfIdeal_toIdeal_le_ker R w
+  intro i j hij
+  have hne : i ≠ j := fun h ↦ hij (congrArg w h)
+  simpa only [hne, ↓reduceIte, BialgHom.coe_toAlgHom] using
+    diagonalTorusCoordinateMap_X (R := R) (N := N) i j
 
 /-- Restriction from a weight Levi to the diagonal torus. The construction exists for every
 weight because diagonal matrices preserve every weight space. -/

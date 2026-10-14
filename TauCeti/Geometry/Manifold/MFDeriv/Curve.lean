@@ -38,7 +38,8 @@ curve need not carry a `HasMFDerivWithinAt` witness for it.
 * `TauCeti.Manifold.curveVelocityWithin` and `TauCeti.Manifold.curveVelocity`: the velocity of a
   curve within a parameter set and its unrestricted case, computed by
   `TauCeti.Manifold.curveVelocityWithin_apply` and `TauCeti.Manifold.curveVelocity_apply` and
-  related by `TauCeti.Manifold.curveVelocityWithin_univ`.
+  related by `TauCeti.Manifold.curveVelocityWithin_univ`; for a curve in a normed space they are
+  its derivatives (`TauCeti.Manifold.curveVelocityWithin_eq_derivWithin`).
 * `TauCeti.Manifold.curveVelocityLiftWithin` and `TauCeti.Manifold.curveVelocityLift`: the
   corresponding curves in the tangent bundle, together with their projection and fibre formulas.
 * `TauCeti.Manifold.tangentMap_curveVelocityLiftWithin`: tangent maps carry velocity lifts to
@@ -325,6 +326,19 @@ would otherwise keep `simp` from reaching. -/
 theorem curveVelocity_const (x : M) : curveVelocity I (fun _ : 𝕜 ↦ x) t = 0 := by
   rw [← curveVelocityWithin_univ, curveVelocityWithin_const]
 
+/-- The velocity within `s` of a curve in a normed space, read in its own model, is its derivative
+within `s`. -/
+@[simp]
+theorem curveVelocityWithin_eq_derivWithin {γ : 𝕜 → F} :
+    curveVelocityWithin 𝓘(𝕜, F) γ s t = derivWithin γ s t := by
+  rw [curveVelocityWithin_apply, mfderivWithin_eq_fderivWithin]
+  exact fderivWithin_derivWithin (f := γ) (s := s) (x := t)
+
+/-- The velocity of a curve in a normed space, read in its own model, is its derivative. -/
+@[simp]
+theorem curveVelocity_eq_deriv {γ : 𝕜 → F} : curveVelocity 𝓘(𝕜, F) γ t = deriv γ t := by
+  rw [← curveVelocityWithin_univ, curveVelocityWithin_eq_derivWithin, derivWithin_univ]
+
 /-! ### The variation field of a two-parameter family -/
 
 section Variation
@@ -485,7 +499,7 @@ theorem ContMDiffOn.continuousOn_curveVelocityLiftWithin {u : Set 𝕜}
   have htangent := hγ.continuousOn_tangentMapWithin le_rfl hu
   have hcomp := htangent.comp hι.continuous.continuousOn
     (fun t ht ↦ by simpa [ι] using ht)
-  refine hcomp.congr fun t ht ↦ ?_
+  refine hcomp.congr fun t _ ↦ ?_
   exact (tangentMapWithin_unit_eq_curveVelocityLiftWithin (I := I) (u := u) t).symm
 
 /-- The velocity lift of a `C¹` curve is continuous on an open parameter set. The openness

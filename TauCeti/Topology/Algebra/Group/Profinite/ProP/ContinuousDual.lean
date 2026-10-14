@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Topology.Algebra.ContinuousMonoidHom
+public import TauCeti.Topology.Algebra.ContinuousMonoidHom.Basic
 public import TauCeti.Topology.Algebra.ContinuousZModDual
 public import TauCeti.Topology.Algebra.Group.Profinite.MaximalProP
 public import TauCeti.Topology.Algebra.Group.Profinite.ProP.Frattini.Basic
@@ -65,7 +65,7 @@ theorem proPFrattini_le_ker {H : Type*} [Group H]
     [TopologicalSpace H] [DiscreteTopology H] (hH : Nat.card H = p) (f : G →ₜ* H) :
     proPFrattini p G ≤ f.ker := by
   by_cases hf : ∀ x, f x = 1
-  · intro x hx
+  · intro x _
     exact MonoidHom.mem_ker.mpr (hf x)
   · have hrange : f.toMonoidHom.range = ⊤ := by
       rcases (f.toMonoidHom.range).eq_bot_or_eq_top_of_prime_card

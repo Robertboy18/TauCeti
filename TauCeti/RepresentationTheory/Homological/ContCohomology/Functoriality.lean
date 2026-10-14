@@ -7,7 +7,7 @@ module
 
 public import Mathlib.RepresentationTheory.Homological.ContCohomology.Functoriality
 public import TauCeti.RepresentationTheory.Continuous.Invariants
-public import TauCeti.Topology.Algebra.ContinuousMonoidHom
+public import TauCeti.Topology.Algebra.ContinuousMonoidHom.Basic
 
 /-!
 # Restriction, inflation and coefficient maps in continuous cohomology
@@ -44,6 +44,9 @@ transformations `resNatTrans` and `inflNatTrans`, matching the shape of Mathlib'
 * `TauCeti.ContinuousCohomology.resolutionMap_injective` and
   `TauCeti.ContinuousCohomology.cochainsMap_f_injective`: a surjective group map paired with an
   injective coefficient map induces injective maps on resolutions and homogeneous cochains.
+* `TauCeti.ContinuousCohomology.resolutionMap_id_apply_of_comp_eq` and
+  `TauCeti.ContinuousCohomology.cochainsMap_id_apply_of_comp_eq`: elementwise composition of
+  coefficient maps on resolutions and homogeneous cochains.
 * `TauCeti.ContinuousCohomology.coeffMap_comp`,
   `TauCeti.ContinuousCohomology.res_comp_res`, `TauCeti.ContinuousCohomology.res_comp_resLE`,
   `TauCeti.ContinuousCohomology.resLE_comp_resLE` and
@@ -101,6 +104,40 @@ theorem cochainsMap_f_injective (hφ : Function.Surjective φ)
 
 end InjectiveResolutionMap
 
+section Composition
+
+variable {k : Type u} [Ring k] [TopologicalSpace k]
+  {G : Type v} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
+
+/-- On the coinduced resolutions, the maps induced by two composable coefficient morphisms compose
+to the map induced by their composite `e`, elementwise. This is Mathlib's
+`ContinuousCohomology.resolutionMap_comp` at the identity of `G`, read on elements; the composite is
+passed as `e` with the equation `h` because the coefficient morphism of `resolutionMap` is typed on
+`TopRep.res id X`, where an equation between composites in `TopRep k G` cannot be rewritten. -/
+theorem resolutionMap_id_apply_of_comp_eq {X Y Z : TopRep.{v} k G} (a : X ⟶ Y)
+    (b : Y ⟶ Z) {e : X ⟶ Z} (h : a ≫ b = e) (i : ℕ) (x : (TopRep.resolutionX X i).V) :
+    (resolutionMap (ContinuousMonoidHom.id G) b i).hom
+        ((resolutionMap (ContinuousMonoidHom.id G) a i).hom x) =
+      (resolutionMap (ContinuousMonoidHom.id G) e i).hom x := by
+  subst h
+  -- the composite of the identity of `G` with itself is the identity, by definition
+  exact (ConcreteCategory.congr_hom (resolutionMap_comp (ContinuousMonoidHom.id G)
+    (ContinuousMonoidHom.id G) a b i) x).symm
+
+/-- On homogeneous cochains, the maps induced by two composable coefficient morphisms compose to
+the map induced by their composite `e`, elementwise: Mathlib's
+`ContinuousCohomology.cochainsMap_comp` at the identity of `G`, stated as
+`resolutionMap_id_apply_of_comp_eq` is. -/
+theorem cochainsMap_id_apply_of_comp_eq {X Y Z : TopRep.{v} k G} (a : X ⟶ Y)
+    (b : Y ⟶ Z) {e : X ⟶ Z} (h : a ≫ b = e) (n : ℕ)
+    (x : (TopRep.homogeneousCochains X).X n) :
+    (cochainsMap (ContinuousMonoidHom.id G) b).f n
+        ((cochainsMap (ContinuousMonoidHom.id G) a).f n x) =
+      (cochainsMap (ContinuousMonoidHom.id G) e).f n x :=
+  Subtype.ext (resolutionMap_id_apply_of_comp_eq a b h (n + 1) x.1)
+
+end Composition
+
 variable (R : Type u) [Ring R] [TopologicalSpace R]
   {G : Type v} [Group G] [TopologicalSpace G] [IsTopologicalGroup G]
 
@@ -114,6 +151,18 @@ theorem map_congr {H : Type v} [Group H] [TopologicalSpace H] [IsTopologicalGrou
     _root_.ContinuousCohomology.map φ f n = _root_.ContinuousCohomology.map ψ g n := by
   subst hφ
   rw [eq_of_heq hfg]
+
+variable {R} in
+/-- Two compatible pairs with equal homomorphisms and coefficient maps that agree pointwise induce
+the same map on continuous cohomology: the elementwise form of `map_congr`, for coefficient maps
+over homomorphisms that are only propositionally equal. -/
+theorem map_congr_of_hom_apply {H : Type v} [Group H] [TopologicalSpace H] [IsTopologicalGroup H]
+    {X : TopRep R G} {Y : TopRep R H} {φ ψ : H →ₜ* G} (hφ : φ = ψ)
+    (f : TopRep.res (φ : H →* G) X ⟶ Y) (g : TopRep.res (ψ : H →* G) X ⟶ Y)
+    (hfg : ∀ x : X, f.hom x = g.hom x) (n : ℕ) :
+    _root_.ContinuousCohomology.map φ f n = _root_.ContinuousCohomology.map ψ g n := by
+  subst hφ
+  rw [TopRep.hom_ext (DFunLike.ext _ _ hfg)]
 
 section CoeffMap
 

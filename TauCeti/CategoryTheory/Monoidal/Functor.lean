@@ -8,12 +8,18 @@ module
 public import Mathlib.CategoryTheory.Adjunction.Mates
 public import Mathlib.CategoryTheory.Monoidal.NaturalTransformation
 public import Mathlib.CategoryTheory.Functor.TwoSquare
+public import Mathlib.CategoryTheory.Limits.Preserves.Basic
 
 /-!
-# Lax monoidal functors: tensorator squares, transport, and conjugates
+# Monoidal functors: tensor comparisons, transport, and conjugates
 
 The tensorator of a lax monoidal functor is natural in its right argument, giving a
 square between left tensoring and the functor.
+
+For an oplax monoidal functor with invertible unit comparison, its tensor comparisons at the
+unit are invertible. Invertibility in either argument propagates across any colimit preserved
+by the two functors in the corresponding tensor comparison. This reduces tensor compatibility
+for objects built from coproducts and cokernels to the unit case.
 
 A lax monoidal structure transports along a natural isomorphism of functors
 (`CategoryTheory.Functor.LaxMonoidal.transport`), in the same way as Mathlib's
@@ -28,6 +34,18 @@ the oplax structures (`CategoryTheory.Adjunction.app_tensorUnit_comp_η_of_conju
 isomorphisms between left adjoints, such as the composition isomorphism of pullback functors, are
 shown to respect their oplax monoidal structures from the corresponding facts about the right
 adjoints.
+
+**Doctrinal adjunction** for tensorators: if `F ⊣ G` is an adjunction between lax monoidal
+functors whose unit and counit are compatible with the tensorators, then the tensorator of the
+left adjoint `F` is invertible (`CategoryTheory.Adjunction.isIso_μ_of_unit_of_counit`), and its
+inverse is the mate of the tensorator of `G` (`CategoryTheory.Adjunction.inv_μ_eq_homEquiv_symm`),
+the tensor comparison of `CategoryTheory.Adjunction.leftAdjointOplaxMonoidal`. This is how a
+left adjoint that is lax monoidal for an independent reason, such as restriction of sheaves to an
+open subset, is shown to have invertible oplax tensor comparisons.
+
+## References
+
+* G. M. Kelly, *Doctrinal adjunction*, Lecture Notes in Mathematics 420 (1974).
 -/
 
 public section
@@ -52,6 +70,78 @@ theorem laxCommTensorLeft_app (F : C ⥤ D) [F.LaxMonoidal] (A B : C) :
     (laxCommTensorLeft F A).app B = Functor.LaxMonoidal.μ F A B := by
   unfold laxCommTensorLeft
   rfl
+
+/-- The natural oplax tensor comparison for right tensoring by `B`. -/
+def oplaxCommTensorRight (F : C ⥤ D) [F.OplaxMonoidal] (B : C) :
+    MonoidalCategory.tensorRight B ⋙ F ⟶ F ⋙ MonoidalCategory.tensorRight (F.obj B) where
+  app A := Functor.OplaxMonoidal.δ F A B
+  naturality _ _ f := (Functor.OplaxMonoidal.δ_natural_left F f B).symm
+
+/-- The component of the oplax tensor comparison is the oplax tensorator. -/
+@[simp]
+theorem oplaxCommTensorRight_app (F : C ⥤ D) [F.OplaxMonoidal] (A B : C) :
+    (F.oplaxCommTensorRight B).app A = Functor.OplaxMonoidal.δ F A B :=
+  (rfl)
+
+/-- The natural oplax tensor comparison for left tensoring by `A`. -/
+def oplaxCommTensorLeft (F : C ⥤ D) [F.OplaxMonoidal] (A : C) :
+    MonoidalCategory.tensorLeft A ⋙ F ⟶ F ⋙ MonoidalCategory.tensorLeft (F.obj A) where
+  app B := Functor.OplaxMonoidal.δ F A B
+  naturality _ _ f := (Functor.OplaxMonoidal.δ_natural_right F A f).symm
+
+/-- The component of the oplax tensor comparison is the oplax tensorator. -/
+@[simp]
+theorem oplaxCommTensorLeft_app (F : C ⥤ D) [F.OplaxMonoidal] (A B : C) :
+    (F.oplaxCommTensorLeft A).app B = Functor.OplaxMonoidal.δ F A B :=
+  (rfl)
+
+namespace OplaxMonoidal
+
+open MonoidalCategory Limits
+
+variable (F : C ⥤ D) [F.OplaxMonoidal]
+
+/-- An invertible unit comparison makes the tensor comparison at the left unit invertible. -/
+theorem isIso_δ_tensorUnit_left [IsIso (η F)] (B : C) :
+    IsIso (δ F (𝟙_ C) B) := by
+  have : IsIso (δ F (𝟙_ C) B ≫ η F ▷ F.obj B ≫ (λ_ (F.obj B)).hom) := by
+    rw [left_unitality_hom]
+    infer_instance
+  exact IsIso.of_isIso_comp_right _ (η F ▷ F.obj B ≫ (λ_ (F.obj B)).hom)
+
+/-- Invertibility of an oplax tensor comparison extends across a colimit when the functor and
+right tensoring preserve that colimit. -/
+theorem isIso_δ_of_isColimit_left {J : Type*} [Category* J] (K : J ⥤ C)
+    (c : Cocone K) (hc : IsColimit c) (B : C)
+    [PreservesColimit K (tensorRight B ⋙ F)]
+    [PreservesColimit K (F ⋙ tensorRight (F.obj B))]
+    (h : ∀ j, IsIso (δ F (K.obj j) B)) : IsIso (δ F c.pt B) := by
+  have : IsIso (whiskerLeft K (F.oplaxCommTensorRight B)) := by
+    rw [NatTrans.isIso_iff_isIso_app]
+    exact h
+  exact isIso_app_coconePt_of_preservesColimit K (F.oplaxCommTensorRight B) c hc
+
+/-- An invertible unit comparison makes the tensor comparison at the right unit invertible. -/
+theorem isIso_δ_tensorUnit_right [IsIso (η F)] (A : C) :
+    IsIso (δ F A (𝟙_ C)) := by
+  have : IsIso (δ F A (𝟙_ C) ≫ F.obj A ◁ η F ≫ (ρ_ (F.obj A)).hom) := by
+    rw [right_unitality_hom]
+    infer_instance
+  exact IsIso.of_isIso_comp_right _ (F.obj A ◁ η F ≫ (ρ_ (F.obj A)).hom)
+
+/-- Invertibility of an oplax tensor comparison extends across a colimit when the functor and
+left tensoring preserve that colimit. -/
+theorem isIso_δ_of_isColimit_right {J : Type*} [Category* J] (K : J ⥤ C)
+    (c : Cocone K) (hc : IsColimit c) (A : C)
+    [PreservesColimit K (tensorLeft A ⋙ F)]
+    [PreservesColimit K (F ⋙ tensorLeft (F.obj A))]
+    (h : ∀ j, IsIso (δ F A (K.obj j))) : IsIso (δ F A c.pt) := by
+  have : IsIso (whiskerLeft K (F.oplaxCommTensorLeft A)) := by
+    rw [NatTrans.isIso_iff_isIso_app]
+    exact h
+  exact isIso_app_coconePt_of_preservesColimit K (F.oplaxCommTensorLeft A) c hc
+
+end OplaxMonoidal
 
 namespace LaxMonoidal
 
@@ -148,5 +238,54 @@ theorem app_tensor_comp_δ_of_conjugateEquiv (h : conjugateEquiv adj₁ adj₂ �
   simp only [homEquiv_unit, Functor.map_comp, reassoc_of% hσ, ← τ.naturality,
     unit_app_tensor_comp_map_δ_assoc, NatTrans.IsMonoidal.tensor, ← μ_natural,
     tensorHom_comp_tensorHom_assoc, hσ]
+
+section Doctrinal
+
+variable {F : C ⥤ D} {G : D ⥤ C} (adj : F ⊣ G) [F.LaxMonoidal] [G.LaxMonoidal]
+
+/-- If the counit of an adjunction between lax monoidal functors is compatible with the
+tensorators, then the tensorator of the left adjoint is a split monomorphism, split by the mate
+of the tensorator of the right adjoint. -/
+theorem μ_comp_homEquiv_symm_tensorHom_unit_comp_μ
+    (hcounit : ∀ X Y : D, μ F (G.obj X) (G.obj Y) ≫ F.map (μ G X Y) ≫ adj.counit.app (X ⊗ Y) =
+      (adj.counit.app X ⊗ₘ adj.counit.app Y)) (X Y : C) :
+    μ F X Y ≫ (adj.homEquiv _ _).symm ((adj.unit.app X ⊗ₘ adj.unit.app Y) ≫ μ G _ _) = 𝟙 _ := by
+  rw [homEquiv_counit, F.map_comp, Category.assoc, ← μ_natural_assoc]
+  simp [hcounit]
+
+/-- If the unit of an adjunction between lax monoidal functors is compatible with the
+tensorators, then the mate of the tensorator of the right adjoint is a section of the tensorator
+of the left adjoint. -/
+theorem homEquiv_symm_tensorHom_unit_comp_μ_comp_μ
+    (hunit : ∀ X Y : C, adj.unit.app (X ⊗ Y) =
+      (adj.unit.app X ⊗ₘ adj.unit.app Y) ≫ μ G _ _ ≫ G.map (μ F X Y)) (X Y : C) :
+    (adj.homEquiv _ _).symm ((adj.unit.app X ⊗ₘ adj.unit.app Y) ≫ μ G _ _) ≫ μ F X Y = 𝟙 _ := by
+  apply (adj.homEquiv _ _).injective
+  rw [homEquiv_naturality_right, Equiv.apply_symm_apply, Category.assoc, ← hunit]
+  simp [homEquiv_unit]
+
+/-- **Doctrinal adjunction** for tensorators: if the unit and the counit of an adjunction
+between lax monoidal functors are compatible with the tensorators, then the tensorator of the
+left adjoint is invertible. Its inverse is computed by `inv_μ_eq_homEquiv_symm`. -/
+theorem isIso_μ_of_unit_of_counit
+    (hunit : ∀ X Y : C, adj.unit.app (X ⊗ Y) =
+      (adj.unit.app X ⊗ₘ adj.unit.app Y) ≫ μ G _ _ ≫ G.map (μ F X Y))
+    (hcounit : ∀ X Y : D, μ F (G.obj X) (G.obj Y) ≫ F.map (μ G X Y) ≫ adj.counit.app (X ⊗ Y) =
+      (adj.counit.app X ⊗ₘ adj.counit.app Y)) (X Y : C) :
+    IsIso (μ F X Y) :=
+  ⟨_, μ_comp_homEquiv_symm_tensorHom_unit_comp_μ adj hcounit X Y,
+    homEquiv_symm_tensorHom_unit_comp_μ_comp_μ adj hunit X Y⟩
+
+/-- If the counit of an adjunction between lax monoidal functors is compatible with the
+tensorators, then an inverse of the tensorator of the left adjoint is the mate of the tensorator
+of the right adjoint, that is, the tensor comparison of the oplax monoidal structure
+`CategoryTheory.Adjunction.leftAdjointOplaxMonoidal`. -/
+theorem inv_μ_eq_homEquiv_symm
+    (hcounit : ∀ X Y : D, μ F (G.obj X) (G.obj Y) ≫ F.map (μ G X Y) ≫ adj.counit.app (X ⊗ Y) =
+      (adj.counit.app X ⊗ₘ adj.counit.app Y)) (X Y : C) [IsIso (μ F X Y)] :
+    inv (μ F X Y) = (adj.homEquiv _ _).symm ((adj.unit.app X ⊗ₘ adj.unit.app Y) ≫ μ G _ _) :=
+  IsIso.inv_eq_of_hom_inv_id (μ_comp_homEquiv_symm_tensorHom_unit_comp_μ adj hcounit X Y)
+
+end Doctrinal
 
 end CategoryTheory.Adjunction
