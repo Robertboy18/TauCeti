@@ -33,34 +33,6 @@ open TauCeti.GaloisDescent
 
 universe u
 
-private theorem property_tensorProduct_map
-    {P : ∀ {A B : Type u} [CommRing A] [CommRing B], (A →+* B) → Prop}
-    (hP : RingHom.IsStableUnderBaseChange P)
-    {R S A B : Type u} [CommRing R] [CommRing S] [CommRing A] [CommRing B]
-    [Algebra R S] [Algebra R A] [Algebra R B] (f : A →ₐ[R] B)
-    (hf : P f.toRingHom) :
-    P (Algebra.TensorProduct.map (AlgHom.id R S) f).toRingHom := by
-  let : Algebra A B := f.toAlgebra
-  let : Algebra A (S ⊗[R] A) := Algebra.TensorProduct.rightAlgebra
-  let : Algebra B (S ⊗[R] B) := Algebra.TensorProduct.rightAlgebra
-  let : Algebra A (S ⊗[R] B) := ((Algebra.TensorProduct.includeRight :
-    B →ₐ[R] S ⊗[R] B).comp f).toAlgebra
-  let : Algebra (S ⊗[R] A) (S ⊗[R] B) :=
-    (Algebra.TensorProduct.map (AlgHom.id R S) f).toAlgebra
-  have : IsScalarTower R A B := IsScalarTower.of_algHom f
-  have : IsScalarTower A B (S ⊗[R] B) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
-  have : IsScalarTower A (S ⊗[R] A) (S ⊗[R] B) :=
-    IsScalarTower.of_algebraMap_eq fun a ↦ by simp [RingHom.algebraMap_toAlgebra]
-  have : IsScalarTower S (S ⊗[R] A) (S ⊗[R] B) :=
-    IsScalarTower.of_algebraMap_eq fun s ↦ by simp [RingHom.algebraMap_toAlgebra]
-  have : IsScalarTower R (S ⊗[R] A) (S ⊗[R] B) :=
-    IsScalarTower.of_algebraMap_eq fun r ↦ by simp [RingHom.algebraMap_toAlgebra]
-  have : IsScalarTower R A (S ⊗[R] B) :=
-    IsScalarTower.of_algebraMap_eq fun r ↦ by simp [RingHom.algebraMap_toAlgebra]
-  have : Algebra.IsPushout A B (S ⊗[R] A) (S ⊗[R] B) :=
-    (Algebra.IsPushout.comp_iff R A S (S ⊗[R] A)).mp inferInstance
-  exact hP A B (S ⊗[R] A) (S ⊗[R] B) hf
-
 namespace Representation.IntertwiningMap
 
 variable {k L M N : Type u} [Field k] [Field L] [Algebra k L]
@@ -81,20 +53,22 @@ private theorem property_groupAlgebraInvariantsAlgHom_iff
   let eM := (groupAlgebraInvariantsBaseChangeBialgEquiv rho).toAlgEquiv.toRingEquiv
   let eN := (groupAlgebraInvariantsBaseChangeBialgEquiv tau).toAlgEquiv.toRingEquiv
   have hcomm : eN.toRingHom.comp g.toRingHom = s.comp eM.toRingHom := by
-    apply RingHom.ext
-    intro x
-    induction x using TensorProduct.inductionOn with
-    | tmul a x =>
-        simp [eN, eM, g, s, MonoidAlgebra.mapDomainBialgHom,
-          MonoidAlgebra.mapDomainAlgHom]
-    | add x y hx hy => simp only [map_add, hx, hy]
+    -- Forget the bialgebra naturality square. The tensor maps over `k` and `L`
+    -- have definitionally equal underlying ring homomorphisms.
+    convert (congrArg (fun h => h.toAlgHom.toRingHom)
+      (groupAlgebraInvariantsBaseChangeBialgEquiv_naturality f)) using 1
+    · rw [BialgHom.comp_toAlgHom, Bialgebra.TensorProduct.map_toAlgHom,
+        BialgHom.id_toAlgHom, groupAlgebraInvariantsBialgHom_toAlgHom]
+      rfl
+    · rfl
   have hg : P g.toRingHom ↔ P s := by
     have h₁ := hiso.cancel_right_isIso (CommRingCat.ofHom g.toRingHom)
       eN.toCommRingCatIso.hom
     have h₂ := hiso.cancel_left_isIso eM.toCommRingCatIso.hom (CommRingCat.ofHom s)
     exact h₁.symm.trans (hcomm ▸ h₂)
-  exact (show P f.groupAlgebraInvariantsAlgHom.toRingHom ↔ P g.toRingHom from
-    ⟨property_tensorProduct_map hbase _, hdesc.of_tensorProduct_map _⟩).trans hg
+  have hbase_iff : P f.groupAlgebraInvariantsAlgHom.toRingHom ↔ P g.toRingHom :=
+    ⟨hbase.tensorProduct_map _, hdesc.of_tensorProduct_map _⟩
+  exact hbase_iff.trans hg
 
 /-- The descended coordinate map is finite exactly when the character cokernel is finite. -/
 theorem groupAlgebraInvariantsAlgHom_finite_iff
@@ -114,29 +88,6 @@ theorem groupAlgebraInvariantsAlgHom_faithfullyFlat_iff
     RingHom.FaithfullyFlat.codescendsAlong_faithfullyFlat f).trans
       (TauCeti.MonoidAlgebra.faithfullyFlat_mapDomainRingHom_iff L _)
 
-private theorem groupAlgebraInvariants_isCocomm
-    (rho : Representation ℤ (L ≃ₐ[k] L) M) :
-    Coalgebra.IsCocomm k (groupAlgebraInvariants rho) := by
-  let B : Type u := groupAlgebraInvariants rho
-  let A := MonoidAlgebra L (Multiplicative M)
-  have hswap (t : B ⊗[k] B) :
-      (groupAlgebraInvariantsTensorEquiv rho (_root_.TensorProduct.comm k B B t) : A ⊗[L] A) =
-        _root_.TensorProduct.comm L A A (groupAlgebraInvariantsTensorEquiv rho t) := by
-    induction t using TensorProduct.inductionOn with
-    | tmul x y => simp [A, B]
-    | add x y hx hy => simp only [map_add, AddMemClass.coe_add, hx, hy]
-  constructor
-  apply LinearMap.ext
-  intro x
-  apply (groupAlgebraInvariantsTensorEquiv rho).injective
-  apply Subtype.val_injective
-  change (groupAlgebraInvariantsTensorEquiv rho
-    (_root_.TensorProduct.comm k B B (Coalgebra.comul x)) : A ⊗[L] A) = _
-  rw [hswap]
-  dsimp only [A, B]
-  simp only [groupAlgebraInvariantsTensorEquiv_comul, groupAlgebraInvariantsComul_apply,
-    Coalgebra.comm_comul]
-
 /-- Central isogenies in finite Galois descent correspond to injective character maps with
 finite cokernel. The kernel may be nonreduced in positive characteristic. -/
 theorem isCentralIsogeny_groupAlgebraInvariantsBialgHom_iff
@@ -150,6 +101,6 @@ theorem isCentralIsogeny_groupAlgebraInvariantsBialgHom_iff
   rw [groupAlgebraInvariantsAlgHom_finite_iff, groupAlgebraInvariantsAlgHom_faithfullyFlat_iff]
   refine ⟨fun ⟨hfin, hinj, _⟩ ↦ ⟨hinj, hfin⟩, fun ⟨hinj, hfin⟩ ↦ ⟨hfin, hinj, ?_⟩⟩
   exact (TauCeti.HopfIdeal.isCentral_bot_iff_isCocomm.mpr
-    (groupAlgebraInvariants_isCocomm tau)).mono bot_le
+    inferInstance).mono bot_le
 
 end Representation.IntertwiningMap
