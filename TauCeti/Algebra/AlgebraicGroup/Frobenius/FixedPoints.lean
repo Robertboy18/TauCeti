@@ -205,6 +205,7 @@ theorem fixedSubgroup_iterateFrobeniusPoints_le_of_dvd {m k : ℕ} (hmk : m ∣ 
 
 /-- Two Frobenius-fixed point subgroups intersect in the fixed subgroup at the gcd of their
 exponents. In the motivating case this is the intersection formula for groups of rational points. -/
+@[simp]
 theorem fixedSubgroup_iterateFrobeniusPoints_inf (m n : ℕ) :
     fixedSubgroup (iterateFrobeniusPoints p m (H := H) (A := A)) ⊓
         fixedSubgroup (iterateFrobeniusPoints p n) =

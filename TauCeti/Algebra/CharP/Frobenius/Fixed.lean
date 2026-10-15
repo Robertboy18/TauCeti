@@ -118,6 +118,7 @@ theorem frobeniusFixedSubring_le_of_dvd {m k : ℕ} (h : m ∣ k) :
 
 /-- The intersection of two Frobenius-fixed subrings is the fixed subring at the gcd of their
 exponents. This also holds for zero exponents and does not require Frobenius to be injective. -/
+@[simp]
 theorem frobeniusFixedSubring_inf (m n : ℕ) :
     frobeniusFixedSubring A p m ⊓ frobeniusFixedSubring A p n =
       frobeniusFixedSubring A p (m.gcd n) := by
@@ -198,13 +199,14 @@ theorem frobeniusFixedSubfield_le_of_dvd {m k : ℕ} (h : m ∣ k) :
 
 /-- The intersection of two Frobenius-fixed subfields is the fixed subfield at the gcd of their
 exponents. -/
+@[simp]
 theorem frobeniusFixedSubfield_inf (m n : ℕ) :
     frobeniusFixedSubfield K p m ⊓ frobeniusFixedSubfield K p n =
       frobeniusFixedSubfield K p (m.gcd n) := by
   ext a
-  change a ∈ (frobeniusFixedSubring K p m ⊓ frobeniusFixedSubring K p n) ↔
-    a ∈ frobeniusFixedSubring K p (m.gcd n)
-  rw [frobeniusFixedSubring_inf]
+  rw [Subfield.mem_inf]
+  simp only [← Subfield.mem_toSubring, toSubring_frobeniusFixedSubfield]
+  rw [← Subring.mem_inf, frobeniusFixedSubring_inf]
 
 end Field
 
