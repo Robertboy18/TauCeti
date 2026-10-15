@@ -63,9 +63,9 @@ operator is zero on an inequivalent model over any `𝕜`, and the identity on t
 on the `π`-block for an algebraically closed `𝕜`; its kernel being symmetric it is self-adjoint,
 and for a skeleton of the unitary dual every element of `L²(G)` is carried into the `π`-block, so
 it *is* the orthogonal projection of `L²(G)` onto that block
-(`TauCeti.peterWeylBlockAveraging_eq_starProjection`). That is the sense in which averaging against
-the character is the isotypic projector here: it is a statement about the orthogonal projection onto
-a subspace of `L²(G)`, not about a `G`-isotypic decomposition.
+(`TauCeti.peterWeylBlockAveraging_eq_starProjection`). The algebraic identification of this
+subspace with the corresponding isotypic component under left translation is proved in
+`TauCeti/RepresentationTheory/Compact/IsotypicBlock/Isotypic.lean`.
 
 The operator is defined for every `RCLike 𝕜`, and is deliberately *not* named a projection, because
 over a `𝕜` that is not algebraically closed it need not be one: on a model whose endomorphism
@@ -88,16 +88,16 @@ Hilbert spaces, their subspaces, their isometries and their bounded operators, a
 enters them. The blocks are called *isotypic* because the `π`-block is spanned by
 the matrix coefficients of `π` alone; that it is the `π`-isotypic component of a `G`-action, and
 that the decomposition of `L²(G)` is one of unitary `G × G`-representations under left and right
-translation, are statements about group actions and are **not** proved here. (For a *finite* `G` the
-first of them is
-`TauCeti/RepresentationTheory/Compact/IsotypicBlock/Finite.lean`, where the obstruction recorded
-below disappears.) What *is* proved
-about the action, in the section `Stability under translation` and nowhere else, is that each
+translation, are statements about group actions and are **not** proved here. The first is proved
+for arbitrary compact groups in `TauCeti/RepresentationTheory/Compact/IsotypicBlock/Isotypic.lean`;
+the equivariant Hilbert sum is constructed in
+`TauCeti/RepresentationTheory/Compact/TraceCoefficient/HilbertSum.lean`. What *is* proved about
+the action, in the section `Stability under translation` and nowhere else, is that each
 block is stable under the biregular representation
 (`TauCeti.biRegularLp_mem_peterWeylBlock`), because translation carries matrix coefficients of a
 model to matrix coefficients of the same model
-(`TauCeti.ContRepresentation.matrixCoeff_comp_mulLeft` and
-`TauCeti.ContRepresentation.matrixCoeff_comp_mulRight`). Equivariance of the identification of a
+(`ContRepresentation.matrixCoeff_comp_mulLeft` and
+`ContRepresentation.matrixCoeff_comp_mulRight`). Equivariance of the identification of a
 block with `End(V_π)` is not proved here either: `TauCeti.endEquivPeterWeylBlock` is built from the
 canonical basis of the model, so nothing is claimed below about its equivariance. The equivariant
 comparison is the basis-free trace pairing `T ↦ (x ↦ trace (T ∘ π x⁻¹))` of
@@ -106,7 +106,7 @@ bi-translation with
 the action `(g, h) · A = π g ∘ A ∘ π h⁻¹` and differs from the comparison below by a transposition
 (`TauCeti.coe_endEquivPeterWeylBlock_basis_end_eq_smul_traceCoeffLp_rankOne`). The character
 averaging operator `TauCeti.peterWeylBlockAveraging` *is* built here, but not as an instance of
-`TauCeti.ContRepresentation.isotypicProjector`: that projector is built from
+`ContRepresentation.isotypicProjector`: that projector is built from
 `TauCeti.ContRepresentation.integratedOperator` for a *finite-dimensional* carrier and a
 norm-continuous representation, while `L²(G)` is in general infinite-dimensional and its regular
 representation then only strongly continuous (`TauCeti.continuous_rightRegularLp_apply`). Both
@@ -326,7 +326,7 @@ theorem iSup_peterWeylBlock_eq_span_peterWeylFamily (models : ι → IrrepModel 
 /-- **Each block is stable under right translation**, that is, under the right regular
 representation `TauCeti.rightRegularLp` of `G` on `L²(G)`: right translating a matrix coefficient of
 a model absorbs the translation into its first vector
-(`TauCeti.ContRepresentation.matrixCoeff_comp_mulRight`), so the translate is again a matrix
+(`ContRepresentation.matrixCoeff_comp_mulRight`), so the translate is again a matrix
 coefficient of the same model. -/
 theorem rightRegularLp_mem_peterWeylBlock (model : IrrepModel 𝕜 G) (g : G)
     {f : Lp 𝕜 2 (haarProb G)} (hf : f ∈ peterWeylBlock model) :
@@ -343,12 +343,12 @@ theorem rightRegularLp_mem_peterWeylBlock (model : IrrepModel 𝕜 G) (g : G)
 
 /-- **Each block is stable under left translation**: left translating a matrix coefficient of a
 unitary model moves the inverse translation onto its second vector
-(`TauCeti.ContRepresentation.matrixCoeff_comp_mulLeft`), so the translate is again a matrix
+(`ContRepresentation.matrixCoeff_comp_mulLeft`), so the translate is again a matrix
 coefficient of the same model.
 
 Left translation is spelled as Mathlib's precomposition operator
 `MeasureTheory.Lp.compMeasurePreserving`, which is also what `TauCeti.rightRegularLp_apply` unfolds
-right translation to; the left regular representation of `G` on `L²(G)` is not in the library. -/
+right translation to, while `leftRegularLp_apply` identifies this operator with left translation. -/
 theorem compMeasurePreserving_mulLeft_mem_peterWeylBlock (model : IrrepModel 𝕜 G)
     (g : G) {f : Lp 𝕜 2 (haarProb G)} (hf : f ∈ peterWeylBlock model) :
     Lp.compMeasurePreserving (g * ·) (measurePreserving_mul_left (haarProb G) g) f ∈
