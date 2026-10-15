@@ -142,6 +142,6 @@ theorem geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace_baseChange
     ((geometricallyConnectedCommHopfAlgProperty_iff_connectedSpace K
       (CommHopfAlgCat.baseChange (K := K) H)).trans
       (PrimeSpectrum.homeomorphOfRingEquiv
-        (CommHopfAlgCat.baseChangeAlgEquiv (K := K) H).toRingEquiv).connectedSpace_iff)
+        (H.baseChangeAlgEquiv (K := K)).toRingEquiv).connectedSpace_iff)
 
 end TauCeti
