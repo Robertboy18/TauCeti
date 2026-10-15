@@ -60,6 +60,8 @@ open scoped TensorProduct
 
 namespace TauCeti
 
+attribute [local instance] Algebra.TensorProduct.rightAlgebra
+
 universe u v w
 
 /-- A geometrically connected commutative Hopf algebra has connected spectrum after every field
@@ -99,7 +101,7 @@ theorem geometricallyConnectedCommHopfAlgProperty.baseChange
   let _ : Algebra k L := Algebra.compHom L (algebraMap k K)
   let _ : IsScalarTower k K L := IsScalarTower.of_algebraMap_eq' rfl
   exact (PrimeSpectrum.homeomorphOfRingEquiv
-    (Algebra.TensorProduct.baseChangeTowerRingEquiv k K H L)).connectedSpace_iff.mpr
+    (Algebra.TensorProduct.baseChangeTowerRightAlgEquiv k K H L).toRingEquiv).connectedSpace_iff.mpr
       (hH.connectedSpace_tensorProduct k L H)
 
 /-- **Geometric connectedness descends from an extension of the base field.**
