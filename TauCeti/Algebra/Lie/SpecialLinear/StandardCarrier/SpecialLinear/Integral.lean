@@ -42,8 +42,12 @@ including rank zero. -/
 theorem definingIdeal_eq_specialLinearDefiningHopfIdeal :
     definingIdeal r = SpecialLinear.definingHopfIdeal ℤ (r + 1) := by
   apply le_antisymm
-  · intro f hf
-    let K := AlgebraicClosure ℚ
+  · let K := AlgebraicClosure ℚ
+    apply (CommHopfAlgCat.baseChangeHopfIdeal_le_iff (K := K)
+      (by exact Int.cast_injective)).mp
+    rw [← HopfIdeal.toIdeal_le_toIdeal, CommHopfAlgCat.baseChangeHopfIdeal_toIdeal,
+      Ideal.map_le_iff_le_comap]
+    intro f hf
     have hmem :
         (GeneralLinear.coordinateHopfAlgebraBaseChangeIso ℤ K (r + 1)).hom.hom
             ((1 : K) ⊗ₜ[ℤ] f) ∈ baseChangeDefiningIdeal r K := by
@@ -62,13 +66,10 @@ theorem definingIdeal_eq_specialLinearDefiningHopfIdeal :
         (SpecialLinear.coordinateHopfAlgebraBaseChangeIso ℤ K (r + 1)).hom).1
       exact (SpecialLinear.coordinateHopfAlgebraBaseChangeIso_hom_tmul_coordinateMap
         ℤ K (r + 1) 1 f).trans (hzero.trans (map_zero _).symm)
-    -- The special-linear quotient is smooth, hence flat; tensoring it preserves `ℤ ↪ K`.
-    have hz : (SpecialLinear.coordinateMap ℤ (r + 1)).hom f = 0 := by
-      apply Algebra.TensorProduct.includeRight_injective
-        (R := ℤ) (A := K) (B := SpecialLinear.coordinateHopfAlgebra ℤ (r + 1))
-        (by exact Int.cast_injective)
-      simpa only [Algebra.TensorProduct.includeRight_apply, map_zero] using ht
-    exact (CommHopfAlgCat.mkQuotient_eq_zero_iff _ _ _).1 hz
+    exact (CommHopfAlgCat.mem_baseChangeHopfIdeal_iff _ _).2 <| by
+      simpa only [Algebra.TensorProduct.includeRight_apply] using
+        (CommHopfAlgCat.baseChangeMap_apply_tmul (K := K)
+          (SpecialLinear.coordinateMap ℤ (r + 1)) 1 f).trans ht
   · exact specialLinearDefiningHopfIdeal_le_kostantToralDefiningIdeal r
 
 /-- The integral carrier--special-linear isomorphism induced by equality of defining ideals. -/
