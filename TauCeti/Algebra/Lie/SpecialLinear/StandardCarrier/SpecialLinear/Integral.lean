@@ -21,8 +21,7 @@ Kostant carrier is needed.
 
 The resulting coordinate Hopf isomorphism preserves every pair-indexed root map and transfers
 smoothness to the integral carrier. These are the inputs for its stored pinning in
-`StandardCarrier.SpecialLinear.Pinning`, under Layer 9 of the ReductiveGroups roadmap and
-the explicit pinned-carrier construction in CFSGStatement L0.
+`StandardCarrier.SpecialLinear.Pinning`.
 -/
 
 public section
@@ -71,10 +70,6 @@ theorem definingIdeal_eq_specialLinearDefiningHopfIdeal :
       simpa only [Algebra.TensorProduct.includeRight_apply, map_zero] using ht
     exact (CommHopfAlgCat.mkQuotient_eq_zero_iff _ _ _).1 hz
   · exact specialLinearDefiningHopfIdeal_le_kostantToralDefiningIdeal r
-
-/-- The coordinate Hopf algebra of the existing integral full-weight type `A_r` carrier. -/
-abbrev coordinateHopfAlgebra : CommHopfAlgCat ℤ :=
-  CommHopfAlgCat.quotient (GeneralLinear.coordinateHopfAlgebra ℤ (r + 1)) (definingIdeal r)
 
 /-- The integral carrier--special-linear isomorphism induced by equality of defining ideals. -/
 def coordinateSpecialLinearIso :

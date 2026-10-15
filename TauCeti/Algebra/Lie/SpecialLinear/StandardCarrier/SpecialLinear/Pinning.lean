@@ -20,8 +20,6 @@ at additive parameter zero applied to tangent vector one.
 
 The stored torus uses the classical determinant-one diagonal coordinates. No identification
 with the fundamental-weight parametrization of the original carrier torus is asserted here.
-This supplies explicit pinning data and compatibility equations for ReductiveGroups Layer 9
-and the corresponding construction obligation in CFSGStatement L0, for every natural rank.
 -/
 
 public section
@@ -75,12 +73,12 @@ theorem comap_pinning_borel :
       (SpecialLinear.UpperTriangular.definingHopfIdeal ℤ (r + 1)).comapOfSurjective
         (SpecialLinear.coordinateMap ℤ (r + 1)).hom
         (CommHopfAlgCat.mkQuotient_surjective _ _) := by
-    ext f
-    rw [pinning_borel]
-    simp only [HopfIdeal.mem_comapOfSurjective]
-    have h := congrArg (fun q ↦ q.hom f) (mkQuotient_comp_coordinateSpecialLinearIso_hom r)
-    rw [CommHopfAlgCat.hom_comp, BialgHom.comp_apply] at h
-    rw [h]
+    have hcomp : (coordinateSpecialLinearIso r).hom.hom.comp
+        (CommHopfAlgCat.mkQuotient (GeneralLinear.coordinateHopfAlgebra ℤ (r + 1))
+          (definingIdeal r)).hom = (SpecialLinear.coordinateMap ℤ (r + 1)).hom := by
+      simpa only [CommHopfAlgCat.hom_comp] using
+        congrArg CommHopfAlgCat.Hom.hom (mkQuotient_comp_coordinateSpecialLinearIso_hom r)
+    simp only [pinning_borel, HopfIdeal.comapOfSurjective_comapOfSurjective, hcomp]
   have hker : HopfIdeal.kerOfSurjective (SpecialLinear.coordinateMap ℤ (r + 1)).hom
       (CommHopfAlgCat.mkQuotient_surjective _ _) =
         SpecialLinear.definingHopfIdeal ℤ (r + 1) :=
@@ -93,14 +91,9 @@ theorem comap_pinning_borel :
 def pinningSimpleRootEquiv :
     Fin r ≃ {α // (pinning r).torus.IsSimpleRoot (pinning r).borel α} :=
   (SpecialLinear.standardPinningSimpleRootEquiv (R := ℤ)).trans
-    { toFun := fun α ↦ ⟨α.val,
-        ((SpecialLinear.standardPinning ℤ r).isSimpleRoot_comapOfIso_iff
-          (coordinateSpecialLinearIso r) α.val).mpr α.property⟩
-      invFun := fun α ↦ ⟨α.val,
-        ((SpecialLinear.standardPinning ℤ r).isSimpleRoot_comapOfIso_iff
-          (coordinateSpecialLinearIso r) α.val).mp α.property⟩
-      left_inv := fun _ ↦ rfl
-      right_inv := fun _ ↦ rfl }
+    (Equiv.subtypeEquivRight fun α ↦
+      ((SpecialLinear.standardPinning ℤ r).isSimpleRoot_comapOfIso_iff
+        (coordinateSpecialLinearIso r) α).symm)
 
 /-- The numbered simple root retains its consecutive-difference character. -/
 @[simp]
