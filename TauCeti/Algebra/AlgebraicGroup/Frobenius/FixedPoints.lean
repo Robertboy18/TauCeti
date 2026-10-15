@@ -225,7 +225,8 @@ theorem map_fixedSubgroup_iterateFrobeniusPoints_of_injective (φ : A →ₐ[ℤ
     Subgroup.map (AlgHom.mapValue (H := H) φ)
         (fixedSubgroup (iterateFrobeniusPoints p n)) =
       (AlgHom.mapValue (H := H) φ).range ⊓ fixedSubgroup (iterateFrobeniusPoints p n) :=
-  map_fixedSubgroup_of_injective _ (mapValue_comp_iterateFrobeniusPoints p n φ)
+  (AlgHom.mapValue (H := H) φ).map_fixedSubgroup_of_injective
+    (mapValue_comp_iterateFrobeniusPoints p n φ)
     (AlgHom.mapValue_injective hφ)
 
 /-- The pointwise form of `map_fixedSubgroup_iterateFrobeniusPoints_le`: a homomorphism of value
