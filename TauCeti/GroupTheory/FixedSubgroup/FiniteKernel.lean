@@ -34,17 +34,19 @@ theorem existsUnique_fixed_lift_of_finite_ker (ψ : G →* H) {F : G →* G} {F'
     ∃! x : G, F x = x ∧ ψ x = y := by
   have heq (x : G) : ψ (F x) = F' (ψ x) := DFunLike.congr_fun hψ x
   let f : ψ.ker →* ψ.ker := (F.domRestrict ψ.ker).codRestrict ψ.ker fun k ↦ by
-    change ψ (F k) = 1
-    rw [heq, k.property, map_one]
+    apply MonoidHom.mem_ker.mpr
+    rw [MonoidHom.domRestrict_apply, heq, MonoidHom.mem_ker.mp k.property, map_one]
   have hf : FixedPointFree f := by
     intro k hk
     apply Subtype.ext
-    exact Subgroup.disjoint_def.mp hker k.property (congrArg Subtype.val hk)
+    -- The restricted map acts by `F` on underlying elements of `G`.
+    exact Subgroup.disjoint_def.mp hker k.property
+      (TauCeti.mem_fixedSubgroup.mpr (congrArg Subtype.val hk))
   obtain ⟨x, rfl⟩ := hsurj y
   have hd : x / F x ∈ ψ.ker := by
-    change ψ (x / F x) = 1
-    rw [map_div, heq, hy, div_self']
+    rw [MonoidHom.mem_ker, map_div, heq, hy, div_self']
   obtain ⟨k, hk⟩ := hf.commutatorMap_surjective ⟨x / F x, hd⟩
+  -- Coercing the kernel equation to `G` replaces the restricted map by `F`.
   have hcorr : (k : G) / F k = x / F x := congrArg Subtype.val hk
   have hfixed : F ((k : G)⁻¹ * x) = (k : G)⁻¹ * x := by
     apply mul_left_cancel (a := (k : G))
@@ -54,15 +56,13 @@ theorem existsUnique_fixed_lift_of_finite_ker (ψ : G →* H) {F : G →* G} {F'
       _ = (x / F x) * F x := by rw [hcorr]
       _ = (k : G) * ((k : G)⁻¹ * x) := by simp
   have himage : ψ ((k : G)⁻¹ * x) = ψ x := by
-    rw [map_mul, map_inv, show ψ (k : G) = 1 from k.property, inv_one, one_mul]
+    rw [map_mul, map_inv, MonoidHom.mem_ker.mp k.property, inv_one, one_mul]
   refine ⟨(k : G)⁻¹ * x, ⟨hfixed, himage⟩, ?_⟩
   rintro z ⟨hz, hzy⟩
   apply div_eq_one.mp
   apply Subgroup.disjoint_def.mp hker
-  · change ψ (z / ((k : G)⁻¹ * x)) = 1
-    rw [map_div, hzy, himage, div_self']
-  · change F (z / ((k : G)⁻¹ * x)) = z / ((k : G)⁻¹ * x)
-    rw [map_div, hz, hfixed]
+  · rw [MonoidHom.mem_ker, map_div, hzy, himage, div_self']
+  · rw [TauCeti.mem_fixedSubgroup, map_div, hz, hfixed]
 
 /-- Restriction of an equivariant surjection to fixed subgroups, when its finite kernel has
 no nonidentity fixed point. Its inverse sends a point to its unique fixed lift. -/
