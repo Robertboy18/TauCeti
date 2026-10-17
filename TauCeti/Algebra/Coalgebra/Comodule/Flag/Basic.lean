@@ -141,6 +141,42 @@ theorem flagSubcomodule_toSubmodule (b : Basis (Fin n) k M)
   rw [flagSubcomodule, Basis.coordinateSpanSubcomodule_toSubmodule]
   rfl
 
+/-- Membership in the bundled stable flag is membership in the corresponding basis flag. -/
+@[simp]
+theorem mem_flagSubcomodule_iff (bas : Basis (Fin n) k M)
+    (htri : (coefficientMatrix (C := H) bas).IsUpperTriangular)
+    (r : Fin (n + 1)) (x : M) :
+    x ∈ flagSubcomodule bas htri r ↔ x ∈ bas.flag r := by
+  rw [← Subcomodule.mem_toSubmodule, flagSubcomodule_toSubmodule]
+
+/-- A coordinate flag separating two basis vectors forces the corresponding coefficient to
+vanish when every subcomodule containing the first vector contains the second. -/
+theorem coefficient_eq_zero_of_coordinate_flag {ι : Type*} [Finite ι]
+    (cb : Basis ι k M) (bas : Basis (Fin n) k M)
+    (htri : (coefficientMatrix (C := H) bas).IsUpperTriangular)
+    (hbas : ∀ r, bas.flag r = Submodule.span k (cb '' {i | cb i ∈ bas.flag r}))
+    {a b : ι} (hsep : ∃ r, ¬ (cb a ∈ bas.flag r ↔ cb b ∈ bas.flag r))
+    (hclosed : ∀ N : Subcomodule k H M, cb a ∈ N → cb b ∈ N) :
+    coefficientMatrix (C := H) cb a b = 0 := by
+  classical
+  let F := Comodule.flagSubcomodule bas htri
+  have hcoord (r : Fin (n + 1)) :
+      (F r).toSubmodule = Submodule.span k (cb '' {i | cb i ∈ F r}) := by
+    rw [Comodule.flagSubcomodule_toSubmodule]
+    simpa only [F, mem_flagSubcomodule_iff] using hbas r
+  obtain ⟨r, hr⟩ := hsep
+  have hforward : cb a ∈ F r → cb b ∈ F r := hclosed (F r)
+  have hr' : ¬ (cb a ∈ F r ↔ cb b ∈ F r) := by
+    simpa only [F, mem_flagSubcomodule_iff] using hr
+  have hnot : cb a ∉ F r := by
+    intro ha
+    exact hr' ⟨fun _ ↦ hforward ha, fun _ ↦ ha⟩
+  have hmem : cb b ∈ F r := by
+    by_contra hb
+    exact hr' ⟨fun ha ↦ False.elim (hnot ha), fun h ↦ False.elim (hb h)⟩
+  exact Module.Basis.coefficient_eq_zero_of_coordinate_subcomodule cb {i | cb i ∈ F r}
+    (F r) (hcoord r) hnot hmem
+
 /-- The coaction of a basis vector in a stable initial segment belongs to the tensor product of
 that initial segment with the coalgebra. -/
 theorem coact_basis_mem_flag (b : Basis (Fin n) k M)

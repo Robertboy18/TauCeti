@@ -33,8 +33,13 @@ local notation "μ" => e7MinusculeWeight
 local notation "α" => fun i : Fin 7 ↦ e7Root (e7SimpleIndex i)
 
 /-- A positive simple-root step in the minuscule weight diagram. -/
-@[expose] def E7MinusculeRaisingStep (a b : Fin 56) : Prop :=
+def E7MinusculeRaisingStep (a b : Fin 56) : Prop :=
   ∃ i : Fin 7, μ a i = -1 ∧ e7MinusculeReflection i a = b
+
+/-- A raising step is reflection in a simple root at which the source has weight minus one. -/
+theorem e7MinusculeRaisingStep_iff (a b : Fin 56) :
+    E7MinusculeRaisingStep a b ↔
+      ∃ i : Fin 7, μ a i = -1 ∧ e7MinusculeReflection i a = b := Iff.rfl
 
 /-- The integral positive root cone in the seven numbered simple-root coordinates. -/
 theorem mem_e7_posRootCone_iff {x : Fin 7 → ℤ} :
@@ -184,7 +189,8 @@ private theorem raisingPath_of_sum (a : Fin 56) :
       exact sub_eq_iff_eq_add.mpr (by linear_combination hc)
     have hpath := ih (e7MinusculeReflection i a)
       ((e7MinusculeReflection_lt_iff i a).mpr hi) b ⟨c', hremaining⟩
-    exact (Relation.ReflTransGen.single ⟨i, hi, rfl⟩).trans hpath
+    exact (Relation.ReflTransGen.single ((e7MinusculeRaisingStep_iff _ _).mpr
+      ⟨i, hi, rfl⟩)).trans hpath
 
 /-- Raising paths are exactly the positive integral differences of minuscule weights. -/
 theorem e7Minuscule_raisingPath_iff_mem_posRootCone (a b : Fin 56) :
@@ -195,7 +201,7 @@ theorem e7Minuscule_raisingPath_iff_mem_posRootCone (a b : Fin 56) :
     induction h with
     | refl => simp
     | @tail b c h hbc ih =>
-      obtain ⟨i, hi, rfl⟩ := hbc
+      obtain ⟨i, hi, rfl⟩ := (e7MinusculeRaisingStep_iff _ _).mp hbc
       have hroot : α i ∈ posRootCone P e7SimplyConnectedBase := by
         simpa only [e7SimplyConnectedRootDatum_root] using
           root_mem_posRootCone_of_mem_posRoots P e7SimplyConnectedBase
