@@ -81,10 +81,9 @@ theorem baseChangeMap_restriction_comp_coordinateHopfAlgebraBaseChangeIso_hom :
           CommHopfAlgCat.baseChangeMap (K := S) (restriction R) =
         CommHopfAlgCat.baseChangeMap (K := S)
           (CommHopfAlgCat.mkQuotient _ (definingIdeal R)) := by
-    let F := CommHopfAlgCat.baseChangeFunctor (k := R) (K := S)
-    change F.map (generatedCoordinateMap R) ≫ F.map (restriction R) =
-      F.map (CommHopfAlgCat.mkQuotient _ (definingIdeal R))
-    rw [← F.map_comp, generatedCoordinateMap_comp_restriction]
+    rw [← CommHopfAlgCat.baseChangeFunctor_map,
+      ← CommHopfAlgCat.baseChangeFunctor_map, ← Functor.map_comp,
+      generatedCoordinateMap_comp_restriction, CommHopfAlgCat.baseChangeFunctor_map]
   have hcomp :
       CommHopfAlgCat.baseChangeMap (K := S) (generatedCoordinateMap R) ≫
           (CommHopfAlgCat.baseChangeMap (K := S) (restriction R) ≫
