@@ -50,6 +50,74 @@ public section
 
 open scoped TensorProduct
 
+namespace Module.Basis
+
+/-- A complete flag spanned by subsets of a basis separates any two distinct basis vectors. -/
+theorem exists_flag_separating {R M ι : Type*} [CommRing R] [Nontrivial R]
+    [AddCommGroup M] [Module R M] {n : ℕ} (cb : Basis ι R M) (bas : Basis (Fin n) R M)
+    (hcoord : ∀ r, bas.flag r = Submodule.span R (cb '' {j | cb j ∈ bas.flag r}))
+    {a b : ι} (hab : a ≠ b) :
+    ∃ r, ¬ (cb a ∈ bas.flag r ↔ cb b ∈ bas.flag r) := by
+  classical
+  by_contra! hsame
+  have hex : ∃ r, cb a ∈ bas.flag r := ⟨Fin.last n, by simp⟩
+  let r := Fin.find (fun r ↦ cb a ∈ bas.flag r) hex
+  have har : cb a ∈ bas.flag r := Fin.find_spec hex
+  have hr0 : r ≠ 0 := by
+    intro hr
+    simp [hr, cb.ne_zero a] at har
+  obtain ⟨i, hi⟩ : ∃ i : Fin n, i.succ = r := by
+    refine ⟨⟨r.val - 1, by have := r.isLt; have := Fin.val_ne_zero_iff.mpr hr0; omega⟩, ?_⟩
+    apply Fin.ext
+    have := Fin.val_ne_zero_iff.mpr hr0
+    simp only [Fin.val_succ]
+    omega
+  have ha : cb a ∉ bas.flag i.castSucc := by
+    apply Fin.find_min hex
+    -- The local r is the first flag term containing this basis vector.
+    change i.castSucc < r
+    rw [← hi]
+    exact Fin.castSucc_lt_succ
+  have hb : cb b ∉ bas.flag i.castSucc := fun h ↦ ha ((hsame _).mpr h)
+  have har' : cb a ∈ bas.flag i.succ := by simpa only [hi] using har
+  have hbr' : cb b ∈ bas.flag i.succ := (hsame _).mp har'
+  have hzero (j : ι) (hj : cb j ∉ bas.flag i.castSucc) {z : M}
+      (hz : z ∈ bas.flag i.castSucc) : cb.repr z j = 0 := by
+    have hker : bas.flag i.castSucc ≤ LinearMap.ker (cb.coord j) := by
+      rw [hcoord]
+      refine Submodule.span_le.mpr ?_
+      rintro _ ⟨l, hl, rfl⟩
+      apply LinearMap.mem_ker.mpr
+      have hjl : j ≠ l := by
+        rintro rfl
+        exact hj hl
+      simp [Basis.coord_apply, hjl]
+    simpa only [Basis.coord_apply] using LinearMap.mem_ker.mp (hker hz)
+  rw [bas.flag_succ] at har' hbr'
+  obtain ⟨va, hva, ua, hua, hsum_a⟩ := Submodule.mem_sup.mp har'
+  obtain ⟨vb, hvb, ub, hub, hsum_b⟩ := Submodule.mem_sup.mp hbr'
+  obtain ⟨x, rfl⟩ := Submodule.mem_span_singleton.mp hva
+  obtain ⟨y, rfl⟩ := Submodule.mem_span_singleton.mp hvb
+  have hxa : x * cb.coord a (bas i) = 1 := by
+    simpa [Basis.coord_apply, hzero a ha hua] using
+      congrArg (cb.coord a) hsum_a
+  have hxb : x * cb.coord b (bas i) = 0 := by
+    simpa [Basis.coord_apply, hab, hab.symm, hzero b hb hua] using
+      congrArg (cb.coord b) hsum_a
+  have hya : y * cb.coord a (bas i) = 0 := by
+    simpa [Basis.coord_apply, hab, hab.symm, hzero a ha hub] using
+      congrArg (cb.coord a) hsum_b
+  have hyb : y * cb.coord b (bas i) = 1 := by
+    simpa [Basis.coord_apply, hzero b hb hub] using
+      congrArg (cb.coord b) hsum_b
+  apply one_ne_zero (α := R)
+  calc
+    1 = (x * cb.coord a (bas i)) * (y * cb.coord b (bas i)) := by rw [hxa, hyb, mul_one]
+    _ = (x * cb.coord b (bas i)) * (y * cb.coord a (bas i)) := by ring
+    _ = 0 := by rw [hxb, hya, mul_zero]
+
+end Module.Basis
+
 namespace TauCeti.Comodule
 
 open Module
@@ -155,16 +223,22 @@ theorem coefficient_eq_zero_of_coordinate_flag {ι : Type*} [Finite ι]
     (cb : Basis ι k M) (bas : Basis (Fin n) k M)
     (htri : (coefficientMatrix (C := H) bas).IsUpperTriangular)
     (hbas : ∀ r, bas.flag r = Submodule.span k (cb '' {i | cb i ∈ bas.flag r}))
-    {a b : ι} (hsep : ∃ r, ¬ (cb a ∈ bas.flag r ↔ cb b ∈ bas.flag r))
+    {a b : ι} (hab : a ≠ b)
     (hclosed : ∀ N : Subcomodule k H M, cb a ∈ N → cb b ∈ N) :
     coefficientMatrix (C := H) cb a b = 0 := by
+  rcases subsingleton_or_nontrivial k with h | h
+  · have : Subsingleton k := h
+    calc
+      _ = (1 : k) • coefficientMatrix (C := H) cb a b := (one_smul k _).symm
+      _ = 0 := by rw [Subsingleton.elim (1 : k) 0, zero_smul]
+  have : Nontrivial k := h
   classical
   let F := Comodule.flagSubcomodule bas htri
   have hcoord (r : Fin (n + 1)) :
       (F r).toSubmodule = Submodule.span k (cb '' {i | cb i ∈ F r}) := by
     rw [Comodule.flagSubcomodule_toSubmodule]
     simpa only [F, mem_flagSubcomodule_iff] using hbas r
-  obtain ⟨r, hr⟩ := hsep
+  obtain ⟨r, hr⟩ := cb.exists_flag_separating bas hbas hab
   have hforward : cb a ∈ F r → cb b ∈ F r := hclosed (F r)
   have hr' : ¬ (cb a ∈ F r ↔ cb b ∈ F r) := by
     simpa only [F, mem_flagSubcomodule_iff] using hr

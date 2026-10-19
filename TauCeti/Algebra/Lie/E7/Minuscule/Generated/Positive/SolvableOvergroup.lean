@@ -52,57 +52,63 @@ variable {k : Type u} [Field k]
 local notation "μ" => e7MinusculeWeight
 local notation "C₊" => posRootCone e7SimplyConnectedRootDatum e7SimplyConnectedBase
 
-private theorem coordinate_flag_separates {n : ℕ}
-    (b : Module.Basis (Fin n) k (Fin 56 → k))
-    (hcoord : ∀ r, b.flag r = Submodule.span k ((Pi.basisFun k (Fin 56)) ''
-      {a | Pi.single a (1 : k) ∈ b.flag r}))
-    {a c : Fin 56} (hac : a ≠ c) :
-    ∃ r, ¬ (Pi.single a (1 : k) ∈ b.flag r ↔ Pi.single c (1 : k) ∈ b.flag r) := by
-  classical
-  by_contra! hsame
-  have hex : ∃ r, Pi.single a (1 : k) ∈ b.flag r := ⟨Fin.last n, by simp⟩
-  let r := Fin.find (fun r ↦ Pi.single a (1 : k) ∈ b.flag r) hex
-  have har : Pi.single a (1 : k) ∈ b.flag r := Fin.find_spec hex
-  have hr0 : r ≠ 0 := by
-    intro hr
-    simp [hr] at har
-  obtain ⟨i, hi⟩ : ∃ i : Fin n, i.succ = r := by
-    refine ⟨⟨r.val - 1, by have := r.isLt; have := Fin.val_ne_zero_iff.mpr hr0; omega⟩, ?_⟩
-    apply Fin.ext
-    have := Fin.val_ne_zero_iff.mpr hr0
-    simp only [Fin.val_succ]
-    omega
-  have ha : Pi.single a (1 : k) ∉ b.flag i.castSucc := by
-    apply Fin.find_min hex
-    -- The local r is the least flag index containing this basis vector.
-    change i.castSucc < r
-    rw [← hi]
-    exact Fin.castSucc_lt_succ
-  have hc : Pi.single c (1 : k) ∉ b.flag i.castSucc := fun h ↦
-    ha ((hsame _).mpr h)
-  have har' : Pi.single a (1 : k) ∈ b.flag i.succ := by simpa only [hi] using har
-  have hcr' : Pi.single c (1 : k) ∈ b.flag i.succ := (hsame _).mp har'
-  let L := b.flag i.castSucc ⊔ k ∙ Pi.single a (1 : k)
-  have hL : L = b.flag i.succ := by
-    -- L is the sum of the preceding flag term and the line through the new vector.
-    rcases (b.flag_covBy i).eq_or_eq (show b.flag i.castSucc ≤ L from le_sup_left)
-        (sup_le (b.flag_mono (Fin.castSucc_le_succ i))
-          ((Submodule.span_singleton_le_iff_mem _ _).mpr har')) with h | h
-    · exact False.elim (ha (h ▸ (show Pi.single a (1 : k) ∈ L from
-        Submodule.mem_sup_right (Submodule.mem_span_singleton_self _))))
-    · exact h
-  have hLcoord : L = Submodule.span k ((Pi.basisFun k (Fin 56)) ''
-      insert a {j | Pi.single j (1 : k) ∈ b.flag i.castSucc}) := by
-    dsimp only [L]
-    rw [Set.image_insert_eq, Submodule.span_insert, ← hcoord, Pi.basisFun_apply]
-    exact sup_comm _ _
-  have hmem : c ∈ insert a {j | Pi.single j (1 : k) ∈ b.flag i.castSucc} := by
-    apply (Pi.basisFun k (Fin 56)).self_mem_span_image.mp
-    rw [← hLcoord, hL]
-    simpa only [Pi.basisFun_apply] using hcr'
-  rcases hmem with h | h
-  · exact hac h.symm
-  · exact hc h
+private theorem liftQuotient_generator_comp_mkQuotient
+    (J : HopfIdeal k (GeneralLinear.coordinateHopfAlgebra k 56))
+    (g : (Fin 7 ⊕ Fin 7) ⊕ Unit)
+    (hg : J.toIdeal ≤ RingHom.ker (generatorCoordinateMap k g).hom.toAlgHom.toRingHom) :
+    (CommHopfAlgCat.liftQuotient J (generatorCoordinateMap k g) hg).hom.comp
+        (Bialgebra.Quotient.mkBialgHom (R := k) J.toIdeal) =
+      (generatorCoordinateMap k g).hom := by
+  simpa only [_root_.CommHopfAlgCat.hom_comp, CommHopfAlgCat.hom_mkQuotient] using
+    congrArg _root_.CommHopfAlgCat.Hom.hom
+      (CommHopfAlgCat.mkQuotient_comp_liftQuotient J (generatorCoordinateMap k g) hg)
+
+private theorem quotient_rootSubgroup_point
+    (J : HopfIdeal k (GeneralLinear.coordinateHopfAlgebra k 56))
+    (hJ : J ≤ definingIdeal k) (i : Fin 7) (t : k) :
+    let f := CommHopfAlgCat.liftQuotient J (generatorCoordinateMap k (.inl (.inl i)))
+      (((le_definingIdeal_iff k J).mp hJ).1 i)
+    let q := (AdditiveGroup.gaPointsMulEquiv (R := k) (A := k)).symm
+      (Multiplicative.ofAdd t)
+    GeneralLinear.pointToGeneralLinear 56
+        ((CommHopfAlgCat.mkQuotient
+          (GeneralLinear.coordinateHopfAlgebra k 56) J).mapPointsFunctor.app
+          (CommAlgCat.of k k) (f.mapPointsFunctor.app (CommAlgCat.of k k) q)) =
+      (rootSubgroupPoints (.inl i) k (Multiplicative.ofAdd t) :
+        Matrix.GeneralLinearGroup (Fin 56) k) := by
+  let f := CommHopfAlgCat.liftQuotient J (generatorCoordinateMap k (.inl (.inl i)))
+    (((le_definingIdeal_iff k J).mp hJ).1 i)
+  let q := (AdditiveGroup.gaPointsMulEquiv (R := k) (A := k)).symm
+    (Multiplicative.ofAdd t)
+  dsimp only
+  -- The exposed point-functor application packages coordinate precomposition.
+  -- Folding this wrapper does not unfold the underlying point-map implementation.
+  have h : GeneralLinear.pointToGeneralLinear 56
+      ((coordinateMap k).mapPointsFunctor.app (CommAlgCat.of k k)
+        (toConv (q.ofConv.comp
+          (rootSubgroupToBaseChangeCoordinateMap k (.inl i)).hom.toAlgHom))) =
+      (rootSubgroupPoints (.inl i) k (AdditiveGroup.gaPointsMulEquiv q) :
+        Matrix.GeneralLinearGroup (Fin 56) k) :=
+    pointToGeneralLinear_mapDomain_rootSubgroupToBaseChangeCoordinateMap_eq_rootSubgroupPoints
+      k (.inl i) (CommAlgCat.of k k) q
+  have hcomp' : f.hom.comp (Bialgebra.Quotient.mkBialgHom (R := k) J.toIdeal) =
+      (rootSubgroupToBaseChangeCoordinateMap k (.inl i)).hom.comp (coordinateMap k).hom := by
+    calc
+      _ = (generatorCoordinateMap k (.inl (.inl i))).hom :=
+        liftQuotient_generator_comp_mkQuotient J (.inl (.inl i))
+          (((le_definingIdeal_iff k J).mp hJ).1 i)
+      _ = _ := by
+        rw [generatorCoordinateMap_inl,
+          ← coordinateMap_comp_rootSubgroupToBaseChangeCoordinateMap,
+          _root_.CommHopfAlgCat.hom_comp]
+  have hcompAlg := congrArg BialgHom.toAlgHom hcomp'
+  simp only [BialgHom.comp_toAlgHom] at hcompAlg
+  -- Explicit evaluation crosses the categorical object and hom coercions.
+  erw [_root_.CommHopfAlgCat.Hom.mapPointsFunctor_app_apply] at h
+  erw [_root_.CommHopfAlgCat.Hom.mapPointsFunctor_app_apply,
+    _root_.CommHopfAlgCat.Hom.mapPointsFunctor_app_apply]
+  simpa only [CommHopfAlgCat.hom_mkQuotient, ofConv_toConv, AlgHom.comp_assoc,
+    ← hcompAlg, f, q, MulEquiv.apply_symm_apply] using h
 
 private theorem single_mem_of_raising_step
     (J : HopfIdeal k (GeneralLinear.coordinateHopfAlgebra k 56))
@@ -121,43 +127,8 @@ private theorem single_mem_of_raising_step
     (((le_definingIdeal_iff k J).mp hJ).1 i)
   let q := (AdditiveGroup.gaPointsMulEquiv (R := k) (A := k)).symm
     (Multiplicative.ofAdd (1 : k))
-  have hcomp := congrArg _root_.CommHopfAlgCat.Hom.hom
-    (CommHopfAlgCat.mkQuotient_comp_liftQuotient J
-      (generatorCoordinateMap k (.inl (.inl i))) (((le_definingIdeal_iff k J).mp hJ).1 i))
-  have hpoint : GeneralLinear.pointToGeneralLinear 56
-      ((CommHopfAlgCat.mkQuotient (GeneralLinear.coordinateHopfAlgebra k 56) J).mapPointsFunctor.app
-        (CommAlgCat.of k k) (f.mapPointsFunctor.app (CommAlgCat.of k k) q)) =
-      (rootSubgroupPoints (.inl i) k (Multiplicative.ofAdd (1 : k)) :
-        Matrix.GeneralLinearGroup (Fin 56) k) := by
-    -- The exposed point-functor application packages coordinate precomposition.
-    -- Folding this wrapper does not unfold the underlying point-map implementation.
-    have h : GeneralLinear.pointToGeneralLinear 56
-        ((coordinateMap k).mapPointsFunctor.app (CommAlgCat.of k k)
-          (toConv (q.ofConv.comp
-            (rootSubgroupToBaseChangeCoordinateMap k (.inl i)).hom.toAlgHom))) =
-        (rootSubgroupPoints (.inl i) k (AdditiveGroup.gaPointsMulEquiv q) :
-          Matrix.GeneralLinearGroup (Fin 56) k) :=
-      pointToGeneralLinear_mapDomain_rootSubgroupToBaseChangeCoordinateMap_eq_rootSubgroupPoints
-        k (.inl i) (CommAlgCat.of k k) q
-    simp only [_root_.CommHopfAlgCat.hom_comp, CommHopfAlgCat.hom_mkQuotient] at hcomp
-    have hcomp' : f.hom.comp (Bialgebra.Quotient.mkBialgHom (R := k) J.toIdeal) =
-        (rootSubgroupToBaseChangeCoordinateMap k (.inl i)).hom.comp (coordinateMap k).hom := by
-      calc
-        _ = (generatorCoordinateMap k (.inl (.inl i))).hom := hcomp
-        _ = _ := by
-          rw [generatorCoordinateMap_inl,
-            ← coordinateMap_comp_rootSubgroupToBaseChangeCoordinateMap,
-            _root_.CommHopfAlgCat.hom_comp]
-    have hcompAlg := congrArg BialgHom.toAlgHom hcomp'
-    simp only [BialgHom.comp_toAlgHom] at hcompAlg
-    -- Explicit evaluation crosses the categorical object and hom coercions.
-    erw [_root_.CommHopfAlgCat.Hom.mapPointsFunctor_app_apply] at h
-    erw [_root_.CommHopfAlgCat.Hom.mapPointsFunctor_app_apply,
-      _root_.CommHopfAlgCat.Hom.mapPointsFunctor_app_apply]
-    simpa only [CommHopfAlgCat.hom_mkQuotient, ofConv_toConv, AlgHom.comp_assoc,
-      hcompAlg, q, MulEquiv.apply_symm_apply] using h
   -- The quotient's point-functor application folds the same exposed wrapper, so
-  -- the subcomodule action is expressed in precisely the form of hpoint.
+  -- the subcomodule action is expressed in the form of quotient_rootSubgroup_point.
   have hmem :
       (GeneralLinear.pointToGeneralLinear 56
         ((CommHopfAlgCat.mkQuotient
@@ -167,7 +138,7 @@ private theorem single_mem_of_raising_step
     GeneralLinear.corestrictStandardComodule_mulVec_mem k 56
       (Bialgebra.Quotient.mkBialgHom (R := k) J.toIdeal) N
       (f.mapPointsFunctor.app (CommAlgCat.of k k) q) ha
-  rw [hpoint] at hmem
+  rw [quotient_rootSubgroup_point J hJ i (1 : k)] at hmem
   rw [← Subcomodule.mem_toSubmodule] at hmem ha ⊢
   simpa only [positiveRoot_mulVec_single_sub k i a hi] using
     N.toSubmodule.sub_mem hmem ha
@@ -289,12 +260,10 @@ theorem quotient_genericMatrix_eq_zero_of_posRootCone
   let π := CommHopfAlgCat.liftQuotient J (generatorCoordinateMap k (.inr ()))
     (((le_definingIdeal_iff k J).mp hJ).2)
   have hπ : π.hom.comp q = GeneralLinear.weightTorusCoordinateBialgHom (S := k) μ := by
-    have h := congrArg _root_.CommHopfAlgCat.Hom.hom
-      (CommHopfAlgCat.mkQuotient_comp_liftQuotient J
-        (generatorCoordinateMap k (.inr ())) (((le_definingIdeal_iff k J).mp hJ).2))
-    simp only [_root_.CommHopfAlgCat.hom_comp, CommHopfAlgCat.hom_mkQuotient] at h
     calc
-      π.hom.comp q = (generatorCoordinateMap k (.inr ())).hom := h
+      π.hom.comp q = (generatorCoordinateMap k (.inr ())).hom :=
+        liftQuotient_generator_comp_mkQuotient J (.inr ())
+          (((le_definingIdeal_iff k J).mp hJ).2)
       _ = GeneralLinear.weightTorusCoordinateBialgHom (S := k) μ := by
         rw [generatorCoordinateMap_inr, GeneralLinear.hom_weightTorusBaseChangeCoordinateMap]
   have hweights := GeneralLinear.corestrict_corestrict_standardComodule_eq_ofWeights q π.hom μ hπ
@@ -319,7 +288,7 @@ theorem quotient_genericMatrix_eq_zero_of_posRootCone
   have hzero : Comodule.coefficientMatrix (C := H) (Pi.basisFun k (Fin 56)) a b = 0 := by
     apply Comodule.coefficient_eq_zero_of_coordinate_flag (Pi.basisFun k (Fin 56)) bas htri
     · simpa only [Pi.basisFun_apply] using hbas
-    · simpa only [Pi.basisFun_apply] using coordinate_flag_separates bas hbas hab
+    · exact hab
     · intro N
       simpa only [Pi.basisFun_apply] using single_mem_of_raising_path J hJ N hpath
   have hcoeff : Comodule.coefficientMatrix (C := H) (Pi.basisFun k (Fin 56)) =
@@ -382,6 +351,51 @@ theorem adjointWeightSpace_neg_eq_bot_of_posRootCone
   · exact hentry a b hab
 
 omit [IsAlgClosed k] in
+private abbrev carrierQuotientIso (I : HopfIdeal k (generatedCoordinateHopfAlgebra k)) :
+    CommHopfAlgCat.quotient (GeneralLinear.coordinateHopfAlgebra k 56)
+        (I.comapOfSurjective (generatedCoordinateMap k).hom
+          (generatedCoordinateMap_surjective k)) ≅
+      CommHopfAlgCat.quotient (generatedCoordinateHopfAlgebra k) I :=
+  (open _root_.TauCeti.CommHopfAlgCat _root_.CommHopfAlgCat.Hom in
+    quotientIsoOfSurjective (generatedCoordinateMap k)
+      (generatedCoordinateMap_surjective k) I)
+
+omit [IsAlgClosed k] in
+private theorem carrier_comap_properties
+    (I : HopfIdeal k (generatedCoordinateHopfAlgebra k))
+    [IsReduced (generatedCoordinateHopfAlgebra k ⧸ I.toIdeal)]
+    (hconn : geometricallyConnectedCommHopfAlgProperty k
+      (CommHopfAlgCat.quotient (generatedCoordinateHopfAlgebra k) I))
+    (hsolv : geometricallySolvablePointsCommHopfAlgProperty k
+      (CommHopfAlgCat.quotient (generatedCoordinateHopfAlgebra k) I)) :
+    let J := I.comapOfSurjective (generatedCoordinateMap k).hom
+      (generatedCoordinateMap_surjective k)
+    IsReduced (GeneralLinear.coordinateHopfAlgebra k 56 ⧸ J.toIdeal) ∧
+      geometricallyConnectedCommHopfAlgProperty k
+        (CommHopfAlgCat.quotient (GeneralLinear.coordinateHopfAlgebra k 56) J) ∧
+      geometricallySolvablePointsCommHopfAlgProperty k
+        (CommHopfAlgCat.quotient (GeneralLinear.coordinateHopfAlgebra k 56) J) := by
+  let e := carrierQuotientIso I
+  exact ⟨isReduced_of_injective (_root_.CommHopfAlgCat.ofIso e).toAlgEquiv.toRingHom
+      (_root_.CommHopfAlgCat.ofIso e).injective,
+    (geometricallyConnectedCommHopfAlgProperty k).prop_of_iso e.symm hconn,
+    (geometricallySolvablePointsCommHopfAlgProperty k).prop_of_iso e.symm hsolv⟩
+
+omit [IsAlgClosed k] in
+private theorem carrierQuotientIso_hom_comp_mkQuotient
+    (I : HopfIdeal k (generatedCoordinateHopfAlgebra k)) :
+    (carrierQuotientIso I).hom.hom.comp
+        (Bialgebra.Quotient.mkBialgHom (R := k)
+          (I.comapOfSurjective (generatedCoordinateMap k).hom
+            (generatedCoordinateMap_surjective k)).toIdeal) =
+      (Bialgebra.Quotient.mkBialgHom (R := k) I.toIdeal).comp (generatedCoordinateMap k).hom := by
+  simpa only [_root_.CommHopfAlgCat.hom_comp, CommHopfAlgCat.hom_mkQuotient] using
+    congrArg _root_.CommHopfAlgCat.Hom.hom
+      (open _root_.TauCeti.CommHopfAlgCat _root_.CommHopfAlgCat.Hom in
+        mkQuotient_comp_quotientIsoOfSurjective_hom
+          (generatedCoordinateMap k) (generatedCoordinateMap_surjective k) I)
+
+omit [IsAlgClosed k] in
 private theorem carrier_comap_le_definingIdeal
     (I : HopfIdeal k (generatedCoordinateHopfAlgebra k))
     (hI : I ≤ carrierDefiningIdeal k) :
@@ -411,23 +425,15 @@ theorem carrierQuotient_genericMatrix_eq_zero_of_posRootCone
       ((generatedCoordinateMap k).hom (GeneralLinear.genericMatrix k 56 a b)) = 0 := by
   let J := I.comapOfSurjective (generatedCoordinateMap k).hom
     (generatedCoordinateMap_surjective k)
-  let e := (open _root_.TauCeti.CommHopfAlgCat _root_.CommHopfAlgCat.Hom in
-    quotientIsoOfSurjective (generatedCoordinateMap k)
-      (generatedCoordinateMap_surjective k) I)
-  let : IsReduced (GeneralLinear.coordinateHopfAlgebra k 56 ⧸ J.toIdeal) :=
-    isReduced_of_injective (_root_.CommHopfAlgCat.ofIso e).toAlgEquiv.toRingHom
-      (_root_.CommHopfAlgCat.ofIso e).injective
+  let e := carrierQuotientIso I
+  obtain ⟨hred, hconn', hsolv'⟩ := carrier_comap_properties I hconn hsolv
+  have : IsReduced (GeneralLinear.coordinateHopfAlgebra k 56 ⧸ J.toIdeal) := hred
   have hzero := quotient_genericMatrix_eq_zero_of_posRootCone J
     (carrier_comap_le_definingIdeal I hI)
-    ((geometricallyConnectedCommHopfAlgProperty k).prop_of_iso e.symm hconn)
-    ((geometricallySolvablePointsCommHopfAlgProperty k).prop_of_iso e.symm hsolv) hcone hne
-  have hcomm := congrArg _root_.CommHopfAlgCat.Hom.hom
-    (open _root_.TauCeti.CommHopfAlgCat _root_.CommHopfAlgCat.Hom in
-      mkQuotient_comp_quotientIsoOfSurjective_hom
-        (generatedCoordinateMap k) (generatedCoordinateMap_surjective k) I)
+    hconn' hsolv' hcone hne
+  have hcomm := carrierQuotientIso_hom_comp_mkQuotient I
   have hz := BialgHom.congr_fun hcomm (GeneralLinear.genericMatrix k 56 a b)
-  simp only [_root_.CommHopfAlgCat.hom_comp, CommHopfAlgCat.hom_mkQuotient,
-    BialgHom.comp_apply] at hz
+  simp only [BialgHom.comp_apply] at hz
   exact hz.symm.trans ((congrArg e.hom.hom hzero).trans (map_zero _))
 
 /-- The actual carrier quotient has no negative-cone adjoint characters. The torus factor
@@ -448,17 +454,10 @@ theorem carrierQuotient_adjointWeightSpace_neg_eq_bot_of_posRootCone
     Derivation.adjointWeightSpace π (SplitTorus.weightCharacter (-δ)) = ⊥ := by
   let J := I.comapOfSurjective (generatedCoordinateMap k).hom
     (generatedCoordinateMap_surjective k)
-  let e := (open _root_.TauCeti.CommHopfAlgCat _root_.CommHopfAlgCat.Hom in
-    quotientIsoOfSurjective (generatedCoordinateMap k)
-      (generatedCoordinateMap_surjective k) I)
-  let : IsReduced (GeneralLinear.coordinateHopfAlgebra k 56 ⧸ J.toIdeal) :=
-    isReduced_of_injective (_root_.CommHopfAlgCat.ofIso e).toAlgEquiv.toRingHom
-      (_root_.CommHopfAlgCat.ofIso e).injective
-  have hcomm := congrArg _root_.CommHopfAlgCat.Hom.hom
-    (open _root_.TauCeti.CommHopfAlgCat _root_.CommHopfAlgCat.Hom in
-      mkQuotient_comp_quotientIsoOfSurjective_hom
-        (generatedCoordinateMap k) (generatedCoordinateMap_surjective k) I)
-  simp only [_root_.CommHopfAlgCat.hom_comp, CommHopfAlgCat.hom_mkQuotient] at hcomm
+  let e := carrierQuotientIso I
+  obtain ⟨hred, hconn', hsolv'⟩ := carrier_comap_properties I hconn hsolv
+  have : IsReduced (GeneralLinear.coordinateHopfAlgebra k 56 ⧸ J.toIdeal) := hred
+  have hcomm := carrierQuotientIso_hom_comp_mkQuotient I
   have htorus : (π.comp e.hom.hom).comp (Bialgebra.Quotient.mkBialgHom (R := k) J.toIdeal) =
       GeneralLinear.weightTorusCoordinateBialgHom (S := k) μ := by
     rw [BialgHom.comp_assoc, hcomm, ← BialgHom.comp_assoc, hπ]
@@ -469,8 +468,7 @@ theorem carrierQuotient_adjointWeightSpace_neg_eq_bot_of_posRootCone
       GeneralLinear.hom_weightTorusCoordinateMap] using hgen
   have hzero := adjointWeightSpace_neg_eq_bot_of_posRootCone J
     (carrier_comap_le_definingIdeal I hI)
-    ((geometricallyConnectedCommHopfAlgProperty k).prop_of_iso e.symm hconn)
-    ((geometricallySolvablePointsCommHopfAlgProperty k).prop_of_iso e.symm hsolv)
+    hconn' hsolv'
     (π.comp e.hom.hom) htorus hδ hne
   apply (Submodule.eq_bot_iff _).mpr
   intro x hx
