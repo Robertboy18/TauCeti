@@ -84,24 +84,15 @@ theorem baseChangeMap_restriction_comp_coordinateHopfAlgebraBaseChangeIso_hom :
     rw [← CommHopfAlgCat.baseChangeFunctor_map,
       ← CommHopfAlgCat.baseChangeFunctor_map, ← Functor.map_comp,
       generatedCoordinateMap_comp_restriction, CommHopfAlgCat.baseChangeFunctor_map]
-  have hcomp :
-      CommHopfAlgCat.baseChangeMap (K := S) (generatedCoordinateMap R) ≫
-          (CommHopfAlgCat.baseChangeMap (K := S) (restriction R) ≫
-            (coordinateHopfAlgebraBaseChangeIso R S).hom) =
-        CommHopfAlgCat.baseChangeMap (K := S) (generatedCoordinateMap R) ≫
-          ((generatedCoordinateHopfAlgebraBaseChangeIso R S).hom ≫ restriction S) := by
-    rw [← Category.assoc, hq,
-      baseChangeMap_mkQuotient_comp_coordinateHopfAlgebraBaseChangeIso_hom,
-      ← Category.assoc,
-      baseChangeMap_generatedCoordinateMap_comp_generatedCoordinateHopfAlgebraBaseChangeIso_hom,
-      Category.assoc, generatedCoordinateMap_comp_restriction]
-  apply _root_.CommHopfAlgCat.hom_ext
-  apply DFunLike.ext
-  intro x
-  obtain ⟨y, rfl⟩ := CommHopfAlgCat.baseChangeMap_surjective (K := S)
-    (generatedCoordinateMap R) (generatedCoordinateMap_surjective R) x
-  simpa only [_root_.CommHopfAlgCat.hom_comp, BialgHom.comp_apply] using
-    congrArg (fun f ↦ f.hom y) hcomp
+  have := ConcreteCategory.epi_of_surjective _
+    (CommHopfAlgCat.baseChangeMap_surjective (K := S) _
+      (generatedCoordinateMap_surjective R))
+  rw [← cancel_epi (CommHopfAlgCat.baseChangeMap (K := S) (generatedCoordinateMap R)),
+    ← Category.assoc, hq,
+    baseChangeMap_mkQuotient_comp_coordinateHopfAlgebraBaseChangeIso_hom,
+    ← Category.assoc,
+    baseChangeMap_generatedCoordinateMap_comp_generatedCoordinateHopfAlgebraBaseChangeIso_hom,
+    Category.assoc, generatedCoordinateMap_comp_restriction]
 
 /-- The positive subgroup's defining ideal inside the full generated carrier commutes
 with free scalar extension. -/
