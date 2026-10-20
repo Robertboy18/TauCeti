@@ -79,6 +79,9 @@ theorem mkQuotient_comp_weightTorusCoordinateIso_hom :
   apply _root_.CommHopfAlgCat.hom_ext
   apply BialgHom.ext
   intro x
+  -- The composite reduces definitionally: weightTorusCoordinateIso unwraps via
+  -- ObjectProperty.isoMk and CommHopfAlgCat.isoMk to kerLiftBialgEquiv, while mkQuotient
+  -- sends x to its quotient class. The right side reduces via ObjectProperty.homMk.
   change HopfIdeal.kerLiftBialgEquiv (generatedCoordinateLift R (.inr ())).hom
     (generatedCoordinateLift_torus_surjective R) (Ideal.Quotient.mk _ x) = _
   rw [HopfIdeal.kerLiftBialgEquiv_apply, HopfIdeal.kerLiftBialgHom_mk]
