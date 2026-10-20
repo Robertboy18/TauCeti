@@ -176,4 +176,26 @@ theorem baseChangeMap_generatedCoordinateMap_comp_generatedCoordinateHopfAlgebra
     Category.assoc, ← generatedCoordinateMap_comp_eqToIso_hom]
   simp
 
+/-- The generated-carrier comparison intertwines every numbered root-subgroup and weight-torus
+coordinate lift. -/
+@[reassoc (attr := simp)]
+theorem baseChangeMap_generatedCoordinateLift_comp_generatorCoordinateAlgebraBaseChangeIso_hom
+    (j : Sum (Fin 7 ⊕ Fin 7) Unit) :
+    CommHopfAlgCat.baseChangeMap (K := S) (generatedCoordinateLift R j) ≫
+        (generatorCoordinateAlgebraBaseChangeIso R S j).hom =
+      (generatedCoordinateHopfAlgebraBaseChangeIso R S).hom ≫
+        generatedCoordinateLift S j := by
+  have := ConcreteCategory.epi_of_surjective _
+    (CommHopfAlgCat.baseChangeMap_surjective (K := S) _
+      (generatedCoordinateMap_surjective R))
+  rw [← cancel_epi (CommHopfAlgCat.baseChangeMap (K := S) (generatedCoordinateMap R)),
+    ← Category.assoc, ← CommHopfAlgCat.baseChangeFunctor_map,
+    ← CommHopfAlgCat.baseChangeFunctor_map, ← Functor.map_comp,
+    generatedCoordinateMap_comp_generatedCoordinateLift, CommHopfAlgCat.baseChangeFunctor_map,
+    ← Category.assoc,
+    baseChangeMap_generatedCoordinateMap_comp_generatedCoordinateHopfAlgebraBaseChangeIso_hom,
+    Category.assoc, generatedCoordinateMap_comp_generatedCoordinateLift]
+  exact (Iso.inv_comp_eq (GeneralLinear.coordinateHopfAlgebraBaseChangeIso R S 56)).mp
+    (generatorCoordinateMap_baseChange R S j)
+
 end TauCeti.E7Minuscule
