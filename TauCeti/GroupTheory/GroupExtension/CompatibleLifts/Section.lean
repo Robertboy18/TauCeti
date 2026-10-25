@@ -18,30 +18,34 @@ The sections need not be normalized or multiplicative.
 
 public section
 
-namespace GroupExtension.CompatibleLifts
+namespace TauCeti.GroupExtension.CompatibleLifts
+
+open _root_.GroupExtension
 
 variable {N E G A : Type*} [Group N] [Group E] [Group G] [Group A]
   (S : GroupExtension N E G) (ρ : A →* MulAut G)
 
 /-- Transport a section by a compatible lift with acting-group coordinate one. -/
 def kernelSection (x : (projection S ρ).ker) (σ : S.Section) : S.Section :=
-  σ.monoidHomComp (toCoverAut S ρ x.val).toMonoidHom (by
+  σ.monoidHomComp (toMulAut S ρ x.val).toMonoidHom (by
     ext e
-    change S.rightHom (toCoverAut S ρ x.val e) = S.rightHom e
-    rw [rightHom_toCoverAut, MonoidHom.mem_ker.mp x.property, map_one, MulAut.one_apply])
+    simp only [MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom]
+    rw [rightHom_toMulAut, MonoidHom.mem_ker.mp x.property, map_one, MulAut.one_apply])
 
 @[simp]
 theorem kernelSection_apply (x : (projection S ρ).ker) (σ : S.Section) (g : G) :
-    kernelSection S ρ x σ g = toCoverAut S ρ x.val (σ g) := by
+    kernelSection S ρ x σ g = toMulAut S ρ x.val (σ g) := by
   simp only [kernelSection, Section.monoidHomComp_apply, MulEquiv.coe_toMonoidHom]
 
-end GroupExtension.CompatibleLifts
+end TauCeti.GroupExtension.CompatibleLifts
 
-namespace GroupExtension.CompatibleLifts
+namespace TauCeti.GroupExtension.CompatibleLifts
+
+open _root_.GroupExtension
 
 variable {N E G A : Type*} [CommGroup N] [Group E] [Group G] [Group A]
   (S : GroupExtension N E G) (ρ : A →* MulAut G)
-  (hcentral : ∀ n e, Commute (S.inl n) e)
+  (hcentral : S.inl.range ≤ Subgroup.center E)
 
 /-- The native section difference of a kernel lift is its quotient character. -/
 theorem sectionDiff_kernelSection (x : (projection S ρ).ker) (σ : S.Section) (g : G) :
@@ -51,4 +55,4 @@ theorem sectionDiff_kernelSection (x : (projection S ρ).ker) (σ : S.Section) (
   rw [TauCeti.GroupExtension.inl_sectionDiff, kernelSection_apply,
     inl_kernelCharacter_section]
 
-end GroupExtension.CompatibleLifts
+end TauCeti.GroupExtension.CompatibleLifts

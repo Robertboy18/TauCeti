@@ -90,31 +90,6 @@ universe u v w
 
 variable {G : Type u} {M : Type v} {E : Type w} [Group G] [Group E]
 
-section InlInv
-
-variable [Group M] (S : GroupExtension M E G)
-
-/-- The partial inverse of the inclusion `S.inl : M →* E` of a group extension. It is a genuine
-inverse on the range of `S.inl` and junk off it, so it stays file-local: the public API records
-its values through `S.inl` instead, in `TauCeti.GroupExtension.inl_factorSetFun` and
-`TauCeti.GroupExtension.inl_sectionDiff`. -/
-private noncomputable def inlInv (e : E) : M := Function.invFun S.inl e
-
-variable {S}
-
-@[simp]
-private theorem inlInv_inl (m : M) : inlInv S (S.inl m) = m :=
-  Function.leftInverse_invFun S.inl_injective m
-
-private theorem inl_inlInv {e : E} (he : e ∈ S.inl.range) : S.inl (inlInv S e) = e :=
-  Function.invFun_eq (MonoidHom.mem_range.1 he)
-
-@[simp]
-private theorem inlInv_one : inlInv S (1 : E) = 1 := by
-  simpa using inlInv_inl (S := S) (1 : M)
-
-end InlInv
-
 section Conj
 
 variable [Group M] {S : GroupExtension M E G}

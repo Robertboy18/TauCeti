@@ -20,23 +20,18 @@ public section
 
 namespace Matrix.SignCover
 
-open TauCeti GroupExtension.CompatibleLifts
+open TauCeti GroupExtension
 
 variable {I : Type*} [Fintype I] [LinearOrder I] (B : Matrix I I ℤ)
 
 attribute [local instance] trivialMulDistribMulAction
 
-/-- The included signs commute with every element of the ordered sign cover. -/
-theorem inl_commute (n : ℤˣ) (x : SignCover B) :
-    Commute ((signFactorSet B).groupExtension.inl n) x := by
-  rw [FactorSet.groupExtension_inl]
-  exact (Subgroup.mem_center_iff.mp
-    (FactorSet.inl_range_le_center _ trivialMulDistribMulAction_smul ⟨n, rfl⟩) x).symm
-
 /-- The twist of the existing sign cover by a character of its lattice. -/
 noncomputable def characterTwist (χ : Multiplicative (I → ℤ) →* ℤˣ) :
     MulAut (SignCover B) :=
-  twist (signFactorSet B).groupExtension (inl_commute B) χ
+  twist (signFactorSet B).groupExtension (by
+    simpa only [FactorSet.groupExtension_inl] using
+      FactorSet.inl_range_le_center (signFactorSet B) trivialMulDistribMulAction_smul) χ
 
 @[simp]
 theorem characterTwist_right (χ : Multiplicative (I → ℤ) →* ℤˣ) (x : SignCover B) :

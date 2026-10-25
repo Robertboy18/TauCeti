@@ -24,7 +24,9 @@ This file provides operations on an existing group extension.
 * `GroupExtension.surjective_of_comp_inl_eq`: a homomorphism of extensions over the identity of
   the quotient group is surjective as soon as it is surjective on the kernel terms.
 
-The constructions are mirrored for additive groups by `to_additive`.
+The relabelling and homomorphism constructions are mirrored for additive groups by `to_additive`.
+Central extensions also admit character twists, and a shared partial inverse to the inclusion
+is available for extracting values from the kernel.
 -/
 
 public section
@@ -190,4 +192,80 @@ theorem surjective_of_comp_inl_eq (f : N →* N') (hf : Function.Surjective f) (
 
 end Hom
 
+section Central
+
+variable (S : GroupExtension N E G) (hcentral : S.inl.range ≤ Subgroup.center E)
+
+/-- The automorphism obtained by multiplying each element by its character value. -/
+def twist (χ : G →* N) : MulAut E where
+  toFun e := S.inl (χ (S.rightHom e)) * e
+  invFun e := S.inl (χ (S.rightHom e))⁻¹ * e
+  left_inv e := by simp
+  right_inv e := by simp
+  map_mul' e f := by
+    simp only [map_mul]
+    exact (show Commute (S.inl (χ (S.rightHom f))) e from
+      (Subgroup.mem_center_iff.mp (hcentral ⟨_, rfl⟩) e).symm).mul_mul_mul_comm _ _
+
+@[simp]
+theorem twist_apply (χ : G →* N) (e : E) :
+    twist S hcentral χ e = S.inl (χ (S.rightHom e)) * e :=
+  (rfl)
+
+@[simp]
+theorem twist_symm_apply (χ : G →* N) (e : E) :
+    (twist S hcentral χ).symm e = S.inl (χ (S.rightHom e))⁻¹ * e :=
+  (rfl)
+
+theorem twist_inl (χ : G →* N) (n : N) :
+    twist S hcentral χ (S.inl n) = S.inl n := by
+  simp
+
+theorem rightHom_twist (χ : G →* N) (e : E) :
+    S.rightHom (twist S hcentral χ e) = S.rightHom e := by
+  simp
+
+end Central
+
+namespace Equiv
+
+variable {E' : Type*} [Group E'] {S : GroupExtension N E G} {S' : GroupExtension N E' G}
+
+/-- An equivalence of extensions preserves centrality of the included kernel. -/
+theorem inl_range_le_center (F : S.Equiv S') (hcentral : S.inl.range ≤ Subgroup.center E) :
+    S'.inl.range ≤ Subgroup.center E' := by
+  rintro _ ⟨n, rfl⟩
+  apply Subgroup.mem_center_iff.mpr
+  intro e
+  obtain ⟨f, rfl⟩ := F.toMulEquiv.surjective e
+  simpa only [Equiv.toMulEquiv_eq_coe, Equiv.coe_toMulEquiv, map_mul, F.map_inl] using
+    congrArg F (Subgroup.mem_center_iff.mp (hcentral ⟨n, rfl⟩) f)
+
+end Equiv
+
 end GroupExtension
+
+namespace TauCeti.GroupExtension
+
+variable {N : Type u} {E : Type v} {G : Type w} [Group N] [Group E] [Group G]
+  (S : GroupExtension N E G)
+
+/-- A partial inverse to the inclusion of the kernel. Its right-inverse law holds only on
+`S.inl.range`; values outside that range are unspecified. Downstream statements should normally
+express recovered kernel values through `S.inl`. -/
+noncomputable def inlInv (e : E) : N := Function.invFun S.inl e
+
+variable {S}
+
+@[simp]
+theorem inlInv_inl (n : N) : inlInv S (S.inl n) = n :=
+  Function.leftInverse_invFun S.inl_injective n
+
+theorem inl_inlInv {e : E} (he : e ∈ S.inl.range) : S.inl (inlInv S e) = e :=
+  Function.invFun_eq (MonoidHom.mem_range.1 he)
+
+@[simp]
+theorem inlInv_one : inlInv S (1 : E) = 1 := by
+  simpa using inlInv_inl (S := S) (1 : N)
+
+end TauCeti.GroupExtension
