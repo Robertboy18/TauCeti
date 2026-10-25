@@ -20,9 +20,8 @@ scheme-theoretic kernel is the represented centre of `SLₙ`, hence `μₙ`. Thi
 the whole kernel scheme, including its infinitesimal structure when the characteristic
 divides `n`.
 
-The morphism is surjective on algebraically closed field-valued points. Its finiteness and the
-centrality of its kernel are proved in
-`TauCeti.Algebra.AlgebraicGroup.SpecialLinear.CentralIsogeny`; faithful flatness is not asserted.
+The morphism is surjective on algebraically closed field-valued points. That it is a central
+isogeny over a field is proved in `TauCeti.Algebra.AlgebraicGroup.SpecialLinear.CentralIsogeny`.
 
 ## References
 
@@ -150,7 +149,7 @@ in every characteristic and also in rank zero. -/
 theorem mapPointsFunctor_conjugationMap_app_surjective {R : Type u} [CommRing R]
     (K : Type w) [Field K] [IsAlgClosed K] [Algebra R K] :
     Function.Surjective
-      ((CommHopfAlgCat.mapPointsFunctor (conjugationMap n R)).app (CommAlgCat.of R K)) := by
+      ((CommHopfAlgCat.Hom.mapPointsFunctor (conjugationMap n R)).app (CommAlgCat.of R K)) := by
   -- Combine Mathlib's `PSL ≃ PGL` equivalence over algebraically closed fields with the
   -- Skolem–Noether identification `Matrix.ProjGenLinGroup.innerAut_bijective`.
   intro q
@@ -161,7 +160,7 @@ theorem mapPointsFunctor_conjugationMap_app_surjective {R : Type u} [CommRing R]
   obtain ⟨g, rfl⟩ := QuotientGroup.mk_surjective s
   refine ⟨(pointsMulEquiv (R := R) (A := K) n).symm g,
     (ProjectiveGeneralLinear.pointsMulEquiv n R _).injective ?_⟩
-  rw [CommHopfAlgCat.mapPointsFunctor_app_apply,
+  rw [CommHopfAlgCat.Hom.mapPointsFunctor_app_apply,
     pointsMulEquiv_conjugationMap, MulEquiv.apply_symm_apply]
   rw [← Matrix.ProjGenLinGroup.innerAut_mk]
   have hs' : Matrix.ProjectiveSpecialLinearGroup.toPGL (QuotientGroup.mk g) = p := by

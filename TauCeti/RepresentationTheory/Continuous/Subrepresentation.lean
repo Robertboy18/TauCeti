@@ -6,13 +6,16 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.RepresentationTheory.Continuous.Basic
+public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.Quotient
 public import Mathlib.Topology.Algebra.Module.Spaces.ContinuousLinearMap
 
 /-!
 # Restricting a continuous representation to an invariant submodule
 
 This file restricts a continuous representation of a monoid to a submodule preserved by every
-action operator, the continuous counterpart of Mathlib's `Representation.subrepresentation`.
+action operator, the continuous counterpart of Mathlib's `Representation.subrepresentation`, and
+descends it to the quotient by such a submodule, the continuous counterpart of
+`Representation.quotient`.
 
 ## Main definitions
 
@@ -20,15 +23,21 @@ action operator, the continuous counterpart of Mathlib's `Representation.subrepr
   an invariant submodule.
 * `ContRepresentation.subrepresentationInclusion`: the continuous intertwiner including a
   subrepresentation into its ambient representation.
+* `ContRepresentation.quotient`: a continuous representation descended to the quotient by an
+  invariant submodule, the continuous counterpart of `Representation.quotient`.
 
 ## Main results
 
+* `Subrepresentation.contRepresentation_apply_mem_toSubmodule`: a subrepresentation of the
+  underlying representation is stable under the continuous operators.
 * `ContRepresentation.mem_invariants_subrepresentation`: a vector of the submodule is
   invariant for the restricted representation exactly when it is invariant for the ambient one.
 * `ContRepresentation.toRepresentation_subrepresentation`: the underlying representation of
   a restricted continuous representation is the restriction of the underlying representation.
 * `Subrepresentation.toRepresentation_subrepresentation_toSubmodule`: restricting to the
   submodule a subrepresentation carries has that subrepresentation's own representation underneath.
+* `ContRepresentation.toRepresentation_quotient`: the underlying representation of a descended
+  continuous representation is the descended underlying representation.
 * `ContRepresentation.continuous_subrepresentation`: the restriction of a continuous
   representation to an invariant submodule is again continuous.
 -/
@@ -58,6 +67,17 @@ variable {π : ContRepresentation R G V} {W : Submodule R V} {hW : ∀ g, ∀ v 
 theorem coe_subrepresentation_apply (g : G) (v : W) :
     ((subrepresentation π W hW g v : W) : V) = π g (v : V) :=
   (rfl)
+
+/-- A subrepresentation of the underlying representation of `π` is stable under the continuous
+operators `π g`. This is `Subrepresentation.apply_mem_toSubmodule` with `π.toRepresentation g`
+read as `π g`, in the shape of the stability hypothesis of `ContRepresentation.subrepresentation`;
+the two operators agree only after unfolding `ContRepresentation.toRepresentation`, so passing this
+lemma, rather than `Subrepresentation.apply_mem_toSubmodule` itself, keeps the restricted
+representation type-correct at the transparency at which `rw` and `simp` check their motives. -/
+theorem _root_.Subrepresentation.contRepresentation_apply_mem_toSubmodule
+    (σ : Subrepresentation π.toRepresentation) (g : G) (v : V) (hv : v ∈ σ.toSubmodule) :
+    π g v ∈ σ.toSubmodule :=
+  σ.apply_mem_toSubmodule g hv
 
 /-- The inclusion of a subrepresentation into its ambient continuous representation, packaged as a
 continuous intertwiner. -/
@@ -110,6 +130,44 @@ theorem _root_.Subrepresentation.toRepresentation_subrepresentation_toSubmodule
   exact toRepresentation_subrepresentation.trans (by ext g v; rfl)
 
 end Restriction
+
+section Quotient
+
+variable {R G V : Type*} [Ring R] [Monoid G] [AddCommGroup V] [TopologicalSpace V]
+  [IsTopologicalAddGroup V] [Module R V]
+
+/-- A continuous representation descended to the quotient by an invariant submodule, which
+carries the quotient topology. This is the continuous counterpart of `Representation.quotient`. -/
+def quotient (π : ContRepresentation R G V) (W : Submodule R V)
+    (hW : ∀ g, ∀ v ∈ W, π g v ∈ W) : ContRepresentation R G (V ⧸ W) :=
+  .ofMonoidHom
+    { toFun g := W.liftQL (W.mkQL ∘L π g) fun v hv ↦ by simpa using hW g v hv
+      map_one' := by
+        ext v
+        obtain ⟨v, rfl⟩ := W.mkQ_surjective v
+        simp
+      map_mul' g h := by
+        ext v
+        obtain ⟨v, rfl⟩ := W.mkQ_surjective v
+        simp }
+
+variable {π : ContRepresentation R G V} {W : Submodule R V} {hW : ∀ g, ∀ v ∈ W, π g v ∈ W}
+
+/-- The descended action on the class of `v` is the class of the ambient action on `v`. -/
+@[simp]
+theorem quotient_apply_mk (g : G) (v : V) :
+    quotient π W hW g (Submodule.Quotient.mk v) = Submodule.Quotient.mk (π g v) :=
+  (rfl)
+
+/-- The underlying representation of a descended continuous representation is the descended
+underlying representation. -/
+@[simp]
+theorem toRepresentation_quotient : (quotient π W hW).toRepresentation
+      = π.toRepresentation.quotient W fun g _ hv => hW g _ hv := by
+  ext g v
+  rfl
+
+end Quotient
 
 section Continuity
 

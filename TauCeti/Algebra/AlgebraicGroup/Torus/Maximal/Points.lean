@@ -47,8 +47,8 @@ theorem isMaximalTorus_of_centralizer_quotientPointsSubgroup
     IsMaximalTorus k H I := by
   rw [isMaximalTorus_iff]
   refine ⟨hI, fun J hJ hJI ↦ ?_⟩
-  let _ : IsReduced (CommHopfAlgCat.quotient H J) := hJ.geometricallyReduced.isReduced
-  let _ : Coalgebra.IsCocomm k (CommHopfAlgCat.quotient H J) := hJ.isCocomm k _
+  have : IsReduced (CommHopfAlgCat.quotient H J) := hJ.geometricallyReduced.isReduced
+  have : Coalgebra.IsCocomm k (CommHopfAlgCat.quotient H J) := hJ.isCocomm k _
   exact (eq_of_le_of_centralizer_quotientPointsSubgroup hJI hpoints).ge
 
 end TauCeti.HopfIdeal

@@ -12,8 +12,8 @@ public import TauCeti.Algebra.Group.Subgroup.Centralizer
 # Self-centralizing geometric points of closed subgroups
 
 A closed subgroup whose geometric points are self-centralizing admits no strictly larger
-reduced commutative closed subgroup of finite type. Indeed, the points of any such larger subgroup
-commute and hence lie in the centralizer. Point separation recovers the defining ideal.
+closed subgroup that is reduced, commutative and of finite type. The points of any such larger
+subgroup commute and hence lie in the centralizer. Point separation recovers the defining ideal.
 
 Only the competing subgroup needs to be reduced: its points detect the reverse ideal inclusion,
 while the other inclusion is a hypothesis. The ambient group need not be reduced or of finite
@@ -52,7 +52,7 @@ theorem eq_of_le_of_centralizer_quotientPointsSubgroup
         (CommHopfAlgCat.quotientPointsSubgroup H J (CommAlgCat.of k K) : Set _) =
       CommHopfAlgCat.quotientPointsSubgroup H J (CommAlgCat.of k K)) :
     I = J := by
-  let _ : IsMulCommutative
+  have : IsMulCommutative
       (CommHopfAlgCat.quotientPointsSubgroup H I (CommAlgCat.of k K)) :=
     CommHopfAlgCat.instIsMulCommutativeQuotientPointsSubgroup H I (CommAlgCat.of k K)
   apply le_antisymm hIJ
