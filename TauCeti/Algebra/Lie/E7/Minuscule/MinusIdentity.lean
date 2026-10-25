@@ -67,6 +67,12 @@ def weylElement (i : Fin 7) : points R :=
     (rootSubgroupPoints (.inr i) R (Multiplicative.ofAdd 1))⁻¹ *
     rootSubgroupPoints (.inl i) R (Multiplicative.ofAdd 1)
 
+/-- The defining product of the simple Weyl representative. -/
+theorem weylElement_def (i : Fin 7) :
+    weylElement R i = rootSubgroupPoints (.inl i) R (Multiplicative.ofAdd 1) *
+      (rootSubgroupPoints (.inr i) R (Multiplicative.ofAdd 1))⁻¹ *
+      rootSubgroupPoints (.inl i) R (Multiplicative.ofAdd 1) := (rfl)
+
 /-- The matrix of the simple Weyl representative is the minuscule rank-one word. -/
 @[simp]
 theorem coe_weylElement (i : Fin 7) :
@@ -80,7 +86,7 @@ theorem coe_weylElement (i : Fin 7) :
     ext a b
     rw [weightTable.loweringMatrix_apply, loweringMatrix_apply,
       weightTable_weight, weightTable_reflection]
-  rw [weylElement, hinv]
+  rw [weylElement_def, hinv]
   simp only [Subgroup.coe_mul, Units.val_mul]
   rw [coe_rootSubgroupPoints_inl, coe_rootSubgroupPoints_inr]
   simp [MinusculeWeightTable.weylMatrix_def, weightTable_raisingMatrix, hF,
@@ -90,12 +96,17 @@ theorem coe_weylElement (i : Fin 7) :
 def minusIdentity : points R :=
   weylElement R 1 ^ 2 * weylElement R 4 ^ 2 * weylElement R 6 ^ 2
 
+/-- The defining product of the root word for minus the identity. -/
+theorem minusIdentity_def :
+    minusIdentity R = weylElement R 1 ^ 2 * weylElement R 4 ^ 2 *
+      weylElement R 6 ^ 2 := (rfl)
+
 /-- The chosen root word acts as minus the identity on all fifty-six weights. -/
 @[simp]
 theorem coe_minusIdentity :
     ((minusIdentity R : Matrix.GeneralLinearGroup (Fin 56) R) :
       Matrix (Fin 56) (Fin 56) R) = -1 := by
-  simp only [minusIdentity, Subgroup.coe_mul, Subgroup.coe_pow, Units.val_mul,
+  simp only [minusIdentity_def, Subgroup.coe_mul, Subgroup.coe_pow, Units.val_mul,
     Units.val_pow_eq_pow_val]
   rw [coe_weylElement, coe_weylElement, coe_weylElement,
     weightTable.weylMatrix_pow_two, weightTable.weylMatrix_pow_two,
