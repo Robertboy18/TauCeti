@@ -5,10 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Algebra.BigOperators.Fin
+public import TauCeti.Data.Fin.Basic
 public import Mathlib.Algebra.Module.Torsion.Basic
 public import Mathlib.LinearAlgebra.FixedSubmodule
-public import Mathlib.Logic.Equiv.Fin.Rotate
 
 /-!
 # Fixed coefficients of a weighted cycle
@@ -20,13 +19,11 @@ torsion by `(∏ i, a i) - 1`. This holds over every commutative ring, with arbi
 weights. In particular, monodromy `1` gives the coefficient module, while monodromy
 `-1` gives its `2`-torsion.
 
-This is the single-cycle coefficient calculation for ReductiveGroups 9A.1b.
-The basis-facing consumer is in `WeightedCycle.Basis`.
+The basis-facing form of this calculation is in `WeightedCycle.Basis`.
 
-Roadmap: ReductiveGroups
 -/
 
-@[expose] public section
+public section
 
 namespace TauCeti.WeightedCycle
 
@@ -37,11 +34,25 @@ def linearMap (a : Fin (n + 1) → A) : (Fin (n + 1) → M) →ₗ[A] (Fin (n + 
   LinearMap.pi fun j ↦
     a ((finRotate (n + 1)).symm j) • LinearMap.proj ((finRotate (n + 1)).symm j)
 
+/-- At an arbitrary coordinate, the weighted shift reads the preceding coordinate. -/
+theorem linearMap_apply (a : Fin (n + 1) → A) (v : Fin (n + 1) → M)
+    (j : Fin (n + 1)) :
+    linearMap a v j = a ((finRotate (n + 1)).symm j) •
+      v ((finRotate (n + 1)).symm j) := by
+  rfl
+
 /-- The coefficient at the successor of `i` comes from `i`. -/
 theorem linearMap_apply_rotate (a : Fin (n + 1) → A) (v : Fin (n + 1) → M)
     (i : Fin (n + 1)) :
     linearMap a v (finRotate (n + 1) i) = a i • v i := by
-  simp [linearMap]
+  simp only [linearMap_apply, Equiv.symm_apply_apply]
+
+/-- The coefficient at the cyclic successor of `i` is its weighted source coefficient. -/
+@[simp]
+theorem linearMap_apply_add_one (a : Fin (n + 1) → A) (v : Fin (n + 1) → M)
+    (i : Fin (n + 1)) :
+    linearMap a v (i + 1) = a i • v i := by
+  simpa only [finRotate_apply] using linearMap_apply_rotate a v i
 
 /-- Fixed tuples satisfy the cyclic recurrence, including its closing edge. -/
 theorem mem_fixedSubmodule_iff (a : Fin (n + 1) → A) (v : Fin (n + 1) → M) :
@@ -56,21 +67,6 @@ theorem mem_fixedSubmodule_iff (a : Fin (n + 1) → A) (v : Fin (n + 1) → M) :
     obtain ⟨i, rfl⟩ := (finRotate (n + 1)).surjective j
     exact (linearMap_apply_rotate a v i).trans (h i).symm
 
-private theorem partialProd_last_mul (a : Fin (n + 1) → A) :
-    Fin.partialProd (Fin.init a) (Fin.last n) * a (Fin.last n) = ∏ i, a i := by
-  rw [Fin.prod_univ_castSucc]
-  congr 1
-  change (List.take n (List.ofFn (Fin.init a))).prod = _
-  have ht : List.take (List.ofFn (Fin.init a)).length (List.ofFn (Fin.init a)) =
-      List.ofFn (Fin.init a) := List.take_length
-  simp only [List.length_ofFn] at ht
-  rw [ht, List.prod_ofFn]
-  rfl
-
-private theorem rotate_castSucc (i : Fin n) :
-    finRotate (n + 1) i.castSucc = i.succ := by
-  rw [finRotate_apply, Fin.coeSucc_eq_succ]
-
 /-- Every fixed coordinate is the initial coordinate multiplied by a prefix product. -/
 theorem coeff_eq_partialProd_smul (a : Fin (n + 1) → A)
     (v : (linearMap a (M := M)).fixedSubmodule) (i : Fin (n + 1)) :
@@ -79,7 +75,7 @@ theorem coeff_eq_partialProd_smul (a : Fin (n + 1) → A)
   | zero => simp
   | succ i ih =>
     have h := (mem_fixedSubmodule_iff a v.val).mp v.property i.castSucc
-    rw [rotate_castSucc] at h
+    rw [Fin.finRotate_castSucc] at h
     rw [h, ih, Fin.partialProd_succ]
     rw [mul_smul]
     exact smul_comm _ _ _
@@ -97,19 +93,20 @@ theorem mem_fixedSubmodule_iff_partialProd (a : Fin (n + 1) → A)
     refine ⟨hc, ?_⟩
     have h := (mem_fixedSubmodule_iff a v).mp hv (Fin.last n)
     rw [finRotate_last, hc (Fin.last n), ← mul_smul, mul_comm,
-      partialProd_last_mul] at h
+      Fin.partialProd_last, Fin.init_def, ← Fin.prod_univ_castSucc a] at h
     simpa [sub_smul, sub_eq_zero] using h.symm
   · rintro ⟨hc, hm⟩
     rw [mem_fixedSubmodule_iff]
     intro i
     induction i using Fin.lastCases with
     | last =>
-      rw [finRotate_last, hc (Fin.last n), ← mul_smul, mul_comm, partialProd_last_mul]
+      rw [finRotate_last, hc (Fin.last n), ← mul_smul, mul_comm,
+        Fin.partialProd_last, Fin.init_def, ← Fin.prod_univ_castSucc a]
       have hm' : (∏ i, a i) • v 0 = v 0 := by
         simpa [sub_smul, sub_eq_zero] using hm
       exact hm'.symm
     | cast i =>
-      rw [rotate_castSucc, hc i.succ, hc i.castSucc, Fin.partialProd_succ]
+      rw [Fin.finRotate_castSucc, hc i.succ, hc i.castSucc, Fin.partialProd_succ]
       rw [mul_smul]
       exact smul_comm _ _ _
 
@@ -130,14 +127,14 @@ def fixedEquivTorsion (a : Fin (n + 1) → A) :
 @[simp]
 theorem fixedEquivTorsion_apply (a : Fin (n + 1) → A)
     (v : (linearMap a (M := M)).fixedSubmodule) :
-    (fixedEquivTorsion a v : M) = v.val 0 :=
+    (fixedEquivTorsion a v : M) = v.val 0 := by
   rfl
 
 /-- The inverse equivalence multiplies by the prefix products. -/
 @[simp]
 theorem fixedEquivTorsion_symm_apply (a : Fin (n + 1) → A)
     (t : Submodule.torsionBy A M ((∏ i, a i) - 1)) (i : Fin (n + 1)) :
-    ((fixedEquivTorsion a).symm t).val i = Fin.partialProd (Fin.init a) i • t.val :=
+    ((fixedEquivTorsion a).symm t).val i = Fin.partialProd (Fin.init a) i • t.val := by
   rfl
 
 /-- A cycle of monodromy one contributes one copy of the coefficient module. -/
@@ -151,14 +148,14 @@ def fixedEquivOfProdEqOne (a : Fin (n + 1) → A) (h : ∏ i, a i = 1) :
 @[simp]
 theorem fixedEquivOfProdEqOne_apply (a : Fin (n + 1) → A) (h : ∏ i, a i = 1)
     (v : (linearMap a (M := M)).fixedSubmodule) :
-    fixedEquivOfProdEqOne a h v = v.val 0 :=
+    fixedEquivOfProdEqOne a h v = v.val 0 := by
   rfl
 
 /-- Positive monodromy: the inverse retains the prefix-product formula. -/
 @[simp]
 theorem fixedEquivOfProdEqOne_symm_apply (a : Fin (n + 1) → A) (h : ∏ i, a i = 1)
     (t : M) (i : Fin (n + 1)) :
-    ((fixedEquivOfProdEqOne a h).symm t).val i = Fin.partialProd (Fin.init a) i • t :=
+    ((fixedEquivOfProdEqOne a h).symm t).val i = Fin.partialProd (Fin.init a) i • t := by
   rfl
 
 /-- A cycle of monodromy minus one contributes the full `2`-torsion submodule. -/
@@ -173,14 +170,14 @@ def fixedEquivOfProdEqNegOne (a : Fin (n + 1) → A) (h : ∏ i, a i = -1) :
 @[simp]
 theorem fixedEquivOfProdEqNegOne_apply (a : Fin (n + 1) → A) (h : ∏ i, a i = -1)
     (v : (linearMap a (M := M)).fixedSubmodule) :
-    (fixedEquivOfProdEqNegOne a h v : M) = v.val 0 :=
+    (fixedEquivOfProdEqNegOne a h v : M) = v.val 0 := by
   rfl
 
-/-- Negative monodromy: no `2`-torsion coefficient is discarded by the inverse. -/
+/-- Negative monodromy: the inverse has the same prefix-product coordinates. -/
 @[simp]
 theorem fixedEquivOfProdEqNegOne_symm_apply (a : Fin (n + 1) → A) (h : ∏ i, a i = -1)
     (t : Submodule.torsionBy A M 2) (i : Fin (n + 1)) :
-    ((fixedEquivOfProdEqNegOne a h).symm t).val i = Fin.partialProd (Fin.init a) i • t.val :=
+    ((fixedEquivOfProdEqNegOne a h).symm t).val i = Fin.partialProd (Fin.init a) i • t.val := by
   rfl
 
 end TauCeti.WeightedCycle
