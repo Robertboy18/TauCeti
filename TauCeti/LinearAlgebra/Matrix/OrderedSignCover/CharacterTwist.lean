@@ -5,13 +5,13 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.GroupTheory.GroupExtension.CompatibleLifts.Character
+public import TauCeti.GroupTheory.GroupExtension.Basic
 public import TauCeti.LinearAlgebra.Matrix.OrderedSignCover
 
 /-!
 # Character twists of the ordered sign cover
 
-The character-kernel construction for a central extension applies to the existing ordered sign
+The character-twist construction for a central extension applies to the existing ordered sign
 cover of any integer matrix. A character twist preserves the lattice coordinate and multiplies
 the sign coordinate by the character value. No symmetry, parity, or ADE hypothesis is needed.
 -/

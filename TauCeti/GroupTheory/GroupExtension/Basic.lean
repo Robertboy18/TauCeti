@@ -235,17 +235,26 @@ variable {E' : Type*} [Group E'] {S : GroupExtension N E G} {S' : GroupExtension
 theorem inl_range_le_center (F : S.Equiv S') (hcentral : S.inl.range ≤ Subgroup.center E) :
     S'.inl.range ≤ Subgroup.center E' := by
   rintro _ ⟨n, rfl⟩
-  apply Subgroup.mem_center_iff.mpr
-  intro e
-  obtain ⟨f, rfl⟩ := F.toMulEquiv.surjective e
-  simpa only [Equiv.toMulEquiv_eq_coe, Equiv.coe_toMulEquiv, map_mul, F.map_inl] using
-    congrArg F (Subgroup.mem_center_iff.mp (hcentral ⟨n, rfl⟩) f)
+  rw [← F.map_inl]
+  exact MulEquivClass.apply_mem_center F (hcentral ⟨n, rfl⟩)
+
+@[simp]
+theorem symm_apply_apply (F : S.Equiv S') (e : E) : F.symm (F e) = e :=
+  F.toMulEquiv.symm_apply_apply e
+
+@[simp]
+theorem apply_symm_apply (F : S.Equiv S') (e : E') : F (F.symm e) = e :=
+  F.toMulEquiv.apply_symm_apply e
+
+@[simp]
+theorem symm_symm (F : S.Equiv S') : F.symm.symm = F :=
+  rfl
 
 end Equiv
 
 end GroupExtension
 
-namespace TauCeti.GroupExtension
+namespace GroupExtension
 
 variable {N : Type u} {E : Type v} {G : Type w} [Group N] [Group E] [Group G]
   (S : GroupExtension N E G)
@@ -268,4 +277,4 @@ theorem inl_inlInv {e : E} (he : e ∈ S.inl.range) : S.inl (inlInv S e) = e :=
 theorem inlInv_one : inlInv S (1 : E) = 1 := by
   simpa using inlInv_inl (S := S) (1 : N)
 
-end TauCeti.GroupExtension
+end GroupExtension

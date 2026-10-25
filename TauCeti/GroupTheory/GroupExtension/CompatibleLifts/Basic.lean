@@ -14,8 +14,8 @@ public import TauCeti.GroupTheory.GroupExtension.Basic
 For an extension `S` and an action `ρ` on its quotient, `S.compatibleLifts ρ` is the subgroup
 of pairs consisting of an automorphism of the middle group and an element of the acting group.
 The automorphism fixes the included kernel pointwise and induces the specified quotient action.
-Its projection need not be surjective: `CompatibleLifts.toLiftable` restricts its codomain to
-the subgroup of elements that have a lift.
+Its projection need not be surjective: `GroupExtension.compatibleLiftsToLiftable` restricts its
+codomain to the subgroup of elements that have a lift.
 
 The action `ρ` need not be faithful. In particular, the projection remembers the acting-group
 element even when different elements induce the same quotient automorphism. Each compatible
@@ -61,108 +61,97 @@ theorem mem_compatibleLifts (x : MulAut E × A) :
       ∀ e, S.rightHom (x.1 e) = ρ x.2 (S.rightHom e) :=
   Iff.rfl
 
-end GroupExtension
-
-namespace TauCeti.CompatibleLifts
-
-open _root_.GroupExtension
-
-variable {N E G A : Type*} [Group N] [Group E] [Group G] [Group A]
-  (S : GroupExtension N E G) (ρ : A →* MulAut G)
-
 /-- The action of a compatible lift on the middle group. -/
-def toMulAut : S.compatibleLifts ρ →* MulAut E :=
+def compatibleLiftsToMulAut : S.compatibleLifts ρ →* MulAut E :=
   (MonoidHom.fst (MulAut E) A).comp (S.compatibleLifts ρ).subtype
 
-theorem toMulAut_apply (x : S.compatibleLifts ρ) :
-    toMulAut S ρ x = x.val.1 :=
+theorem compatibleLiftsToMulAut_apply (x : S.compatibleLifts ρ) :
+    compatibleLiftsToMulAut S ρ x = x.val.1 :=
   (rfl)
 
 /-- The quotient-action element recorded by a compatible lift. -/
-def projection : S.compatibleLifts ρ →* A :=
+def compatibleLiftsProjection : S.compatibleLifts ρ →* A :=
   (MonoidHom.snd (MulAut E) A).comp (S.compatibleLifts ρ).subtype
 
-theorem projection_apply (x : S.compatibleLifts ρ) :
-    projection S ρ x = x.val.2 :=
+theorem compatibleLiftsProjection_apply (x : S.compatibleLifts ρ) :
+    compatibleLiftsProjection S ρ x = x.val.2 :=
   (rfl)
 
 /-- Compatible lifts are equal when their two components agree. -/
 @[ext]
-theorem ext {x y : S.compatibleLifts ρ}
-    (hAut : toMulAut S ρ x = toMulAut S ρ y)
-    (hAct : projection S ρ x = projection S ρ y) : x = y :=
+theorem compatibleLifts_ext {x y : S.compatibleLifts ρ}
+    (hAut : compatibleLiftsToMulAut S ρ x = compatibleLiftsToMulAut S ρ y)
+    (hAct : compatibleLiftsProjection S ρ x = compatibleLiftsProjection S ρ y) : x = y :=
   Subtype.ext (Prod.ext hAut hAct)
 
 /-- The subgroup of acting-group elements that admit a compatible lift. -/
-def liftableSubgroup : Subgroup A :=
-  (projection S ρ).range
+abbrev compatibleLiftsLiftableSubgroup : Subgroup A :=
+  (compatibleLiftsProjection S ρ).range
 
-@[simp]
-theorem mem_liftableSubgroup {a : A} :
-    a ∈ liftableSubgroup S ρ ↔ ∃ f : MulAut E, (f, a) ∈ S.compatibleLifts ρ := by
+theorem mem_compatibleLiftsLiftableSubgroup {a : A} :
+    a ∈ compatibleLiftsLiftableSubgroup S ρ ↔ ∃ f : MulAut E, (f, a) ∈ S.compatibleLifts ρ := by
   constructor
   · rintro ⟨x, rfl⟩
-    exact ⟨toMulAut S ρ x, x.property⟩
+    exact ⟨compatibleLiftsToMulAut S ρ x, x.property⟩
   · rintro ⟨f, hf⟩
     exact ⟨⟨(f, a), hf⟩, rfl⟩
 
 /-- Projection onto the actual subgroup of elements admitting a lift. -/
-def toLiftable : S.compatibleLifts ρ →* liftableSubgroup S ρ :=
-  (projection S ρ).rangeRestrict
+abbrev compatibleLiftsToLiftable : S.compatibleLifts ρ →* compatibleLiftsLiftableSubgroup S ρ :=
+  (compatibleLiftsProjection S ρ).rangeRestrict
 
 @[simp]
-theorem coe_toLiftable (x : S.compatibleLifts ρ) :
-    (toLiftable S ρ x : A) = projection S ρ x :=
+theorem coe_compatibleLiftsToLiftable (x : S.compatibleLifts ρ) :
+    (compatibleLiftsToLiftable S ρ x : A) = compatibleLiftsProjection S ρ x :=
   (rfl)
 
-theorem toLiftable_surjective : Function.Surjective (toLiftable S ρ) :=
-  (projection S ρ).rangeRestrict_surjective
+theorem compatibleLiftsToLiftable_surjective : Function.Surjective
+    (compatibleLiftsToLiftable S ρ) :=
+  (compatibleLiftsProjection S ρ).rangeRestrict_surjective
 
-theorem ker_toLiftable : (toLiftable S ρ).ker = (projection S ρ).ker := by
-  ext x
-  simp only [MonoidHom.mem_ker, Subtype.ext_iff, coe_toLiftable, OneMemClass.coe_one]
-
-theorem toMulAut_inl (x : S.compatibleLifts ρ) (n : N) :
-    toMulAut S ρ x (S.inl n) = S.inl n :=
+@[simp]
+theorem compatibleLiftsToMulAut_inl (x : S.compatibleLifts ρ) (n : N) :
+    compatibleLiftsToMulAut S ρ x (S.inl n) = S.inl n :=
   x.property.1 n
 
-theorem rightHom_toMulAut (x : S.compatibleLifts ρ) (e : E) :
-    S.rightHom (toMulAut S ρ x e) = ρ (projection S ρ x) (S.rightHom e) :=
+@[simp]
+theorem rightHom_compatibleLiftsToMulAut (x : S.compatibleLifts ρ) (e : E) :
+    S.rightHom (compatibleLiftsToMulAut S ρ x e) =
+      ρ (compatibleLiftsProjection S ρ x) (S.rightHom e) :=
   x.property.2 e
 
-theorem rightHom_toMulAut_symm (x : S.compatibleLifts ρ) (e : E) :
-    S.rightHom ((toMulAut S ρ x).symm e) =
-      (ρ (projection S ρ x)).symm (S.rightHom e) := by
-  apply (ρ (projection S ρ x)).injective
+@[simp]
+theorem rightHom_compatibleLiftsToMulAut_symm (x : S.compatibleLifts ρ) (e : E) :
+    S.rightHom ((compatibleLiftsToMulAut S ρ x).symm e) =
+      (ρ (compatibleLiftsProjection S ρ x)).symm (S.rightHom e) := by
+  apply (ρ (compatibleLiftsProjection S ρ x)).injective
   simpa only [MulEquiv.apply_symm_apply] using
-    (rightHom_toMulAut S ρ x ((toMulAut S ρ x).symm e)).symm
+    (rightHom_compatibleLiftsToMulAut S ρ x ((compatibleLiftsToMulAut S ρ x).symm e)).symm
 
 /-- Conjugating a character twist pulls the character back by the inverse quotient action. -/
-theorem conjugate_twist (hcentral : S.inl.range ≤ Subgroup.center E)
+theorem compatibleLifts_conjugate_twist (hcentral : S.inl.range ≤ Subgroup.center E)
     (x : S.compatibleLifts ρ) (χ : G →* N) :
-    toMulAut S ρ x * twist S hcentral χ * (toMulAut S ρ x)⁻¹ =
-      twist S hcentral (χ.comp (ρ (projection S ρ x)).symm.toMonoidHom) := by
+    compatibleLiftsToMulAut S ρ x * twist S hcentral χ * (compatibleLiftsToMulAut S ρ x)⁻¹ =
+      twist S hcentral (χ.comp (ρ (compatibleLiftsProjection S ρ x)).symm.toMonoidHom) := by
   ext e
-  simp only [MulAut.mul_apply, MulAut.inv_apply]
-  rw [twist_apply, map_mul, toMulAut_inl, MulEquiv.apply_symm_apply, twist_apply,
-    MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom, rightHom_toMulAut_symm]
+  simp [MulAut.mul_apply, MulAut.inv_apply]
 
 /-- A compatible lift is an equivalence from the quotient-relabeled extension to the
 original extension. -/
-def toExtensionEquiv (x : S.compatibleLifts ρ) :
-    (S.relabelQuotient (ρ (projection S ρ x))).Equiv S where
-  toMulEquiv := toMulAut S ρ x
+def compatibleLiftsToExtensionEquiv (x : S.compatibleLifts ρ) :
+    (S.relabelQuotient (ρ (compatibleLiftsProjection S ρ x))).Equiv S where
+  toMulEquiv := compatibleLiftsToMulAut S ρ x
   inl_comm := by
     ext n
-    simpa only [Function.comp_apply, relabelQuotient_inl] using toMulAut_inl S ρ x n
+    simpa only [Function.comp_apply, relabelQuotient_inl] using compatibleLiftsToMulAut_inl S ρ x n
   rightHom_comm := by
     ext e
     simpa only [Function.comp_apply, relabelQuotient_rightHom, MonoidHom.comp_apply,
-      MulEquiv.coe_toMonoidHom] using rightHom_toMulAut S ρ x e
+      MulEquiv.coe_toMonoidHom] using rightHom_compatibleLiftsToMulAut S ρ x e
 
 @[simp]
-theorem toExtensionEquiv_apply (x : S.compatibleLifts ρ) (e : E) :
-    toExtensionEquiv S ρ x e = toMulAut S ρ x e :=
+theorem compatibleLiftsToExtensionEquiv_apply (x : S.compatibleLifts ρ) (e : E) :
+    compatibleLiftsToExtensionEquiv S ρ x e = compatibleLiftsToMulAut S ρ x e :=
   (rfl)
 
-end TauCeti.CompatibleLifts
+end GroupExtension
