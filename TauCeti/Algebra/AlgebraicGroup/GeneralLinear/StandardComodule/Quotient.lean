@@ -49,9 +49,7 @@ theorem quotientStandardComodule_mulVec_mem
   have h := corestrictStandardComodule_mulVec_mem R n
     (Bialgebra.Quotient.mkBialgHom (R := R) J.toIdeal) N
     (toConv (p.ofConv.comp φbar.hom.toAlgHom)) hv
-  change (pointToGeneralLinear n (toConv ((p.ofConv.comp φbar.hom.toAlgHom).comp
-    (Bialgebra.Quotient.mkBialgHom (R := R) J.toIdeal).toAlgHom)) :
-      Matrix (Fin n) (Fin n) R) *ᵥ v ∈ N at h
+  rw [BialgHom.mapDomain_apply, ofConv_toConv] at h
   simpa only [AlgHom.comp_assoc, ← BialgHom.comp_toAlgHom, hcomp] using h
 
 end TauCeti.GeneralLinear

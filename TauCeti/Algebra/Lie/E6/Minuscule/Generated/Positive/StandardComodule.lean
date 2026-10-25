@@ -89,9 +89,7 @@ private theorem rootPoint_matrix (i : Fin 6) (A : CommAlgCat.{u} R)
   have h :=
     pointToGeneralLinear_mapDomain_rootSubgroupToBaseChangeCoordinateMap_eq_rootSubgroupPoints
       R (.inl i) A q
-  change GeneralLinear.pointToGeneralLinear 27 (toConv
-    ((q.ofConv.comp (rootSubgroupToBaseChangeCoordinateMap R (.inl i)).hom.toAlgHom).comp
-      (coordinateMap R).hom.toAlgHom)) = _ at h
+  rw [BialgHom.mapDomain_apply, ofConv_toConv] at h
   simpa only [CommHopfAlgCat.hom_comp, BialgHom.comp_toAlgHom, AlgHom.comp_assoc] using h
 
 /-- Every positive subcomodule is stable under each raising-root point. -/

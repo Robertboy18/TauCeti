@@ -75,9 +75,7 @@ private theorem rootPoint_matrix (i : Fin 7) (A : CommAlgCat.{u} k)
   have h :=
     pointToGeneralLinear_mapDomain_rootSubgroupToBaseChangeCoordinateMap_eq_rootSubgroupPoints
       k (.inl i) A p
-  change GeneralLinear.pointToGeneralLinear 56 (toConv
-    ((p.ofConv.comp (rootSubgroupToBaseChangeCoordinateMap k (.inl i)).hom.toAlgHom).comp
-      (coordinateMap k).hom.toAlgHom)) = _ at h
+  rw [BialgHom.mapDomain_apply, ofConv_toConv] at h
   simpa only [CommHopfAlgCat.hom_comp, BialgHom.comp_toAlgHom, AlgHom.comp_assoc] using h
 
 private theorem single_mem_of_raising_step
