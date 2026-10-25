@@ -10,6 +10,7 @@ public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.Positive.Basic
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.RelativeBaseChange
 public import TauCeti.Algebra.AlgebraicGroup.Torus.Basic
 import TauCeti.Algebra.AlgebraicGroup.Hopf.KernelPoints
+import TauCeti.Algebra.Lie.E7.Minuscule.WeightTorus
 
 /-!
 # The closed weight torus of the generated E₇ subgroup
@@ -22,8 +23,9 @@ This is the torus inside `generatedCoordinateHopfAlgebra`, not the specializatio
 integral carrier studied in `E7.Minuscule.WeightTorus`. No equality of those carriers or
 maximality of this torus is asserted.
 
-The quotient and split-torus arguments follow `E7.Minuscule.WeightTorus`, using the existing
-Hopf-algebra first isomorphism theorem.
+The quotient uses the Hopf-algebra first isomorphism theorem. The split-torus property and
+point comparison are transported from `E7.Minuscule.WeightTorus` through the common torus
+coordinates.
 -/
 
 public section
@@ -83,14 +85,9 @@ theorem splitTorusCommHopfAlgProperty_quotient_weightTorusDefiningIdeal :
     splitTorusCommHopfAlgProperty R
       (FiniteTypeCommHopfAlgCat.quotient (finiteTypeGeneratedCoordinateHopfAlgebra R)
         (weightTorusDefiningIdeal R)) := by
-  rw [splitTorusCommHopfAlgProperty_iff]
-  let e : Multiplicative (Fin 7 →₀ ℤ) ≃* Multiplicative (ULift.{u} (Fin 7) →₀ ℤ) :=
-    AddEquiv.toMultiplicative (Finsupp.domCongr Equiv.ulift.symm)
-  let i : DiagonalizableGroup.coordinateRing R (SplitTorus.characterGroup (Fin 7)) ≅
-      DiagonalizableGroup.coordinateRing R (SplitTorus.characterGroup (ULift.{u} (Fin 7))) :=
-    ObjectProperty.isoMk _
-      (_root_.CommHopfAlgCat.isoMk (MonoidAlgebra.domCongrBialgEquiv R R e))
-  exact ⟨7, ⟨(weightTorusCoordinateIso R ≪≫ i).symm⟩⟩
+  exact (splitTorusCommHopfAlgProperty R).prop_of_iso
+    (E7Minuscule.weightTorusCoordinateIso R ≪≫ (weightTorusCoordinateIso R).symm)
+    (E7Minuscule.splitTorusCommHopfAlgProperty_quotient_weightTorusDefiningIdeal R)
 
 /-- Contravariantly, the closed weight torus lies in the generated positive subgroup. -/
 theorem carrierDefiningIdeal_le_weightTorusDefiningIdeal :
@@ -111,25 +108,14 @@ theorem pointsMulEquiv_mapPointsFunctor_generatedCoordinateLift_torus
             q)) =
       (weightTorusPoints A (SplitTorus.pointsMulEquiv q) :
         Matrix.GeneralLinearGroup (Fin 56) A) := by
-  have hcomp : (generatedCoordinateLift R (.inr ())).hom.comp (generatedCoordinateMap R).hom =
-      GeneralLinear.weightTorusCoordinateBialgHom (S := R) e7MinusculeWeight := by
-    rw [← _root_.CommHopfAlgCat.hom_comp, generatedCoordinateMap_comp_generatedCoordinateLift,
-      generatorCoordinateMap_inr, GeneralLinear.hom_weightTorusBaseChangeCoordinateMap]
-  have hp := CommHopfAlgCat.Hom.mapPointsFunctor_app_apply
-    (generatedCoordinateMap R ≫ generatedCoordinateLift R (.inr ())) A q
-  simp only [_root_.CommHopfAlgCat.hom_comp, hcomp] at hp
-  have he := (CommHopfAlgCat.Hom.mapPointsFunctor_comp_app_apply
-    (generatedCoordinateMap R) (generatedCoordinateLift R (.inr ())) A q).symm.trans hp
-  apply Units.ext
-  rw [coe_weightTorusPoints, UniversalEnvelopingAlgebra.kostantTorusMatrix_apply, diagGL_coe]
-  refine (congrArg (fun g ↦
-    (GeneralLinear.pointsMulEquiv 56 g : Matrix (Fin 56) (Fin 56) A)) he).trans ?_
-  rw [GeneralLinear.pointsMulEquiv_apply, GeneralLinear.weightTorusCoordinateBialgHom_def,
-    DiagonalizableGroup.pointToGeneralLinear_comp_diagonalCoordinateMap]
-  congr 1
-  funext i
-  exact congrArg (fun s : Aˣ ↦ (s : A))
-    (SplitTorus.charOfPoint_weightCharacter q (e7MinusculeWeight i))
+  have hg := CommHopfAlgCat.Hom.mapPointsFunctor_comp_app_apply
+    (generatedCoordinateMap R) (generatedCoordinateLift R (.inr ())) A q
+  have hs := CommHopfAlgCat.Hom.mapPointsFunctor_comp_app_apply
+    (coordinateMap R) (weightTorusToBaseChangeCoordinateMap R) A q
+  rw [generatedCoordinateMap_comp_generatedCoordinateLift, generatorCoordinateMap_inr] at hg
+  rw [coordinateMap_comp_weightTorusToBaseChangeCoordinateMap] at hs
+  exact (congrArg (GeneralLinear.pointsMulEquiv 56) (hg.symm.trans hs)).trans
+    (E7Minuscule.pointsMulEquiv_mapPointsFunctor_weightTorusToBaseChangeCoordinateMap R A q)
 
 /-- The closed generated torus maps to precisely the named weight-torus matrices in `GL₅₆`.
 The value algebra need not be reduced or a field. -/
