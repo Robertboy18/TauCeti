@@ -18,7 +18,7 @@ The sections need not be normalized or multiplicative.
 
 public section
 
-namespace TauCeti.GroupExtension.CompatibleLifts
+namespace TauCeti.CompatibleLifts
 
 open _root_.GroupExtension
 
@@ -37,9 +37,9 @@ theorem kernelSection_apply (x : (projection S ρ).ker) (σ : S.Section) (g : G)
     kernelSection S ρ x σ g = toMulAut S ρ x.val (σ g) := by
   simp only [kernelSection, Section.monoidHomComp_apply, MulEquiv.coe_toMonoidHom]
 
-end TauCeti.GroupExtension.CompatibleLifts
+end TauCeti.CompatibleLifts
 
-namespace TauCeti.GroupExtension.CompatibleLifts
+namespace TauCeti.CompatibleLifts
 
 open _root_.GroupExtension
 
@@ -55,4 +55,4 @@ theorem sectionDiff_kernelSection (x : (projection S ρ).ker) (σ : S.Section) (
   rw [TauCeti.GroupExtension.inl_sectionDiff, kernelSection_apply,
     inl_kernelCharacter_section]
 
-end TauCeti.GroupExtension.CompatibleLifts
+end TauCeti.CompatibleLifts

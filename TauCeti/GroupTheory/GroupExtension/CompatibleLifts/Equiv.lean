@@ -17,7 +17,7 @@ acting-group element and, for central extensions, the character twists.
 
 public section
 
-namespace TauCeti.GroupExtension.CompatibleLifts
+namespace TauCeti.CompatibleLifts
 
 open _root_.GroupExtension
 
@@ -108,9 +108,9 @@ theorem congr_twist (hcentral : S.inl.range ≤ Subgroup.center E) (χ : G →* 
   simpa only [Equiv.toMulEquiv_eq_coe, Equiv.coe_toMulEquiv, Equiv.coe_symm] using
     congrArg (S'.inl (χ (S'.rightHom e)) * ·) (F.toMulEquiv.apply_symm_apply e)
 
-end TauCeti.GroupExtension.CompatibleLifts
+end TauCeti.CompatibleLifts
 
-namespace TauCeti.GroupExtension.CompatibleLifts
+namespace TauCeti.CompatibleLifts
 
 open _root_.GroupExtension
 
@@ -126,4 +126,4 @@ theorem mapEquiv_character (χ : G →* N) :
   · rw [toMulAut_mapEquiv, toMulAut_character, toMulAut_character, congr_twist]
   · rw [projection_mapEquiv, projection_character, projection_character]
 
-end TauCeti.GroupExtension.CompatibleLifts
+end TauCeti.CompatibleLifts

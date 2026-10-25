@@ -63,7 +63,7 @@ theorem mem_compatibleLifts (x : MulAut E × A) :
 
 end GroupExtension
 
-namespace TauCeti.GroupExtension.CompatibleLifts
+namespace TauCeti.CompatibleLifts
 
 open _root_.GroupExtension
 
@@ -165,4 +165,4 @@ theorem toExtensionEquiv_apply (x : S.compatibleLifts ρ) (e : E) :
     toExtensionEquiv S ρ x e = toMulAut S ρ x e :=
   (rfl)
 
-end TauCeti.GroupExtension.CompatibleLifts
+end TauCeti.CompatibleLifts

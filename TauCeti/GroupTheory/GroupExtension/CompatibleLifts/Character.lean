@@ -18,7 +18,7 @@ compatible lift lying over the identity.
 
 public section
 
-namespace TauCeti.GroupExtension.CompatibleLifts
+namespace TauCeti.CompatibleLifts
 
 open _root_.GroupExtension
 
@@ -64,11 +64,11 @@ theorem character_injective : Function.Injective (character S ρ hcentral) := by
 
 /-- The displacement of a lift over the identity, expressed in the included kernel. -/
 private noncomputable def kernelDeviation (x : (projection S ρ).ker) (e : E) : N :=
-  inlInv S (toMulAut S ρ x.val e * e⁻¹)
+  TauCeti.GroupExtension.inlInv S (toMulAut S ρ x.val e * e⁻¹)
 
 private theorem inl_kernelDeviation (x : (projection S ρ).ker) (e : E) :
     S.inl (kernelDeviation S ρ x e) = toMulAut S ρ x.val e * e⁻¹ := by
-  apply inl_inlInv
+  apply TauCeti.GroupExtension.inl_inlInv
   rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
   simp only [map_mul, map_inv, rightHom_toMulAut, MonoidHom.mem_ker.mp x.property,
     map_one, MulAut.one_apply, mul_inv_cancel]
@@ -271,4 +271,4 @@ theorem mul_character_eq_character_mul (x : S.compatibleLifts ρ) (χ : G →* N
   rw [← conjugate_character]
   simp only [inv_mul_cancel_right]
 
-end TauCeti.GroupExtension.CompatibleLifts
+end TauCeti.CompatibleLifts
