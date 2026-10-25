@@ -39,11 +39,29 @@ noncomputable def signedOpposition : weightTable.SignedOpposition where
     simpa only [weightTable_reflection] using
       e7MinusculeSign_reflection i a (by simpa only [weightTable_weight] using h)
 
+@[simp]
+theorem signedOpposition_sign : signedOpposition.sign = e7MinusculeSign := by
+  rfl
+
 /-- The integral minuscule alternating form, read in any coefficient ring. -/
 noncomputable def alternatingForm (R : Type*) [CommRing R] : Matrix (Fin 56) (Fin 56) R :=
   signedOpposition.form R
 
 variable (R : Type*) [CommRing R]
+
+/-- The native alternating form is the form of the signed minuscule opposition. -/
+theorem alternatingForm_def : alternatingForm R = signedOpposition.form R := by
+  rfl
+
+@[simp]
+theorem alternatingForm_apply_opposition (a : Fin 56) :
+    alternatingForm R a (signedOpposition.opposition a) = (e7MinusculeSign a : R) := by
+  rw [alternatingForm_def, signedOpposition.form_apply_opposition, signedOpposition_sign]
+
+@[simp]
+theorem alternatingForm_apply_of_ne {a b : Fin 56} (h : b ≠ signedOpposition.opposition a) :
+    alternatingForm R a b = 0 := by
+  rw [alternatingForm_def, signedOpposition.form_apply_of_ne R h]
 
 @[simp]
 theorem alternatingForm_transpose : (alternatingForm R)ᵀ = -alternatingForm R :=
@@ -64,11 +82,9 @@ theorem alternatingForm_map {S : Type*} [CommRing S] (f : R →+* S) :
   signedOpposition.form_map R f
 
 /-- The highest weight pairs with its opposite with coefficient one. -/
-@[simp]
 theorem alternatingForm_zero_opposition :
     alternatingForm R 0 (signedOpposition.opposition 0) = 1 := by
-  rw [alternatingForm, signedOpposition.form_apply_opposition]
-  change (e7MinusculeSign 0 : R) = 1
+  rw [alternatingForm_apply_opposition]
   simp
 
 /-- All numbered root-subgroup points preserve the minuscule form. -/
@@ -201,10 +217,13 @@ theorem transpose_mul_alternatingForm_of_mem_points
   let M : Matrix (Fin 56) (Fin 56) R := g
   let N : Matrix (Fin 56) (Fin 56) R := g⁻¹
   have hNM : N * M = 1 := by simp [N, M]
-  have h := congrArg (fun X ↦ N * X) (mul_alternatingForm_transpose_of_mem_points R hg)
-  change N * (M * alternatingForm R * Mᵀ) = N * alternatingForm R at h
+  have h : M * alternatingForm R * Mᵀ = alternatingForm R :=
+    mul_alternatingForm_transpose_of_mem_points R hg
   have hleft : alternatingForm R * Mᵀ = N * alternatingForm R := by
-    simpa only [← Matrix.mul_assoc, hNM, Matrix.one_mul] using h
+    calc
+      _ = (N * M) * alternatingForm R * Mᵀ := by rw [hNM, Matrix.one_mul]
+      _ = N * (M * alternatingForm R * Mᵀ) := by simp only [Matrix.mul_assoc]
+      _ = N * alternatingForm R := by rw [h]
   have haux : alternatingForm R * (Mᵀ * alternatingForm R * M) =
       alternatingForm R * alternatingForm R := by
     calc
