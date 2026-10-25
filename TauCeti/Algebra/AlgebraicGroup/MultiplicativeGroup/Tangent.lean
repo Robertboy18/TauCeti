@@ -18,6 +18,9 @@ identifies the tangent Lie bracket with the zero bracket.
 
 ## Main declarations
 
+* `TauCeti.MultiplicativeGroup.derivation_T`: tangent derivations evaluate every integral
+  Laurent power by its exponent times their value on `T`.
+* `TauCeti.MultiplicativeGroup.derivation_ext`: agreement on `T` determines a tangent derivation.
 * `TauCeti.MultiplicativeGroup.tangentLinearEquiv`: the tangent space of `𝔾ₘ` is linearly
   equivalent to `B`.
 * `TauCeti.MultiplicativeGroup.tangent_bracket_eq_zero`: the tangent Lie bracket of `𝔾ₘ`
@@ -65,27 +68,24 @@ private lemma derivation_T_add (d : Derivation R H C) (m n : ℤ) :
     d (LaurentPolynomial.T m) + d (LaurentPolynomial.T n)
   simp only [one_mul, add_comm]
 
+/-- A tangent derivation evaluates an integral Laurent power by multiplying its value on `T`
+by the exponent. This uses the counit value one, including for negative powers. -/
+theorem derivation_T (d : Derivation R H C) (n : ℤ) :
+    d (LaurentPolynomial.T n) = n • d (LaurentPolynomial.T 1) := by
+  let f : ℤ →+ C :=
+    { toFun := fun m ↦ d (LaurentPolynomial.T m)
+      map_zero' := by simp
+      map_add' := derivation_T_add d }
+  change f n = n • f 1
+  simpa only [smul_eq_mul, mul_one] using f.map_zsmul n (1 : ℤ)
+
 /-- Two tangent derivations of the Laurent polynomial algebra are equal if they agree on `T`. -/
 @[ext]
 theorem derivation_ext {d e : Derivation R H C}
     (h : d (LaurentPolynomial.T 1) = e (LaurentPolynomial.T 1)) : d = e := by
   have hT : ∀ n : ℤ, d (LaurentPolynomial.T n) = e (LaurentPolynomial.T n) := by
     intro n
-    induction n using Int.induction_on with
-    | zero => simp
-    | succ n hn =>
-        rw [derivation_T_add d n 1, derivation_T_add e n 1, hn, h]
-    | pred n hn =>
-        calc
-          d (LaurentPolynomial.T (-(n : ℤ) - 1)) =
-              d (LaurentPolynomial.T (-(n : ℤ))) - d (LaurentPolynomial.T 1) := by
-                rw [eq_sub_iff_add_eq, ← derivation_T_add]
-                norm_num
-          _ = e (LaurentPolynomial.T (-(n : ℤ))) - e (LaurentPolynomial.T 1) := by
-                rw [hn, h]
-          _ = e (LaurentPolynomial.T (-(n : ℤ) - 1)) := by
-                rw [sub_eq_iff_eq_add, ← derivation_T_add]
-                norm_num
+    rw [derivation_T d n, derivation_T e n, h]
   apply Derivation.ext
   intro p
   induction p using LaurentPolynomial.induction_on' with

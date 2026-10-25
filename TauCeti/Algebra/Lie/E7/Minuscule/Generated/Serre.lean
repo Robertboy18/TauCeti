@@ -18,10 +18,10 @@ pairwise brackets. The differential of the closed immersion into `GL₅₆` is i
 these relations follow from the existing integral minuscule matrix relations.
 
 This constructs a comparison from the Serre presentation to the Lie algebra of the generated
-group and recovers the matrix representation after its tangent inclusion. It supplies an
-input to the Lie comparison and explicit carrier of `TauCetiRoadmap/ReductiveGroups/README.md`,
-Layer 9B. It does not identify the whole Lie algebra, prove that these vectors generate it,
-or identify the bracket-defined Cartan vectors with torus coroot differentials.
+group and recovers the matrix representation after its tangent inclusion. The companion
+`TauCeti.Algebra.Lie.E7.Minuscule.Generated.Coroot` module identifies the Cartan vectors with
+actual simple-coroot differentials.
+The comparison does not assert that these vectors generate the whole Lie algebra.
 
 ## Main declarations
 
@@ -74,7 +74,7 @@ theorem generatedTangentMatrixLieHom_generatedRootVector (k : Fin 7 ⊕ Fin 7) :
   rw [generatedTangentMatrixLieHom_apply, tangentMatrix_generatedRootVector]
 
 /-- The Cartan vector defined by the bracket of the normalized opposite root vectors.
-Identification with a torus coroot differential is a separate statement. -/
+The companion `Generated.Coroot` module identifies it with the simple-coroot differential. -/
 def generatedCartanVector (i : Fin 7) :
     Derivation R (generatedCoordinateHopfAlgebra R)
       (Bialgebra.CounitAlgebra R (generatedCoordinateHopfAlgebra R) R) :=
