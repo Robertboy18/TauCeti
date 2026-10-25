@@ -13,8 +13,9 @@ public import Mathlib.LinearAlgebra.Basis.Defs
 # Fixed vectors of a weighted cycle on a basis
 
 An enumeration of a basis and the actual weighted-cycle action equations for a
-linear endomorphism identify its fixed submodule with the annihilator of monodromy
-minus one. The inverse is the basis expansion with prefix-product coefficients.
+linear endomorphism identify its fixed submodule with the fixed coefficient tuples
+over a commutative semiring. Over a commutative ring these are the annihilator of
+monodromy minus one. The inverse is the basis expansion with prefix-product coefficients.
 This consumes a supplied basis and action; it does not construct a root-orbit basis.
 The enumeration exhausts the basis, so the module consists of one cycle.
 
@@ -22,9 +23,15 @@ The enumeration exhausts the basis, so the module consists of one cycle.
 
 public section
 
-namespace TauCeti.WeightedCycle
+open TauCeti.WeightedCycle
 
-variable {A V ι : Type*} [CommRing A] [AddCommGroup V] [Module A V] {n : ℕ}
+namespace Module.Basis
+
+variable {A V ι : Type*} {n : ℕ}
+
+section CommSemiring
+
+variable [CommSemiring A] [AddCommMonoid V] [Module A V]
 
 /-- Basis coordinates intertwine the given weighted-cycle action with `linearMap`. -/
 theorem equivFun_comp_eq_linearMap_comp (b : Module.Basis ι A V) (e : Fin (n + 1) ≃ ι)
@@ -73,6 +80,22 @@ theorem fixedBasisEquiv_symm_apply (b : Module.Basis ι A V)
     ((fixedBasisEquiv b e a f h).symm w : V) = ∑ i, w.val i • b (e i) := by
   simp [fixedBasisEquiv, Module.Basis.equivFun_symm_apply]
 
+/-- Every coefficient of a fixed vector is the corresponding prefix product times
+its initial coefficient, in the original basis indexing. -/
+theorem repr_eq_partialProd_mul (b : Module.Basis ι A V)
+    (e : Fin (n + 1) ≃ ι) (a : Fin (n + 1) → A) (f : V →ₗ[A] V)
+    (h : ∀ i, f (b (e i)) = a i • b (e (finRotate (n + 1) i)))
+    (v : f.fixedSubmodule) (i : Fin (n + 1)) :
+    b.repr v.val (e i) = Fin.partialProd (Fin.init a) i * b.repr v.val (e 0) := by
+  have hc := coeff_eq_partialProd_smul a (fixedBasisEquiv b e a f h v) i
+  simpa only [fixedBasisEquiv_apply, smul_eq_mul] using hc
+
+end CommSemiring
+
+section CommRing
+
+variable [CommRing A] [AddCommGroup V] [Module A V]
+
 /-- The initial basis coefficient classifies fixed vectors of the given endomorphism.
 For a negative signed cycle the codomain retains every coefficient killed by two. -/
 noncomputable def fixedEquivTorsionOfBasis (b : Module.Basis ι A V)
@@ -100,14 +123,6 @@ theorem fixedEquivTorsionOfBasis_symm_apply (b : Module.Basis ι A V)
       ∑ i, (Fin.partialProd (Fin.init a) i * t.val) • b (e i) := by
   simp [fixedEquivTorsionOfBasis]
 
-/-- Every coefficient of a fixed vector is the corresponding prefix product times
-its initial coefficient, in the original basis indexing. -/
-theorem repr_eq_partialProd_mul (b : Module.Basis ι A V)
-    (e : Fin (n + 1) ≃ ι) (a : Fin (n + 1) → A) (f : V →ₗ[A] V)
-    (h : ∀ i, f (b (e i)) = a i • b (e (finRotate (n + 1) i)))
-    (v : f.fixedSubmodule) (i : Fin (n + 1)) :
-    b.repr v.val (e i) = Fin.partialProd (Fin.init a) i * b.repr v.val (e 0) := by
-  have hc := coeff_eq_partialProd_smul a (fixedBasisEquiv b e a f h v) i
-  simpa only [fixedBasisEquiv_apply, smul_eq_mul] using hc
+end CommRing
 
-end TauCeti.WeightedCycle
+end Module.Basis

@@ -14,10 +14,10 @@ public import Mathlib.LinearAlgebra.FixedSubmodule
 
 A weighted cycle sends coordinate `i` to coordinate `finRotate _ i`, multiplying
 by `a i`. Its fixed tuples are determined by coordinate zero: the other coordinates
-are its scalar multiples by the prefix products, and the closing equation is
-torsion by `(∏ i, a i) - 1`. This holds over every commutative ring, with arbitrary
-weights. In particular, monodromy `1` gives the coefficient module, while monodromy
-`-1` gives its `2`-torsion.
+are its scalar multiples by the prefix products over every commutative semiring.
+Over a commutative ring, the closing equation is torsion by `(∏ i, a i) - 1`.
+The weights are arbitrary. In particular, monodromy `1` gives the coefficient module,
+while monodromy `-1` gives its `2`-torsion.
 
 The basis-facing form of this calculation is in `WeightedCycle.Basis`.
 
@@ -27,7 +27,11 @@ public section
 
 namespace TauCeti.WeightedCycle
 
-variable {A M : Type*} [CommRing A] [AddCommGroup M] [Module A M] {n : ℕ}
+variable {A M : Type*} {n : ℕ}
+
+section CommSemiring
+
+variable [CommSemiring A] [AddCommMonoid M] [Module A M]
 
 /-- The weighted cyclic shift: the weight at a source coordinate travels with it. -/
 def linearMap (a : Fin (n + 1) → A) : (Fin (n + 1) → M) →ₗ[A] (Fin (n + 1) → M) :=
@@ -79,6 +83,12 @@ theorem coeff_eq_partialProd_smul (a : Fin (n + 1) → A)
     rw [h, ih, Fin.partialProd_succ]
     rw [mul_smul]
     exact smul_comm _ _ _
+
+end CommSemiring
+
+section CommRing
+
+variable [CommRing A] [AddCommGroup M] [Module A M]
 
 /-- The fixed condition is the prefix formula together with the monodromy equation. -/
 theorem mem_fixedSubmodule_iff_partialProd (a : Fin (n + 1) → A)
@@ -179,5 +189,7 @@ theorem fixedEquivOfProdEqNegOne_symm_apply (a : Fin (n + 1) → A) (h : ∏ i, 
     (t : Submodule.torsionBy A M 2) (i : Fin (n + 1)) :
     ((fixedEquivOfProdEqNegOne a h).symm t).val i = Fin.partialProd (Fin.init a) i • t.val := by
   rfl
+
+end CommRing
 
 end TauCeti.WeightedCycle
