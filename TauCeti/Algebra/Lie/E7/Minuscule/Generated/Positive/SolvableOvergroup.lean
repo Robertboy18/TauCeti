@@ -14,7 +14,6 @@ import TauCeti.Algebra.Coalgebra.Comodule.Flag.Basic
 import TauCeti.Algebra.Coalgebra.Subcomodule.Coordinate
 import TauCeti.Algebra.Coalgebra.Subcomodule.Corestrict
 import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.StandardComodule.Quotient
-import TauCeti.Algebra.Lie.Presentation.MinusculeWeightTable.Raising
 import TauCeti.Algebra.Lie.E7.Minuscule.WeightAction
 
 /-!
@@ -96,15 +95,9 @@ private theorem single_mem_of_raising_step
   have hmem := GeneralLinear.quotientStandardComodule_mulVec_mem k 56 J
     (generatorCoordinateMap k (.inl (.inl i)))
     (((le_definingIdeal_iff k J).mp hJ).1 i) N p ha
-  rw [rootPoint_matrix i (CommAlgCat.of k k) p, MulEquiv.apply_symm_apply,
-    coe_rootSubgroupPoints_inl, toAdd_ofAdd, one_smul] at hmem
-  have hmatrix : raisingMatrix i = weightTable.raisingMatrix i := by
-    ext b c
-    simp
-  rw [hmatrix] at hmem
-  simpa only [weightTable_reflection, Subcomodule.mem_toSubmodule] using
-    weightTable.single_reflection_mem_of_mulVec_mem N.toSubmodule i a
-      (by simpa only [weightTable_weight] using hi) ha hmem
+  rw [rootPoint_matrix i (CommAlgCat.of k k) p, MulEquiv.apply_symm_apply] at hmem
+  simpa only [positiveRoot_mulVec_single_sub k i a hi, Subcomodule.mem_toSubmodule] using
+    N.toSubmodule.sub_mem hmem ha
 
 private theorem single_mem_of_raising_path
     (J : HopfIdeal k (GeneralLinear.coordinateHopfAlgebra k 56))
