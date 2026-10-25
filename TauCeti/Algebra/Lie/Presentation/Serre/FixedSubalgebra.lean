@@ -16,12 +16,9 @@ that performs the same reindexing on its three generator families. It therefore
 restricts to their fixed Lie subalgebras. If this particular realization is an
 equivalence, its restriction is an equivalence as well.
 
-This supplies a concrete consumer of the fixed-carrier transport in ReductiveGroups
-9A.1b. It makes no injectivity claim for a general Serre realization and no
-identification with a folded root type.
 -/
 
-@[expose] public section
+public section
 
 namespace TauCeti
 
@@ -49,7 +46,7 @@ noncomputable def serreLiftFixed :
 theorem coe_serreLiftFixed
     (x : (serreDiagramAut R CM hσ).toLieHom.fixedSubalgebra) :
     (serreLiftFixed h hσ ψ hH hE hF x : L) = serreLift h x :=
-  rfl
+  LieHom.coe_restrictFixed _ _ _
 
 /-- A Serre realization that is an equivalence identifies the two fixed Lie subalgebras. -/
 noncomputable def serreEquivFixed (e : Matrix.ToLieAlgebra R CM ≃ₗ⁅R⁆ L)
@@ -63,13 +60,13 @@ theorem serreEquivFixed_apply (e : Matrix.ToLieAlgebra R CM ≃ₗ⁅R⁆ L)
     (x : (serreDiagramAut R CM hσ).toLieHom.fixedSubalgebra) :
     serreEquivFixed h hσ ψ hH hE hF e he x = serreLiftFixed h hσ ψ hH hE hF x := by
   apply Subtype.ext
-  exact DFunLike.congr_fun he (x : Matrix.ToLieAlgebra R CM)
+  simpa [serreEquivFixed] using DFunLike.congr_fun he (x : Matrix.ToLieAlgebra R CM)
 
 @[simp]
 theorem coe_serreEquivFixed_symm (e : Matrix.ToLieAlgebra R CM ≃ₗ⁅R⁆ L)
     (he : e.toLieHom = serreLift h) (y : ψ.fixedSubalgebra) :
     ((serreEquivFixed h hσ ψ hH hE hF e he).symm y : Matrix.ToLieAlgebra R CM) =
       e.symm y :=
-  rfl
+  LieEquiv.coe_restrictFixed_symm _ _ _
 
 end TauCeti

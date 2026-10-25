@@ -20,7 +20,7 @@ Flatness is essential: negation on the zero-bracket Lie algebra `ℤ` has no non
 fixed element, whereas after extension to `ZMod 2` every element is fixed.
 -/
 
-@[expose] public section
+public section
 
 open TensorProduct
 
@@ -32,22 +32,51 @@ namespace LieHom
 
 variable (f : L →ₗ⁅R⁆ L)
 
+private def fixedSubalgebraTensorEquiv :
+    S ⊗[R] f.fixedSubalgebra ≃ₗ[S] S ⊗[R] LinearMap.eqLocus f.toLinearMap LinearMap.id :=
+  LinearEquiv.baseChange R S _ _
+    (LinearEquiv.ofEq _ _ (fixedSubalgebra_eq_eqLocus f))
+
+private theorem eqLocus_baseChange :
+    LinearMap.eqLocus (AlgebraTensorModule.lTensor S S f.toLinearMap)
+      (AlgebraTensorModule.lTensor S S (LinearMap.id : L →ₗ[R] L)) =
+        (f.baseChange S).fixedSubalgebra.toSubmodule := by
+  rw [fixedSubalgebra_eq_eqLocus, coe_baseChange]
+  exact congrArg (LinearMap.eqLocus (LinearMap.baseChange S f.toLinearMap))
+    (LinearMap.baseChange_id (R := R) (A := S) (M := L))
+
+private def fixedBaseChangeLinearMap :
+    S ⊗[R] f.fixedSubalgebra →ₗ[S] (f.baseChange S).fixedSubalgebra :=
+  (LinearEquiv.ofEq _ _ (eqLocus_baseChange S f)).toLinearMap.comp
+    ((LinearMap.tensorEqLocus S S f.toLinearMap LinearMap.id).comp
+      (fixedSubalgebraTensorEquiv S f).toLinearMap)
+
+private theorem coe_fixedBaseChangeLinearMap (x : S ⊗[R] f.fixedSubalgebra) :
+    (fixedBaseChangeLinearMap S f x : S ⊗[R] L) =
+      f.fixedSubalgebra.incl.baseChange S x := by
+  induction x with
+  | tmul s x =>
+      simp [fixedBaseChangeLinearMap, fixedSubalgebraTensorEquiv]
+      rfl
+  | add x y hx hy => simp [hx, hy]
+
 /-- The canonical map from extended fixed elements to fixed extended elements. -/
 def fixedBaseChange :
     S ⊗[R] f.fixedSubalgebra →ₗ⁅S⁆ (f.baseChange S).fixedSubalgebra where
-  __ := (f.fixedSubalgebra.incl.baseChange S).toLinearMap.codRestrict
-    (f.baseChange S).fixedSubalgebra.toSubmodule fun x => by
-      change f.baseChange S (f.fixedSubalgebra.incl.baseChange S x) =
-        f.fixedSubalgebra.incl.baseChange S x
-      induction x with
-      | tmul s x => simp
-      | add x y hx hy => simp [hx, hy]
-  map_lie' {x y} := Subtype.ext ((f.fixedSubalgebra.incl.baseChange S).map_lie x y)
+  __ := fixedBaseChangeLinearMap S f
+  map_lie' {x y} := Subtype.ext (calc
+    (fixedBaseChangeLinearMap S f ⁅x, y⁆ : S ⊗[R] L) =
+        f.fixedSubalgebra.incl.baseChange S ⁅x, y⁆ := coe_fixedBaseChangeLinearMap S f _
+    _ = ⁅f.fixedSubalgebra.incl.baseChange S x, f.fixedSubalgebra.incl.baseChange S y⁆ :=
+      (f.fixedSubalgebra.incl.baseChange S).map_lie x y
+    _ = ⁅(fixedBaseChangeLinearMap S f x : S ⊗[R] L),
+        (fixedBaseChangeLinearMap S f y : S ⊗[R] L)⁆ := by
+      rw [coe_fixedBaseChangeLinearMap, coe_fixedBaseChangeLinearMap])
 
 @[simp]
 theorem coe_fixedBaseChange (x : S ⊗[R] f.fixedSubalgebra) :
     (fixedBaseChange S f x : S ⊗[R] L) = f.fixedSubalgebra.incl.baseChange S x :=
-  rfl
+  coe_fixedBaseChangeLinearMap S f x
 
 theorem fixedBaseChange_tmul (s : S) (x : f.fixedSubalgebra) :
     (fixedBaseChange S f (s ⊗ₜ[R] x) : S ⊗[R] L) = s ⊗ₜ[R] (x : L) := by
@@ -55,31 +84,10 @@ theorem fixedBaseChange_tmul (s : S) (x : f.fixedSubalgebra) :
 
 private theorem fixedBaseChange_bijective [Module.Flat R S] :
     Function.Bijective (fixedBaseChange S f) := by
-  constructor
-  · have hinj : Function.Injective (f.fixedSubalgebra.incl.baseChange S) := by
-      change Function.Injective ⇑(f.fixedSubalgebra.incl.baseChange S).toLinearMap
-      rw [coe_baseChange]
-      exact Module.Flat.lTensor_preserves_injective_linearMap
-        f.fixedSubalgebra.toSubmodule.subtype Subtype.val_injective
-    intro x y h
-    apply hinj
-    exact congrArg Subtype.val h
-  · intro y
-    have hy : (y : S ⊗[R] L) ∈ LinearMap.range
-        (AlgebraTensorModule.lTensor S S f.fixedSubalgebra.toSubmodule.subtype) := by
-      change (y : S ⊗[R] L) ∈ LinearMap.range (AlgebraTensorModule.lTensor S S
-        (LinearMap.eqLocus f.toLinearMap LinearMap.id).subtype)
-      rw [← Module.Flat.eqLocus_lTensor_eq S S f.toLinearMap LinearMap.id]
-      change LinearMap.baseChange S f.toLinearMap y =
-        LinearMap.baseChange S (LinearMap.id : L →ₗ[R] L) y
-      rw [LinearMap.baseChange_id, ← coe_baseChange]
-      exact y.property
-    obtain ⟨x, hx⟩ := hy
-    refine ⟨x, Subtype.ext ?_⟩
-    rw [coe_fixedBaseChange]
-    change (f.fixedSubalgebra.incl.baseChange S).toLinearMap x = y
-    rw [coe_baseChange]
-    exact hx
+  let e := (fixedSubalgebraTensorEquiv S f).trans
+    ((LinearMap.tensorEqLocusEquiv S S f.toLinearMap LinearMap.id).trans
+      (LinearEquiv.ofEq _ _ (eqLocus_baseChange S f)))
+  exact e.bijective
 
 /-- Fixed Lie subalgebras commute with flat scalar extension. -/
 noncomputable def fixedBaseChangeEquiv [Module.Flat R S] :
@@ -88,7 +96,7 @@ noncomputable def fixedBaseChangeEquiv [Module.Flat R S] :
 
 @[simp]
 theorem fixedBaseChangeEquiv_apply [Module.Flat R S] (x : S ⊗[R] f.fixedSubalgebra) :
-    fixedBaseChangeEquiv S f x = fixedBaseChange S f x :=
+    fixedBaseChangeEquiv S f x = fixedBaseChange S f x := by
   rfl
 
 /-- The inverse comparison still maps to the given element under the extended inclusion. -/
@@ -99,12 +107,6 @@ theorem incl_fixedBaseChangeEquiv_symm [Module.Flat R S]
   rw [← coe_fixedBaseChange, ← fixedBaseChangeEquiv_apply, LieEquiv.apply_symm_apply]
 
 variable {f} {g : M →ₗ⁅R⁆ M} (u : L →ₗ⁅R⁆ M) (h : g.comp u = u.comp f)
-
-include h in
-/-- Scalar extension preserves the intertwining equation. -/
-theorem baseChange_intertwines :
-    (g.baseChange S).comp (u.baseChange S) = (u.baseChange S).comp (f.baseChange S) := by
-  rw [← baseChange_comp, h, baseChange_comp]
 
 /-- The fixed-subalgebra comparison is natural under intertwining maps. -/
 theorem fixedBaseChange_natural :
