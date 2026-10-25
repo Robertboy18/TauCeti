@@ -88,7 +88,7 @@ theorem fixedBasisEquiv_symm_apply (b : Module.Basis ι A V)
     (h : ∀ i, f (b (e i)) = a i • b (e (finRotate (n + 1) i)))
     (w : (linearMap a (M := A)).fixedSubmodule) :
     ((fixedBasisEquiv b e a f h).symm w : V) = ∑ i, w.val i • b (e i) := by
-  simp [fixedBasisEquiv]
+  simp [fixedBasisEquiv, fixedFamilyEquiv_symm_apply]
 
 /-- Every coefficient of a fixed vector is the corresponding prefix product times
 its initial coefficient, in the original basis indexing. -/

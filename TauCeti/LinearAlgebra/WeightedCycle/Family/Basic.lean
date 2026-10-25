@@ -93,7 +93,6 @@ theorem fixedFamilyEquiv_symm_repr [Finite J] (b : Module.Basis ι A V)
     (fixedFamilyEquiv_apply b e a f h ((fixedFamilyEquiv b e a f h).symm w) j i).symm
 
 /-- The inverse assembles the componentwise fixed tuples into the original basis. -/
-@[simp]
 theorem fixedFamilyEquiv_symm_apply [Fintype J] (b : Module.Basis ι A V)
     (e : (Σ j, Fin (n j + 1)) ≃ ι) (a : ∀ j, Fin (n j + 1) → A) (f : V →ₗ[A] V)
     (h : ∀ j i, f (b (e ⟨j, i⟩)) = a j i • b (e ⟨j, finRotate (n j + 1) i⟩))
@@ -148,14 +147,13 @@ theorem fixedEquivPiTorsionOfBasis_symm_repr [Finite J] (b : Module.Basis ι A V
   simp [fixedEquivPiTorsionOfBasis]
 
 /-- The inverse is the double basis sum with the native prefix-product coefficients. -/
-@[simp]
 theorem fixedEquivPiTorsionOfBasis_symm_apply [Fintype J] (b : Module.Basis ι A V)
     (e : (Σ j, Fin (n j + 1)) ≃ ι) (a : ∀ j, Fin (n j + 1) → A) (f : V →ₗ[A] V)
     (h : ∀ j i, f (b (e ⟨j, i⟩)) = a j i • b (e ⟨j, finRotate (n j + 1) i⟩))
     (t : ∀ j, Submodule.torsionBy A A ((∏ i, a j i) - 1)) :
     ((fixedEquivPiTorsionOfBasis b e a f h).symm t).val =
       ∑ j, ∑ i, (Fin.partialProd (Fin.init (a j)) i * (t j).val) • b (e ⟨j, i⟩) := by
-  simp [fixedEquivPiTorsionOfBasis]
+  simp [fixedEquivPiTorsionOfBasis, fixedFamilyEquiv_symm_apply]
 
 end CommRing
 
