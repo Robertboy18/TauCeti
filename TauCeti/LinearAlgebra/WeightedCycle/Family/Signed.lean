@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.LinearAlgebra.WeightedCycle.Family.Basic
+public import TauCeti.LinearAlgebra.Pi
 
 /-!
 # Integral signs and fixed vectors of a basis-cycle family
@@ -26,57 +27,42 @@ variable {A V ι J : Type*} {n : J → ℕ}
 
 private theorem sign_prod (ε : ∀ j, Fin (n j + 1) → ℤ)
     (hε : ∀ j i, ε j i = 1 ∨ ε j i = -1) (j : J) :
-    (∏ i, ε j i) = 1 ∨ (∏ i, ε j i) = -1 := by
-  classical
-  have hs (s : Finset (Fin (n j + 1))) :
-      (∏ i ∈ s, ε j i) = 1 ∨ (∏ i ∈ s, ε j i) = -1 := by
-    induction s using Finset.induction_on with
-    | empty => simp
-    | @insert i s hi ih =>
-      rw [Finset.prod_insert hi]
-      rcases hε j i with h | h <;> rcases ih with ih | ih <;> simp [h, ih]
-  exact hs Finset.univ
+    (∏ i, ε j i) = 1 ∨ (∏ i, ε j i) = -1 :=
+  Int.isUnit_iff.mp (IsUnit.prod_univ_iff.mpr fun i ↦ Int.isUnit_iff.mpr (hε j i))
 
 private def negativeIndexEquiv (ε : ∀ j, Fin (n j + 1) → ℤ)
     (hε : ∀ j i, ε j i = 1 ∨ ε j i = -1) :
     {j // (∏ i, ε j i) ≠ 1} ≃ {j // (∏ i, ε j i) = -1} :=
-  Equiv.subtypeEquivProp (funext fun j ↦ propext (by
+  Equiv.subtypeEquivRight fun j ↦ by
     constructor
     · exact fun h ↦ (sign_prod ε hε j).resolve_left h
     · intro h
       rw [h]
-      norm_num))
-
-private noncomputable def splitPiLinearEquiv (R : Type*) [Semiring R]
-    (p : J → Prop) (W : J → Type*) [∀ j, AddCommMonoid (W j)] [∀ j, Module R (W j)] :
-    (∀ j, W j) ≃ₗ[R] (∀ j : {j // p j}, W j) × (∀ j : {j // ¬p j}, W j) := by
-  classical
-  exact { Equiv.piEquivPiSubtypeProd p W with
-    map_add' := fun _ _ ↦ rfl
-    map_smul' := fun _ _ ↦ rfl }
+      norm_num
 
 variable [CommRing A] [AddCommGroup V] [Module A V]
 
 private noncomputable def fixedSignedTuplesEquiv (ε : ∀ j, Fin (n j + 1) → ℤ)
     (hε : ∀ j i, ε j i = 1 ∨ ε j i = -1) :
-    (∀ j, (linearMap (fun i ↦ (ε j i : A)) (M := A)).fixedSubmodule) ≃ₗ[A]
+    (∀ j, (TauCeti.WeightedCycle.linearMap (fun i ↦ (ε j i : A)) (M := A)).fixedSubmodule) ≃ₗ[A]
       ({j // (∏ i, ε j i) = 1} → A) ×
         ({j // (∏ i, ε j i) = -1} → Submodule.torsionBy A A 2) := by
+  classical
   let pos : (∀ j : {j // (∏ i, ε j i) = 1},
-      (linearMap (fun i ↦ (ε j.val i : A)) (M := A)).fixedSubmodule) ≃ₗ[A]
+      (TauCeti.WeightedCycle.linearMap (fun i ↦ (ε j.val i : A)) (M := A)).fixedSubmodule) ≃ₗ[A]
       ({j // (∏ i, ε j i) = 1} → A) :=
     LinearEquiv.piCongrRight fun j ↦ fixedEquivOfProdEqOne
       (fun i ↦ (ε j.val i : A)) (by
         simpa using congrArg (Int.castRingHom A) j.property)
   let neg : (∀ j : {j // (∏ i, ε j i) ≠ 1},
-      (linearMap (fun i ↦ (ε j.val i : A)) (M := A)).fixedSubmodule) ≃ₗ[A]
+      (TauCeti.WeightedCycle.linearMap (fun i ↦ (ε j.val i : A)) (M := A)).fixedSubmodule) ≃ₗ[A]
       ({j // (∏ i, ε j i) ≠ 1} → Submodule.torsionBy A A 2) :=
     LinearEquiv.piCongrRight fun j ↦ fixedEquivOfProdEqNegOne
       (fun i ↦ (ε j.val i : A)) (by
         have hj := (sign_prod ε hε j.val).resolve_left j.property
         simpa using congrArg (Int.castRingHom A) hj)
-  exact ((splitPiLinearEquiv A (fun j ↦ (∏ i, ε j i) = 1)
-    (fun j ↦ (linearMap (fun i ↦ (ε j i : A)) (M := A)).fixedSubmodule)).trans
+  exact ((LinearEquiv.piEquivPiSubtypeProd A (fun j ↦ (∏ i, ε j i) = 1)
+    (fun j ↦ (TauCeti.WeightedCycle.linearMap (fun i ↦ (ε j i : A)) (M := A)).fixedSubmodule)).trans
       (pos.prodCongr neg)).trans
         ((LinearEquiv.refl A _).prodCongr
           (LinearEquiv.piCongrLeft' A (fun _ ↦ Submodule.torsionBy A A 2)
@@ -101,8 +87,7 @@ theorem fixedEquivSignedFamily_apply_pos [Finite J] (b : Module.Basis ι A V)
     (h : ∀ j i, f (b (e ⟨j, i⟩)) = (ε j i : A) • b (e ⟨j, finRotate (n j + 1) i⟩))
     (v : f.fixedSubmodule) (j : {j // (∏ i, ε j i) = 1}) :
     (fixedEquivSignedFamily b e ε hε f h v).1 j = b.repr v.val (e ⟨j.val, 0⟩) := by
-  simp [fixedEquivSignedFamily, fixedSignedTuplesEquiv, splitPiLinearEquiv,
-    negativeIndexEquiv, Equiv.piEquivPiSubtypeProd, Equiv.subtypeEquivProp]
+  simp [fixedEquivSignedFamily, fixedSignedTuplesEquiv]
 
 /-- A negative cycle contributes its initial coefficient, including any nonzero `2`-torsion. -/
 @[simp]
@@ -113,8 +98,8 @@ theorem fixedEquivSignedFamily_apply_neg [Finite J] (b : Module.Basis ι A V)
     (v : f.fixedSubmodule) (j : {j // (∏ i, ε j i) = -1}) :
     ((fixedEquivSignedFamily b e ε hε f h v).2 j : A) =
       b.repr v.val (e ⟨j.val, 0⟩) := by
-  simp [fixedEquivSignedFamily, fixedSignedTuplesEquiv, splitPiLinearEquiv,
-    negativeIndexEquiv, Equiv.piEquivPiSubtypeProd, Equiv.subtypeEquivProp]
+  simp [fixedEquivSignedFamily, fixedSignedTuplesEquiv, negativeIndexEquiv,
+    Equiv.subtypeEquivRight_symm_apply]
 
 /-- Inverting the signed classification gives the prefix coefficients on a positive cycle. -/
 @[simp]
