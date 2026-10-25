@@ -94,7 +94,7 @@ noncomputable def rootIntMatrix (k : Fin (n + 1) ⊕ Fin (n + 1)) :
     Matrix (Fin ((n + 1) + (n + 1))) (Fin ((n + 1) + (n + 1))) ℤ :=
   TauCeti.UniversalEnvelopingAlgebra.kostantRootGeneratorIntMatrix
     (rootGenerator n) (cartanGenerator n) (rep n) (lattice n).toAddSubgroup
-    (fun _ hu _ hv ↦ rep_kostantForm_mem_lattice n hu hv) k (latticeBasis n)
+    (rep_kostantForm_mem_lattice n) k (latticeBasis n)
 
 /-- A numbered root generator acts on a coordinate basis vector by the corresponding column of
 `TauCeti.SpStd.rootIntMatrix`. -/
@@ -157,23 +157,12 @@ private theorem rootIntMatrix_mul_JFin_add_eq_zero (k : Fin (n + 1) ⊕ Fin (n +
 
 private theorem rootIntMatrix_mul_self_eq_zero (k : Fin (n + 1) ⊕ Fin (n + 1)) :
     rootIntMatrix n k * rootIntMatrix n k = 0 := by
-  have hsq := pow_two_rep_rootGenerator_eq_zero n k
-  have hG : (rootGenerator n k :
-      Matrix (Fin (n + 1) ⊕ Fin (n + 1)) (Fin (n + 1) ⊕ Fin (n + 1)) ℚ) *
-      (rootGenerator n k : Matrix _ _ ℚ) = 0 := by
-    ext a b
-    have h := DFunLike.congr_fun hsq (Pi.single b (1 : ℚ))
-    rw [pow_two, Module.End.mul_apply, rep_ι_apply, rep_ι_apply,
-      Matrix.mulVec_mulVec] at h
-    simp only [LinearMap.zero_apply] at h
-    have := congrFun h a
-    simpa [Matrix.mulVec_single] using this
   refine Matrix.map_injective (f := ((Int.castRingHom ℚ : ℤ →+* ℚ) : ℤ → ℚ))
     Int.cast_injective ?_
   simp only [Matrix.map_zero _ (map_zero (Int.castRingHom ℚ))]
   rw [← RingHom.mapMatrix_apply, map_mul]
   simp only [RingHom.mapMatrix_apply, Int.coe_castRingHom]
-  rw [map_rootIntMatrix, Matrix.submatrix_mul_equiv, hG]
+  rw [map_rootIntMatrix, Matrix.submatrix_mul_equiv, rootGenerator_mul_self_eq_zero]
   simp
 
 /-! ### The two generator matrices preserve the form -/
@@ -236,21 +225,21 @@ private theorem rootCoordinateMap_symplectic (k : Fin (n + 1) ⊕ Fin (n + 1)) :
     (GeneralLinear.genericMatrix ℤ ((n + 1) + (n + 1))).map
         (TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupCoordinateMap (rootGenerator n)
           (cartanGenerator n) (rep n) (lattice n).toAddSubgroup
-          (fun _ hu _ hv => rep_kostantForm_mem_lattice n hu hv) k
+          (rep_kostantForm_mem_lattice n) k
           (isNilpotent_rep_rootGenerator n k) (latticeBasis n)).hom.toAlgHom *
         (TauCeti.JFin (n + 1) ℤ).map
           (algebraMap ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ)) *
         ((GeneralLinear.genericMatrix ℤ ((n + 1) + (n + 1))).map
           (TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupCoordinateMap (rootGenerator n)
             (cartanGenerator n) (rep n) (lattice n).toAddSubgroup
-            (fun _ hu _ hv => rep_kostantForm_mem_lattice n hu hv) k
+            (rep_kostantForm_mem_lattice n) k
             (isNilpotent_rep_rootGenerator n k) (latticeBasis n)).hom.toAlgHom)ᵀ =
       (TauCeti.JFin (n + 1) ℤ).map
         (algebraMap ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ)) := by
   have ht :=
     map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul
       (rootGenerator n) (cartanGenerator n) (rep n) (lattice n).toAddSubgroup
-      (fun _ hu _ hv => rep_kostantForm_mem_lattice n hu hv) k
+      (rep_kostantForm_mem_lattice n) k
       (isNilpotent_rep_rootGenerator n k) (latticeBasis n) (rootIntMatrix n k)
       (nilpotencyClass_rep_rootGenerator n k).le (rep_rootGenerator_latticeBasis_eq_sum n k)
   rw [ht, TauCeti.JFin_map (n + 1) (algebraMap ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ))]
@@ -353,10 +342,10 @@ theorem symplecticDefiningHopfIdeal_le_definingIdeal :
     Symplectic.definingHopfIdeal ℤ (n + 1) ≤ definingIdeal n := by
   rw [definingIdeal_def, TauCeti.UniversalEnvelopingAlgebra.le_kostantToralDefiningIdeal_iff]
   refine ⟨fun k => ?_, ?_⟩
-  · exact ConstantForm.definingHopfIdeal_toIdeal_le_ker_of_map_genericMatrix_mul_mul_transpose
-      ℤ _ _ _ (rootCoordinateMap_symplectic n k)
-  · exact ConstantForm.definingHopfIdeal_toIdeal_le_ker_of_map_genericMatrix_mul_mul_transpose
-      ℤ _ _ _ (torusCoordinateMap_symplectic n)
+  · exact (ConstantForm.definingHopfIdeal_toIdeal_le_ker_iff ℤ _ _ _).2
+      (rootCoordinateMap_symplectic n k)
+  · exact (ConstantForm.definingHopfIdeal_toIdeal_le_ker_iff ℤ _ _ _).2
+      (torusCoordinateMap_symplectic n)
 
 /-- Every matrix-valued point of the full-weight type `C_(n+1)` carrier preserves the standard
 alternating form. -/
@@ -399,6 +388,5 @@ theorem toSymplectic_comp_inclusion :
   rw [toSymplectic, Symplectic.inclusion_def, GeneralLinear.hopfIdealInclusion_def,
     carrierι_def, TauCeti.UniversalEnvelopingAlgebra.kostantToralGroupSchemeι_def,
     ← Category.assoc, CommHopfAlgCat.quotientSpecMapOfLe_comp_quotientSpecι]
-  simp
 
 end TauCeti.SpStd

@@ -22,7 +22,9 @@ import Mathlib.Topology.Algebra.Group.Basic
 # Transfer instances for restricted and properly discontinuous actions
 
 This file records generic instances for actions on a topological space that typeclass search
-cannot otherwise reach. A submonoid, and hence a subgroup, inherits `ContinuousConstSMul` from
+cannot otherwise reach, and continuity of maps equal to fixed-element scalar actions.
+A continuous monoid action on a Hausdorff space has closed fixed sets.
+A submonoid, and hence a subgroup, inherits `ContinuousConstSMul` from
 an ambient scalar action; and a properly discontinuous action has `Finite` point stabilisers.
 It also records that a properly discontinuous scalar family on a nonempty σ-compact space is
 countable, and that the translates of a compact set under it form a locally finite family.
@@ -36,6 +38,11 @@ open embedding.
 
 * `Submonoid.continuousConstSMul` and `TauCeti.Subgroup.continuousConstSMul`: continuity
   in the point is inherited by a submonoid, hence by a subgroup.
+* `SubMulAction.continuousConstSMul`: continuity of the action of each element is inherited by an
+  invariant subset; in particular (`Units.continuousConstSMul_nonZero`) the units of a ring act
+  continuously on the nonzero vectors of a module on which they act continuously. These two
+  instances are from Zayn Blore's Mathlib pull request
+  [mathlib4#44117](https://github.com/leanprover-community/mathlib4/pull/44117).
 * `SubMulAction.properlyDiscontinuousSMul`: proper discontinuity is inherited by every invariant
   subspace.
 * `TauCeti.properlyDiscontinuousSMul_of_conjAct_smul_eq`: a conjugate `g H g⁻¹` of a
@@ -62,6 +69,17 @@ namespace TauCeti
 
 open Topology
 open scoped Pointwise
+
+/-- A map equal to the action of a fixed scalar is continuous. -/
+theorem continuous_of_eq_smul {G M : Type*} [TopologicalSpace M] [SMul G M]
+    [ContinuousConstSMul G M] (g : G) {f : M → M} (hf : ∀ m : M, f m = g • m) :
+    Continuous f :=
+  (continuous_const_smul g).congr fun m => (hf m).symm
+
+/-- The fixed set of an element acting continuously on a Hausdorff space is closed. -/
+theorem isClosed_fixedBy {M X : Type*} [Monoid M] [MulAction M X] [TopologicalSpace X]
+    [T2Space X] [ContinuousConstSMul M X] (g : M) : IsClosed (MulAction.fixedBy X g) :=
+  isClosed_eq (continuous_const_smul g) continuous_id
 
 section DisjointTranslates
 
@@ -251,7 +269,21 @@ theorem properlyDiscontinuousSMul {G X : Type*} [TopologicalSpace X] [SMul G X]
     exact
       ⟨(y : X), ⟨(x : X), ⟨x, hx, rfl⟩, congrArg Subtype.val hxy⟩, ⟨y, hy, rfl⟩⟩
 
+/-- A `SubMulAction` inherits the continuity of the action of each element. -/
+@[to_additive /-- A `SubAddAction` inherits the continuity of the action of each element. -/]
+instance continuousConstSMul {M X : Type*} [TopologicalSpace X] [SMul M X]
+    [ContinuousConstSMul M X] (p : SubMulAction M X) :
+    ContinuousConstSMul M p :=
+  ⟨fun c ↦ ((continuous_const_smul c).comp continuous_subtype_val).subtype_mk _⟩
+
 end SubMulAction
+
+/-- The units of `R` act continuously on the nonzero elements of `M` when they act continuously
+on `M`. -/
+instance Units.continuousConstSMul_nonZero {R M : Type*} [TopologicalSpace M] [Monoid R]
+    [AddCommMonoid M] [DistribMulAction R M] [ContinuousConstSMul Rˣ M] :
+    ContinuousConstSMul Rˣ {x : M // x ≠ 0} :=
+  inferInstanceAs (ContinuousConstSMul Rˣ (Units.nonZeroSubMul R M))
 
 namespace TauCeti
 

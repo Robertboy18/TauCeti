@@ -58,11 +58,13 @@ noncomputable section
 
 namespace TauCeti
 
+universe u
+
 open CategoryTheory ContCohomology _root_.ContinuousCohomology _root_.IntermediateField
 
 attribute [local instance] TopRep.distribMulAction
 
-variable {K : Type} [Field K]
+variable {K : Type u} [Field K]
 
 /-- The trivial `𝔽₂` coefficients are a discrete `G_K`-module. -/
 local instance : ContinuousSMul (AbsoluteGaloisGroup K) (trivialF2 (AbsoluteGaloisGroup K)).V :=
@@ -124,8 +126,9 @@ private theorem h2MuToUnits_explicitH2
         (explicitCoeff2 _ _ (kummerShortExact K 2 (isUnit_of_invertible _)).inclDistribMulActionHom
           continuous_of_discreteTopology
           (explicitCoeff2 _ _ (trivialF2ToMu2 K) continuous_of_discreteTopology z)) := by
-  rw [h2MuToUnits_def, ← TauCeti.ContinuousCohomology.coeffMap_eqToHom,
-    ← h2KummerToUnits_explicitH2AddEquivContinuousCohomology (isUnit_of_invertible _),
+  rw [kummerShortExact_inclDistribMulActionHom, h2MuToUnits_def,
+    ← TauCeti.ContinuousCohomology.coeffMap_eqToHom,
+    ← h2KummerToUnits_explicitH2AddEquivContinuousCohomology,
     ← explicitH2AddEquivContinuousCohomology_coeffMap, ← eqToHom_comp_kummerCoeffIsoTrivialF2_inv,
     TauCeti.ContinuousCohomology.coeffMap_comp]
   -- the two sides apply the same composite of coefficient maps, once as a composite morphism and
@@ -237,7 +240,6 @@ private theorem coboundary_eq {a b : Kˣ} {α β : (SeparableClosure K)ˣ}
       or_false, smul_one, div_one, one_div, mul_one]
   all_goals first
     | exact div_self' _
-    | exact inv_mul_cancel _
     | rw [← smul_mul', ← sq, hβ, smul_units_map_algebraMap]
     | rw [neg_mul, ← smul_mul', ← sq, hβ, smul_units_map_algebraMap, div_neg, div_one]
     | rw [← neg_inv, neg_mul, inv_mul_cancel, inv_neg_one]
@@ -280,7 +282,7 @@ private theorem inflateZ2_quadratic_sub_mem_B2 {a b : Kˣ} {α β : (SeparableCl
     simp only [hg, hk, or_self, ↓reduceIte]
     ext
     simp
-  simp only [Pi.sub_apply, hW, TwoCocycle.coe_inflateZ2, TwoCocycle.coe_toCocycles₂,
+  simp only [Pi.sub_apply, hW, TwoCocycle.coe_inflateZ2,
     TwoCocycle.inflate_toFun, hq]
   apply Additive.toMul.injective
   simp only [toMul_add, toMul_sub, Additive.toMul_smul, toMul_ofMul, apply_ite Additive.toMul,
@@ -306,7 +308,7 @@ theorem TwoCocycle.inflateClass_quadratic_eq_h2MuToUnits_cup {a b : Kˣ}
         (kummerClass a) (kummerClass b)) := by
   obtain ⟨β, hβ⟩ := exists_pow_eq_units_map (n := 2) (isUnit_of_invertible (2 : K)) b
   obtain ⟨W, hW, hWv⟩ := exists_h2MuToUnits_cup_kummerClass hα hβ
-  rw [TwoCocycle.inflateClass_def, hW]
+  rw [TwoCocycle.inflateClass_def, TwoCocycle.inflateH2_def, hW]
   exact congrArg _ (H2pi_eq_iff.2
     (inflateZ2_quadratic_sub_mem_B2 hα hβ L hcard hr W hWv))
 

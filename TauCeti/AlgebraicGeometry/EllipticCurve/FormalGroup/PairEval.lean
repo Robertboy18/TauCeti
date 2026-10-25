@@ -404,8 +404,7 @@ theorem formalAddEval_eq {t₁ t₂ : O} (h₁ : PowerSeries.HasEval t₁)
 /-- **The inverse law at parameters**: `F(t, ι(t)) = 0`, so the value of the inverse series at `t`
 is the additive inverse of `t` under the group law read at parameters. -/
 @[simp]
-theorem formalAddEval_formalInverseEval {t : O} (ht : PowerSeries.HasEval t)
-    (hι : PowerSeries.HasEval (W.formalInverseEval t)) :
+theorem formalAddEval_formalInverseEval {t : O} (ht : PowerSeries.HasEval t) :
     W.formalAddEval t (W.formalInverseEval t) = 0 := by
   have hid : (algebraMap O O) = RingHom.id O := rfl
   -- Evaluating the substituted pair at `t` is evaluating at the pair `(t, ι(t))`.
@@ -418,7 +417,7 @@ theorem formalAddEval_formalInverseEval {t : O} (ht : PowerSeries.HasEval t)
       (fun s : Unit ⊕ Unit ↦ MvPowerSeries.aeval (PowerSeries.hasEval ht)
         (Sum.elim MvPowerSeries.X (fun _ ↦ formalInverse W) s)) := by
     simp only [MvPowerSeries.coe_aeval, hid, hfam]
-    exact hasEval_pair ht hι
+    exact hasEval_pair ht (W.hasEval_formalInverseEval ht)
   have h := MvPowerSeries.aeval_subst W.hasSubst_invPair
     (MvPowerSeries.continuous_aeval (PowerSeries.hasEval ht)) hpair W.formalAdd
   rw [W.subst_invPair_formalAdd] at h
@@ -530,8 +529,7 @@ theorem formalAddEval_zero_right {t : O} (ht : PowerSeries.HasEval t) :
     funext s
     rcases s with _ | _
     · simp
-    · simpa using
-        MvPowerSeries.eval₂_C (φ := RingHom.id O) (a := fun _ : Unit ↦ t) (0 : O)
+    · simp
   have hev : MvPowerSeries.HasEval fun s : Unit ⊕ Unit ↦
       MvPowerSeries.aeval (PowerSeries.hasEval ht)
         ((Sum.elim MvPowerSeries.X (fun _ ↦ 0) : Unit ⊕ Unit → MvPowerSeries Unit O) s) := by
@@ -554,8 +552,7 @@ theorem formalAddEval_zero_left {t : O} (ht : PowerSeries.HasEval t) :
       Sum.elim (fun _ ↦ (0 : O)) fun _ ↦ t := by
     funext s
     rcases s with _ | _
-    · simpa using
-        MvPowerSeries.eval₂_C (φ := RingHom.id O) (a := fun _ : Unit ↦ t) (0 : O)
+    · simp
     · simp
   have hev : MvPowerSeries.HasEval fun s : Unit ⊕ Unit ↦
       MvPowerSeries.aeval (PowerSeries.hasEval ht)
