@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.LinearAlgebra.Graded.Insertion
 public import TauCeti.LinearAlgebra.TensorCoalgebra.Basic
 
 /-!
@@ -81,6 +82,20 @@ theorem splice_eq_of_tprod {n : ℕ} (x : Fin n → M) {a b p d : ℕ} (e : M) (
           else if _ : j.1 = p then e
           else x ⟨a + (j.1 + d - 1), by omega⟩) := by
   rw [splice, dite_eq_left ⟨hd, hpd, hab⟩]
+
+/-- A spliced word of a natural-indexed string is the word of the string with the block
+replaced. -/
+theorem splice_eq_of_tprod_replaceBlock (x : ℕ → M) {n p d : ℕ} (hd : 0 < d) (hpd : p + d ≤ n)
+    (e : M) :
+    splice R (fun i : Fin n ↦ x i) 0 n p d e =
+      of R M ⟨p + 1 + (n - p - d), by omega⟩
+        (PiTensorProduct.tprod R fun j : Fin (p + 1 + (n - p - d)) ↦ replaceBlock x p d e j) := by
+  rw [splice_eq_of_tprod R _ e (a := 0) (b := n) hd hpd (by omega)]
+  refine of_tprod_congr R M _ (by omega) fun j ↦ ?_
+  rcases lt_trichotomy (j : ℕ) p with h | h | h
+  · simp [h]
+  · simp [h]
+  · simp [h, show ¬ (j : ℕ) < p by omega, show (j : ℕ) ≠ p by omega]
 
 /-- Collapsing an empty subblock is zero: a letter is never produced out of nothing. -/
 @[simp]
@@ -202,7 +217,6 @@ private theorem deconcatenation_splice_left {n : ℕ} (x : Fin n → M) {a b p d
     rw [subword_eq_of_tprod R _ (by omega) (by omega),
       splice_eq_of_tprod R x e hd (by omega) (by omega)]
     refine of_tprod_congr R M _ (by omega) fun j ↦ ?_
-    have hj := j.isLt
     simp only [Fin.val_cast]
     split_ifs <;> first | rfl | exact congrArg x (by simp only [Fin.mk.injEq]; omega) | omega
   rw [hfst, hsnd]
@@ -231,7 +245,6 @@ private theorem deconcatenation_splice_right {n : ℕ} (x : Fin n → M) {a b p 
     rw [subword_eq_of_tprod R _ (by omega) (by omega),
       splice_eq_of_tprod R x e hd (by omega) (by omega)]
     refine of_tprod_congr R M _ (by omega) fun j ↦ ?_
-    have hj := j.isLt
     simp only [Fin.val_cast]
     split_ifs <;> first | rfl | exact congrArg x (by simp only [Fin.mk.injEq]; omega) | omega
   have hsnd : subword R
@@ -243,7 +256,6 @@ private theorem deconcatenation_splice_right {n : ℕ} (x : Fin n → M) {a b p 
     rw [subword_eq_of_tprod R _ (by omega) (by omega),
       subword_eq_of_tprod R x (by omega) (by omega)]
     refine of_tprod_congr R M _ (by omega) fun j ↦ ?_
-    have hj := j.isLt
     simp only [Fin.val_cast]
     have hjp : ¬(c + j.1) < p := by omega
     have hjp_ne : ¬(c + j.1) = p := by omega

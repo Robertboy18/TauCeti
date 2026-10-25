@@ -148,6 +148,46 @@ variable (T : NumericalType.{u})
 lemma intersection_comm (i j : T.Component) : T.intersection i j = T.intersection j i :=
   (T.intersection_isSymm.apply i j).symm
 
+/-! ### Weight and multiplicity bounds -/
+
+/-- Integral weight and multiplicity ratios with arbitrary natural bounds give uniform
+natural-number divisibility bounds. -/
+lemma exists_weight_and_multiplicity_dvd_and_le_of_int (T : NumericalType)
+    (jw jm : T.Component) {nw nm : ℕ}
+    (hw : ∀ i, ∃ k ≤ nw, (T.weight i : ℤ) = (k : ℤ) * T.weight jw)
+    (hm : ∀ i, ∃ k ≤ nm, (T.multiplicity i : ℤ) = (k : ℤ) * T.multiplicity jm) :
+    (∃ j, ∀ i, (T.weight j : ℕ) ∣ T.weight i ∧ (T.weight i : ℕ) ≤ nw * T.weight j) ∧
+      (∃ j, ∀ i, (T.multiplicity j : ℕ) ∣ T.multiplicity i ∧
+        (T.multiplicity i : ℕ) ≤ nm * T.multiplicity j) := by
+  have bound (f : T.Component → ℕ+) (j : T.Component) (n : ℕ)
+      (h : ∀ i, ∃ k ≤ n, (f i : ℤ) = (k : ℤ) * f j) :
+      ∃ j, ∀ i, (f j : ℕ) ∣ f i ∧ (f i : ℕ) ≤ n * f j := by
+    refine ⟨j, fun i ↦ ?_⟩
+    obtain ⟨k, hk, hi⟩ := h i
+    have hiNat : (f i : ℕ) = k * f j := by exact_mod_cast hi
+    rw [hiNat]
+    exact ⟨Nat.dvd_mul_left _ _, Nat.mul_le_mul_right _ hk⟩
+  exact ⟨bound T.weight jw nw hw, bound T.multiplicity jm nm hm⟩
+
+/-- Bounded integral ratios on an index type equivalent to the components give uniform weight
+and multiplicity divisibility bounds. Finite shape proofs can check their coefficient vectors on
+the index type without transporting each component through the inverse equivalence. -/
+lemma exists_weight_and_multiplicity_dvd_and_le_of_int_of_equiv (T : NumericalType)
+    {ι : Type*} (e : ι ≃ T.Component) (jw jm : ι) {nw nm : ℕ}
+    (hw : ∀ i, ∃ k ≤ nw, (T.weight (e i) : ℤ) = (k : ℤ) * T.weight (e jw))
+    (hm : ∀ i, ∃ k ≤ nm, (T.multiplicity (e i) : ℤ) =
+      (k : ℤ) * T.multiplicity (e jm)) :
+    (∃ j, ∀ i, (T.weight j : ℕ) ∣ T.weight i ∧ (T.weight i : ℕ) ≤ nw * T.weight j) ∧
+      (∃ j, ∀ i, (T.multiplicity j : ℕ) ∣ T.multiplicity i ∧
+        (T.multiplicity i : ℕ) ≤ nm * T.multiplicity j) := by
+  apply T.exists_weight_and_multiplicity_dvd_and_le_of_int (e jw) (e jm)
+  · intro i
+    obtain ⟨k, rfl⟩ := e.surjective i
+    exact hw k
+  · intro i
+    obtain ⟨k, rfl⟩ := e.surjective i
+    exact hm k
+
 /-! ### Connectedness of the intersection graph -/
 
 /-- Two components of a numerical type are adjacent when they are distinct and meet. -/
@@ -276,6 +316,17 @@ lemma multiplicity_mul_weight_le_of_pos {i j : T.Component} (hij : 0 < T.interse
   (mul_le_mul_of_nonneg_left (Int.le_of_dvd hij (T.weight_dvd i j))
     (Int.natCast_nonneg _)).trans (T.multiplicity_mul_intersection_le i j)
 
+/-- Two components that meet have intersection number `aᵢⱼ = wᵢα = wⱼβ` for positive integers `α`
+and `β`. -/
+lemma exists_intersection_eq_weight_mul {i j : T.Component} (h : 0 < T.intersection i j) :
+    ∃ α β : ℤ, 0 < α ∧ 0 < β ∧
+      T.intersection i j = T.weight i * α ∧ T.intersection i j = T.weight j * β := by
+  obtain ⟨α, hα⟩ := T.weight_dvd i j
+  obtain ⟨β, hβ⟩ := T.weight_dvd j i
+  rw [T.intersection_comm j i] at hβ
+  exact ⟨α, β, pos_of_mul_pos_right (hα ▸ h) (Int.natCast_nonneg _),
+    pos_of_mul_pos_right (hβ ▸ h) (Int.natCast_nonneg _), hα, hβ⟩
+
 /-! ### Numerical types with one component -/
 
 /-- A numerical type with a single component has zero intersection matrix
@@ -293,6 +344,16 @@ lemma one_lt_card_of_intersection_self_ne_zero {i : T.Component}
     (h : T.intersection i i ≠ 0) : 1 < Fintype.card T.Component :=
   lt_of_le_of_ne Fintype.card_pos fun h1 ↦
     h (T.intersection_eq_zero_of_card_eq_one h1.symm i i)
+
+/-- Any numerical type in which every component has self-intersection `-2w` has at least two
+components. -/
+lemma one_lt_card_of_intersection_self_eq
+    (hself : ∀ i, T.intersection i i = -(2 * (T.weight i : ℤ))) :
+    1 < Fintype.card T.Component := by
+  obtain ⟨i⟩ := T.componentNonempty
+  apply T.one_lt_card_of_intersection_self_ne_zero (i := i)
+  rw [hself i]
+  exact (neg_neg_of_pos (by positivity)).ne
 
 /-! ### Integrality of the signed genus -/
 

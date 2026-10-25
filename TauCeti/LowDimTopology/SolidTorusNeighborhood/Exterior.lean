@@ -5,11 +5,12 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Analysis.Normed.Module.Ball.RadialEquiv
 public import Mathlib.Analysis.SpecialFunctions.Sigmoid
 public import TauCeti.Geometry.Manifold.Boundary.BicollarSide
 public import TauCeti.Geometry.Manifold.Instances.Torus
 public import TauCeti.LowDimTopology.SolidTorusNeighborhood.Basic
+import TauCeti.Analysis.Complex.Circle
+import TauCeti.Analysis.Normed.Module.Ball.Radial.Equiv
 
 /-!
 # Knot exteriors from solid-torus neighbourhoods
@@ -34,6 +35,7 @@ topological charted-space structure.
 
 * `TauCeti.knotExterior`: the exterior of a solid torus neighbourhood.
 * `TauCeti.SolidTorus.halve`: the solid torus of half the radius inside the solid torus.
+* `TauCeti.halveBicollar`: the bicollar of its boundary torus, swept out by the annuli of `Φ`.
 * `TauCeti.IsSolidTorusNeighborhood.exteriorChartedSpace`: the exterior of the half-radius
   neighbourhood, charted on the Euclidean half-space.
 
@@ -41,8 +43,11 @@ topological charted-space structure.
 
 * `TauCeti.IsSolidTorusNeighborhood.comp_halve`: the half-radius solid torus is again a solid
   torus neighbourhood of the knot.
-* `TauCeti.IsSolidTorusNeighborhood.isBicollared_comp_halve_comp_boundaryInclusion`: its boundary
+* `TauCeti.IsSolidTorusNeighborhood.isBicollar_halveBicollar` and
+  `TauCeti.IsSolidTorusNeighborhood.isBicollared_comp_halve_comp_boundaryInclusion`: its boundary
   torus is bicollared.
+* `TauCeti.IsSolidTorusNeighborhood.preimage_halveBicollar_knotExterior`: the exterior of the
+  half-radius solid torus is the outer side of that bicollar.
 * `TauCeti.IsSolidTorusNeighborhood.boundary_exteriorChartedSpace`: the manifold boundary of the
   exterior is the boundary torus.
 
@@ -199,35 +204,35 @@ private theorem norm_sigmoidPolar (q : Circle × ℝ) : ‖sigmoidPolar q‖ = R
     Real.norm_of_nonneg (Real.sigmoid_pos _).le]
 
 private theorem isOpenEmbedding_sigmoidPolar : IsOpenEmbedding sigmoidPolar := by
-  let σ : ℝ → Ioi (0 : ℝ) := codRestrict Real.sigmoid (Ioi 0) fun t => Real.sigmoid_pos t
-  have hσ : IsOpenEmbedding σ := by
-    refine ⟨(IsEmbedding.subtypeVal.comp Topology.isEmbedding_sigmoid).codRestrict _ _, ?_⟩
-    have hσr : range σ = Subtype.val ⁻¹' range Real.sigmoid := range_codRestrict _
-    rw [hσr]
-    refine IsOpen.preimage continuous_subtype_val ?_
-    have : range Real.sigmoid = Ioo 0 1 := Real.range_sigmoid
-    exact this ▸ isOpen_Ioo
-  have hpolar : sigmoidPolar = Subtype.val ∘ (homeomorphUnitSphereProd ℂ).symm ∘
-      Prod.map (Homeomorph.refl Circle) σ := by
+  have hσ : IsOpenEmbedding Real.sigmoid :=
+    ⟨IsEmbedding.subtypeVal.comp Topology.isEmbedding_sigmoid, Real.range_sigmoid ▸ isOpen_Ioo⟩
+  have hpolar : sigmoidPolar = (fun q : sphere (0 : ℂ) 1 × ℝ => Real.sigmoid q.2 • (q.1 : ℂ)) ∘
+      Prod.map Circle.homeomorphSphere id := by
     funext q
-    -- `Circle` is the unit sphere of `ℂ` by definition, so the two sides agree on the nose once
-    -- the polar inverse is unfolded.
-    simp only [sigmoidPolar, Function.comp_apply, homeomorphUnitSphereProd_symm_apply_coe]
-    rfl
+    simp [sigmoidPolar]
   rw [hpolar]
-  exact isOpen_compl_singleton.isOpenEmbedding_subtypeVal.comp
-    ((homeomorphUnitSphereProd ℂ).symm.isOpenEmbedding.comp
-      ((Homeomorph.refl Circle).isOpenEmbedding.prodMap hσ))
+  exact (hσ.smul_coe_sphere Real.sigmoid_pos).comp
+    (Circle.homeomorphSphere.isOpenEmbedding.prodMap IsOpenEmbedding.id)
 
 /-- The bicollar of the boundary torus of the half-radius solid torus inside a solid torus
-neighbourhood `Φ`: `((u, z), t) ↦ Φ (σ(t) u, z)`. -/
-private noncomputable def halveBicollar (Φ : SolidTorus → X) (q : (Circle × Circle) × ℝ) : X :=
+neighbourhood `Φ`: `((u, z), t) ↦ Φ (σ(t) u, z)`, where `σ` is the logistic sigmoid. It meets
+the exterior of the half-radius solid torus exactly in its nonnegative half
+(`TauCeti.IsSolidTorusNeighborhood.preimage_halveBicollar_knotExterior`). -/
+noncomputable def halveBicollar (Φ : SolidTorus → X) (q : (Circle × Circle) × ℝ) : X :=
   Φ (⟨sigmoidPolar (q.1.1, q.2), mem_closedBall_zero_iff.mpr
     ((norm_sigmoidPolar _).trans_le (Real.sigmoid_le_one _))⟩, q.1.2)
 
+omit [TopologicalSpace X] in
+/-- The bicollar of the half-radius boundary torus stays inside the solid torus. -/
+theorem range_halveBicollar_subset (Φ : SolidTorus → X) : range (halveBicollar Φ) ⊆ range Φ := by
+  rintro _ ⟨q, rfl⟩
+  exact mem_range_self _
+
 namespace IsSolidTorusNeighborhood
 
-private theorem isBicollar_halveBicollar (h : IsSolidTorusNeighborhood f Φ) :
+/-- `TauCeti.halveBicollar Φ` is a bicollar of the boundary torus of the half-radius solid torus
+inside a solid torus neighbourhood `Φ`. -/
+theorem isBicollar_halveBicollar (h : IsSolidTorusNeighborhood f Φ) :
     IsBicollar (Φ ∘ SolidTorus.halve ∘ SolidTorus.boundaryInclusion) (halveBicollar Φ) := by
   -- The bicollar is `Φ` after an open embedding into the open solid torus.
   let e : (Circle × Circle) × ℝ ≃ₜ (Circle × ℝ) × Circle :=
@@ -257,7 +262,9 @@ theorem isBicollared_comp_halve_comp_boundaryInclusion (h : IsSolidTorusNeighbor
     IsBicollared (Φ ∘ SolidTorus.halve ∘ SolidTorus.boundaryInclusion) :=
   h.isBicollar_halveBicollar.isBicollared
 
-private theorem preimage_halveBicollar_knotExterior (h : IsSolidTorusNeighborhood f Φ) :
+/-- The bicollar `TauCeti.halveBicollar Φ` meets the exterior of the half-radius solid torus
+exactly in its nonnegative half. -/
+theorem preimage_halveBicollar_knotExterior (h : IsSolidTorusNeighborhood f Φ) :
     halveBicollar Φ ⁻¹' knotExterior (Φ := Φ ∘ SolidTorus.halve) = univ ×ˢ Ici 0 := by
   ext q
   simp only [mem_preimage, mem_knotExterior, image_comp, SolidTorus.image_halve_setOf_norm_lt_one,
