@@ -29,6 +29,11 @@ namespace TauCeti.WeightedCycle
 
 variable {A M : Type*} {n : ℕ}
 
+/-- The closing weight times the preceding prefix product is the total monodromy. -/
+private theorem last_mul_partialProd [CommMonoid A] (a : Fin (n + 1) → A) :
+    a (Fin.last n) * Fin.partialProd (Fin.init a) (Fin.last n) = ∏ i, a i := by
+  rw [mul_comm, Fin.partialProd_last, Fin.init_def, ← Fin.prod_univ_castSucc a]
+
 section CommSemiring
 
 variable [CommSemiring A] [AddCommMonoid M] [Module A M]
@@ -94,8 +99,7 @@ def fixedEquivOfProdEqOne (a : Fin (n + 1) → A) (h : ∏ i, a i = 1) :
     induction i using Fin.lastCases with
     | last =>
       simp only [finRotate_last, Fin.partialProd_zero, one_smul]
-      rw [← mul_smul, mul_comm, Fin.partialProd_last, Fin.init_def,
-        ← Fin.prod_univ_castSucc a, h, one_smul]
+      rw [← mul_smul, last_mul_partialProd, h, one_smul]
     | cast i =>
       rw [Fin.finRotate_castSucc, Fin.partialProd_succ, mul_smul]
       exact smul_comm _ _ _⟩
@@ -136,16 +140,14 @@ theorem mem_fixedSubmodule_iff_partialProd (a : Fin (n + 1) → A)
       coeff_eq_partialProd_smul a ⟨v, hv⟩
     refine ⟨hc, ?_⟩
     have h := (mem_fixedSubmodule_iff a v).mp hv (Fin.last n)
-    rw [finRotate_last, hc (Fin.last n), ← mul_smul, mul_comm,
-      Fin.partialProd_last, Fin.init_def, ← Fin.prod_univ_castSucc a] at h
+    rw [finRotate_last, hc (Fin.last n), ← mul_smul, last_mul_partialProd] at h
     simpa [sub_smul, sub_eq_zero] using h.symm
   · rintro ⟨hc, hm⟩
     rw [mem_fixedSubmodule_iff]
     intro i
     induction i using Fin.lastCases with
     | last =>
-      rw [finRotate_last, hc (Fin.last n), ← mul_smul, mul_comm,
-        Fin.partialProd_last, Fin.init_def, ← Fin.prod_univ_castSucc a]
+      rw [finRotate_last, hc (Fin.last n), ← mul_smul, last_mul_partialProd]
       have hm' : (∏ i, a i) • v 0 = v 0 := by
         simpa [sub_smul, sub_eq_zero] using hm
       exact hm'.symm
