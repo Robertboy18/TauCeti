@@ -11,6 +11,8 @@ public import TauCeti.Algebra.AlgebraicGroup.SplitTorus.Tangent
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.Serre
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.StandardComodule
 
+import TauCeti.Algebra.Lie.E7.Minuscule.ClosedGenerators
+
 /-!
 # Simple-coroot differentials in the generated E₇ group
 
@@ -20,8 +22,9 @@ brackets of the normalized opposite root vectors, over every commutative ring.
 
 The calculation uses character–cocharacter pairings in the 56-dimensional minuscule
 representation and the injective tangent inclusion. Consequently the Serre comparison sends
-its Cartan generators to these coroot differentials. The tangent image of the weight torus is
-their linear span and is therefore contained in the image of the Serre comparison.
+its Cartan generators to these coroot differentials. They form a basis of the tangent image
+of the weight torus, which is contained in the image of the Serre comparison. This also proves
+linear independence of the presented Serre Cartan generators over every commutative ring.
 No assertion of torus maximality or of surjectivity of the Serre comparison is needed.
 
 ## Main declarations
@@ -34,9 +37,14 @@ No assertion of torus maximality or of surjectivity of the Serre comparison is n
 * `range_derivationCompLieHom_generatedWeightTorusCoordinateMap_eq_span`: the toral tangent image.
 * `range_derivationCompLieHom_generatedWeightTorusCoordinateMap_le_range_generatedSerreLift`:
   containment of that image in the Serre image.
+* `linearIndependent_generatedCartanVector`: independence of the numbered Cartan vectors.
+* `generatedCartanBasis`: their basis of the toral tangent image.
+* `linearIndependent_serreH`: independence of the presented E₇ Cartan generators.
 -/
 
 public section
+
+open CategoryTheory
 
 namespace TauCeti.E7Minuscule
 
@@ -133,6 +141,58 @@ theorem range_derivationCompLieHom_generatedWeightTorusCoordinateMap_le_range_ge
   rw [range_derivationCompLieHom_generatedWeightTorusCoordinateMap_eq_span, Submodule.span_le]
   rintro _ ⟨i, rfl⟩
   exact ⟨serreH R (CartanMatrix.E 7) i, generatedSerreLift_serreH R i⟩
+
+/-- The weight-torus differential is injective over every coefficient algebra. -/
+theorem derivationCompLieHom_generatedWeightTorusCoordinateMap_injective
+    (B : Type*) [CommRing B] [Algebra R B] :
+    Function.Injective
+      (derivationCompLieHom (B := B) (generatedWeightTorusCoordinateMap R).hom) := by
+  apply derivationCompLieHom_injective_of_surjective
+  have h : Function.Surjective
+      (coordinateMap R ≫ weightTorusToBaseChangeCoordinateMap R).hom := by
+    simpa only [_root_.CommHopfAlgCat.hom_comp, BialgHom.coe_comp] using
+      (weightTorusToBaseChangeCoordinateMap_surjective R).comp (coordinateMap_surjective R)
+  rw [coordinateMap_comp_weightTorusToBaseChangeCoordinateMap,
+    ← generatedCoordinateMap_comp_generatedWeightTorusCoordinateMap] at h
+  exact Function.Surjective.of_comp
+    (by simpa only [_root_.CommHopfAlgCat.hom_comp, BialgHom.coe_comp] using h)
+
+/-- The numbered Cartan vectors are independent, including in characteristic two. -/
+theorem linearIndependent_generatedCartanVector :
+    LinearIndependent R (generatedCartanVector R) := by
+  have h := (SplitTorus.tangentBasis (R := R) (B := R) (I := Fin 7)).linearIndependent.map_injOn
+    (derivationCompLieHom (B := R) (generatedWeightTorusCoordinateMap R).hom).toLinearMap
+    (derivationCompLieHom_generatedWeightTorusCoordinateMap_injective R R).injOn
+  have heq :
+      ⇑(derivationCompLieHom (B := R) (generatedWeightTorusCoordinateMap R).hom).toLinearMap ∘
+          SplitTorus.tangentBasis (R := R) (B := R) (I := Fin 7) =
+        generatedCartanVector R := by
+    funext i
+    rw [Function.comp_apply, LieHom.coe_toLinearMap,
+      SplitTorus.derivationCompLieHom_tangentBasis (I := Fin 7),
+      generatedCartanVector_eq_corootDifferential, generatedCorootCocharacter,
+      derivationCompLieHom_apply]
+  rwa [heq] at h
+
+/-- The simple-coroot differentials form a basis of their span, the toral tangent image. -/
+def generatedCartanBasis :
+    Module.Basis (Fin 7) R (Submodule.span R (Set.range (generatedCartanVector R))) :=
+  Module.Basis.span (linearIndependent_generatedCartanVector R)
+
+/-- Including a Cartan basis vector into the tangent algebra gives the numbered Cartan vector. -/
+@[simp]
+theorem coe_generatedCartanBasis (i : Fin 7) :
+    (generatedCartanBasis R i :
+      Derivation R (generatedCoordinateHopfAlgebra R)
+        (Bialgebra.CounitAlgebra R (generatedCoordinateHopfAlgebra R) R)) =
+      generatedCartanVector R i :=
+  Module.Basis.coe_span_apply (linearIndependent_generatedCartanVector R) i
+
+/-- The presented E₇ Cartan generators are independent over every commutative ring. -/
+theorem linearIndependent_serreH :
+    LinearIndependent R (serreH R (CartanMatrix.E 7)) :=
+  TauCeti.linearIndependent_serreH (isSerreSystem_generatedRootVector R)
+    (linearIndependent_generatedCartanVector R)
 
 end
 
