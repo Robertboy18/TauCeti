@@ -15,9 +15,9 @@ public import Mathlib.LinearAlgebra.FixedSubmodule
 A weighted cycle sends coordinate `i` to coordinate `finRotate _ i`, multiplying
 by `a i`. Its fixed tuples are determined by coordinate zero: the other coordinates
 are its scalar multiples by the prefix products over every commutative semiring.
-Over a commutative ring, the closing equation is torsion by `(∏ i, a i) - 1`.
-The weights are arbitrary. In particular, monodromy `1` gives the coefficient module,
-while monodromy `-1` gives its `2`-torsion.
+Monodromy `1` gives the coefficient module over every commutative semiring.
+Over a commutative ring, the closing equation is torsion by `(∏ i, a i) - 1`,
+and monodromy `-1` gives its `2`-torsion. The weights are arbitrary.
 
 The basis-facing form of this calculation is in `WeightedCycle.Basis`.
 
@@ -84,6 +84,40 @@ theorem coeff_eq_partialProd_smul (a : Fin (n + 1) → A)
     rw [mul_smul]
     exact smul_comm _ _ _
 
+/-- A cycle of monodromy one contributes one copy of the coefficient module. -/
+def fixedEquivOfProdEqOne (a : Fin (n + 1) → A) (h : ∏ i, a i = 1) :
+    (linearMap a (M := M)).fixedSubmodule ≃ₗ[A] M where
+  toFun v := v.val 0
+  invFun t := ⟨fun i ↦ Fin.partialProd (Fin.init a) i • t, by
+    rw [mem_fixedSubmodule_iff]
+    intro i
+    induction i using Fin.lastCases with
+    | last =>
+      simp only [finRotate_last, Fin.partialProd_zero, one_smul]
+      rw [← mul_smul, mul_comm, Fin.partialProd_last, Fin.init_def,
+        ← Fin.prod_univ_castSucc a, h, one_smul]
+    | cast i =>
+      rw [Fin.finRotate_castSucc, Fin.partialProd_succ, mul_smul]
+      exact smul_comm _ _ _⟩
+  left_inv v := Subtype.ext <| funext fun i ↦ (coeff_eq_partialProd_smul a v i).symm
+  right_inv t := by simp
+  map_add' v w := rfl
+  map_smul' r v := rfl
+
+/-- Positive monodromy: the forward map is evaluation at zero. -/
+@[simp]
+theorem fixedEquivOfProdEqOne_apply (a : Fin (n + 1) → A) (h : ∏ i, a i = 1)
+    (v : (linearMap a (M := M)).fixedSubmodule) :
+    fixedEquivOfProdEqOne a h v = v.val 0 := by
+  rfl
+
+/-- Positive monodromy: the inverse retains the prefix-product formula. -/
+@[simp]
+theorem fixedEquivOfProdEqOne_symm_apply (a : Fin (n + 1) → A) (h : ∏ i, a i = 1)
+    (t : M) (i : Fin (n + 1)) :
+    ((fixedEquivOfProdEqOne a h).symm t).val i = Fin.partialProd (Fin.init a) i • t := by
+  rfl
+
 end CommSemiring
 
 section CommRing
@@ -145,27 +179,6 @@ theorem fixedEquivTorsion_apply (a : Fin (n + 1) → A)
 theorem fixedEquivTorsion_symm_apply (a : Fin (n + 1) → A)
     (t : Submodule.torsionBy A M ((∏ i, a i) - 1)) (i : Fin (n + 1)) :
     ((fixedEquivTorsion a).symm t).val i = Fin.partialProd (Fin.init a) i • t.val := by
-  rfl
-
-/-- A cycle of monodromy one contributes one copy of the coefficient module. -/
-def fixedEquivOfProdEqOne (a : Fin (n + 1) → A) (h : ∏ i, a i = 1) :
-    (linearMap a (M := M)).fixedSubmodule ≃ₗ[A] M :=
-  (fixedEquivTorsion a).trans <|
-    (LinearEquiv.ofEq _ _ (by ext t; simp [h])).trans
-      (Submodule.topEquiv : (⊤ : Submodule A M) ≃ₗ[A] M)
-
-/-- Positive monodromy: the forward map is evaluation at zero. -/
-@[simp]
-theorem fixedEquivOfProdEqOne_apply (a : Fin (n + 1) → A) (h : ∏ i, a i = 1)
-    (v : (linearMap a (M := M)).fixedSubmodule) :
-    fixedEquivOfProdEqOne a h v = v.val 0 := by
-  rfl
-
-/-- Positive monodromy: the inverse retains the prefix-product formula. -/
-@[simp]
-theorem fixedEquivOfProdEqOne_symm_apply (a : Fin (n + 1) → A) (h : ∏ i, a i = 1)
-    (t : M) (i : Fin (n + 1)) :
-    ((fixedEquivOfProdEqOne a h).symm t).val i = Fin.partialProd (Fin.init a) i • t := by
   rfl
 
 /-- A cycle of monodromy minus one contributes the full `2`-torsion submodule. -/
