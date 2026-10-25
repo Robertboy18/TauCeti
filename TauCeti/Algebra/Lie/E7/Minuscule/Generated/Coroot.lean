@@ -71,6 +71,8 @@ theorem generatedCorootCocharacter_eq_namedCoroot (ht : DynkinType.E7.Valid) (i 
   congr 1
   apply SplitTorus.cocharEquiv.injective
   erw [Equiv.apply_symm_apply, DynkinType.coroot_simpleIndex]
+  -- Expose the root datum's coroot coordinates as functions on `Fin 7` so that
+  -- `Pi.single_apply` matches at the simplifier's transparency level.
   change SplitTorus.cocharEquiv (Finsupp.applyAddHom i).toMultiplicative =
     (Pi.single i 1 : Fin 7 → ℤ)
   ext j

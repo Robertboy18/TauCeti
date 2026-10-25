@@ -44,13 +44,12 @@ private def monomialDerivative (d : Derivation R A C) : (I →₀ ℤ) →+ C wh
   map_zero' := by
     simpa only [ofAdd_zero, ← MonoidAlgebra.one_def] using d.map_one_eq_zero
   map_add' m n := by
-    rw [show MonoidAlgebra.single (Multiplicative.ofAdd (m + n)) (1 : R) =
-        MonoidAlgebra.single (Multiplicative.ofAdd m) 1 *
-          MonoidAlgebra.single (Multiplicative.ofAdd n) 1 by
-      rw [MonoidAlgebra.single_mul_single, one_mul]
-      rfl, Derivation.leibniz]
+    rw [ofAdd_add, ← mul_one (1 : R), ← MonoidAlgebra.single_mul_single,
+      Derivation.leibniz]
     simp only [Algebra.smul_def, CounitAlgebra.algebraMap_apply,
       MonoidAlgebra.counit_single, _root_.Bialgebra.counit_one, map_one]
+    -- The counit calculation leaves `1 : B`, while derivation values lie in the synonym `C`.
+    -- Display its identical multiplication on `C` so that `one_mul` applies.
     change (1 : C) * d _ + (1 : C) * d _ = d _ + d _
     simp only [one_mul, add_comm]
 
@@ -71,8 +70,9 @@ theorem derivation_ext {d e : Derivation R A C}
   | zero => simp only [map_zero]
   | add x y hx hy => simp only [map_add, hx, hy]
   | single m r =>
-    have hm := DFunLike.congr_fun hmon m.toAdd
-    change d (MonoidAlgebra.single m 1) = e (MonoidAlgebra.single m 1) at hm
+    have hm : d (MonoidAlgebra.single m 1) = e (MonoidAlgebra.single m 1) := by
+      simpa only [monomialDerivative, AddMonoidHom.coe_mk, ZeroHom.coe_mk, ofAdd_toAdd] using
+        DFunLike.congr_fun hmon m.toAdd
     have hs : MonoidAlgebra.single m r = r • MonoidAlgebra.single m (1 : R) := by
       rw [MonoidAlgebra.smul_single, smul_eq_mul, mul_one]
     rw [hs, Derivation.map_smul, Derivation.map_smul, hm]
@@ -95,30 +95,15 @@ private def coordinateDerivation (i : I) : Derivation R A C :=
     ((BialgHom.id R A).cocharacter (Finsupp.applyAddHom i).toMultiplicative)
     ((MultiplicativeGroup.tangentLinearEquiv (R := R) (B := B)).symm 1)
 
-private theorem cocharacter_single (i : I) (m : I →₀ ℤ) :
-    (BialgHom.id R A).cocharacter (Finsupp.applyAddHom i).toMultiplicative
-        (MonoidAlgebra.single (Multiplicative.ofAdd m) 1) =
-      LaurentPolynomial.T (m i) := by
-  apply (AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ).injective
-  change AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ _ =
-    AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ (LaurentPolynomial.T (m i))
-  have h := DFunLike.congr_fun
-    ((BialgHom.id R A).toMultiplicativeBialgEquiv_comp_cocharacter
-      (Finsupp.applyAddHom i).toMultiplicative)
-    (MonoidAlgebra.single (Multiplicative.ofAdd m) 1)
-  simpa only [BialgHom.comp_apply, BialgEquiv.coe_toBialgHom, BialgHom.id_apply,
-    MonoidAlgebra.mapDomainBialgHom_single, LaurentPolynomial.T,
-    AddMonoidAlgebra.toMultiplicativeBialgEquiv_single, AddMonoidHom.coe_toMultiplicative,
-    Function.comp_apply, toAdd_ofAdd, Finsupp.applyAddHom_apply] using h
-
 private theorem tangentCoordinates_coordinateDerivation [DecidableEq I] (i j : I) :
     tangentCoordinates (coordinateDerivation (R := R) (B := B) i) j =
       if i = j then 1 else 0 := by
-  change CounitAlgebra.algEquivSelf R A B
-    (coordinateDerivation (R := R) (B := B) i
-      (MonoidAlgebra.single (Multiplicative.ofAdd (Finsupp.single j 1)) 1)) = _
+  rw [tangentCoordinates_apply]
   simp only [coordinateDerivation, derivationCompLieHom_apply,
-    algEquivSelf_derivationComp_apply, BialgHom.coe_toAlgHom, cocharacter_single]
+    algEquivSelf_derivationComp_apply, BialgHom.coe_toAlgHom, BialgHom.cocharacter_id_single,
+    AddMonoidHom.coe_toMultiplicative, Function.comp_apply, toAdd_ofAdd,
+    Finsupp.applyAddHom_apply]
+  rw [← LaurentPolynomial.T]
   by_cases h : i = j
   · subst j
     simp only [Finsupp.single_eq_same, MultiplicativeGroup.tangentLinearEquiv_symm_apply_T,
@@ -156,7 +141,7 @@ theorem tangentLinearEquiv_apply [Finite I] (d : Derivation R A C) (i : I) :
     tangentLinearEquiv d i =
       CounitAlgebra.algEquivSelf R A B
         (d (MonoidAlgebra.single (Multiplicative.ofAdd (Finsupp.single i 1)) 1)) := by
-  change tangentCoordinates d i = _
+  unfold tangentLinearEquiv
   exact tangentCoordinates_apply d i
 
 /-- The tangent basis of a split torus, indexed by its coordinate cocharacters. -/
@@ -174,9 +159,8 @@ theorem tangentBasis_apply [Finite I] (i : I) :
   apply (tangentLinearEquiv (R := R) (B := B) (I := I)).injective
   simp only [tangentBasis, Module.Basis.coe_ofEquivFun, LinearEquiv.apply_symm_apply]
   ext j
-  change (Pi.single i (1 : B) : I → B) j =
-    tangentCoordinates (coordinateDerivation (R := R) (B := B) i) j
-  simpa only [Pi.single_apply, eq_comm] using
+  rw [tangentLinearEquiv_apply]
+  simpa only [coordinateDerivation, tangentCoordinates_apply, Pi.single_apply, eq_comm] using
     (tangentCoordinates_coordinateDerivation (R := R) (B := B) i j).symm
 
 /-- Every tangent vector is the sum of its coordinate values times the coordinate
@@ -189,20 +173,6 @@ theorem tangentLinearEquiv_symm_apply [Fintype I] (b : I → B) :
 
 variable {H : Type*} [CommRing H] [Bialgebra R H]
 
-private theorem cocharacter_id_comp (π : H →ₐc[R] A)
-    (ψ : Multiplicative (I →₀ ℤ) →* Multiplicative ℤ) :
-    ((BialgHom.id R A).cocharacter ψ).comp π = π.cocharacter ψ := by
-  ext x : 1
-  apply (AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ).injective
-  change AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ
-      (((BialgHom.id R A).cocharacter ψ) (π x)) =
-    AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ ((π.cocharacter ψ) x)
-  have h₁ := DFunLike.congr_fun
-    ((BialgHom.id R A).toMultiplicativeBialgEquiv_comp_cocharacter ψ) (π x)
-  have h₂ := DFunLike.congr_fun (π.toMultiplicativeBialgEquiv_comp_cocharacter ψ) x
-  simp only [BialgHom.comp_apply, BialgEquiv.coe_toBialgHom, BialgHom.id_apply] at h₁ h₂
-  exact h₁.trans h₂.symm
-
 /-- A split-torus differential sends a coordinate tangent vector to the differential of
 the corresponding cocharacter of its target. -/
 theorem derivationCompLieHom_tangentBasis [Finite I] (π : H →ₐc[R] A) (i : I) :
@@ -211,7 +181,7 @@ theorem derivationCompLieHom_tangentBasis [Finite I] (π : H →ₐc[R] A) (i : 
       derivationCompLieHom (π.cocharacter (Finsupp.applyAddHom i).toMultiplicative)
         ((MultiplicativeGroup.tangentLinearEquiv (R := R) (B := B)).symm 1) := by
   rw [tangentBasis_apply, ← LieHom.comp_apply, ← derivationCompLieHom_comp,
-    cocharacter_id_comp]
+    BialgHom.cocharacter_id_comp]
 
 /-- The tangent image of a finite split torus is the span of the differentials of its
 coordinate cocharacters. The map from the torus need not be an immersion. -/

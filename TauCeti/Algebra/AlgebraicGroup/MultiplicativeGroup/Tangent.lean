@@ -76,8 +76,8 @@ theorem derivation_T (d : Derivation R H C) (n : ℤ) :
     { toFun := fun m ↦ d (LaurentPolynomial.T m)
       map_zero' := by simp
       map_add' := derivation_T_add d }
-  change f n = n • f 1
-  simpa only [smul_eq_mul, mul_one] using f.map_zsmul n (1 : ℤ)
+  simpa only [smul_eq_mul, mul_one, f, AddMonoidHom.coe_mk, ZeroHom.coe_mk] using
+    f.map_zsmul n (1 : ℤ)
 
 /-- Two tangent derivations of the Laurent polynomial algebra are equal if they agree on `T`. -/
 @[ext]

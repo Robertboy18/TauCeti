@@ -157,18 +157,21 @@ theorem generatedTangentMatrixLieHom_comp_generatedSerreLift_int :
   · intro i
     rw [LieHom.comp_apply, generatedSerreLift_serreH,
       generatedTangentMatrixLieHom_generatedCartanVector]
-    exact (show (cartanMatrix i).map (Int.cast : ℤ → ℤ) = cartanMatrix i from
-      Matrix.ext fun _ _ ↦ Int.cast_id).trans (serreRepresentation_serreH i).symm
+    calc
+      _ = cartanMatrix i := Matrix.ext fun _ _ ↦ Int.cast_id
+      _ = _ := (serreRepresentation_serreH i).symm
   · intro i
     rw [LieHom.comp_apply, generatedSerreLift_serreE,
       generatedTangentMatrixLieHom_generatedRootVector, Sum.elim_inl]
-    exact (show (raisingMatrix i).map (Int.cast : ℤ → ℤ) = raisingMatrix i from
-      Matrix.ext fun _ _ ↦ Int.cast_id).trans (serreRepresentation_serreE i).symm
+    calc
+      _ = raisingMatrix i := Matrix.ext fun _ _ ↦ Int.cast_id
+      _ = _ := (serreRepresentation_serreE i).symm
   · intro i
     rw [LieHom.comp_apply, generatedSerreLift_serreF,
       generatedTangentMatrixLieHom_generatedRootVector, Sum.elim_inr]
-    exact (show (loweringMatrix i).map (Int.cast : ℤ → ℤ) = loweringMatrix i from
-      Matrix.ext fun _ _ ↦ Int.cast_id).trans (serreRepresentation_serreF i).symm
+    calc
+      _ = loweringMatrix i := Matrix.ext fun _ _ ↦ Int.cast_id
+      _ = _ := (serreRepresentation_serreF i).symm
 
 end
 

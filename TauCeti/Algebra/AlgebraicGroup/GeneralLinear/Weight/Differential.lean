@@ -57,6 +57,8 @@ private theorem cocharacter_comp_apply_X_of_weightTorus (a b : Fin N) :
   have h := DFunLike.congr_fun (π.toMultiplicativeBialgEquiv_comp_cocharacter ψ) (q x)
   simp only [BialgHom.comp_apply, BialgEquiv.coe_toBialgHom] at h
   apply (AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ).injective
+  -- Injectivity is inherited through `toMulEquiv`; expose the bialgebra-equivalence
+  -- application so that the composition identity `h` matches at rewrite transparency.
   change (AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ)
     ((π.cocharacter ψ) (q x)) =
       (AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ)
