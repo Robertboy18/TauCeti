@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Weight.Differential
 public import TauCeti.Algebra.AlgebraicGroup.SplitTorus.Cocharacter
+public import TauCeti.Algebra.AlgebraicGroup.SplitTorus.Tangent
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.Serre
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.StandardComodule
 
@@ -19,8 +20,9 @@ brackets of the normalized opposite root vectors, over every commutative ring.
 
 The calculation uses character–cocharacter pairings in the 56-dimensional minuscule
 representation and the injective tangent inclusion. Consequently the Serre comparison sends
-its Cartan generators to these coroot differentials. No assertion of torus maximality or of
-surjectivity of the Serre comparison is needed.
+its Cartan generators to these coroot differentials. The tangent image of the weight torus is
+their linear span and is therefore contained in the image of the Serre comparison.
+No assertion of torus maximality or of surjectivity of the Serre comparison is needed.
 
 ## Main declarations
 
@@ -29,6 +31,9 @@ surjectivity of the Serre comparison is needed.
 * `generatedTangentMatrixLieHom_corootDifferential`: its matrix of weight–coroot pairings.
 * `generatedCartanVector_eq_corootDifferential`: the normalized opposite-root bracket.
 * `generatedSerreLift_serreH_eq_corootDifferential`: the Cartan-generator value of the comparison.
+* `range_derivationCompLieHom_generatedWeightTorusCoordinateMap_eq_span`: the toral tangent image.
+* `range_derivationCompLieHom_generatedWeightTorusCoordinateMap_le_range_generatedSerreLift`:
+  containment of that image in the Serre image.
 -/
 
 public section
@@ -106,6 +111,28 @@ theorem generatedSerreLift_serreH_eq_corootDifferential (i : Fin 7) :
       derivationComp (generatedCorootCocharacter R i)
         (MultiplicativeGroup.tangentLinearEquiv.symm (1 : R)) := by
   rw [generatedSerreLift_serreH, generatedCartanVector_eq_corootDifferential]
+
+/-- The tangent image of the generated weight torus is the span of the normalized
+Cartan vectors. No injectivity of the torus differential is assumed. -/
+theorem range_derivationCompLieHom_generatedWeightTorusCoordinateMap_eq_span :
+    LinearMap.range
+        (derivationCompLieHom (B := R) (generatedWeightTorusCoordinateMap R).hom).toLinearMap =
+      Submodule.span R (Set.range (generatedCartanVector R)) := by
+  rw [SplitTorus.range_derivationCompLieHom]
+  congr 1
+  congr 1
+  funext i
+  rw [generatedCartanVector_eq_corootDifferential, generatedCorootCocharacter,
+    derivationCompLieHom_apply]
+
+/-- Every tangent vector in the weight-torus image is in the image of the Serre comparison. -/
+theorem range_derivationCompLieHom_generatedWeightTorusCoordinateMap_le_range_generatedSerreLift :
+    LinearMap.range
+        (derivationCompLieHom (B := R) (generatedWeightTorusCoordinateMap R).hom).toLinearMap ≤
+      LinearMap.range (generatedSerreLift R).toLinearMap := by
+  rw [range_derivationCompLieHom_generatedWeightTorusCoordinateMap_eq_span, Submodule.span_le]
+  rintro _ ⟨i, rfl⟩
+  exact ⟨serreH R (CartanMatrix.E 7) i, generatedSerreLift_serreH R i⟩
 
 end
 
