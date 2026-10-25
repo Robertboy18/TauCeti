@@ -189,7 +189,7 @@ theorem baseChangeMap_generatedCoordinateLift_comp_generatorCoordinateAlgebraBas
   have := ConcreteCategory.epi_of_surjective _
     (CommHopfAlgCat.baseChangeMap_surjective (K := S) _
       (generatedCoordinateMap_surjective R))
-  change F.map (generatedCoordinateLift R j) ≫ _ = _
+  rw [← CommHopfAlgCat.baseChangeFunctor_map] at this ⊢
   apply (cancel_epi (F.map (generatedCoordinateMap R))).mp
   have hquot :=
     baseChangeMap_generatedCoordinateMap_comp_generatedCoordinateHopfAlgebraBaseChangeIso_hom_assoc
@@ -197,15 +197,17 @@ theorem baseChangeMap_generatedCoordinateLift_comp_generatorCoordinateAlgebraBas
   calc
     _ = F.map (generatorCoordinateMap R j) ≫
         (generatorCoordinateAlgebraBaseChangeIso R S j).hom := by
-      simp only [← Category.assoc, ← Functor.map_comp,
+      rw [← Category.assoc, ← Functor.map_comp,
         generatedCoordinateMap_comp_generatedCoordinateLift]
     _ = (GeneralLinear.coordinateHopfAlgebraBaseChangeIso R S 56).hom ≫
-        generatorCoordinateMap S j :=
-      (Iso.inv_comp_eq (GeneralLinear.coordinateHopfAlgebraBaseChangeIso R S 56)).mp
+        generatorCoordinateMap S j := by
+      rw [CommHopfAlgCat.baseChangeFunctor_map]
+      exact (Iso.inv_comp_eq (GeneralLinear.coordinateHopfAlgebraBaseChangeIso R S 56)).mp
         (generatorCoordinateMap_baseChange R S j)
     _ = (GeneralLinear.coordinateHopfAlgebraBaseChangeIso R S 56).hom ≫
         generatedCoordinateMap S ≫ generatedCoordinateLift S j := by
       rw [generatedCoordinateMap_comp_generatedCoordinateLift]
-    _ = _ := hquot.symm
+    _ = _ := by
+      simpa only [CommHopfAlgCat.baseChangeFunctor_map] using hquot.symm
 
 end TauCeti.E7Minuscule

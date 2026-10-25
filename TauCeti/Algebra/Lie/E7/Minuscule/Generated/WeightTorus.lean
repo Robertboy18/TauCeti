@@ -153,16 +153,19 @@ theorem map_quotientPointsSubgroup_weightTorusDefiningIdeal (A : CommAlgCat.{v} 
   ext g
   simp only [Subgroup.mem_map, MonoidHom.mem_range]
   constructor
+  -- After removing the subgroup inclusion, composite monoid homomorphisms and
+  -- equivalences-to-homomorphisms have the same element map as the point comparison.
   · rintro ⟨_, ⟨q, rfl⟩, rfl⟩
-    exact ⟨_, ⟨SplitTorus.pointsMulEquiv q, rfl⟩,
-      (pointsMulEquiv_mapPointsFunctor_generatedCoordinateLift_torus R A q).symm⟩
+    refine ⟨_, ⟨SplitTorus.pointsMulEquiv q, rfl⟩, ?_⟩
+    simp only [Subgroup.coe_subtype]
+    exact (pointsMulEquiv_mapPointsFunctor_generatedCoordinateLift_torus R A q).symm
   · rintro ⟨_, ⟨s, rfl⟩, rfl⟩
     refine ⟨_, ⟨(SplitTorus.pointsMulEquiv (R := R) (A := A)).symm s, rfl⟩, ?_⟩
-    convert pointsMulEquiv_mapPointsFunctor_generatedCoordinateLift_torus R A
-      ((SplitTorus.pointsMulEquiv (R := R) (A := A)).symm s) using 1
-    · rfl
-    · rw [MulEquiv.apply_symm_apply]
-      rfl
+    simp only [Subgroup.coe_subtype]
+    have h := pointsMulEquiv_mapPointsFunctor_generatedCoordinateLift_torus R A
+      ((SplitTorus.pointsMulEquiv (R := R) (A := A)).symm s)
+    rw [MulEquiv.apply_symm_apply] at h
+    exact h
 
 variable (S : Type u) [CommRing S] [Algebra R S] [Module.Free R S]
 
