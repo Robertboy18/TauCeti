@@ -8,6 +8,8 @@ module
 public import Mathlib.NumberTheory.DirichletCharacter.Basic
 public import TauCeti.NumberTheory.ModularForms.EisensteinSeries.Weighted
 public import TauCeti.NumberTheory.ModularForms.Parity
+import TauCeti.Data.ZMod.Divisibility
+import TauCeti.NumberTheory.DirichletCharacter.Basic
 
 /-!
 # Eisenstein series with character
@@ -82,33 +84,15 @@ theorem charWeight_intCast [NeZero N] (huv : u * v ∣ N) (x : Fin 2 → ℤ) :
       if (v : ℤ) ∣ x 0 then ψ ((x 0 / v : ℤ) : ZMod u) * φ⁻¹ (x 1 : ZMod v) else 0 := by
   have hv : v ∣ N := dvd_of_mul_left_dvd huv
   simp only [charWeight, Function.comp_apply]
-  -- the second entry: reduction modulo `v` factors through reduction modulo `N`
   have h1 : (((x 1 : ZMod N).val : ℕ) : ZMod v) = (x 1 : ZMod v) := by
     rw [ZMod.natCast_val, ZMod.cast_intCast hv]
-  -- the first entry: the representative differs from `x 0` by a multiple of `N`
-  obtain ⟨s, hs⟩ : (N : ℤ) ∣ ((x 0 : ZMod N).val : ℤ) - x 0 :=
-    (ZMod.intCast_eq_intCast_iff_dvd_sub _ _ _).mp (by simp)
-  obtain ⟨t, rfl⟩ := huv
-  have hdvd : v ∣ (x 0 : ZMod (u * v * t)).val ↔ (v : ℤ) ∣ x 0 := by
-    rw [← Int.natCast_dvd_natCast, eq_add_of_sub_eq hs]
-    push_cast
-    exact dvd_add_right ⟨u * t * s, by ring⟩
+  have hdvd : v ∣ (x 0 : ZMod N).val ↔ (v : ℤ) ∣ x 0 := by
+    rw [← ZMod.natCast_eq_zero_iff, ZMod.natCast_val,
+      ZMod.cast_intCast hv, ZMod.intCast_zmod_eq_zero_iff_dvd]
   rw [h1]
-  split_ifs with h h' h''
-  · obtain ⟨c, hc⟩ := h'
-    have hv0 : (v : ℤ) ≠ 0 := by
-      rintro hv0
-      have hv0' : v = 0 := by exact_mod_cast hv0
-      exact NeZero.ne (u * v * t) (by simp [hv0'])
-    have hfactor : (↑(u * v * t) : ℤ) * s + v * c = v * (c + u * t * s) := by
-      push_cast
-      ring
-    have hval : ((((x 0 : ZMod (u * v * t)).val / v : ℕ) : ℤ)) = c + u * t * s := by
-      rw [Int.natCast_div, eq_add_of_sub_eq hs, hc, hfactor, Int.mul_ediv_cancel_left _ hv0]
-    rw [← Int.cast_natCast, hval, hc, Int.mul_ediv_cancel_left _ hv0]
-    simp
-  · exact absurd (hdvd.mp h) h'
-  · exact absurd (hdvd.mpr h'') h
+  simp only [hdvd]
+  split_ifs with h
+  · rw [ZMod.natCast_val_div_eq_intCast_div huv h]
   · rfl
 
 variable {k : ℤ}
@@ -248,10 +232,6 @@ theorem charEisensteinSeriesMF_eq_zero (hk : 3 ≤ k) (huv : u * v ∣ N)
     (h : ψ (-1) * φ (-1) ≠ (-1) ^ k) : charEisensteinSeriesMF ψ φ hk huv = 0 := by
   have hmem := charEisensteinSeriesMF_mem_modFormCharSpace ψ φ hk huv
   rwa [modFormCharSpace_eq_bot_of_char_neg_one_ne, Submodule.mem_bot] at hmem
-  have hneg {m : ℕ} (hm : m ∣ N) (χ : DirichletCharacter ℂ m) :
-      χ.changeLevel hm (-1) = χ (-1) := by
-    simpa using
-      DirichletCharacter.changeLevel_eq_cast_of_dvd' χ hm (a := -1) isCoprime_one_left.neg_left
-  simpa [MulChar.coe_toUnitHom, hneg] using h
+  simpa [MulChar.coe_toUnitHom] using h
 
 end TauCeti.EisensteinSeries

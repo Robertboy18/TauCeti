@@ -8,7 +8,7 @@ module
 public import TauCeti.Algebra.Homology.AInfinity.Algebra.Hom.Cohomology
 public import TauCeti.Algebra.Homology.AInfinity.Algebra.Minimal
 public import TauCeti.Algebra.Homology.AInfinity.Algebra.Transfer.Perturbation
-public import TauCeti.Algebra.Homology.Contraction.TensorTrick.Perturbation
+public import TauCeti.Algebra.Homology.Contraction.TensorTrick.Perturbation.Basic
 
 /-!
 # Homological transfer of A-infinity structures
@@ -131,6 +131,17 @@ noncomputable def barTensorTrick :
     (𝒜.isHomogeneous_homotopy_shift c hh) (𝒜.isHomogeneous_incl_shift c hincl)
     (𝒜.isHomogeneous_proj_shift c hproj)
 
+/-- The bar tensor trick is the reduced tensor-word contraction for the suspended gradings.
+The homogeneity witness for the differential may be supplied by the caller. -/
+theorem barTensorTrick_def
+    (hd : LinearMap.IsHomogeneous 𝒜.differential (𝒜.grading.shift 1).piece
+      (𝒜.grading.shift 1).piece 1) :
+    𝒜.barTensorTrick c hh hincl hproj =
+      c.reducedTensorWords (𝒜.grading.shift 1) (GH.shift 1) hd
+        (LinearMap.isHomogeneous_shift_piece_iff.2 hh)
+        (LinearMap.isHomogeneous_shift_piece_iff.2 hincl)
+        (LinearMap.isHomogeneous_shift_piece_iff.2 hproj) := (rfl)
+
 /-- The inclusion of the bar tensor trick is the letterwise inclusion. -/
 @[simp]
 theorem barTensorTrick_incl :
@@ -170,7 +181,7 @@ theorem isUnit_one_add_higherBarDifferential_mul_barTensorTrick_homotopy :
   exact 𝒜.isUnit_one_add_higherBarDifferential_comp_homotopy c
 
 /-- The perturbation operator `X = (1 + δ K)⁻¹ δ` of the bar construction has degree one. -/
-private theorem isHomogeneous_perturbationSeries :
+theorem isHomogeneous_perturbationSeries :
     LinearMap.IsHomogeneous
       ((𝒜.barTensorTrick c hh hincl hproj).perturbationSeries 𝒜.higherBarDifferential)
       (gradedPiece (𝒜.grading.shift 1))
@@ -232,6 +243,11 @@ reduced tensor coalgebra of `sH`, obtained from the tensor-trick contraction by 
 the higher bar differential of `𝒜`. -/
 noncomputable def transferBarDifferential : Module.End R (ReducedTensorWords R H) :=
   (𝒜.barTensorTrick c hh hincl hproj).perturbedDifferential 𝒜.higherBarDifferential
+
+/-- The transferred bar differential is the perturbed differential of the bar tensor trick. -/
+theorem transferBarDifferential_def :
+    𝒜.transferBarDifferential c hh hincl hproj =
+      (𝒜.barTensorTrick c hh hincl hproj).perturbedDifferential 𝒜.higherBarDifferential := (rfl)
 
 /-- The transferred bar differential is a graded coderivation for the suspended grading. -/
 theorem isGradedCoderivation_transferBarDifferential :
@@ -350,6 +366,16 @@ theorem barMap_transferInclusion :
             hproj)).incl := rfl
       _ = _ := by
         rw [LinearSpecialContraction.perturb_incl, barTensorTrick_incl, barTensorTrick_homotopy]
+
+/-- The Taylor components of the extending morphism are the letter projection of the perturbed
+inclusion `i - K X i`. -/
+theorem taylor_transferInclusion :
+    (𝒜.transferInclusion c hh hincl hproj).taylor =
+      letter R A ∘ₗ (ReducedTensorWords.map (R := R) c.incl -
+        c.reducedTensorWordsHomotopy (𝒜.grading.shift 1) ∘ₗ
+          (𝒜.barTensorTrick c hh hincl hproj).perturbationSeries 𝒜.higherBarDifferential ∘ₗ
+          ReducedTensorWords.map (R := R) c.incl) := by
+  rw [AInfinityHom.taylor_def, barMap_transferInclusion]
 
 /-- The linear part of the extending morphism is the inclusion of the contraction. -/
 @[simp]
@@ -688,6 +714,16 @@ theorem barMap_transferProjection :
             hproj)).proj := rfl
       _ = _ := by
         rw [LinearSpecialContraction.perturb_proj, barTensorTrick_proj, barTensorTrick_homotopy]
+
+/-- The Taylor components of the projection morphism are the letter projection of the perturbed
+projection `p - p X K`. -/
+theorem taylor_transferProjection :
+    (𝒜.transferProjection c hh hincl hproj).taylor =
+      letter R H ∘ₗ (ReducedTensorWords.map (R := R) c.proj -
+        ReducedTensorWords.map (R := R) c.proj ∘ₗ
+          (𝒜.barTensorTrick c hh hincl hproj).perturbationSeries 𝒜.higherBarDifferential ∘ₗ
+          c.reducedTensorWordsHomotopy (𝒜.grading.shift 1)) := by
+  rw [AInfinityHom.taylor_def, barMap_transferProjection]
 
 /-- The linear part of the projection morphism is the projection of the contraction. -/
 @[simp]

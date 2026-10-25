@@ -20,6 +20,9 @@ finiteness properties defining `K₀(proj R)` and `G₀(mod R)` survive it.
 * Along a **surjective** ring homomorphism, finite generation is preserved and reflected: every
   scalar of `S` is the image of a scalar of `R`, so the `S`-span and the `R`-span of a set
   coincide.
+* Along a ring homomorphism making `S` a **finitely generated** `R`-module, finite generation is
+  preserved, so restriction of scalars is a functor between the categories of finitely generated
+  modules.
 * Along a ring **isomorphism**, projectivity is preserved and reflected: the identity of the
   module is then a semilinear equivalence between the two module structures.
 
@@ -30,11 +33,19 @@ The API is dot notation on the ring homomorphism, respectively the ring isomorph
 
 * `RingHom.restrictScalarsSemilinearMap`: the identity of a module, as a semilinear map from its
   restriction of scalars.
+* `RingHom.finiteModulesRestrictScalars`: restriction of scalars along a finite ring
+  homomorphism, as a functor between the categories of finitely generated modules.
+* `RingHom.finiteModulesRestrictScalarsCompιIso`: the underlying module of an image under
+  `RingHom.finiteModulesRestrictScalars` is the restriction of scalars, naturally in the module.
+* `ModuleCat.restrictScalarsAlgebraMapIso`: restricting the scalars of an `S`-module along
+  `algebraMap R S` gives back its compatible `R`-module structure.
 
 ## Main results
 
 * `RingHom.finite_restrictScalars_iff` and `RingHom.isFG_restrictScalars_iff`: finite generation
   is invariant under restriction of scalars along a surjective ring homomorphism.
+* `RingHom.isFG_restrictScalars_of_finite`: finite generation is preserved by restriction of
+  scalars along a ring homomorphism `f : R →+* S` making `S` a finitely generated `R`-module.
 * `RingEquiv.projective_restrictScalars_iff`: projectivity is invariant under restriction of
   scalars along a ring isomorphism.
 -/
@@ -43,7 +54,7 @@ public section
 
 open CategoryTheory
 
-universe v u₁ u₂
+universe v u u₁ u₂
 
 variable {R : Type u₁} {S : Type u₂} [Ring R] [Ring S]
 
@@ -80,6 +91,51 @@ theorem isFG_restrictScalars_iff (f : R →+* S) (hf : Function.Surjective f)
     ModuleCat.isFG R ((ModuleCat.restrictScalars f).obj M) ↔ ModuleCat.isFG S M := by
   rw [ModuleCat.isFG_iff, ModuleCat.isFG_iff, f.finite_restrictScalars_iff hf]
 
+/-- **Finite generation along a finite ring homomorphism.** If `S` is finitely generated as an
+`R`-module through `f : R →+* S`, then restriction of scalars along `f` sends every finitely
+generated `S`-module to a finitely generated `R`-module. -/
+theorem isFG_restrictScalars_of_finite (f : R →+* S)
+    (hf : letI := f.toModule; Module.Finite R S)
+    {M : ModuleCat.{v} S} (hM : ModuleCat.isFG S M) :
+    ModuleCat.isFG R ((ModuleCat.restrictScalars f).obj M) := by
+  let : Module R S := f.toModule
+  let : Module R M := Module.compHom M f
+  have : Module.Finite R S := hf
+  have : Module.Finite S M := (ModuleCat.isFG_iff M).mp hM
+  have : IsScalarTower R S M := ⟨fun r s m ↦ mul_smul (f r) s m⟩
+  have hRM : Module.Finite R M := Module.Finite.trans S M
+  exact (ModuleCat.isFG_iff _).mpr hRM
+
+/-- **Restriction of scalars on finitely generated modules.** A ring homomorphism
+`f : R →+* S` making `S` a finitely generated `R`-module induces a functor from the finitely
+generated `S`-modules to the finitely generated `R`-modules, sending a module to the same module
+with scalars restricted along `f`. -/
+noncomputable def finiteModulesRestrictScalars {R S : Type u} [Ring R] [Ring S] (f : R →+* S)
+    (hf : letI := f.toModule; Module.Finite R S) : FGModuleCat.{u} S ⥤ FGModuleCat.{u} R :=
+  (ModuleCat.isFG R).lift ((ModuleCat.isFG S).ι ⋙ ModuleCat.restrictScalars f)
+    fun M ↦ f.isFG_restrictScalars_of_finite hf M.property
+
+instance {R S : Type u} [Ring R] [Ring S] (f : R →+* S)
+    (hf : letI := f.toModule; Module.Finite R S) :
+    (f.finiteModulesRestrictScalars hf).Additive := by
+  unfold finiteModulesRestrictScalars
+  infer_instance
+
+/-- The underlying module of the image of a finitely generated module under
+`RingHom.finiteModulesRestrictScalars` is the module with scalars restricted along `f`,
+naturally in the module. -/
+noncomputable def finiteModulesRestrictScalarsCompιIso {R S : Type u} [Ring R] [Ring S]
+    (f : R →+* S) (hf : letI := f.toModule; Module.Finite R S) :
+    f.finiteModulesRestrictScalars hf ⋙ (ModuleCat.isFG R).ι ≅
+      (ModuleCat.isFG S).ι ⋙ ModuleCat.restrictScalars f :=
+  ObjectProperty.liftCompιIso _ _ _
+
+@[simp]
+theorem finiteModulesRestrictScalars_obj_obj {R S : Type u} [Ring R] [Ring S] (f : R →+* S)
+    (hf : letI := f.toModule; Module.Finite R S) (M : FGModuleCat.{u} S) :
+    ((f.finiteModulesRestrictScalars hf).obj M).obj = (ModuleCat.restrictScalars f).obj M.obj :=
+  (rfl)
+
 end RingHom
 
 namespace RingEquiv
@@ -100,3 +156,43 @@ theorem projective_restrictScalars_iff (e : R ≃+* S) (M : ModuleCat.{v} S) :
   exact ⟨fun _ ↦ Module.Projective.of_equiv φ, fun _ ↦ Module.Projective.of_equiv φ.symm⟩
 
 end RingEquiv
+
+namespace ModuleCat
+
+variable {R : Type u₁} {S : Type u₂} [CommRing R] [Ring S] [Algebra R S]
+
+/-- For an `S`-module `M` whose `R`-module structure factors through `algebraMap R S`,
+restricting the scalars of `M` along `algebraMap R S` gives back `M` as an `R`-module. -/
+noncomputable def restrictScalarsAlgebraMapIso (M : Type v) [AddCommGroup M] [Module R M]
+    [Module S M] [IsScalarTower R S M] :
+    (restrictScalars.{v} (algebraMap R S)).obj (of S M) ≅ of R M where
+  -- Both carriers are `M` by definition, so each map is the identity function. The `show`s fix
+  -- which carrier an element is viewed in: as an element of `M` it has the `S`-module structure
+  -- needed by `algebraMap_smul`, while as an element of the restricted module it only has the
+  -- restricted `R`-action. Without them, instance synthesis and `rw` see the wrong carrier.
+  hom := ConcreteCategory.ofHom
+    { toFun := fun m ↦ (show M from m)
+      map_add' := fun _ _ ↦ rfl
+      map_smul' := fun r m ↦ by
+        rw [restrictScalars.smul_def]
+        exact algebraMap_smul S r (show M from m) }
+  inv := ConcreteCategory.ofHom
+    { toFun := fun m ↦ (show (restrictScalars.{v} (algebraMap R S)).obj (of S M) from m)
+      map_add' := fun _ _ ↦ rfl
+      map_smul' := fun r m ↦ by
+        rw [RingHom.id_apply, restrictScalars.smul_def]
+        exact (algebraMap_smul S r m).symm }
+
+@[simp]
+theorem restrictScalarsAlgebraMapIso_hom_apply (M : Type v) [AddCommGroup M] [Module R M]
+    [Module S M] [IsScalarTower R S M] (m : M) :
+    (restrictScalarsAlgebraMapIso (R := R) (S := S) M).hom m = m :=
+  (rfl)
+
+@[simp]
+theorem restrictScalarsAlgebraMapIso_inv_apply (M : Type v) [AddCommGroup M] [Module R M]
+    [Module S M] [IsScalarTower R S M] (m : M) :
+    (restrictScalarsAlgebraMapIso (R := R) (S := S) M).inv m = m :=
+  (rfl)
+
+end ModuleCat

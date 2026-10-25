@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.BigOperators.AlternatingSum
 public import TauCeti.CategoryTheory.Exact.Equivalence
 public import TauCeti.CategoryTheory.Exact.ExtensionClosed
 public import TauCeti.CategoryTheory.Exact.Split
@@ -32,6 +33,10 @@ exact structure is the smallest one (`TauCeti.ExactStructure.conflation_of_split
 structure on the same category. Both maps are characterized by their values on object classes,
 and both are natural in conflation-exact functors.
 
+For an exact-additive invariant, this file also provides finite Euler sums of explicitly supported
+`ℤ`-graded object families, together with support independence, reindexing, pointwise isomorphism,
+biproduct, and degreewise-conflation formulas.
+
 ## Main definitions
 
 * `TauCeti.conflationRelation S`: the relation `[X₂] - [X₁] - [X₃]` attached to a short complex,
@@ -39,6 +44,8 @@ and both are natural in conflation-exact functors.
 * `TauCeti.ExactK0 E`: exact `K₀`, with class map `TauCeti.ExactK0.of`.
 * `TauCeti.ExactK0.AdditiveInvariant E G`: an isomorphism-invariant, conflation-additive function
   on objects, and `TauCeti.ExactK0.lift` the homomorphism it induces.
+* `TauCeti.ExactK0.AdditiveInvariant.finiteEulerSum`: the finite Euler sum of the values of an
+  exact-additive invariant on a family of objects.
 * `TauCeti.ExactK0.RightAdditiveInvariant C E' G`: an object-level invariant additive on
   conflations in its second variable, and `TauCeti.ExactK0.RightAdditiveInvariant.rightLift` its
   one-sided descent.
@@ -48,6 +55,8 @@ and both are natural in conflation-exact functors.
 * `TauCeti.ExactK0.map` and `TauCeti.ExactK0.mapEquiv`: functoriality for conflation-exact
   functors and invariance under exact equivalences, with `TauCeti.ExactK0.transportEquiv` the
   instance of the latter for a transported exact structure.
+* `TauCeti.ExactK0.map₂`: the biadditive map induced by a bifunctor which is conflation-exact in
+  each variable, with `TauCeti.ExactK0.map₂_of_of` its value `[F(X, Y)]` on a pair of classes.
 * `TauCeti.ExactK0.ofLE` and `TauCeti.ExactK0.fromSplit`: the comparison induced by the identity
   functor towards an exact structure with more conflations, and its instance out of the split
   Grothendieck group; `TauCeti.ExactK0.ofLEEquiv` is the comparison isomorphism between exact
@@ -59,6 +68,9 @@ and both are natural in conflation-exact functors.
   `TauCeti.ExactK0.of_eq_zero_of_isZero` its biproduct and zero-object consequences.
 * `TauCeti.ExactK0.liftEquiv`: the universal property. Conflation-additive invariants with values
   in `G` correspond bijectively to homomorphisms `ExactK0 E →+ G`.
+* `TauCeti.ExactK0.AdditiveInvariant.finiteEulerSum_biprod` and
+  `TauCeti.ExactK0.AdditiveInvariant.finiteEulerSum_conflation`: additivity under pointwise
+  biproducts and degreewise conflations.
 * `TauCeti.ExactK0.RightAdditiveInvariant.rightLift_of` and
   `TauCeti.ExactK0.RightAdditiveInvariant.rightLift_unique`: evaluation and uniqueness of the
   one-sided descent.
@@ -95,8 +107,8 @@ section Relations
 
 variable {C : Type u} [Category.{v} C] [HasZeroMorphisms C] [EssentiallySmall.{w} C]
 
-/-- The relation `[X₂] - [X₁] - [X₃]` attached to a short complex. It is imposed in exact `K₀`
-exactly for the distinguished conflations. -/
+/-- The relation `[X₂] - [X₁] - [X₃]` attached to a short complex. Exact `K₀` imposes it for every
+conflation. -/
 noncomputable def conflationRelation (S : ShortComplex C) : FreeAbelianGroup (ObjectCode C) :=
   freeOf S.X₂ - freeOf S.X₁ - freeOf S.X₃
 
@@ -167,7 +179,7 @@ instance (E : ExactStructure C) : AddCommGroup (ExactK0 E) :=
 
 namespace ExactK0
 
-variable {E E'' : ExactStructure C} {E' : ExactStructure D}
+variable {E : ExactStructure C} {E' : ExactStructure D}
 
 /-- The class of an object in exact `K₀`. -/
 noncomputable def of (X : C) : ExactK0 E := PresentedK0.of X
@@ -205,14 +217,12 @@ theorem of_conflation_fullSubcategory {P : ObjectProperty C}
     ObjectProperty.hom_ext _ S.zero
   refine of_eq_add_of_conflation hzero ?_
   rw [ExactStructure.fullSubcategory_conflation_iff]
-  convert hS using 1
-  rfl
+  exact hS
 
 /-- The class of the subobject of a conflation is the difference of the other two classes. -/
 theorem of_eq_sub_of_conflation {S : ShortComplex C} (hS : E.Conflation S) :
     (of S.X₁ : ExactK0 E) = of S.X₂ - of S.X₃ := by
-  rw [of_conflation hS]
-  abel
+  rw [of_conflation hS, add_sub_cancel_right]
 
 /-- The class of a biproduct is the sum of the classes: every exact structure contains the
 biproduct conflations. -/
@@ -312,7 +322,7 @@ theorem AdditiveInvariant.obj_eq_zero_of_isZero (a : AdditiveInvariant E G) {X :
   rw [a.map_iso (hX.iso (isZero_zero C))]
   simpa using a.map_conflation (E.conflation_id_zero (0 : C))
 
-private noncomputable def AdditiveInvariant.toPresented (a : AdditiveInvariant E G) :
+private def AdditiveInvariant.toPresented (a : AdditiveInvariant E G) :
     PresentedK0.AdditiveInvariant (exactRelations E) G where
   obj := a.obj
   map_iso := a.map_iso
@@ -321,10 +331,6 @@ private noncomputable def AdditiveInvariant.toPresented (a : AdditiveInvariant E
     rw [map_conflationRelation_eq_zero_iff, freeLift_freeOf a.map_iso,
       freeLift_freeOf a.map_iso, freeLift_freeOf a.map_iso]
     exact a.map_conflation hS
-
-@[simp] private lemma AdditiveInvariant.toPresented_obj (a : AdditiveInvariant E G) :
-    a.toPresented.obj = a.obj :=
-  (rfl)
 
 /-- The homomorphism out of exact `K₀` induced by a conflation-additive invariant. -/
 noncomputable def lift (a : AdditiveInvariant E G) : ExactK0 E →+ G :=
@@ -357,6 +363,89 @@ lemma liftEquiv_apply (a : AdditiveInvariant E G) : liftEquiv a = lift a := (rfl
 lemma liftEquiv_symm_apply_obj (f : ExactK0 E →+ G) (X : C) :
     ((liftEquiv (E := E) (G := G)).symm f).obj X = f (of X) := (rfl)
 
+/-! ### Finite Euler sums of exact-additive invariants -/
+
+namespace AdditiveInvariant
+
+variable (a : ExactK0.AdditiveInvariant E G)
+
+/-- The Euler sum of an exact-additive invariant on a `ℤ`-indexed family of objects, over an
+explicit finite set of degrees. -/
+def finiteEulerSum (X : ℤ → C) (s : Finset ℤ) : G :=
+  TauCeti.finiteEulerSum (fun n ↦ a.obj (X n)) s
+
+omit [EssentiallySmall.{w} C] in
+/-- The object-family Euler sum is its defining finite alternating sum. -/
+theorem finiteEulerSum_def (X : ℤ → C) (s : Finset ℤ) :
+    a.finiteEulerSum X s = ∑ n ∈ s, (n.negOnePow : ℤ) • a.obj (X n) :=
+  by rw [AdditiveInvariant.finiteEulerSum, TauCeti.finiteEulerSum_def]
+
+omit [EssentiallySmall.{w} C] in
+@[simp]
+theorem finiteEulerSum_empty (X : ℤ → C) : a.finiteEulerSum X ∅ = 0 :=
+  TauCeti.finiteEulerSum_empty _
+
+omit [EssentiallySmall.{w} C] in
+/-- Adjoining a new degree adds its signed value to an object-family Euler sum. -/
+@[simp]
+theorem finiteEulerSum_insert (X : ℤ → C) {s : Finset ℤ} {n : ℤ} (hn : n ∉ s) :
+    a.finiteEulerSum X (insert n s) =
+      (n.negOnePow : ℤ) • a.obj (X n) + a.finiteEulerSum X s :=
+  TauCeti.finiteEulerSum_insert _ hn
+
+omit [EssentiallySmall.{w} C] in
+/-- If the object family is zero outside each of two finite sets, both sets compute the same
+Euler sum. -/
+theorem finiteEulerSum_eq_of_isZero (X : ℤ → C) {s t : Finset ℤ}
+    (hs : ∀ n, n ∉ s → IsZero (X n)) (ht : ∀ n, n ∉ t → IsZero (X n)) :
+    a.finiteEulerSum X s = a.finiteEulerSum X t :=
+  TauCeti.finiteEulerSum_eq_of_eq_zero _
+    (fun n hn ↦ a.obj_eq_zero_of_isZero (hs n hn))
+    (fun n hn ↦ a.obj_eq_zero_of_isZero (ht n hn))
+
+omit [EssentiallySmall.{w} C] in
+/-- Pointwise isomorphic object families have the same Euler sum. -/
+theorem finiteEulerSum_iso {X Y : ℤ → C} {s : Finset ℤ}
+    (e : ∀ n ∈ s, X n ≅ Y n) : a.finiteEulerSum X s = a.finiteEulerSum Y s :=
+  TauCeti.finiteEulerSum_congr fun n hn ↦ a.map_iso (e n hn)
+
+omit [EssentiallySmall.{w} C] in
+/-- Translating the degrees of an object family changes its Euler sum by the parity sign of the
+translation. -/
+theorem finiteEulerSum_reindex_add (X : ℤ → C) (m : ℤ) (s : Finset ℤ) :
+    a.finiteEulerSum (fun n ↦ X (n + m)) s =
+      (m.negOnePow : ℤ) •
+        a.finiteEulerSum X (s.map (Equiv.addRight m).toEmbedding) :=
+  by
+    rw [finiteEulerSum, finiteEulerSum]
+    exact TauCeti.finiteEulerSum_reindex_add (G := G) (fun n ↦ a.obj (X n)) m s
+
+omit [EssentiallySmall.{w} C] in
+/-- The Euler sum of pointwise biproducts is the sum of the two Euler sums. -/
+@[simp]
+theorem finiteEulerSum_biprod (X Y : ℤ → C) (s : Finset ℤ) :
+    a.finiteEulerSum (fun n ↦ X n ⊞ Y n) s =
+      a.finiteEulerSum X s + a.finiteEulerSum Y s := by
+  rw [finiteEulerSum, finiteEulerSum, finiteEulerSum, ← TauCeti.finiteEulerSum_add]
+  apply TauCeti.finiteEulerSum_congr
+  intro n _
+  exact a.map_conflation (E.conflation_biprodShortComplex (X n) (Y n))
+
+omit [EssentiallySmall.{w} C] in
+/-- A degreewise family of conflations gives an additive identity of Euler sums. Only the
+degrees in the stated finite range need to be conflations. -/
+theorem finiteEulerSum_conflation (S : ℤ → ShortComplex C) (s : Finset ℤ)
+    (hS : ∀ n ∈ s, E.Conflation (S n)) :
+    a.finiteEulerSum (fun n ↦ (S n).X₂) s =
+      a.finiteEulerSum (fun n ↦ (S n).X₁) s +
+        a.finiteEulerSum (fun n ↦ (S n).X₃) s := by
+  rw [finiteEulerSum, finiteEulerSum, finiteEulerSum, ← TauCeti.finiteEulerSum_add]
+  apply TauCeti.finiteEulerSum_congr
+  intro n hn
+  exact a.map_conflation (hS n hn)
+
+end AdditiveInvariant
+
 /-! ### Biadditive invariants -/
 
 /-- An object-level invariant on an indexing category and an exact category which is invariant
@@ -364,52 +453,48 @@ under isomorphisms in the first variable and additive on conflations in the seco
 Additivity already makes it invariant under isomorphisms in the second variable
 (`TauCeti.ExactK0.RightAdditiveInvariant.map_iso₂`). -/
 @[ext]
-structure RightAdditiveInvariant (C : Type u) [Category.{v} C] (E' : ExactStructure D)
+structure RightAdditiveInvariant (I : Type u) [Category.{v} I] (E' : ExactStructure D)
     (G : Type*) [AddCommGroup G] where
   /-- The value of the invariant on a pair of objects. -/
-  obj : C → D → G
+  obj : I → D → G
   /-- Isomorphic objects in the first variable receive equal values. -/
-  map_iso₁ : ∀ {X X' : C}, (X ≅ X') → ∀ Y : D, obj X Y = obj X' Y
+  map_iso₁ : ∀ {X X' : I}, (X ≅ X') → ∀ Y : D, obj X Y = obj X' Y
   /-- The invariant is additive on conflations in the second variable. -/
-  map_conflation₂ : ∀ (X : C) {S : ShortComplex D}, E'.Conflation S →
+  map_conflation₂ : ∀ (X : I) {S : ShortComplex D}, E'.Conflation S →
     obj X S.X₂ = obj X S.X₁ + obj X S.X₃
 
 namespace RightAdditiveInvariant
 
-variable (a : RightAdditiveInvariant C E' G)
+variable {I : Type u} [Category.{v} I] (a : RightAdditiveInvariant I E' G)
 
-private noncomputable def additiveInvariant (X : C) : AdditiveInvariant E' G where
+private def additiveInvariant (X : I) : AdditiveInvariant E' G where
   obj := a.obj X
   map_conflation := fun {_} hS ↦ a.map_conflation₂ X hS
 
-omit [Preadditive C] [HasZeroObject C] [HasBinaryBiproducts C] [EssentiallySmall.{w} C]
-  [EssentiallySmall.{w'} D] in
+omit [EssentiallySmall.{w'} D] in
 /-- A right-additive invariant takes equal values on isomorphic objects in its second variable,
 since it is additive on conflations there. -/
-theorem map_iso₂ (X : C) {Y Y' : D} (e : Y ≅ Y') : a.obj X Y = a.obj X Y' :=
+theorem map_iso₂ (X : I) {Y Y' : D} (e : Y ≅ Y') : a.obj X Y = a.obj X Y' :=
   (a.additiveInvariant X).map_iso e
 
 /-- A right-additive invariant with its first argument fixed, descended through the exact
 Grothendieck group in its second variable. -/
-noncomputable def rightLift (X : C) : ExactK0 E' →+ G :=
+noncomputable def rightLift (X : I) : ExactK0 E' →+ G :=
   lift (a.additiveInvariant X)
 
-omit [Preadditive C] [HasZeroObject C] [HasBinaryBiproducts C] [EssentiallySmall.{w} C] in
 /-- Evaluation of the one-sided descent on an object class. -/
 @[simp]
-lemma rightLift_of (X : C) (Y : D) : a.rightLift X (of Y) = a.obj X Y :=
+lemma rightLift_of (X : I) (Y : D) : a.rightLift X (of Y) = a.obj X Y :=
   lift_of _ Y
 
-omit [Preadditive C] [HasZeroObject C] [HasBinaryBiproducts C] [EssentiallySmall.{w} C] in
 /-- Any homomorphism agreeing with the invariant on the object classes of the second variable is
 its one-sided descent. -/
-theorem rightLift_unique (X : C) (f : ExactK0 E' →+ G) (hf : ∀ Y : D, f (of Y) = a.obj X Y) :
+theorem rightLift_unique (X : I) (f : ExactK0 E' →+ G) (hf : ∀ Y : D, f (of Y) = a.obj X Y) :
     f = a.rightLift X :=
   hom_ext fun Y ↦ by rw [hf, a.rightLift_of]
 
-omit [Preadditive C] [HasZeroObject C] [HasBinaryBiproducts C] [EssentiallySmall.{w} C] in
 /-- Isomorphic indexing objects induce the same one-sided descent. -/
-theorem rightLift_congr {X X' : C} (i : X ≅ X') : a.rightLift X = a.rightLift X' := by
+theorem rightLift_congr {X X' : I} (i : X ≅ X') : a.rightLift X = a.rightLift X' := by
   refine hom_ext fun Y ↦ ?_
   rw [a.rightLift_of, a.rightLift_of]
   exact a.map_iso₁ i Y
@@ -538,7 +623,41 @@ lemma transportEquiv_of (E : ExactStructure C) (e : C ≌ D) [e.functor.Additive
 
 end Functoriality
 
+section Bifunctor
+
+variable {K : Type u''} [Category.{v''} K] [Preadditive K] [HasZeroObject K]
+  [HasBinaryBiproducts K] [EssentiallySmall.{w''} K] {E'' : ExactStructure K}
+  (F : C ⥤ D ⥤ K) [∀ X, (F.obj X).Additive] [∀ Y, (F.flip.obj Y).Additive]
+
+/-- The class `[F(X, Y)]` of a bifunctor which is conflation-exact in each variable, as a
+biadditive invariant. -/
+private noncomputable def map₂Invariant (h₁ : ∀ Y, E.IsConflationExact E'' (F.flip.obj Y))
+    (h₂ : ∀ X, E'.IsConflationExact E'' (F.obj X)) : BiadditiveInvariant E E' (ExactK0 E'') where
+  obj X Y := of ((F.obj X).obj Y)
+  map_iso₁ e Y := of_congr ((F.mapIso e).app Y)
+  map_conflation₂ X _ hS := of_conflation ((h₂ X).map_conflation hS)
+  map_conflation₁ hS Y := of_conflation ((h₁ Y).map_conflation hS)
+
+/-- **Biadditivity of exact `K₀`**: a bifunctor which is conflation-exact in each variable
+separately induces a biadditive map of exact Grothendieck groups, sending the pair of classes
+`([X], [Y])` to `[F(X, Y)]`. -/
+noncomputable def map₂ (h₁ : ∀ Y, E.IsConflationExact E'' (F.flip.obj Y))
+    (h₂ : ∀ X, E'.IsConflationExact E'' (F.obj X)) : ExactK0 E →+ ExactK0 E' →+ ExactK0 E'' :=
+  (map₂Invariant F h₁ h₂).bilift
+
+/-- The biadditive map induced by a bifunctor sends a pair of object classes to the class of the
+image of the pair. -/
+@[simp]
+lemma map₂_of_of (h₁ : ∀ Y, E.IsConflationExact E'' (F.flip.obj Y))
+    (h₂ : ∀ X, E'.IsConflationExact E'' (F.obj X)) (X : C) (Y : D) :
+    map₂ F h₁ h₂ (of X) (of Y) = (of ((F.obj X).obj Y) : ExactK0 E'') :=
+  (map₂Invariant F h₁ h₂).bilift_of_of X Y
+
+end Bifunctor
+
 section Comparison
+
+variable {E'' : ExactStructure C}
 
 /-- **The comparison map of two exact structures**: enlarging the class of conflations imposes
 more relations, and the identity functor induces a homomorphism of exact Grothendieck groups. -/

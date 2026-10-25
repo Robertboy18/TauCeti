@@ -8,6 +8,7 @@ module
 public import Mathlib.Data.ZMod.QuotientGroup
 public import TauCeti.NumberTheory.ModularForms.Norm.Trace
 public import TauCeti.NumberTheory.ModularForms.Norm.Valence
+import TauCeti.NumberTheory.ModularForms.QExpansion.BigO
 
 /-!
 # The cusp term of the general-level valence formula
@@ -80,7 +81,7 @@ Nothing here divides by an order that could be `⊤`: each factor of a nonzero f
 
 public section
 
-open UpperHalfPlane Complex Function SlashInvariantForm MulAction
+open UpperHalfPlane Complex Function SlashInvariantForm MulAction Filter
 
 open scoped ModularForm Topology Filter Manifold MatrixGroups
 
@@ -106,6 +107,24 @@ space `𝒮ℒ ⧸ 𝒢 ⊓ 𝒮ℒ`. The orbit of the coset of `x` represents t
 for the full coset space rather than its projective quotient; see the module docstring. -/
 abbrev CuspTranslationOrbit (𝒢 : Subgroup (GL (Fin 2) ℝ)) : Type :=
   orbitRel.Quotient (Subgroup.zpowers TSL) (𝒮ℒ ⧸ 𝒢.subgroupOf 𝒮ℒ)
+
+/-- To prove a property of cusp translation orbits, it suffices to consider the orbits of
+cosets represented by integral matrices. -/
+@[elab_as_elim]
+theorem CuspTranslationOrbit.induction_on {P : CuspTranslationOrbit 𝒢 → Prop}
+    (c : CuspTranslationOrbit 𝒢)
+    (h : ∀ γ : SL(2, ℤ), P
+      (⟦(QuotientGroup.mk ((Matrix.SpecialLinearGroup.mapGL ℝ).rangeRestrict γ) :
+        𝒮ℒ ⧸ 𝒢.subgroupOf 𝒮ℒ)⟧ : CuspTranslationOrbit 𝒢)) : P c := by
+  induction c using Quotient.inductionOn with
+  | h q =>
+    induction q using Quotient.inductionOn with
+    | h x =>
+      obtain ⟨γ, hγ⟩ := x.property
+      have hx : x = (Matrix.SpecialLinearGroup.mapGL ℝ).rangeRestrict γ :=
+        Subtype.ext hγ.symm
+      rw [hx]
+      exact h γ
 
 section Translate
 
@@ -356,6 +375,36 @@ coset's own period; the `Quotient.out` in the definition is therefore only a cho
   obtain ⟨j, hj⟩ := exists_zpow_smul_eq_out (𝒢 := 𝒢) q
   rw [orderAtCuspTranslationOrbit, cuspTranslationOrbitWidth_mk, ← hj,
     qExpansionOrderAtCusp_quotientFunc_TSL_zpow_smul]
+
+/-- Each translated coset factor tends to its constant term at infinity. -/
+lemma tendsto_quotientFunc_valueAtInfty (f : F) (q : 𝒮ℒ ⧸ 𝒢.subgroupOf 𝒮ℒ) :
+    Tendsto (quotientFunc (k := k) f q) atImInfty
+      (𝓝 (valueAtInfty (quotientFunc (k := k) f q))) := by
+  have hw : 0 < minimalPeriod (TSL • ·) q := Nat.pos_of_neZero _
+  have hw' : (0 : ℝ) < minimalPeriod (TSL • ·) q := by exact_mod_cast hw
+  have hper := periodic_quotientFunc (k := k) f q
+  have hhol := TauCeti.SlashInvariantForm.mdifferentiable_quotientFunc
+    (𝒢 := 𝒢) (ℋ := 𝒮ℒ) (k := k) f q
+  have hbdd := TauCeti.SlashInvariantForm.isBoundedAtImInfty_quotientFunc
+    (𝒢 := 𝒢) (ℋ := 𝒮ℒ) (k := k) f q
+  have hana := analyticAt_cuspFunction_zero hw' hper hhol hbdd
+  exact TauCeti.UpperHalfPlane.tendsto_valueAtInfty
+    (h := (minimalPeriod (TSL • ·) q : ℝ))
+    (f := quotientFunc (𝒢 := 𝒢) (ℋ := 𝒮ℒ) (k := k) f q) hw' hper hana
+
+/-- Integer translation of a coset does not change its constant term. -/
+lemma valueAtInfty_quotientFunc_TSL_zpow_smul (f : F)
+    (q : 𝒮ℒ ⧸ 𝒢.subgroupOf 𝒮ℒ) (j : ℤ) :
+    valueAtInfty (quotientFunc f (TSL ^ j • q)) = valueAtInfty (quotientFunc f q) := by
+  have hshift : Tendsto (fun τ : ℍ ↦ (-j : ℝ) +ᵥ τ) atImInfty atImInfty := by
+    simpa only [TauCeti.Matrix.GeneralLinearGroup.upperRightHom_smul] using
+      (tendsto_smul_atImInfty (g := Matrix.GeneralLinearGroup.upperRightHom (-j : ℝ))
+        (by simp [Matrix.GeneralLinearGroup.upperRightHom_apply]))
+  have hlim := (tendsto_quotientFunc_valueAtInfty f q).comp hshift
+  have hlim' : Tendsto (quotientFunc f (TSL ^ j • q)) atImInfty
+      (𝓝 (valueAtInfty (quotientFunc f q))) :=
+    hlim.congr (fun τ ↦ (quotientFunc_TSL_zpow_smul f q j τ).symm)
+  exact tendsto_nhds_unique (tendsto_quotientFunc_valueAtInfty f _) hlim'
 
 private lemma analyticAt_cuspFunction_one_galoisProd (f : F) (c : CuspTranslationOrbit 𝒢) :
     AnalyticAt ℂ

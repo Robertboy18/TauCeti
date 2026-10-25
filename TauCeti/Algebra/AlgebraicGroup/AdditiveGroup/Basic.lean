@@ -11,12 +11,16 @@ public import TauCeti.Algebra.HopfAlgebra.SymmetricAlgebra.Basic
 /-!
 # The additive group
 
-The affine scheme `Spec (SymmetricAlgebra R M)` is the **additive (vector) group** on `M`.
-Its functor of points is computed here: for a commutative `R`-algebra `A`, the
-convolution monoid of `R`-algebra maps `SymmetricAlgebra R M →ₐ[R] A` is the additive monoid
-of `R`-linear maps `M →ₗ[R] A`, with convolution corresponding to addition. Taking `M = R`
-recovers the one-dimensional additive group `𝔾ₐ = Spec R[X]`, whose `A`-valued points are
-`(A, +)`; the `R`-points are this construction specialized to `A = R`.
+The affine scheme `Spec (SymmetricAlgebra R M)` is the **additive (vector) group** on `M`, in
+the convention `V(M) = Spec (Sym M)` of EGA II, (1.7.8); in general it does not represent
+`A ↦ M ⊗[R] A`. Its functor of points is computed here: for a commutative `R`-algebra `A`, the
+convolution monoid of `R`-algebra maps `SymmetricAlgebra R M →ₐ[R] A` is the additive monoid of
+`R`-linear maps `M →ₗ[R] A`, with convolution corresponding to addition. Over a commutative
+semiring these points form only a monoid; over a commutative ring they form a group, in which
+the inverse of a point corresponds to the negative of its linear map. Taking `M = R` recovers the
+one-dimensional additive group `𝔾ₐ = Spec R[X]`, whose `A`-valued points are `(A, +)`; the
+`R`-points are this construction specialized to `A = R`.
+
 ## Main declarations
 
 * `TauCeti.AdditiveGroup.pointsMulEquiv`: the convolution monoid of points
@@ -32,12 +36,16 @@ recovers the one-dimensional additive group `𝔾ₐ = Spec R[X]`, whose `A`-val
 The symmetric-algebra Hopf structure is supplied by
 `TauCeti.Algebra.HopfAlgebra.SymmetricAlgebra.Basic`, on top of Mathlib's symmetric-algebra
 bialgebra and convolution monoid APIs.
+
+## References
+
+* A. Grothendieck, *Éléments de géométrie algébrique II*, Publ. Math. IHÉS 8 (1961), (1.7.8)
+  (the vector bundle `V(E)` defined by a quasi-coherent module `E`).
 -/
 
 public section
 
-open _root_.Coalgebra HopfAlgebra SymmetricAlgebra WithConv
-open scoped TensorProduct
+open SymmetricAlgebra WithConv
 
 namespace TauCeti
 
@@ -55,7 +63,7 @@ variable {B : Type*} [CommSemiring B] [Algebra R B]
 the convolution monoid of `R`-algebra maps out of `SymmetricAlgebra R M` is the additive monoid
 of `R`-linear maps `M →ₗ[R] A`: a point `F` corresponds to the linear map `x ↦ F (ι x)`, and
 convolution of points corresponds to addition of linear maps. -/
-@[expose] noncomputable def pointsMulEquiv :
+@[expose] def pointsMulEquiv :
     WithConv (SymmetricAlgebra R M →ₐ[R] A) ≃* Multiplicative (M →ₗ[R] A) where
   toFun F := Multiplicative.ofAdd (SymmetricAlgebra.lift.symm F.ofConv)
   invFun φ := toConv (SymmetricAlgebra.lift (Multiplicative.toAdd φ))
@@ -128,18 +136,11 @@ section RingPoints
 variable {R : Type u} [CommRing R] {M : Type v} [AddCommMonoid M] [Module R M]
 variable {A : Type w} [CommRing A] [Algebra R A]
 
-/-- Over commutative rings, `pointsMulEquiv` identifies the convolution inverse of a point with
-negation of the corresponding linear map. -/
-@[simp]
-theorem pointsMulEquiv_inv (F : WithConv (SymmetricAlgebra R M →ₐ[R] A)) :
-    pointsMulEquiv (F⁻¹) = (pointsMulEquiv F)⁻¹ :=
-  map_inv pointsMulEquiv F
-
 /-- In additive notation, the convolution inverse of a point corresponds to negating its linear
 map of generator values. -/
 theorem toAdd_pointsMulEquiv_inv (F : WithConv (SymmetricAlgebra R M →ₐ[R] A)) :
     Multiplicative.toAdd (pointsMulEquiv (F⁻¹)) = -Multiplicative.toAdd (pointsMulEquiv F) := by
-  rw [pointsMulEquiv_inv]
+  rw [map_inv]
   rfl
 
 end RingPoints
@@ -157,8 +158,8 @@ noncomputable def gaPointsMulEquiv :
   pointsMulEquiv.trans
     (AddEquiv.toMultiplicative (LinearMap.ringLmapEquivSelf R R A).toAddEquiv)
 
-/-- A point of `𝔾ₐ` is the additive group element obtained by evaluating it at the generator
-`ι 1`. -/
+/-- A point of `𝔾ₐ` corresponds to the element of the value algebra obtained by evaluating it at
+the generator `ι 1`. -/
 @[simp]
 theorem toAdd_gaPointsMulEquiv (F : WithConv (SymmetricAlgebra R R →ₐ[R] A)) :
     Multiplicative.toAdd (gaPointsMulEquiv F) = F.ofConv (ι R R 1) := by
@@ -255,18 +256,11 @@ section GaRing
 
 variable {R : Type u} [CommRing R] {A : Type w} [CommRing A] [Algebra R A]
 
-/-- Over commutative rings, `gaPointsMulEquiv` identifies the convolution inverse of a
-`𝔾ₐ`-point with negation in the value ring. -/
-@[simp]
-theorem gaPointsMulEquiv_inv (F : WithConv (SymmetricAlgebra R R →ₐ[R] A)) :
-    gaPointsMulEquiv (F⁻¹) = (gaPointsMulEquiv F)⁻¹ :=
-  map_inv gaPointsMulEquiv F
-
 /-- In additive notation, the convolution inverse of a `𝔾ₐ`-point is the negative of its value
 on the generator `ι 1`. -/
 theorem toAdd_gaPointsMulEquiv_inv (F : WithConv (SymmetricAlgebra R R →ₐ[R] A)) :
     Multiplicative.toAdd (gaPointsMulEquiv (F⁻¹)) = -Multiplicative.toAdd (gaPointsMulEquiv F) := by
-  rw [gaPointsMulEquiv_inv]
+  rw [map_inv]
   rfl
 
 end GaRing

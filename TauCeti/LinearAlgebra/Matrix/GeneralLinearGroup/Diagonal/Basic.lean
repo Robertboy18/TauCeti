@@ -55,6 +55,8 @@ element (`TauCeti.diagGL_const`).
 * `TauCeti.diagGL` embeds a family of units as an invertible diagonal matrix.
 * `TauCeti.diagonalTorus`: the subgroup of invertible diagonal matrices in `GL n k`.
 * `TauCeti.diagonalTorusEquiv`: the identification `(Fin n → kˣ) ≃* diagonalTorus k n`.
+* `TauCeti.detOneRescale`: the explicit rescaling of the first column of an invertible matrix
+  that makes its determinant one.
 
 ## Main statements
 
@@ -68,6 +70,11 @@ element (`TauCeti.diagGL_const`).
 * `TauCeti.natCard_diagonalTorus`: the torus has `(q - 1)ⁿ` elements over a division semiring
   with `q` elements.
 * `TauCeti.centralizer_diagonalTorus`: the diagonal torus is its own centralizer.
+* `TauCeti.mem_centralizer_range_iff_apply_eq_zero_of_coe_eq_diagGL` and
+  `TauCeti.mem_centralizer_range_iff_isDiag_of_coe_eq_diagGL`: inside any subgroup, an element
+  centralizes a family of diagonal elements exactly when its entries vanish between the
+  coordinates the family separates; for a family separating all coordinates, exactly when it is
+  diagonal.
 * `TauCeti.centralizer_diagonalTorus_eq_top`: over a semiring with a single unit the centralizer
   is instead the whole group.
 * `TauCeti.scalar_mem_center` and `TauCeti.centralizer_scalar`: a scalar matrix is central, so its
@@ -293,6 +300,50 @@ theorem eq_diagonalTorus_of_le_of_isMulCommutative (H : Subgroup (GL (Fin n) k))
 
 end IsLeftCancelMulZero
 
+section FamilyCentralizer
+
+variable [IsLeftCancelMulZero k] {X : Type*} {P : Subgroup (GL ι k)} {T : X → P}
+  {f : X → ι → kˣ}
+
+/-- **The centralizer of a family of diagonal elements.** Suppose `T` sends each `x` to an element
+of a subgroup `P` of `GL ι k` whose matrix is diagonal with entries `f x`. An element of `P`
+commutes with every `T x` exactly when its `(i, j)` entry vanishes whenever some `f x` takes
+different values at `i` and `j`. -/
+theorem mem_centralizer_range_iff_apply_eq_zero_of_coe_eq_diagGL
+    (hT : ∀ x, (T x : GL ι k) = diagGL (f x)) (g : P) :
+    g ∈ Subgroup.centralizer (Set.range T) ↔
+      ∀ i j, (∃ x, f x i ≠ f x j) → ((g : GL ι k) : Matrix ι ι k) i j = 0 := by
+  constructor
+  · rintro hg i j ⟨x, hx⟩
+    have hcomm := congrArg (fun y : P ↦ ((y : GL ι k) : Matrix ι ι k))
+      (Subgroup.mem_centralizer_iff.mp hg (T x) ⟨x, rfl⟩)
+    simp only [Subgroup.coe_mul, Units.val_mul, hT, diagGL_coe] at hcomm
+    exact apply_eq_zero_of_commute_diagonal hcomm fun h ↦ hx (Units.ext h)
+  · intro hg
+    rw [Subgroup.mem_centralizer_iff]
+    rintro _ ⟨x, rfl⟩
+    refine Subtype.ext (Units.ext ?_)
+    simp only [Subgroup.coe_mul, Units.val_mul, hT, diagGL_coe]
+    ext i j
+    rw [Matrix.diagonal_mul, Matrix.mul_diagonal]
+    by_cases hij : f x i = f x j
+    · rw [hij, mul_comm]
+    · rw [hg i j ⟨x, hij⟩, mul_zero, zero_mul]
+
+/-- **An element centralizing a separating family of diagonal elements is diagonal.** If every
+pair of distinct coordinates is separated by some `f x`, an element of `P` commutes with every
+`T x` exactly when its matrix is diagonal. -/
+theorem mem_centralizer_range_iff_isDiag_of_coe_eq_diagGL
+    (hT : ∀ x, (T x : GL ι k) = diagGL (f x))
+    (hf : Pairwise fun i j ↦ ∃ x, f x i ≠ f x j) (g : P) :
+    g ∈ Subgroup.centralizer (Set.range T) ↔ ((g : GL ι k) : Matrix ι ι k).IsDiag := by
+  rw [mem_centralizer_range_iff_apply_eq_zero_of_coe_eq_diagGL hT]
+  refine ⟨fun h i j hij ↦ h i j (hf hij), fun h i j ⟨x, hx⟩ ↦ h ?_⟩
+  rintro rfl
+  exact hx rfl
+
+end FamilyCentralizer
+
 end CommSemiring
 
 variable [CommRing k]
@@ -322,6 +373,52 @@ theorem exists_det_mul_diagGL_eq_one (P : GL ι k) :
   · exact ⟨1, Units.ext <| by simp [Matrix.GeneralLinearGroup.val_det_apply]⟩
   refine ⟨Pi.mulSingle i (Matrix.GeneralLinearGroup.det P)⁻¹, ?_⟩
   rw [map_mul, det_diagGL, Fintype.prod_pi_mulSingle' i, mul_inv_cancel]
+
+/-- Rescale the first column of an invertible matrix by the inverse of its determinant. The
+result has determinant one (`TauCeti.det_detOneRescale`), and the operation is the identity on
+determinant-one matrices (`TauCeti.detOneRescale_of_det_eq_one`).
+
+Unlike `TauCeti.exists_det_mul_diagGL_eq_one`, the rescaling is an explicit formula, so it
+commutes with entrywise ring homomorphisms (`TauCeti.map_detOneRescale`): it is a morphism of
+schemes `GLₙ → SLₙ`. In rank zero it is the identity. -/
+def detOneRescale (g : GL (Fin n) k) : GL (Fin n) k :=
+  g * diagGL fun i : Fin n ↦ if (i : ℕ) = 0 then (Matrix.GeneralLinearGroup.det g)⁻¹ else 1
+
+/-- The determinant-one rescaling multiplies on the right by the diagonal matrix
+`diag((det g)⁻¹, 1, …, 1)`. -/
+theorem detOneRescale_def (g : GL (Fin n) k) :
+    detOneRescale g =
+      g * diagGL fun i : Fin n ↦ if (i : ℕ) = 0 then (Matrix.GeneralLinearGroup.det g)⁻¹ else 1 :=
+  (rfl)
+
+/-- The determinant-one rescaling has determinant one. -/
+@[simp]
+theorem det_detOneRescale (g : GL (Fin n) k) :
+    Matrix.GeneralLinearGroup.det (detOneRescale g) = 1 := by
+  rw [detOneRescale, map_mul, det_diagGL]
+  cases n with
+  | zero =>
+    rw [Fin.prod_univ_zero, mul_one]
+    exact Units.ext (by simp [Matrix.GeneralLinearGroup.val_det_apply])
+  | succ m =>
+    rw [Fin.prod_univ_succ]
+    simp
+
+/-- The determinant-one rescaling fixes matrices of determinant one. -/
+theorem detOneRescale_of_det_eq_one {g : GL (Fin n) k}
+    (hg : Matrix.GeneralLinearGroup.det g = 1) : detOneRescale g = g := by
+  rw [detOneRescale, hg, inv_one]
+  simp
+
+/-- The determinant-one rescaling commutes with mapping the entries along a ring
+homomorphism. -/
+theorem map_detOneRescale {S : Type*} [CommRing S] (f : k →+* S) (g : GL (Fin n) k) :
+    Matrix.GeneralLinearGroup.map f (detOneRescale g) =
+      detOneRescale (Matrix.GeneralLinearGroup.map f g) := by
+  rw [detOneRescale, detOneRescale, map_mul, map_diagGL, Matrix.GeneralLinearGroup.map_det]
+  congr 2
+  funext i
+  split_ifs <;> simp
 
 /-- If `P` intertwines `M` with a diagonal matrix, there is an intertwining matrix of determinant
 one, obtained in the nonempty case by rescaling one of the columns of `P`. -/
