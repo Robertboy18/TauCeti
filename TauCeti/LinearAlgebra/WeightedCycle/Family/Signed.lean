@@ -25,17 +25,14 @@ namespace Module.Basis
 
 variable {A V ι J : Type*} {n : J → ℕ}
 
-private theorem sign_prod (ε : ∀ j, Fin (n j + 1) → ℤ)
-    (hε : ∀ j i, ε j i = 1 ∨ ε j i = -1) (j : J) :
-    (∏ i, ε j i) = 1 ∨ (∏ i, ε j i) = -1 :=
-  Int.isUnit_iff.mp (IsUnit.prod_univ_iff.mpr fun i ↦ Int.isUnit_iff.mpr (hε j i))
-
 private def negativeIndexEquiv (ε : ∀ j, Fin (n j + 1) → ℤ)
     (hε : ∀ j i, ε j i = 1 ∨ ε j i = -1) :
     {j // (∏ i, ε j i) ≠ 1} ≃ {j // (∏ i, ε j i) = -1} :=
   Equiv.subtypeEquivRight fun j ↦ by
     constructor
-    · exact fun h ↦ (sign_prod ε hε j).resolve_left h
+    · intro h
+      exact (Int.isUnit_iff.mp
+        (IsUnit.prod_univ_iff.mpr fun i ↦ Int.isUnit_iff.mpr (hε j i))).resolve_left h
     · intro h
       rw [h]
       norm_num
@@ -59,7 +56,7 @@ private noncomputable def fixedSignedTuplesEquiv (ε : ∀ j, Fin (n j + 1) → 
       ({j // (∏ i, ε j i) ≠ 1} → Submodule.torsionBy A A 2) :=
     LinearEquiv.piCongrRight fun j ↦ fixedEquivOfProdEqNegOne
       (fun i ↦ (ε j.val i : A)) (by
-        have hj := (sign_prod ε hε j.val).resolve_left j.property
+        have hj : (∏ i, ε j.val i) = -1 := ((negativeIndexEquiv ε hε) j).property
         simpa using congrArg (Int.castRingHom A) hj)
   exact ((LinearEquiv.piEquivPiSubtypeProd A (fun j ↦ (∏ i, ε j i) = 1)
     (fun j ↦ (TauCeti.WeightedCycle.linearMap (fun i ↦ (ε j i : A)) (M := A)).fixedSubmodule)).trans
@@ -112,11 +109,7 @@ theorem fixedEquivSignedFamily_symm_repr_pos [Finite J] (b : Module.Basis ι A V
     (j : {j // (∏ i, ε j i) = 1}) (i : Fin (n j.val + 1)) :
     b.repr ((fixedEquivSignedFamily b e ε hε f h).symm t).val (e ⟨j.val, i⟩) =
       Fin.partialProd (Fin.init (fun k ↦ (ε j.val k : A))) i * t.1 j := by
-  rw [repr_eq_family_partialProd_mul b e (fun j i ↦ (ε j i : A)) f h]
-  have hc := fixedEquivSignedFamily_apply_pos b e ε hε f h
-    ((fixedEquivSignedFamily b e ε hε f h).symm t) j
-  rw [LinearEquiv.apply_symm_apply] at hc
-  rw [← hc]
+  simp [fixedEquivSignedFamily, fixedSignedTuplesEquiv, j.property]
 
 /-- Negative cycles retain the full `2`-torsion coordinate in the inverse basis coefficients. -/
 @[simp]
@@ -129,11 +122,11 @@ theorem fixedEquivSignedFamily_symm_repr_neg [Finite J] (b : Module.Basis ι A V
     (j : {j // (∏ i, ε j i) = -1}) (i : Fin (n j.val + 1)) :
     b.repr ((fixedEquivSignedFamily b e ε hε f h).symm t).val (e ⟨j.val, i⟩) =
       Fin.partialProd (Fin.init (fun k ↦ (ε j.val k : A))) i * (t.2 j).val := by
-  rw [repr_eq_family_partialProd_mul b e (fun j i ↦ (ε j i : A)) f h]
-  have hc := fixedEquivSignedFamily_apply_neg b e ε hε f h
-    ((fixedEquivSignedFamily b e ε hε f h).symm t) j
-  rw [LinearEquiv.apply_symm_apply] at hc
-  rw [← hc]
+  have hj : (∏ k, ε j.val k) ≠ 1 := by
+    rw [j.property]
+    norm_num
+  simp [fixedEquivSignedFamily, fixedSignedTuplesEquiv, negativeIndexEquiv, hj,
+    Equiv.subtypeEquivRight_apply]
 
 /-- The inverse signed classification is the sum of the positive and negative cycle
 expansions in the original basis, including the negative `2`-torsion terms. -/
@@ -156,7 +149,6 @@ theorem fixedEquivSignedFamily_symm_apply [Fintype J] (b : Module.Basis ι A V)
     simpa only [LinearEquiv.symm_apply_apply, fixedFamilyEquiv_apply] using
       fixedFamilyEquiv_symm_apply b e (fun j i ↦ (ε j i : A)) f h
         (fixedFamilyEquiv b e (fun j i ↦ (ε j i : A)) f h v)
-  change v.val = _
   rw [hv, ← Fintype.sum_subtype_add_sum_subtype (fun j ↦ (∏ i, ε j i) = 1)]
   congr 1
   · apply Finset.sum_congr rfl

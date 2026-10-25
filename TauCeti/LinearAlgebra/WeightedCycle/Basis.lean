@@ -48,20 +48,18 @@ theorem equivFun_comp_eq_linearMap_comp (b : Module.Basis ι A V) (e : Fin (n + 
     (h : ∀ i, f (b (e i)) = a i • b (e (finRotate (n + 1) i))) :
     (b.reindex e.symm).equivFun.toLinearMap ∘ₗ f =
       linearMap a ∘ₗ (b.reindex e.symm).equivFun.toLinearMap := by
-  have hf := equivFun_comp_eq_piMap_comp b (singleCycleFamilyIndex e)
-    (fun _ : Unit ↦ a) f (fun _ i ↦ by simpa using h i)
-  have hc (v : V) :
-      (fun i ↦ (b.reindex (singleCycleFamilyIndex e).symm).equivFun v ⟨(), i⟩) =
-        (b.reindex e.symm).equivFun v := by
-    ext i
-    simp
-  ext v i
-  have hv := congrArg (fun g : V →ₗ[A] (Unit → Fin (n + 1) → A) ↦ g v () i) hf
-  change (b.reindex (singleCycleFamilyIndex e).symm).equivFun (f v) ⟨(), i⟩ =
-    linearMap a (fun k ↦ (b.reindex (singleCycleFamilyIndex e).symm).equivFun v ⟨(), k⟩) i
-      at hv
-  rw [hc] at hv
-  simpa using hv
+  apply (b.reindex e.symm).ext
+  intro i
+  simp only [LinearMap.comp_apply, LinearEquiv.coe_coe]
+  have hi : f ((b.reindex e.symm) i) = a i •
+      (b.reindex e.symm) (finRotate (n + 1) i) := by
+    simpa using h i
+  rw [hi, map_smul]
+  funext j
+  obtain ⟨k, rfl⟩ := (finRotate (n + 1)).surjective j
+  rw [linearMap_apply_rotate]
+  simp only [Pi.smul_apply, Module.Basis.equivFun_self, Equiv.apply_eq_iff_eq]
+  by_cases hik : i = k <;> simp [hik]
 
 /-- Basis coordinates restrict to an equivalence of the actual fixed submodules. -/
 noncomputable def fixedBasisEquiv (b : Module.Basis ι A V)

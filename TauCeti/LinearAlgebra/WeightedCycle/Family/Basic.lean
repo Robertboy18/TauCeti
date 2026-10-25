@@ -51,6 +51,7 @@ theorem equivFun_comp_eq_piMap_comp [Finite J] (b : Module.Basis ι A V)
   rw [hi, map_smul, map_smul]
   funext k l
   obtain ⟨r, rfl⟩ := (finRotate (n k + 1)).surjective l
+  -- Currying reads the Sigma coordinate; scalar multiplication is pointwise.
   change a j i * (b.reindex e.symm).equivFun
       ((b.reindex e.symm) ⟨j, finRotate (n j + 1) i⟩) ⟨k, finRotate (n k + 1) r⟩ =
     linearMap (a k) (fun t ↦ (b.reindex e.symm).equivFun
@@ -81,6 +82,16 @@ theorem fixedFamilyEquiv_apply [Finite J] (b : Module.Basis ι A V)
     (fixedFamilyEquiv b e a f h v j).val i = b.repr v.val (e ⟨j, i⟩) := by
   simp [fixedFamilyEquiv, Sigma.curry]
 
+/-- The inverse family equivalence has the supplied tuple as its basis coefficients. -/
+@[simp]
+theorem fixedFamilyEquiv_symm_repr [Finite J] (b : Module.Basis ι A V)
+    (e : (Σ j, Fin (n j + 1)) ≃ ι) (a : ∀ j, Fin (n j + 1) → A) (f : V →ₗ[A] V)
+    (h : ∀ j i, f (b (e ⟨j, i⟩)) = a j i • b (e ⟨j, finRotate (n j + 1) i⟩))
+    (w : ∀ j, (linearMap (a j) (M := A)).fixedSubmodule) (j : J) (i : Fin (n j + 1)) :
+    b.repr ((fixedFamilyEquiv b e a f h).symm w).val (e ⟨j, i⟩) = (w j).val i := by
+  simpa only [LinearEquiv.apply_symm_apply] using
+    (fixedFamilyEquiv_apply b e a f h ((fixedFamilyEquiv b e a f h).symm w) j i).symm
+
 /-- The inverse assembles the componentwise fixed tuples into the original basis. -/
 @[simp]
 theorem fixedFamilyEquiv_symm_apply [Fintype J] (b : Module.Basis ι A V)
@@ -92,7 +103,7 @@ theorem fixedFamilyEquiv_symm_apply [Fintype J] (b : Module.Basis ι A V)
   simp [fixedFamilyEquiv, Module.Basis.equivFun_symm_apply, Fintype.sum_sigma, Sigma.uncurry]
 
 /-- All coefficients in a fixed vector are prefix products times their cycle's initial
-coefficient. This uses the native single-cycle recurrence. -/
+coefficient. -/
 theorem repr_eq_family_partialProd_mul [Finite J] (b : Module.Basis ι A V)
     (e : (Σ j, Fin (n j + 1)) ≃ ι) (a : ∀ j, Fin (n j + 1) → A) (f : V →ₗ[A] V)
     (h : ∀ j i, f (b (e ⟨j, i⟩)) = a j i • b (e ⟨j, finRotate (n j + 1) i⟩))
@@ -124,6 +135,16 @@ theorem fixedEquivPiTorsionOfBasis_apply [Finite J] (b : Module.Basis ι A V)
     (h : ∀ j i, f (b (e ⟨j, i⟩)) = a j i • b (e ⟨j, finRotate (n j + 1) i⟩))
     (v : f.fixedSubmodule) (j : J) :
     (fixedEquivPiTorsionOfBasis b e a f h v j : A) = b.repr v.val (e ⟨j, 0⟩) := by
+  simp [fixedEquivPiTorsionOfBasis]
+
+/-- The inverse torsion equivalence has prefix products times its parameters as coefficients. -/
+@[simp]
+theorem fixedEquivPiTorsionOfBasis_symm_repr [Finite J] (b : Module.Basis ι A V)
+    (e : (Σ j, Fin (n j + 1)) ≃ ι) (a : ∀ j, Fin (n j + 1) → A) (f : V →ₗ[A] V)
+    (h : ∀ j i, f (b (e ⟨j, i⟩)) = a j i • b (e ⟨j, finRotate (n j + 1) i⟩))
+    (t : ∀ j, Submodule.torsionBy A A ((∏ i, a j i) - 1)) (j : J) (i : Fin (n j + 1)) :
+    b.repr ((fixedEquivPiTorsionOfBasis b e a f h).symm t).val (e ⟨j, i⟩) =
+      Fin.partialProd (Fin.init (a j)) i * (t j).val := by
   simp [fixedEquivPiTorsionOfBasis]
 
 /-- The inverse is the double basis sum with the native prefix-product coefficients. -/
