@@ -79,11 +79,16 @@ jobs:
     if: ${{ vars.CI_REVIEW_ENABLED == 'true' && needs.resolve.outputs.pr != '' }}
     # Pinned to a TauCetiReview commit; bump deliberately (an unpinned @main lets an upstream change
     # break every contributor's review at once, and this workflow inherits TauCeti's secrets).
-    uses: TauCetiProject/TauCetiReview/.github/workflows/review.yml@95fa10ea655e8dacfcc84b8cd3f3e482e8c852ae
+    # Re-pin together with the other two callers and .github/actions/checkout-merge-policy
+    # (scripts/test_workflow_pins.py checks they agree). The called workflow checks out its own
+    # commit, supplied explicitly as review_ref.
+    uses: TauCetiProject/TauCetiReview/.github/workflows/review.yml@14d5db7642210a3cec00059feb33ac33a45daa5d
     with:
+      review_ref: 14d5db7642210a3cec00059feb33ac33a45daa5d
+      tools_repository: TauCetiProject/TauCetiTools
+      tools_ref: 0f4096297f058bff8ccd873067aab7120202aecf
       pr: ${{ needs.resolve.outputs.pr }}
       trigger: ${{ github.event_name }}
-      review_ref: 95fa10ea655e8dacfcc84b8cd3f3e482e8c852ae
       # Merging is handled by auto-merge.yml (the single merge path), so generation never merges.
       enable_automerge: false
     secrets: inherit

@@ -75,11 +75,8 @@ same root system; `Valid` keeps only `B 2` of those two names.
 
 ## References
 
-This file implements the `DynkinType` enumeration of Layer 5 of
-`TauCetiRoadmap/RepresentationTheory/RootSystems/README.md`, following the target signatures in
-`TauCetiRoadmap/RepresentationTheory/RootSystems/Suggested.lean`. See Bourbaki, *Lie Groups and Lie
-Algebras, Chapters 4-6*, plates I-IX, and Humphreys, *Introduction to Lie Algebras and
-Representation Theory*, Chapter 11, for the standard Cartan matrices.
+See Bourbaki, *Lie Groups and Lie Algebras, Chapters 4-6*, plates I-IX, and Humphreys, *Introduction
+to Lie Algebras and Representation Theory*, Chapter 11, for the standard Cartan matrices.
 -/
 
 public section
@@ -459,6 +456,18 @@ lemma HasCartanType.card_support {b : P.Base} {t : DynkinType} (h : HasCartanTyp
     b.support.card = t.rank := by
   obtain ⟨e, -⟩ := h
   simpa using Fintype.card_congr e
+
+/-- **The Cartan type is transported by an equivalence of root pairings.** The push-forward of a
+base along an equivalence has the same Cartan matrix, up to the induced relabelling of the simple
+roots (`RootPairing.Base.map_equiv_cartanMatrix`). -/
+theorem HasCartanType.map [CharZero R] {ι₂ M₂ N₂ : Type*} [AddCommGroup M₂] [Module R M₂]
+    [AddCommGroup N₂] [Module R N₂] {P₂ : RootPairing ι₂ R M₂ N₂} [P₂.IsCrystallographic]
+    {b : P.Base} {t : DynkinType} (h : HasCartanType P b t) (e : P.Equiv P₂) :
+    HasCartanType P₂ (b.map e) t := by
+  classical
+  obtain ⟨f, hf⟩ := (hasCartanType_iff b t).mp h
+  refine (hasCartanType_iff _ t).mpr ⟨(b.supportMapEquiv e).symm.trans f, fun i j ↦ ?_⟩
+  simp [b.map_equiv_cartanMatrix e, hf]
 
 /-- **A base of Cartan type `t` is simply laced exactly when `t` is, or `t` has rank at most one.**
 The second alternative adds only the degenerate types `B 0`, `B 1`, `C 0` and `C 1`: the remaining

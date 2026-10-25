@@ -55,6 +55,8 @@ Lie-algebra theory.
 * `Matrix.IsUpperUnitriangular` — an upper-triangular matrix with diagonal one.
 * `Matrix.IsUpperUnitriangular.ext` — upper-unitriangular matrices are determined by their
   entries strictly above the diagonal.
+* `Matrix.IsUpperUnitriangular.submatrix` — selecting rows and columns by a strictly increasing
+  map preserves upper unitriangularity.
 * `Matrix.IsUpperUnitriangular.det_eq_one` — an upper-unitriangular matrix has determinant one.
 * `Matrix.isNilpotent_of_isUpperTriangular_of_diag_eq_zero` — strict upper triangularity implies
   nilpotence.
@@ -99,6 +101,25 @@ theorem IsUpperUnitriangular.isUpperTriangular [LT m] [Zero R] [One R]
 theorem IsUpperUnitriangular.apply_diag [LT m] [Zero R] [One R]
     {M : Matrix m m R} (hM : M.IsUpperUnitriangular) (i : m) : M i i = 1 :=
   ((isUpperUnitriangular_def M).1 hM).2 i
+
+/-- Subtracting the identity preserves upper triangularity of an upper-unitriangular matrix. -/
+theorem IsUpperUnitriangular.isUpperTriangular_sub_one [Preorder m] [DecidableEq m]
+    [AddGroupWithOne R] {M : Matrix m m R} (hM : M.IsUpperUnitriangular) :
+    (M - 1).IsUpperTriangular :=
+  hM.isUpperTriangular.sub blockTriangular_one
+
+/-- Subtracting the identity from an upper-unitriangular matrix gives a zero diagonal. -/
+theorem IsUpperUnitriangular.sub_one_apply_diag [LT m] [DecidableEq m] [AddGroupWithOne R]
+    {M : Matrix m m R} (hM : M.IsUpperUnitriangular) (i : m) : (M - 1) i i = 0 := by
+  simp [hM.apply_diag]
+
+/-- Selecting the same strictly increasing family of rows and columns preserves upper
+unitriangularity. In particular, this applies to principal submatrices and order-preserving
+reindexing. -/
+theorem IsUpperUnitriangular.submatrix {n : Type*} [Preorder m] [Preorder n] [Zero R] [One R]
+    {M : Matrix m m R} (hM : M.IsUpperUnitriangular) {f : n → m} (hf : StrictMono f) :
+    (M.submatrix f f).IsUpperUnitriangular :=
+  ⟨fun _ _ hij ↦ hM.isUpperTriangular (hf hij), fun i ↦ hM.apply_diag (f i)⟩
 
 /-- Two upper-unitriangular matrices are equal if their entries strictly above the diagonal
 agree. -/
@@ -394,11 +415,9 @@ theorem IsUpperUnitriangular.inv {T p : Type*} [CommRing T] [Fintype p] [LinearO
 /-- Subtracting the identity from an upper-unitriangular matrix gives a nilpotent matrix. -/
 theorem IsUpperUnitriangular.isNilpotent_sub_one {T p : Type*} [Ring T] [Fintype p]
     [LinearOrder p] {M : Matrix p p T} (hM : M.IsUpperUnitriangular) :
-    _root_.IsNilpotent (M - 1) := by
-  apply isNilpotent_of_isUpperTriangular_of_diag_eq_zero
-  · exact hM.1.sub blockTriangular_one
-  · intro i
-    simp [hM.2 i]
+    _root_.IsNilpotent (M - 1) :=
+  isNilpotent_of_isUpperTriangular_of_diag_eq_zero
+    hM.isUpperTriangular_sub_one hM.sub_one_apply_diag
 
 end Matrix
 

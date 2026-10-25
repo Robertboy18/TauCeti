@@ -208,6 +208,20 @@ instance : One (PermutationTriple n) := ⟨⟨1, 1, 1, by group⟩⟩
 
 @[simp] theorem one_σinf : (1 : PermutationTriple n).σinf = 1 := rfl
 
+/-- A triple whose components over `1` and `∞` are the identity is the trivial triple. -/
+theorem eq_one_of_σ1_eq_one_of_σinf_eq_one {t : PermutationTriple n} (h1 : t.σ1 = 1)
+    (hinf : t.σinf = 1) : t = 1 := by
+  have h0 := t.σinf_eq_inv
+  rw [h1, hinf, one_mul, eq_comm, inv_eq_one] at h0
+  exact ext_of_two h0 h1
+
+/-- A triple whose components over `0` and `∞` are the identity is the trivial triple. -/
+theorem eq_one_of_σ0_eq_one_of_σinf_eq_one {t : PermutationTriple n} (h0 : t.σ0 = 1)
+    (hinf : t.σinf = 1) : t = 1 := by
+  have h1 := t.σinf_eq_inv
+  rw [h0, hinf, mul_one, eq_comm, inv_eq_one] at h1
+  exact ext_of_two h0 h1
+
 instance : Inhabited (PermutationTriple n) := ⟨1⟩
 
 /-- In degrees `0` and `1` there is nothing to choose. -/
@@ -309,12 +323,17 @@ instance : DecidableRel (@Equivalent n) :=
           MulAction.orbitRel (Perm (Fin n)) (PermutationTriple n) t t'))
 
 /-- Isomorphism classes of degree-`n` permutation triples. -/
-def IsoClass (n : ℕ) : Type :=
+-- The carrier is exposed for the generic quotient/subtype API.
+@[expose] def IsoClass (n : ℕ) : Type :=
   MulAction.orbitRel.Quotient (Perm (Fin n)) (PermutationTriple n)
 
 /-- The isomorphism class of a permutation triple. -/
 def IsoClass.mk (t : PermutationTriple n) : IsoClass n :=
   Quotient.mk'' t
+
+/-- The quotient constructor gives the isomorphism class of its representative. -/
+@[simp] theorem IsoClass.quotient_mk (t : PermutationTriple n) :
+    (⟦t⟧ : IsoClass n) = IsoClass.mk t := (rfl)
 
 /-- Two triples determine the same isomorphism class exactly when they are isomorphic. -/
 @[simp] theorem IsoClass.mk_eq_mk_iff {t t' : PermutationTriple n} :

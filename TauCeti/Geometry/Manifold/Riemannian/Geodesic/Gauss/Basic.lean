@@ -8,6 +8,7 @@ module
 public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.ConstantSpeed
 public import TauCeti.Geometry.Manifold.Riemannian.Geodesic.Exponential
 public import TauCeti.Geometry.Manifold.Riemannian.VariationField
+import Mathlib.Analysis.InnerProductSpace.Calculus
 
 /-!
 # The Gauss lemma for the Riemannian exponential map
@@ -107,12 +108,12 @@ private theorem contMDiffAt_radialVariation
 
 /-- The covariant acceleration of a radial curve of the variation vanishes on its maximal
 interval. -/
-private theorem alongCurve_curveVelocity_radialVariation_eq_zero
+private theorem acceleration_radialVariation_eq_zero
     (hF : ∀ u t : ℝ, F u t = riemannianExp I M p (t • (v + u • w))) {u t : ℝ}
     (ht : t ∈ geodesicInterval I M p (v + u • w)) :
-    alongCurve (leviCivitaConnection I M) (F u) (curveVelocity I (F u)) t = 0 := by
+    acceleration (leviCivitaConnection I M) (F u) t = 0 := by
   rw [radialVariation_eq_maximalGeodesic hF u]
-  exact alongCurve_curveVelocity_maximalGeodesic_eq_zero ht
+  exact acceleration_maximalGeodesic_eq_zero ht
 
 /-- A radial curve of the variation has the squared speed of its initial velocity. -/
 private theorem inner_curveVelocity_radialVariation_self
@@ -178,8 +179,6 @@ theorem inner_mfderiv_riemannianExp_radial [I.Boundaryless]
     fun t u ↦ curveVelocity I (fun q ↦ F q t) u
   let cov := leviCivitaConnection I M
   have hF : ∀ u t : ℝ, F u t = riemannianExp I M p (t • (v + u • w)) := fun _ _ ↦ rfl
-  have hF_eq_maximal (u : ℝ) : F u = maximalGeodesic I M p (v + u • w) :=
-    radialVariation_eq_maximalGeodesic hF u
   have hIcc : Icc (0 : ℝ) 1 ⊆ geodesicInterval I M p v :=
     ordConnected_geodesicInterval.out zero_mem_geodesicInterval (mem_expDomain_iff.mp hv)
   -- The product rule for the variation field against the radial velocity, the vanishing
@@ -193,8 +192,8 @@ theorem inner_mfderiv_riemannianExp_radial [I.Boundaryless]
       mem_geodesicInterval_iff_smul_mem_expDomain.mp htJ
     have hsurface : ContMDiffAt 𝓘(ℝ, ℝ × ℝ) I ∞ (fun z : ℝ × ℝ ↦ F z.1 z.2) (0, t) :=
       contMDiffAt_radialVariation hF (u := 0) (t := t) (by simpa using htExp)
-    have haccel : alongCurve cov (F 0) (curveVelocity I (F 0)) t = 0 :=
-      alongCurve_curveVelocity_radialVariation_eq_zero hF (u := 0) (by simpa using htJ)
+    have haccel : acceleration cov (F 0) t = 0 :=
+      acceleration_radialVariation_eq_zero hF (u := 0) (by simpa using htJ)
     have hDtV_inner : inner ℝ (alongCurve cov (F 0) (variationField I F) t) (P 0 t) =
         inner ℝ v w :=
       inner_alongCurve_variationField_radialVariation hF htJ

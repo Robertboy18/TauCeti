@@ -52,6 +52,8 @@ Crainic's `1 - δ h` and `+ h X i`.
 
 * `TauCeti.LinearSpecialContraction.perturbationSeries_maurerCartan`: the identity
   `dM X + X dM + X i p X = 0`.
+* `TauCeti.LinearSpecialContraction.perturbationSeries_mem`: the perturbation operator preserves
+  every additive subgroup preserved by `δ` and `h`, wherever the geometric series is finite.
 * `TauCeti.LinearSpecialContraction.perturbedDifferential_comp_perturbedDifferential`: the
   perturbed differential of the retract squares to the square of `dN`.
 * `TauCeti.LinearSpecialContraction.perturb_proj_comp_one_add_mul`: the perturbed projection
@@ -136,7 +138,7 @@ series `∑_{j < k} (-1)^j (δ h)^j δ`. -/
 theorem perturbationSeries_apply_eq_sum_of_pow_apply_eq_zero {z : M} {k : ℕ}
     (hz : ((δ * c.homotopy) ^ k) (δ z) = 0) :
     c.perturbationSeries δ z = ∑ j ∈ Finset.range k, ((-(δ * c.homotopy)) ^ j) (δ z) := by
-  set u := δ * c.homotopy with hu
+  set u := δ * c.homotopy
   have hgeom : (1 + u) * ∑ j ∈ Finset.range k, (-u) ^ j = 1 - (-u) ^ k := by
     simpa only [sub_neg_eq_add] using mul_neg_geom_sum (-u) k
   have hk : ((-u) ^ k) (δ z) = 0 := by
@@ -150,13 +152,29 @@ theorem perturbationSeries_apply_eq_sum_of_pow_apply_eq_zero {z : M} {k : ℕ}
         rw [← Module.End.mul_apply, Ring.inverse_mul_cancel _ hU, Module.End.one_apply]
     _ = ∑ j ∈ Finset.range k, ((-u) ^ j) (δ z) := LinearMap.sum_apply _ _ _
 
+/-- **The perturbation operator preserves invariant subgroups.**  If `δ` and `h` preserve an
+additive subgroup `S`, such as a submodule, then the perturbation operator sends every `z ∈ S` with
+`(δ h)^k δ z = 0` back into `S`, being the finite geometric series `∑_{j < k} (-1)^j (δ h)^j δ`
+on `z`. -/
+theorem perturbationSeries_mem {S : AddSubgroup M} (hδ : ∀ z ∈ S, δ z ∈ S)
+    (hh : ∀ z ∈ S, c.homotopy z ∈ S) {z : M} (hz : z ∈ S) {k : ℕ}
+    (hk : ((δ * c.homotopy) ^ k) (δ z) = 0) : c.perturbationSeries δ z ∈ S := by
+  rw [c.perturbationSeries_apply_eq_sum_of_pow_apply_eq_zero δ hU hk]
+  have key (j : ℕ) : ((-(δ * c.homotopy)) ^ j) (δ z) ∈ S := by
+    induction j with
+    | zero => simpa using hδ z hz
+    | succ j ih =>
+      rw [pow_succ', Module.End.mul_apply, LinearMap.neg_apply, Module.End.mul_apply]
+      exact S.neg_mem (hδ _ (hh _ ih))
+  exact sum_mem fun j _ ↦ key j
+
 /-- The perturbation operator satisfies the Maurer--Cartan-type identity
 `dM X + X dM + X i p X = 0`; this single identity drives every equation of the basic
 perturbation lemma. -/
 theorem perturbationSeries_maurerCartan (hδ : (dM + δ) ∘ₗ (dM + δ) = dM ∘ₗ dM) :
     dM ∘ₗ c.perturbationSeries δ + c.perturbationSeries δ ∘ₗ dM +
       c.perturbationSeries δ ∘ₗ c.incl ∘ₗ c.proj ∘ₗ c.perturbationSeries δ = 0 := by
-  set X := c.perturbationSeries δ with hX
+  set X := c.perturbationSeries δ
   have hT : dM * δ + δ * dM + δ * δ = 0 := by
     calc dM * δ + δ * dM + δ * δ = (dM + δ) * (dM + δ) - dM * dM := by noncomm_ring
       _ = 0 := by simp only [Module.End.mul_eq_comp]; rw [hδ, sub_self]
@@ -298,6 +316,28 @@ theorem perturb_proj_comp_one_add_mul :
   simp only [LinearMap.comp_assoc, LinearMap.comp_sub, LinearMap.sub_comp] at h
   rw [perturb_proj, Module.End.mul_eq_comp, LinearMap.comp_add, Module.End.one_eq_id,
     LinearMap.comp_id]
+  simp only [LinearMap.sub_comp, LinearMap.comp_assoc, h]
+  abel
+
+/-- The perturbed homotopy solves the fixed-point equation `h' (1 + δ h) = h`. -/
+theorem perturb_homotopy_comp_one_add_mul :
+    (c.perturb δ hδ hU).homotopy ∘ₗ (1 + δ * c.homotopy) = c.homotopy := by
+  have h := congrArg (fun f ↦ c.homotopy ∘ₗ f ∘ₗ c.homotopy)
+    (c.perturbationSeries_comp_homotopy_comp δ hU)
+  simp only [LinearMap.comp_assoc, LinearMap.comp_sub, LinearMap.sub_comp] at h
+  rw [perturb_homotopy, Module.End.mul_eq_comp, LinearMap.comp_add, Module.End.one_eq_id,
+    LinearMap.comp_id]
+  simp only [LinearMap.sub_comp, LinearMap.comp_assoc, h]
+  abel
+
+/-- The perturbed inclusion satisfies `i' + h' δ i = i`. -/
+theorem perturb_incl_add_homotopy_comp :
+    (c.perturb δ hδ hU).incl +
+      (c.perturb δ hδ hU).homotopy ∘ₗ δ ∘ₗ c.incl = c.incl := by
+  have h := congrArg (fun f ↦ c.homotopy ∘ₗ f ∘ₗ c.incl)
+    (c.perturbationSeries_comp_homotopy_comp δ hU)
+  simp only [LinearMap.comp_assoc, LinearMap.comp_sub, LinearMap.sub_comp] at h
+  rw [perturb_incl, perturb_homotopy]
   simp only [LinearMap.sub_comp, LinearMap.comp_assoc, h]
   abel
 

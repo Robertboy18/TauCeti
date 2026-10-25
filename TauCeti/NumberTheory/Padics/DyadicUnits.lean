@@ -9,6 +9,7 @@ public import TauCeti.NumberTheory.Padics.TwistedUnits
 import Mathlib.Topology.Algebra.OpenSubgroup
 import TauCeti.Algebra.Group.Subgroup.ZPowers
 import TauCeti.NumberTheory.Padics.PadicIntegers
+import TauCeti.NumberTheory.Padics.RingHoms
 import TauCeti.Topology.Algebra.Group.Subgroup
 
 /-!
@@ -57,6 +58,11 @@ or `4`, with `1` exactly for `A = 1` and `4` exactly for `A = V^(f)`.
   `TauCeti.not_exists_topologicalClosure_zpowers_eq_unitsPlusMinus`: `V^(f)` is not.
 * `TauCeti.map_powMonoidHom_two_unitsPlusMinus`: `(V^(f))² = U^(f+1)`;
   `TauCeti.relIndex_map_powMonoidHom_two_unitsPlusMinus`: `(V^(f) : (V^(f))²) = 4`.
+* `TauCeti.unitsPrincipal_three_eq_range_powMonoidHom_two`: the squares of `ℤ_2ˣ` are
+  `U^(3) = 1 + 8ℤ_2`.
+* `PadicInt.isSquare_mul_iff_toZModPow_three_eq`: two units of `ℤ_2` lie in the same square
+  class exactly when they agree modulo `8`, with `PadicInt.exists_eq_sq_mul_of_toZModPow_three_eq`
+  producing the unit square.
 * `TauCeti.relIndex_map_powMonoidHom_two_eq_one_or_two_or_four`: `(A : A²) ∈ {1, 2, 4}` for
   closed `A`;
   `TauCeti.relIndex_map_powMonoidHom_two_eq_four_iff` and
@@ -374,8 +380,8 @@ theorem exists_topologicalClosure_zpowers_eq_of_isClosed_of_neg_one_notMem {A : 
     rw [Subgroup.zpowers_one_eq_bot]
     exact Subgroup.topologicalClosure_minimal _ le_rfl
       (by rw [Subgroup.coe_bot]; exact isClosed_singleton)
-  rcases closedSubgroup_units_two_classification hA hA' with ⟨f, hf, rfl⟩ | ⟨f, hf, rfl⟩ | rfl |
-    ⟨f, u, hf, hu, rfl⟩
+  rcases closedSubgroup_units_two_classification hA hA' with ⟨f, hf, rfl⟩ | ⟨f, _, rfl⟩ | rfl |
+    ⟨f, u, _, _, rfl⟩
   · exact exists_topologicalClosure_zpowers_eq_unitsPrincipal (by omega) fun _ ↦ hf
   · exact (h1 (neg_one_mem_unitsPlusMinus f)).elim
   · exact (h1 (Subgroup.mem_zpowers _)).elim
@@ -412,6 +418,11 @@ theorem relIndex_map_powMonoidHom_two_unitsPlusMinus {f : ℕ} (hf : 2 ≤ f) :
     ((unitsPlusMinus f).map (powMonoidHom 2)).relIndex (unitsPlusMinus f) = 4 := by
   rw [map_powMonoidHom_two_unitsPlusMinus hf]
   exact relIndex_unitsPrincipal_succ_unitsPlusMinus hf
+
+/-- The squares of `ℤ_2ˣ` are the units `U^(3)` that are `1 mod 8`. -/
+theorem unitsPrincipal_three_eq_range_powMonoidHom_two :
+    unitsPrincipal 2 3 = (powMonoidHom 2 : ℤ_[2]ˣ →* ℤ_[2]ˣ).range := by
+  rw [← map_powMonoidHom_two_unitsPlusMinus le_rfl, unitsPlusMinus_two, ← MonoidHom.range_eq_map]
 
 /-- **The table of `(A : A²)`.** A nontrivial closed subgroup `A ≤ ℤ_2ˣ` has `(A : A²) = 2`
 unless it is some `V^(f)` with `f ≥ 2`: the three procyclic families `U^(f)`, `{±1}` and `U^[f]`
@@ -467,3 +478,35 @@ theorem relIndex_map_powMonoidHom_two_eq_one_or_two_or_four {A : Subgroup ℤ_[2
   · exact Or.inr (Or.inr (relIndex_map_powMonoidHom_two_unitsPlusMinus hf))
 
 end TauCeti
+
+namespace PadicInt
+
+/-! ### Square classes of dyadic units -/
+
+/-- Two units of `ℤ_[2]` with the same residue modulo `8` differ by the square of a unit. -/
+theorem exists_eq_sq_mul_of_toZModPow_three_eq {a c : ℤ_[2]} (ha : IsUnit a) (hc : IsUnit c)
+    (h : toZModPow 3 a = toZModPow 3 c) : ∃ s : ℤ_[2], IsUnit s ∧ c = s ^ 2 * a := by
+  have hmem : hc.unit * ha.unit⁻¹ ∈ TauCeti.unitsPrincipal 2 3 := by
+    rw [TauCeti.mem_unitsPrincipal_iff_toZModPow, Units.val_mul, map_mul, IsUnit.unit_spec, ← h,
+      ← map_mul, IsUnit.mul_val_inv, map_one]
+  rw [TauCeti.unitsPrincipal_three_eq_range_powMonoidHom_two] at hmem
+  obtain ⟨w, hw⟩ := hmem
+  rw [powMonoidHom_apply, eq_mul_inv_iff_mul_eq] at hw
+  refine ⟨w, w.isUnit, ?_⟩
+  simpa using (congrArg Units.val hw).symm
+
+/-- For units `a` and `c` of `ℤ_[2]`, the product `a * c` is a square exactly when `a` and `c`
+agree modulo `8`. -/
+theorem isSquare_mul_iff_toZModPow_three_eq {a c : ℤ_[2]} (ha : IsUnit a) (hc : IsUnit c) :
+    IsSquare (a * c) ↔ toZModPow 3 a = toZModPow 3 c := by
+  refine ⟨fun ⟨r, hr⟩ ↦ ?_, fun h ↦ ?_⟩
+  · have hru : IsUnit r := isUnit_of_mul_isUnit_left (hr ▸ ha.mul hc)
+    have key : ∀ x y z : ZMod (2 ^ 3), x * x = 1 → z * z = 1 → x * y = z * z → x = y := by
+      decide
+    exact key _ _ _ (isUnit_iff_toZModPow_three_mul_self.mp ha)
+      (isUnit_iff_toZModPow_three_mul_self.mp hru)
+      (by rw [← map_mul, ← map_mul, hr])
+  · obtain ⟨s, -, hs⟩ := exists_eq_sq_mul_of_toZModPow_three_eq ha hc h
+    exact ⟨s * a, by rw [hs]; ring⟩
+
+end PadicInt

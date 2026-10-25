@@ -21,19 +21,6 @@ namespace TauCeti.CosetTable
 
 variable {m k : ℕ} {T : CosetTable m k}
 
-private theorem prod_smul_point_of_edges {G α : Type*} [Monoid G] [MulAction G α]
-    {g : Fin m → G} {a : α} (i : Fin k) :
-    ∀ u : List (Fin m),
-      (∀ e ∈ T.edges u i,
-        g e.1 • T.point g a e.2 = T.point g a (T.act e.1 e.2)) →
-      (u.map g).prod • T.point g a i = T.point g a (T.trace u i)
-  | [], _ => by simp
-  | t :: u, hu => by
-    have hu' := fun e he ↦ hu e (List.mem_cons_of_mem (t, T.trace u i) he)
-    rw [List.map_cons, List.prod_cons, mul_smul,
-      prod_smul_point_of_edges i u hu', trace_cons]
-    exact hu _ List.mem_cons_self
-
 /-- A closed word `pre ++ t :: post` determines its interior edge when the suffix and prefix
 edges are sound and its table trace closes. Closedness is required at the starting named point;
 no injectivity of the named points or faithfulness of the group action is required. -/

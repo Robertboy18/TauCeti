@@ -43,6 +43,8 @@ known; it is a finite computation, run by `decide`.
 
 ## Main results
 
+* `TauCeti.CosetTable.prod_smul_point_of_edges`: sound edges along a word determine its action
+  on a named point, for any monoid action.
 * `TauCeti.CosetTable.smul_mem_range_point_of_edges`: an empty root and sound generator edges
   imply orbit coverage when the generators generate the group.
 * `TauCeti.CosetTable.surjective_point_of_edges`, `TauCeti.CosetTable.index_le_of_edges` and
@@ -162,15 +164,19 @@ private def Sound (known : List (Fin m × Fin k)) : Prop :=
 
 variable {T g a}
 
-private theorem prod_smul_point_of_sound {known : List (Fin m × Fin k)}
-    (hk : Sound T g a known) (i : Fin k) :
-    ∀ u : List (Fin m), (∀ e ∈ T.edges u i, e ∈ known) →
+/-- If every edge along a word is sound, the word sends a named point to the point reached
+by its table trace. This only requires a monoid action. -/
+theorem prod_smul_point_of_edges (i : Fin k) :
+    ∀ u : List (Fin m),
+      (∀ e ∈ T.edges u i,
+        g e.1 • T.point g a e.2 = T.point g a (T.act e.1 e.2)) →
       (u.map g).prod • T.point g a i = T.point g a (T.trace u i)
-  | [], _ => by simp [trace_nil]
+  | [], _ => by simp
   | t :: u, hu => by
-    have hu' : ∀ e ∈ T.edges u i, e ∈ known := fun e he ↦ hu e (List.mem_cons_of_mem _ he)
-    rw [List.map_cons, List.prod_cons, mul_smul, prod_smul_point_of_sound hk i u hu', trace_cons]
-    exact hk _ (hu _ List.mem_cons_self)
+    have hu' := fun e he ↦ hu e (List.mem_cons_of_mem (t, T.trace u i) he)
+    rw [List.map_cons, List.prod_cons, mul_smul,
+      prod_smul_point_of_edges i u hu', trace_cons]
+    exact hu _ List.mem_cons_self
 
 private theorem sound_deduce {known : List (Fin m × Fin k)} (hk : Sound T g a known)
     {i : Fin k} {r : List (Fin m)} (hr : (r.map g).prod • T.point g a i = T.point g a i) :
@@ -184,7 +190,7 @@ private theorem sound_deduce {known : List (Fin m × Fin k)} (hk : Sound T g a k
       intro e he
       rcases List.mem_cons.1 he with rfl | he
       · rw [List.map_cons, List.prod_cons, mul_smul,
-          prod_smul_point_of_sound hk i u h.1] at hr
+          prod_smul_point_of_edges i u (fun e he ↦ hk e (h.1 e he))] at hr
         rw [h.2]
         exact hr
       · exact hk e he
