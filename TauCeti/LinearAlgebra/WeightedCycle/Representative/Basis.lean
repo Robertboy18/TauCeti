@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.LinearAlgebra.WeightedCycle.Basis
-public import TauCeti.LinearAlgebra.WeightedCycle.Representative
+public import TauCeti.LinearAlgebra.WeightedCycle.Representative.Basic
 
 /-!
 # Changing the representative in a basis cycle
