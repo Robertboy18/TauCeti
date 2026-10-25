@@ -68,6 +68,7 @@ def weylElement (i : Fin 7) : points R :=
     rootSubgroupPoints (.inl i) R (Multiplicative.ofAdd 1)
 
 /-- The matrix of the simple Weyl representative is the minuscule rank-one word. -/
+@[simp]
 theorem coe_weylElement (i : Fin 7) :
     ((weylElement R i : Matrix.GeneralLinearGroup (Fin 56) R) :
       Matrix (Fin 56) (Fin 56) R) = weightTable.weylMatrix R i := by
@@ -80,13 +81,7 @@ theorem coe_weylElement (i : Fin 7) :
     rw [weightTable.loweringMatrix_apply, loweringMatrix_apply,
       weightTable_weight, weightTable_reflection]
   rw [weylElement, hinv]
-  change
-    ((rootSubgroupPoints (.inl i) R (Multiplicative.ofAdd 1) :
-      Matrix.GeneralLinearGroup (Fin 56) R) : Matrix (Fin 56) (Fin 56) R) *
-      ((rootSubgroupPoints (.inr i) R (Multiplicative.ofAdd (-1)) :
-        Matrix.GeneralLinearGroup (Fin 56) R) : Matrix (Fin 56) (Fin 56) R) *
-      ((rootSubgroupPoints (.inl i) R (Multiplicative.ofAdd 1) :
-        Matrix.GeneralLinearGroup (Fin 56) R) : Matrix (Fin 56) (Fin 56) R) = _
+  simp only [Subgroup.coe_mul, Units.val_mul]
   rw [coe_rootSubgroupPoints_inl, coe_rootSubgroupPoints_inr]
   simp [MinusculeWeightTable.weylMatrix_def, weightTable_raisingMatrix, hF,
     sub_eq_add_neg]
@@ -96,16 +91,12 @@ def minusIdentity : points R :=
   weylElement R 1 ^ 2 * weylElement R 4 ^ 2 * weylElement R 6 ^ 2
 
 /-- The chosen root word acts as minus the identity on all fifty-six weights. -/
+@[simp]
 theorem coe_minusIdentity :
     ((minusIdentity R : Matrix.GeneralLinearGroup (Fin 56) R) :
       Matrix (Fin 56) (Fin 56) R) = -1 := by
-  change
-    ((weylElement R 1 : Matrix.GeneralLinearGroup (Fin 56) R) :
-      Matrix (Fin 56) (Fin 56) R) ^ 2 *
-      ((weylElement R 4 : Matrix.GeneralLinearGroup (Fin 56) R) :
-        Matrix (Fin 56) (Fin 56) R) ^ 2 *
-      ((weylElement R 6 : Matrix.GeneralLinearGroup (Fin 56) R) :
-        Matrix (Fin 56) (Fin 56) R) ^ 2 = _
+  simp only [minusIdentity, Subgroup.coe_mul, Subgroup.coe_pow, Units.val_mul,
+    Units.val_pow_eq_pow_val]
   rw [coe_weylElement, coe_weylElement, coe_weylElement,
     weightTable.weylMatrix_pow_two, weightTable.weylMatrix_pow_two,
     weightTable.weylMatrix_pow_two, Matrix.diagonal_mul_diagonal,
@@ -136,13 +127,7 @@ theorem minusIdentity_mem_center : minusIdentity R ∈ Subgroup.center (points R
   intro g
   apply Subtype.ext
   apply Units.ext
-  change
-    ((g : Matrix.GeneralLinearGroup (Fin 56) R) : Matrix (Fin 56) (Fin 56) R) *
-      ((minusIdentity R : Matrix.GeneralLinearGroup (Fin 56) R) :
-        Matrix (Fin 56) (Fin 56) R) =
-    ((minusIdentity R : Matrix.GeneralLinearGroup (Fin 56) R) :
-      Matrix (Fin 56) (Fin 56) R) *
-      ((g : Matrix.GeneralLinearGroup (Fin 56) R) : Matrix (Fin 56) (Fin 56) R)
+  simp only [Subgroup.coe_mul, Units.val_mul]
   rw [coe_minusIdentity]
   simp
 
@@ -156,12 +141,11 @@ theorem minusIdentity_mem_center_subgroup (H : Subgroup (points R))
   exact Subgroup.mem_center_iff.mp (minusIdentity_mem_center R) g.val
 
 /-- The root word squares to the identity, including in characteristic two. -/
+@[simp]
 theorem minusIdentity_pow_two : minusIdentity R ^ 2 = 1 := by
   apply Subtype.ext
   apply Units.ext
-  change
-    ((minusIdentity R : Matrix.GeneralLinearGroup (Fin 56) R) :
-      Matrix (Fin 56) (Fin 56) R) ^ 2 = 1
+  simp only [Subgroup.coe_pow, Subgroup.coe_one, Units.val_pow_eq_pow_val, Units.val_one]
   rw [coe_minusIdentity]
   simp
 
@@ -176,9 +160,7 @@ theorem minusIdentity_eq_one_iff : minusIdentity R = 1 ↔ (1 : R) = -1 := by
   · intro h
     apply Subtype.ext
     apply Units.ext
-    change
-      ((minusIdentity R : Matrix.GeneralLinearGroup (Fin 56) R) :
-        Matrix (Fin 56) (Fin 56) R) = 1
+    simp only [Subgroup.coe_one, Units.val_one]
     rw [coe_minusIdentity]
     ext a b
     simp only [Matrix.neg_apply, Matrix.one_apply]

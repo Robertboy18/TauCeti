@@ -71,10 +71,11 @@ private theorem weylMatrix_eq (i : B) :
           (T.raisingMatrix i).map (Int.cast : ℤ → R) := by
   have hEE : (T.raisingMatrix i).map (Int.cast : ℤ → R) *
       (T.raisingMatrix i).map (Int.cast : ℤ → R) = 0 := by
-    change (T.raisingMatrix i).map (Int.castRingHom R) *
-      (T.raisingMatrix i).map (Int.castRingHom R) = 0
-    rw [← Matrix.map_mul, ← pow_two, T.raisingMatrix_pow_two]
-    simp
+    calc
+      _ = ((T.raisingMatrix i) ^ 2).map (Int.castRingHom R) := by
+        rw [pow_two, Matrix.map_mul]
+        rfl
+      _ = 0 := by rw [T.raisingMatrix_pow_two]; simp
   simpa only [weylMatrix, one_smul, neg_one_smul, sub_eq_add_neg] using
     (Sl2.triple_product_of_mul_self_eq_zero hEE
       (T.raising_mul_lowering_mul_raising R i) (α := (1 : R)) (β := -1) (by simp))
@@ -94,20 +95,29 @@ theorem weylMatrix_mulVec_single (i : B) (a : ι) :
     simp [h, hr]
   · simp [h]
 
+/-- Each column of a simple Weyl representative is its signed reflected coordinate vector. -/
+@[simp]
+theorem weylMatrix_col (i : B) (a : ι) :
+    (T.weylMatrix R i).col a =
+      if T.weight a i = 1 then -Pi.single (T.reflection i a) 1
+      else Pi.single (T.reflection i a) 1 := by
+  simpa only [Matrix.mulVec_single_one] using T.weylMatrix_mulVec_single R i a
+
 /-- Squaring a simple Weyl representative gives the sign on each reflection orbit. -/
+@[simp]
 theorem weylMatrix_pow_two (i : B) :
     T.weylMatrix R i ^ 2 =
       Matrix.diagonal (fun a ↦ if T.weight a i = 0 then (1 : R) else -1) := by
   apply Matrix.ext
   intro a b
-  have h := congrFun (show
-      (T.weylMatrix R i ^ 2) *ᵥ Pi.single b 1 =
-        (if T.weight b i = 0 then (1 : R) else -1) • Pi.single b 1 from by
-      rw [pow_two, ← Matrix.mulVec_mulVec, T.weylMatrix_mulVec_single]
-      rcases T.weight_eq_neg_one_or_eq_zero_or_eq_one b i with hb | hb | hb
-      · simp [hb, T.weylMatrix_mulVec_single]
-      · simp [hb, T.weylMatrix_mulVec_single]
-      · simp [hb, Matrix.mulVec_neg, T.weylMatrix_mulVec_single]) a
+  have hvec : (T.weylMatrix R i ^ 2) *ᵥ Pi.single b 1 =
+      (if T.weight b i = 0 then (1 : R) else -1) • Pi.single b 1 := by
+    rw [pow_two, ← Matrix.mulVec_mulVec, T.weylMatrix_mulVec_single]
+    rcases T.weight_eq_neg_one_or_eq_zero_or_eq_one b i with hb | hb | hb
+    · simp [hb, T.weylMatrix_mulVec_single]
+    · simp [hb, T.weylMatrix_mulVec_single]
+    · simp [hb, Matrix.mulVec_neg, T.weylMatrix_mulVec_single]
+  have h := congrFun hvec a
   by_cases hab : a = b
   · subst b
     simpa [Matrix.mulVec_single_one, Matrix.col_apply, Pi.single_apply] using h
