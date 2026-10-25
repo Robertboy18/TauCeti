@@ -56,6 +56,24 @@ theorem exists_finiteDimensional_groupLikeSpanned_baseChange
   refine ⟨L, hL, (DiagonalizableGroup.groupLikeSpannedProperty_iff _ _).mpr ?_⟩
   exact Subcoalgebra.groupLikeSetSpan_eq_top_iff_span_eq_top.mpr hspanL
 
+/-- Over the separable closure, a multiplicative-type coordinate algebra is spanned
+by its group-like elements, even when the ground field is imperfect. -/
+theorem span_groupLike_separableClosure_eq_top
+    (hH : multiplicativeTypeCommHopfAlgProperty k H) :
+    Submodule.span (separableClosure k (AlgebraicClosure k))
+      (Set.range (_root_.GroupLike.val
+        (R := separableClosure k (AlgebraicClosure k))
+        (A := separableClosure k (AlgebraicClosure k) ⊗[k] H))) = ⊤ := by
+  have hspanΩ := (DiagonalizableGroup.groupLikeSpannedProperty_iff _ _).mp
+    ((multiplicativeTypeCommHopfAlgProperty_iff k H).mp hH)
+  apply span_groupLike_eq_top_of_isPurelyInseparable
+    (k := separableClosure k (AlgebraicClosure k)) (L := AlgebraicClosure k)
+    (A := separableClosure k (AlgebraicClosure k) ⊗[k] H)
+  rw [← Subcoalgebra.groupLikeSetSpan_eq_top_iff_span_eq_top]
+  exact (Subcoalgebra.groupLikeSetSpan_eq_top_iff_of_coalgEquiv
+    (Bialgebra.TensorProduct.baseChangeTowerBialgEquiv k
+      (separableClosure k (AlgebraicClosure k)) H (AlgebraicClosure k)).toCoalgEquiv).mpr hspanΩ
+
 /-- Every finite-type group of multiplicative type becomes diagonalizable over a finite
 Galois intermediate field of the algebraic closure, over an arbitrary base field. -/
 theorem exists_finiteGalois_groupLikeSpanned_baseChange
@@ -64,16 +82,9 @@ theorem exists_finiteGalois_groupLikeSpanned_baseChange
       DiagonalizableGroup.groupLikeSpannedProperty L
         (FiniteTypeCommHopfAlgCat.baseChange (K := L) H) := by
   let F := separableClosure k (AlgebraicClosure k)
-  have hspanΩ := (DiagonalizableGroup.groupLikeSpannedProperty_iff _ _).mp
-    ((multiplicativeTypeCommHopfAlgProperty_iff k H).mp hH)
   have hspanF : Submodule.span F
-      (Set.range (_root_.GroupLike.val (R := F) (A := F ⊗[k] H))) = ⊤ := by
-    apply span_groupLike_eq_top_of_isPurelyInseparable
-      (k := F) (L := AlgebraicClosure k) (A := F ⊗[k] H)
-    rw [← Subcoalgebra.groupLikeSetSpan_eq_top_iff_span_eq_top]
-    exact (Subcoalgebra.groupLikeSetSpan_eq_top_iff_of_coalgEquiv
-      (Bialgebra.TensorProduct.baseChangeTowerBialgEquiv k F H
-        (AlgebraicClosure k)).toCoalgEquiv).mpr hspanΩ
+      (Set.range (_root_.GroupLike.val (R := F) (A := F ⊗[k] H))) = ⊤ :=
+    hH.span_groupLike_separableClosure_eq_top
   let _ := CommHopfAlgCat.geometricCharacterGroup_fg_of_multiplicativeType H hH
   let _ : Group (_root_.GroupLike F (F ⊗[k] H)) :=
     _root_.GroupLike.instGroup (R := F) (A := F ⊗[k] H)
