@@ -141,16 +141,12 @@ theorem range_derivationCompLieHom_generatedWeightTorusCoordinateMap_eq_span :
     LinearMap.range
         (derivationCompLieHom (B := R) (generatedWeightTorusCoordinateMap R).hom).toLinearMap =
       Submodule.span R (Set.range (generatedCartanVector R)) := by
-  have h := congrArg
-    (Submodule.map (derivationCompLieHom (B := R)
-      (generatedWeightTorusCoordinateMap R).hom).toLinearMap)
-    (SplitTorus.tangentBasis (R := R) (B := R) (I := Fin 7)).span_eq
-  rw [Submodule.map_span, Submodule.map_top] at h
-  rw [← h, ← Set.range_comp']
-  simp only [LieHom.coe_toLinearMap]
+  rw [SplitTorus.range_derivationCompLieHom]
   congr 1
-  exact congrArg Set.range
-    (funext (derivationCompLieHom_generatedWeightTorusCoordinateMap_tangentBasis R))
+  apply congrArg Set.range
+  funext i
+  rw [generatedCartanVector_eq_corootDifferential, generatedCorootCocharacter_def,
+    derivationCompLieHom_apply]
 
 /-- Every tangent vector in the weight-torus image is in the image of the Serre comparison. -/
 theorem range_derivationCompLieHom_generatedWeightTorusCoordinateMap_le_range_generatedSerreLift :

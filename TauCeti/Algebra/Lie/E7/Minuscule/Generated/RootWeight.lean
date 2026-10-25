@@ -252,8 +252,7 @@ private theorem rootMatrix_apply_eq_zero_of_weight_sub_ne (k : Fin 7 ⊕ Fin 7) 
   rcases k with i | i
   · have hroot : (E7.rootGeneratorWeight valid_E7 (.inl i) : Fin 7 → ℤ) =
         fun j : Fin 7 ↦ weightTable.cartanMatrix j i := by
-      funext j
-      change Fin 7 at j
+      funext (j : Fin 7)
       rw [rootGeneratorWeight_inl i j, weightTable_cartanMatrix,
         (CartanMatrix.E_isSymm 7).apply]
     have hz := weightTable.raisingMatrix_apply_eq_zero_of_weight_sub_ne i a b
@@ -265,8 +264,7 @@ private theorem rootMatrix_apply_eq_zero_of_weight_sub_ne (k : Fin 7 ⊕ Fin 7) 
       weightTable_weight, weightTable_reflection] using hz
   · have hroot : (E7.rootGeneratorWeight valid_E7 (.inr i) : Fin 7 → ℤ) =
         -fun j : Fin 7 ↦ weightTable.cartanMatrix j i := by
-      funext j
-      change Fin 7 at j
+      funext (j : Fin 7)
       rw [rootGeneratorWeight_inr i j, Pi.neg_apply, weightTable_cartanMatrix,
         (CartanMatrix.E_isSymm 7).apply]
     have hz := weightTable.loweringMatrix_apply_eq_zero_of_weight_sub_ne i a b

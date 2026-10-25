@@ -82,6 +82,8 @@ open DynkinType
 theorem coroot_simpleIndex (ht : E7.Valid) (i : Fin 7) :
     ((E7.simplyConnectedRootDatum ht).coroot (E7.simpleIndex ht i) : Fin 7 → ℤ) =
       Pi.single i 1 := by
+  -- Use the generic formula's index type so both occurrences of `Pi.single`
+  -- have matching dependent types; `E7.rank` is definitionally seven.
   change (E7.simplyConnectedRootDatum ht).coroot (E7.simpleIndex ht i) =
     (Pi.single i 1 : Fin E7.rank → ℤ)
   exact E7.coroot_simpleIndex ht i
