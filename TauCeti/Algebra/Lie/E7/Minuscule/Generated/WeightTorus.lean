@@ -65,9 +65,8 @@ def weightTorusCoordinateIso :
         (weightTorusDefiningIdeal R) ≅
       DiagonalizableGroup.coordinateRing R (SplitTorus.characterGroup (Fin 7)) :=
   ObjectProperty.isoMk _ <|
-    _root_.CommHopfAlgCat.isoMk
-      (HopfIdeal.kerLiftBialgEquiv (generatedCoordinateLift R (.inr ())).hom
-        (generatedCoordinateLift_torus_surjective R))
+    _root_.CommHopfAlgCat.Hom.quotientKerOfSurjectiveIso
+      (generatedCoordinateLift R (.inr ())) (generatedCoordinateLift_torus_surjective R)
 
 /-- The quotient identification recovers restriction to the weight torus. -/
 @[reassoc (attr := simp)]
@@ -76,16 +75,8 @@ theorem mkQuotient_comp_weightTorusCoordinateIso_hom :
         (weightTorusDefiningIdeal R) ≫ (weightTorusCoordinateIso R).hom =
       ObjectProperty.homMk (generatedCoordinateLift R (.inr ())) := by
   apply ObjectProperty.hom_ext
-  apply _root_.CommHopfAlgCat.hom_ext
-  apply BialgHom.ext
-  intro x
-  -- The composite reduces definitionally: weightTorusCoordinateIso unwraps via
-  -- ObjectProperty.isoMk and CommHopfAlgCat.isoMk to kerLiftBialgEquiv, while mkQuotient
-  -- sends x to its quotient class. The right side reduces via ObjectProperty.homMk.
-  change HopfIdeal.kerLiftBialgEquiv (generatedCoordinateLift R (.inr ())).hom
-    (generatedCoordinateLift_torus_surjective R) (Ideal.Quotient.mk _ x) = _
-  rw [HopfIdeal.kerLiftBialgEquiv_apply, HopfIdeal.kerLiftBialgHom_mk]
-  rfl
+  exact _root_.CommHopfAlgCat.Hom.mkQuotient_comp_quotientKerOfSurjectiveIso_hom
+    (generatedCoordinateLift R (.inr ())) (generatedCoordinateLift_torus_surjective R)
 
 /-- The closed subgroup cut out by the torus ideal is split over any commutative base ring. -/
 theorem splitTorusCommHopfAlgProperty_quotient_weightTorusDefiningIdeal :
