@@ -6,7 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.GroupTheory.GroupAction.SubMulAction
-public import Mathlib.LinearAlgebra.Span.Defs
+public import Mathlib.Algebra.Module.LinearMap.End
+public import Mathlib.LinearAlgebra.Span.Basic
 
 /-!
 # Faithful actions on spanning invariant subsets
@@ -29,14 +30,8 @@ theorem faithfulSMul_of_span_eq_top (p : SubMulAction G M)
   eq_of_smul_eq_smul {g h} hgh := by
     apply eq_of_smul_eq_smul (α := M)
     intro x
-    have hx : x ∈ Submodule.span R (p : Set M) := by rw [hp]; trivial
-    refine Submodule.span_induction ?_ ?_ ?_ ?_ hx
-    · intro x hx
-      exact congrArg Subtype.val (hgh ⟨x, hx⟩)
-    · simp
-    · intro x y _ _ hx hy
-      simp only [smul_add, hx, hy]
-    · intro a x _ hx
-      rw [smul_comm g a x, smul_comm h a x, hx]
+    have heq : DistribSMul.toLinearMap R M g = DistribSMul.toLinearMap R M h :=
+      LinearMap.ext_on hp fun y hy ↦ congrArg Subtype.val (hgh ⟨y, hy⟩)
+    exact LinearMap.congr_fun heq x
 
 end SubMulAction

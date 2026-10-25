@@ -5,10 +5,12 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.LinearAlgebra.Matrix.NormTwoShell
+public import TauCeti.GroupTheory.GroupAction.SubMulAction
+public import TauCeti.LinearAlgebra.Matrix.NormTwoShell.Basic
 public import TauCeti.LinearAlgebra.Matrix.ToQuadraticForm
 public import TauCeti.LinearAlgebra.QuadraticForm.OrthogonalGroup.Action
-import Mathlib.LinearAlgebra.StdBasis
+public import Mathlib.Algebra.Group.Action.End
+import Mathlib.Data.Fintype.Perm
 
 /-!
 # The orthogonal action on an integral norm-two shell
@@ -35,14 +37,20 @@ def normTwoShellSubMulAction (B : Matrix I I ℤ) :
     SubMulAction (orthogonalGroup B.toQuadraticForm') (I → ℤ) :=
   (orthogonalLevelSet B.toQuadraticForm' 2).copy B.normTwoShell (by
     ext x
-    change x ∈ B.normTwoShell ↔ x ∈ orthogonalLevelSet B.toQuadraticForm' 2
-    rw [mem_normTwoShell, mem_orthogonalLevelSet_iff, toQuadraticForm'_apply])
+    rw [mem_normTwoShell, coe_orthogonalLevelSet, Set.mem_ofPred_eq,
+      toQuadraticForm'_apply])
 
 /-- The invariant subset has exactly the existing norm-two shell as its carrier. -/
 @[simp]
 theorem coe_normTwoShellSubMulAction (B : Matrix I I ℤ) :
     (normTwoShellSubMulAction B : Set (I → ℤ)) = B.normTwoShell := by
   simp only [normTwoShellSubMulAction, SubMulAction.coe_copy]
+
+/-- Membership in the invariant subset is membership in the existing norm-two shell. -/
+@[simp]
+theorem mem_normTwoShellSubMulAction_iff (B : Matrix I I ℤ) (x : I → ℤ) :
+    x ∈ normTwoShellSubMulAction B ↔ x ∈ B.normTwoShell :=
+  Iff.rfl
 
 /-- The integral orthogonal group acts by permutations of the norm-two shell. -/
 def normTwoShellPermHom (B : Matrix I I ℤ) :
@@ -66,19 +74,20 @@ theorem normTwoShellPermHom_symm_apply (B : Matrix I I ℤ)
   rfl
 
 /-- The kernel consists of orthogonal maps fixing every shell vector. -/
-theorem mem_normTwoShellPermHom_ker_iff (B : Matrix I I ℤ)
+theorem mem_ker_normTwoShellPermHom_iff (B : Matrix I I ℤ)
     (g : orthogonalGroup B.toQuadraticForm') :
     g ∈ (normTwoShellPermHom B).ker ↔
       ∀ x ∈ B.normTwoShell, (g : (I → ℤ) ≃ₗ[ℤ] (I → ℤ)) x = x := by
-  change normTwoShellPermHom B g = 1 ↔ _
+  rw [MonoidHom.mem_ker]
   constructor
   · intro h x hx
-    exact congrArg Subtype.val (Equiv.congr_fun h ⟨x, hx⟩)
+    simpa only [normTwoShellPermHom_apply, Equiv.Perm.one_apply] using
+      congrArg Subtype.val (Equiv.congr_fun h ⟨x, hx⟩)
   · intro h
     apply Equiv.ext
     intro x
     apply Subtype.ext
-    exact h x x.property
+    simpa only [normTwoShellPermHom_apply, Equiv.Perm.one_apply] using h x x.property
 
 /-- A spanning norm-two shell determines every integral orthogonal map. -/
 theorem normTwoShellPermHom_injective (B : Matrix I I ℤ)
@@ -87,20 +96,10 @@ theorem normTwoShellPermHom_injective (B : Matrix I I ℤ)
   have hs : Submodule.span ℤ (normTwoShellSubMulAction B : Set (I → ℤ)) = ⊤ := by
     simpa only [coe_normTwoShellSubMulAction] using hspan
   let := SubMulAction.faithfulSMul_of_span_eq_top (normTwoShellSubMulAction B) hs
+  -- `copy` keeps the shell subtype while supplying its inherited action.
   change Function.Injective (MulAction.toPermHom _ (normTwoShellSubMulAction B))
   rw [MulAction.coe_toPermHom]
   exact MulAction.toPerm_injective
-
-omit [DecidableEq I] in
-/-- Diagonal entries equal to two put a basis in the norm-two shell, so the shell spans. -/
-theorem span_normTwoShell_eq_top_of_diagonal_eq_two (B : Matrix I I ℤ)
-    (hdiag : ∀ i, B i i = 2) : Submodule.span ℤ B.normTwoShell = ⊤ := by
-  classical
-  apply top_unique
-  rw [← (Pi.basisFun ℤ I).span_eq]
-  apply Submodule.span_mono
-  rintro _ ⟨i, rfl⟩
-  simpa only [Pi.basisFun_apply] using single_mem_normTwoShell (hdiag i)
 
 /-- Diagonal entries equal to two suffice for a faithful shell permutation representation. -/
 theorem normTwoShellPermHom_injective_of_diagonal_eq_two (B : Matrix I I ℤ)
