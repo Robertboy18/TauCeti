@@ -80,12 +80,18 @@ def generatedCartanVector (i : Fin 7) :
       (Bialgebra.CounitAlgebra R (generatedCoordinateHopfAlgebra R) R) :=
   ⁅generatedRootVector R (.inl i), generatedRootVector R (.inr i)⁆
 
+/-- The Cartan vector is the bracket of the normalized opposite simple-root vectors. -/
+theorem generatedCartanVector_def (i : Fin 7) :
+    generatedCartanVector R i =
+      ⁅generatedRootVector R (.inl i), generatedRootVector R (.inr i)⁆ :=
+  (rfl)
+
 /-- The bracket-defined Cartan vector maps to the integral Cartan matrix, with its given sign. -/
 @[simp]
 theorem generatedTangentMatrixLieHom_generatedCartanVector (i : Fin 7) :
     generatedTangentMatrixLieHom R (generatedCartanVector R i) =
       (cartanMatrix i).map (Int.cast : ℤ → R) := by
-  rw [generatedCartanVector, LieHom.map_lie,
+  rw [generatedCartanVector_def, LieHom.map_lie,
     generatedTangentMatrixLieHom_generatedRootVector,
     generatedTangentMatrixLieHom_generatedRootVector, Sum.elim_inl, Sum.elim_inr]
   simpa only [Function.comp_apply, matrixIntCastLieHom_eq_map] using

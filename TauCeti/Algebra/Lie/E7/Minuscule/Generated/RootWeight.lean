@@ -10,6 +10,7 @@ public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Root.Differential
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Adjoint.WeightSpace
 public import TauCeti.Algebra.Lie.E7.Minuscule.ClosedGenerators
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.StandardComodule
+public import TauCeti.Algebra.Lie.E7.Minuscule.RootDatum
 
 /-!
 # Root vectors and adjoint weights of the generated E₇ subgroup
@@ -247,14 +248,14 @@ corresponding signed simple root. -/
 private theorem rootMatrix_apply_eq_zero_of_weight_sub_ne (k : Fin 7 ⊕ Fin 7) (a b : Fin 56)
     (h : e7MinusculeWeight a - e7MinusculeWeight b ≠ E7.rootGeneratorWeight valid_E7 k) :
     Sum.elim raisingMatrix loweringMatrix k a b = 0 := by
-  -- E₇ symmetry identifies the table's Cartan columns with the numbered root rows;
-  -- `erw` also identifies the exported rank-seven index with `Fin 7`.
+  -- E₇ symmetry identifies the table's Cartan columns with the numbered root rows.
   rcases k with i | i
-  · have hroot : E7.rootGeneratorWeight valid_E7 (.inl i) =
+  · have hroot : (E7.rootGeneratorWeight valid_E7 (.inl i) : Fin 7 → ℤ) =
         fun j : Fin 7 ↦ weightTable.cartanMatrix j i := by
       funext j
-      erw [weightTable_cartanMatrix, (CartanMatrix.E_isSymm 7).apply]
-      simpa only [rank_E7, cartanMatrix_E7] using E7.rootGeneratorWeight_inl valid_E7 i j
+      change Fin 7 at j
+      rw [rootGeneratorWeight_inl i j, weightTable_cartanMatrix,
+        (CartanMatrix.E_isSymm 7).apply]
     have hz := weightTable.raisingMatrix_apply_eq_zero_of_weight_sub_ne i a b
       (by
         rw [weightTable_weight]
@@ -262,11 +263,12 @@ private theorem rootMatrix_apply_eq_zero_of_weight_sub_ne (k : Fin 7 ⊕ Fin 7) 
         exact h (hab.trans hroot.symm))
     simpa only [Sum.elim_inl, raisingMatrix_apply, weightTable.raisingMatrix_apply,
       weightTable_weight, weightTable_reflection] using hz
-  · have hroot : E7.rootGeneratorWeight valid_E7 (.inr i) =
+  · have hroot : (E7.rootGeneratorWeight valid_E7 (.inr i) : Fin 7 → ℤ) =
         -fun j : Fin 7 ↦ weightTable.cartanMatrix j i := by
       funext j
-      erw [Pi.neg_apply, weightTable_cartanMatrix, (CartanMatrix.E_isSymm 7).apply]
-      simpa only [rank_E7, cartanMatrix_E7] using E7.rootGeneratorWeight_inr valid_E7 i j
+      change Fin 7 at j
+      rw [rootGeneratorWeight_inr i j, Pi.neg_apply, weightTable_cartanMatrix,
+        (CartanMatrix.E_isSymm 7).apply]
     have hz := weightTable.loweringMatrix_apply_eq_zero_of_weight_sub_ne i a b
       (by
         rw [weightTable_weight]
@@ -283,8 +285,7 @@ theorem generatedRootVector_mem_adjointWeightSpace (k : Fin 7 ⊕ Fin 7) :
     (Derivation.cotangentLinearEquiv (B := R)).symm (generatedRootVector R k) ∈
       Derivation.adjointWeightSpace (generatedWeightTorusCoordinateMap R).hom
         (SplitTorus.weightCharacter (E7.rootGeneratorWeight valid_E7 k)) := by
-  -- The root-character index is identified with `Fin 7` by `rank_E7`.
-  erw [mem_adjointWeightSpace_generatedWeightTorusCoordinateMap_iff]
+  apply (mem_adjointWeightSpace_generatedWeightTorusCoordinateMap_iff R _ _).2
   intro a b hab
   rw [LinearEquiv.apply_symm_apply, tangentMatrix_generatedRootVector, Matrix.map_apply,
     rootMatrix_apply_eq_zero_of_weight_sub_ne k a b
@@ -298,17 +299,22 @@ theorem weightCharacter_rootGeneratorWeight_mem_nontrivialAdjointWeights [Nontri
     (k : Fin 7 ⊕ Fin 7) :
     SplitTorus.weightCharacter (E7.rootGeneratorWeight valid_E7 k) ∈
       Derivation.nontrivialAdjointWeights (generatedWeightTorusCoordinateMap R).hom := by
-  have hroot : E7.rootGeneratorWeight valid_E7 k ≠ 0 := by
+  have hroot : (E7.rootGeneratorWeight valid_E7 k : Fin 7 → ℤ) ≠ 0 := by
     rcases k with i | i
-    · erw [E7.rootGeneratorWeight_inl_eq_root_simpleIndex]
+    · intro hzero
       exact (E7.simplyConnectedRootDatum valid_E7).ne_zero _
-    · erw [E7.rootGeneratorWeight_inr_eq_neg_root_simpleIndex, neg_ne_zero]
+        ((rootGeneratorWeight_inl_eq_root_simpleIndex valid_E7 i).symm.trans hzero)
+    · intro hzero
       exact (E7.simplyConnectedRootDatum valid_E7).ne_zero _
-  erw [Derivation.mem_nontrivialAdjointWeights]
+        (neg_eq_zero.mp
+          ((rootGeneratorWeight_inr_eq_neg_root_simpleIndex valid_E7 i).symm.trans hzero))
+  apply Derivation.mem_nontrivialAdjointWeights.mpr
   refine ⟨SplitTorus.weightCharacter_eq_one_iff.not.2 hroot, fun hbot ↦ ?_⟩
   have hz := generatedRootVector_mem_adjointWeightSpace R k
-  erw [hbot, Submodule.mem_bot, LinearEquiv.map_eq_zero_iff] at hz
-  exact generatedRootVector_ne_zero R k hz
+  have hz' : (Derivation.cotangentLinearEquiv (B := R)).symm (generatedRootVector R k) ∈
+      (⊥ : Submodule R _) := hbot ▸ hz
+  apply generatedRootVector_ne_zero R k
+  simpa only [Submodule.mem_bot, LinearEquiv.map_eq_zero_iff] using hz'
 
 end Weights
 

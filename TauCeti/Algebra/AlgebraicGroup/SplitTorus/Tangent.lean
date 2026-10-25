@@ -148,6 +148,20 @@ theorem tangentLinearEquiv_apply [Finite I] (d : Derivation R A C) (i : I) :
 def tangentBasis [Finite I] : Module.Basis I B (Derivation R A C) :=
   Module.Basis.ofEquivFun tangentLinearEquiv
 
+/-- The tangent basis has the coordinate equivalence as its function-valued representation. -/
+@[simp]
+theorem tangentBasis_equivFun [Finite I] :
+    (tangentBasis (R := R) (B := B) (I := I)).equivFun = tangentLinearEquiv :=
+  Module.Basis.equivFun_ofEquivFun _
+
+/-- A tangent basis coefficient is the value on the corresponding character monomial. -/
+@[simp]
+theorem tangentBasis_repr_apply [Finite I] (d : Derivation R A C) (i : I) :
+    (tangentBasis (R := R) (B := B)).repr d i =
+      CounitAlgebra.algEquivSelf R A B
+        (d (MonoidAlgebra.single (Multiplicative.ofAdd (Finsupp.single i 1)) 1)) := by
+  rw [← Module.Basis.equivFun_apply, tangentBasis_equivFun, tangentLinearEquiv_apply]
+
 /-- The tangent basis vector of index `i` is the differential of the corresponding
 coordinate cocharacter, evaluated on the Laurent tangent vector with value one on `T`. -/
 theorem tangentBasis_apply [Finite I] (i : I) :
@@ -168,7 +182,7 @@ cocharacter differentials. -/
 theorem tangentLinearEquiv_symm_apply [Fintype I] (b : I → B) :
     (tangentLinearEquiv (R := R) (B := B)).symm b =
       ∑ i, b i • tangentBasis (R := R) (B := B) i := by
-  simpa only [tangentBasis, Module.Basis.equivFun_ofEquivFun] using
+  simpa only [tangentBasis_equivFun] using
     (tangentBasis (R := R) (B := B) (I := I)).equivFun_symm_apply b
 
 variable {H : Type*} [CommRing H] [Bialgebra R H]
