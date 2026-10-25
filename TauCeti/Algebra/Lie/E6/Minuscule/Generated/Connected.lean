@@ -7,34 +7,31 @@ module
 
 public import TauCeti.Algebra.Lie.E6.Minuscule.Generated.Basic
 public import TauCeti.Algebra.AlgebraicGroup.Connected.Generated
-import TauCeti.Algebra.AlgebraicGroup.AdditiveGroup.CoordinateBaseChange
 import TauCeti.Algebra.AlgebraicGroup.DiagonalizableGroup.SmoothConnected
+import TauCeti.Algebra.AlgebraicGroup.AdditiveGroup.CoordinateBaseChange
 
 /-!
-# Connectedness of the generated type-E₆ minuscule subgroup
+# Geometric connectedness of the generated type-E₆ minuscule subgroup
 
-The numbered simple-root subgroups and the weight torus of the full-weight type-`E₆` minuscule
-carrier are geometrically connected over every field: their coordinate algebras are those
-of the affine line and a split torus. The subgroup they generate is therefore geometrically
-connected over every field.
+Over every field, the numbered root subgroups and weight torus generate a geometrically
+connected closed subgroup. Each generator is an affine line or split torus, hence geometrically
+connected. The common-kernel criterion transfers this property to their generated subgroup.
 
-Connectedness is one of the two geometric inputs, smoothness being the other, to recognizing this
-explicit carrier as a split reductive group of type `E₆`. The result concerns the generated
-subgroup; it says nothing about the base change of the integral carrier, which contains it.
+This supplies one generated-carrier property for Layer 9B of the ReductiveGroups roadmap.
+Smoothness, reductivity and identification with a pinned group require separate arguments.
 
-## References
-
-* J. S. Milne, *Algebraic Groups* (2017), Propositions 2.37 and 2.48.
-* R. Steinberg, *Lectures on Chevalley Groups*, §3.
-
+The proof uses `TauCeti.Algebra.AlgebraicGroup.Connected.Generated` and the existing additive
+and diagonalizable coordinate-algebra APIs, as in
+`TauCeti.Algebra.Lie.D4.Tripled.Generated.Connected`.
 -/
 
 public section
 
+open TauCeti.CommHopfAlgCat
+
 namespace TauCeti.E6Minuscule
 
-open CategoryTheory TauCeti.CommHopfAlgCat
-open scoped TensorProduct
+open CategoryTheory
 
 universe v
 
@@ -45,12 +42,7 @@ private theorem geometricallyConnected_generatorCoordinateAlgebra :
   intro j
   cases j with
   | inl _ =>
-    rw [geometricallyConnectedCommHopfAlgProperty_iff]
-    intro L _ _
-    have := AdditiveGroup.connectedSpace_primeSpectrum_baseChange_coordinateHopfAlgebra k L
-    exact connectedSpace_primeSpectrum_of_injective
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).toRingHom
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).injective
+    exact AdditiveGroup.geometricallyConnectedCommHopfAlgProperty_coordinateHopfAlgebra k
   | inr _ =>
     exact DiagonalizableGroup.geometricallyConnected_coordinateRing k
       (SplitTorus.characterGroup (Fin 6))

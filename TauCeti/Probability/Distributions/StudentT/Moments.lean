@@ -145,6 +145,18 @@ theorem integrable_pow_studentTMeasure_iff (hν : 0 < ν) (q : ℕ) :
     simpa only [studentTPDFReal_abs, Real.rpow_natCast, Real.norm_eq_abs, abs_mul,
       abs_of_nonneg (studentTPDFReal_nonneg ν _), abs_pow] using habs
 
+/-- A Student t variable belongs to `Lⁿ` exactly when its natural exponent is below the
+number of degrees of freedom. This includes the measurable exponent-zero case. -/
+@[simp]
+theorem memLp_id_natCast_studentTMeasure_iff (hν : 0 < ν) (n : ℕ) :
+    MemLp id n (studentTMeasure ν) ↔ (n : ℝ) < ν := by
+  rcases n.eq_zero_or_pos with rfl | hn
+  · simp [memLp_zero_iff_aestronglyMeasurable, hν, aestronglyMeasurable_id]
+  rw [← integrable_norm_rpow_iff aestronglyMeasurable_id (by exact_mod_cast hn.ne')
+    (by simp)]
+  simpa only [ENNReal.toReal_natCast, Real.rpow_natCast, id_eq, ← norm_pow] using
+    (integrable_norm_iff (by fun_prop)).trans (integrable_pow_studentTMeasure_iff hν n)
+
 /-- The identity is integrable under a nondegenerate Student t law exactly when the number of
 degrees of freedom exceeds one. -/
 @[simp]
@@ -255,7 +267,7 @@ theorem integral_sq_studentTMeasure (hν : 2 < ν) :
     ∫ x, x ^ 2 ∂studentTMeasure ν = ν / (ν - 2) := by
   have hνpos : 0 < ν := lt_trans zero_lt_two hν
   have hbpos : 0 < (ν - 2) / 2 := by linarith
-  have hGν : Real.Gamma (ν / 2) ≠ 0 := (Real.Gamma_pos_of_pos (by linarith)).ne'
+  have _ : Real.Gamma (ν / 2) ≠ 0 := (Real.Gamma_pos_of_pos (by linarith)).ne'
   have hGb : Real.Gamma ((ν - 2) / 2) ≠ 0 := (Real.Gamma_pos_of_pos hbpos).ne'
   have hGs : Real.Gamma ((ν + 1) / 2) ≠ 0 :=
     (Real.Gamma_pos_of_pos (by linarith)).ne'

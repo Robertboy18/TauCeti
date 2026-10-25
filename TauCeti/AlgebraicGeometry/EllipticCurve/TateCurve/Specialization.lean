@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.Analysis.Normed.Field.Basic
 public import TauCeti.AlgebraicGeometry.EllipticCurve.TateCurve.Basic
 public import TauCeti.NumberTheory.ArithmeticFunction.Sigma.Evaluation
 
@@ -12,15 +13,15 @@ public import TauCeti.NumberTheory.ArithmeticFunction.Sigma.Evaluation
 # Specialization of the Tate equation
 
 The coefficients of the Tate equation are formal power series with integer coefficients. In a
-complete non-archimedean normed ring with `‖1‖ = 1`, their sums converge at every parameter of norm
-less than one.
+complete non-archimedean normed ring, their sums converge at every parameter of norm less than one.
 This remains true in residue characteristics `2` and `3`: the sixth coefficient is summed from
 its integral coefficients, with no division in the target ring.
 
-For a unit parameter in the open unit ball of a complete non-archimedean normed commutative ring
-with `‖1‖ = 1`, these sums give a nonsingular Tate equation. Its discriminant has the same norm as
-the parameter, even when the ring norm is only submultiplicative. Point uniformisation requires
-further arguments.
+For a unit parameter in the open unit ball of a complete non-archimedean normed commutative ring,
+these sums give a nonsingular Tate equation. The discriminant has the same norm as the parameter,
+even when the ring norm is only submultiplicative, and the coefficients `a₄` and `a₆` have norm at
+most that of the parameter. The invariant `c₄` has norm one under `NormOneClass` (`‖1‖ = 1`).
+Over a field, `|j| = 1 / |q| > 1`. Point uniformisation requires further arguments.
 
 ## References
 
@@ -34,7 +35,7 @@ namespace TauCeti
 
 section
 
-variable {K : Type*} [NormedCommRing K] [NormOneClass K] [CompleteSpace K]
+variable {K : Type*} [NormedCommRing K] [CompleteSpace K]
   [IsUltrametricDist K]
 
 /-- The analytic fourth Tate coefficient, obtained from the integral formal series. -/
@@ -59,7 +60,7 @@ theorem tateCurveA₆_def (q : K) (hq : ‖q‖ < 1) :
     evalIntSeries_divisorSumSeries]
 
 /-- The integral identity `12 a₆(q) = -(5 s₃(q) + 7 s₅(q))` holds in every complete
-non-archimedean normed commutative ring with `‖1‖ = 1`, even when `12 = 0` there. -/
+non-archimedean normed commutative ring, even when `12 = 0` there. -/
 @[simp] theorem twelve_mul_tateCurveA₆ {q : K} (hq : ‖q‖ < 1) :
     12 * tateCurveA₆ q hq = -(5 * divisorSumAt 3 q + 7 * divisorSumAt 5 q) := by
   simpa only [map_mul, map_ofNat, map_neg, map_add, evalIntSeries_divisorSumSeries, tateCurveA₆]
@@ -69,6 +70,11 @@ non-archimedean normed commutative ring with `‖1‖ = 1`, even when `12 = 0` t
 norm less than one. The unit parameter will also support its integer powers in uniformisation. -/
 noncomputable def tateCurveAt (q : Kˣ) (hq : ‖(q : K)‖ < 1) : WeierstrassCurve K :=
   tateCurve.map (evalIntSeries (q : K) hq)
+
+/-- The specialized Tate curve is obtained by applying integral-series evaluation to its
+formal coefficients. -/
+theorem tateCurveAt_def (q : Kˣ) (hq : ‖(q : K)‖ < 1) :
+    tateCurveAt q hq = tateCurve.map (evalIntSeries (q : K) hq) := (rfl)
 
 @[simp] theorem tateCurveAt_a₁ (q : Kˣ) (hq : ‖(q : K)‖ < 1) :
     (tateCurveAt q hq).a₁ = 1 := by
@@ -92,6 +98,12 @@ noncomputable def tateCurveAt (q : Kˣ) (hq : ‖(q : K)‖ < 1) : WeierstrassCu
     (tateCurveAt q hq).a₆ = tateCurveA₆ (q : K) hq := by
   simp only [tateCurveAt, WeierstrassCurve.map, tateCurveA₆]
 
+/-- The discriminant of the specialized Tate equation is the evaluation of the formal
+discriminant of the Tate curve. -/
+theorem tateCurveAt_Δ (q : Kˣ) (hq : ‖(q : K)‖ < 1) :
+    (tateCurveAt q hq).Δ = evalIntSeries (q : K) hq tateCurve.Δ := by
+  rw [tateCurveAt, WeierstrassCurve.map_Δ]
+
 /-- The discriminant of the specialized Tate equation is a unit. -/
 theorem isUnit_tateCurveAt_Δ (q : Kˣ) (hq : ‖(q : K)‖ < 1) :
     IsUnit (tateCurveAt q hq).Δ := by
@@ -112,6 +124,38 @@ submultiplicative ring norm. -/
   obtain ⟨u, -, hu, hΔ⟩ := exists_tateCurve_Δ_eq_X_mul
   rw [tateCurveAt, WeierstrassCurve.map_Δ, hΔ, map_mul, evalIntSeries_X]
   exact norm_mul_evalIntSeries_of_isUnit (q : K) (q : K) hq hu
+
+/-- The fourth Tate coefficient has norm at most that of the parameter, since the formal series
+`a₄` has no constant term. -/
+theorem norm_tateCurveA₄_le (q : K) (hq : ‖q‖ < 1) : ‖tateCurveA₄ q hq‖ ≤ ‖q‖ :=
+  norm_evalIntSeries_le_of_constantCoeff_eq_zero q hq constantCoeff_tateCurve_a₄
+
+/-- The sixth Tate coefficient has norm at most that of the parameter, since the formal series
+`a₆` has no constant term. -/
+theorem norm_tateCurveA₆_le (q : K) (hq : ‖q‖ < 1) : ‖tateCurveA₆ q hq‖ ≤ ‖q‖ :=
+  norm_evalIntSeries_le_of_constantCoeff_eq_zero q hq constantCoeff_tateCurve_a₆
+
+variable [NormOneClass K]
+
+/-- The invariant `c₄ = 1 + 240 s₃(q)` of the specialized Tate equation has norm one. -/
+@[simp] theorem norm_tateCurveAt_c₄ (q : Kˣ) (hq : ‖(q : K)‖ < 1) :
+    ‖(tateCurveAt q hq).c₄‖ = 1 := by
+  rw [tateCurveAt, WeierstrassCurve.map_c₄]
+  exact norm_evalIntSeries_eq_one_of_isUnit (q : K) hq
+    (PowerSeries.isUnit_iff_constantCoeff.mpr (by simp))
+
+end
+
+section
+
+variable {K : Type*} [NormedField K] [CompleteSpace K] [IsUltrametricDist K]
+
+/-- **`|j(q)| = 1 / |q|`**: the `j`-invariant of the specialized Tate equation has norm the inverse
+of that of the parameter. In particular `|j| > 1`, so `j` is not integral. -/
+@[simp] theorem norm_tateCurveAt_j (q : Kˣ) (hq : ‖(q : K)‖ < 1) :
+    ‖(tateCurveAt q hq).j‖ = ‖(q : K)‖⁻¹ := by
+  rw [WeierstrassCurve.j, norm_mul, norm_pow, norm_tateCurveAt_c₄, Units.val_inv_eq_inv_val,
+    WeierstrassCurve.coe_Δ', norm_inv, norm_tateCurveAt_Δ, one_pow, mul_one]
 
 end
 

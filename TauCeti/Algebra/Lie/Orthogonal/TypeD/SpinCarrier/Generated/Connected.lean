@@ -14,9 +14,8 @@ import TauCeti.Algebra.AlgebraicGroup.DiagonalizableGroup.SmoothConnected
 # Connectedness of the generated type-Dₙ spin subgroup
 
 The numbered simple-root subgroups and the weight torus of the full-weight type-`Dₙ` spin carrier
-are geometrically connected over every field: their coordinate algebras are those of the
-affine line and a split torus. The subgroup they generate is therefore geometrically connected
-over every field.
+are geometrically connected over every field, being the affine line and a split torus. The
+subgroup they generate is therefore geometrically connected over every field.
 
 Connectedness is one of the two geometric inputs, smoothness being the other, to recognizing this
 explicit carrier as a split reductive group of type `Dₙ`. The result concerns the generated
@@ -32,24 +31,25 @@ public section
 
 namespace TauCeti.TypeDSpinCarrier
 
-open CategoryTheory TauCeti.CommHopfAlgCat
-open scoped TensorProduct
+open CategoryTheory
+open TauCeti.CommHopfAlgCat
+  (geometricallyConnectedCommHopfAlgProperty_commonKernelQuotient_of_geometricallyConnected)
 
 universe v
 
 variable (n : ℕ) (hn : 4 ≤ n) (k : Type v) [Field k]
 
-private theorem geometricallyConnected_generatorCoordinateAlgebra :
+-- The argument follows the sibling connectedness proofs for the other explicit Chevalley
+-- carriers, such as `TauCeti.Algebra.Lie.D4.Tripled.Generated.Connected`; the arbitrary-field
+-- refinement follows `TauCeti.Algebra.Lie.E7.Minuscule.Generated.Connected`.
+/-- The coordinate algebras of the numbered root subgroups and of the weight torus, the affine
+line and a split torus, are geometrically connected over every field. -/
+theorem geometricallyConnected_generatorCoordinateAlgebra :
     ∀ j, geometricallyConnectedCommHopfAlgProperty k (generatorCoordinateAlgebra n k j) := by
   intro j
   cases j with
   | inl _ =>
-    rw [geometricallyConnectedCommHopfAlgProperty_iff]
-    intro L _ _
-    have := AdditiveGroup.connectedSpace_primeSpectrum_baseChange_coordinateHopfAlgebra k L
-    exact connectedSpace_primeSpectrum_of_injective
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).toRingHom
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).injective
+    exact AdditiveGroup.geometricallyConnectedCommHopfAlgProperty_coordinateHopfAlgebra k
   | inr _ =>
     exact DiagonalizableGroup.geometricallyConnected_coordinateRing k
       (SplitTorus.characterGroup (Fin n))

@@ -7,58 +7,42 @@ module
 
 public import TauCeti.Algebra.AlgebraicGroup.Connected.Generated
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.GeckLattice.Generated.Basic
-import TauCeti.Algebra.AlgebraicGroup.AdditiveGroup.CoordinateBaseChange
 import TauCeti.Algebra.AlgebraicGroup.DiagonalizableGroup.SmoothConnected
+import TauCeti.Algebra.AlgebraicGroup.AdditiveGroup.CoordinateBaseChange
 
 /-!
-# Connectedness of the generated Geck subgroup
+# Geometric connectedness of the generated Geck subgroup
 
-The numbered Geck root subgroups and the Geck weight torus of a valid Dynkin type are
-geometrically connected over every field. Their coordinate algebras are those of the affine line
-and a split torus, so their generated closed subgroup of `GLₙ` is geometrically connected.
+Over every field, the numbered root subgroups and weight torus generate a geometrically
+connected closed subgroup. Each generator is an affine line or split torus, hence geometrically
+connected. The common-kernel criterion transfers this property to their generated subgroup.
 
-Connectedness is one of the geometric properties a split reductive group scheme has, so it is an
-input to recognizing the Geck carrier as the pinned simply connected group of its type.
+This supplies one generated-carrier property for Layer 9B of the ReductiveGroups roadmap.
+Smoothness, reductivity and identification with a pinned group require separate arguments.
 
-## Main results
-
-* `TauCeti.DynkinType.geometricallyConnectedCommHopfAlgProperty_geckGeneratedCoordinateHopfAlgebra`:
-  the generated subgroup is geometrically connected over every field.
-
-## References
-
-* M. Geck, *On the construction of semisimple Lie algebras and Chevalley groups*,
-  Proc. Amer. Math. Soc. **145** (2017), 3233--3247.
-* J. S. Milne, *Algebraic Groups* (2017), Propositions 2.37 and 2.48.
-
-The argument follows the parallel minuscule statements in
-`TauCeti.Algebra.Lie.E6.Minuscule.Generated.Connected` and
-`TauCeti.Algebra.Lie.E7.Minuscule.Generated.Connected`.
+The proof uses `TauCeti.Algebra.AlgebraicGroup.Connected.Generated` and the existing additive
+and diagonalizable coordinate-algebra APIs, as in
+`TauCeti.Algebra.Lie.D4.Tripled.Generated.Connected`.
 -/
 
 public section
 
+open TauCeti.CommHopfAlgCat
+
 namespace TauCeti.DynkinType
 
-open CategoryTheory TauCeti.CommHopfAlgCat
-open scoped TensorProduct
+open CategoryTheory
 
 universe v
 
 variable (t : DynkinType) (ht : t.Valid) (k : Type v) [Field k]
 
 private theorem geometricallyConnected_geckGeneratorCoordinateAlgebra :
-    ∀ j, geometricallyConnectedCommHopfAlgProperty k
-      (t.geckGeneratorCoordinateAlgebra k j) := by
+    ∀ j, geometricallyConnectedCommHopfAlgProperty k (t.geckGeneratorCoordinateAlgebra k j) := by
   intro j
   cases j with
   | inl _ =>
-    rw [geometricallyConnectedCommHopfAlgProperty_iff]
-    intro L _ _
-    have := AdditiveGroup.connectedSpace_primeSpectrum_baseChange_coordinateHopfAlgebra k L
-    exact connectedSpace_primeSpectrum_of_injective
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).toRingHom
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).injective
+    exact AdditiveGroup.geometricallyConnectedCommHopfAlgProperty_coordinateHopfAlgebra k
   | inr _ =>
     exact DiagonalizableGroup.geometricallyConnected_coordinateRing k
       (SplitTorus.characterGroup (Fin t.rank))
@@ -69,7 +53,6 @@ theorem geometricallyConnectedCommHopfAlgProperty_geckGeneratedCoordinateHopfAlg
     geometricallyConnectedCommHopfAlgProperty k (t.geckGeneratedCoordinateHopfAlgebra ht k) := by
   rw [geckGeneratedCoordinateHopfAlgebra_def, geckGeneratedDefiningIdeal_def]
   exact geometricallyConnectedCommHopfAlgProperty_commonKernelQuotient_of_geometricallyConnected
-    (t.geckGeneratorCoordinateMap ht k)
-    (t.geometricallyConnected_geckGeneratorCoordinateAlgebra k)
+    (t.geckGeneratorCoordinateMap ht k) (t.geometricallyConnected_geckGeneratorCoordinateAlgebra k)
 
 end TauCeti.DynkinType

@@ -13,10 +13,9 @@ import TauCeti.Algebra.AlgebraicGroup.DiagonalizableGroup.SmoothConnected
 /-!
 # Connectedness of the generated type-Bₙ₊₁ spin subgroup
 
-The numbered simple-root subgroups and the weight torus of the full-weight type-`Bₙ₊₁` spin
-carrier are geometrically connected over every field: their coordinate algebras are those of the
-affine line and a split torus. The subgroup they generate is therefore geometrically connected
-over every field.
+Each numbered simple-root subgroup and the weight torus of the full-weight type-`Bₙ₊₁` spin
+carrier is geometrically connected over every field. The subgroup they generate is therefore
+geometrically connected over every field.
 
 Connectedness is one of the two geometric inputs, smoothness being the other, to recognizing this
 explicit carrier as a split reductive group of type `Bₙ₊₁`. The result concerns the generated
@@ -26,6 +25,7 @@ subgroup; it says nothing about the base change of the integral carrier, which c
 
 * J. S. Milne, *Algebraic Groups* (2017), Propositions 2.37 and 2.48.
 * R. Steinberg, *Lectures on Chevalley Groups*, §3.
+* Related formalization: `TauCeti.Algebra.Lie.E7.Minuscule.Generated.Connected`.
 -/
 
 public section
@@ -33,23 +33,20 @@ public section
 namespace TauCeti.TypeBSpinCarrier
 
 open CategoryTheory TauCeti.CommHopfAlgCat
-open scoped TensorProduct
 
 universe v
 
 variable (n : ℕ) (k : Type v) [Field k]
 
-private theorem geometricallyConnected_generatorCoordinateAlgebra :
-    ∀ j, geometricallyConnectedCommHopfAlgProperty k (generatorCoordinateAlgebra n k j) := by
+/-- Each numbered root subgroup and the weight torus of the type-`Bₙ₊₁` spin carrier is
+geometrically connected over every field. -/
+theorem geometricallyConnected_generatorCoordinateAlgebra :
+    ∀ j, geometricallyConnectedCommHopfAlgProperty k
+      (generatorCoordinateAlgebra n k j) := by
   intro j
   cases j with
   | inl _ =>
-    rw [geometricallyConnectedCommHopfAlgProperty_iff]
-    intro L _ _
-    have := AdditiveGroup.connectedSpace_primeSpectrum_baseChange_coordinateHopfAlgebra k L
-    exact connectedSpace_primeSpectrum_of_injective
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).toRingHom
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).injective
+      exact AdditiveGroup.geometricallyConnectedCommHopfAlgProperty_coordinateHopfAlgebra k
   | inr _ =>
     exact DiagonalizableGroup.geometricallyConnected_coordinateRing k
       (SplitTorus.characterGroup (Fin (n + 1)))

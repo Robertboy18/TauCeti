@@ -11,33 +11,27 @@ import TauCeti.Algebra.AlgebraicGroup.AdditiveGroup.CoordinateBaseChange
 import TauCeti.Algebra.AlgebraicGroup.DiagonalizableGroup.SmoothConnected
 
 /-!
-# Connectedness of the generated doubled type-E₆ subgroup
+# Geometric connectedness of the generated doubled type-E₆ subgroup
 
-The numbered root subgroups and the weight torus of the doubled minuscule carrier generate a
-geometrically connected closed subgroup of `GL₅₄` over every field. The coordinate algebras
-of its generators remain connected after every field extension, and the closed subgroup they
-generate inherits this property. This supplies the connectedness input for recognizing the
-explicit carrier as a pinned split group of type `E₆`.
+Over every field, the numbered root subgroups and weight torus generate a geometrically
+connected closed subgroup. Each generator is an affine line or split torus, hence geometrically
+connected. The common-kernel criterion transfers this property to their generated subgroup.
 
-The integral carrier is presently known to contain the generated subgroup. The result here
-concerns the generated subgroup; identifying it with the integral carrier after base change
-requires a separate comparison.
+This supplies one generated-carrier property for Layer 9B of the ReductiveGroups roadmap.
+Smoothness, reductivity and identification with a pinned group require separate arguments.
 
-## References
-
-* J. S. Milne, *Algebraic Groups* (2017), Propositions 2.37 and 2.48.
-* R. Steinberg, *Lectures on Chevalley Groups*, Section 3.
-* `TauCeti.Algebra.AlgebraicGroup.Connected.Generated`, connectedness of common-kernel quotients.
-* `TauCeti.Algebra.Lie.D4.Tripled.GeneratedConnected`, the analogous result for the tripled
-  type-`D₄` generated subgroup.
+The proof uses `TauCeti.Algebra.AlgebraicGroup.Connected.Generated` and the existing additive
+and diagonalizable coordinate-algebra APIs, as in
+`TauCeti.Algebra.Lie.D4.Tripled.Generated.Connected`.
 -/
 
 public section
 
+open TauCeti.CommHopfAlgCat
+
 namespace TauCeti.E6DoubledMinuscule
 
-open CategoryTheory TauCeti.CommHopfAlgCat
-open scoped TensorProduct
+open CategoryTheory
 
 universe u
 
@@ -48,12 +42,7 @@ private theorem geometricallyConnected_generatorCoordinateAlgebra :
   intro j
   cases j with
   | inl _ =>
-    rw [geometricallyConnectedCommHopfAlgProperty_iff]
-    intro L _ _
-    have := AdditiveGroup.connectedSpace_primeSpectrum_baseChange_coordinateHopfAlgebra k L
-    exact connectedSpace_primeSpectrum_of_injective
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).toRingHom
-      (Algebra.TensorProduct.comm k (AdditiveGroup.coordinateHopfAlgebra k) L).injective
+    exact AdditiveGroup.geometricallyConnectedCommHopfAlgProperty_coordinateHopfAlgebra k
   | inr _ =>
     exact DiagonalizableGroup.geometricallyConnected_coordinateRing k
       (SplitTorus.characterGroup (Fin 6))

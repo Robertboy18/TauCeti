@@ -54,14 +54,17 @@ and to deduce `TauCeti.character_ind` from `Subgroup.indClassFun_eq_natCard_inv_
   the inducing function is invariant under conjugation in the subgroup.
 * `Subgroup.indClassFun_conj` and `Subgroup.indClassFun_mem_classFunction`: induction preserves
   conjugation invariance over additive coefficients and sends class functions to class functions.
+* `Subgroup.indClassFun_bot`: induction from the trivial subgroup is supported at the identity.
 * `Subgroup.indClassFun_top` and `Subgroup.indClassFun_indClassFun_subgroupOf`: for
   conjugation-invariant inducing functions, induction from `⊤` is the identity, and induction is
   transitive along `L ≤ T ≤ G`.
 * `Subgroup.natCard_nsmul_indClassFun`: for a conjugation-invariant function `f`, the additive
   group-sum form `|S| • (Ind f)(g) = ∑_{x ∈ G} f(x⁻¹gx)`, and its averaged corollary
   `Subgroup.indClassFun_eq_natCard_inv_mul_sum`.
-* `Subgroup.indClassFun_comp_subtype_mul`: the **projection formula**,
-  `Ind_S^G ((Res_S f) · ψ) = f · Ind_S^G ψ` for a class function `f` of `G`.
+* `Subgroup.indClassFun_comp_subtype_smul`: the **projection formula**,
+  `Ind_S^G ((Res_S f) • ψ) = f • Ind_S^G ψ` for a conjugation-invariant scalar function `f`
+  and a function `ψ` with additive coefficients. `Subgroup.indClassFun_comp_subtype_mul`
+  specializes it to multiplication by a class function.
 
 Frobenius reciprocity for class functions, `⟨Ind f, h⟩_G = ⟨f, Res h⟩_S`, is
 `TauCeti.frobenius_reciprocity_classFunction`; it needs the pairing, so it lives with the other
@@ -73,7 +76,8 @@ The definition sums over `Quotient.out` representatives of `G ⧸ S`, so it lite
 `TauCeti.character_indFDRep_sum_quotient`.  For a general `f` the individual summands depend on
 that choice of representatives; being a class function is a sufficient condition for them not to,
 and that is what `Subgroup.indClassFun_mem_classFunction` extracts, in the form of conjugation
-invariance of the total sum. The additive and scalar identities hold for arbitrary functions.
+invariance of the total sum. Additivity and commutation with constant scalars hold for arbitrary
+inducing functions.
 
 `Function.indTerm` and the lemmas that evaluate it are shared, not internal to this file:
 `TauCeti.RepresentationTheory.Induction.Character` sums it over right cosets and
@@ -272,6 +276,24 @@ theorem _root_.Subgroup.indClassFun_smul (S : Subgroup G) [S.FiniteIndex] {R : T
     Subgroup.indClassFun S (c • f) = c • Subgroup.indClassFun S f :=
   Subgroup.indClassFun_comp S (DistribSMul.toAddMonoidHom k c) f
 
+/-! ### The projection formula -/
+
+/-- **The projection formula with additive coefficients.** A conjugation-invariant scalar
+function can act on an induced function either before or after induction. The coefficient type
+needs only addition and a distributive scalar action; the inducing function `ψ` is arbitrary. -/
+@[simp]
+theorem _root_.Subgroup.indClassFun_comp_subtype_smul (S : Subgroup G) [S.FiniteIndex]
+    {R : Type*} [DistribSMul R k] {f : G → R}
+    (hf : ∀ g c, f (c * g * c⁻¹) = f g) (ψ : S → k) :
+    Subgroup.indClassFun S ((fun s : S => f s) • ψ) = f • Subgroup.indClassFun S ψ := by
+  classical
+  funext g
+  simp only [Subgroup.indClassFun, Pi.smul_apply', Finset.smul_sum]
+  refine Finset.sum_congr rfl fun t _ => ?_
+  have hconj : f (t.out⁻¹ * g * t.out) = f g := by
+    simpa using hf g t.out⁻¹
+  by_cases h : t.out⁻¹ * g * t.out ∈ S <;> simp [Function.indTerm, h, hconj]
+
 /-! ### Conjugation invariance and transitivity -/
 
 /-- Induction preserves conjugation invariance over any additive commutative monoid. -/
@@ -299,6 +321,22 @@ theorem _root_.Subgroup.indClassFun_top {f : (⊤ : Subgroup G) → k}
   rw [Subgroup.indClassFun, Fintype.sum_subsingleton _ (QuotientGroup.mk 1),
     Function.indTerm_eq_of_mk_eq_of_conj f hf g _ 1 (Subsingleton.elim _ _), Function.indTerm_one,
     dite_eq_left (Subgroup.mem_top g)]
+
+open scoped Classical in
+/-- Induction from the trivial subgroup is supported at the identity, where its value is
+`|G|` times the value of the inducing function. -/
+@[simp]
+theorem _root_.Subgroup.indClassFun_bot [Finite G] (f : (⊥ : Subgroup G) → k) (g : G) :
+    Subgroup.indClassFun ⊥ f g = if g = 1 then Nat.card G • f 1 else 0 := by
+  let := Fintype.ofFinite (G ⧸ (⊥ : Subgroup G))
+  have hcard : Fintype.card (G ⧸ (⊥ : Subgroup G)) = Nat.card G := by
+    rw [← Nat.card_eq_fintype_card]
+    exact Nat.card_congr QuotientGroup.quotientBot.toEquiv
+  have hf (x : (⊥ : Subgroup G)) : f x = f 1 :=
+    congrArg f (Subsingleton.elim _ _)
+  have hconj (x : G) : x⁻¹ * g * x = 1 ↔ g = 1 := by
+    simpa only [inv_inv] using (conj_eq_one_iff (a := x⁻¹) (b := g))
+  by_cases hg : g = 1 <;> simp [Subgroup.indClassFun_apply, hconj, hg, hf, hcard]
 
 open scoped Classical in
 /-- **Transitivity of induction.**  For subgroups `L ≤ T` with `L` of finite index, inducing a
@@ -416,36 +454,20 @@ section Projection
 
 variable {f : G → k}
 
-/-- **The projection formula, on a single summand.**  The summand only ever evaluates a function on
-`S` at a conjugate of `g`, so multiplying by the restriction of a class function `f` of `G`
-multiplies the summand by the constant `f g`.
-
-It is private: `Subgroup.indClassFun_comp_subtype_mul` is the projection formula every consumer
-uses. -/
-private theorem _root_.Function.indTerm_comp_subtype_mul (hf : f ∈ ClassFunction k G)
-    (ψ : S → k) (g x : G) :
-    Function.indTerm ((fun s : S => f s) * ψ) g x = f g * Function.indTerm ψ g x := by
-  classical
-  by_cases h : x⁻¹ * g * x ∈ S
-  · have hconj : f (x⁻¹ * g * x) = f g := by
-      simpa using ClassFunction.mem_iff.mp hf g x⁻¹
-    simp [Function.indTerm, h, hconj]
-  · simp [Function.indTerm, h]
-
 /-- **The projection formula for the induced class function**:
 `Ind_S^G ((Res_S f) · ψ) = f · Ind_S^G ψ` for a class function `f` of `G` and an arbitrary
 function `ψ` on `S`.
 
 This is the class-function shadow of the tensor identity `TauCeti.indProjection`, and it is what
-makes induction a map of modules over the ring of class functions: an induced function may be
+makes induction a map of modules over the semiring of class functions: an induced function may be
 multiplied by `f` either before or after inducing.  Only `f` is required to be a class function;
 the identity is pointwise in `ψ`. -/
+@[simp]
 theorem _root_.Subgroup.indClassFun_comp_subtype_mul (S : Subgroup G) [S.FiniteIndex]
     (hf : f ∈ ClassFunction k G) (ψ : S → k) :
     Subgroup.indClassFun S ((fun s : S => f s) * ψ) = f * Subgroup.indClassFun S ψ := by
-  funext g
-  simp only [Subgroup.indClassFun, Pi.mul_apply, Finset.mul_sum]
-  exact Finset.sum_congr rfl fun t _ => Function.indTerm_comp_subtype_mul hf ψ g _
+  simpa only [smul_eq_mul] using
+    Subgroup.indClassFun_comp_subtype_smul S (ClassFunction.mem_iff.mp hf) ψ
 
 end Projection
 

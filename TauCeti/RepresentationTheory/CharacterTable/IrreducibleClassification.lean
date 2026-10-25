@@ -16,15 +16,15 @@ import Mathlib.RingTheory.SimpleRing.Matrix
 A Wedderburn presentation `e : k[G] ≃ₐ[k] Π i, Matₙᵢ(k)` of a finite group algebra over an
 algebraically closed field carries an irreducible representation on each block, and distinct blocks
 carry inequivalent ones (`TauCeti/RepresentationTheory/CharacterTable/BlockRepresentation.lean`).
-This file supplies the missing half, that the list is **complete**: every finite-dimensional
-irreducible representation of `G` over `k` is equivalent to a block representation. The block index
+This file supplies the missing half, that the list is **complete**: every irreducible
+representation of `G` over `k` is equivalent to a block representation. The block index
 is therefore a faithful index of the irreducible representations up to equivalence, and everything
 read off a presentation — first of all the multiset of degrees `nᵢ` — is an invariant of `G`.
 
 Completeness is not a new argument: a family of pairwise inequivalent irreducibles indexed by as
 many indices as `G` has conjugacy classes already exhausts the irreducibles
 (`TauCeti.ClassFunction.exists_nonempty_equiv`), and a presentation has exactly that many blocks
-(`TauCeti.card_eq_card_conjClasses_of_algEquiv_pi_matrix`). What was missing was the assembly, and
+(`AlgEquiv.card_eq_card_conjClasses_of_pi_matrix`). What was missing was the assembly, and
 the invariance statements it unlocks.
 
 ## Main results
@@ -81,17 +81,8 @@ variable {k : Type u} {G : Type v} [Field k] [Group G] [Finite G] [IsAlgClosed k
   [Invertible (Nat.card G : k)] {ι : Type w} [Finite ι] {d : ι → ℕ} [∀ i, NeZero (d i)]
   (e : k[G] ≃ₐ[k] Π i, Matrix (Fin (d i)) (Fin (d i)) k)
 
-omit [IsAlgClosed k] [Invertible (Nat.card G : k)] in
-include e in
-/-- The `Nat.card` spelling of `TauCeti.card_eq_card_conjClasses_of_algEquiv_pi_matrix`, which is
-the shape `TauCeti.ClassFunction.exists_nonempty_equiv` asks for. -/
-private theorem natCard_eq_card_conjClasses : Nat.card ι = Nat.card (ConjClasses G) := by
-  let _ := Fintype.ofFinite ι
-  rw [Nat.card_eq_fintype_card]
-  exact card_eq_card_conjClasses_of_algEquiv_pi_matrix e
-
 /-- **The Wedderburn blocks are a complete list of the irreducible representations.** Every
-finite-dimensional irreducible representation of `G` over an algebraically closed field whose
+irreducible representation of `G` over an algebraically closed field whose
 characteristic does not divide `|G|` is equivalent to the representation carried by one of the
 blocks of any Wedderburn presentation of `k[G]`.
 
@@ -99,17 +90,18 @@ Together with `TauCeti.isIrreducible_blockRepresentation` and
 `TauCeti.isEmpty_equiv_blockRepresentation` this makes the block index a faithful index of the
 irreducible representations up to equivalence. -/
 theorem exists_nonempty_equiv_blockRepresentation {W : Type w'} [AddCommGroup W] [Module k W]
-    [FiniteDimensional k W] (σ : Representation k G W) [σ.IsIrreducible] :
+    (σ : Representation k G W) [σ.IsIrreducible] :
     ∃ i, Nonempty (σ.Equiv (blockRepresentation e i)) := by
   have : ∀ i, (blockRepresentation e i).IsIrreducible := fun i =>
     isIrreducible_blockRepresentation e i
   exact ClassFunction.exists_nonempty_equiv (blockRepresentation e)
-    (fun _ _ hij => isEmpty_equiv_blockRepresentation e hij) (natCard_eq_card_conjClasses e) σ
+    (fun _ _ hij => isEmpty_equiv_blockRepresentation e hij)
+    e.card_eq_card_conjClasses_of_pi_matrix σ
 
 include e in
 /-- **The dimension of an irreducible representation is one of the Wedderburn degrees.** -/
 theorem exists_degree_eq_finrank {W : Type w'} [AddCommGroup W] [Module k W]
-    [FiniteDimensional k W] (σ : Representation k G W) [σ.IsIrreducible] :
+    (σ : Representation k G W) [σ.IsIrreducible] :
     ∃ i, d i = Module.finrank k W := by
   obtain ⟨i, ⟨φ⟩⟩ := exists_nonempty_equiv_blockRepresentation e σ
   refine ⟨i, ?_⟩
@@ -174,8 +166,9 @@ theorem exists_equiv_blockRepresentation :
   let _ := Fintype.ofFinite ι'
   -- Both index sets have as many members as `G` has conjugacy classes, so it is a bijection.
   have hcard : Fintype.card ι = Fintype.card ι' := by
-    rw [card_eq_card_conjClasses_of_algEquiv_pi_matrix e,
-      card_eq_card_conjClasses_of_algEquiv_pi_matrix e']
+    simpa only [Nat.card_eq_fintype_card] using
+      e.card_eq_card_conjClasses_of_pi_matrix.trans
+        e'.card_eq_card_conjClasses_of_pi_matrix.symm
   have hbij : Function.Bijective f := (Fintype.bijective_iff_injective_and_card f).2 ⟨hinj, hcard⟩
   refine ⟨Equiv.ofBijective f hbij, fun i => ⟨?_, hf i⟩⟩
   obtain ⟨φ⟩ := hf i

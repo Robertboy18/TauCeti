@@ -58,7 +58,9 @@ Compact Lie Groups*, Springer GTM 98 (1985), Chapter II.
 
 public section
 
-open MeasureTheory TauCeti TauCeti.ContRepresentation
+open _root_.ContRepresentation
+
+open MeasureTheory TauCeti
 open scoped InnerProductSpace
 
 namespace ContRepresentation

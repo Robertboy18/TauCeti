@@ -27,6 +27,8 @@ characterizes this restriction. The induced map is injective exactly when the ve
 ## Main definitions
 
 * `AbstractSimplicialComplex.StandardSimplex.map`: affine pushforward on a closed simplex.
+* `AbstractSimplicialComplex.StandardSimplex.comap`: the inverse affine pullback for an injective
+  vertex map, used to identify polyhedra under relabeling.
 * `PreAbstractSimplicialComplex.SimplicialMap.realizationMap`: the induced continuous map.
 * `PreAbstractSimplicialComplex.SimplicialMap.realizationHomeomorph`: the homeomorphism induced by
   mutually inverse simplicial maps.
@@ -90,6 +92,48 @@ theorem continuous_map (f : α → β) :
   have hg : (Subtype.val : σ.image f → β) ∘ g = f ∘ (Subtype.val : σ → α) := rfl
   rw [hg, Finsupp.mapDomain_comp, ← Finset.standardSimplexHomeomorph_symm_val,
     Homeomorph.symm_apply_apply]
+
+/-- Pull barycentric coordinates back along an injective vertex map. This is the inverse of
+its affine pushforward on the simplex spanned by its image. -/
+def comap {f : α ↪ β} (x : StandardSimplex (σ.image f)) : StandardSimplex σ :=
+  ⟨Finsupp.comapDomain f x.1 f.injective.injOn, by
+    classical
+    have h := mem_image_of_mem (Finsupp.lcomapDomain (R := ℝ) (M := ℝ) f f.injective) x.2
+    rw [(Finsupp.lcomapDomain f f.injective).image_convexHull] at h
+    simpa only [Finset.coe_image, image_image, Function.comp_def,
+      Finsupp.lcomapDomain_apply, Finsupp.comapDomain_single] using h⟩
+
+/-- Pullback of a simplex point pulls back its finitely supported coordinate vector. -/
+@[simp]
+theorem comap_val {f : α ↪ β} (x : StandardSimplex (σ.image f)) :
+    (comap (f := f) x : α →₀ ℝ) = Finsupp.comapDomain f x.1 f.injective.injOn := (rfl)
+
+/-- Pulling coordinates back after pushing them forward recovers a simplex point. -/
+@[simp]
+theorem comap_map (x : StandardSimplex σ) (f : α ↪ β) : comap (map x f) = x := by
+  apply Subtype.ext
+  rw [comap_val, map_val]
+  exact Finsupp.comapDomain_mapDomain f f.injective _
+
+/-- Pushing coordinates forward after pulling them back recovers an image-simplex point. -/
+@[simp]
+theorem map_comap {f : α ↪ β} (x : StandardSimplex (σ.image f)) : map (comap (f := f) x) f = x := by
+  apply Subtype.ext
+  rw [map_val, comap_val]
+  exact Finsupp.mapDomain_comapDomain f f.injective x.1 fun b hb => by
+    obtain ⟨a, -, rfl⟩ := Finset.mem_image.mp (support_subset x hb)
+    exact mem_range_self a
+
+/-- Affine pullback between coordinate simplices is continuous, including on empty simplices. -/
+theorem continuous_comap (f : α ↪ β) :
+    Continuous (fun x : StandardSimplex (σ.image f) => comap (f := f) x) := by
+  apply continuous_induced_rng.mpr
+  apply continuous_pi
+  intro a
+  have hc : Continuous (fun x : StandardSimplex (σ.image f) => (x.1 : β → ℝ)) :=
+    continuous_induced_dom
+  simpa only [Function.comp_def, comap_val, Finsupp.comapDomain_apply] using
+    (continuous_apply (f a)).comp hc
 
 end AbstractSimplicialComplex.StandardSimplex
 
@@ -232,3 +276,41 @@ theorem realizationHomeomorph_symm_apply
     (f.realizationHomeomorph g hgf hfg).symm x = g.realizationMap x := (rfl)
 
 end PreAbstractSimplicialComplex.SimplicialMap
+
+namespace TauCeti.PreAbstractSimplicialComplex.SimplicialMap
+
+open _root_.AbstractSimplicialComplex
+
+/-- Injectivity on a point's support makes realization carry its support to the vertex image. -/
+theorem support_realizationMap_of_injOn {α β : Type*} [DecidableEq β]
+    {K : AbstractSimplicialComplex α} {L : AbstractSimplicialComplex β}
+    (f : _root_.PreAbstractSimplicialComplex.SimplicialMap
+      K.toPreAbstractSimplicialComplex L.toPreAbstractSimplicialComplex)
+    (x : Realization K) (hf : InjOn f (x.1.support : Set α)) :
+    (f.realizationMap x).1.support = x.1.support.image f := by
+  rw [_root_.PreAbstractSimplicialComplex.SimplicialMap.realizationMap_val,
+    Finsupp.mapDomain_support_of_injOn x.1 hf]
+
+/-- A simplicial isomorphism transports sets defined by support predicates whenever those
+predicates correspond under the vertex map. -/
+theorem image_realizationMap_ofPred_support {α β : Type*} [DecidableEq α] [DecidableEq β]
+    {K : AbstractSimplicialComplex α} {L : AbstractSimplicialComplex β}
+    (f : _root_.PreAbstractSimplicialComplex.SimplicialMap
+      K.toPreAbstractSimplicialComplex L.toPreAbstractSimplicialComplex)
+    (g : _root_.PreAbstractSimplicialComplex.SimplicialMap
+      L.toPreAbstractSimplicialComplex K.toPreAbstractSimplicialComplex)
+    (hgf : g.comp f = _root_.PreAbstractSimplicialComplex.SimplicialMap.id
+      K.toPreAbstractSimplicialComplex)
+    (hfg : f.comp g = _root_.PreAbstractSimplicialComplex.SimplicialMap.id
+      L.toPreAbstractSimplicialComplex)
+    {P : Finset α → Prop} {Q : Finset β → Prop}
+    (hPQ : ∀ s, P s ↔ Q (s.image f)) :
+    f.realizationMap '' {x | P x.1.support} = {y | Q y.1.support} := by
+  have hf := injective_of_comp_eq_id f g hgf
+  ext y
+  obtain ⟨x, rfl⟩ := (f.realizationHomeomorph g hgf hfg).surjective y
+  rw [_root_.PreAbstractSimplicialComplex.SimplicialMap.realizationHomeomorph_apply,
+    (f.realizationMap_injective_iff.mpr hf).mem_set_image]
+  simp only [mem_ofPred_eq, support_realizationMap_of_injOn f x hf.injOn, hPQ]
+
+end TauCeti.PreAbstractSimplicialComplex.SimplicialMap

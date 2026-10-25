@@ -97,7 +97,7 @@ private theorem conjAction_apply {𝕜 G V W : Type*} [RCLike 𝕜] [Group G]
 
 end TauCeti
 
-open TauCeti TauCeti.ContRepresentation
+open TauCeti
 
 namespace ContRepresentation
 
@@ -133,7 +133,7 @@ private theorem conjAction_comp_conjFamily (T : V →L[𝕜] W) (g : G) :
     (conjAction π ρ g : C(V →L[𝕜] W, V →L[𝕜] W)).comp (conjFamily π hπ ρ hρ T)
       = (conjFamily π hπ ρ hρ T).comp (ContinuousMap.mulRight g) := by
   ext h v
-  simp only [ContinuousMap.comp_apply, ContinuousMap.coe_coe, conjAction_apply,
+  simp only [ContinuousMap.comp_apply, ContinuousMap.coe_ofClass, conjAction_apply,
     ContinuousLinearMap.comp_apply, conjFamily_apply_apply, ContinuousMap.coe_mulRight,
     mul_inv_rev, map_mul ρ, map_mul π, mul_apply_eq_comp]
 
@@ -387,7 +387,7 @@ theorem inner_averageOperator_of_isUnitary (hunitary : IsUnitary ρ) (T : V →L
 operator.** For the rank-one operator `InnerProductSpace.rankOne 𝕜 w' w = ⟪w, ·⟫ • w'` the
 integrand `⟪ρ g v', T (π g v)⟫` is exactly the pointwise product
 `⟪ρ g v', w'⟫ · conj ⟪π g v, w⟫` computed by
-`TauCeti.ContRepresentation.inner_matrixCoeffLp`.
+`ContRepresentation.inner_matrixCoeffLp`.
 
 This is the identity that reduces Schur orthogonality to a statement about the intertwiner space:
 the operator on the right is an intertwiner `π → ρ` by

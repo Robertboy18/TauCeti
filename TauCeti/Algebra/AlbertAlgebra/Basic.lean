@@ -64,12 +64,18 @@ ring for the trace-zero subspace.
 * the `NonAssocCommRing` instance: the product is `R`-bilinear and commutative, and the identity
   matrix is a two-sided unit. It is `NonAssocCommRing` and not `CommRing` because the product is
   not associative.
+* `TauCeti.AlbertAlgebra.mul_self_diag`, `TauCeti.AlbertAlgebra.mul_self_offDiag` and
+  `TauCeti.AlbertAlgebra.trace_mul_self`: the entries and the trace of the Jordan square.
 * `TauCeti.AlbertAlgebra.diagIdempotent_mul_diagIdempotent` and
   `TauCeti.AlbertAlgebra.sum_diagIdempotent`: the diagonal idempotents are orthogonal and sum
   to `1`.
 * `TauCeti.AlbertAlgebra.diagIdempotent_mul_offDiagSingle`: the **Peirce relation** between the
   diagonal frame and the off-diagonal slots: `Eᵢ` annihilates its opposite slot and halves the other
   two.
+* `TauCeti.AlbertAlgebra.offDiagSingle_mul_offDiagSingle` and
+  `TauCeti.AlbertAlgebra.offDiagSingle_mul_offDiagSingle_add_one`: the off-diagonal **Peirce
+  products**. A same-slot product is the associated norm form times the sum of the other two
+  diagonal idempotents; a cyclic distinct-slot product is half the remaining slot of `conj (a * b)`.
 * `TauCeti.AlbertAlgebra.eq_sum_smul_diagIdempotent_add_sum_offDiagSingle`: the diagonal frame and
   the off-diagonal slots span `H₃(𝕆)`.
 
@@ -257,6 +263,21 @@ instance [Invertible (2 : R)] : Mul (AlbertAlgebra R) :=
               + B.offDiag (i + 1) * A.offDiag (i + 2))) :=
   (rfl)
 
+/-- **The diagonal of the Jordan square**: `(A ∘ A)ᵢᵢ = aᵢ² + N(xᵢ₊₁) + N(xᵢ₊₂)`. -/
+theorem mul_self_diag [Invertible (2 : R)] (A : AlbertAlgebra R) (i : Fin 3) :
+    (A * A).diag i = A.diag i ^ 2 + Octonion.norm (A.offDiag (i + 1))
+      + Octonion.norm (A.offDiag (i + 2)) := by
+  rw [mul_diag, sq, QuadraticMap.associated_eq_self_apply, QuadraticMap.associated_eq_self_apply,
+    Octonion.normQuadraticForm_apply, Octonion.normQuadraticForm_apply]
+
+/-- **The off-diagonal entries of the Jordan square**:
+`(A ∘ A)ᵢ = (aᵢ₊₁ + aᵢ₊₂) xᵢ + conj (xᵢ₊₁ xᵢ₊₂)`. -/
+theorem mul_self_offDiag [Invertible (2 : R)] (A : AlbertAlgebra R) (i : Fin 3) :
+    (A * A).offDiag i = (A.diag (i + 1) + A.diag (i + 2)) • A.offDiag i
+      + Octonion.conj (A.offDiag (i + 1) * A.offDiag (i + 2)) := by
+  rw [mul_offDiag, smul_add, invOf_two_smul_add_invOf_two_smul, smul_add,
+    invOf_two_smul_add_invOf_two_smul]
+
 variable [Invertible (2 : R)]
 
 instance : NonAssocCommRing (AlbertAlgebra R) where
@@ -361,6 +382,13 @@ private def traceZeroLinearEquivProd (R : Type*) [Ring R] :
 
 end Trace
 
+/-- **The trace of the Jordan square** is the sum of the squares of the diagonal entries and twice
+the norms of the octonion entries. -/
+theorem trace_mul_self [CommRing R] [Invertible (2 : R)] (A : AlbertAlgebra R) :
+    trace (A * A) = ∑ i, A.diag i ^ 2 + 2 * ∑ i, Octonion.norm (A.offDiag i) := by
+  simp only [trace_apply, mul_self_diag, Fin.sum_univ_three, Fin.reduceAdd]
+  ring
+
 /-- **The trace-zero subspace of the split Albert algebra is `26`-dimensional**: a vanishing trace
 pins the last diagonal entry to the negative of the sum of the other two. -/
 theorem finrank_traceZero (R : Type*) [Ring R] [StrongRankCondition R] :
@@ -457,6 +485,25 @@ it, while the two other idempotents halve it. -/
         · simp [h]
         · simp [h]
       · simp [h, Pi.single_eq_of_ne hm]
+
+/-- **The product of two octonions in the same off-diagonal slot**: the symmetric bilinear form
+associated with the octonion norm multiplies the sum of the two other diagonal idempotents. -/
+@[simp] theorem offDiagSingle_mul_offDiagSingle [CommRing R] [Invertible (2 : R)]
+    (i : Fin 3) (a b : Octonion R) :
+    offDiagSingle i a * offDiagSingle i b =
+      QuadraticMap.associated (Octonion.normQuadraticForm R) a b •
+        (diagIdempotent R (i + 1) + diagIdempotent R (i + 2)) := by
+  refine AlbertAlgebra.ext (funext fun k => ?_) (funext fun k => ?_) <;>
+    fin_cases i <;> fin_cases k <;> simp
+
+/-- **The product of two cyclically adjacent off-diagonal slots**: half the remaining slot of
+`conj (a * b)`. The order of the octonion factors follows the cyclic order of the slots. -/
+@[simp] theorem offDiagSingle_mul_offDiagSingle_add_one [CommRing R] [Invertible (2 : R)]
+    (i : Fin 3) (a b : Octonion R) :
+    offDiagSingle i a * offDiagSingle (i + 1) b =
+      ⅟(2 : R) • offDiagSingle (i + 2) (Octonion.conj (a * b)) := by
+  refine AlbertAlgebra.ext (funext fun k => ?_) (funext fun k => ?_) <;>
+    fin_cases i <;> fin_cases k <;> simp
 
 /-- **The diagonal frame and the off-diagonal slots span `H₃(𝕆)`**: a Hermitian octonion matrix is
 the combination of the diagonal idempotents read off its diagonal, plus its three off-diagonal
