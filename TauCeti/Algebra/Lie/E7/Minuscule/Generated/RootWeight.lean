@@ -194,8 +194,9 @@ section Weights
 -- The closed-subgroup weight criterion takes the base ring in the universe of the torus index.
 variable (R : Type) [CommRing R]
 
-/-- Transport the quotient weight criterion along the exported presentation equation and the
-corresponding equation for the ambient coordinate morphism. -/
+/-- For a Hopf algebra equal to the generated quotient of `GL₅₆` with finite projective
+cotangent module, a tangent vector has character `α` for its minuscule weight torus exactly
+when its matrix vanishes outside entries with weight difference `α`. -/
 private theorem mem_adjointWeightSpace_iff_of_eq {G : CommHopfAlgCat R}
     (hG : G = CommHopfAlgCat.quotient (GeneralLinear.coordinateHopfAlgebra R 56)
       (generatedDefiningIdeal R))
@@ -241,12 +242,13 @@ theorem mem_adjointWeightSpace_generatedWeightTorusCoordinateMap_iff
   exact mem_adjointWeightSpace_iff_of_eq R (generatedCoordinateHopfAlgebra_def R)
     (generatedCoordinateMap R) (generatedCoordinateMap_comp_eqToIso_hom R) _ hπ α x
 
-/-- The generic support criterion uses a Cartan column, while the numbered E₇ character uses
-its row. Symmetry converts between these conventions; `erw` aligns the definitionally
-rank-seven index in the exported root-character equations. -/
+/-- A raising or lowering matrix entry vanishes unless its minuscule weight difference is the
+corresponding signed simple root. -/
 private theorem rootMatrix_apply_eq_zero_of_weight_sub_ne (k : Fin 7 ⊕ Fin 7) (a b : Fin 56)
     (h : e7MinusculeWeight a - e7MinusculeWeight b ≠ E7.rootGeneratorWeight valid_E7 k) :
     Sum.elim raisingMatrix loweringMatrix k a b = 0 := by
+  -- E₇ symmetry identifies the table's Cartan columns with the numbered root rows;
+  -- `erw` also identifies the exported rank-seven index with `Fin 7`.
   rcases k with i | i
   · have hroot : E7.rootGeneratorWeight valid_E7 (.inl i) =
         fun j : Fin 7 ↦ weightTable.cartanMatrix j i := by
