@@ -89,6 +89,9 @@ theorem splitTorusCommHopfAlgProperty_quotient_weightTorusDefiningIdeal :
     (E7Minuscule.weightTorusCoordinateIso R ≪≫ (weightTorusCoordinateIso R).symm)
     (E7Minuscule.splitTorusCommHopfAlgProperty_quotient_weightTorusDefiningIdeal R)
 
+grind_pattern splitTorusCommHopfAlgProperty_quotient_weightTorusDefiningIdeal =>
+  weightTorusDefiningIdeal R
+
 /-- Contravariantly, the closed weight torus lies in the generated positive subgroup. -/
 theorem carrierDefiningIdeal_le_weightTorusDefiningIdeal :
     Positive.carrierDefiningIdeal R ≤ weightTorusDefiningIdeal R := by
@@ -149,6 +152,7 @@ variable (S : Type u) [CommRing S] [Algebra R S] [Module.Free R S]
 attribute [local instance high] Algebra.toModule
 
 /-- The generated-carrier comparison transports the torus ideal under free scalar extension. -/
+@[simp↓]
 theorem map_baseChange_weightTorusDefiningIdeal :
     (CommHopfAlgCat.baseChangeHopfIdeal (K := S) (weightTorusDefiningIdeal R)).map
         (generatedCoordinateHopfAlgebraBaseChangeIso R S).hom.hom =
