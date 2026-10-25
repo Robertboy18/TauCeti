@@ -87,7 +87,10 @@ private theorem fixedBaseChange_bijective [Module.Flat R S] :
   let e := (fixedSubalgebraTensorEquiv S f).trans
     ((LinearMap.tensorEqLocusEquiv S S f.toLinearMap LinearMap.id).trans
       (LinearEquiv.ofEq _ _ (eqLocus_baseChange S f)))
-  exact e.bijective
+  have he (x : S ⊗[R] f.fixedSubalgebra) : e x = fixedBaseChange S f x := by
+    simp only [e, LinearEquiv.trans_apply, LinearMap.tensorEqLocusEquiv_apply]
+    rfl
+  exact (funext he) ▸ e.bijective
 
 /-- Fixed Lie subalgebras commute with flat scalar extension. -/
 noncomputable def fixedBaseChangeEquiv [Module.Flat R S] :
