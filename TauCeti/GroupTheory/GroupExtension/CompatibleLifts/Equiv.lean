@@ -45,17 +45,17 @@ def compatibleLiftsMap : S.compatibleLifts ρ →* S'.compatibleLifts ρ where
     · simp only [map_mul, compatibleLiftsProjection_apply]
 
 @[simp]
-theorem compatibleLiftsMap_toMulAut (x : S.compatibleLifts ρ) :
+theorem compatibleLiftsToMulAut_compatibleLiftsMap (x : S.compatibleLifts ρ) :
     compatibleLiftsToMulAut S' ρ (compatibleLiftsMap F ρ x) =
       MulAut.congr F.toMulEquiv (compatibleLiftsToMulAut S ρ x) :=
   compatibleLiftsToMulAut_apply S' ρ _
 
 @[simp]
-theorem compatibleLiftsMap_projection (x : S.compatibleLifts ρ) :
+theorem compatibleLiftsProjection_compatibleLiftsMap (x : S.compatibleLifts ρ) :
     compatibleLiftsProjection S' ρ (compatibleLiftsMap F ρ x) = compatibleLiftsProjection S ρ x :=
   compatibleLiftsProjection_apply S' ρ _
 
-theorem compatibleLiftsMap_toMulAut_apply (x : S.compatibleLifts ρ) (e : E') :
+theorem compatibleLiftsToMulAut_compatibleLiftsMap_apply (x : S.compatibleLifts ρ) (e : E') :
     compatibleLiftsToMulAut S' ρ (compatibleLiftsMap F ρ x) e =
       F (compatibleLiftsToMulAut S ρ x (F.symm e)) := by
   simp [MulAut.congr_apply, MulEquiv.trans_apply]
@@ -65,9 +65,10 @@ theorem compatibleLiftsMap_symm_map (x : S.compatibleLifts ρ) :
     compatibleLiftsMap F.symm ρ (compatibleLiftsMap F ρ x) = x := by
   apply compatibleLifts_ext S ρ
   · ext e
-    rw [compatibleLiftsMap_toMulAut_apply, compatibleLiftsMap_toMulAut_apply]
+    rw [compatibleLiftsToMulAut_compatibleLiftsMap_apply,
+      compatibleLiftsToMulAut_compatibleLiftsMap_apply]
     simp only [symm_apply_apply, apply_symm_apply]
-  · rw [compatibleLiftsMap_projection, compatibleLiftsMap_projection]
+  · rw [compatibleLiftsProjection_compatibleLiftsMap, compatibleLiftsProjection_compatibleLiftsMap]
 
 /-- Equivalent extensions have equivalent groups of compatible lifts. -/
 def compatibleLiftsCongr : S.compatibleLifts ρ ≃* S'.compatibleLifts ρ where
@@ -88,13 +89,6 @@ theorem compatibleLiftsCongr_symm_apply (x : S'.compatibleLifts ρ) :
     (compatibleLiftsCongr F ρ).symm x = compatibleLiftsMap F.symm ρ x :=
   (rfl)
 
-/-- Transport through an extension equivalence preserves each character twist. -/
-theorem mulAutCongr_twist (hcentral : S.inl.range ≤ Subgroup.center E) (χ : G →* N) :
-    MulAut.congr F.toMulEquiv (twist S hcentral χ) =
-      twist S' (F.inl_range_le_center hcentral) χ := by
-  ext e
-  simp [MulAut.congr_apply, MulEquiv.trans_apply]
-
 end GroupExtension.Equiv
 
 namespace GroupExtension.Equiv
@@ -108,9 +102,9 @@ theorem compatibleLiftsMap_character (χ : G →* N) :
     compatibleLiftsMap F ρ (compatibleLiftsCharacter S ρ hcentral χ) =
       compatibleLiftsCharacter S' ρ (F.inl_range_le_center hcentral) χ := by
   apply compatibleLifts_ext S' ρ
-  · rw [compatibleLiftsMap_toMulAut, compatibleLiftsToMulAut_character,
+  · rw [compatibleLiftsToMulAut_compatibleLiftsMap, compatibleLiftsToMulAut_character,
     compatibleLiftsToMulAut_character, mulAutCongr_twist]
-  · rw [compatibleLiftsMap_projection, compatibleLiftsProjection_character,
+  · rw [compatibleLiftsProjection_compatibleLiftsMap, compatibleLiftsProjection_character,
     compatibleLiftsProjection_character]
 
 end GroupExtension.Equiv

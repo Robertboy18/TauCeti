@@ -25,8 +25,7 @@ This file provides operations on an existing group extension.
   the quotient group is surjective as soon as it is surjective on the kernel terms.
 
 The relabelling and homomorphism constructions are mirrored for additive groups by `to_additive`.
-Central extensions also admit character twists, and a shared partial inverse to the inclusion
-is available for extracting values from the kernel.
+Central extensions also admit character twists, preserved by equivalences of extensions.
 -/
 
 public section
@@ -250,31 +249,14 @@ theorem apply_symm_apply (F : S.Equiv S') (e : E') : F (F.symm e) = e :=
 theorem symm_symm (F : S.Equiv S') : F.symm.symm = F :=
   rfl
 
+/-- Transport through an extension equivalence preserves each character twist. -/
+theorem mulAutCongr_twist (F : S.Equiv S') (hcentral : S.inl.range ≤ Subgroup.center E)
+    (χ : G →* N) :
+    MulAut.congr F.toMulEquiv (twist S hcentral χ) =
+      twist S' (F.inl_range_le_center hcentral) χ := by
+  ext e
+  simp [MulAut.congr_apply, MulEquiv.trans_apply]
+
 end Equiv
-
-end GroupExtension
-
-namespace GroupExtension
-
-variable {N : Type u} {E : Type v} {G : Type w} [Group N] [Group E] [Group G]
-  (S : GroupExtension N E G)
-
-/-- A partial inverse to the inclusion of the kernel. Its right-inverse law holds only on
-`S.inl.range`; values outside that range are unspecified. Downstream statements should normally
-express recovered kernel values through `S.inl`. -/
-noncomputable def inlInv (e : E) : N := Function.invFun S.inl e
-
-variable {S}
-
-@[simp]
-theorem inlInv_inl (n : N) : inlInv S (S.inl n) = n :=
-  Function.leftInverse_invFun S.inl_injective n
-
-theorem inl_inlInv {e : E} (he : e ∈ S.inl.range) : S.inl (inlInv S e) = e :=
-  Function.invFun_eq (MonoidHom.mem_range.1 he)
-
-@[simp]
-theorem inlInv_one : inlInv S (1 : E) = 1 := by
-  simpa using inlInv_inl (S := S) (1 : N)
 
 end GroupExtension

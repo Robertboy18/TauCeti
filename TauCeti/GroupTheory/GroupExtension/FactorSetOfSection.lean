@@ -229,12 +229,14 @@ kernel, and this is its preimage there. It is a genuine factor set once the kern
 section is normalized and the ambient action is the conjugation action; see
 `TauCeti.GroupExtension.factorSet`. -/
 noncomputable def factorSetFun (σ : S.Section) (p : G × G) : M :=
-  _root_.GroupExtension.inlInv S (σ p.1 * σ p.2 * (σ (p.1 * p.2))⁻¹)
+  (MonoidHom.ofInjective S.inl_injective).symm
+    ⟨σ p.1 * σ p.2 * (σ (p.1 * p.2))⁻¹,
+      GroupExtension.Section.mul_mul_mul_inv_mem_range_inl σ p.1 p.2⟩
 
 @[simp]
 theorem inl_factorSetFun (σ : S.Section) (g h : G) :
     S.inl (factorSetFun σ (g, h)) = σ g * σ h * (σ (g * h))⁻¹ :=
-  _root_.GroupExtension.inl_inlInv (GroupExtension.Section.mul_mul_mul_inv_mem_range_inl σ g h)
+  MonoidHom.apply_ofInjective_symm S.inl_injective _
 
 /-- **The factor set measures the failure of a section to be a homomorphism.** This matches the
 convention of `TauCeti.FactorSet.canonicalSection_mul`. -/
@@ -407,11 +409,13 @@ variable [Group M] {S : GroupExtension M E G} (σ σ' : S.Section)
 /-- The difference of two sections, as a function `G → M`: `σ g * (σ' g)⁻¹` lies in the kernel, and
 this is its preimage there. It is the rescaling relating the two factor sets; see
 `TauCeti.GroupExtension.isMulCoboundary₂_div`. -/
-noncomputable def sectionDiff (g : G) : M := _root_.GroupExtension.inlInv S (σ g * (σ' g)⁻¹)
+noncomputable def sectionDiff (g : G) : M :=
+  (MonoidHom.ofInjective S.inl_injective).symm
+    ⟨σ g * (σ' g)⁻¹, GroupExtension.Section.mul_inv_mem_range_inl σ σ' g⟩
 
 @[simp]
 theorem inl_sectionDiff (g : G) : S.inl (sectionDiff σ σ' g) = σ g * (σ' g)⁻¹ :=
-  _root_.GroupExtension.inl_inlInv (GroupExtension.Section.mul_inv_mem_range_inl σ σ' g)
+  MonoidHom.apply_ofInjective_symm S.inl_injective _
 
 end SectionDiff
 

@@ -53,25 +53,17 @@ theorem compatibleLiftsProjection_character (χ : G →* N) :
     compatibleLiftsProjection S ρ (compatibleLiftsCharacter S ρ hcentral χ) = 1 :=
   compatibleLiftsProjection_apply S ρ _
 
-theorem compatibleLiftsCharacter_injective : Function.Injective
-    (compatibleLiftsCharacter S ρ hcentral) := by
-  intro χ ψ h
-  ext g
-  obtain ⟨e, rfl⟩ := S.rightHom_surjective g
-  have he := congrArg (fun x => compatibleLiftsToMulAut S ρ x e) h
-  simpa only [compatibleLiftsToMulAut_character, twist_apply, mul_left_inj,
-    S.inl_injective.eq_iff] using he
-
 /-- The displacement of a lift over the identity, expressed in the included kernel. -/
 private noncomputable def kernelDeviation (x : (compatibleLiftsProjection S ρ).ker) (e : E) : N :=
-  _root_.GroupExtension.inlInv S (compatibleLiftsToMulAut S ρ x.val e * e⁻¹)
+  (MonoidHom.ofInjective S.inl_injective).symm
+    ⟨compatibleLiftsToMulAut S ρ x.val e * e⁻¹, by
+      rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
+      simp only [map_mul, map_inv, rightHom_compatibleLiftsToMulAut,
+        MonoidHom.mem_ker.mp x.property, map_one, MulAut.one_apply, mul_inv_cancel]⟩
 
 private theorem inl_kernelDeviation (x : (compatibleLiftsProjection S ρ).ker) (e : E) :
-    S.inl (kernelDeviation S ρ x e) = compatibleLiftsToMulAut S ρ x.val e * e⁻¹ := by
-  apply _root_.GroupExtension.inl_inlInv
-  rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
-  simp only [map_mul, map_inv, rightHom_compatibleLiftsToMulAut, MonoidHom.mem_ker.mp x.property,
-    map_one, MulAut.one_apply, mul_inv_cancel]
+    S.inl (kernelDeviation S ρ x e) = compatibleLiftsToMulAut S ρ x.val e * e⁻¹ :=
+  MonoidHom.apply_ofInjective_symm S.inl_injective _
 
 /-- The displacement is multiplicative because the included kernel is central. -/
 private noncomputable def kernelDeviationHom
@@ -159,6 +151,13 @@ theorem compatibleLiftsKernelCharacter_characterToKernel (χ : G →* N) :
   rw [inl_compatibleLiftsKernelCharacter_rightHom, coe_compatibleLiftsCharacterToKernel,
     compatibleLiftsToMulAut_character, twist_apply,
     mul_inv_cancel_right]
+
+theorem compatibleLiftsCharacter_injective : Function.Injective
+    (compatibleLiftsCharacter S ρ hcentral) := by
+  intro χ ψ h
+  apply Function.LeftInverse.injective
+    (compatibleLiftsKernelCharacter_characterToKernel S ρ hcentral)
+  exact Subtype.ext h
 
 @[simp]
 theorem compatibleLiftsCharacter_kernelCharacter (x : (compatibleLiftsProjection S ρ).ker) :
