@@ -195,35 +195,6 @@ section Weights
 -- The closed-subgroup weight criterion takes the base ring in the universe of the torus index.
 variable (R : Type) [CommRing R]
 
-/-- For a Hopf algebra equal to the generated quotient of `GL₅₆` with finite projective
-cotangent module, a tangent vector has character `α` for its minuscule weight torus exactly
-when its matrix vanishes outside entries with weight difference `α`. -/
-private theorem mem_adjointWeightSpace_iff_of_eq {G : CommHopfAlgCat R}
-    (hG : G = CommHopfAlgCat.quotient (GeneralLinear.coordinateHopfAlgebra R 56)
-      (generatedDefiningIdeal R))
-    (q : GeneralLinear.coordinateHopfAlgebra R 56 ⟶ G)
-    (hq : q ≫ (eqToIso hG).hom = CommHopfAlgCat.mkQuotient
-      (GeneralLinear.coordinateHopfAlgebra R 56) (generatedDefiningIdeal R))
-    (π : G ⟶ (DiagonalizableGroup.coordinateRing R (SplitTorus.characterGroup (Fin 7))).obj)
-    (hπ : q ≫ π = GeneralLinear.weightTorusCoordinateMap (R := R) e7MinusculeWeight)
-    [Module.Finite R (Bialgebra.CotangentSpace R G)]
-    [Module.Projective R (Bialgebra.CotangentSpace R G)]
-    (α : Multiplicative (Fin 7 →₀ ℤ)) (x : Module.Dual R (Bialgebra.CotangentSpace R G)) :
-    x ∈ Derivation.adjointWeightSpace π.hom α ↔
-      ∀ a b, SplitTorus.weightCharacter (e7MinusculeWeight a - e7MinusculeWeight b) ≠ α →
-        GeneralLinear.tangentMatrix 56
-          (derivationComp (B := R) q.hom (Derivation.cotangentLinearEquiv (B := R) x)) a b = 0 := by
-  subst hG
-  simp only [eqToIso_refl, Iso.refl_hom, Category.comp_id] at hq
-  rw [hq] at hπ ⊢
-  rw [CommHopfAlgCat.hom_mkQuotient]
-  have hπ' : π.hom.comp (Bialgebra.Quotient.mkBialgHom (generatedDefiningIdeal R).toIdeal) =
-      (GeneralLinear.weightTorusCoordinateMap (R := R) e7MinusculeWeight).hom := by
-    rw [← CommHopfAlgCat.hom_mkQuotient, ← _root_.CommHopfAlgCat.hom_comp, hπ]
-  simpa only [HopfIdeal.quotientLieHom_apply] using
-    HopfIdeal.mem_adjointWeightSpace_iff_of_weightTorus (generatedDefiningIdeal R)
-      e7MinusculeWeight π.hom hπ' α x
-
 variable [Module.Projective R
   (Bialgebra.CotangentSpace R (generatedCoordinateHopfAlgebra R))]
 
@@ -240,7 +211,8 @@ theorem mem_adjointWeightSpace_generatedWeightTorusCoordinateMap_iff
             (Derivation.cotangentLinearEquiv (B := R) x)) a b = 0 := by
   have hπ := generatedCoordinateMap_comp_generatedWeightTorusCoordinateMap R
   rw [GeneralLinear.weightTorusBaseChangeCoordinateMap_eq] at hπ
-  exact mem_adjointWeightSpace_iff_of_eq R (generatedCoordinateHopfAlgebra_def R)
+  exact HopfIdeal.mem_adjointWeightSpace_iff_of_weightTorus_of_eq
+    (generatedDefiningIdeal R) e7MinusculeWeight (generatedCoordinateHopfAlgebra_def R)
     (generatedCoordinateMap R) (generatedCoordinateMap_comp_eqToIso_hom R) _ hπ α x
 
 /-- A raising or lowering matrix entry vanishes unless its minuscule weight difference is the
