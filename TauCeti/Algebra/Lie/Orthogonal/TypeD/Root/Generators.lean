@@ -82,9 +82,8 @@ even-polarization quadratic equivalence are computed by
   `TauCeti.SpStd.rootGeneratorWeight_inl_eq_root_simpleIndex` and its lowering counterpart in
   `TauCeti.Algebra.Lie.Symplectic.StandardCarrier.RootDatum`, specialized to type `D`.
 
-This advances the explicit Chevalley--Demazure construction in Layer 9 of
-`TauCetiRoadmap/ReductiveGroups/README.md`. Its consumer is milestone L0, pinned ambient groups,
-of `TauCetiRoadmap/CFSGStatement/README.md`.
+The numbered generators supply root data for the explicit Chevalley--Demazure construction
+of pinned ambient groups.
 -/
 
 public section
@@ -162,6 +161,11 @@ def loweringMatrix {K : Type*} [Ring K] (i : Fin n) :
     Matrix (Fin n ⊕ Fin n) (Fin n ⊕ Fin n) K :=
   (raisingMatrix n hn i).transpose
 
+/-- The defining transpose equation for a native lowering matrix. -/
+theorem loweringMatrix_eq_transpose_raisingMatrix {K : Type*} [Ring K] (i : Fin n) :
+    loweringMatrix (K := K) n hn i = (raisingMatrix n hn i).transpose :=
+  (rfl)
+
 @[simp]
 theorem raisingMatrix_of_chain {K : Type*} [Ring K] {i : Fin n}
     (hi : (i : ℕ) + 1 < n) :
@@ -179,6 +183,24 @@ theorem raisingMatrix_of_fork {K : Type*} [Ring K] {i : Fin n}
           Matrix.single (forkRight n hn) (forkLeft n hn) 1
       Matrix.fromBlocks 0 B 0 0 := by
   simp [raisingMatrix, hi, forkBlock]
+
+/-- A chain raising matrix is a difference of two matrix units. -/
+theorem raisingMatrix_eq_single_sub_single_of_chain {K : Type*} [Ring K] {i : Fin n}
+    (hi : (i : ℕ) + 1 < n) :
+    raisingMatrix (K := K) n hn i =
+      Matrix.single (.inl i) (.inl (chainNext n i hi)) 1 -
+        Matrix.single (.inr (chainNext n i hi)) (.inr i) 1 := by
+  rw [raisingMatrix_of_chain n hn hi]
+  ext (j | j) (k | k) <;> simp [Matrix.fromBlocks, Matrix.single_apply]
+
+/-- A non-chain raising matrix is the alternating pair of matrix units at the fork. -/
+theorem raisingMatrix_eq_single_sub_single_of_fork {K : Type*} [Ring K] {i : Fin n}
+    (hi : ¬(i : ℕ) + 1 < n) :
+    raisingMatrix (K := K) n hn i =
+      Matrix.single (.inl (forkLeft n hn)) (.inr (forkRight n hn)) 1 -
+        Matrix.single (.inl (forkRight n hn)) (.inr (forkLeft n hn)) 1 := by
+  rw [raisingMatrix_of_fork n hn hi]
+  ext (j | j) (k | k) <;> simp [Matrix.fromBlocks, Matrix.single_apply]
 
 @[simp]
 theorem loweringMatrix_of_chain {K : Type*} [Ring K] {i : Fin n}
@@ -212,12 +234,8 @@ theorem toLinAlgEquiv_raisingMatrix_apply_basis_of_chain {K M : Type*} [CommRing
     Matrix.toLinAlgEquiv bas (raisingMatrix n hn i) (bas c) =
       (if Sum.inl (chainNext n i hi) = c then bas (.inl i) else 0) -
         if Sum.inr i = c then bas (.inr (chainNext n i hi)) else 0 := by
-  have hmat : raisingMatrix (K := K) n hn i =
-      Matrix.single (.inl i) (.inl (chainNext n i hi)) 1 -
-        Matrix.single (.inr (chainNext n i hi)) (.inr i) 1 := by
-    rw [raisingMatrix_of_chain n hn hi]
-    ext (j | j) (k | k) <;> simp [Matrix.fromBlocks, Matrix.single_apply]
-  rw [hmat, map_sub, LinearMap.sub_apply, Module.Basis.toLinAlgEquiv_single_apply_basis,
+  rw [raisingMatrix_eq_single_sub_single_of_chain n hn hi,
+    map_sub, LinearMap.sub_apply, Module.Basis.toLinAlgEquiv_single_apply_basis,
     Module.Basis.toLinAlgEquiv_single_apply_basis]
   simp
 
@@ -229,12 +247,8 @@ theorem toLinAlgEquiv_raisingMatrix_apply_basis_of_fork {K M : Type*} [CommRing 
     Matrix.toLinAlgEquiv bas (raisingMatrix n hn i) (bas c) =
       (if Sum.inr (forkRight n hn) = c then bas (.inl (forkLeft n hn)) else 0) -
         if Sum.inr (forkLeft n hn) = c then bas (.inl (forkRight n hn)) else 0 := by
-  have hmat : raisingMatrix (K := K) n hn i =
-      Matrix.single (.inl (forkLeft n hn)) (.inr (forkRight n hn)) 1 -
-        Matrix.single (.inl (forkRight n hn)) (.inr (forkLeft n hn)) 1 := by
-    rw [raisingMatrix_of_fork n hn hi]
-    ext (j | j) (k | k) <;> simp [Matrix.fromBlocks, Matrix.single_apply]
-  rw [hmat, map_sub, LinearMap.sub_apply, Module.Basis.toLinAlgEquiv_single_apply_basis,
+  rw [raisingMatrix_eq_single_sub_single_of_fork n hn hi,
+    map_sub, LinearMap.sub_apply, Module.Basis.toLinAlgEquiv_single_apply_basis,
     Module.Basis.toLinAlgEquiv_single_apply_basis]
   simp
 
