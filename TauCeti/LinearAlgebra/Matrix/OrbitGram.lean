@@ -33,6 +33,14 @@ def orbitColumnSum {M : Type*} [AddCommMonoid M]
   ∑ i ∈ Finset.univ.filter (fun i ↦ Quotient.mk (orbitRel Γ I) i = O), A i P.out
 
 open Classical in
+/-- The orbit column sum is the filtered row sum at the chosen column representative. -/
+theorem orbitColumnSum_def {M : Type*} [AddCommMonoid M]
+    (A : Matrix I I M) (O P : orbitRel.Quotient Γ I) :
+    orbitColumnSum A O P =
+      ∑ i ∈ Finset.univ.filter (fun i ↦ Quotient.mk (orbitRel Γ I) i = O), A i P.out :=
+  (rfl)
+
+open Classical in
 /-- Invariance of the original matrix makes its orbit column sum independent of the
 chosen representative of the column orbit. -/
 theorem orbitColumnSum_eq_sum {M : Type*} [AddCommMonoid M] (A : Matrix I I M)
@@ -44,7 +52,7 @@ theorem orbitColumnSum_eq_sum {M : Type*} [AddCommMonoid M] (A : Matrix I I M)
   obtain ⟨g, hg⟩ : ∃ g : Γ, g • j = (Quotient.mk (orbitRel Γ I) j).out :=
     Quotient.mk_out (s := orbitRel Γ I) j
   rw [hj] at hg
-  unfold orbitColumnSum
+  rw [orbitColumnSum_def]
   rw [← hg]
   symm
   apply Finset.sum_bij (fun i _ ↦ g • i)
