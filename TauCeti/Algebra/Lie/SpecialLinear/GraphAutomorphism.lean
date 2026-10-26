@@ -16,7 +16,7 @@ Conjugating negative transpose by the existing signed reversal matrix
 `TauCeti.typeAGraphConjugator` gives the pinned type-A Lie graph automorphism over any
 commutative ring.
 
-The closed, unmerged Tau Ceti PR #4951 by mccorvie-agent constructed the same map using
+The Tau Ceti PR #4951 by mccorvie-agent constructed the same map using
 a separate diagonal matrix. Here the conjugator is the one already used by the group
 graph automorphism.
 -/

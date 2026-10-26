@@ -34,10 +34,10 @@ underlying graph -- is `TauCeti.doubleEdgeCartanMatrix p q` after one simultaneo
   `TauCeti.doubleEdgeCartanMatrix p q`.
 
 This is the reindexing bridge in the double-edge branch of the classification of finite-type
-Cartan matrices, Layer 5 of `TauCetiRoadmap/RepresentationTheory/RootSystems/README.md`. The
-remaining global assembly must prove that a connected diagram containing a double edge has no
-branch vertex. See J. E. Humphreys, *Introduction to Lie Algebras and Representation Theory*,
-section 11.4, and Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Chapter VI, section 4.
+Cartan matrices under the degree-at-most-two hypothesis. Excluding branch vertices in a general
+connected diagram containing a double edge is a separate result. See J. E. Humphreys,
+*Introduction to Lie Algebras and Representation Theory*, section 11.4, and Bourbaki,
+*Lie Groups and Lie Algebras, Chapters 4--6*, Chapter VI, section 4.
 -/
 
 public section
