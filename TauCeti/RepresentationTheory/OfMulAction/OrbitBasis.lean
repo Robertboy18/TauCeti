@@ -176,16 +176,10 @@ theorem ofMulActionOrbitProjection_invariant (w : (ofMulAction ℚ Γ I).invaria
       w.val.coeff i = w.val.coeff O.out := by
     apply mul_left_cancel₀ (Nat.cast_ne_zero.mpr O.card_orbit_ne_zero)
     rw [← ofMulActionOrbitBasis_repr_of_mem Γ I w O i hi, ofMulActionOrbitBasis_repr]
-  have hn : (Finset.univ.filter (fun i ↦ Quotient.mk (orbitRel Γ I) i = O)).card =
-      Nat.card O.orbit := by
-    rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-    congr 1
-    ext i
-    simp [orbitRel.Quotient.mem_orbit]
   calc
     _ = ∑ _i ∈ Finset.univ.filter (fun i ↦ Quotient.mk (orbitRel Γ I) i = O),
         w.val.coeff O.out := Finset.sum_congr rfl fun i hi ↦ hc i (Finset.mem_filter.mp hi).2
-    _ = _ := by rw [Finset.sum_const, hn, nsmul_eq_mul]
+    _ = _ := by rw [Finset.sum_const, O.card_filter_quotient_mk, nsmul_eq_mul]
 
 /-- For a cyclic action, orbit projection is the average over any positive period of the
 permutation representation. The period need not be minimal. -/

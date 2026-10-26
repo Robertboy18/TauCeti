@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.LinearAlgebra.Matrix.OfMulAction
 public import TauCeti.RepresentationTheory.OfMulAction.OrbitBasis
 public import Mathlib.LinearAlgebra.Matrix.PosDef
 
@@ -91,12 +92,6 @@ theorem toBilin_ofMulActionOrbitBasis [DecidableEq I] (A : Matrix I I ℚ)
         (ofMulActionOrbitBasis Γ I O).val (ofMulActionOrbitBasis Γ I P).val =
       (orbitColumnSum A O P : ℚ) / (Nat.card O.orbit : ℚ) := by
   classical
-  have hn : (Finset.univ.filter (fun i ↦ Quotient.mk (orbitRel Γ I) i = P)).card =
-      Nat.card P.orbit := by
-    rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-    congr 1
-    ext i
-    simp [orbitRel.Quotient.mem_orbit]
   rw [ofMulActionOrbitBasis_eq_sum Γ I P, map_smul, map_sum]
   simp only [smul_eq_mul, toBilin_ofMulActionOrbitBasis_single A hact]
   calc
@@ -108,7 +103,7 @@ theorem toBilin_ofMulActionOrbitBasis [DecidableEq I] (A : Matrix I I ℚ)
       intro j hj
       rw [(Finset.mem_filter.mp hj).2]
     _ = _ := by
-      rw [Finset.sum_const, hn, nsmul_eq_mul, ← mul_assoc,
+      rw [Finset.sum_const, P.card_filter_quotient_mk, nsmul_eq_mul, ← mul_assoc,
         inv_mul_cancel₀ (Nat.cast_ne_zero.mpr P.card_orbit_ne_zero), one_mul]
 
 open Classical in
@@ -152,25 +147,6 @@ theorem posDef_orbitColumnSum (A : Matrix I I ℚ)
     (hB.restrict _)).mp hres
 
 open Classical in
-private theorem toBilin_ofMulAction [DecidableEq I] (A : Matrix I I ℚ)
-    (hact : ∀ (g : Γ) i j, A (g • i) (g • j) = A i j)
-    (g : Γ) (x y : ℚ[I]) :
-    toBilin (MonoidAlgebra.basis I ℚ) A
-        (ofMulAction ℚ Γ I g x) (ofMulAction ℚ Γ I g y) =
-      toBilin (MonoidAlgebra.basis I ℚ) A x y := by
-  classical
-  let B := toBilin (MonoidAlgebra.basis I ℚ) A
-  have hs (i j : I) : B (MonoidAlgebra.single i 1) (MonoidAlgebra.single j 1) = A i j := by
-    simpa only [LinearMap.BilinForm.toMatrix_apply, MonoidAlgebra.basis_apply] using
-      congr_fun (congr_fun (LinearMap.BilinForm.toMatrix_toBilin
-        (MonoidAlgebra.basis I ℚ) A) i) j
-  have hB : B.compl₁₂ (ofMulAction ℚ Γ I g) (ofMulAction ℚ Γ I g) = B := by
-    apply (LinearMap.BilinForm.ext_iff_basis (MonoidAlgebra.basis I ℚ)).mpr
-    intro i j
-    simpa [LinearMap.compl₁₂_apply, hs] using hact g i j
-  exact congrArg (fun C : LinearMap.BilinForm ℚ ℚ[I] ↦ C x y) hB
-
-open Classical in
 /-- Orbit projection preserves the pairing against every invariant vector. Neither
 symmetry nor positive definiteness of the original matrix is required. -/
 theorem toBilin_ofMulActionOrbitProjection [DecidableEq I] (A : Matrix I I ℚ)
@@ -191,10 +167,6 @@ theorem toBilin_ofMulActionOrbitProjection [DecidableEq I] (A : Matrix I I ℚ)
       B (ofMulActionOrbitBasis Γ I (Quotient.mk (orbitRel Γ I) i)).val w.val =
         B (MonoidAlgebra.single i 1) w.val := by
     let O : orbitRel.Quotient Γ I := Quotient.mk (orbitRel Γ I) i
-    have hn : (Finset.univ.filter (fun j ↦ Quotient.mk (orbitRel Γ I) j = O)).card =
-        Nat.card O.orbit := by
-      rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
-      congr 1
     rw [ofMulActionOrbitBasis_eq_sum]
     simp only [map_smul, map_sum, LinearMap.smul_apply, LinearMap.sum_apply, smul_eq_mul]
     calc
@@ -204,7 +176,7 @@ theorem toBilin_ofMulActionOrbitProjection [DecidableEq I] (A : Matrix I I ℚ)
         congr 1
         exact Finset.sum_congr rfl fun j hj ↦ hconst j i (Finset.mem_filter.mp hj).2
       _ = _ := by
-        rw [Finset.sum_const, hn, nsmul_eq_mul, ← mul_assoc,
+        rw [Finset.sum_const, O.card_filter_quotient_mk, nsmul_eq_mul, ← mul_assoc,
           inv_mul_cancel₀ (Nat.cast_ne_zero.mpr O.card_orbit_ne_zero), one_mul]
   induction x using induction_linear with
   | zero => simp
@@ -231,6 +203,7 @@ theorem toBilin_ofMulActionOrbitProjection_eq [DecidableEq I] (A : Matrix I I �
   have htranspose : toBilin (MonoidAlgebra.basis I ℚ) A.transpose = B.flip := by
     apply (LinearMap.BilinForm.ext_iff_basis (MonoidAlgebra.basis I ℚ)).mpr
     intro i j
+    -- Unfold the local form B; evaluating flip exchanges its two arguments.
     change toBilin (MonoidAlgebra.basis I ℚ) A.transpose
         (MonoidAlgebra.basis I ℚ i) (MonoidAlgebra.basis I ℚ j) =
       toBilin (MonoidAlgebra.basis I ℚ) A
