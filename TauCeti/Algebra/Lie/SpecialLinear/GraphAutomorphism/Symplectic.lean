@@ -73,17 +73,36 @@ def typeASymplecticDiagonal :
     Matrix (Fin (k + 1) ⊕ Fin (k + 1)) (Fin (k + 1) ⊕ Fin (k + 1)) A :=
   diagonal (Sum.elim (fun _ ↦ 1) (fun i ↦ (-1 : A) ^ (i : ℕ)))
 
+/-- The coordinate sign change is the diagonal matrix of alternating signs. -/
+theorem typeASymplecticDiagonal_def :
+    typeASymplecticDiagonal k A =
+      diagonal (Sum.elim (fun _ : Fin (k + 1) ↦ 1)
+        (fun i : Fin (k + 1) ↦ (-1 : A) ^ (i : ℕ))) := by
+  rfl
+
+/-- The sign change fixes each vector in the first copy. -/
+@[simp]
+theorem typeASymplecticDiagonal_apply_inl_inl (i : Fin (k + 1)) :
+    typeASymplecticDiagonal k A (Sum.inl i) (Sum.inl i) = 1 := by
+  simp [typeASymplecticDiagonal_def]
+
+/-- The sign on the second copy alternates with the index. -/
+@[simp]
+theorem typeASymplecticDiagonal_apply_inr_inr (i : Fin (k + 1)) :
+    typeASymplecticDiagonal k A (Sum.inr i) (Sum.inr i) = (-1 : A) ^ (i : ℕ) := by
+  simp [typeASymplecticDiagonal_def]
+
 /-- The coordinate sign change is symmetric. -/
 @[simp]
 theorem typeASymplecticDiagonal_transpose :
     (typeASymplecticDiagonal k A)ᵀ = typeASymplecticDiagonal k A := by
-  simp [typeASymplecticDiagonal]
+  simp [typeASymplecticDiagonal_def]
 
 /-- Applying the coordinate sign change twice is the identity. -/
 @[simp]
 theorem typeASymplecticDiagonal_mul_self :
     typeASymplecticDiagonal k A * typeASymplecticDiagonal k A = 1 := by
-  rw [typeASymplecticDiagonal, diagonal_mul_diagonal, ← diagonal_one]
+  rw [typeASymplecticDiagonal_def, diagonal_mul_diagonal, ← diagonal_one]
   congr 1
   funext i
   cases i <;> simp [← pow_add, ← two_mul, pow_mul]
@@ -114,7 +133,7 @@ theorem typeASymplecticDiagonal_transpose_mul_reindex_typeAGraphConjugator_inv_m
         typeASymplecticDiagonal k A = Matrix.J (Fin (k + 1)) A := by
   rw [typeASymplecticDiagonal_transpose, typeAGraphConjugator_inv_eq_transpose]
   ext a b
-  simp only [typeASymplecticDiagonal, diagonal_mul, mul_diagonal, reindex_apply,
+  simp only [typeASymplecticDiagonal_def, diagonal_mul, mul_diagonal, reindex_apply,
     submatrix_apply, Equiv.symm_symm, transpose_apply, typeAGraphConjugator_apply]
   rcases a with i | i <;> rcases b with j | j
   · simp [Matrix.J]
