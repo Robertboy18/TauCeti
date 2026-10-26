@@ -236,13 +236,13 @@ theorem compatibleLiftsExtensionOfSurjective_inl
   rfl
 
 /-- The kernel action of compatible lifts is the inverse-pullback action on characters. -/
-theorem conjugate_compatibleLiftsCharacter (x : S.compatibleLifts ρ) (χ : G →* N) :
+theorem conj_compatibleLiftsCharacter (x : S.compatibleLifts ρ) (χ : G →* N) :
     x * compatibleLiftsCharacter S ρ hcentral χ * x⁻¹ =
       compatibleLiftsCharacter S ρ hcentral
         (χ.comp (ρ (compatibleLiftsProjection S ρ x)).symm.toMonoidHom) := by
   apply compatibleLifts_ext S ρ
   · simpa only [map_mul, map_inv,
-    compatibleLiftsToMulAut_character] using compatibleLifts_conjugate_twist S ρ hcentral x χ
+    compatibleLiftsToMulAut_character] using compatibleLiftsToMulAut_conj_twist S ρ hcentral x χ
   · simp only [map_mul, map_inv, compatibleLiftsProjection_character, mul_one, mul_inv_cancel]
 
 /-- Two lifts of the same acting-group element differ by a unique source character twist. -/
@@ -295,7 +295,7 @@ theorem mul_compatibleLiftsCharacter_eq_character_mul (x : S.compatibleLifts ρ)
     x * compatibleLiftsCharacter S ρ hcentral χ =
       compatibleLiftsCharacter S ρ hcentral
         (χ.comp (ρ (compatibleLiftsProjection S ρ x)).symm.toMonoidHom) * x := by
-  rw [← conjugate_compatibleLiftsCharacter]
+  rw [← conj_compatibleLiftsCharacter]
   simp only [inv_mul_cancel_right]
 
 end GroupExtension

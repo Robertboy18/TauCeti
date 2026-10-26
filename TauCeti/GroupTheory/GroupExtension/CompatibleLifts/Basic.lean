@@ -129,7 +129,7 @@ theorem rightHom_compatibleLiftsToMulAut_symm (x : S.compatibleLifts ρ) (e : E)
     (rightHom_compatibleLiftsToMulAut S ρ x ((compatibleLiftsToMulAut S ρ x).symm e)).symm
 
 /-- Conjugating a character twist pulls the character back by the inverse quotient action. -/
-theorem compatibleLifts_conjugate_twist (hcentral : S.inl.range ≤ Subgroup.center E)
+theorem compatibleLiftsToMulAut_conj_twist (hcentral : S.inl.range ≤ Subgroup.center E)
     (x : S.compatibleLifts ρ) (χ : G →* N) :
     compatibleLiftsToMulAut S ρ x * twist S hcentral χ * (compatibleLiftsToMulAut S ρ x)⁻¹ =
       twist S hcentral (χ.comp (ρ (compatibleLiftsProjection S ρ x)).symm.toMonoidHom) := by
