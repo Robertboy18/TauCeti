@@ -25,49 +25,6 @@ namespace TauCeti.DynkinType
 
 variable {t : DynkinType} (ht : t.Valid) {σ : Equiv.Perm (Fin t.rank)}
 
-/-- The actual coweight equivalence is precomposition by the node permutation. -/
-theorem diagramAut_coweightEquiv (hσ : σ ∈ t.diagramSymmetry) :
-    RootPairing.Equiv.coweightEquiv (diagramAut ht hσ) =
-      LinearEquiv.funCongrLeft ℤ ℤ σ := by
-  ext v i
-  simp only [RootPairing.Equiv.coweightEquiv_apply, diagramAut_coweightMap,
-    LinearEquiv.coe_coe]
-
-/-- The native transpose action precomposes cocharacter coordinates by the node permutation. -/
-@[simp]
-theorem diagramAut_coweightEquiv_apply (hσ : σ ∈ t.diagramSymmetry)
-    (v : Fin t.rank → ℤ) (i : Fin t.rank) :
-    RootPairing.Equiv.coweightEquiv (diagramAut ht hσ) v i = v (σ i) := by
-  rw [diagramAut_coweightEquiv]
-  rfl
-
-/-- The inverse native map is the forward action on simple-coroot coordinates. -/
-@[simp]
-theorem diagramAut_coweightEquiv_symm_apply (hσ : σ ∈ t.diagramSymmetry)
-    (v : Fin t.rank → ℤ) (i : Fin t.rank) :
-    (RootPairing.Equiv.coweightEquiv (diagramAut ht hσ)).symm v i = v (σ.symm i) := by
-  rw [diagramAut_coweightEquiv]
-  rfl
-
-/-- The native transpose map sends a simple coroot to the inverse-permuted simple coroot. -/
-theorem diagramAut_coweightEquiv_coroot (hσ : σ ∈ t.diagramSymmetry) (j : Fin t.rank) :
-    RootPairing.Equiv.coweightEquiv (diagramAut ht hσ)
-        ((t.simplyConnectedRootDatum ht).coroot (t.simpleIndex ht j)) =
-      (t.simplyConnectedRootDatum ht).coroot (t.simpleIndex ht (σ.symm j)) := by
-  ext i
-  simp only [diagramAut_coweightEquiv_apply, coroot_simpleIndex, Pi.single_apply]
-  congr 1
-  exact propext σ.eq_symm_apply.symm
-
-/-- The inverse native coweight map sends each simple coroot forward by the node permutation. -/
-theorem diagramAut_coweightEquiv_symm_coroot (hσ : σ ∈ t.diagramSymmetry) (j : Fin t.rank) :
-    (RootPairing.Equiv.coweightEquiv (diagramAut ht hσ)).symm
-        ((t.simplyConnectedRootDatum ht).coroot (t.simpleIndex ht j)) =
-      (t.simplyConnectedRootDatum ht).coroot (t.simpleIndex ht (σ j)) := by
-  apply (RootPairing.Equiv.coweightEquiv (diagramAut ht hσ)).injective
-  rw [LinearEquiv.apply_symm_apply, diagramAut_coweightEquiv_coroot,
-    Equiv.symm_apply_apply]
-
 /-- The forward cocharacter action and the native transpose action have equal fixed lattices. -/
 theorem diagramAut_fixedSubmodule_symm (hσ : σ ∈ t.diagramSymmetry) :
     (RootPairing.Equiv.coweightEquiv (diagramAut ht hσ)).symm.toLinearMap.fixedSubmodule =
@@ -78,7 +35,7 @@ theorem diagramAut_fixedSubmodule_symm (hσ : σ ∈ t.diagramSymmetry) :
 def diagramFixedBasis (hσ : σ ∈ t.diagramSymmetry) :
     Module.Basis (Quotient (Equiv.Perm.SameCycle.setoid σ)) ℤ
       (RootPairing.Equiv.coweightEquiv (diagramAut ht hσ)).toLinearMap.fixedSubmodule :=
-  (LinearEquiv.permutationFixedBasis (R := ℤ) σ).map
+  (Equiv.Perm.permutationFixedBasis (R := ℤ) σ).map
     (LinearEquiv.ofEq _ _ (by rw [diagramAut_coweightEquiv]))
 
 /-- Native fixed coordinates recover each ambient simple-coroot coordinate. -/
@@ -88,7 +45,7 @@ theorem diagramFixedBasis_repr (hσ : σ ∈ t.diagramSymmetry)
     (i : Fin t.rank) :
     (diagramFixedBasis ht hσ).repr v (Quotient.mk _ i) = v.val i := by
   simp only [diagramFixedBasis, Module.Basis.map_repr, LinearEquiv.trans_apply,
-    LinearEquiv.ofEq_symm, LinearEquiv.permutationFixedBasis_repr,
+    LinearEquiv.ofEq_symm, Equiv.Perm.permutationFixedBasis_repr,
     LinearEquiv.coe_ofEq_apply]
 
 /-- A native basis vector is one on its node orbit and zero elsewhere. -/
@@ -98,7 +55,7 @@ theorem diagramFixedBasis_apply (hσ : σ ∈ t.diagramSymmetry)
     (c : Quotient (Equiv.Perm.SameCycle.setoid σ)) (i : Fin t.rank) :
     (diagramFixedBasis ht hσ c).val i = if Quotient.mk _ i = c then 1 else 0 := by
   simp only [diagramFixedBasis, Module.Basis.map_apply, LinearEquiv.coe_ofEq_apply,
-    LinearEquiv.permutationFixedBasis_apply]
+    Equiv.Perm.permutationFixedBasis_apply]
 
 /-- Native fixed basis vectors are literal sums of the pinned simple coroots. -/
 theorem diagramFixedBasis_eq_sum_coroot (hσ : σ ∈ t.diagramSymmetry)
@@ -109,7 +66,7 @@ theorem diagramFixedBasis_eq_sum_coroot (hσ : σ ∈ t.diagramSymmetry)
         (t.simplyConnectedRootDatum ht).coroot (t.simpleIndex ht i) := by
   simp only [diagramFixedBasis, Module.Basis.map_apply, LinearEquiv.coe_ofEq_apply,
     coroot_simpleIndex]
-  exact LinearEquiv.permutationFixedBasis_eq_sum σ c
+  exact Equiv.Perm.permutationFixedBasis_eq_sum σ c
 
 /-- Read chosen node representatives and extend their coordinates over the node orbits. -/
 def diagramFixedProjection (hσ : σ ∈ t.diagramSymmetry)
@@ -117,7 +74,7 @@ def diagramFixedProjection (hσ : σ ∈ t.diagramSymmetry)
     (Fin t.rank → ℤ) →ₗ[ℤ]
       (RootPairing.Equiv.coweightEquiv (diagramAut ht hσ)).toLinearMap.fixedSubmodule :=
   (LinearEquiv.ofEq _ _ (by rw [diagramAut_coweightEquiv ht hσ])).toLinearMap.comp
-    (LinearEquiv.permutationFixedProjection σ r)
+    (Equiv.Perm.permutationFixedProjection σ r)
 
 /-- The chosen representative determines every coordinate of the native projection. -/
 @[simp]
@@ -126,7 +83,7 @@ theorem diagramFixedProjection_apply (hσ : σ ∈ t.diagramSymmetry)
     (v : Fin t.rank → ℤ) (i : Fin t.rank) :
     (diagramFixedProjection ht hσ r v).val i = v (r (Quotient.mk _ i)) := by
   simp only [diagramFixedProjection, LinearMap.comp_apply, LinearEquiv.coe_coe,
-    LinearEquiv.coe_ofEq_apply, LinearEquiv.permutationFixedProjection_apply]
+    LinearEquiv.coe_ofEq_apply, Equiv.Perm.permutationFixedProjection_apply]
 
 /-- A section of the node quotient makes the native projection a retraction. -/
 @[simp]

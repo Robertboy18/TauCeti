@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.Dynamics.FixedPoints.Basic
 public import Mathlib.LinearAlgebra.FixedSubmodule
 public import Mathlib.LinearAlgebra.Pi
 
@@ -92,16 +93,8 @@ variable {R U W : Type*} [Semiring R] [AddCommMonoid U] [AddCommMonoid W]
 
 /-- A linear automorphism and its inverse have the same fixed submodule. -/
 theorem fixedSubmodule_symm_eq (e : U ≃ₗ[R] U) :
-    e.symm.toLinearMap.fixedSubmodule = e.toLinearMap.fixedSubmodule := by
-  ext v
-  simp only [LinearMap.mem_fixedSubmodule_iff, coe_coe]
-  constructor
-  · intro h
-    have := congrArg e h
-    simpa only [apply_symm_apply] using this.symm
-  · intro h
-    have := congrArg e.symm h
-    simpa only [symm_apply_apply] using this.symm
+    e.symm.toLinearMap.fixedSubmodule = e.toLinearMap.fixedSubmodule :=
+  SetLike.coe_injective (Function.fixedPoints_symm (e := e.toEquiv))
 
 /-- An intertwining linear equivalence maps the fixed submodule of its source endomorphism
 onto the fixed submodule of its target endomorphism. -/

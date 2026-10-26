@@ -7,7 +7,6 @@ module
 
 public import TauCeti.GroupTheory.Perm.Basic
 public import TauCeti.LinearAlgebra.FixedSubmodule
-public import Mathlib.LinearAlgebra.Pi
 public import Mathlib.LinearAlgebra.Basis.Defs
 
 /-!
@@ -15,20 +14,22 @@ public import Mathlib.LinearAlgebra.Basis.Defs
 
 Functions on the cycle quotient identify linearly with the fixed submodule of
 precomposition by a permutation. The underlying bijection is the existing
-invariant-colouring equivalence; no enumeration of cycles is needed.
+invariant-colouring equivalence; no enumeration of cycles is needed. The orbit basis
+requires only finitely many cycles, even when their elements form an infinite type.
 -/
 
 public noncomputable section
 
 open Equiv
 
-namespace LinearEquiv
+namespace Equiv.Perm
+
+open LinearEquiv
 
 variable {R M I : Type*} [Semiring R] [AddCommMonoid M] [Module R M]
 
 /-- Functions on permutation cycles are precisely the fixed vectors of precomposition. -/
-def permutationFixedEquiv (R M : Type*) [Semiring R] [AddCommMonoid M] [Module R M]
-    (σ : Perm I) :
+def permutationFixedEquiv (σ : Perm I) :
     (Quotient (Perm.SameCycle.setoid σ) → M) ≃ₗ[R]
       (funCongrLeft R M σ).toLinearMap.fixedSubmodule where
   toFun a := ⟨(TauCeti.invariantColouringEquiv σ a).val, by
@@ -58,33 +59,36 @@ def permutationFixedEquiv (R M : Type*) [Semiring R] [AddCommMonoid M] [Module R
 @[simp]
 theorem permutationFixedEquiv_apply (σ : Perm I)
     (a : Quotient (Perm.SameCycle.setoid σ) → M) (i : I) :
-    (permutationFixedEquiv R M σ a).val i = a (Quotient.mk _ i) :=
+    (permutationFixedEquiv (R := R) (M := M) σ a).val i = a (Quotient.mk _ i) :=
   TauCeti.invariantColouringEquiv_apply_coe σ a i
 
 /-- Inverse coordinates recover every ambient coordinate of a fixed vector. -/
 @[simp]
 theorem permutationFixedEquiv_symm_apply (σ : Perm I)
     (v : (funCongrLeft R M σ).toLinearMap.fixedSubmodule) (i : I) :
-    (permutationFixedEquiv R M σ).symm v (Quotient.mk _ i) = v.val i :=
+    (permutationFixedEquiv (R := R) (M := M) σ).symm v (Quotient.mk _ i) = v.val i :=
   TauCeti.invariantColouringEquiv_symm_apply σ _ i
 
 /-- The orbit indicator vectors form a basis of the fixed submodule. -/
-def permutationFixedBasis [Finite I] (σ : Perm I) :
+def permutationFixedBasis (σ : Perm I)
+    [Finite (Quotient (Perm.SameCycle.setoid σ))] :
     Module.Basis (Quotient (Perm.SameCycle.setoid σ)) R
       (funCongrLeft R R σ).toLinearMap.fixedSubmodule :=
-  Module.Basis.ofEquivFun (permutationFixedEquiv R R σ).symm
+  Module.Basis.ofEquivFun (permutationFixedEquiv (R := R) (M := R) σ).symm
 
 /-- A fixed vector's orbit coordinate is its value at any member of that orbit. -/
 @[simp]
-theorem permutationFixedBasis_repr [Finite I] (σ : Perm I)
+theorem permutationFixedBasis_repr (σ : Perm I)
+    [Finite (Quotient (Perm.SameCycle.setoid σ))]
     (v : (funCongrLeft R R σ).toLinearMap.fixedSubmodule) (i : I) :
     (permutationFixedBasis (R := R) σ).repr v (Quotient.mk _ i) = v.val i := by
   rw [permutationFixedBasis, Module.Basis.ofEquivFun_repr_apply]
   exact permutationFixedEquiv_symm_apply σ v i
 
-/-- An orbit basis vector is the indicator of its cycle. -/
+/-- An orbit basis vector is the indicator of its cycle, which may be infinite. -/
 @[simp]
-theorem permutationFixedBasis_apply [Finite I] (σ : Perm I)
+theorem permutationFixedBasis_apply (σ : Perm I)
+    [Finite (Quotient (Perm.SameCycle.setoid σ))]
     [DecidableEq (Quotient (Perm.SameCycle.setoid σ))]
     (c : Quotient (Perm.SameCycle.setoid σ)) (i : I) :
     (permutationFixedBasis (R := R) σ c).val i =
@@ -107,7 +111,7 @@ A section of the quotient map makes this a retraction; the map depends on that s
 def permutationFixedProjection (σ : Perm I)
     (r : Quotient (Perm.SameCycle.setoid σ) → I) :
     (I → M) →ₗ[R] (funCongrLeft R M σ).toLinearMap.fixedSubmodule :=
-  (permutationFixedEquiv R M σ).toLinearMap.comp (LinearMap.funLeft R M r)
+  (permutationFixedEquiv (R := R) (M := M) σ).toLinearMap.comp (LinearMap.funLeft R M r)
 
 /-- The chosen representative determines every coordinate of the projection. -/
 @[simp]
@@ -140,4 +144,4 @@ theorem permutationFixedProjection_comp_subtype (σ : Perm I)
   ext v i
   exact congrFun (congrArg Subtype.val (permutationFixedProjection_fixed σ r hr v)) i
 
-end LinearEquiv
+end Equiv.Perm
