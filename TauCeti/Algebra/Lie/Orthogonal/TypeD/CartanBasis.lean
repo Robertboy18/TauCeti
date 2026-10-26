@@ -14,8 +14,10 @@ public import TauCeti.LinearAlgebra.IntegralLattice.RootLattice.TypeD.SimpleRoot
 
 The explicit type-D Chevalley generators use the Bourbaki simple roots as diagonal coordinates.
 Over a commutative ring with invertible two, these vectors form a basis of the diagonal Cartan.
-Their coordinates are prefix sums along the chain and half-total sums at the fork. The basis
-expansion gives the Lie-span theorem used by the native split Lie algebra basis.
+Their coordinates are prefix sums of the upper diagonal entries along the chain. At the two
+fork nodes they are half the upper diagonal total minus its last entry and half that total,
+respectively. The basis-span theorem gives the Lie-span result used by the native split Lie
+algebra basis.
 
 Independence over a commutative domain only requires that `2` be nonzero. This weaker result
 comes from `DynkinType.linearIndependent_typeDSimpleRoot_cast`: the doubled fundamental
@@ -28,8 +30,9 @@ The generator membership and coordinate lemmas live in `Root/Generators.lean`.
   Cartan when two is invertible.
 * `TypeDStd.typeDSimpleCorootBasis_repr_apply`: explicit coefficients from upper diagonal entries.
 * `TypeDStd.linearIndependent_cartanGenerator`: the ambient Cartan generators are independent.
-* `TypeDStd.typeDDiagonalCartan_eq_lieSpan_cartanGenerator`: they span the diagonal Cartan as a
-  Lie subalgebra.
+* `TypeDStd.typeDDiagonalCartan_eq_lieSpan_cartanGenerator_of_invertible`: they span the diagonal
+  Cartan as a Lie subalgebra when two is invertible.
+* `TypeDStd.typeDDiagonalCartan_eq_lieSpan_cartanGenerator`: the field corollary with nonzero two.
 
 ## References
 
@@ -91,7 +94,8 @@ theorem coe_typeDSimpleCorootBasis_apply (n : ℕ) (hn : 4 ≤ n) (i : Fin n) :
   rw [typeDSimpleCorootBasis, Module.Basis.map_apply, DynkinType.typeDSimpleRootBasis_apply]
   exact (cartanGenerator_eq_typeDDiagonalEquiv n hn i).symm
 
-/-- The upper diagonal entries determine the coefficients in the simple-coroot basis. -/
+/-- Simple-coroot coordinates are prefix sums of the upper diagonal entries for `k < n - 2`.
+At the two fork nodes they are half that total minus its last entry and half that total. -/
 theorem typeDSimpleCorootBasis_repr_apply (n : ℕ) (hn : 4 ≤ n)
     (A : typeDDiagonalCartan K (Fin n)) (k : Fin n) :
     (typeDSimpleCorootBasis (K := K) n hn).repr A k =
@@ -100,12 +104,32 @@ theorem typeDSimpleCorootBasis_repr_apply (n : ℕ) (hn : 4 ≤ n)
         ⅟ (2 : K) * (∑ j, A.1.1 (Sum.inl j) (Sum.inl j)) -
           A.1.1 (Sum.inl ⟨n - 1, by omega⟩) (Sum.inl ⟨n - 1, by omega⟩)
       else ⅟ (2 : K) * (∑ j, A.1.1 (Sum.inl j) (Sum.inl j)) := by
-  -- Unwrap Basis.map; the diagonal inverse itself is rewritten by its public coordinate lemma.
-  change (DynkinType.typeDSimpleRootBasis K n hn).repr
-    ((typeDDiagonalEquiv (K := K) (ι := Fin n)).symm A) k = _
+  rw [typeDSimpleCorootBasis, Module.Basis.map_repr, LinearEquiv.trans_apply]
   simpa only [typeDDiagonalEquiv_symm_apply] using
     DynkinType.typeDSimpleRootBasis_repr_apply K hn
       ((typeDDiagonalEquiv (K := K) (ι := Fin n)).symm A) k
+
+/-- The explicit simple-root Cartan generators span the diagonal Cartan whenever two is
+invertible in the coefficient ring. -/
+theorem typeDDiagonalCartan_eq_lieSpan_cartanGenerator_of_invertible (n : ℕ) (hn : 4 ≤ n) :
+    typeDDiagonalCartan K (Fin n) =
+      LieSubalgebra.lieSpan K (LieAlgebra.Orthogonal.typeD (Fin n) K)
+        (Set.range (cartanGenerator (K := K) n hn)) := by
+  apply le_antisymm
+  · intro x hx
+    have h := Submodule.mem_map_of_mem
+      (f := (typeDDiagonalCartan K (Fin n)).toSubmodule.subtype)
+      ((typeDSimpleCorootBasis (K := K) n hn).mem_span ⟨x, hx⟩)
+    rw [Submodule.map_span, ← Set.range_comp] at h
+    have hgenerators : (typeDDiagonalCartan K (Fin n)).toSubmodule.subtype ∘
+        typeDSimpleCorootBasis (K := K) n hn = cartanGenerator (K := K) n hn := by
+      funext i
+      exact coe_typeDSimpleCorootBasis_apply n hn i
+    rw [hgenerators] at h
+    exact LieSubalgebra.submodule_span_le_lieSpan h
+  · rw [LieSubalgebra.lieSpan_le]
+    rintro x ⟨i, rfl⟩
+    exact cartanGenerator_mem_typeDDiagonalCartan n hn i
 
 end InvertibleTwo
 
@@ -119,19 +143,7 @@ theorem typeDDiagonalCartan_eq_lieSpan_cartanGenerator (n : ℕ) (hn : 4 ≤ n) 
       LieSubalgebra.lieSpan K (LieAlgebra.Orthogonal.typeD (Fin n) K)
         (Set.range (cartanGenerator (K := K) n hn)) := by
   let := invertibleOfNonzero (NeZero.ne (2 : K))
-  apply le_antisymm
-  · intro x hx
-    let y : typeDDiagonalCartan K (Fin n) := ⟨x, hx⟩
-    have hy := (typeDSimpleCorootBasis (K := K) n hn).sum_repr y
-    have heq := congrArg (typeDDiagonalCartan K (Fin n)).toSubmodule.subtype hy
-    simp only [map_sum, map_smul, Submodule.subtype_apply, coe_typeDSimpleCorootBasis_apply,
-      y] at heq
-    rw [← heq]
-    exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _
-      (LieSubalgebra.subset_lieSpan ⟨i, rfl⟩)
-  · rw [LieSubalgebra.lieSpan_le]
-    rintro x ⟨i, rfl⟩
-    exact cartanGenerator_mem_typeDDiagonalCartan n hn i
+  exact typeDDiagonalCartan_eq_lieSpan_cartanGenerator_of_invertible n hn
 
 end Field
 
