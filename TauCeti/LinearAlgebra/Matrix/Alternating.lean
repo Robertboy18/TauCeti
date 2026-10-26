@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.Algebra.Group.Subgroup.Ker
 public import Mathlib.Data.Matrix.Basic
 public import Mathlib.Data.Matrix.Basis
 public import Mathlib.Algebra.CharP.Defs
@@ -32,6 +33,8 @@ covers every ring of odd characteristic.
 * `Matrix.trace_eq_zero_of_transpose_eq_neg`: the trace vanishes when `2` is invertible.
 * `Matrix.ext_of_lt_of_transpose_eq_neg`: two such matrices with vanishing diagonals agree as soon
   as they agree above the diagonal.
+* `Matrix.ofStrictUpper` and `Matrix.skewStrictUpperAddEquiv`: complete arbitrary strict-upper
+  entries and give additive coordinates when doubling has trivial kernel.
 * `Matrix.natCard_transpose_eq_neg`: when doubling is injective at zero, the `Nat.card` of such
   matrices with entries in an additive subgroup `I` is `(Nat.card I) ^ (k.choose 2)`, for an
   index type of cardinality `k`; for finite `I` this is the number of such matrices.
@@ -49,6 +52,20 @@ theorem transpose_single_sub_single {K ι : Type*} [AddGroup K] [DecidableEq ι]
     (i j : ι) (a : K) :
     (single i j a - single j i a).transpose = -(single i j a - single j i a) := by
   simp only [transpose_sub, transpose_single, neg_sub]
+
+/-- A strict-upper entry of the difference of opposite matrix units reads its coefficient. -/
+theorem single_sub_single_apply_of_lt [LinearOrder n] [AddGroup S]
+    (p q : {p : n × n // p.1 < p.2}) (x : S) :
+    (single p.val.1 p.val.2 x - single p.val.2 p.val.1 x : Matrix n n S)
+        q.val.1 q.val.2 = if p = q then x else 0 := by
+  have hrev : ¬(p.val.2 = q.val.1 ∧ p.val.1 = q.val.2) := by
+    rintro ⟨h₁, h₂⟩
+    have h := p.property
+    rw [h₁, h₂] at h
+    exact (not_lt_of_ge q.property.le) h
+  have heq : (p.val.1 = q.val.1 ∧ p.val.2 = q.val.2) ↔ p = q :=
+    ⟨fun h => Subtype.ext (Prod.ext h.1 h.2), fun h => by subst q; exact ⟨rfl, rfl⟩⟩
+  simp [sub_apply, single_apply, hrev, heq]
 
 /-- **The condition `Mᵀ = -M` passes to the image of the matrix** under an additive morphism of
 the entry types. -/
@@ -111,6 +128,79 @@ theorem ext_of_lt_of_transpose_eq_neg [LinearOrder n] [Zero S] [Neg S] {M N : Ma
   · rw [hMd a, hNd a]
   · rw [hskew M hM b a, hskew N hN b a, h b a hab]
 
+/-- Complete strict-upper entries to a matrix with zero diagonal and opposite lower entries. -/
+def ofStrictUpper [LinearOrder n] [AddGroup S]
+    (b : {p : n × n // p.1 < p.2} → S) : Matrix n n S :=
+  fun i j => if h : i < j then b ⟨(i, j), h⟩
+    else if h : j < i then -b ⟨(j, i), h⟩ else 0
+
+/-- Strict-upper completion negates under transposition. -/
+@[simp]
+theorem transpose_ofStrictUpper [LinearOrder n] [AddGroup S]
+    (b : {p : n × n // p.1 < p.2} → S) : (ofStrictUpper b).transpose = -ofStrictUpper b := by
+  ext i j
+  rcases lt_trichotomy i j with h | rfl | h
+  · simp [ofStrictUpper, h, h.not_gt]
+  · simp [ofStrictUpper]
+  · simp [ofStrictUpper, h, h.not_gt]
+
+/-- The diagonal of a strict-upper completion is zero. -/
+@[simp]
+theorem ofStrictUpper_apply_diag [LinearOrder n] [AddGroup S]
+    (b : {p : n × n // p.1 < p.2} → S) (i : n) : ofStrictUpper b i i = 0 := by
+  simp [ofStrictUpper]
+
+/-- Completing a strict-upper coefficient function preserves its specified entries. -/
+@[simp]
+theorem ofStrictUpper_apply_of_lt [LinearOrder n] [AddGroup S]
+    (b : {p : n × n // p.1 < p.2} → S) (p : {p : n × n // p.1 < p.2}) :
+    ofStrictUpper b p.val.1 p.val.2 = b p := by
+  simp [ofStrictUpper, p.property]
+
+/-- A skew matrix is recovered from its strict-upper entries when doubling has trivial kernel. -/
+theorem ofStrictUpper_upper [LinearOrder n] [AddGroup S]
+    (h2 : ∀ x : S, x + x = 0 → x = 0) (M : Matrix n n S) (hM : M.transpose = -M) :
+    ofStrictUpper (fun p => M p.val.1 p.val.2) = M := by
+  apply ext_of_lt_of_transpose_eq_neg
+    (transpose_ofStrictUpper _) hM (ofStrictUpper_apply_diag _)
+    (diag_eq_zero_of_transpose_eq_neg hM h2)
+  intro i j hij
+  exact ofStrictUpper_apply_of_lt _ ⟨(i, j), hij⟩
+
+/-- The additive subgroup of matrices equal to the negative of their transpose. -/
+def skewAddSubgroup (n S : Type*) [AddCommGroup S] : AddSubgroup (Matrix n n S) :=
+  AddMonoidHom.eqLocus (transposeAddEquiv n n S).toAddMonoidHom (-AddMonoidHom.id _)
+
+@[simp]
+theorem mem_skewAddSubgroup [AddCommGroup S] (M : Matrix n n S) :
+    M ∈ skewAddSubgroup n S ↔ M.transpose = -M := Iff.rfl
+
+/-- Strict-upper entries give additive coordinates on skew matrices with no nonzero
+entries annihilated by doubling. No finiteness or scalar multiplication is required. -/
+def skewStrictUpperAddEquiv [LinearOrder n] [AddCommGroup S]
+    (h2 : ∀ x : S, x + x = 0 → x = 0) :
+    skewAddSubgroup n S ≃+ ({p : n × n // p.1 < p.2} → S) where
+  toFun M p := M.val p.val.1 p.val.2
+  invFun b := ⟨ofStrictUpper b, transpose_ofStrictUpper b⟩
+  left_inv M := Subtype.ext (ofStrictUpper_upper h2 M.val M.property)
+  right_inv b := funext (ofStrictUpper_apply_of_lt b)
+  map_add' _ _ := rfl
+
+/-- The forward additive coordinates are the strict-upper matrix entries. -/
+@[simp]
+theorem skewStrictUpperAddEquiv_apply [LinearOrder n] [AddCommGroup S]
+    (h2 : ∀ x : S, x + x = 0 → x = 0) (M : skewAddSubgroup n S)
+    (p : {p : n × n // p.1 < p.2}) :
+    skewStrictUpperAddEquiv h2 M p = M.val p.val.1 p.val.2 := by
+  rfl
+
+/-- The inverse additive coordinates are strict-upper completion. -/
+@[simp]
+theorem coe_skewStrictUpperAddEquiv_symm [LinearOrder n] [AddCommGroup S]
+    (h2 : ∀ x : S, x + x = 0 → x = 0) (b : {p : n × n // p.1 < p.2} → S) :
+    ((skewStrictUpperAddEquiv h2).symm b : Matrix n n S) = ofStrictUpper b := by
+  rfl
+
 /-- **Counting matrices equal to the negative of their transpose with entries in a subgroup.**
 When zero is the only element that doubles to zero, such a matrix is determined by its entries
 above the diagonal, and these are arbitrary elements of the subgroup; for an index type of
@@ -124,30 +214,20 @@ theorem natCard_transpose_eq_neg [Fintype n] [AddCommGroup S] (I : AddSubgroup S
   let : LinearOrder n := LinearOrder.lift' (Fintype.equivFin n) (Fintype.equivFin n).injective
   have hpairs : Nat.card {q : n × n // q.1 < q.2} = (Fintype.card n).choose 2 := by
     rw [Nat.card_eq_fintype_card, Fintype.card_subtype, Fintype.card_product_filter_lt]
-  have hskew : ∀ M : Matrix n n S, Mᵀ = -M → ∀ i j, M j i = -M i j := fun M hM i j => by
-    simpa only [transpose_apply, neg_apply] using congrFun (congrFun hM i) j
+  have h2I : ∀ x : I, x + x = 0 → x = 0 := by
+    intro x hx
+    apply Subtype.ext
+    exact h2 x (congrArg Subtype.val hx)
+  let e : {M : Matrix n n S // (∀ i j, M i j ∈ I) ∧ Mᵀ = -M} ≃
+      skewAddSubgroup n I :=
+    { toFun := fun M => ⟨fun i j => ⟨M.val i j, M.property.1 i j⟩, by
+        ext i j
+        exact congrFun (congrFun M.property.2 i) j⟩
+      invFun := fun M => ⟨M.val.map I.subtype, fun i j => (M.val i j).property,
+        transpose_map_of_transpose_eq_neg I.subtype M.property⟩
+      left_inv := fun _ => rfl
+      right_inv := fun _ => rfl }
   rw [← hpairs, ← Nat.card_fun]
-  refine Nat.card_congr
-    { toFun := fun M q => ⟨M.1 q.1.1 q.1.2, M.2.1 _ _⟩
-      invFun := fun g => ⟨of fun i j => if h : i < j then (g ⟨(i, j), h⟩ : S)
-          else if h' : j < i then -(g ⟨(j, i), h'⟩ : S) else 0, fun i j => ?_, ?_⟩
-      left_inv := fun M => Subtype.ext ?_
-      right_inv := fun g => funext fun q => Subtype.ext ?_ }
-  · rw [of_apply]
-    split_ifs
-    exacts [(g _).2, I.neg_mem (g _).2, I.zero_mem]
-  · ext i j
-    simp only [transpose_apply, neg_apply, of_apply]
-    rcases lt_trichotomy i j with h | rfl | h
-    · simp [h, h.not_gt]
-    · simp
-    · simp [h, h.not_gt]
-  · ext i j
-    simp only [of_apply]
-    rcases lt_trichotomy i j with h | rfl | h
-    · simp [h]
-    · simp [diag_eq_zero_of_transpose_eq_neg M.2.2 h2 i]
-    · simp [h, h.not_gt, hskew M.1 M.2.2 j i]
-  · simp [q.2]
+  exact Nat.card_congr (e.trans (skewStrictUpperAddEquiv h2I).toEquiv)
 
 end Matrix
