@@ -175,28 +175,15 @@ private theorem typeDGraphReindex_raising (i : Fin n) :
       raisingMatrix n hn (graphPermD n (by omega) i) := by
   have hac := forkLeft_ne_forkRight n hn
   have hchain : (forkLeft n hn : ℕ) + 1 < n := by simp; omega
-  have hnext : chainNext n (forkLeft n hn) hchain = forkRight n hn := by
-    apply Fin.ext
-    simp
-    omega
-  have hfl : forkLeft n hn = (⟨n - 2, by omega⟩ : Fin n) := Fin.ext (forkLeft_val n hn)
-  have hfr : forkRight n hn = (⟨n - 1, by omega⟩ : Fin n) := Fin.ext (forkRight_val n hn)
-  have hleft : graphPermD n (by omega) (forkLeft n hn) = forkRight n hn := by
-    simpa only [hfl, hfr] using graphPermD_apply_left n (by omega)
-  have hright : graphPermD n (by omega) (forkRight n hn) = forkLeft n hn := by
-    simpa only [hfl, hfr] using graphPermD_apply_right n (by omega)
-  by_cases hi : i = forkLeft n hn
-  · subst i
-    rw [hleft, raisingMatrix_eq_single_sub_single_of_chain n hn hchain,
-      raisingMatrix_eq_single_sub_single_of_fork n hn (by simp; omega)]
-    rw [map_sub, typeDGraphReindex_single, typeDGraphReindex_single]
-    simp [hnext, hac]
-  by_cases hi' : i = forkRight n hn
-  · subst i
-    rw [hright, raisingMatrix_eq_single_sub_single_of_fork n hn (by simp; omega),
-      raisingMatrix_eq_single_sub_single_of_chain n hn hchain]
-    rw [map_sub, typeDGraphReindex_single, typeDGraphReindex_single]
-    simp [hnext, hac]
+  have hfr_not : ¬(forkRight n hn : ℕ) + 1 < n := by simp; omega
+  by_cases hi : i = forkLeft n hn ∨ i = forkRight n hn
+  · rcases hi with rfl | rfl <;>
+      simp only [graphPermD_forkLeft, graphPermD_forkRight] <;>
+      rw [raisingMatrix_eq_single_sub_single_of_chain n hn hchain,
+        raisingMatrix_eq_single_sub_single_of_fork n hn (i := forkRight n hn) hfr_not] <;>
+      rw [map_sub, typeDGraphReindex_single, typeDGraphReindex_single] <;>
+      simp [hac]
+  obtain ⟨hi, hi'⟩ := not_or.mp hi
   have hiv : (i : ℕ) ≠ n - 2 := by simpa [Fin.ext_iff] using hi
   have hiv' : (i : ℕ) ≠ n - 1 := by simpa [Fin.ext_iff] using hi'
   have hic : (i : ℕ) + 1 < n := by omega
@@ -220,7 +207,7 @@ theorem typeDGraphLieEquiv_rootGenerator (k : Fin n ⊕ Fin n) :
   rw [typeDGraphLieEquiv_apply_val, typeDGraphMatrix_conj]
   rcases k with i | i
   · simpa only [val_rootGenerator_inl, Sum.map_inl] using typeDGraphReindex_raising A n hn i
-  · simp only [Sum.map_inr, val_rootGenerator_inr, loweringMatrix]
+  · simp only [Sum.map_inr, val_rootGenerator_inr, loweringMatrix_eq_transpose]
     simpa only [Matrix.coe_reindexAlgEquiv, Matrix.transpose_reindex] using
       congrArg Matrix.transpose (typeDGraphReindex_raising A n hn i)
 
