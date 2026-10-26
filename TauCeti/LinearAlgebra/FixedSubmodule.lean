@@ -90,6 +90,19 @@ namespace LinearEquiv
 variable {R U W : Type*} [Semiring R] [AddCommMonoid U] [AddCommMonoid W]
   [Module R U] [Module R W] {f : U →ₗ[R] U} {g : W →ₗ[R] W}
 
+/-- A linear automorphism and its inverse have the same fixed submodule. -/
+theorem fixedSubmodule_symm_eq (e : U ≃ₗ[R] U) :
+    e.symm.toLinearMap.fixedSubmodule = e.toLinearMap.fixedSubmodule := by
+  ext v
+  simp only [LinearMap.mem_fixedSubmodule_iff, coe_coe]
+  constructor
+  · intro h
+    have := congrArg e h
+    simpa only [apply_symm_apply] using this.symm
+  · intro h
+    have := congrArg e.symm h
+    simpa only [symm_apply_apply] using this.symm
+
 /-- An intertwining linear equivalence maps the fixed submodule of its source endomorphism
 onto the fixed submodule of its target endomorphism. -/
 theorem map_fixedSubmodule (e : U ≃ₗ[R] W)
