@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Algebra.Lie.GeneralLinear.Finrank
 public import TauCeti.Algebra.Lie.SpecialLinear.Diagonal
+public import Mathlib.Data.Nat.Dist
 public import Mathlib.LinearAlgebra.Pi
 public import Mathlib.LinearAlgebra.Prod
 
@@ -15,8 +16,8 @@ public import Mathlib.LinearAlgebra.Prod
 
 Over a commutative ring, adjacent diagonal differences and signed off-diagonal matrix units
 form a basis of the trace-zero matrices. Its diagonal coordinates are initial sums; its root
-coordinates are signed matrix entries. The construction composes the existing free-entry
-equivalence with a partition of its index set and the partial-sum equivalence.
+coordinates are signed matrix entries. The construction composes `specialLinearEntryEquiv`
+with a partition of its index set and `partialSumsLinearEquiv`.
 -/
 
 public section
@@ -33,10 +34,31 @@ def specialLinearRootSign (i j : Fin (r + 1)) : A :=
   if i < j then 1 else (-1) ^ (i.val - j.val - 1)
 
 /-- The sign is determined by the orientation and length of the interval. -/
-theorem specialLinearRootSign_eq (i j : Fin (r + 1)) :
+theorem specialLinearRootSign_def (i j : Fin (r + 1)) :
     specialLinearRootSign r A i j =
       if i < j then 1 else (-1) ^ (i.val - j.val - 1) := by
   rfl
+
+/-- A positive interval root has sign one. -/
+@[simp]
+theorem specialLinearRootSign_of_lt (i j : Fin (r + 1)) (hij : i < j) :
+    specialLinearRootSign r A i j = 1 := by
+  simp only [specialLinearRootSign_def, ite_eq_left hij]
+
+/-- A negative interval root has the sign determined by its height minus one. -/
+@[simp]
+theorem specialLinearRootSign_of_lt' (i j : Fin (r + 1)) (hji : j < i) :
+    specialLinearRootSign r A i j = (-1 : A) ^ (i.val - j.val - 1) := by
+  simp only [specialLinearRootSign_def, ite_eq_right (not_lt_of_ge hji.le)]
+
+/-- Reversing and swapping the indices preserves the interval-root sign. -/
+@[simp]
+theorem specialLinearRootSign_rev_rev (i j : Fin (r + 1)) :
+    specialLinearRootSign r A j.rev i.rev = specialLinearRootSign r A i j := by
+  have h : j.rev.val - i.rev.val = i.val - j.val := by
+    simp only [Fin.val_rev]
+    omega
+  simp only [specialLinearRootSign_def, Fin.rev_lt_rev, h]
 
 /-- Every interval-root sign is its own inverse. -/
 @[simp]
@@ -44,6 +66,35 @@ theorem specialLinearRootSign_mul_self (i j : Fin (r + 1)) :
     specialLinearRootSign r A i j * specialLinearRootSign r A i j = 1 := by
   unfold specialLinearRootSign
   split <;> simp [← mul_pow]
+
+/-- The product of opposite root signs depends only on the interval height. -/
+theorem specialLinearRootSign_mul_swap (i j : Fin (r + 1)) (hij : i ≠ j) :
+    specialLinearRootSign r A i j * specialLinearRootSign r A j i =
+      (-1 : A) ^ (Nat.dist i.val j.val - 1) := by
+  rcases lt_or_gt_of_ne hij with h | h
+  · rw [specialLinearRootSign_of_lt r A i j h,
+      specialLinearRootSign_of_lt' r A j i h, one_mul]
+    congr 1
+    unfold Nat.dist
+    omega
+  · rw [specialLinearRootSign_of_lt' r A i j h,
+      specialLinearRootSign_of_lt r A j i h, mul_one]
+    congr 1
+    unfold Nat.dist
+    omega
+
+/-- The product of opposite root signs is also the alternating matrix-graph sign. -/
+theorem specialLinearRootSign_mul_swap_eq_neg_one_pow
+    (i j : Fin (r + 1)) (hij : i ≠ j) :
+    specialLinearRootSign r A i j * specialLinearRootSign r A j i =
+      (-1 : A) ^ (i.val + j.val + 1) := by
+  rw [specialLinearRootSign_mul_swap r A i j hij,
+    neg_one_pow_eq_pow_mod_two (Nat.dist i.val j.val - 1),
+    neg_one_pow_eq_pow_mod_two (i.val + j.val + 1)]
+  congr 1
+  have hne : i.val ≠ j.val := fun h ↦ hij (Fin.ext h)
+  unfold Nat.dist
+  omega
 
 /-- The signed matrix unit belonging to an unequal pair of indices. -/
 def specialLinearSignedRoot (i j : Fin (r + 1)) (h : i ≠ j) : sl (Fin (r + 1)) A :=
@@ -118,6 +169,7 @@ noncomputable def specialLinearRootEquiv :
 theorem specialLinearRootEquiv_inl (X : sl (Fin (r + 1)) A) (i : Fin r) :
     specialLinearRootEquiv r A X (.inl i) =
       Fin.partialSum (fun j : Fin r => X.val j.castSucc j.castSucc) i.succ := by
+  -- Evaluate the sum/product reindexing and project onto the partial-sum factor.
   change partialSumsLinearEquiv A r (fun j : Fin r =>
     specialLinearEntryEquiv (R := A) (Fin.last r) X
       ((rootEntryIndexEquiv r) (.inl j))) i = _
@@ -131,18 +183,20 @@ theorem specialLinearRootEquiv_inr (X : sl (Fin (r + 1)) A)
     (p : {p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2}) :
     specialLinearRootEquiv r A X (.inr p) =
       specialLinearRootSign r A p.val.1 p.val.2 * X.val p.val.1 p.val.2 := by
+  -- Evaluate the sum/product reindexing and project onto the sign-multiplication factor.
   change specialLinearRootSign r A p.val.1 p.val.2 *
     specialLinearEntryEquiv (R := A) (Fin.last r) X
       ((rootEntryIndexEquiv r) (.inr p)) = _
   rw [specialLinearEntryEquiv_apply]
   rfl
 
-/-- On diagonal matrices, the new coroot coordinates agree with the existing coordinates. -/
+/-- On diagonal matrices, `specialLinearRootEquiv` agrees with `specialLinearCorootEquiv`. -/
 theorem specialLinearRootEquiv_diagonal_inl (X : specialLinearDiagonal r A) (i : Fin r) :
     specialLinearRootEquiv r A X.val (.inl i) = specialLinearCorootEquiv r A X i := by
   rw [specialLinearRootEquiv_inl, specialLinearCorootEquiv_apply]
 
 /-- Diagonal matrices have zero root coordinates. -/
+@[simp high]
 theorem specialLinearRootEquiv_diagonal_inr (X : specialLinearDiagonal r A)
     (p : {p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2}) :
     specialLinearRootEquiv r A X.val (.inr p) = 0 := by
@@ -169,7 +223,7 @@ private theorem rootEquiv_basis
   rw [← specialLinearRootBasis_repr, Module.Basis.repr_self]
   simp only [Finsupp.single_apply, Pi.single_apply, eq_comm]
 
-/-- The first summand of the full basis is the existing simple-coroot basis. -/
+/-- The first summand of `specialLinearRootBasis` is `specialLinearCorootBasis`. -/
 @[simp]
 theorem specialLinearRootBasis_inl (i : Fin r) :
     specialLinearRootBasis r A (.inl i) = (specialLinearCorootBasis r A i).val := by

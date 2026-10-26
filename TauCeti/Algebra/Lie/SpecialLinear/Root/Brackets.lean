@@ -56,9 +56,7 @@ theorem lie_specialLinearSignedRoot_of_outer_eq
   apply Subtype.ext
   rw [LieSubalgebra.coe_bracket, SetLike.val_smul, specialLinearSignedRoot_val,
     specialLinearSignedRoot_val, specialLinearSignedRoot_val, lie_single_single]
-  simpa [hkj.symm, Matrix.smul_single, smul_eq_mul, mul_assoc] using
-    congrArg (fun a : A => -Matrix.single k j a)
-      (mul_comm (specialLinearRootSign r A k i) (specialLinearRootSign r A i j))
+  simp [hkj.symm, Matrix.smul_single, smul_eq_mul, mul_assoc, mul_left_comm, mul_comm]
 
 /-- Opposite signed roots bracket to the corresponding diagonal difference. -/
 theorem lie_specialLinearSignedRoot_reverse
@@ -85,28 +83,8 @@ theorem lie_specialLinearCoroot_signedRoot
   rw [lie_single_of_mem_diagonalCartan (mem_diagonalCartan_iff_isDiag.mpr hd)]
   simp [specialLinearCorootBasis_apply, val_singleSubSingle, Matrix.single_apply]
 
-/-- Simple coroots commute over every coefficient ring. -/
-theorem lie_specialLinearCoroot_eq_zero (s t : Fin r) :
-    ⁅(specialLinearCorootBasis r A s).val, (specialLinearCorootBasis r A t).val⁆ = 0 := by
-  apply Subtype.ext
-  rw [LieSubalgebra.coe_bracket]
-  exact lie_eq_zero_of_isDiag
-    ((mem_specialLinearDiagonal_iff r A _).mp (specialLinearCorootBasis r A s).property)
-    ((mem_specialLinearDiagonal_iff r A _).mp (specialLinearCorootBasis r A t).property)
-
-/-- Summing adjacent coroots over an interval gives its endpoint difference. -/
-theorem sum_Icc_specialLinearCoroot (i j : Fin r) (hij : i ≤ j) :
-    ∑ t ∈ Finset.Icc i j, (specialLinearCorootBasis r A t).val =
-      singleSubSingle i.castSucc j.succ (1 : A) := by
-  apply Subtype.ext
-  -- View the coercion as the additive inclusion so that `map_sum` applies.
-  change (sl (Fin (r + 1)) A).incl _ = _
-  simp only [map_sum, LieSubalgebra.coe_incl, specialLinearCorootBasis_apply,
-    val_singleSubSingle]
-  simpa only [neg_sub_neg] using
-    (Fin.sum_Icc_sub hij (fun k : Fin (r + 1) ↦ -Matrix.single k k (1 : A)))
-
-/-- Opposite roots on a positive interval bracket to its sum of simple coroots. -/
+/-- Opposite roots on `[i, j]` bracket to `(-1) ^ (j.val - i.val)` times the sum
+of its simple coroots. The displayed coefficient is the product of the two root signs. -/
 theorem lie_specialLinearSignedRoot_interval (i j : Fin r) (hij : i ≤ j) :
     ⁅specialLinearSignedRoot r A i.castSucc j.succ
         (show i.castSucc < j.succ from Nat.lt_succ_of_le hij).ne,
@@ -117,7 +95,8 @@ theorem lie_specialLinearSignedRoot_interval (i j : Fin r) (hij : i ≤ j) :
           ∑ t ∈ Finset.Icc i j, (specialLinearCorootBasis r A t).val := by
   rw [lie_specialLinearSignedRoot_reverse, sum_Icc_specialLinearCoroot r A i j hij]
 
-/-- Reversing the two roots negates the interval-coroot expansion. -/
+/-- Reversing the two roots negates the signed interval-coroot expansion, whose coefficient
+is `(-1) ^ (j.val - i.val)`. -/
 theorem lie_specialLinearSignedRoot_interval_reverse (i j : Fin r) (hij : i ≤ j) :
     ⁅specialLinearSignedRoot r A j.succ i.castSucc
         (show i.castSucc < j.succ from Nat.lt_succ_of_le hij).ne',

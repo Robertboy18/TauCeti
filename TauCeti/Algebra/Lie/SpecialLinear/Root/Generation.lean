@@ -29,13 +29,13 @@ private theorem signedRoot_upper (i : Fin r) :
     specialLinearSignedRoot r A i.castSucc i.succ (Fin.castSucc_lt_succ (i := i)).ne =
       single i.castSucc i.succ (Fin.castSucc_lt_succ (i := i)).ne (1 : A) := by
   apply Subtype.ext
-  simp [specialLinearRootSign_eq]
+  simp
 
 private theorem signedRoot_lower (i : Fin r) :
     specialLinearSignedRoot r A i.succ i.castSucc (Fin.castSucc_lt_succ (i := i)).ne' =
       single i.succ i.castSucc (Fin.castSucc_lt_succ (i := i)).ne' (1 : A) := by
   apply Subtype.ext
-  simp [specialLinearRootSign_eq, not_lt_of_ge (Fin.castSucc_lt_succ (i := i)).le]
+  simp
 
 private theorem sign_smul_mem_iff (S : LieSubalgebra A (sl (Fin (r + 1)) A))
     (i j : Fin (r + 1)) (X : sl (Fin (r + 1)) A) :
@@ -89,11 +89,15 @@ private theorem interval_mem (S : LieSubalgebra A (sl (Fin (r + 1)) A))
           by simpa only [signedRoot_lower] using hf i⟩
       · have hij' : i.val < j.val := (lt_of_le_of_ne hij h : i < j)
         let k : Fin r := ⟨j.val - 1, lt_of_le_of_lt (Nat.sub_le _ _) j.isLt⟩
-        have hik : i ≤ k := by change i.val ≤ j.val - 1; omega
+        have hik : i ≤ k := by
+          simp only [Fin.le_def]
+          dsimp only [k]
+          omega
         have hkn : k.val < n := by dsimp only [k]; omega
         have hks : k.succ = j.castSucc := by
           apply Fin.ext
-          change j.val - 1 + 1 = j.val
+          simp only [Fin.val_succ, Fin.val_castSucc]
+          dsimp only [k]
           omega
         obtain ⟨hp, hn⟩ := ih k.val hkn i k hik rfl
         simp only [hks] at hp hn
@@ -120,11 +124,13 @@ private theorem roots_mem_of_lt (S : LieSubalgebra A (sl (Fin (r + 1)) A))
   have ha : a.castSucc = i := rfl
   have hb : b.succ = j := by
     apply Fin.ext
-    change j.val - 1 + 1 = j.val
+    simp only [Fin.val_succ]
+    dsimp only [b]
     have hij' : i.val < j.val := hij
     omega
   have hab : a ≤ b := by
-    change i.val ≤ j.val - 1
+    simp only [Fin.le_def]
+    dsimp only [a, b]
     have hij' : i.val < j.val := hij
     omega
   simpa only [ha, hb] using interval_mem r A S he hf a b hab
@@ -146,7 +152,7 @@ private theorem eq_top_of_simple_mem (S : LieSubalgebra A (sl (Fin (r + 1)) A))
     obtain ⟨hp, hn⟩ := interval_mem r A S he hf i i le_rfl
     have h := S.lie_mem hp hn
     rw [lie_specialLinearSignedRoot_reverse] at h
-    simpa [specialLinearRootSign_eq] using h
+    simpa [specialLinearRootSign_def] using h
   | inr p =>
     rw [specialLinearRootBasis_inr]
     rcases lt_or_gt_of_ne p.property with h | h
@@ -154,7 +160,7 @@ private theorem eq_top_of_simple_mem (S : LieSubalgebra A (sl (Fin (r + 1)) A))
     · exact (roots_mem_of_lt r A S he hf _ _ h).2
 
 /-- Adjacent raising and lowering matrices generate the special linear Lie algebra. -/
-theorem lieSpan_specialLinearSimpleRoots :
+theorem lieSpan_specialLinear_adjacent_single_eq_top :
     LieSubalgebra.lieSpan A (sl (Fin (r + 1)) A)
       (Set.range (fun i : Fin r ↦ single i.castSucc i.succ
         (Fin.castSucc_lt_succ (i := i)).ne (1 : A)) ∪
@@ -168,7 +174,7 @@ theorem lieSpan_specialLinearSimpleRoots :
 
 /-- Lie homomorphisms from the special linear algebra agree if they agree on adjacent
 raising and lowering matrices. -/
-theorem lieHom_ext_specialLinearSimpleRoots {M : Type*} [LieRing M] [LieAlgebra A M]
+theorem lieHom_ext_specialLinear_adjacent_single {M : Type*} [LieRing M] [LieAlgebra A M]
     (f g : sl (Fin (r + 1)) A →ₗ⁅A⁆ M)
     (he : ∀ i : Fin r, f (single i.castSucc i.succ
         (Fin.castSucc_lt_succ (i := i)).ne (1 : A)) =
@@ -183,7 +189,7 @@ theorem lieHom_ext_specialLinearSimpleRoots {M : Type*} [LieRing M] [LieAlgebra 
         (Fin.castSucc_lt_succ (i := i)).ne (1 : A)) ∪
       Set.range (fun i : Fin r ↦ single i.succ i.castSucc
         (Fin.castSucc_lt_succ (i := i)).ne' (1 : A))) := by
-    rw [lieSpan_specialLinearSimpleRoots]
+    rw [lieSpan_specialLinear_adjacent_single_eq_top]
     trivial
   induction hX using LieSubalgebra.lieSpan_induction with
   | mem Y hY =>
