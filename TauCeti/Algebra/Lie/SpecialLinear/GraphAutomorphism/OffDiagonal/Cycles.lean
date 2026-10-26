@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Logic.Equiv.Fin.Rotate
-public import TauCeti.Algebra.Lie.SpecialLinear.GraphAutomorphism.OffDiagonal
+public import TauCeti.Algebra.Lie.SpecialLinear.GraphAutomorphism.OffDiagonal.Basic
 
 /-!
 # Explicit off-diagonal cycles of the type-A graph automorphism

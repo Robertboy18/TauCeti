@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.SpecialLinear.GraphAutomorphism.OffDiagonalCycles
+public import TauCeti.Algebra.Lie.SpecialLinear.GraphAutomorphism.OffDiagonal.Cycles
 public import TauCeti.LinearAlgebra.WeightedCycle.Family.Signed
 
 /-!
