@@ -17,7 +17,7 @@ signed simple roots. They require no minuscule carrier or group-scheme construct
 
 `Root.Datum` uses the root identities in the carrier's conjugation equations;
 `Generated.RootWeight` and `Generated.Coroot` use the same coordinates for the generated group.
-The entrywise Cartan-row formulas remain available from the generic `DynkinType` API.
+The generic `DynkinType` API gives the entrywise Cartan-row formulas.
 
 ## References
 

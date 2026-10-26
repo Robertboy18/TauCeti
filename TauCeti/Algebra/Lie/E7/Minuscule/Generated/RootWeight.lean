@@ -29,9 +29,9 @@ base rings in `Type`;
 the differential statements allow arbitrary universes for both the base and value algebra.
 In particular the weight statements apply over every field in `Type`, in every characteristic.
 
-These are numbered candidate root vectors for the future pinning of the generated reductive
-subgroup. This does not identify the generated group with the specialized integral carrier,
-prove maximality of its torus, construct a Borel, or identify a root line with a full weight space.
+These are the normalized numbered root vectors of the generated subgroup. This does not identify
+the generated group with the specialized integral carrier, prove maximality of its torus,
+construct a Borel, or identify a root line with a full weight space.
 
 The differential and quotient-weight arguments follow the generated E₆ construction in
 `TauCeti.Algebra.Lie.E6.Minuscule.Generated.RootWeight`. The matrix support argument uses the
