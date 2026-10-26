@@ -7,7 +7,7 @@ module
 
 public import TauCeti.RepresentationTheory.OfMulAction
 public import Mathlib.RepresentationTheory.Invariants
-public import Mathlib.Data.Fintype.Quotient
+public import TauCeti.GroupTheory.GroupAction.Orbit.Card
 
 /-!
 # Orbit-average bases of permutation invariants
@@ -20,25 +20,20 @@ it agrees with averaging over any positive period, including a nonminimal period
 
 ## Main declarations
 
-* `Representation.ofMulActionOrbitBasis`: the basis of normalized orbit sums.
-* `Representation.ofMulActionOrbitProjection`: projection onto the actual invariant subspace.
-* `Representation.ofMulActionOrbitBasis_repr_projection`: projection coordinates as native
+* `TauCeti.ofMulActionOrbitBasis`: the basis of normalized orbit sums.
+* `TauCeti.ofMulActionOrbitProjection`: projection onto the actual invariant subspace.
+* `TauCeti.ofMulActionOrbitBasis_repr_projection`: projection coordinates as native
   finitely supported orbit sums.
-* `Representation.ofMulActionOrbitProjection_eq_average`: the cyclic averaging formula.
+* `TauCeti.ofMulActionOrbitProjection_eq_average`: the cyclic averaging formula.
 -/
 
 public noncomputable section
 
-open MonoidAlgebra MulAction Module
+open MonoidAlgebra MulAction Module Representation
 
-namespace Representation
+namespace TauCeti
 
 variable (Γ I : Type*) [Group Γ] [MulAction Γ I]
-
-private theorem orbit_card_ne_zero [Finite I] (O : orbitRel.Quotient Γ I) :
-    (Nat.card O.orbit : ℚ) ≠ 0 := by
-  have : Nonempty O.orbit := O.nonempty_orbit.to_subtype
-  exact_mod_cast Nat.card_pos.ne'
 
 variable [Fintype I]
 
@@ -57,20 +52,22 @@ private def orbitCoordinates : (ofMulAction ℚ Γ I).invariants ≃ₗ[ℚ]
     apply TauCeti.eq_of_coeff_out_eq_of_forall_ofMulAction_eq (fun g ↦ ?_) w.property
     · intro O
       simp only [Finsupp.coe_equivFunOnFinite_symm, Quotient.out_eq']
-      exact mul_div_cancel_left₀ _ (orbit_card_ne_zero Γ I O)
+      exact mul_div_cancel_left₀ _ (Nat.cast_ne_zero.mpr O.card_orbit_ne_zero)
     · ext i
       simp only [coeff_ofMulAction, Finsupp.coe_equivFunOnFinite_symm]
       simp only [orbitRel.Quotient.quotient_smul_eq]
   right_inv z := by
     funext O
     simp only [Finsupp.coe_equivFunOnFinite_symm, Quotient.out_eq']
-    exact mul_div_cancel₀ _ (orbit_card_ne_zero Γ I O)
+    exact mul_div_cancel₀ _ (Nat.cast_ne_zero.mpr O.card_orbit_ne_zero)
   map_add' w v := by
     funext O
+    -- Addition in the invariant subtype and coefficient evaluation reduce pointwise.
     change (Nat.card O.orbit : ℚ) * (w.val.coeff O.out + v.val.coeff O.out) = _
     exact mul_add _ _ _
   map_smul' r w := by
     funext O
+    -- Scalar multiplication in the invariant subtype reduces to multiplication of coefficients.
     change (Nat.card O.orbit : ℚ) * (r * w.val.coeff O.out) =
       r * ((Nat.card O.orbit : ℚ) * w.val.coeff O.out)
     ring
@@ -101,6 +98,7 @@ theorem ofMulActionOrbitBasis_repr_of_mem (w : (ofMulAction ℚ Γ I).invariants
 open Classical in
 /-- An orbit-average basis vector has constant coefficient equal to the reciprocal orbit
 size on its orbit, and zero coefficient elsewhere. -/
+@[simp]
 theorem ofMulActionOrbitBasis_coeff (O : orbitRel.Quotient Γ I) (i : I) :
     ((ofMulActionOrbitBasis Γ I O).val).coeff i =
       if Quotient.mk (orbitRel Γ I) i = O then (Nat.card O.orbit : ℚ)⁻¹ else 0 := by
@@ -110,12 +108,13 @@ theorem ofMulActionOrbitBasis_coeff (O : orbitRel.Quotient Γ I) (i : I) :
   by_cases hi : Quotient.mk (orbitRel Γ I) i = O
   · simp only [hi, Basis.repr_self, Finsupp.single_eq_same] at h
     rw [ite_eq_left hi]
-    apply mul_left_cancel₀ (orbit_card_ne_zero Γ I O)
-    rw [← h, mul_inv_cancel₀ (orbit_card_ne_zero Γ I O)]
+    apply mul_left_cancel₀ (Nat.cast_ne_zero.mpr O.card_orbit_ne_zero)
+    rw [← h, mul_inv_cancel₀ (Nat.cast_ne_zero.mpr O.card_orbit_ne_zero)]
   · simp only [Basis.repr_self, Finsupp.single_apply, Ne.symm hi, ite_false] at h
     rw [ite_eq_right hi]
     exact (mul_eq_zero.mp h.symm).resolve_left
-      (orbit_card_ne_zero Γ I (Quotient.mk (orbitRel Γ I) i))
+      (Nat.cast_ne_zero.mpr (orbitRel.Quotient.card_orbit_ne_zero
+        (Quotient.mk (orbitRel Γ I) i)))
 
 open Classical in
 /-- An orbit-average basis vector is the normalized sum of its ambient basis vectors. -/
@@ -175,7 +174,7 @@ theorem ofMulActionOrbitProjection_invariant (w : (ofMulAction ℚ Γ I).invaria
   rw [ofMulActionOrbitBasis_repr_projection_apply, ofMulActionOrbitBasis_repr]
   have hc (i : I) (hi : Quotient.mk (orbitRel Γ I) i = O) :
       w.val.coeff i = w.val.coeff O.out := by
-    apply mul_left_cancel₀ (orbit_card_ne_zero Γ I O)
+    apply mul_left_cancel₀ (Nat.cast_ne_zero.mpr O.card_orbit_ne_zero)
     rw [← ofMulActionOrbitBasis_repr_of_mem Γ I w O i hi, ofMulActionOrbitBasis_repr]
   have hn : (Finset.univ.filter (fun i ↦ Quotient.mk (orbitRel Γ I) i = O)).card =
       Nat.card O.orbit := by
@@ -226,4 +225,4 @@ theorem ofMulActionOrbitProjection_eq_average (g : Γ)
   have hid := ofMulActionOrbitProjection_invariant Γ I ⟨y, hy⟩
   exact (congrArg Subtype.val (hproj.symm.trans hid))
 
-end Representation
+end TauCeti
