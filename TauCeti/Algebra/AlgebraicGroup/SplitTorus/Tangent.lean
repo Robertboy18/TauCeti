@@ -108,7 +108,10 @@ private theorem tangentCoordinates_coordinateDerivation [DecidableEq I] (i j : I
   · subst j
     simp only [Finsupp.single_eq_same, MultiplicativeGroup.tangentLinearEquiv_symm_apply_T,
       ↓reduceIte]
-    exact CounitAlgebra.algEquivSelf_apply R (LaurentPolynomial R) B (1 : B)
+    -- Precomposition has transported the value to the Laurent counit algebra.
+    -- Its underlying ring is `B`, so its unit is identified with the unit of `B`.
+    exact CounitAlgebra.algEquivSelf_apply R (LaurentPolynomial R) B
+      (1 : CounitAlgebra R (LaurentPolynomial R) B)
   · simp only [Finsupp.single_eq_of_ne h, LaurentPolynomial.T_zero,
       Derivation.map_one_eq_zero, map_zero, h, ↓reduceIte]
 
@@ -141,8 +144,8 @@ theorem tangentLinearEquiv_apply [Finite I] (d : Derivation R A C) (i : I) :
     tangentLinearEquiv d i =
       CounitAlgebra.algEquivSelf R A B
         (d (MonoidAlgebra.single (Multiplicative.ofAdd (Finsupp.single i 1)) 1)) := by
-  unfold tangentLinearEquiv
-  exact tangentCoordinates_apply d i
+  exact congrFun (LinearEquiv.ofBijective_apply tangentCoordinates
+    (hf := ⟨tangentCoordinates_injective, tangentCoordinates_surjective⟩) d) i
 
 /-- The tangent basis of a split torus, indexed by its coordinate cocharacters. -/
 def tangentBasis [Finite I] : Module.Basis I B (Derivation R A C) :=

@@ -5,6 +5,7 @@ Authors: Codex
 -/
 module
 
+public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Coordinates
 public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Differential
 public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Support
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Adjoint.WeightSpace
@@ -90,24 +91,6 @@ theorem rootVector_mem_adjointWeightSpace (k : Fin 7 ⊕ Fin 7) :
       (fun h => hab (congrArg SplitTorus.weightCharacter h)),
     Int.cast_zero]
 
-/-- The fourteen signed simple-root characters of E₇ are nontrivial integral characters,
-independently of the characteristic of the coefficient ring. -/
-private theorem rootWeightCharacter_ne_one (k : Fin 7 ⊕ Fin 7) :
-    SplitTorus.weightCharacter (E7.rootGeneratorWeight valid_E7 k) ≠ 1 := by
-  intro h
-  have hzero : E7.rootGeneratorWeight valid_E7 k = 0 := by
-    funext j
-    have hj := congrArg (fun χ : Multiplicative (Fin E7.rank →₀ ℤ) =>
-      Multiplicative.toAdd χ j) h
-    -- The upstream character is indexed by the definitionally rank-seven diagram.
-    erw [SplitTorus.toAdd_weightCharacter, toAdd_one, Finsupp.zero_apply] at hj
-    exact hj
-  rcases k with i | i
-  · erw [E7.rootGeneratorWeight_inl_eq_root_simpleIndex] at hzero
-    exact (E7.simplyConnectedRootDatum valid_E7).ne_zero _ hzero
-  · erw [E7.rootGeneratorWeight_inr_eq_neg_root_simpleIndex, neg_eq_zero] at hzero
-    exact (E7.simplyConnectedRootDatum valid_E7).ne_zero _ hzero
-
 /-- Each numbered signed simple root is an actual nontrivial adjoint weight of the specialized
 E₇ carrier. This uses the nonzero differential, rather than assuming a root-space dimension. -/
 theorem rootWeightCharacter_mem_nontrivialAdjointWeights [Nontrivial R] (k : Fin 7 ⊕ Fin 7) :
@@ -115,7 +98,7 @@ theorem rootWeightCharacter_mem_nontrivialAdjointWeights [Nontrivial R] (k : Fin
       Derivation.nontrivialAdjointWeights (weightTorusToBaseChangeCoordinateMap R).hom := by
   -- Normalize the rank-seven root character before applying the generic membership rule.
   erw [Derivation.mem_nontrivialAdjointWeights]
-  refine ⟨rootWeightCharacter_ne_one k, ?_⟩
+  refine ⟨SplitTorus.weightCharacter_eq_one_iff.not.2 (rootGeneratorWeight_ne_zero k), ?_⟩
   intro hbot
   have hz := rootVector_mem_adjointWeightSpace R k
   erw [hbot, Submodule.mem_bot] at hz

@@ -10,10 +10,11 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.KostantF
 /-!
 # Root and coroot coordinates for the E₇ minuscule construction
 
-The four equations below specialize the pinned Dynkin root-datum identities to the rank-seven
+The coordinate equations below specialize the pinned Dynkin root-datum identities to the rank-seven
 lattices used by the E₇ minuscule construction. They identify the simple coroots with coordinate
 vectors, their pairings with coordinate evaluation, and the numbered generator weights with the
-signed simple roots. They require no minuscule carrier or group-scheme construction.
+signed simple roots, which are nonzero in the integral lattice.
+They require no minuscule carrier or group-scheme construction.
 
 `RootDatum` uses the root identities in the carrier's conjugation equations;
 `Generated.RootWeight` and `Generated.Coroot` use the same coordinates for the generated group.
@@ -60,5 +61,17 @@ theorem rootGeneratorWeight_inr_eq_neg_root_simpleIndex (ht : E7.Valid) (i : Fin
     (E7.rootGeneratorWeight valid_E7 (.inr i) : Fin 7 → ℤ) =
       -(E7.simplyConnectedRootDatum ht).root (E7.simpleIndex ht i) := by
   simpa only [rank_E7] using E7.rootGeneratorWeight_inr_eq_neg_root_simpleIndex ht i
+
+/-- Every numbered raising or lowering weight is nonzero in the integral character lattice. -/
+theorem rootGeneratorWeight_ne_zero (k : Fin 7 ⊕ Fin 7) :
+    (E7.rootGeneratorWeight valid_E7 k : Fin 7 → ℤ) ≠ 0 := by
+  rcases k with i | i
+  · intro hzero
+    exact (E7.simplyConnectedRootDatum valid_E7).ne_zero _
+      ((rootGeneratorWeight_inl_eq_root_simpleIndex valid_E7 i).symm.trans hzero)
+  · intro hzero
+    exact (E7.simplyConnectedRootDatum valid_E7).ne_zero _
+      (neg_eq_zero.mp
+        ((rootGeneratorWeight_inr_eq_neg_root_simpleIndex valid_E7 i).symm.trans hzero))
 
 end TauCeti.E7Minuscule

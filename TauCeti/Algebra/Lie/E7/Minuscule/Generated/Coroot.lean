@@ -28,10 +28,14 @@ No assertion of torus maximality or of surjectivity of the Serre comparison is n
 ## Main declarations
 
 * `generatedCorootCocharacter`: the cocharacter defined by a fundamental-weight coordinate.
-* `generatedCorootCocharacter_eq_namedCoroot`: its identification with the named simple coroot.
-* `generatedTangentMatrixLieHom_corootDifferential`: its matrix of weight–coroot pairings.
-* `generatedCartanVector_eq_corootDifferential`: the normalized opposite-root bracket.
-* `generatedSerreLift_serreH_eq_corootDifferential`: the Cartan-generator value of the comparison.
+* `generatedCorootCocharacter_eq_cocharacter_coroot_simpleIndex`:
+  its identification with the named simple coroot.
+* `generatedTangentMatrixLieHom_derivationComp_generatedCorootCocharacter`:
+  its matrix of weight–coroot pairings.
+* `generatedCartanVector_eq_derivationComp_generatedCorootCocharacter`:
+  the normalized opposite-root bracket.
+* `generatedSerreLift_serreH_eq_derivationComp_generatedCorootCocharacter`:
+  the Cartan-generator value of the comparison.
 * `range_derivationCompLieHom_generatedWeightTorusCoordinateMap_eq_span`: the toral tangent image.
 * `range_derivationCompLieHom_generatedWeightTorusCoordinateMap_le_range_generatedSerreLift`:
   containment of that image in the Serre image.
@@ -66,7 +70,8 @@ theorem generatedCorootCocharacter_def (i : Fin 7) :
 
 /-- The cocharacter is the named simple coroot of the simply connected E₇ root datum,
 with the existing simple-root numbering. -/
-theorem generatedCorootCocharacter_eq_namedCoroot (ht : DynkinType.E7.Valid) (i : Fin 7) :
+theorem generatedCorootCocharacter_eq_cocharacter_coroot_simpleIndex
+    (ht : DynkinType.E7.Valid) (i : Fin 7) :
     generatedCorootCocharacter R i =
       (generatedWeightTorusCoordinateMap R).hom.cocharacter
         (SplitTorus.cocharEquiv.symm
@@ -83,7 +88,7 @@ theorem generatedCorootCocharacter_eq_namedCoroot (ht : DynkinType.E7.Valid) (i 
 
 /-- The differential of the `i`-th coroot has diagonal entries given by pairing the
 minuscule weights with the named simple coroot. The tangent vector of `𝔾ₘ` is normalized to one. -/
-theorem generatedTangentMatrixLieHom_corootDifferential
+theorem generatedTangentMatrixLieHom_derivationComp_generatedCorootCocharacter
     (ht : DynkinType.E7.Valid) (i : Fin 7) :
     generatedTangentMatrixLieHom R
         (derivationComp (generatedCorootCocharacter R i)
@@ -105,13 +110,13 @@ theorem generatedTangentMatrixLieHom_corootDifferential
 
 /-- The bracket of the opposite normalized root vectors is the differential of the
 corresponding actual coroot cocharacter, with no characteristic assumption. -/
-theorem generatedCartanVector_eq_corootDifferential (i : Fin 7) :
+theorem generatedCartanVector_eq_derivationComp_generatedCorootCocharacter (i : Fin 7) :
     generatedCartanVector R i =
       derivationComp (generatedCorootCocharacter R i)
         (MultiplicativeGroup.tangentLinearEquiv.symm (1 : R)) := by
   apply generatedTangentMatrixLieHom_injective R
   rw [generatedTangentMatrixLieHom_generatedCartanVector,
-    generatedTangentMatrixLieHom_corootDifferential R DynkinType.valid_E7]
+    generatedTangentMatrixLieHom_derivationComp_generatedCorootCocharacter R DynkinType.valid_E7]
   ext a b
   simp only [Matrix.map_apply, cartanMatrix_apply, Matrix.diagonal_apply]
   split_ifs
@@ -119,18 +124,20 @@ theorem generatedCartanVector_eq_corootDifferential (i : Fin 7) :
   · simp
 
 /-- The Serre comparison sends each Cartan generator to the actual simple-coroot differential. -/
-theorem generatedSerreLift_serreH_eq_corootDifferential (i : Fin 7) :
+theorem generatedSerreLift_serreH_eq_derivationComp_generatedCorootCocharacter (i : Fin 7) :
     generatedSerreLift R (serreH R (CartanMatrix.E 7) i) =
       derivationComp (generatedCorootCocharacter R i)
         (MultiplicativeGroup.tangentLinearEquiv.symm (1 : R)) := by
-  rw [generatedSerreLift_serreH, generatedCartanVector_eq_corootDifferential]
+  rw [generatedSerreLift_serreH,
+    generatedCartanVector_eq_derivationComp_generatedCorootCocharacter]
 
 /-- The weight-torus differential sends a coordinate tangent vector to its Cartan vector. -/
 theorem derivationCompLieHom_generatedWeightTorusCoordinateMap_tangentBasis (i : Fin 7) :
     derivationCompLieHom (B := R) (generatedWeightTorusCoordinateMap R).hom
         (SplitTorus.tangentBasis (R := R) (B := R) i) = generatedCartanVector R i := by
   rw [SplitTorus.derivationCompLieHom_tangentBasis,
-    generatedCartanVector_eq_corootDifferential, generatedCorootCocharacter_def,
+    generatedCartanVector_eq_derivationComp_generatedCorootCocharacter,
+    generatedCorootCocharacter_def,
     derivationCompLieHom_apply]
 
 /-- The tangent image of the generated weight torus is the span of the normalized
@@ -143,7 +150,8 @@ theorem range_derivationCompLieHom_generatedWeightTorusCoordinateMap_eq_span :
   congr 1
   apply congrArg Set.range
   funext i
-  rw [generatedCartanVector_eq_corootDifferential, generatedCorootCocharacter_def,
+  rw [generatedCartanVector_eq_derivationComp_generatedCorootCocharacter,
+    generatedCorootCocharacter_def,
     derivationCompLieHom_apply]
 
 /-- Every tangent vector in the weight-torus image is in the image of the Serre comparison. -/

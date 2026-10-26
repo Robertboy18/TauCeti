@@ -238,17 +238,9 @@ theorem weightCharacter_rootGeneratorWeight_mem_nontrivialAdjointWeights [Nontri
     (k : Fin 7 ⊕ Fin 7) :
     SplitTorus.weightCharacter (E7.rootGeneratorWeight valid_E7 k) ∈
       Derivation.nontrivialAdjointWeights (generatedWeightTorusCoordinateMap R).hom := by
-  have hroot : (E7.rootGeneratorWeight valid_E7 k : Fin 7 → ℤ) ≠ 0 := by
-    rcases k with i | i
-    · intro hzero
-      exact (E7.simplyConnectedRootDatum valid_E7).ne_zero _
-        ((rootGeneratorWeight_inl_eq_root_simpleIndex valid_E7 i).symm.trans hzero)
-    · intro hzero
-      exact (E7.simplyConnectedRootDatum valid_E7).ne_zero _
-        (neg_eq_zero.mp
-          ((rootGeneratorWeight_inr_eq_neg_root_simpleIndex valid_E7 i).symm.trans hzero))
   apply Derivation.mem_nontrivialAdjointWeights.mpr
-  refine ⟨SplitTorus.weightCharacter_eq_one_iff.not.2 hroot, fun hbot ↦ ?_⟩
+  refine ⟨SplitTorus.weightCharacter_eq_one_iff.not.2 (rootGeneratorWeight_ne_zero k),
+    fun hbot ↦ ?_⟩
   have hz := generatedRootVector_mem_adjointWeightSpace R k
   have hz' : (Derivation.cotangentLinearEquiv (B := R)).symm (generatedRootVector R k) ∈
       (⊥ : Submodule R _) := hbot ▸ hz

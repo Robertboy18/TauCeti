@@ -86,7 +86,8 @@ theorem generatedCartanVector_def (i : Fin 7) :
       ⁅generatedRootVector R (.inl i), generatedRootVector R (.inr i)⁆ :=
   (rfl)
 
-/-- The bracket-defined Cartan vector maps to the integral Cartan matrix, with its given sign. -/
+/-- The Cartan vector maps to the integral Cartan generator matrix `H_i`, the diagonal
+matrix of the `i`-th coordinates of the minuscule weights. -/
 @[simp]
 theorem generatedTangentMatrixLieHom_generatedCartanVector (i : Fin 7) :
     generatedTangentMatrixLieHom R (generatedCartanVector R i) =
