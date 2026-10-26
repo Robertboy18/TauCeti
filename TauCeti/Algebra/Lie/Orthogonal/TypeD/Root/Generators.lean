@@ -49,9 +49,11 @@ into Tau Ceti's existing Kostant-form and toral-closure machinery. Their images 
 even-polarization quadratic equivalence are computed by
 `SpinPolarizationData.typeDQuadraticEquiv_rootGenerator`.
 
-The public fork-index equations specialize `graphPermD` from `DiagramPermutations` to these
-numbered generators. Together with the lowering-transpose equation, they let the native
-graph-involution proof use this module's public API.
+The equations `graphPermD_forkLeft` and `graphPermD_forkRight` describe the exchange of the
+two fork nodes. The chain and fork raising matrices are differences of two matrix units,
+as stated in `raisingMatrix_eq_single_sub_single_of_chain` and
+`raisingMatrix_eq_single_sub_single_of_fork`. The equation `loweringMatrix_eq_transpose`
+identifies each lowering matrix with the transpose of its raising matrix.
 
 ## Main definitions and results
 

@@ -123,7 +123,7 @@ theorem typeDGraphLieEquiv_apply_val (X : typeD I A) :
     (LieEquiv.ofEq_apply (typeD I A) (skewAdjointMatricesLieSubalgebra (JD I A)) _ X)
 
 /-- The chosen-pair involution permutes both matrix indices by the chosen pair swap. -/
-theorem typeDGraphLieEquiv_apply_entry (X : typeD I A) (s t : I ⊕ I) :
+theorem typeDGraphLieEquiv_apply_apply (X : typeD I A) (s t : I ⊕ I) :
     (typeDGraphLieEquiv c A X : Matrix (I ⊕ I) (I ⊕ I) A) s t =
       (X : Matrix (I ⊕ I) (I ⊕ I) A) (typeDGraphIndex c s) (typeDGraphIndex c t) := by
   rw [typeDGraphLieEquiv_apply_val, typeDGraphMatrix_conj]
@@ -132,7 +132,7 @@ theorem typeDGraphLieEquiv_apply_entry (X : typeD I A) (s t : I ⊕ I) :
 
 /-- Applying the chosen-pair involution twice returns the original matrix. -/
 @[simp]
-theorem typeDGraphLieEquiv_apply_apply (X : typeD I A) :
+theorem typeDGraphLieEquiv_typeDGraphLieEquiv (X : typeD I A) :
     typeDGraphLieEquiv c A (typeDGraphLieEquiv c A X) = X := by
   apply Subtype.ext
   simp only [typeDGraphLieEquiv_apply_val]
