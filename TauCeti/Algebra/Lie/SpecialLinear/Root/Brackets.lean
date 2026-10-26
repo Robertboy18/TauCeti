@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.SpecialLinear.Root.Basis
-public import TauCeti.Algebra.Lie.GeneralLinear.Basic
 
 /-!
 # Brackets of signed special linear root vectors

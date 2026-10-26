@@ -102,6 +102,32 @@ theorem specialLinearEntryEquiv_apply (X : SpecialLinear.sl n R)
     specialLinearEntryEquiv (R := R) i₀ X p = X.val p.val.1 p.val.2 := by
   rfl
 
+
+/-- Away from the omitted diagonal place, the inverse reads the free entry coordinate. -/
+@[simp]
+theorem specialLinearEntryEquiv_symm_apply_of_ne
+    (g : {p : n × n // p ≠ (i₀, i₀)} → R) {i j : n} (h : (i, j) ≠ (i₀, i₀)) :
+    ((specialLinearEntryEquiv (R := R) i₀).symm g).val i j = g ⟨(i, j), h⟩ := by
+  exact congrFun ((specialLinearEntryEquiv (R := R) i₀).apply_symm_apply g) ⟨(i, j), h⟩
+
+/-- The omitted diagonal entry is minus the sum of the other diagonal coordinates. -/
+@[simp]
+theorem specialLinearEntryEquiv_symm_apply_self
+    (g : {p : n × n // p ≠ (i₀, i₀)} → R) :
+    ((specialLinearEntryEquiv (R := R) i₀).symm g).val i₀ i₀ =
+      -∑ k : {k : n // k ≠ i₀},
+        g ⟨(k.1, k.1), fun h => k.2 (congrArg Prod.fst h)⟩ := by
+  have htrace := SpecialLinear.mem_sl_iff.mp
+    ((specialLinearEntryEquiv (R := R) i₀).symm g).property
+  simp only [Matrix.trace, Matrix.diag_apply] at htrace
+  rw [Fintype.sum_eq_add_sum_subtype_ne _ i₀] at htrace
+  have hdiag (k : {k : n // k ≠ i₀}) :
+      ((specialLinearEntryEquiv (R := R) i₀).symm g).val k.1 k.1 =
+        g ⟨(k.1, k.1), fun h => k.2 (congrArg Prod.fst h)⟩ :=
+    specialLinearEntryEquiv_symm_apply_of_ne i₀ g fun h => k.2 (congrArg Prod.fst h)
+  simp only [hdiag] at htrace
+  exact (neg_eq_of_add_eq_zero_left htrace).symm
+
 end Coordinates
 
 section FreeFinite

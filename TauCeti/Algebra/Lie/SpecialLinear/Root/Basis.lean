@@ -9,7 +9,6 @@ public import TauCeti.Algebra.Lie.GeneralLinear.Finrank
 public import TauCeti.Algebra.Lie.SpecialLinear.Diagonal
 public import Mathlib.Data.Nat.Dist
 public import Mathlib.LinearAlgebra.Pi
-public import Mathlib.LinearAlgebra.Prod
 
 /-!
 # Signed root coordinates for the special linear Lie algebra
