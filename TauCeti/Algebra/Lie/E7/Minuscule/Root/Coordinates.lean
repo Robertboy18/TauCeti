@@ -15,7 +15,7 @@ lattices used by the E₇ minuscule construction. They identify the simple coroo
 vectors, their pairings with coordinate evaluation, and the numbered generator weights with the
 signed simple roots. They require no minuscule carrier or group-scheme construction.
 
-`Root.Datum` uses the root identities in the carrier's conjugation equations;
+`RootDatum` uses the root identities in the carrier's conjugation equations;
 `Generated.RootWeight` and `Generated.Coroot` use the same coordinates for the generated group.
 The generic `DynkinType` API gives the entrywise Cartan-row formulas.
 
@@ -25,7 +25,7 @@ The generic `DynkinType` API gives the entrywise Cartan-row formulas.
 
 The identities are specializations of
 `TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.KostantForm` and its root-datum
-assembly dependencies. They supply the shared coordinates for the pinning construction.
+assembly dependencies.
 -/
 
 public section
