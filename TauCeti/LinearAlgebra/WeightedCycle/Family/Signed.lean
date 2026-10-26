@@ -218,6 +218,7 @@ theorem fixedSignedFamily_repr_neg (v : f.fixedSubmodule)
   exact congrArg Subtype.val (Subsingleton.elim _ 0)
 
 /-- The integral fixed basis vector has the prescribed prefix coefficients on positive cycles. -/
+@[simp]
 theorem fixedBasisSignedFamily_repr_pos [DecidableEq {j // (∏ i, ε j i) = 1}]
     (j k : {j // (∏ i, ε j i) = 1}) (i : Fin (n k.val + 1)) :
     b.repr (b.fixedBasisSignedFamily e ε hε f h j).val (e ⟨k.val, i⟩) =
@@ -227,6 +228,7 @@ theorem fixedBasisSignedFamily_repr_pos [DecidableEq {j // (∏ i, ε j i) = 1}]
   by_cases hj : j = k <;> simp [hj]
 
 /-- Every coefficient on a negative cycle of an integral fixed basis vector vanishes. -/
+@[simp]
 theorem fixedBasisSignedFamily_repr_neg
     (j : {j // (∏ i, ε j i) = 1}) (k : {j // (∏ i, ε j i) = -1})
     (i : Fin (n k.val + 1)) :

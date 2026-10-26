@@ -123,14 +123,24 @@ noncomputable def fixedSubmoduleBaseChangeRetraction :
   ((b.fixedBasisSignedFamily e ε hε f h).baseChange A).equivFun.symm.toLinearMap ∘ₗ
     (LinearMap.fst A _ _) ∘ₗ (b.fixedEquivSignedFamilyBaseChange e ε hε f h A).toLinearMap
 
+/-- Retraction coordinates retain the positive component of every fixed vector, including
+vectors with additional negative-cycle torsion. -/
+theorem fixedSubmoduleBaseChangeRetraction_equivFun
+    (v : (f.baseChange A).fixedSubmodule) :
+    ((b.fixedBasisSignedFamily e ε hε f h).baseChange A).equivFun
+        (b.fixedSubmoduleBaseChangeRetraction e ε hε f h A v) =
+      (b.fixedEquivSignedFamilyBaseChange e ε hε f h A v).1 := by
+  simp only [fixedSubmoduleBaseChangeRetraction, LinearMap.comp_apply,
+    LinearEquiv.coe_coe, LinearMap.fst_apply, LinearEquiv.apply_symm_apply]
+
 /-- The retraction is a left inverse of the actual fixed-submodule comparison. -/
 theorem fixedSubmoduleBaseChangeRetraction_leftInverse :
     Function.LeftInverse (b.fixedSubmoduleBaseChangeRetraction e ε hε f h A)
       (f.fixedSubmoduleBaseChange A) := by
   intro x
-  simp only [fixedSubmoduleBaseChangeRetraction, LinearMap.comp_apply,
-    LinearEquiv.coe_coe, LinearMap.fst_apply,
-    b.fixedEquivSignedFamilyBaseChange_comparison, LinearEquiv.symm_apply_apply]
+  apply ((b.fixedBasisSignedFamily e ε hε f h).baseChange A).equivFun.injective
+  rw [fixedSubmoduleBaseChangeRetraction_equivFun,
+    fixedEquivSignedFamilyBaseChange_comparison]
 
 include b e ε hε h in
 /-- Scalar extension embeds the integral fixed module of a signed basis-cycle family. -/
