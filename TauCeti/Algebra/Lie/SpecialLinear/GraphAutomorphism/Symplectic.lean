@@ -6,6 +6,7 @@ Authors: Robert Boyer
 module
 
 public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.GraphAutomorphism
+public import TauCeti.Logic.Equiv.Fin.Basic
 public import Mathlib.Algebra.Lie.Classical
 public import Mathlib.LinearAlgebra.Matrix.Reindex
 
@@ -36,8 +37,7 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 /-- Pair the lower half of the native indices with their reversals. -/
 def typeASymplecticIndex :
     Fin (k + 1) ⊕ Fin (k + 1) ≃ Fin (2 * k + 1 + 1) :=
-  ((Equiv.sumCongr (Equiv.refl _) Fin.revPerm).trans finSumFinEquiv).trans
-    (finCongr (by omega))
+  finSumFinRevEquiv (k + 1) (k + 1) (2 * k + 1 + 1) (by omega)
 
 /-- The first index of each pair is the original lower-half index. -/
 @[simp]
@@ -49,9 +49,7 @@ theorem typeASymplecticIndex_inl_val (i : Fin (k + 1)) :
 @[simp]
 theorem typeASymplecticIndex_inr_val (i : Fin (k + 1)) :
     (typeASymplecticIndex k (Sum.inr i) : ℕ) = 2 * k + 1 - i := by
-  simp only [typeASymplecticIndex, Equiv.trans_apply, Equiv.sumCongr_apply,
-    Sum.map_inr, Fin.revPerm_apply, finSumFinEquiv_apply_right, finCongr_apply,
-    Fin.val_cast, Fin.val_natAdd, Fin.val_rev]
+  rw [typeASymplecticIndex, finSumFinRevEquiv_inr_val]
   omega
 
 /-- Reversal exchanges the two indices of a pair. -/
@@ -75,24 +73,17 @@ def typeASymplecticDiagonal :
     Matrix (Fin (k + 1) ⊕ Fin (k + 1)) (Fin (k + 1) ⊕ Fin (k + 1)) A :=
   diagonal (Sum.elim (fun _ ↦ 1) (fun i ↦ (-1 : A) ^ (i : ℕ)))
 
-/-- The paired coordinate change is diagonal with alternating signs on its second copy. -/
-theorem typeASymplecticDiagonal_def :
-    typeASymplecticDiagonal k A =
-      diagonal (Sum.elim (fun _ : Fin (k + 1) ↦ (1 : A))
-        (fun i : Fin (k + 1) ↦ (-1 : A) ^ (i : ℕ))) := by
-  rfl
-
 /-- The coordinate sign change is symmetric. -/
 @[simp]
 theorem typeASymplecticDiagonal_transpose :
     (typeASymplecticDiagonal k A)ᵀ = typeASymplecticDiagonal k A := by
-  simp [typeASymplecticDiagonal_def]
+  simp [typeASymplecticDiagonal]
 
 /-- Applying the coordinate sign change twice is the identity. -/
 @[simp]
 theorem typeASymplecticDiagonal_mul_self :
     typeASymplecticDiagonal k A * typeASymplecticDiagonal k A = 1 := by
-  rw [typeASymplecticDiagonal_def, diagonal_mul_diagonal, ← diagonal_one]
+  rw [typeASymplecticDiagonal, diagonal_mul_diagonal, ← diagonal_one]
   congr 1
   funext i
   cases i <;> simp [← pow_add, ← two_mul, pow_mul]
@@ -123,7 +114,7 @@ theorem typeASymplecticDiagonal_transpose_mul_reindex_typeAGraphConjugator_inv_m
         typeASymplecticDiagonal k A = Matrix.J (Fin (k + 1)) A := by
   rw [typeASymplecticDiagonal_transpose, typeAGraphConjugator_inv_eq_transpose]
   ext a b
-  simp only [typeASymplecticDiagonal_def, diagonal_mul, mul_diagonal, reindex_apply,
+  simp only [typeASymplecticDiagonal, diagonal_mul, mul_diagonal, reindex_apply,
     submatrix_apply, Equiv.symm_symm, transpose_apply, typeAGraphConjugator_apply]
   rcases a with i | i <;> rcases b with j | j
   · simp [Matrix.J]
