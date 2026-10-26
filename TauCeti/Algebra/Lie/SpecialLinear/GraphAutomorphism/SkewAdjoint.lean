@@ -14,8 +14,7 @@ public import TauCeti.LinearAlgebra.Matrix.SkewAdjoint
 
 When `2` is invertible, the fixed Lie subalgebra of the native type-A graph automorphism is
 Lie equivalent to the matrices skew-adjoint for the inverse signed reversal form. Both maps
-retain the underlying matrix. The inverse uses the existing trace-zero theorem for
-skew-adjoint matrices; no change of form or classification is involved.
+retain the underlying matrix.
 -/
 
 public section
@@ -62,7 +61,7 @@ def typeASpecialLinearFixedSkewAdjointEquiv :
 
 /-- The forward equivalence retains the underlying matrix of a fixed trace-zero element. -/
 @[simp]
-theorem typeASpecialLinearFixedSkewAdjointEquiv_apply
+theorem coe_typeASpecialLinearFixedSkewAdjointEquiv_apply
     (X : (typeASpecialLinearGraphAutomorphism r A).toLieHom.fixedSubalgebra) :
     (typeASpecialLinearFixedSkewAdjointEquiv r A X :
       Matrix (Fin (r + 1)) (Fin (r + 1)) A) = X.val.val := by
@@ -71,7 +70,7 @@ theorem typeASpecialLinearFixedSkewAdjointEquiv_apply
 
 /-- The inverse equivalence retains the underlying skew-adjoint matrix. -/
 @[simp]
-theorem typeASpecialLinearFixedSkewAdjointEquiv_symm_apply
+theorem coe_typeASpecialLinearFixedSkewAdjointEquiv_symm_apply
     (Y : skewAdjointMatricesLieSubalgebra
       ((typeAGraphConjugator r A : Matrix (Fin (r + 1)) (Fin (r + 1)) A)⁻¹)) :
     ((typeASpecialLinearFixedSkewAdjointEquiv r A).symm Y).val.val = Y.val := by

@@ -26,10 +26,10 @@ def fixedSubalgebra (f : L →ₗ⁅R⁆ L) : LieSubalgebra R L :=
   { f.toLinearMap.fixedSubmodule with
     lie_mem' := by
       intro x y hx hy
-      change f ⁅x, y⁆ = ⁅x, y⁆
-      change f x = x at hx
-      change f y = y at hy
-      rw [map_lie, hx, hy] }
+      apply LinearMap.mem_fixedSubmodule_iff.mpr
+      have hx' : f x = x := LinearMap.mem_fixedSubmodule_iff.mp hx
+      have hy' : f y = y := LinearMap.mem_fixedSubmodule_iff.mp hy
+      simpa only [coe_toLinearMap, hx', hy'] using (map_lie f x y) }
 
 /-- Membership in the fixed Lie subalgebra is the fixed-point equation. -/
 @[simp]
