@@ -25,19 +25,6 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 variable (r : ℕ) (A : Type*) [CommRing A]
 
-private theorem specialLinearCorootEquiv_symm_val (c : Fin r → A) :
-    ((specialLinearCorootEquiv r A).symm c).val =
-      ∑ i, c i • singleSubSingle i.castSucc i.succ 1 := by
-  have hc (i : Fin r) :
-      (specialLinearCorootBasis r A).repr ((specialLinearCorootEquiv r A).symm c) i =
-        c i := by
-    rw [specialLinearCorootBasis_repr, ← specialLinearCorootEquiv_apply,
-      LinearEquiv.apply_symm_apply]
-  have h := congrArg (fun X : specialLinearDiagonal r A ↦ X.val)
-    ((specialLinearCorootBasis r A).sum_repr ((specialLinearCorootEquiv r A).symm c))
-  simpa only [Submodule.coe_sum, Submodule.coe_smul, hc, specialLinearCorootBasis_apply]
-    using h.symm
-
 /-- The graph automorphism reverses simple-coroot coordinates in the native Lie algebra. -/
 theorem typeASpecialLinearGraphAutomorphism_corootEquiv_symm (c : Fin r → A) :
     typeASpecialLinearGraphAutomorphism r A ((specialLinearCorootEquiv r A).symm c).val =

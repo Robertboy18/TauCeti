@@ -159,4 +159,19 @@ theorem specialLinearCorootBasis_apply (i : Fin r) :
       specialLinearDiagonalEquiv_singleSubSingle, LinearEquiv.apply_symm_apply]
   exact congrArg Subtype.val h
 
+/-- Inverse simple-coroot coordinates reconstruct the corresponding linear combination of
+adjacent diagonal differences. -/
+theorem specialLinearCorootEquiv_symm_val (c : Fin r → A) :
+    ((specialLinearCorootEquiv r A).symm c).val =
+      ∑ i, c i • singleSubSingle i.castSucc i.succ 1 := by
+  have hc (i : Fin r) :
+      (specialLinearCorootBasis r A).repr ((specialLinearCorootEquiv r A).symm c) i =
+        c i := by
+    rw [specialLinearCorootBasis_repr, ← specialLinearCorootEquiv_apply,
+      LinearEquiv.apply_symm_apply]
+  have h := congrArg (fun X : specialLinearDiagonal r A ↦ X.val)
+    ((specialLinearCorootBasis r A).sum_repr ((specialLinearCorootEquiv r A).symm c))
+  simpa only [Submodule.coe_sum, Submodule.coe_smul, hc, specialLinearCorootBasis_apply]
+    using h.symm
+
 end TauCeti
