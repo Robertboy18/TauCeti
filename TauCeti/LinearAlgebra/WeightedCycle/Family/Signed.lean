@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.BigOperators.Ring.Int
 public import TauCeti.LinearAlgebra.WeightedCycle.Family.Basic
 public import TauCeti.LinearAlgebra.Pi
 
@@ -28,14 +29,8 @@ variable {A V ι J : Type*} {n : J → ℕ}
 private def negativeIndexEquiv (ε : ∀ j, Fin (n j + 1) → ℤ)
     (hε : ∀ j i, ε j i = 1 ∨ ε j i = -1) :
     {j // (∏ i, ε j i) ≠ 1} ≃ {j // (∏ i, ε j i) = -1} :=
-  Equiv.subtypeEquivRight fun j ↦ by
-    constructor
-    · intro h
-      exact (Int.isUnit_iff.mp
-        (IsUnit.prod_univ_iff.mpr fun i ↦ Int.isUnit_iff.mpr (hε j i))).resolve_left h
-    · intro h
-      rw [h]
-      norm_num
+  Equiv.subtypeEquivRight fun j ↦
+    Int.prod_ne_one_iff_eq_neg_one (fun i _ ↦ hε j i)
 
 variable [CommRing A] [AddCommGroup V] [Module A V]
 
