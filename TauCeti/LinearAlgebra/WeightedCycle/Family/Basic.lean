@@ -51,12 +51,10 @@ theorem equivFun_comp_eq_piMap_comp [Finite J] (b : Module.Basis ι A V)
   rw [hi, map_smul, map_smul]
   funext k l
   obtain ⟨r, rfl⟩ := (finRotate (n k + 1)).surjective l
-  -- Currying reads the Sigma coordinate; scalar multiplication is pointwise.
-  change a j i * (b.reindex e.symm).equivFun
-      ((b.reindex e.symm) ⟨j, finRotate (n j + 1) i⟩) ⟨k, finRotate (n k + 1) r⟩ =
-    linearMap (a k) (fun t ↦ (b.reindex e.symm).equivFun
-      ((b.reindex e.symm) ⟨j, i⟩) ⟨k, t⟩) (finRotate (n k + 1) r)
+  simp only [LinearEquiv.piCurry_apply, Sigma.curry, Pi.smul_apply, smul_eq_mul,
+    LinearMap.coe_piMap, Pi.map]
   rw [linearMap_apply_rotate]
+  simp only [Sigma.curry]
   by_cases hj : j = k
   · subst k
     simp only [equivFun_self, smul_eq_mul]
