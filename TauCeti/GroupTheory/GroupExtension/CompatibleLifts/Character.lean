@@ -116,6 +116,7 @@ private theorem compatibleLiftsKernelCharacter_rightHom
     compatibleLiftsKernelCharacter S ρ hcentral x (S.rightHom e) = kernelDeviation S ρ x e := by
   simp [compatibleLiftsKernelCharacter]
 
+@[simp]
 theorem inl_compatibleLiftsKernelCharacter_rightHom
     (x : (compatibleLiftsProjection S ρ).ker) (e : E) :
     S.inl (compatibleLiftsKernelCharacter S ρ hcentral x (S.rightHom e)) =

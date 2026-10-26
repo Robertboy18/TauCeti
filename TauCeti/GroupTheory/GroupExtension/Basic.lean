@@ -231,21 +231,23 @@ namespace Equiv
 variable {E' : Type*} [Group E'] {S : GroupExtension N E G} {S' : GroupExtension N E' G}
 
 /-- An equivalence of extensions preserves centrality of the included kernel. -/
+@[to_additive
+  /-- An equivalence of additive extensions preserves centrality of the included kernel. -/]
 theorem inl_range_le_center (F : S.Equiv S') (hcentral : S.inl.range ≤ Subgroup.center E) :
     S'.inl.range ≤ Subgroup.center E' := by
   rintro _ ⟨n, rfl⟩
   rw [← F.map_inl]
   exact MulEquivClass.apply_mem_center F (hcentral ⟨n, rfl⟩)
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem symm_apply_apply (F : S.Equiv S') (e : E) : F.symm (F e) = e :=
   F.toMulEquiv.symm_apply_apply e
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem apply_symm_apply (F : S.Equiv S') (e : E') : F (F.symm e) = e :=
   F.toMulEquiv.apply_symm_apply e
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem symm_symm (F : S.Equiv S') : F.symm.symm = F :=
   rfl
 
