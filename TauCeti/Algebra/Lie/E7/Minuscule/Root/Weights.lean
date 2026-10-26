@@ -6,7 +6,7 @@ Authors: Codex
 module
 
 public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Differential
-public import TauCeti.Algebra.Lie.E7.Minuscule.RootSupport
+public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Support
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Adjoint.WeightSpace
 
 /-!

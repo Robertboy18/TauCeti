@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.E7.Minuscule.RootDatum
+public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Datum
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.Closure
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.TypeE7.Index
 

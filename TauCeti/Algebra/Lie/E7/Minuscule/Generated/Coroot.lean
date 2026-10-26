@@ -9,6 +9,7 @@ public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Weight.Differential
 public import TauCeti.Algebra.AlgebraicGroup.SplitTorus.Cocharacter
 public import TauCeti.Algebra.AlgebraicGroup.SplitTorus.Tangent
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.Serre
+public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Coordinates
 
 /-!
 # Simple-coroot differentials in the generated E₇ group

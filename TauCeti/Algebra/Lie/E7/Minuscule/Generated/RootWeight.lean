@@ -10,8 +10,8 @@ public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Root.Differential
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Adjoint.WeightSpace
 public import TauCeti.Algebra.Lie.E7.Minuscule.ClosedGenerators
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.StandardComodule
-public import TauCeti.Algebra.Lie.E7.Minuscule.RootSupport
-public import TauCeti.Algebra.Lie.E7.Minuscule.RootDatum
+public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Support
+public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Coordinates
 
 /-!
 # Root vectors and adjoint weights of the generated E₇ subgroup
