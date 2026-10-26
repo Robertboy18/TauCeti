@@ -48,18 +48,21 @@ theorem equivFun_comp_eq_linearMap_comp (b : Module.Basis ι A V) (e : Fin (n + 
     (h : ∀ i, f (b (e i)) = a i • b (e (finRotate (n + 1) i))) :
     (b.reindex e.symm).equivFun.toLinearMap ∘ₗ f =
       linearMap a ∘ₗ (b.reindex e.symm).equivFun.toLinearMap := by
-  apply (b.reindex e.symm).ext
-  intro i
-  simp only [LinearMap.comp_apply, LinearEquiv.coe_coe]
-  have hi : f ((b.reindex e.symm) i) = a i •
-      (b.reindex e.symm) (finRotate (n + 1) i) := by
-    simpa using h i
-  rw [hi, map_smul]
-  funext j
-  obtain ⟨k, rfl⟩ := (finRotate (n + 1)).surjective j
-  rw [linearMap_apply_rotate]
-  simp only [Pi.smul_apply, Module.Basis.equivFun_self, Equiv.apply_eq_iff_eq]
-  by_cases hik : i = k <;> simp [hik]
+  ext v i
+  have hcoords (w : V) :
+      LinearEquiv.piCurry A (fun (_ : Unit) (_ : Fin (n + 1)) ↦ A)
+        ((b.reindex (singleCycleFamilyIndex e).symm).equivFun w) () =
+          (b.reindex e.symm).equivFun w := by
+    ext j
+    simp [LinearEquiv.piCurry_apply, Sigma.curry]
+  have hv := DFunLike.congr_fun
+    (equivFun_comp_eq_piMap_comp b (singleCycleFamilyIndex e) (fun _ : Unit ↦ a) f
+      (fun _ i ↦ by simpa using h i)) v
+  have hi := congr_fun hv ()
+  simp only [LinearMap.comp_apply, LinearEquiv.coe_coe, LinearEquiv.trans_apply,
+    LinearMap.coe_piMap, Pi.map] at hi
+  rw [hcoords, hcoords] at hi
+  exact congr_fun hi i
 
 /-- Basis coordinates restrict to an equivalence of the actual fixed submodules. -/
 noncomputable def fixedBasisEquiv (b : Module.Basis ι A V)
