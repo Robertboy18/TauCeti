@@ -35,14 +35,9 @@ def typeASpecialLinearFixedDiagonal : Submodule A (sl (Fin (r + 1)) A) :=
 theorem mem_typeASpecialLinearFixedDiagonal_iff (X : sl (Fin (r + 1)) A) :
     X ∈ typeASpecialLinearFixedDiagonal r A ↔
       X.val.IsDiag ∧ typeASpecialLinearGraphAutomorphism r A X = X := by
-  change X ∈ specialLinearDiagonal r A ∧ _ ↔ _
-  constructor
-  · rintro ⟨hD, hF⟩
-    exact ⟨(mem_specialLinearDiagonal_iff r A X).mp hD,
-      LinearMap.mem_fixedSubmodule_iff.mp hF⟩
-  · rintro ⟨hD, hF⟩
-    exact ⟨(mem_specialLinearDiagonal_iff r A X).mpr hD,
-      LinearMap.mem_fixedSubmodule_iff.mpr hF⟩
+  simp only [typeASpecialLinearFixedDiagonal, Submodule.mem_inf,
+    mem_specialLinearDiagonal_iff, LinearMap.mem_fixedSubmodule_iff,
+    LinearEquiv.coe_coe, LieEquiv.coe_toLinearEquiv]
 
 /-- Simple-coroot coordinates identify the fixed diagonal submodule with fixed reversal tuples. -/
 noncomputable def typeASpecialLinearFixedDiagonalEquiv :

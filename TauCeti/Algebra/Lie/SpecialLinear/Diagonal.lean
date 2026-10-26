@@ -44,8 +44,7 @@ The final diagonal entry is minus the sum of that tuple. -/
 def specialLinearDiagonalEquiv : specialLinearDiagonal r A ≃ₗ[A] (Fin r → A) where
   toFun X i := X.val.val i.castSucc i.castSucc
   invFun d := ⟨⟨Matrix.diagonal (Fin.snoc d (-∑ i, d i)), by
-    change Matrix.trace (Matrix.diagonal (Fin.snoc d (-∑ i, d i))) = 0
-    simp [Matrix.trace, Fin.sum_univ_castSucc]⟩,
+    simp [sl, Matrix.traceLinearMap, Matrix.trace, Fin.sum_univ_castSucc]⟩,
     (mem_specialLinearDiagonal_iff r A _).mpr (Matrix.isDiag_diagonal _)⟩
   left_inv X := by
     apply Subtype.ext
@@ -97,9 +96,10 @@ noncomputable def specialLinearCorootEquiv :
 theorem specialLinearCorootEquiv_apply (X : specialLinearDiagonal r A) (i : Fin r) :
     specialLinearCorootEquiv r A X i =
       Fin.partialSum (fun j : Fin r ↦ X.val.val j.castSucc j.castSucc) i.succ := by
-  change partialSumsLinearEquiv A r (specialLinearDiagonalEquiv r A X) i = _
-  rw [partialSumsLinearEquiv_apply]
-  rfl
+  simpa only [specialLinearCorootEquiv, LinearEquiv.trans_apply,
+    partialSumsLinearEquiv_apply] using
+    congrArg (fun d : Fin r → A ↦ Fin.partialSum d i.succ)
+      (funext (specialLinearDiagonalEquiv_apply r A X))
 
 /-- Every difference of two diagonal matrix units belongs to the diagonal submodule. -/
 theorem singleSubSingle_mem_specialLinearDiagonal (i j : Fin (r + 1)) (a : A) :
