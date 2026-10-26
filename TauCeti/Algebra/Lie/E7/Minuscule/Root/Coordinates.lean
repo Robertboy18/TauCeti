@@ -25,8 +25,7 @@ The entrywise Cartan-row formulas remain available from the generic `DynkinType`
 
 The identities are specializations of
 `TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.KostantForm` and its root-datum
-assembly dependencies. They supply the shared coordinates for the pinning construction in
-Layer 9 of `TauCetiRoadmap/ReductiveGroups/README.md`.
+assembly dependencies. They supply the shared coordinates for the pinning construction.
 -/
 
 public section

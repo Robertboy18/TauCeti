@@ -59,9 +59,7 @@ The interface follows `TauCeti/Algebra/Lie/E6/Minuscule/RootDatum.lean`, added i
 rank-seven equations in `Root.Coordinates` specialize the generic `DynkinType` identities once,
 so the carrier and its generated subgroup share the same public root and coroot coordinates.
 
-This advances the "Pinnings" and "Root subgroup maps" targets of Layer 9 of
-`TauCetiRoadmap/ReductiveGroups/README.md`. Milestone L0 of
-`TauCetiRoadmap/CFSGStatement/README.md` consumes it: the type-`E₇` carrier must be traceable from
+For the pinned ambient group interface, the type-`E₇` carrier must be traceable from
 `ValidLieTypeIndex.dynkinType` to `DynkinType.simplyConnectedRootDatum`, with its numbered root
 subgroups governed by characters of that datum.
 -/
