@@ -21,7 +21,6 @@ has Gram matrix `Matrix.J`, whose upper-right block is negative, in these coordi
 the literal inverse matrix with Mathlib's native symplectic Lie algebra. Its two
 matrix-value theorems specify the change of coordinates and its inverse.
 The construction works over every commutative ring, including characteristic two.
-It supplies the form change for type-A folding; root bases and generation are separate.
 -/
 
 public section
@@ -57,7 +56,7 @@ theorem typeASymplecticIndex_inr_val (i : Fin (k + 1)) :
 
 /-- Reversal exchanges the two indices of a pair. -/
 @[simp]
-theorem typeASymplecticIndex_inl_rev (i : Fin (k + 1)) :
+theorem rev_typeASymplecticIndex_inl (i : Fin (k + 1)) :
     (typeASymplecticIndex k (Sum.inl i)).rev =
       typeASymplecticIndex k (Sum.inr i) := by
   apply Fin.ext
@@ -65,10 +64,10 @@ theorem typeASymplecticIndex_inl_rev (i : Fin (k + 1)) :
 
 /-- Reversal takes the second index back to the first. -/
 @[simp]
-theorem typeASymplecticIndex_inr_rev (i : Fin (k + 1)) :
+theorem rev_typeASymplecticIndex_inr (i : Fin (k + 1)) :
     (typeASymplecticIndex k (Sum.inr i)).rev =
       typeASymplecticIndex k (Sum.inl i) := by
-  rw [← typeASymplecticIndex_inl_rev, Fin.rev_rev]
+  rw [← rev_typeASymplecticIndex_inl, Fin.rev_rev]
 
 /-- The diagonal sign change in paired coordinates: `1` on the first copy and
 `(-1)^i` on the second. -/
@@ -76,17 +75,24 @@ def typeASymplecticDiagonal :
     Matrix (Fin (k + 1) ⊕ Fin (k + 1)) (Fin (k + 1) ⊕ Fin (k + 1)) A :=
   diagonal (Sum.elim (fun _ ↦ 1) (fun i ↦ (-1 : A) ^ (i : ℕ)))
 
+/-- The paired coordinate change is diagonal with alternating signs on its second copy. -/
+theorem typeASymplecticDiagonal_def :
+    typeASymplecticDiagonal k A =
+      diagonal (Sum.elim (fun _ : Fin (k + 1) ↦ (1 : A))
+        (fun i : Fin (k + 1) ↦ (-1 : A) ^ (i : ℕ))) := by
+  rfl
+
 /-- The coordinate sign change is symmetric. -/
 @[simp]
 theorem typeASymplecticDiagonal_transpose :
     (typeASymplecticDiagonal k A)ᵀ = typeASymplecticDiagonal k A := by
-  simp [typeASymplecticDiagonal]
+  simp [typeASymplecticDiagonal_def]
 
 /-- Applying the coordinate sign change twice is the identity. -/
 @[simp]
 theorem typeASymplecticDiagonal_mul_self :
     typeASymplecticDiagonal k A * typeASymplecticDiagonal k A = 1 := by
-  rw [typeASymplecticDiagonal, diagonal_mul_diagonal, ← diagonal_one]
+  rw [typeASymplecticDiagonal_def, diagonal_mul_diagonal, ← diagonal_one]
   congr 1
   funext i
   cases i <;> simp [← pow_add, ← two_mul, pow_mul]
@@ -96,19 +102,6 @@ theorem typeASymplecticDiagonal_mul_self :
 theorem typeASymplecticDiagonal_inv :
     (typeASymplecticDiagonal k A)⁻¹ = typeASymplecticDiagonal k A :=
   Matrix.inv_eq_left_inv (typeASymplecticDiagonal_mul_self k A)
-
-private theorem typeASymplectic_inverse_form :
-    (typeAGraphConjugator (2 * k + 1) A :
-        Matrix (Fin (2 * k + 1 + 1)) (Fin (2 * k + 1 + 1)) A)⁻¹ =
-      (typeAGraphConjugator (2 * k + 1) A :
-        Matrix (Fin (2 * k + 1 + 1)) (Fin (2 * k + 1 + 1)) A)ᵀ := by
-  have h := congrArg
-    (fun g : GeneralLinearGroup (Fin (2 * k + 1 + 1)) A ↦
-      (g : Matrix (Fin (2 * k + 1 + 1)) (Fin (2 * k + 1 + 1)) A))
-    (inverseTranspose_typeAGraphConjugator (A := A) (2 * k + 1))
-  rw [GeneralLinearGroup.coe_inverseTranspose] at h
-  simpa only [transpose_transpose, GeneralLinearGroup.coe_inv] using
-    congrArg Matrix.transpose h
 
 private theorem typeASymplectic_sign_product (i : Fin (k + 1)) :
     (-1 : A) ^ (typeASymplecticIndex k (Sum.inr i) : ℕ) * (-1 : A) ^ (i : ℕ) =
@@ -122,15 +115,15 @@ private theorem typeASymplectic_sign_product (i : Fin (k + 1)) :
 
 /-- In the explicit paired and signed coordinates, the inverse native reversal
 form is exactly Mathlib's symplectic form, with no scalar factor. -/
-theorem typeASymplecticDiagonal_congruence :
+theorem typeASymplecticDiagonal_transpose_mul_reindex_typeAGraphConjugator_inv_mul_eq_J :
     (typeASymplecticDiagonal k A)ᵀ *
         reindex (typeASymplecticIndex k).symm (typeASymplecticIndex k).symm
           (typeAGraphConjugator (2 * k + 1) A :
             Matrix (Fin (2 * k + 1 + 1)) (Fin (2 * k + 1 + 1)) A)⁻¹ *
         typeASymplecticDiagonal k A = Matrix.J (Fin (k + 1)) A := by
-  rw [typeASymplecticDiagonal_transpose, typeASymplectic_inverse_form]
+  rw [typeASymplecticDiagonal_transpose, typeAGraphConjugator_inv_eq_transpose]
   ext a b
-  simp only [typeASymplecticDiagonal, diagonal_mul, mul_diagonal, reindex_apply,
+  simp only [typeASymplecticDiagonal_def, diagonal_mul, mul_diagonal, reindex_apply,
     submatrix_apply, Equiv.symm_symm, transpose_apply, typeAGraphConjugator_apply]
   rcases a with i | i <;> rcases b with j | j
   · simp [Matrix.J]
@@ -144,36 +137,27 @@ theorem typeASymplecticDiagonal_congruence :
     · simp [Matrix.J, h]
   · simp [Matrix.J]
 
-private theorem typeASymplectic_reindex_transpose
-    (X : Matrix (Fin (2 * k + 1 + 1)) (Fin (2 * k + 1 + 1)) A) :
-    (reindexAlgEquiv A A (typeASymplecticIndex k).symm X)ᵀ =
-      reindexAlgEquiv A A (typeASymplecticIndex k).symm Xᵀ :=
-  transpose_reindex _ _ X
-
-/-- The skew-adjoint Lie algebra for the inverse native type-`A_(2k+1)` reversal
-form, in native symplectic coordinates. -/
+/-- Reindexing and diagonal conjugation identify the skew-adjoint Lie algebra for
+the inverse native type-`A_(2k+1)` reversal form with the native symplectic Lie algebra. -/
 noncomputable def typeAGraphSkewAdjointSymplecticEquiv :
     skewAdjointMatricesLieSubalgebra
         (typeAGraphConjugator (2 * k + 1) A :
           Matrix (Fin (2 * k + 1 + 1)) (Fin (2 * k + 1 + 1)) A)⁻¹ ≃ₗ⁅A⁆
-      LieAlgebra.Symplectic.sp (Fin (k + 1)) A := by
-  let e := reindexAlgEquiv A A (typeASymplecticIndex k).symm
-  apply (skewAdjointMatricesLieSubalgebraEquivTranspose _ e
-    (typeASymplectic_reindex_transpose k A)).trans
-  apply (skewAdjointMatricesLieSubalgebraEquiv _
-    (typeASymplecticDiagonal k A)
-    ⟨typeASymplecticDiagonal k A, typeASymplecticDiagonal_mul_self k A,
-      typeASymplecticDiagonal_mul_self k A⟩).trans
-  apply LieEquiv.ofEq
-  ext X
-  change X ∈ skewAdjointMatricesLieSubalgebra
-    ((typeASymplecticDiagonal k A)ᵀ *
-      reindex (typeASymplecticIndex k).symm (typeASymplecticIndex k).symm
-        (typeAGraphConjugator (2 * k + 1) A :
-          Matrix (Fin (2 * k + 1 + 1)) (Fin (2 * k + 1 + 1)) A)⁻¹ *
-      typeASymplecticDiagonal k A) ↔ _
-  rw [typeASymplecticDiagonal_congruence]
-  rfl
+      LieAlgebra.Symplectic.sp (Fin (k + 1)) A :=
+  (skewAdjointMatricesLieSubalgebraEquivTranspose _
+    (reindexAlgEquiv A A (typeASymplecticIndex k).symm)
+    (by
+      intro X
+      rw [coe_reindexAlgEquiv]
+      exact transpose_reindex _ _ X)).trans
+    ((skewAdjointMatricesLieSubalgebraEquiv _
+      (typeASymplecticDiagonal k A)
+      ⟨typeASymplecticDiagonal k A, typeASymplecticDiagonal_mul_self k A,
+        typeASymplecticDiagonal_mul_self k A⟩).trans
+      (LieEquiv.ofEq _ (LieAlgebra.Symplectic.sp (Fin (k + 1)) A) (by
+        unfold LieAlgebra.Symplectic.sp
+        rw [coe_reindexAlgEquiv,
+          typeASymplecticDiagonal_transpose_mul_reindex_typeAGraphConjugator_inv_mul_eq_J])))
 
 /-- The forward map is reindexing followed by the explicit diagonal conjugation. -/
 @[simp]
@@ -190,7 +174,7 @@ theorem typeAGraphSkewAdjointSymplecticEquiv_apply_val
   rw [typeAGraphSkewAdjointSymplecticEquiv, LieEquiv.trans_apply, LieEquiv.trans_apply,
     LieEquiv.ofEq_apply, skewAdjointMatricesLieSubalgebraEquiv_apply,
     skewAdjointMatricesLieSubalgebraEquivTranspose_apply, typeASymplecticDiagonal_inv]
-  rfl
+  simp only [coe_reindexAlgEquiv]
 
 /-- The inverse map conjugates by the same diagonal matrix and undoes the index change. -/
 @[simp]
