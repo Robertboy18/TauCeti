@@ -157,14 +157,10 @@ def raisingMatrix {K : Type*} [Ring K] (i : Fin n) :
     Matrix.fromBlocks 0 (forkBlock n hn) 0 0
 
 /-- The lowering matrix is the transpose of the corresponding raising matrix. -/
+@[expose]
 def loweringMatrix {K : Type*} [Ring K] (i : Fin n) :
     Matrix (Fin n ⊕ Fin n) (Fin n ⊕ Fin n) K :=
   (raisingMatrix n hn i).transpose
-
-/-- The defining transpose equation for a native lowering matrix. -/
-theorem loweringMatrix_eq_transpose_raisingMatrix {K : Type*} [Ring K] (i : Fin n) :
-    loweringMatrix (K := K) n hn i = (raisingMatrix n hn i).transpose :=
-  (rfl)
 
 @[simp]
 theorem raisingMatrix_of_chain {K : Type*} [Ring K] {i : Fin n}

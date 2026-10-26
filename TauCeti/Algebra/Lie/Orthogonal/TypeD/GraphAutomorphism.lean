@@ -103,13 +103,14 @@ theorem typeDGraphMatrix_orthogonal :
 
 /-- Swap the chosen hyperbolic pair in the native skew-adjoint Lie algebra. -/
 def typeDGraphLieEquiv : typeD I A ≃ₗ⁅A⁆ typeD I A :=
-  (LieEquiv.ofEq (typeD I A) (skewAdjointMatricesLieSubalgebra (JD I A)) rfl).trans
+  (LieEquiv.ofEq (typeD I A) (skewAdjointMatricesLieSubalgebra (JD I A))
+    (by simp only [typeD])).trans
     ((skewAdjointMatricesLieSubalgebraEquivTranspose (JD I A)
       (Matrix.reindexAlgEquiv A A (typeDGraphIndex c))
       (fun X => by
         simpa only [Matrix.coe_reindexAlgEquiv] using
           Matrix.transpose_reindex (typeDGraphIndex c) (typeDGraphIndex c) X)).trans
-      (LieEquiv.ofEq _ (typeD I A) (by rw [typeDGraphIndex_form]; rfl)))
+      (LieEquiv.ofEq _ (typeD I A) (by rw [typeDGraphIndex_form]; simp only [typeD])))
 
 /-- The chosen-pair involution acts by conjugation with the hyperbolic-pair swap. -/
 theorem typeDGraphLieEquiv_apply_val (X : typeD I A) :
@@ -117,7 +118,9 @@ theorem typeDGraphLieEquiv_apply_val (X : typeD I A) :
       typeDGraphMatrix c A * X * typeDGraphMatrix c A := by
   rw [typeDGraphMatrix_conj, typeDGraphLieEquiv, LieEquiv.trans_apply, LieEquiv.trans_apply,
     LieEquiv.ofEq_apply, skewAdjointMatricesLieSubalgebraEquivTranspose_apply]
-  erw [LieEquiv.ofEq_apply]
+  -- Apply the carrier identity on matrices under the reindexing map.
+  exact congrArg (reindexAlgEquiv A A (typeDGraphIndex c))
+    (LieEquiv.ofEq_apply (typeD I A) (skewAdjointMatricesLieSubalgebra (JD I A)) _ X)
 
 /-- The chosen-pair involution permutes both matrix indices by the chosen pair swap. -/
 theorem typeDGraphLieEquiv_apply_entry (X : typeD I A) (s t : I ⊕ I) :
@@ -217,7 +220,7 @@ theorem typeDGraphLieEquiv_rootGenerator (k : Fin n ⊕ Fin n) :
   rw [typeDGraphLieEquiv_apply_val, typeDGraphMatrix_conj]
   rcases k with i | i
   · simpa only [val_rootGenerator_inl, Sum.map_inl] using typeDGraphReindex_raising A n hn i
-  · simp only [Sum.map_inr, val_rootGenerator_inr, loweringMatrix_eq_transpose_raisingMatrix]
+  · simp only [Sum.map_inr, val_rootGenerator_inr, loweringMatrix]
     simpa only [Matrix.coe_reindexAlgEquiv, Matrix.transpose_reindex] using
       congrArg Matrix.transpose (typeDGraphReindex_raising A n hn i)
 
