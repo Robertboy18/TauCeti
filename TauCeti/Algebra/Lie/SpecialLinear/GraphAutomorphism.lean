@@ -84,8 +84,7 @@ theorem typeAGraphLieEquiv_typeAGraphLieEquiv
         mul_assoc, Q]
     _ = X := by
       rw [hQQ]
-      change diagonal (fun _ ↦ (-1 : A) ^ r) * X *
-        (diagonal (fun _ ↦ (-1 : A) ^ r))ᵀ = X
+      simp only [Matrix.scalar_apply]
       rw [diagonal_transpose]
       ext i j
       simp only [mul_diagonal, diagonal_mul]
