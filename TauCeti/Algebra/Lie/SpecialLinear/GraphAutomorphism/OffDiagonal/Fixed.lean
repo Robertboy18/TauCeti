@@ -46,37 +46,47 @@ def typeASpecialLinearFixedOffDiagonal : Submodule A (sl (Fin (r + 1)) A) :=
 theorem mem_typeASpecialLinearFixedOffDiagonal_iff (X : sl (Fin (r + 1)) A) :
     X ∈ typeASpecialLinearFixedOffDiagonal r A ↔
       (∀ i, X.val i i = 0) ∧ typeASpecialLinearGraphAutomorphism r A X = X := by
-  change X ∈ specialLinearOffDiagonal (Fin (r + 1)) A ∧ _ ↔ _
-  constructor
-  · rintro ⟨hD, hF⟩
-    exact ⟨(mem_specialLinearOffDiagonal_iff _ A X).mp hD,
-      LinearMap.mem_fixedSubmodule_iff.mp hF⟩
-  · rintro ⟨hD, hF⟩
-    exact ⟨(mem_specialLinearOffDiagonal_iff _ A X).mpr hD,
-      LinearMap.mem_fixedSubmodule_iff.mpr hF⟩
+  rw [typeASpecialLinearFixedOffDiagonal, Submodule.mem_inf,
+    mem_specialLinearOffDiagonal_iff, LinearMap.mem_fixedSubmodule_iff]
+  rfl
+
+private theorem offDiagonalGraphLinearMap_mem (X : sl (Fin (r + 1)) A)
+    (hX : X ∈ specialLinearOffDiagonal (Fin (r + 1)) A) :
+    (typeASpecialLinearGraphAutomorphism r A).toLinearEquiv.toLinearMap X ∈
+      specialLinearOffDiagonal (Fin (r + 1)) A :=
+  typeASpecialLinearGraphAutomorphism_mem_specialLinearOffDiagonal r A X hX
+
+private theorem offDiagonalGraphEquiv_toLinearMap :
+    (typeAOffDiagonalGraphEquiv r A).toLinearMap =
+      ((typeASpecialLinearGraphAutomorphism r A).toLinearEquiv.toLinearMap).restrict
+        (offDiagonalGraphLinearMap_mem r A) := by
+  ext X : 1
+  apply Subtype.ext
+  exact typeAOffDiagonalGraphEquiv_apply r A X
+
+private theorem fixedOffDiagonal_eq :
+    typeASpecialLinearFixedOffDiagonal r A =
+      specialLinearOffDiagonal (Fin (r + 1)) A ⊓
+        (typeASpecialLinearGraphAutomorphism r A).toLinearEquiv.toLinearMap.fixedSubmodule :=
+  rfl
 
 private def offDiagonalFixedRestrictEquiv :
     typeASpecialLinearFixedOffDiagonal r A ≃ₗ[A]
-      (typeAOffDiagonalGraphEquiv r A).toLinearMap.fixedSubmodule where
-  toFun X := ⟨⟨X.val, X.property.1⟩, by
-    apply LinearMap.mem_fixedSubmodule_iff.mpr
-    apply Subtype.ext
-    rw [LinearEquiv.coe_coe, typeAOffDiagonalGraphEquiv_apply]
-    exact LinearMap.mem_fixedSubmodule_iff.mp X.property.2⟩
-  invFun X := ⟨X.val.val, X.val.property, by
-    apply LinearMap.mem_fixedSubmodule_iff.mpr
-    have h := congrArg Subtype.val (LinearMap.mem_fixedSubmodule_iff.mp X.property)
-    simpa only [LinearEquiv.coe_coe, LieEquiv.coe_toLinearEquiv,
-      typeAOffDiagonalGraphEquiv_apply] using h⟩
-  left_inv _ := rfl
-  right_inv _ := rfl
-  map_add' _ _ := rfl
-  map_smul' _ _ := rfl
+      (typeAOffDiagonalGraphEquiv r A).toLinearMap.fixedSubmodule :=
+  (LinearEquiv.ofEq (typeASpecialLinearFixedOffDiagonal r A)
+    (specialLinearOffDiagonal (Fin (r + 1)) A ⊓
+      (typeASpecialLinearGraphAutomorphism r A).toLinearEquiv.toLinearMap.fixedSubmodule)
+    (fixedOffDiagonal_eq r A)).trans
+    ((LinearMap.infFixedSubmoduleEquivRestrict
+      (typeASpecialLinearGraphAutomorphism r A).toLinearEquiv.toLinearMap
+      (offDiagonalGraphLinearMap_mem r A)).trans
+      (LinearEquiv.ofEq _ _ (congrArg LinearMap.fixedSubmodule
+        (offDiagonalGraphEquiv_toLinearMap r A).symm)))
 
 private theorem offDiagonalFixedRestrictEquiv_symm_apply
     (X : (typeAOffDiagonalGraphEquiv r A).toLinearMap.fixedSubmodule) :
-    ((offDiagonalFixedRestrictEquiv r A).symm X).val = X.val.val :=
-  (rfl)
+    ((offDiagonalFixedRestrictEquiv r A).symm X).val = X.val.val := by
+  simp [offDiagonalFixedRestrictEquiv]
 
 private theorem offDiagonalCycle_action (c : TypeAOffDiagonalCycle r)
     (i : Fin (typeAOffDiagonalCyclePredLength r c + 1)) :

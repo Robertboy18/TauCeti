@@ -41,8 +41,9 @@ theorem mem_specialLinearOffDiagonal_iff (X : sl I A) :
 def specialLinearOffDiagonalEquiv :
     specialLinearOffDiagonal I A ≃ₗ[A] ({p : I × I // p.1 ≠ p.2} → A) where
   toFun X p := X.val.val p.val.1 p.val.2
-  invFun c := ⟨⟨fun i j ↦ if h : i = j then 0 else c ⟨(i, j), h⟩, by
-    change Matrix.trace _ = 0
+  invFun c := ⟨⟨Matrix.of (fun i j ↦ if h : i = j then 0 else c ⟨(i, j), h⟩), by
+    apply LinearMap.mem_ker.mpr
+    rw [Matrix.traceLinearMap_apply]
     simp [Matrix.trace, Matrix.diag]⟩, by
     rw [mem_specialLinearOffDiagonal_iff]
     intro i
@@ -109,17 +110,17 @@ theorem single_mem_specialLinearOffDiagonal (i j : I) (h : i ≠ j) (a : A) :
 theorem specialLinearOffDiagonalBasis_apply (p : {p : I × I // p.1 ≠ p.2}) :
     (specialLinearOffDiagonalBasis I A p).val =
       single p.val.1 p.val.2 p.property 1 := by
-  have h : specialLinearOffDiagonalBasis I A p =
-      ⟨single p.val.1 p.val.2 p.property 1,
-        single_mem_specialLinearOffDiagonal I A _ _ _ _⟩ := by
-    apply (specialLinearOffDiagonalEquiv I A).injective
-    funext q
-    change (specialLinearOffDiagonalBasis I A p).val.val q.val.1 q.val.2 =
-      (single p.val.1 p.val.2 p.property 1).val q.val.1 q.val.2
-    rw [← specialLinearOffDiagonalBasis_repr I A (specialLinearOffDiagonalBasis I A p) q,
-      Module.Basis.repr_self]
-    simp [Finsupp.single_apply, val_single, Matrix.single_apply, Subtype.ext_iff,
-      Prod.ext_iff]
-  exact congrArg Subtype.val h
+  rw [specialLinearOffDiagonalBasis, Module.Basis.coe_ofEquivFun]
+  apply Subtype.ext
+  ext i j
+  rw [specialLinearOffDiagonalEquiv_symm_apply, val_single]
+  by_cases hij : i = j
+  · subst j
+    by_cases hi : p.val.1 = i
+    · subst i
+      simp [p.property, eq_comm]
+    · simp [hi]
+  · simp [hij, Pi.single_apply, Matrix.single_apply, Subtype.ext_iff, Prod.ext_iff,
+      eq_comm]
 
 end TauCeti

@@ -64,12 +64,18 @@ def typeAOffDiagonalSign
     (p : {p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2}) : ℤ :=
   (-1) ^ (p.val.1.val + p.val.2.val + 1)
 
-/-- Each arrow sign is a unit of square one, including in characteristic two after casting. -/
+/-- The arrow sign is the integral parity sign of the sum of its two indices plus one. -/
+theorem typeAOffDiagonalSign_eq
+    (p : {p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2}) :
+    typeAOffDiagonalSign r p = (-1 : ℤ) ^ (p.val.1.val + p.val.2.val + 1) :=
+  (rfl)
+
+/-- The integral arrow sign squares to one. -/
 @[simp]
 theorem typeAOffDiagonalSign_mul_self
     (p : {p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2}) :
     typeAOffDiagonalSign r p * typeAOffDiagonalSign r p = 1 := by
-  simp [typeAOffDiagonalSign, ← mul_pow]
+  simp [typeAOffDiagonalSign_eq, ← mul_pow]
 
 /-- The sign is constant along each reverse-transpose orbit. -/
 @[simp]
@@ -80,7 +86,7 @@ theorem typeAOffDiagonalSign_perm
       ((p.val.1 : ℕ) + (p.val.2 : ℕ) + 1) % 2 := by
     simp only [Fin.val_rev]
     omega
-  simp only [typeAOffDiagonalSign, typeAOffDiagonalPerm_apply_val]
+  simp only [typeAOffDiagonalSign_eq, typeAOffDiagonalPerm_apply_val]
   rw [neg_one_pow_eq_pow_mod_two ((p.val.2.rev : ℕ) + (p.val.1.rev : ℕ) + 1),
     neg_one_pow_eq_pow_mod_two ((p.val.1 : ℕ) + (p.val.2 : ℕ) + 1), hmod]
 
@@ -89,12 +95,12 @@ theorem typeAOffDiagonalSign_of_fixed
     (p : {p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2})
     (h : typeAOffDiagonalPerm r p = p) :
     typeAOffDiagonalSign r p = (-1 : ℤ) ^ (r + 1) := by
-  rw [typeAOffDiagonalSign, (typeAOffDiagonalPerm_eq_self_iff r p).mp h]
+  rw [typeAOffDiagonalSign_eq, (typeAOffDiagonalPerm_eq_self_iff r p).mp h]
 
 variable (A : Type*) [CommRing A]
 
 /-- The native graph automorphism preserves zero diagonal. -/
-theorem typeASpecialLinearGraphAutomorphism_mem_offDiagonal
+theorem typeASpecialLinearGraphAutomorphism_mem_specialLinearOffDiagonal
     (X : sl (Fin (r + 1)) A) (hX : X ∈ specialLinearOffDiagonal (Fin (r + 1)) A) :
     typeASpecialLinearGraphAutomorphism r A X ∈ specialLinearOffDiagonal (Fin (r + 1)) A := by
   rw [mem_specialLinearOffDiagonal_iff] at hX ⊢
@@ -103,17 +109,17 @@ theorem typeASpecialLinearGraphAutomorphism_mem_offDiagonal
   simp
 
 /-- The native graph equivalence maps the zero-diagonal submodule onto itself. -/
-theorem map_typeASpecialLinearGraphAutomorphism_offDiagonal :
+theorem map_typeASpecialLinearGraphAutomorphism_specialLinearOffDiagonal :
     (specialLinearOffDiagonal (Fin (r + 1)) A).map
       (typeASpecialLinearGraphAutomorphism r A).toLinearEquiv.toLinearMap =
         specialLinearOffDiagonal (Fin (r + 1)) A := by
   ext X
   constructor
   · rintro ⟨Y, hY, rfl⟩
-    exact typeASpecialLinearGraphAutomorphism_mem_offDiagonal r A Y hY
+    exact typeASpecialLinearGraphAutomorphism_mem_specialLinearOffDiagonal r A Y hY
   · intro hX
     exact ⟨typeASpecialLinearGraphAutomorphism r A X,
-      typeASpecialLinearGraphAutomorphism_mem_offDiagonal r A X hX,
+      typeASpecialLinearGraphAutomorphism_mem_specialLinearOffDiagonal r A X hX,
       typeASpecialLinearGraphAutomorphism_typeASpecialLinearGraphAutomorphism r A X⟩
 
 /-- The restriction of the native graph automorphism to zero-diagonal matrices. -/
@@ -121,7 +127,7 @@ def typeAOffDiagonalGraphEquiv :
     specialLinearOffDiagonal (Fin (r + 1)) A ≃ₗ[A]
       specialLinearOffDiagonal (Fin (r + 1)) A :=
   (typeASpecialLinearGraphAutomorphism r A).toLinearEquiv.ofSubmodules _ _
-    (map_typeASpecialLinearGraphAutomorphism_offDiagonal r A)
+    (map_typeASpecialLinearGraphAutomorphism_specialLinearOffDiagonal r A)
 
 /-- The restricted map retains the actual native matrix action. -/
 @[simp]
@@ -139,6 +145,6 @@ theorem typeAOffDiagonalGraphEquiv_basis
   apply Subtype.ext
   simp only [typeAOffDiagonalGraphEquiv_apply, Submodule.coe_smul,
     specialLinearOffDiagonalBasis_apply, typeASpecialLinearGraphAutomorphism_single]
-  simp [typeAOffDiagonalSign, typeAOffDiagonalPerm, ← map_smul]
+  simp [typeAOffDiagonalSign_eq, typeAOffDiagonalPerm, ← map_smul]
 
 end TauCeti
