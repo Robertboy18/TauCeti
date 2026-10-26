@@ -10,6 +10,7 @@ public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Root.Differential
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Adjoint.WeightSpace
 public import TauCeti.Algebra.Lie.E7.Minuscule.ClosedGenerators
 public import TauCeti.Algebra.Lie.E7.Minuscule.Generated.StandardComodule
+public import TauCeti.Algebra.Lie.E7.Minuscule.RootSupport
 public import TauCeti.Algebra.Lie.E7.Minuscule.RootDatum
 
 /-!
@@ -214,38 +215,6 @@ theorem mem_adjointWeightSpace_generatedWeightTorusCoordinateMap_iff
   exact HopfIdeal.mem_adjointWeightSpace_iff_of_weightTorus_of_eq
     (generatedDefiningIdeal R) e7MinusculeWeight (generatedCoordinateHopfAlgebra_def R)
     (generatedCoordinateMap R) (generatedCoordinateMap_comp_eqToIso_hom R) _ hπ α x
-
-/-- A raising or lowering matrix entry vanishes unless its minuscule weight difference is the
-corresponding signed simple root. -/
-private theorem rootMatrix_apply_eq_zero_of_weight_sub_ne (k : Fin 7 ⊕ Fin 7) (a b : Fin 56)
-    (h : e7MinusculeWeight a - e7MinusculeWeight b ≠ E7.rootGeneratorWeight valid_E7 k) :
-    Sum.elim raisingMatrix loweringMatrix k a b = 0 := by
-  -- E₇ symmetry identifies the table's Cartan columns with the numbered root rows.
-  rcases k with i | i
-  · have hroot : (E7.rootGeneratorWeight valid_E7 (.inl i) : Fin 7 → ℤ) =
-        fun j : Fin 7 ↦ weightTable.cartanMatrix j i := by
-      funext (j : Fin 7)
-      rw [rootGeneratorWeight_inl i j, weightTable_cartanMatrix,
-        (CartanMatrix.E_isSymm 7).apply]
-    have hz := weightTable.raisingMatrix_apply_eq_zero_of_weight_sub_ne i a b
-      (by
-        rw [weightTable_weight]
-        intro hab
-        exact h (hab.trans hroot.symm))
-    simpa only [Sum.elim_inl, raisingMatrix_apply, weightTable.raisingMatrix_apply,
-      weightTable_weight, weightTable_reflection] using hz
-  · have hroot : (E7.rootGeneratorWeight valid_E7 (.inr i) : Fin 7 → ℤ) =
-        -fun j : Fin 7 ↦ weightTable.cartanMatrix j i := by
-      funext (j : Fin 7)
-      rw [rootGeneratorWeight_inr i j, Pi.neg_apply, weightTable_cartanMatrix,
-        (CartanMatrix.E_isSymm 7).apply]
-    have hz := weightTable.loweringMatrix_apply_eq_zero_of_weight_sub_ne i a b
-      (by
-        rw [weightTable_weight]
-        intro hab
-        exact h (hab.trans hroot.symm))
-    simpa only [Sum.elim_inr, loweringMatrix_apply, weightTable.loweringMatrix_apply,
-      weightTable_weight, weightTable_reflection] using hz
 
 /-- **Each normalized root vector has its signed simple-root character.** The tangent vector of
 the `k`th numbered root subgroup lies in the adjoint weight space of

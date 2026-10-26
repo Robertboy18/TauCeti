@@ -52,23 +52,9 @@ private theorem cocharacter_comp_apply_X_of_weightTorus (a b : Fin N) :
         LaurentPolynomial.T
           (ψ (Multiplicative.ofAdd (Finsupp.equivFunOnFinite.symm (wt a)))).toAdd
       else 0 := by
-  let x := coordinateHopfAlgebraAlgEquiv R N
-    (coordinateRingMap R N (MvPolynomial.X (a, b)))
-  have h := DFunLike.congr_fun (π.toMultiplicativeBialgEquiv_comp_cocharacter ψ) (q x)
-  simp only [BialgHom.comp_apply, BialgEquiv.coe_toBialgHom] at h
-  apply (AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ).injective
-  -- Injectivity is inherited through `toMulEquiv`; expose the bialgebra-equivalence
-  -- application so that the composition identity `h` matches at rewrite transparency.
-  change (AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ)
-    ((π.cocharacter ψ) (q x)) =
-      (AddMonoidAlgebra.toMultiplicativeBialgEquiv R R ℤ)
-        (if a = b then LaurentPolynomial.T
-          (ψ (Multiplicative.ofAdd (Finsupp.equivFunOnFinite.symm (wt a)))).toAdd else 0)
-  rw [h, ← BialgHom.comp_apply π q, hπ]
-  dsimp only [x]
-  rw [weightTorusCoordinateBialgHom_X]
-  split_ifs <;> simp only [map_zero, MonoidAlgebra.mapDomainBialgHom_single,
-    LaurentPolynomial.T, AddMonoidAlgebra.toMultiplicativeBialgEquiv_single, ofAdd_toAdd]
+  rw [← BialgHom.cocharacter_id_comp π ψ, BialgHom.comp_apply,
+    ← BialgHom.comp_apply π q, hπ, weightTorusCoordinateBialgHom_X]
+  split_ifs <;> simp only [BialgHom.cocharacter_id_single, LaurentPolynomial.T, map_zero]
 
 /-- The differential of a weight-torus cocharacter is diagonal, with entries the integer
 character–cocharacter pairings times its tangent parameter. The weight representation may

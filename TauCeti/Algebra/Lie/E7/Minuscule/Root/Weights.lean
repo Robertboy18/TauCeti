@@ -6,6 +6,7 @@ Authors: Codex
 module
 
 public import TauCeti.Algebra.Lie.E7.Minuscule.Root.Differential
+public import TauCeti.Algebra.Lie.E7.Minuscule.RootSupport
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Adjoint.WeightSpace
 
 /-!
@@ -58,40 +59,6 @@ private theorem weightTorus_comp_quotient :
   rw [coordinateMap_comp_weightTorusToBaseChangeCoordinateMap,
     GeneralLinear.weightTorusBaseChangeCoordinateMap_eq]
 
-/-- A numbered root matrix has no entries outside its integral simple-root weight difference. -/
-private theorem rootMatrix_apply_eq_zero (k : Fin 7 ⊕ Fin 7) (a b : Fin 56)
-    (h : e7MinusculeWeight a - e7MinusculeWeight b ≠ E7.rootGeneratorWeight valid_E7 k) :
-    Sum.elim raisingMatrix loweringMatrix k a b = 0 := by
-  rcases k with i | i
-  · rw [Sum.elim_inl, raisingMatrix_apply]
-    split_ifs with hab
-    · exfalso
-      apply h
-      rw [hab.2, e7MinusculeWeight_reflection, root_e7SimpleIndex]
-      have hroot (j : Fin 7) : E7.rootGeneratorWeight valid_E7 (.inl i) j =
-          CartanMatrix.E 7 i j := by
-        simpa only [rank_E7, cartanMatrix_E7] using
-          E7.rootGeneratorWeight_inl valid_E7 i j
-      ext j
-      simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul, hab.1]
-      erw [hroot j]
-      ring
-    · rfl
-  · rw [Sum.elim_inr, loweringMatrix_apply]
-    split_ifs with hab
-    · exfalso
-      apply h
-      rw [hab.2, e7MinusculeWeight_reflection, root_e7SimpleIndex]
-      have hroot (j : Fin 7) : E7.rootGeneratorWeight valid_E7 (.inr i) j =
-          -CartanMatrix.E 7 i j := by
-        simpa only [rank_E7, cartanMatrix_E7] using
-          E7.rootGeneratorWeight_inr valid_E7 i j
-      ext j
-      simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul, hab.1]
-      erw [hroot j]
-      ring
-    · rfl
-
 variable [Module.Projective R (Bialgebra.CotangentSpace R (coordinateHopfAlgebra R))]
 
 /-- A cotangent-dual vector of the specialized E₇ carrier has adjoint character `α` exactly
@@ -119,7 +86,8 @@ theorem rootVector_mem_adjointWeightSpace (k : Fin 7 ⊕ Fin 7) :
   erw [mem_adjointWeightSpace_iff]
   intro a b hab
   rw [LinearEquiv.apply_symm_apply, tangentMatrix_rootVector, Matrix.map_apply,
-    rootMatrix_apply_eq_zero k a b (fun h => hab (congrArg SplitTorus.weightCharacter h)),
+    rootMatrix_apply_eq_zero_of_weight_sub_ne k a b
+      (fun h => hab (congrArg SplitTorus.weightCharacter h)),
     Int.cast_zero]
 
 /-- The fourteen signed simple-root characters of E₇ are nontrivial integral characters,
