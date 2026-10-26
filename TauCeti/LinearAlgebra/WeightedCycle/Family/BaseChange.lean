@@ -10,7 +10,7 @@ public import TauCeti.LinearAlgebra.WeightedCycle.Family.Signed
 public import Mathlib.LinearAlgebra.TensorProduct.Basis
 
 /-!
-# Integral fixed bases of signed cycle families
+# Scalar extension of signed cycle families
 
 Positive signed cycles give an integral basis of the fixed submodule. Scalar
 extension preserves these vectors; negative cycles can contribute additional
@@ -23,95 +23,11 @@ open TensorProduct TauCeti.WeightedCycle
 
 namespace Module.Basis
 
-@[instance_reducible]
-private def intTwoTorsionUnique : Unique (Submodule.torsionBy ℤ ℤ 2) where
-  default := 0
-  uniq x := by
-    apply Subtype.ext
-    have hx := x.property
-    change (2 : ℤ) * x.val = 0 at hx
-    exact (mul_eq_zero.mp hx).resolve_left (by norm_num)
-
 variable {V ι J : Type*} {n : J → ℕ} [AddCommGroup V] [Finite J]
 variable (b : Module.Basis ι ℤ V) (e : (Σ j, Fin (n j + 1)) ≃ ι)
   (ε : ∀ j, Fin (n j + 1) → ℤ) (hε : ∀ j i, ε j i = 1 ∨ ε j i = -1)
   (f : V →ₗ[ℤ] V)
   (h : ∀ j i, f (b (e ⟨j, i⟩)) = ε j i • b (e ⟨j, finRotate (n j + 1) i⟩))
-
-/-- Integral fixed vectors are determined by the initial coefficients on positive cycles. -/
-noncomputable def fixedEquivPositiveSignedFamily :
-    f.fixedSubmodule ≃ₗ[ℤ] ({j // (∏ i, ε j i) = 1} → ℤ) := by
-  letI := intTwoTorsionUnique
-  exact (b.fixedEquivSignedFamily e ε hε f h).trans LinearEquiv.prodUnique
-
-/-- Positive integral fixed coordinates read the original initial basis coefficients. -/
-@[simp]
-theorem fixedEquivPositiveSignedFamily_apply (v : f.fixedSubmodule)
-    (j : {j // (∏ i, ε j i) = 1}) :
-    b.fixedEquivPositiveSignedFamily e ε hε f h v j = b.repr v.val (e ⟨j.val, 0⟩) := by
-  exact b.fixedEquivSignedFamily_apply_pos e ε hε f h v j
-
-/-- The inverse positive-coordinate map has zero negative coordinates. -/
-theorem fixedEquivPositiveSignedFamily_symm (t : {j // (∏ i, ε j i) = 1} → ℤ) :
-    (b.fixedEquivPositiveSignedFamily e ε hε f h).symm t =
-      (b.fixedEquivSignedFamily e ε hε f h).symm (t, 0) := by
-  rfl
-
-/-- An integral positive-cycle basis of the actual fixed submodule. -/
-noncomputable def fixedBasisSignedFamily :
-    Module.Basis {j // (∏ i, ε j i) = 1} ℤ f.fixedSubmodule :=
-  Module.Basis.ofEquivFun (b.fixedEquivPositiveSignedFamily e ε hε f h)
-
-/-- Coordinates in the integral fixed basis are the original initial coefficients. -/
-@[simp]
-theorem fixedBasisSignedFamily_repr (v : f.fixedSubmodule)
-    (j : {j // (∏ i, ε j i) = 1}) :
-    (b.fixedBasisSignedFamily e ε hε f h).repr v j = b.repr v.val (e ⟨j.val, 0⟩) := by
-  simp [fixedBasisSignedFamily]
-
-/-- The positive coordinate equivalence is the coordinate map of the integral fixed basis. -/
-@[simp]
-theorem fixedBasisSignedFamily_equivFun :
-    (b.fixedBasisSignedFamily e ε hε f h).equivFun =
-      b.fixedEquivPositiveSignedFamily e ε hε f h := by
-  simp [fixedBasisSignedFamily]
-
-include hε h in
-/-- A negative-cycle initial coefficient of an integral fixed vector is zero. -/
-theorem fixedSignedFamily_repr_neg (v : f.fixedSubmodule)
-    (j : {j // (∏ i, ε j i) = -1}) :
-    b.repr v.val (e ⟨j.val, 0⟩) = 0 := by
-  let := intTwoTorsionUnique
-  rw [← b.fixedEquivSignedFamily_apply_neg e ε hε f h v j]
-  exact congrArg Subtype.val (Subsingleton.elim _ 0)
-
-/-- The integral fixed basis vector has the prescribed prefix coefficients on positive cycles. -/
-theorem fixedBasisSignedFamily_repr_pos [DecidableEq {j // (∏ i, ε j i) = 1}]
-    (j k : {j // (∏ i, ε j i) = 1}) (i : Fin (n k.val + 1)) :
-    b.repr (b.fixedBasisSignedFamily e ε hε f h j).val (e ⟨k.val, i⟩) =
-      Fin.partialProd (Fin.init (ε k.val)) i * (if j = k then 1 else 0) := by
-  simp only [fixedBasisSignedFamily, Module.Basis.coe_ofEquivFun,
-    fixedEquivPositiveSignedFamily_symm]
-  by_cases hj : j = k <;> simp [hj]
-
-/-- Every coefficient on a negative cycle of an integral fixed basis vector vanishes. -/
-theorem fixedBasisSignedFamily_repr_neg
-    (j : {j // (∏ i, ε j i) = 1}) (k : {j // (∏ i, ε j i) = -1})
-    (i : Fin (n k.val + 1)) :
-    b.repr (b.fixedBasisSignedFamily e ε hε f h j).val (e ⟨k.val, i⟩) = 0 := by
-  classical
-  simp only [fixedBasisSignedFamily, Module.Basis.coe_ofEquivFun,
-    fixedEquivPositiveSignedFamily_symm]
-  simp
-
-/-- Each integral fixed basis vector is the signed prefix sum along its positive cycle. -/
-theorem fixedBasisSignedFamily_apply (j : {j // (∏ i, ε j i) = 1}) :
-    (b.fixedBasisSignedFamily e ε hε f h j).val =
-      ∑ i, Fin.partialProd (Fin.init (ε j.val)) i • b (e ⟨j.val, i⟩) := by
-  classical
-  let := Fintype.ofFinite J
-  simp [fixedBasisSignedFamily, Module.Basis.coe_ofEquivFun,
-    fixedEquivPositiveSignedFamily_symm, fixedEquivSignedFamily_symm_apply, Pi.single_apply]
 
 variable (A : Type*) [CommRing A]
 
@@ -132,6 +48,48 @@ noncomputable def fixedEquivSignedFamilyBaseChange :
   (b.baseChange A).fixedEquivSignedFamily e ε hε (f.baseChange A)
     (b.baseChange_signedFamily e ε f h A)
 
+/-- Positive scalar-extended fixed coordinates are the initial ambient basis coefficients. -/
+@[simp]
+theorem fixedEquivSignedFamilyBaseChange_apply_pos
+    (v : (f.baseChange A).fixedSubmodule) (j : {j // (∏ i, ε j i) = 1}) :
+    (b.fixedEquivSignedFamilyBaseChange e ε hε f h A v).1 j =
+      (b.baseChange A).repr v.val (e ⟨j.val, 0⟩) := by
+  exact (b.baseChange A).fixedEquivSignedFamily_apply_pos e ε hε (f.baseChange A)
+    (b.baseChange_signedFamily e ε f h A) v j
+
+/-- Negative scalar-extended coordinates retain the initial coefficient as `2`-torsion. -/
+@[simp]
+theorem fixedEquivSignedFamilyBaseChange_apply_neg
+    (v : (f.baseChange A).fixedSubmodule) (j : {j // (∏ i, ε j i) = -1}) :
+    ((b.fixedEquivSignedFamilyBaseChange e ε hε f h A v).2 j : A) =
+      (b.baseChange A).repr v.val (e ⟨j.val, 0⟩) := by
+  exact (b.baseChange A).fixedEquivSignedFamily_apply_neg e ε hε (f.baseChange A)
+    (b.baseChange_signedFamily e ε f h A) v j
+
+/-- Inverse scalar-extended coordinates have the signed prefix coefficients on positive cycles. -/
+@[simp]
+theorem fixedEquivSignedFamilyBaseChange_symm_repr_pos
+    (t : ({j // (∏ i, ε j i) = 1} → A) ×
+      ({j // (∏ i, ε j i) = -1} → Submodule.torsionBy A A 2))
+    (j : {j // (∏ i, ε j i) = 1}) (i : Fin (n j.val + 1)) :
+    (b.baseChange A).repr
+        ((b.fixedEquivSignedFamilyBaseChange e ε hε f h A).symm t).val (e ⟨j.val, i⟩) =
+      Fin.partialProd (Fin.init (fun k ↦ (ε j.val k : A))) i * t.1 j := by
+  exact (b.baseChange A).fixedEquivSignedFamily_symm_repr_pos e ε hε (f.baseChange A)
+    (b.baseChange_signedFamily e ε f h A) t j i
+
+/-- Inverse scalar-extended coordinates retain the full negative-cycle `2`-torsion terms. -/
+@[simp]
+theorem fixedEquivSignedFamilyBaseChange_symm_repr_neg
+    (t : ({j // (∏ i, ε j i) = 1} → A) ×
+      ({j // (∏ i, ε j i) = -1} → Submodule.torsionBy A A 2))
+    (j : {j // (∏ i, ε j i) = -1}) (i : Fin (n j.val + 1)) :
+    (b.baseChange A).repr
+        ((b.fixedEquivSignedFamilyBaseChange e ε hε f h A).symm t).val (e ⟨j.val, i⟩) =
+      Fin.partialProd (Fin.init (fun k ↦ (ε j.val k : A))) i * (t.2 j).val := by
+  exact (b.baseChange A).fixedEquivSignedFamily_symm_repr_neg e ε hε (f.baseChange A)
+    (b.baseChange_signedFamily e ε f h A) t j i
+
 /-- In signed coordinates the natural fixed-submodule comparison is precisely `u ↦ (u, 0)`. -/
 theorem fixedEquivSignedFamilyBaseChange_comparison
     (x : A ⊗[ℤ] f.fixedSubmodule) :
@@ -141,10 +99,10 @@ theorem fixedEquivSignedFamilyBaseChange_comparison
   | tmul a v =>
     apply Prod.ext
     · funext j
-      simp [fixedEquivSignedFamilyBaseChange, Module.Basis.baseChange_repr_tmul]
+      simp [Module.Basis.baseChange_repr_tmul]
     · funext j
       apply Subtype.ext
-      simp [fixedEquivSignedFamilyBaseChange, Module.Basis.baseChange_repr_tmul,
+      simp [Module.Basis.baseChange_repr_tmul,
         b.fixedSignedFamily_repr_neg e ε hε f h v j]
   | add x y hx hy =>
     simp only [map_add, hx, hy, Prod.mk_add_mk, add_zero]
@@ -170,11 +128,9 @@ theorem fixedSubmoduleBaseChangeRetraction_leftInverse :
     Function.LeftInverse (b.fixedSubmoduleBaseChangeRetraction e ε hε f h A)
       (f.fixedSubmoduleBaseChange A) := by
   intro x
-  change ((b.fixedBasisSignedFamily e ε hε f h).baseChange A).equivFun.symm
-    (b.fixedEquivSignedFamilyBaseChange e ε hε f h A
-      (f.fixedSubmoduleBaseChange A x)).1 = x
-  rw [b.fixedEquivSignedFamilyBaseChange_comparison]
-  exact ((b.fixedBasisSignedFamily e ε hε f h).baseChange A).equivFun.symm_apply_apply x
+  simp only [fixedSubmoduleBaseChangeRetraction, LinearMap.comp_apply,
+    LinearEquiv.coe_coe, LinearMap.fst_apply,
+    b.fixedEquivSignedFamilyBaseChange_comparison, LinearEquiv.symm_apply_apply]
 
 include b e ε hε h in
 /-- Scalar extension embeds the integral fixed module of a signed basis-cycle family. -/
