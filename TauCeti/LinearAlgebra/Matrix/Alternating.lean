@@ -9,9 +9,9 @@ public import Mathlib.Algebra.Group.Subgroup.Ker
 public import Mathlib.Data.Matrix.Basic
 public import Mathlib.Data.Matrix.Basis
 public import Mathlib.Algebra.CharP.Defs
-public import Mathlib.Algebra.Ring.Invertible
 public import Mathlib.LinearAlgebra.Matrix.Trace
 public import Mathlib.SetTheory.Cardinal.Finite
+public import TauCeti.Algebra.Ring.Invertible
 
 /-!
 # Matrices equal to the negative of their transpose
@@ -22,8 +22,6 @@ vanish as soon as the value ring has no element that is its own negative apart f
 covers every ring of odd characteristic.
 
 ## Main results
-
-* `IsUnit.eq_zero_of_add_self_eq_zero`: a unit `2` gives a trivial doubling kernel.
 
 * `Matrix.transpose_single_sub_single`: transposing the difference of two opposite singleton
   matrices with the same coefficient negates it.
@@ -47,12 +45,6 @@ covers every ring of odd characteristic.
 -/
 
 public section
-
-/-- If `2` is a unit, only zero doubles to zero. -/
-theorem IsUnit.eq_zero_of_add_self_eq_zero {R : Type*} [Semiring R] (h2 : IsUnit (2 : R)) :
-    ∀ x : R, x + x = 0 → x = 0 := by
-  intro x hx
-  exact h2.mul_right_eq_zero.mp (by rwa [two_mul])
 
 namespace Matrix
 
