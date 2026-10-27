@@ -5,8 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.FixedSubalgebra.Basic
 public import TauCeti.Algebra.Lie.SpecialLinear.GraphAutomorphism
+public import TauCeti.Algebra.Lie.Subalgebra.Fixed
 public import TauCeti.LinearAlgebra.Matrix.SkewAdjoint
 
 /-!
