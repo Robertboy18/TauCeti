@@ -594,12 +594,7 @@ private theorem isBasis_typeDSimpleRoot_cast (hn : 4 ≤ n) :
     LinearIndependent R (fun i j => (typeDSimpleRoot n hn i j : R)) ∧
       Submodule.span R (Set.range (fun i j => (typeDSimpleRoot n hn i j : R))) = ⊤ := by
   apply (Pi.basisFun R (Fin n)).is_basis_iff_det.mpr
-  rw [Module.Basis.det_apply]
-  have hmatrix : (Pi.basisFun R (Fin n)).toMatrix
-      (fun i j => (typeDSimpleRoot n hn i j : R)) =
-      (Matrix.of (fun i j => (typeDSimpleRoot n hn i j : R))).transpose :=
-    congrFun Module.Basis.coePiBasisFun.toMatrix_eq_transpose _
-  rw [hmatrix, Matrix.det_transpose]
+  rw [Pi.basisFun_det_apply]
   have hmap : Matrix.of (fun i j => (typeDSimpleRoot n hn i j : R)) =
       (Int.castRingHom R).mapMatrix (Matrix.of (typeDSimpleRoot n hn)) := by
     ext i j
