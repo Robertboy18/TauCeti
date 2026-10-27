@@ -63,30 +63,32 @@ def rootEntryEquiv (h2 : ∀ x : R, x + x = 0 → x = 0) :
       exact LieAlgebra.Orthogonal.typeD.apply_inr_inl X j i
     apply Subtype.ext
     ext (i | i) (j | j)
-    · rfl
-    · exact congrFun (congrFun (Matrix.ofStrictUpper_upper h2 _ hB) i) j
-    · simpa only [Matrix.fromBlocks, Matrix.of_apply, Sum.elim_inr, Sum.elim_inl, neg_neg] using
-        congrFun (congrFun (Matrix.ofStrictUpper_upper h2 _ hC) i) j
-    · exact (LieAlgebra.Orthogonal.typeD.apply_inr_inr X i j).symm
+    · exact Matrix.fromBlocks_apply₁₁ _ _ _ _ _ _
+    · refine (Matrix.fromBlocks_apply₁₂ _ _ _ _ _ _).trans ?_
+      exact
+        congrFun (congrFun (Matrix.ofStrictUpper_eq_of_transpose_eq_neg h2 _ hB) i) j
+    · refine (Matrix.fromBlocks_apply₂₁ _ _ _ _ _ _).trans ?_
+      simpa only [neg_neg] using
+        congrFun (congrFun (Matrix.ofStrictUpper_eq_of_transpose_eq_neg h2 _ hC) i) j
+    · exact (Matrix.fromBlocks_apply₂₂ _ _ _ _ _ _).trans
+        (LieAlgebra.Orthogonal.typeD.apply_inr_inr X i j).symm
   right_inv a := by
     funext p
     rcases p with p | (p | p)
-    · rfl
-    · exact Matrix.ofStrictUpper_apply_of_lt _ p
-    · simp only [Matrix.fromBlocks, Matrix.of_apply, Sum.elim_inr, Sum.elim_inl,
-        Matrix.ofStrictUpper_apply_of_lt, neg_neg]
+    · exact Matrix.fromBlocks_apply₁₁ _ _ _ _ _ _
+    · exact (Matrix.fromBlocks_apply₁₂ _ _ _ _ _ _).trans
+        (Matrix.ofStrictUpper_apply_of_lt _ p)
+    · refine (congrArg Neg.neg (Matrix.fromBlocks_apply₂₁ _ _ _ _ _ _)).trans ?_
+      simpa only [neg_neg] using
+        congrArg Neg.neg (Matrix.ofStrictUpper_apply_of_lt (fun p => -a (.inr (.inr p))) p)
   map_add' X Y := by
     funext p
-    rcases p with p | (p | p)
-    · rfl
-    · rfl
-    · exact neg_add _ _
+    rcases p with p | (p | p) <;>
+      simp only [AddMemClass.coe_add, Matrix.add_apply, Pi.add_apply, neg_add]
   map_smul' a X := by
     funext p
-    rcases p with p | (p | p)
-    · rfl
-    · rfl
-    · exact (smul_neg a _).symm
+    rcases p with p | (p | p) <;>
+      simp only [SetLike.val_smul, Matrix.smul_apply, Pi.smul_apply, smul_neg, RingHom.id_apply]
 
 /-- Inverse native coordinates complete the upper-right entries and the negatives of the
 lower-left coordinates to skew blocks. -/
@@ -137,9 +139,7 @@ theorem rootEntryBasis_repr (h2 : ∀ x : R, x + x = 0 → x = 0)
 private theorem rootEntryEquiv_basis (h2 : ∀ x : R, x + x = 0 → x = 0)
     (p : RootEntryIndex ι) :
     rootEntryEquiv h2 (rootEntryBasis h2 p) = Pi.single p 1 := by
-  ext q
-  rw [← rootEntryBasis_repr, Module.Basis.repr_self]
-  simp only [Finsupp.single_apply, Pi.single_apply, eq_comm]
+  rw [rootEntryBasis, Module.Basis.coe_ofEquivFun, LinearEquiv.apply_symm_apply]
 
 /-- The first basis family consists of all difference-root matrices, including the diagonal. -/
 @[simp]
@@ -153,8 +153,9 @@ theorem rootEntryBasis_inl (h2 : ∀ x : R, x + x = 0 → x = 0) (p : ι × ι) 
   all_goals
     simp [rootEntryEquiv_apply_differenceRoot, rootEntryEquiv_apply_sumRoot,
       rootEntryEquiv_apply_negSumRoot,
-      val_differenceRootGenerator, differenceRootMatrix_def, Matrix.fromBlocks,
-      Matrix.single_apply, Pi.single_apply, eq_comm]
+      val_differenceRootGenerator, differenceRootMatrix_def, Matrix.fromBlocks_apply₁₁,
+      Matrix.fromBlocks_apply₁₂, Matrix.fromBlocks_apply₂₁, Matrix.single_apply, Pi.single_apply,
+      eq_comm]
 
 /-- The second basis family consists of the positive sum-root matrices above the diagonal. -/
 @[simp]
@@ -165,11 +166,11 @@ theorem rootEntryBasis_inr_inl (h2 : ∀ x : R, x + x = 0 → x = 0)
   rw [rootEntryEquiv_basis]
   ext q
   rcases q with ⟨a, b⟩ | (q | q)
-  · simp [val_sumRootGenerator, sumRootMatrix_def, Matrix.fromBlocks]
+  · simp [val_sumRootGenerator, sumRootMatrix_def, Matrix.fromBlocks_apply₁₁]
   · rw [rootEntryEquiv_apply_sumRoot, val_sumRootGenerator, sumRootMatrix_def]
-    simpa [Matrix.fromBlocks, Pi.single_apply, eq_comm] using
+    simpa [Matrix.fromBlocks_apply₁₂, Pi.single_apply, eq_comm] using
       (Matrix.single_sub_single_apply_of_lt p q (1 : R)).symm
-  · simp [val_sumRootGenerator, sumRootMatrix_def, Matrix.fromBlocks]
+  · simp [val_sumRootGenerator, sumRootMatrix_def, Matrix.fromBlocks_apply₂₁]
 
 /-- The third basis family reverses the negative sum-root indices, as at the native fork. -/
 @[simp]
@@ -180,15 +181,15 @@ theorem rootEntryBasis_inr_inr (h2 : ∀ x : R, x + x = 0 → x = 0)
   rw [rootEntryEquiv_basis]
   ext q
   rcases q with ⟨a, b⟩ | (q | q)
-  · simp [val_negSumRootGenerator, negSumRootMatrix_def, Matrix.fromBlocks]
-  · simp [val_negSumRootGenerator, negSumRootMatrix_def, Matrix.fromBlocks]
+  · simp [val_negSumRootGenerator, negSumRootMatrix_def, Matrix.fromBlocks_apply₁₁]
+  · simp [val_negSumRootGenerator, negSumRootMatrix_def, Matrix.fromBlocks_apply₁₂]
   · rw [rootEntryEquiv_apply_negSumRoot, val_negSumRootGenerator, negSumRootMatrix_def]
-    simpa [Matrix.fromBlocks, Matrix.sub_apply, Pi.single_apply, neg_sub, eq_comm] using
+    simpa [Matrix.fromBlocks_apply₂₁, Matrix.sub_apply, Pi.single_apply, neg_sub, eq_comm] using
       (Matrix.single_sub_single_apply_of_lt p q (1 : R)).symm
 
 /-- Every split even orthogonal matrix expands in the three native root-matrix families.
 Only strict upper pairs occur in the sum-root families, so no coefficient is divided by two. -/
-theorem eq_sum_rootGenerators (h2 : ∀ x : R, x + x = 0 → x = 0)
+theorem eq_sum_rootEntryBasis (h2 : ∀ x : R, x + x = 0 → x = 0)
     (X : LieAlgebra.Orthogonal.typeD ι R) :
     X =
       (∑ p : ι × ι, X.val (.inl p.1) (.inl p.2) • differenceRootGenerator p.1 p.2) +

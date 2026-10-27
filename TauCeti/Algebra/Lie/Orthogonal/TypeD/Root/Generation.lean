@@ -205,9 +205,7 @@ theorem lieSpan_rootGenerator_eq_top [NeZero (2 : K)] (n : ℕ) (hn : 4 ≤ n) :
       exact S.neg_mem (negSumRootGenerator_mem_lieSpan n hn j i hij)
   apply eq_top_iff.mpr
   intro X _
-  have h2 : ∀ x : K, x + x = 0 → x = 0 := fun x hx =>
-    (mul_eq_zero.mp (show (2 : K) * x = 0 by rwa [two_mul])).resolve_left (NeZero.ne _)
-  rw [eq_sum_rootGenerators h2 X]
+  rw [eq_sum_rootEntryBasis (NeZero.ne (2 : K)).isUnit.eq_zero_of_add_self_eq_zero X]
   exact S.add_mem (S.add_mem
     (S.sum_mem fun p _ => S.smul_mem _ (hdiff p.1 p.2))
     (S.sum_mem fun p _ => S.smul_mem _ (hsum p.val.1 p.val.2)))

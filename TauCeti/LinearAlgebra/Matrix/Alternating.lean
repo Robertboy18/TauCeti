@@ -23,6 +23,8 @@ covers every ring of odd characteristic.
 
 ## Main results
 
+* `IsUnit.eq_zero_of_add_self_eq_zero`: a unit `2` gives a trivial doubling kernel.
+
 * `Matrix.transpose_single_sub_single`: transposing the difference of two opposite singleton
   matrices with the same coefficient negates it.
 * `Matrix.transpose_map_of_transpose_eq_neg`: the condition passes to the image of the matrix
@@ -35,12 +37,20 @@ covers every ring of odd characteristic.
   as they agree above the diagonal.
 * `Matrix.ofStrictUpper` and `Matrix.skewStrictUpperAddEquiv`: complete arbitrary strict-upper
   entries and give additive coordinates when doubling has trivial kernel.
+* `Matrix.ofStrictUpper_apply_of_gt`: lower entries are the negatives of the supplied upper
+  entries.
 * `Matrix.natCard_transpose_eq_neg`: when doubling is injective at zero, the `Nat.card` of such
   matrices with entries in an additive subgroup `I` is `(Nat.card I) ^ (k.choose 2)`, for an
   index type of cardinality `k`; for finite `I` this is the number of such matrices.
 -/
 
 public section
+
+/-- If `2` is a unit, only zero doubles to zero. -/
+theorem IsUnit.eq_zero_of_add_self_eq_zero {R : Type*} [Semiring R] (h2 : IsUnit (2 : R)) :
+    ∀ x : R, x + x = 0 → x = 0 := by
+  intro x hx
+  exact h2.mul_right_eq_zero.mp (by rwa [two_mul])
 
 namespace Matrix
 
@@ -90,12 +100,8 @@ theorem diag_eq_zero_of_transpose_eq_neg [AddGroup S] {M : Matrix n n S} (hM : M
 /-- A skew-symmetric matrix has trace zero when `2` is invertible. -/
 theorem trace_eq_zero_of_transpose_eq_neg {R : Type*} [Fintype n] [Ring R]
     [Invertible (2 : R)] (X : Matrix n n R) (hX : Xᵀ = -X) : trace X = 0 := by
-  have h2 : ∀ x : R, x + x = 0 → x = 0 := by
-    intro x hx
-    calc
-      x = ⅟(2 : R) * ((2 : R) * x) := by simp
-      _ = 0 := by rw [two_mul, hx, mul_zero]
-  exact Finset.sum_eq_zero fun a _ => diag_eq_zero_of_transpose_eq_neg hX h2 a
+  exact Finset.sum_eq_zero fun a _ => diag_eq_zero_of_transpose_eq_neg hX
+    (isUnit_of_invertible (2 : R)).eq_zero_of_add_self_eq_zero a
 
 /-- **In a ring of odd characteristic the diagonal of a matrix equal to the negative of its
 transpose vanishes**: odd characteristic implies that doubling is injective at zero, which
@@ -157,8 +163,16 @@ theorem ofStrictUpper_apply_of_lt [LinearOrder n] [AddGroup S]
     ofStrictUpper b p.val.1 p.val.2 = b p := by
   simp [ofStrictUpper, p.property]
 
+/-- Lower entries of a strict-upper completion negate their corresponding upper coefficients. -/
+@[simp]
+theorem ofStrictUpper_apply_of_gt [LinearOrder n] [AddGroup S]
+    (b : {p : n × n // p.1 < p.2} → S) (p : {p : n × n // p.1 < p.2}) :
+    ofStrictUpper b p.val.2 p.val.1 = -b p := by
+  simpa only [transpose_apply, neg_apply, ofStrictUpper_apply_of_lt] using
+    congrFun (congrFun (transpose_ofStrictUpper b) p.val.1) p.val.2
+
 /-- A skew matrix is recovered from its strict-upper entries when doubling has trivial kernel. -/
-theorem ofStrictUpper_upper [LinearOrder n] [AddGroup S]
+theorem ofStrictUpper_eq_of_transpose_eq_neg [LinearOrder n] [AddGroup S]
     (h2 : ∀ x : S, x + x = 0 → x = 0) (M : Matrix n n S) (hM : M.transpose = -M) :
     ofStrictUpper (fun p => M p.val.1 p.val.2) = M := by
   apply ext_of_lt_of_transpose_eq_neg
@@ -182,7 +196,7 @@ def skewStrictUpperAddEquiv [LinearOrder n] [AddCommGroup S]
     skewAddSubgroup n S ≃+ ({p : n × n // p.1 < p.2} → S) where
   toFun M p := M.val p.val.1 p.val.2
   invFun b := ⟨ofStrictUpper b, transpose_ofStrictUpper b⟩
-  left_inv M := Subtype.ext (ofStrictUpper_upper h2 M.val M.property)
+  left_inv M := Subtype.ext (ofStrictUpper_eq_of_transpose_eq_neg h2 M.val M.property)
   right_inv b := funext (ofStrictUpper_apply_of_lt b)
   map_add' _ _ := rfl
 
