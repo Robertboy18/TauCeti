@@ -46,7 +46,7 @@ theorem specialLinearRootSign_of_lt (i j : Fin (r + 1)) (hij : i < j) :
 
 /-- A negative interval root has the sign determined by its height minus one. -/
 @[simp]
-theorem specialLinearRootSign_of_lt' (i j : Fin (r + 1)) (hji : j < i) :
+theorem specialLinearRootSign_of_gt (i j : Fin (r + 1)) (hji : j < i) :
     specialLinearRootSign r A i j = (-1 : A) ^ (i.val - j.val - 1) := by
   simp only [specialLinearRootSign_def, ite_eq_right (not_lt_of_ge hji.le)]
 
@@ -72,11 +72,11 @@ theorem specialLinearRootSign_mul_swap (i j : Fin (r + 1)) (hij : i ≠ j) :
       (-1 : A) ^ (Nat.dist i.val j.val - 1) := by
   rcases lt_or_gt_of_ne hij with h | h
   · rw [specialLinearRootSign_of_lt r A i j h,
-      specialLinearRootSign_of_lt' r A j i h, one_mul]
+      specialLinearRootSign_of_gt r A j i h, one_mul]
     congr 1
     unfold Nat.dist
     omega
-  · rw [specialLinearRootSign_of_lt' r A i j h,
+  · rw [specialLinearRootSign_of_gt r A i j h,
       specialLinearRootSign_of_lt r A j i h, mul_one]
     congr 1
     unfold Nat.dist
