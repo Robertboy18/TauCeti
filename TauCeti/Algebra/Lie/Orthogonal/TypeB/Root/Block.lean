@@ -11,8 +11,8 @@ public import TauCeti.Algebra.Lie.Orthogonal.TypeB.Root.Generators
 /-!
 # The even orthogonal block in the odd orthogonal Lie algebra
 
-The isotropic block of a native type-`B` matrix is a native type-`D` matrix. The linear maps
-`toTypeD` and `ofTypeD` project to this block and extend it by zero.
+The isotropic block of a native type-`B` matrix is a native type-`D` matrix. The basic linear
+maps `toTypeD` and `ofTypeD` project to this block and extend it by zero.
 
 When multiplication by `2` is injective, `blockEquiv` separates the two short-root coordinate
 families from this block. Its inverse uses the native positive and negative short-root
@@ -26,63 +26,6 @@ namespace LieAlgebra.Orthogonal.typeB
 open Matrix
 
 variable {R ι : Type*} [CommRing R] [DecidableEq ι] [Fintype ι]
-
-/-- Extend a type-`D` matrix by zero on the anisotropic row and column. -/
-def ofTypeD : typeD ι R →ₗ[R] typeB ι R where
-  toFun X := ⟨fromBlocks 0 0 0 (X : Matrix (ι ⊕ ι) (ι ⊕ ι) R), by
-    have hX := X.2
-    change (X : Matrix (ι ⊕ ι) (ι ⊕ ι) R) ∈ skewAdjointMatricesSubmodule (JD ι R) at hX
-    rw [mem_skewAdjointMatricesSubmodule] at hX
-    change (X : Matrix (ι ⊕ ι) (ι ⊕ ι) R)ᵀ * JD ι R =
-      JD ι R * (-(X : Matrix (ι ⊕ ι) (ι ⊕ ι) R)) at hX
-    change _ ∈ skewAdjointMatricesSubmodule (JB ι R)
-    rw [mem_skewAdjointMatricesSubmodule]
-    change _ᵀ * JB ι R = JB ι R * (-_)
-    simp only [JB, fromBlocks_transpose, transpose_zero, fromBlocks_neg, neg_zero,
-      fromBlocks_multiply, Matrix.zero_mul, Matrix.mul_zero, zero_add, add_zero, hX]⟩
-  map_add' X Y := by
-    apply Subtype.ext
-    simp only [AddMemClass.coe_add, fromBlocks_add, add_zero]
-  map_smul' c X := by
-    apply Subtype.ext
-    simp only [SetLike.val_smul, fromBlocks_smul, smul_zero, RingHom.id_apply]
-
-/-- The isotropic block of a native type-`B` matrix. -/
-def toTypeD : typeB ι R →ₗ[R] typeD ι R where
-  toFun X := ⟨(X : Matrix (Unit ⊕ ι ⊕ ι) (Unit ⊕ ι ⊕ ι) R).toBlocks₂₂, by
-    have hX := X.2
-    change (X : Matrix (Unit ⊕ ι ⊕ ι) (Unit ⊕ ι ⊕ ι) R) ∈
-      skewAdjointMatricesSubmodule (JB ι R) at hX
-    rw [mem_skewAdjointMatricesSubmodule] at hX
-    change (X : Matrix (Unit ⊕ ι ⊕ ι) (Unit ⊕ ι ⊕ ι) R)ᵀ * JB ι R =
-      JB ι R * (-(X : Matrix (Unit ⊕ ι ⊕ ι) (Unit ⊕ ι ⊕ ι) R)) at hX
-    rw [← fromBlocks_toBlocks (X : Matrix (Unit ⊕ ι ⊕ ι) (Unit ⊕ ι ⊕ ι) R)] at hX
-    simp only [JB, fromBlocks_transpose, fromBlocks_neg, fromBlocks_multiply,
-      Matrix.zero_mul, Matrix.mul_zero, zero_add, add_zero] at hX
-    change _ ∈ skewAdjointMatricesSubmodule (JD ι R)
-    rw [mem_skewAdjointMatricesSubmodule]
-    exact congrArg Matrix.toBlocks₂₂ hX⟩
-  map_add' X Y := rfl
-  map_smul' c X := rfl
-
-/-- Projection recovers a zero-extended type-`D` matrix. -/
-@[simp]
-theorem toTypeD_ofTypeD (X : typeD ι R) : toTypeD (ofTypeD X) = X := by
-  rfl
-
-/-- Zero extension has a zero anisotropic row and column. -/
-@[simp]
-theorem coe_ofTypeD (X : typeD ι R) :
-    (ofTypeD X : Matrix (Unit ⊕ ι ⊕ ι) (Unit ⊕ ι ⊕ ι) R) =
-      fromBlocks 0 0 0 (X : Matrix (ι ⊕ ι) (ι ⊕ ι) R) := by
-  rfl
-
-/-- The underlying matrix of the isotropic projection. -/
-@[simp]
-theorem coe_toTypeD (X : typeB ι R) :
-    (toTypeD X : Matrix (ι ⊕ ι) (ι ⊕ ι) R) =
-      (X : Matrix (Unit ⊕ ι ⊕ ι) (Unit ⊕ ι ⊕ ι) R).toBlocks₂₂ := by
-  rfl
 
 open TauCeti
 
