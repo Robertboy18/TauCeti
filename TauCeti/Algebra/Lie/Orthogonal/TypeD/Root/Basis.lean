@@ -142,6 +142,7 @@ theorem pinnedRootBasis_repr_cartanGenerator (n : ℕ) (hn : 4 ≤ n) (i : Fin n
   rw [← pinnedRootBasis_diagonal n hn i, Module.Basis.repr_self]
 
 /-- The chain raising generators have unit forward-slot coordinate vectors. -/
+@[simp]
 theorem pinnedRootBasis_repr_chain_inl (n : ℕ) (hn : 4 ≤ n)
     (i : Fin n) (hi : (i : ℕ) + 1 < n) :
     (pinnedRootBasis (R := R) n hn).repr (rootGenerator n hn (.inl i)) =
@@ -149,6 +150,7 @@ theorem pinnedRootBasis_repr_chain_inl (n : ℕ) (hn : 4 ≤ n)
   rw [← pinnedRootBasis_chain_inl n hn i hi, Module.Basis.repr_self]
 
 /-- The chain lowering generators have unit reversed-slot coordinate vectors. -/
+@[simp]
 theorem pinnedRootBasis_repr_chain_inr (n : ℕ) (hn : 4 ≤ n)
     (i : Fin n) (hi : (i : ℕ) + 1 < n) :
     (pinnedRootBasis (R := R) n hn).repr (rootGenerator n hn (.inr i)) =
@@ -156,6 +158,7 @@ theorem pinnedRootBasis_repr_chain_inr (n : ℕ) (hn : 4 ≤ n)
   rw [← pinnedRootBasis_chain_inr n hn i hi, Module.Basis.repr_self]
 
 /-- The fork raising generator has a unit positive sum-root coordinate vector. -/
+@[simp]
 theorem pinnedRootBasis_repr_fork_inl (n : ℕ) (hn : 4 ≤ n) :
     (pinnedRootBasis (R := R) n hn).repr
       (rootGenerator n hn (.inl (forkRight n hn))) =
@@ -165,6 +168,7 @@ theorem pinnedRootBasis_repr_fork_inl (n : ℕ) (hn : 4 ≤ n) :
   rw [← pinnedRootBasis_fork_inl n hn, Module.Basis.repr_self]
 
 /-- The fork lowering generator has a unit negative sum-root coordinate vector. -/
+@[simp]
 theorem pinnedRootBasis_repr_fork_inr (n : ℕ) (hn : 4 ≤ n) :
     (pinnedRootBasis (R := R) n hn).repr
       (rootGenerator n hn (.inr (forkRight n hn))) =

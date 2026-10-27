@@ -62,6 +62,12 @@ private def diagonalChangeEquiv (e : (ι → R) ≃ₗ[R] (ι → R)) :
       · simp [h]
     · rfl
 
+omit [Fintype ι] in
+private theorem diagonalChangeEquiv_symm_apply_inl (e : (ι → R) ≃ₗ[R] (ι → R))
+    (a : RootEntryIndex ι → R) (i j : ι) :
+    (diagonalChangeEquiv e).symm a (.inl (i, j)) =
+      if i = j then e.symm (fun k => a (.inl (k, k))) i else a (.inl (i, j)) := rfl
+
 private noncomputable def diagonalCoordsEquiv (h2 : ∀ x : R, x + x = 0 → x = 0)
     (b : Module.Basis ι R (ι → R)) :
     LieAlgebra.Orthogonal.typeD ι R ≃ₗ[R] (RootEntryIndex ι → R) :=
@@ -127,12 +133,9 @@ private theorem diagonalChangeEquiv_symm_single (e : (ι → R) ≃ₗ[R] (ι �
   rcases q with ⟨i, j⟩ | q
   · by_cases hij : i = j
     · subst j
-      change (if i = i then e.symm (fun k =>
-        (Pi.single p (1 : R) : RootEntryIndex ι → R) (.inl (k, k))) i
-        else (Pi.single p (1 : R) : RootEntryIndex ι → R) (.inl (i, i))) = _
-      rw [ite_eq_left rfl, hd, map_zero]
+      rw [diagonalChangeEquiv_symm_apply_inl, ite_eq_left rfl, hd, map_zero]
       simp [Ne.symm (h i)]
-    · simp [diagonalChangeEquiv, hij]
+    · simp [diagonalChangeEquiv_symm_apply_inl, hij]
   · rfl
 
 private theorem basisOfDiagonal_eq_rootEntryBasis
@@ -190,11 +193,7 @@ theorem val_basisOfDiagonal_diagonal (h2 : ∀ x : R, x + x = 0 → x = 0)
       (diagonalChangeEquiv b.equivFun).symm (Pi.single (.inl (i, i)) 1) (.inl (j, k))) =
         Matrix.diagonal (b i) := by
     ext j k
-    change (if j = k then b.equivFun.symm
-      (fun l => (Pi.single (.inl (i, i)) (1 : R) : RootEntryIndex ι → R)
-        (.inl (l, l))) j else
-      (Pi.single (.inl (i, i)) (1 : R) : RootEntryIndex ι → R) (.inl (j, k))) = _
-    rw [hd, hb]
+    rw [diagonalChangeEquiv_symm_apply_inl, hd, hb]
     by_cases h : j = k
     · simp [h]
     · suffices j = i → k = i → (1 : R) = 0 by
