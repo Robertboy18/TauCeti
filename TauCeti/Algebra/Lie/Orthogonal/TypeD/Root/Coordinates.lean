@@ -104,21 +104,21 @@ theorem val_rootEntryEquiv_symm (h2 : ∀ x : R, x + x = 0 → x = 0)
 
 /-- Difference-root coordinates read the entire upper-left block. -/
 @[simp]
-theorem rootEntryEquiv_apply_differenceRoot (h2 : ∀ x : R, x + x = 0 → x = 0)
+theorem rootEntryEquiv_apply_inl (h2 : ∀ x : R, x + x = 0 → x = 0)
     (X : LieAlgebra.Orthogonal.typeD ι R) (p : ι × ι) :
     rootEntryEquiv h2 X (.inl p) = X.val (.inl p.1) (.inl p.2) := by
   rfl
 
 /-- Positive sum-root coordinates read the strict upper triangle of the upper-right block. -/
 @[simp]
-theorem rootEntryEquiv_apply_sumRoot (h2 : ∀ x : R, x + x = 0 → x = 0)
+theorem rootEntryEquiv_apply_inr_inl (h2 : ∀ x : R, x + x = 0 → x = 0)
     (X : LieAlgebra.Orthogonal.typeD ι R) (p : {p : ι × ι // p.1 < p.2}) :
     rootEntryEquiv h2 X (.inr (.inl p)) = X.val (.inl p.val.1) (.inr p.val.2) := by
   rfl
 
 /-- Negative sum-root coordinates negate the strict upper triangle of the lower-left block. -/
 @[simp]
-theorem rootEntryEquiv_apply_negSumRoot (h2 : ∀ x : R, x + x = 0 → x = 0)
+theorem rootEntryEquiv_apply_inr_inr (h2 : ∀ x : R, x + x = 0 → x = 0)
     (X : LieAlgebra.Orthogonal.typeD ι R) (p : {p : ι × ι // p.1 < p.2}) :
     rootEntryEquiv h2 X (.inr (.inr p)) = -X.val (.inr p.val.1) (.inl p.val.2) := by
   rfl
@@ -151,8 +151,8 @@ theorem rootEntryBasis_inl (h2 : ∀ x : R, x + x = 0 → x = 0) (p : ι × ι) 
   ext q
   rcases q with ⟨a, b⟩ | (p | p)
   all_goals
-    simp [rootEntryEquiv_apply_differenceRoot, rootEntryEquiv_apply_sumRoot,
-      rootEntryEquiv_apply_negSumRoot,
+    simp [rootEntryEquiv_apply_inl, rootEntryEquiv_apply_inr_inl,
+      rootEntryEquiv_apply_inr_inr,
       val_differenceRootGenerator, differenceRootMatrix_def, Matrix.fromBlocks_apply₁₁,
       Matrix.fromBlocks_apply₁₂, Matrix.fromBlocks_apply₂₁, Matrix.single_apply, Pi.single_apply,
       eq_comm]
@@ -167,7 +167,7 @@ theorem rootEntryBasis_inr_inl (h2 : ∀ x : R, x + x = 0 → x = 0)
   ext q
   rcases q with ⟨a, b⟩ | (q | q)
   · simp [val_sumRootGenerator, sumRootMatrix_def, Matrix.fromBlocks_apply₁₁]
-  · rw [rootEntryEquiv_apply_sumRoot, val_sumRootGenerator, sumRootMatrix_def]
+  · rw [rootEntryEquiv_apply_inr_inl, val_sumRootGenerator, sumRootMatrix_def]
     simpa [Matrix.fromBlocks_apply₁₂, Pi.single_apply, eq_comm] using
       (Matrix.single_sub_single_apply_of_lt p q (1 : R)).symm
   · simp [val_sumRootGenerator, sumRootMatrix_def, Matrix.fromBlocks_apply₂₁]
@@ -183,7 +183,7 @@ theorem rootEntryBasis_inr_inr (h2 : ∀ x : R, x + x = 0 → x = 0)
   rcases q with ⟨a, b⟩ | (q | q)
   · simp [val_negSumRootGenerator, negSumRootMatrix_def, Matrix.fromBlocks_apply₁₁]
   · simp [val_negSumRootGenerator, negSumRootMatrix_def, Matrix.fromBlocks_apply₁₂]
-  · rw [rootEntryEquiv_apply_negSumRoot, val_negSumRootGenerator, negSumRootMatrix_def]
+  · rw [rootEntryEquiv_apply_inr_inr, val_negSumRootGenerator, negSumRootMatrix_def]
     simpa [Matrix.fromBlocks_apply₂₁, Matrix.sub_apply, Pi.single_apply, neg_sub, eq_comm] using
       (Matrix.single_sub_single_apply_of_lt p q (1 : R)).symm
 
@@ -197,8 +197,8 @@ theorem eq_sum_rootEntryBasis (h2 : ∀ x : R, x + x = 0 → x = 0)
         X.val (.inl p.val.1) (.inr p.val.2) • sumRootGenerator p.val.1 p.val.2) +
       (∑ p : {p : ι × ι // p.1 < p.2},
         (-X.val (.inr p.val.1) (.inl p.val.2)) • negSumRootGenerator p.val.2 p.val.1) := by
-  simpa only [Fintype.sum_sum_type, rootEntryBasis_repr, rootEntryEquiv_apply_differenceRoot,
-    rootEntryEquiv_apply_sumRoot, rootEntryEquiv_apply_negSumRoot, rootEntryBasis_inl,
+  simpa only [Fintype.sum_sum_type, rootEntryBasis_repr, rootEntryEquiv_apply_inl,
+    rootEntryEquiv_apply_inr_inl, rootEntryEquiv_apply_inr_inr, rootEntryBasis_inl,
     rootEntryBasis_inr_inl, rootEntryBasis_inr_inr, add_assoc] using
     ((rootEntryBasis h2).sum_repr X).symm
 

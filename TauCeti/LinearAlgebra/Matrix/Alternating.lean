@@ -37,6 +37,8 @@ covers every ring of odd characteristic.
   as they agree above the diagonal.
 * `Matrix.ofStrictUpper` and `Matrix.skewStrictUpperAddEquiv`: complete arbitrary strict-upper
   entries and give additive coordinates when doubling has trivial kernel.
+* `Matrix.ofStrictUpper_apply`, `Matrix.ofStrictUpper_zero`, `Matrix.ofStrictUpper_neg`, and
+  `Matrix.ofStrictUpper_add`: the entry formula and preservation of zero, negation, and addition.
 * `Matrix.ofStrictUpper_apply_of_gt`: lower entries are the negatives of the supplied upper
   entries.
 * `Matrix.natCard_transpose_eq_neg`: when doubling is injective at zero, the `Nat.card` of such
@@ -139,6 +141,41 @@ def ofStrictUpper [LinearOrder n] [AddGroup S]
     (b : {p : n × n // p.1 < p.2} → S) : Matrix n n S :=
   fun i j => if h : i < j then b ⟨(i, j), h⟩
     else if h : j < i then -b ⟨(j, i), h⟩ else 0
+
+/-- The entries of a strict-upper completion. -/
+theorem ofStrictUpper_apply [LinearOrder n] [AddGroup S]
+    (b : {p : n × n // p.1 < p.2} → S) (i j : n) :
+    ofStrictUpper b i j = if h : i < j then b ⟨(i, j), h⟩
+      else if h : j < i then -b ⟨(j, i), h⟩ else 0 := by
+  rfl
+
+/-- Completing zero coefficients gives the zero matrix. -/
+@[simp]
+theorem ofStrictUpper_zero [LinearOrder n] [AddGroup S] :
+    ofStrictUpper (0 : {p : n × n // p.1 < p.2} → S) = 0 := by
+  ext i j
+  simp [ofStrictUpper_apply]
+
+/-- Strict-upper completion commutes with negation. -/
+@[simp]
+theorem ofStrictUpper_neg [LinearOrder n] [AddGroup S]
+    (b : {p : n × n // p.1 < p.2} → S) : ofStrictUpper (-b) = -ofStrictUpper b := by
+  ext i j
+  rcases lt_trichotomy i j with h | rfl | h
+  · simp [ofStrictUpper_apply, h]
+  · simp [ofStrictUpper_apply]
+  · simp [ofStrictUpper_apply, h, h.not_gt]
+
+/-- Strict-upper completion is additive for commutative coefficients. -/
+@[simp]
+theorem ofStrictUpper_add [LinearOrder n] [AddCommGroup S]
+    (b c : {p : n × n // p.1 < p.2} → S) :
+    ofStrictUpper (b + c) = ofStrictUpper b + ofStrictUpper c := by
+  ext i j
+  rcases lt_trichotomy i j with h | rfl | h
+  · simp [ofStrictUpper_apply, h]
+  · simp [ofStrictUpper_apply]
+  · simp [ofStrictUpper_apply, h, h.not_gt, add_comm]
 
 /-- Strict-upper completion negates under transposition. -/
 @[simp]
