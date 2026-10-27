@@ -7,6 +7,8 @@ module
 
 public import TauCeti.Algebra.Lie.Orthogonal.TypeD.Root.Generators
 public import TauCeti.Algebra.Lie.Orthogonal.TypeD.Root.Space
+import TauCeti.Data.Matrix.Basis
+import TauCeti.Data.Matrix.Block
 import TauCeti.LinearAlgebra.Matrix.Alternating
 
 /-!
@@ -245,26 +247,11 @@ theorem differenceRootGenerator_self_eq_typeDDiagonalEquiv (i : ι) :
       (typeDDiagonalEquiv (K := K) (Pi.single i 1) : typeDDiagonalCartan K ι) := by
   apply Subtype.ext
   rw [val_differenceRootGenerator, coe_typeDDiagonalEquiv_apply]
-  change differenceRootMatrix (K := K) i i = typeDDiagonalMatrix (Pi.single i 1)
+  dsimp only
   ext (a | a) (b | b) <;>
-    by_cases hia : i = a <;>
-    by_cases hib : i = b <;>
-    by_cases hab : a = b <;>
-    simp_all only [differenceRootMatrix_def, Matrix.fromBlocks, Matrix.transpose_single,
-      Matrix.of_apply, Sum.elim_inl, Matrix.single_apply_same, typeDDiagonalMatrix_apply,
-      ↓reduceIte, typeDDiagonalValue_inl, Pi.single_eq_same, eq_comm, not_false_eq_true,
-      and_false, Matrix.single_apply_of_ne, Sum.inl.injEq, not_true_eq_false, and_true, and_self,
-      ne_eq, Pi.single_eq_of_ne, Sum.elim_inr, Matrix.zero_apply, reduceCtorEq, Matrix.neg_apply,
-      typeDDiagonalValue_inr, neg_zero, Sum.inr.injEq]
-
-private theorem single_mul_single_eq_ite (i j k l : ι) :
-    Matrix.single i j (1 : K) * Matrix.single k l 1 =
-      if j = k then Matrix.single i l 1 else 0 := by
-  by_cases h : j = k
-  · subst k
-    simp only [Matrix.single_mul_single_same, one_mul, ↓reduceIte]
-  · simp only [Matrix.single_mul_single_of_ne (c := (1 : K)) i j k h 1,
-      h, ↓reduceIte]
+    simp [differenceRootMatrix_def, Matrix.transpose_single, typeDDiagonalMatrix_apply,
+      Matrix.single_apply, Pi.single_apply, eq_comm] <;>
+    split_ifs <;> grind
 
 /-- The bracket of two difference-root generators, including all index collisions. -/
 theorem lie_differenceRootGenerator_differenceRootGenerator_eq_ite (i j k l : ι) :
@@ -277,13 +264,10 @@ theorem lie_differenceRootGenerator_differenceRootGenerator_eq_ite (i j k l : ι
     simp only [LieSubalgebra.coe_bracket, AddSubgroupClass.coe_sub, ZeroMemClass.coe_zero,
       val_differenceRootGenerator]
     simp only [LieRing.of_associative_ring_bracket, differenceRootMatrix_def,
-      Matrix.fromBlocks_multiply, Matrix.transpose_single, Matrix.neg_mul, Matrix.mul_neg,
-      neg_neg, single_mul_single_eq_ite, zero_mul, mul_zero, zero_add, add_zero]
-    ext (a | a) (b | b) <;>
-      simp_all only [Matrix.fromBlocks, Matrix.of_apply, Sum.elim_inl, Sum.elim_inr,
-        Matrix.sub_apply,
-        Matrix.neg_apply, Matrix.zero_apply, eq_comm, ↓reduceIte, sub_zero, zero_sub, sub_self,
-        neg_neg]
+      Matrix.fromBlocks_mul_sub_mul, Matrix.transpose_single, Matrix.neg_mul, Matrix.mul_neg,
+      neg_neg, Matrix.single_mul_single_eq_ite, one_mul, zero_mul, mul_zero,
+      zero_add, add_zero]
+    ext (a | a) (b | b) <;> simp_all [eq_comm]
   all_goals abel
 
 /-- The bracket of a difference-root generator and a positive sum-root generator. -/
@@ -297,13 +281,10 @@ theorem lie_differenceRootGenerator_sumRootGenerator_eq_ite (i j k l : ι) :
     simp only [LieSubalgebra.coe_bracket, AddSubgroupClass.coe_sub, ZeroMemClass.coe_zero,
       val_differenceRootGenerator, val_sumRootGenerator]
     simp only [LieRing.of_associative_ring_bracket, differenceRootMatrix_def, sumRootMatrix_def,
-      Matrix.fromBlocks_multiply, Matrix.transpose_single, Matrix.mul_sub, Matrix.sub_mul,
-      Matrix.mul_neg, single_mul_single_eq_ite, zero_mul, mul_zero, zero_add, add_zero]
-    ext (a | a) (b | b) <;>
-      simp_all only [Matrix.fromBlocks, Matrix.of_apply, Sum.elim_inl, Sum.elim_inr,
-        Matrix.sub_apply,
-        Matrix.neg_apply, Matrix.zero_apply, eq_comm, ↓reduceIte, sub_zero, zero_sub, neg_zero,
-        sub_self, neg_neg]
+      Matrix.fromBlocks_mul_sub_mul, Matrix.transpose_single, Matrix.mul_sub, Matrix.sub_mul,
+      Matrix.mul_neg, Matrix.single_mul_single_eq_ite, one_mul, zero_mul, mul_zero,
+      zero_add, add_zero]
+    ext (a | a) (b | b) <;> simp_all [eq_comm]
   all_goals abel
 
 /-- The bracket of a difference-root generator and a negative sum-root generator. -/
@@ -317,13 +298,10 @@ theorem lie_differenceRootGenerator_negSumRootGenerator_eq_ite (i j k l : ι) :
     simp only [LieSubalgebra.coe_bracket, AddMemClass.coe_add, NegMemClass.coe_neg,
       ZeroMemClass.coe_zero, val_differenceRootGenerator, val_negSumRootGenerator]
     simp only [LieRing.of_associative_ring_bracket, differenceRootMatrix_def, negSumRootMatrix_def,
-      Matrix.fromBlocks_multiply, Matrix.transpose_single, Matrix.mul_sub, Matrix.sub_mul,
-      Matrix.neg_mul, single_mul_single_eq_ite, zero_mul, mul_zero, zero_add, add_zero]
-    ext (a | a) (b | b) <;>
-      simp_all only [Matrix.fromBlocks, Matrix.of_apply, Sum.elim_inl, Sum.elim_inr,
-        Matrix.add_apply,
-        Matrix.sub_apply, Matrix.neg_apply, Matrix.zero_apply, eq_comm, ↓reduceIte, zero_add,
-        add_zero, sub_zero, zero_sub, neg_zero, sub_self, neg_neg]
+      Matrix.fromBlocks_mul_sub_mul, Matrix.transpose_single, Matrix.mul_sub, Matrix.sub_mul,
+      Matrix.neg_mul, Matrix.single_mul_single_eq_ite, one_mul, zero_mul, mul_zero,
+      zero_add, add_zero]
+    ext (a | a) (b | b) <;> simp_all [eq_comm]
   all_goals abel
 
 /-- The bracket of opposite sum-root families, with their native matrix signs. -/
@@ -340,39 +318,31 @@ theorem lie_sumRootGenerator_negSumRootGenerator_eq_ite (i j k l : ι) :
       ZeroMemClass.coe_zero, val_differenceRootGenerator, val_sumRootGenerator,
       val_negSumRootGenerator]
     simp only [LieRing.of_associative_ring_bracket, differenceRootMatrix_def, sumRootMatrix_def,
-      negSumRootMatrix_def, Matrix.fromBlocks_multiply, Matrix.transpose_single, Matrix.mul_sub,
-      Matrix.sub_mul, single_mul_single_eq_ite, zero_mul, mul_zero, zero_add, add_zero]
-    ext (a | a) (b | b) <;>
-      simp_all only [Matrix.fromBlocks, Matrix.of_apply, Sum.elim_inl, Sum.elim_inr,
-        Matrix.add_apply,
-        Matrix.sub_apply, Matrix.neg_apply, Matrix.zero_apply, eq_comm, ↓reduceIte,
-        not_true_eq_false, zero_add, add_zero, sub_zero, zero_sub, neg_zero, sub_self,
-        neg_neg]
+      negSumRootMatrix_def, Matrix.fromBlocks_mul_sub_mul, Matrix.transpose_single, Matrix.mul_sub,
+      Matrix.sub_mul, Matrix.single_mul_single_eq_ite, one_mul, zero_mul, mul_zero,
+      zero_add, add_zero]
+    ext (a | a) (b | b) <;> simp_all [eq_comm]
   all_goals abel
 
 /-- Any two positive sum-root generators commute. -/
+@[simp]
 theorem lie_sumRootGenerator_sumRootGenerator (i j k l : ι) :
     ⁅sumRootGenerator (K := K) i j, sumRootGenerator (K := K) k l⁆ =
       0 := by
   apply Subtype.ext
   simp only [LieSubalgebra.coe_bracket, val_sumRootGenerator, ZeroMemClass.coe_zero]
-  simp only [sumRootMatrix_def, LieRing.of_associative_ring_bracket,
-    Matrix.fromBlocks_multiply, mul_zero, zero_mul, add_zero]
-  ext (a | a) (b | b) <;>
-    simp only [Matrix.fromBlocks, Matrix.sub_apply, Matrix.of_apply, Sum.elim_inl,
-      Sum.elim_inr, Matrix.zero_apply, sub_self]
+  simp [sumRootMatrix_def, LieRing.of_associative_ring_bracket,
+    Matrix.fromBlocks_mul_sub_mul]
 
 /-- Any two negative sum-root generators commute. -/
+@[simp]
 theorem lie_negSumRootGenerator_negSumRootGenerator (i j k l : ι) :
     ⁅negSumRootGenerator (K := K) i j, negSumRootGenerator (K := K) k l⁆ =
       0 := by
   apply Subtype.ext
   simp only [LieSubalgebra.coe_bracket, val_negSumRootGenerator, ZeroMemClass.coe_zero]
-  simp only [negSumRootMatrix_def, LieRing.of_associative_ring_bracket,
-    Matrix.fromBlocks_multiply, mul_zero, zero_mul, add_zero]
-  ext (a | a) (b | b) <;>
-    simp only [Matrix.fromBlocks, Matrix.sub_apply, Matrix.of_apply, Sum.elim_inl,
-      Sum.elim_inr, Matrix.zero_apply, sub_self]
+  simp [negSumRootMatrix_def, LieRing.of_associative_ring_bracket,
+    Matrix.fromBlocks_mul_sub_mul]
 
 /-- Bracketing two consecutive difference-root vectors concatenates their coordinate intervals.
 
