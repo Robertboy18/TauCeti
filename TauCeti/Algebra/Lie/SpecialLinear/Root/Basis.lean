@@ -134,23 +134,13 @@ private def rootEntryIndexEquiv :
 
 private def rootSignEquiv :
     ({p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2} → A) ≃ₗ[A]
-      ({p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2} → A) where
-  toFun d p := specialLinearRootSign r A p.val.1 p.val.2 * d p
-  invFun d p := specialLinearRootSign r A p.val.1 p.val.2 * d p
-  left_inv d := by
-    funext p
-    dsimp only
-    rw [← mul_assoc, specialLinearRootSign_mul_self, one_mul]
-  right_inv d := by
-    funext p
-    dsimp only
-    rw [← mul_assoc, specialLinearRootSign_mul_self, one_mul]
-  map_add' d e := by
-    ext p
-    exact mul_add _ _ _
-  map_smul' a d := by
-    ext p
-    exact mul_left_comm _ _ _
+      ({p : Fin (r + 1) × Fin (r + 1) // p.1 ≠ p.2} → A) :=
+  LinearEquiv.ofInvolutive
+    (LinearMap.mulLeft A fun p => specialLinearRootSign r A p.val.1 p.val.2)
+    (fun d => by
+      funext p
+      simp only [LinearMap.mulLeft_apply, Pi.mul_apply, ← mul_assoc,
+        specialLinearRootSign_mul_self, one_mul])
 
 /-- Coordinates on trace-zero matrices adapted to adjacent coroots and signed interval roots. -/
 noncomputable def specialLinearRootEquiv :
@@ -251,11 +241,8 @@ private theorem rootEquiv_signedRoot
         (specialLinearSignedRoot r A p.val.1 p.val.2 p.property).val
           j.castSucc j.castSucc) = 0 := by
       funext j
-      rw [specialLinearSignedRoot_val, Matrix.single_apply]
-      split
-      · rename_i h
-        exact False.elim (p.property (h.1.trans h.2.symm))
-      · rfl
+      rw [specialLinearSignedRoot_val]
+      exact congrFun (Matrix.diag_single_of_ne _ _ _ p.property) j.castSucc
     rw [hd, ← partialSumsLinearEquiv_apply, map_zero]
     simp
   | inr q =>
