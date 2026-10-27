@@ -152,7 +152,7 @@ private theorem eq_top_of_simple_mem (S : LieSubalgebra A (sl (Fin (r + 1)) A))
     obtain ⟨hp, hn⟩ := interval_mem r A S he hf i i le_rfl
     have h := S.lie_mem hp hn
     rw [lie_specialLinearSignedRoot_reverse] at h
-    simpa [specialLinearRootSign_def] using h
+    simpa only [mul_smul, sign_smul_mem_iff] using h
   | inr p =>
     rw [specialLinearRootBasis_inr]
     rcases lt_or_gt_of_ne p.property with h | h

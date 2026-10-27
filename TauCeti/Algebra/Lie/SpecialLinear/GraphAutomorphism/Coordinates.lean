@@ -25,6 +25,11 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 variable (r : ℕ) (A : Type*) [CommRing A]
 
+private theorem graph_sign_eq_height_sign (i j : Fin (r + 1)) (hij : i ≠ j) :
+    (-1 : A) ^ (i.val + j.val + 1) = (-1 : A) ^ (Nat.dist i.val j.val - 1) :=
+  (specialLinearRootSign_mul_swap_eq_neg_one_pow r A i j hij).symm.trans
+    (specialLinearRootSign_mul_swap r A i j hij)
+
 /-- Signed root vectors transform by reversed indices and the interval-height sign. -/
 @[simp]
 theorem typeASpecialLinearGraphAutomorphism_signedRoot
@@ -33,11 +38,10 @@ theorem typeASpecialLinearGraphAutomorphism_signedRoot
       (-1 : A) ^ (Nat.dist i.val j.val - 1) •
         specialLinearSignedRoot r A j.rev i.rev (Fin.rev_injective.ne hij.symm) := by
   apply Subtype.ext
-  rw [coe_typeASpecialLinearGraphAutomorphism, specialLinearSignedRoot_val,
+  simp only [coe_typeASpecialLinearGraphAutomorphism, specialLinearSignedRoot_val,
     typeAGraphLieEquiv_single, SetLike.val_smul, specialLinearSignedRoot_val,
-    Matrix.smul_single, smul_eq_mul, specialLinearRootSign_rev_rev,
-    ← specialLinearRootSign_mul_swap_eq_neg_one_pow r A i j hij,
-    specialLinearRootSign_mul_swap r A i j hij]
+    Matrix.smul_single, smul_eq_mul, specialLinearRootSign_rev_rev]
+  rw [graph_sign_eq_height_sign r A i j hij]
 
 /-- On the coroot part of the full basis, the graph map reverses the Dynkin node. -/
 theorem typeASpecialLinearGraphAutomorphism_specialLinearRootBasis_inl (i : Fin r) :
@@ -91,10 +95,11 @@ theorem specialLinearRootEquiv_typeASpecialLinearGraphAutomorphism_inr (X : sl (
     typeAGraphLieEquiv_apply_apply, Fin.rev_rev, specialLinearRootSign_rev_rev]
   have hsign : (-1 : A) ^ (p.val.2.rev.val + p.val.1.rev.val + 1) =
       (-1 : A) ^ (Nat.dist p.val.1.val p.val.2.val - 1) := by
-    rw [← specialLinearRootSign_mul_swap_eq_neg_one_pow r A p.val.2.rev p.val.1.rev
+    rw [graph_sign_eq_height_sign r A p.val.2.rev p.val.1.rev
       (Fin.rev_injective.ne p.property.symm)]
-    simp only [specialLinearRootSign_rev_rev]
-    exact specialLinearRootSign_mul_swap r A p.val.1 p.val.2 p.property
+    congr 1
+    simp only [Nat.dist, Fin.val_rev]
+    omega
   rw [← hsign, pow_add, pow_add, pow_one]
   ring
 
