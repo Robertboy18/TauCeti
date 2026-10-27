@@ -107,11 +107,7 @@ private theorem tangentCoordinates_coordinateDerivation [DecidableEq I] (i j : I
   by_cases h : i = j
   · subst j
     simp only [Finsupp.single_eq_same, MultiplicativeGroup.tangentLinearEquiv_symm_apply_T,
-      ↓reduceIte]
-    -- Precomposition has transported the value to the Laurent counit algebra.
-    -- Its underlying ring is `B`, so its unit is identified with the unit of `B`.
-    exact CounitAlgebra.algEquivSelf_apply R (LaurentPolynomial R) B
-      (1 : CounitAlgebra R (LaurentPolynomial R) B)
+      one_smul, ↓reduceIte]
   · simp only [Finsupp.single_eq_of_ne h, LaurentPolynomial.T_zero,
       Derivation.map_one_eq_zero, map_zero, h, ↓reduceIte]
 

@@ -72,7 +72,7 @@ theorem tangentMatrix_derivationComp_cocharacter_of_weightTorus
   simp only [BialgHom.coe_toAlgHom]
   rw [cocharacter_comp_apply_X_of_weightTorus q π wt hπ ψ, Matrix.diagonal_apply]
   split_ifs with hab
-  · rw [MultiplicativeGroup.derivation_T, map_zsmul,
+  · rw [MultiplicativeGroup.derivation_T_zsmul, map_zsmul,
       MultiplicativeGroup.tangentLinearEquiv_apply]
   · simp only [map_zero]
 
